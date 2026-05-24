@@ -17,14 +17,24 @@
    - 비가역적/구조적 결정(새 레이어, 라우팅 구조 변경, API 계약 변경)이면 `architect`에 위임하고 `docs/adr/`에 ADR을 남긴다.
    - 단순 기능 추가면 이 단계를 건너뛴다.
 
-4. **피처별 구현 (implementer)**
-   - 변경을 해당 `features/<feature>/` 내부로 격리한다. 서버 API 변경은 `core/network` + 그 피처의 `data` 레이어에만 반영한다.
-   - 위임 시 4요소(의도/제약/완료 기준/관련 파일)를 항상 명시한다.
+4. **피처별 구현 — 이슈 라벨에 따라 RGR 흐름 분기**
 
-5. **테스트 (test-writer)**
-   - `[TDD]`/`[Review]` 라벨이 붙은 이슈는 테스트를 작성/갱신한다. 판별 로직(EatVerdict 계산)은 우선 단위 테스트 대상.
+   이슈 분해 시 각 이슈에 `[TDD]` / `[Review]` / `[None]` 라벨을 부여한다(`.claude/skills/test-strategy-routing/SKILL.md`).
 
-6. **리뷰 (pr-reviewer)**
+   #### `[TDD]` 이슈 — Red-Green-Refactor 전체 흐름
+   로직 레이어(domain 판정 룰·repository 계약·Riverpod 컨트롤러 상태)에 기본 적용한다.
+
+   1. **test-writer → Red**: 아직 통과하지 않는 실패 스펙 테스트를 작성한다. 테스트 이름은 한국어 행위서술(`given-when-then` 본문). PR을 먼저 머지한 뒤 다음 단계를 연다.
+   2. **implementer → Green**: 테스트를 통과하는 최소 구현을 작성한다. 변경을 해당 `features/<feature>/` 내부로 격리하고, 서버 API 변경은 `core/network` + 그 피처의 `data` 레이어에만 반영한다. 위임 시 4요소(의도/제약/완료 기준/관련 파일)를 항상 명시한다.
+   3. **refactorer → Refactor**: 모든 테스트가 green인 상태를 유지하면서 코드를 정리한다. 행위 변경 없이 구조·가독성만 개선한다.
+
+   #### `[Review]` 이슈 — Red 없이 implementer 직접 구현
+   UI 레이어(위젯·화면 레이아웃)처럼 test-first가 비효율적인 영역에 적용한다. implementer가 직접 구현한 뒤, 행위 테스트·골든 테스트를 추가하고 pr-reviewer(핵심·보안 영향 시)로 보낸다.
+
+   #### `[None]` 이슈 — implementer 직접 구현, 테스트 없음
+   설정 파일·문서·린트 규칙 등 테스트 대상이 아닌 변경에 한정한다. 남용하지 않는다.
+
+5. **리뷰 (pr-reviewer)**
    - 보안·핵심·아키텍처 영향이 있는 변경만 `pr-reviewer`로 보낸다. 스타일/린트는 `flutter analyze` + `riverpod_lint`가 담당.
 
 ## 서버 API가 아직 안 나온 주

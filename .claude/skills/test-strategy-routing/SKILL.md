@@ -7,6 +7,15 @@ description: Use during issue decomposition (master planning stage) to assign ve
 
 이슈를 분해할 때 각 이슈에 검증 전략 라벨을 부여한다. **활성화 시점은 마스터 플래닝 단계** — 이슈 분해 시점이지, 작업 실행 시점이 아니다.
 
+## 0. 프로젝트 기본값 (ADR-0004: 스펙 주도 TDD)
+
+이 프로젝트는 **스펙 주도 TDD(Red-Green-Refactor)** 를 기본 방법론으로 한다. 라벨 분기 시 다음을 기본값으로 적용한다(아래 1~6은 이 기본값의 세부 규칙):
+
+- **로직 레이어(domain 판정 룰 · repository 계약 · Riverpod 컨트롤러 상태) → 기본 `[TDD]`**: 실패 테스트(Red, 스펙=한국어 행위서술) → 최소 구현(Green) → 리팩토링(Refactor). 스펙 소스는 Figma Description Note + 기능명세서 + `docs/project/api-contract.md`.
+- **UI(위젯/화면) → 기본 `[Review]`**: 행위·골든 테스트로 검증(상태 전이·면책 고지 노출·verdict 렌더링). test-first 강제하지 않음.
+- **`[None]` 최소화**: 셋업·환경 변수·순수 boilerplate에만.
+- **Repository 계약 스위트**: 인터페이스 대상 테스트는 mock 구현과 미래 retrofit 구현이 **둘 다 통과**해야 하므로 항상 `[TDD]`. 테스트가 곧 API 계약 명세.
+
 ## 1. 라벨 정의
 
 | 라벨 | 의미 |
