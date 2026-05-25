@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class FoodCheckScreen extends StatelessWidget {
-  const FoodCheckScreen({super.key});
+class TimelineScreen extends StatelessWidget {
+  const TimelineScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Center(child: Text('체크')),
+      body: Center(child: Text('타임라인')),
     );
   }
 }
