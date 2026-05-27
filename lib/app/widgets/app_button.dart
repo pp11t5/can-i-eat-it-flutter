@@ -89,7 +89,7 @@ class AppButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         ),
-        textStyle: AppTextStyles.button,
+        textStyle: AppTextStyles.body1Bold,
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
@@ -113,7 +113,7 @@ class AppButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         ),
-        textStyle: AppTextStyles.button,
+        textStyle: AppTextStyles.body1Bold,
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),

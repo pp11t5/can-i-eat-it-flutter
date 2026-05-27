@@ -15,10 +15,10 @@ class AppTheme {
         textTheme: _textTheme,
       );
 
-  /// provisional — W1에서는 light와 동일하게 유지. 다크 토큰 분리는 추후 진행.
+  /// W1에서는 light와 동일하게 유지. 다크 토큰 분리는 추후 진행.
   static ThemeData get dark => ThemeData(
         useMaterial3: true,
-        colorScheme: _lightColorScheme, // provisional
+        colorScheme: _lightColorScheme,
         textTheme: _textTheme,
       );
 
@@ -36,9 +36,9 @@ class AppTheme {
     onTertiary: AppColors.surface,
     tertiaryContainer: AppColors.surfaceMuted,
     onTertiaryContainer: AppColors.textPrimary,
-    error: AppColors.verdictDanger, // provisional (verdictDanger 경유 — primitive 교체 시 연동)
+    error: AppColors.verdictDanger, // 실측 #FF383C (verdictDanger 경유 — primitive 교체 시 연동)
     onError: AppColors.surface,
-    errorContainer: AppColors.disclaimerBg, // provisional (disclaimerBg 경유)
+    errorContainer: AppColors.disclaimerBg, // disclaimerBg 경유
     onErrorContainer: AppColors.textPrimary,
     surface: AppColors.surface,
     onSurface: AppColors.textPrimary,
@@ -53,16 +53,15 @@ class AppTheme {
   );
 
   static const TextTheme _textTheme = TextTheme(
-    // heading2 → displaySmall 또는 titleLarge로 매핑
-    displaySmall: AppTextStyles.heading1,
-    titleLarge: AppTextStyles.heading2,
-    titleMedium: AppTextStyles.title,
-    titleSmall: AppTextStyles.labelBold,
-    labelLarge: AppTextStyles.button,
-    labelMedium: AppTextStyles.bodyMedium,
-    labelSmall: AppTextStyles.caption,
-    bodyLarge: AppTextStyles.bodyLg,
-    bodyMedium: AppTextStyles.body,
-    bodySmall: AppTextStyles.caption,
+    displaySmall: AppTextStyles.title2,
+    titleLarge: AppTextStyles.header1Bold,
+    titleMedium: AppTextStyles.header2Bold,
+    titleSmall: AppTextStyles.header1Medium,
+    labelLarge: AppTextStyles.body1Bold,
+    labelMedium: AppTextStyles.body2Bold,
+    labelSmall: AppTextStyles.caption1Bold,
+    bodyLarge: AppTextStyles.body1Medium,
+    bodyMedium: AppTextStyles.body2Medium,
+    bodySmall: AppTextStyles.caption1Medium,
   );
 }

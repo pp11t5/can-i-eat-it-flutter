@@ -12,43 +12,43 @@ abstract final class AppColors {
   // --- EatVerdict 신호등 ---
 
   /// 권장 상태 (ADR-0003: recommend)
-  static const Color verdictRecommend = ColorPrimitives.green500;
+  static const Color verdictRecommend = ColorPrimitives.green100;
 
   /// 주의 상태 (ADR-0003: caution)
-  static const Color verdictCaution = ColorPrimitives.amber400; // provisional
+  static const Color verdictCaution = ColorPrimitives.semanticOrange;
 
   /// 위험 상태 (ADR-0003: danger)
-  static const Color verdictDanger = ColorPrimitives.red500; // provisional
+  static const Color verdictDanger = ColorPrimitives.semanticRed;
 
-  /// 확인어려움 상태 (ADR-0003: unknown)
-  static const Color verdictUnknown = ColorPrimitives.grayUnknown; // provisional
+  /// 확인어려움 상태 (ADR-0003: unknown) — unknown 전용 semantic 없음 → gray80(line) 매핑
+  static const Color verdictUnknown = ColorPrimitives.gray80;
 
   // --- 브랜드 / 주요 색 ---
 
-  static const Color primary = ColorPrimitives.green500;
+  static const Color primary = ColorPrimitives.green100;
   static const Color onPrimary = ColorPrimitives.white;
 
   // --- Surface ---
 
   static const Color surface = ColorPrimitives.white;
-  static const Color surfaceSelected = ColorPrimitives.green50;
-  static const Color surfaceMuted = ColorPrimitives.gray100;
+  static const Color surfaceSelected = ColorPrimitives.green10;
+  static const Color surfaceMuted = ColorPrimitives.gray30;
 
   // --- 텍스트 ---
 
-  static const Color textPrimary = ColorPrimitives.gray900;
-  static const Color textSecondary = ColorPrimitives.gray700;
-  static const Color textTertiary = ColorPrimitives.gray600;
+  static const Color textPrimary = ColorPrimitives.fontColor100;
+  static const Color textSecondary = ColorPrimitives.fontColor50;
+  static const Color textTertiary = ColorPrimitives.fontColor20;
 
   // --- 선·구분선 ---
 
-  static const Color border = ColorPrimitives.gray300;
-  static const Color divider = ColorPrimitives.gray350;
+  static const Color border = ColorPrimitives.gray40;
+  static const Color divider = ColorPrimitives.gray40;
 
   // --- 컴포넌트 고유 ---
 
-  /// MedicalDisclaimer 배경
-  static const Color disclaimerBg = ColorPrimitives.amber50; // provisional
+  /// MedicalDisclaimer 배경 — 중립 gray30. 디자이너 tint 지정 시 갱신.
+  static const Color disclaimerBg = ColorPrimitives.gray30;
 
   /// 카카오 로그인 버튼 배경
   static const Color kakao = ColorPrimitives.kakaoYellow;

@@ -57,7 +57,7 @@ class VerdictBadge extends StatelessWidget {
           // 한국어 라벨
           Text(
             level.label,
-            style: AppTextStyles.labelBold.copyWith(color: color),
+            style: AppTextStyles.body2Bold.copyWith(color: color),
           ),
         ],
       ),

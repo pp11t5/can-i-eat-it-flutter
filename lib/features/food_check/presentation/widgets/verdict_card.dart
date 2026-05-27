@@ -83,7 +83,7 @@ class VerdictCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               foodName,
-                              style: AppTextStyles.title.copyWith(
+                              style: AppTextStyles.header2Bold.copyWith(
                                 color: AppColors.textPrimary,
                               ),
                               maxLines: 1,
@@ -103,7 +103,7 @@ class VerdictCard extends StatelessWidget {
                       // 분석 결과 플레이스홀더 (W3에서 3섹션으로 교체)
                       Text(
                         _placeholderMessage(),
-                        style: AppTextStyles.body.copyWith(
+                        style: AppTextStyles.body2Medium.copyWith(
                           color: level == VerdictLevel.unknown
                               ? AppColors.textSecondary
                               : AppColors.textTertiary,

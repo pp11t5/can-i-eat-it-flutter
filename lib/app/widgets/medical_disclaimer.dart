@@ -31,7 +31,7 @@ class MedicalDisclaimer extends StatelessWidget {
             child: Text(
               '이 결과는 일반적인 참고 정보이며 의학적 진단이나 처방을 대신하지 않습니다. '
               '증상이 지속되면 전문의와 상담하세요.',
-              style: AppTextStyles.caption.copyWith(
+              style: AppTextStyles.caption1Medium.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),

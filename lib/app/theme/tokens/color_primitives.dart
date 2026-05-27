@@ -2,63 +2,81 @@ import 'package:flutter/material.dart';
 
 /// Layer 1: 원시 색상 팔레트.
 ///
-/// 완성 GUI Figma(node 82:178) 도착 시 이 파일의 값만 교체하면
-/// semantic(AppColors) → ThemeData 전체에 자동 반영된다.
+/// 출처: docs/design/figma-tokens.md (실측 — 단일 진실 원천).
+/// 값 변경 시 이 파일 → AppColors(semantic) → ThemeData 순으로 자동 연동.
 /// 위젯이 이 클래스를 직접 참조하는 것을 금지한다. AppColors를 경유할 것.
 abstract final class ColorPrimitives {
-  // --- 실제 Figma 추출값 (node 82:178) ---
+  // --- Green 스케일 ---
 
-  /// primary / 권장 상태 색
-  static const Color green500 = Color(0xFF00BF72);
+  static const Color green10 = Color(0xFFF0FFF4);
+  static const Color green50 = Color(0xFFD9F5EA);
+  static const Color green80 = Color(0xFFB1EBD3);
 
-  /// 선택 surface
-  static const Color green50 = Color(0xFFE5FFEC);
+  /// primary / 권장 상태 색 / semanticGreen
+  static const Color green100 = Color(0xFF00BF72);
 
-  /// 주 텍스트
-  static const Color gray900 = Color(0xFF1A1A1F);
+  static const Color green200 = Color(0xFF02995B);
+  static const Color green300 = Color(0xFF027344);
 
-  /// 보조 텍스트
-  static const Color gray700 = Color(0xFF595966);
+  // --- Semantic ---
 
-  /// placeholder / 3차 텍스트
-  static const Color gray600 = Color(0xFF737380);
+  /// 위험(danger)
+  static const Color semanticRed = Color(0xFFFF383C);
 
-  static const Color gray400 = Color(0xFFD0D0D0);
+  /// 주의(caution)
+  static const Color semanticOrange = Color(0xFFFF8D28);
 
-  /// divider
-  static const Color gray350 = Color(0xFFDBDBE5);
+  // semanticGreen = green100
 
-  /// 기본 border
-  static const Color gray300 = Color(0xFFE9E9E9);
+  // --- Foundation ---
 
-  static const Color gray200 = Color(0xFFEFEFEF);
+  static const Color white = Color(0xFFFEFEFE);
+  static const Color black = Color(0xFF222222);
 
-  static const Color gray150 = Color(0xFFF2F2F7);
+  // --- Font color ---
 
-  /// 미선택 surface
-  static const Color gray100 = Color(0xFFF4F4F4);
+  /// tertiary / placeholder
+  static const Color fontColor20 = Color(0xFF8C8C99);
 
-  static const Color gray50 = Color(0xFFF7F7FA);
+  /// secondary
+  static const Color fontColor50 = Color(0xFF737380);
 
-  static const Color white = Color(0xFFFFFFFF);
+  /// strong
+  static const Color fontColor80 = Color(0xFF10111A);
+
+  /// primary 텍스트
+  static const Color fontColor100 = Color(0xFF1A1A1F);
+
+  // --- Gray (Figma 라벨: background/disable/stroke/border/navi/line/check) ---
+
+  static const Color gray10 = Color(0xFFFDFDFD);
+
+  /// background
+  static const Color gray20 = Color(0xFFFCFCFC);
+
+  /// disable
+  static const Color gray30 = Color(0xFFF5F5F5);
+
+  /// stroke / border
+  static const Color gray40 = Color(0xFFEAEAEA);
+
+  static const Color gray50 = Color(0xFFD3D3D3);
+
+  /// navi
+  static const Color gray60 = Color(0xFFBBBBBB);
+
+  static const Color gray70 = Color(0xFFB0B0B0);
+
+  /// line
+  static const Color gray80 = Color(0xFF8C8C8C);
+
+  static const Color gray90 = Color(0xFF696969);
+
+  /// check
+  static const Color gray100 = Color(0xFF525252);
+
+  // --- 브랜드 (Figma foundation 외 — 고정 브랜드값) ---
 
   /// 카카오 로그인 버튼 배경
   static const Color kakaoYellow = Color(0xFFFEE500);
-
-  /// 로그인 배경
-  static const Color loginBg = Color(0xFFF7FFFB);
-
-  // --- provisional (결과화면 Figma 도착 시 교체 대상) ---
-
-  /// provisional — 주의(caution) 상태 색
-  static const Color amber400 = Color(0xFFF5A623); // provisional
-
-  /// provisional — 위험(danger) 상태 색
-  static const Color red500 = Color(0xFFE5484D); // provisional
-
-  /// provisional — 확인어려움(unknown) 상태 색
-  static const Color grayUnknown = Color(0xFF8A8A8F); // provisional
-
-  /// provisional — MedicalDisclaimer 배경
-  static const Color amber50 = Color(0xFFFFF8E1); // provisional
 }

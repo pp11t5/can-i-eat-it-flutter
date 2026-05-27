@@ -4,74 +4,100 @@ import 'tokens/typography_primitives.dart';
 
 /// Layer 2: semantic TextStyle 정의.
 ///
+/// 출처: docs/design/figma-tokens.md (실측 10종 — 단일 진실 원천).
 /// 위젯은 반드시 이 클래스를 통해 텍스트 스타일을 참조한다.
 /// [TypographyPrimitives]를 직접 참조하는 것을 금지한다.
 ///
 /// color는 각 TextStyle에 포함하지 않는다.
 /// 색은 위젯 또는 테마(ThemeData)에서 결정한다.
 abstract final class AppTextStyles {
-  /// 메인 타이틀 (size22 / bold)
-  static const TextStyle heading1 = TextStyle(
-    fontFamily: TypographyPrimitives.notoSansKr,
-    fontSize: TypographyPrimitives.size22,
+  /// Title_2(B) — 32/700, height 1.0, letterSpacing 0
+  static const TextStyle title2 = TextStyle(
+    fontFamily: TypographyPrimitives.fontFamily,
+    fontSize: TypographyPrimitives.size32,
     fontWeight: TypographyPrimitives.bold,
+    height: 1.0,
+    letterSpacing: 0,
   );
 
-  /// 화면 헤더 (size20 / bold, height 1.5)
-  static const TextStyle heading2 = TextStyle(
-    fontFamily: TypographyPrimitives.notoSansKr,
+  /// Header_1(B) — 24/700, height 1.5, letterSpacing 0
+  static const TextStyle header1Bold = TextStyle(
+    fontFamily: TypographyPrimitives.fontFamily,
+    fontSize: TypographyPrimitives.size24,
+    fontWeight: TypographyPrimitives.bold,
+    height: 1.5,
+    letterSpacing: 0,
+  );
+
+  /// Header_2(B) — 20/700, height 1.2, letterSpacing 1.2
+  static const TextStyle header2Bold = TextStyle(
+    fontFamily: TypographyPrimitives.fontFamily,
     fontSize: TypographyPrimitives.size20,
     fontWeight: TypographyPrimitives.bold,
-    height: 1.5,
+    height: 1.2,
+    letterSpacing: 1.2,
   );
 
-  /// 모달 타이틀 (size18 / bold)
-  static const TextStyle title = TextStyle(
-    fontFamily: TypographyPrimitives.notoSansKr,
-    fontSize: TypographyPrimitives.size18,
-    fontWeight: TypographyPrimitives.bold,
+  /// Header_1(M) — 20/400, height 1.2, letterSpacing 0
+  static const TextStyle header1Medium = TextStyle(
+    fontFamily: TypographyPrimitives.fontFamily,
+    fontSize: TypographyPrimitives.size20,
+    fontWeight: TypographyPrimitives.regular,
+    height: 1.2,
+    letterSpacing: 0,
   );
 
-  /// CTA 버튼 라벨 (size16 / bold)
-  static const TextStyle button = TextStyle(
-    fontFamily: TypographyPrimitives.notoSansKr,
+  /// Body_1(B) — 16/700, height 1.4, letterSpacing 0.32
+  static const TextStyle body1Bold = TextStyle(
+    fontFamily: TypographyPrimitives.fontFamily,
     fontSize: TypographyPrimitives.size16,
     fontWeight: TypographyPrimitives.bold,
+    height: 1.4,
+    letterSpacing: 0.32,
   );
 
-  /// 로그인 라벨 등 큰 본문 (size16 / regular)
-  static const TextStyle bodyLg = TextStyle(
-    fontFamily: TypographyPrimitives.notoSansKr,
+  /// Body_1(M) — 16/500, height 1.6, letterSpacing 0
+  static const TextStyle body1Medium = TextStyle(
+    fontFamily: TypographyPrimitives.fontFamily,
     fontSize: TypographyPrimitives.size16,
-    fontWeight: TypographyPrimitives.regular,
+    fontWeight: TypographyPrimitives.medium,
+    height: 1.6,
+    letterSpacing: 0,
   );
 
-  /// 섹션 라벨 / 아이템 제목 (size14 / bold)
-  static const TextStyle labelBold = TextStyle(
-    fontFamily: TypographyPrimitives.notoSansKr,
+  /// Body_2(B) — 14/700, height 1.4, letterSpacing 0
+  static const TextStyle body2Bold = TextStyle(
+    fontFamily: TypographyPrimitives.fontFamily,
     fontSize: TypographyPrimitives.size14,
     fontWeight: TypographyPrimitives.bold,
+    height: 1.4,
+    letterSpacing: 0,
   );
 
-  /// 기본 본문 (size14 / regular, height 1.5)
-  static const TextStyle body = TextStyle(
-    fontFamily: TypographyPrimitives.notoSansKr,
-    fontSize: TypographyPrimitives.size14,
-    fontWeight: TypographyPrimitives.regular,
-    height: 1.5,
-  );
-
-  /// 중간 굵기 본문 (size14 / medium)
-  static const TextStyle bodyMedium = TextStyle(
-    fontFamily: TypographyPrimitives.notoSansKr,
+  /// Body_2(M) — 14/500, height 1.6, letterSpacing 0
+  static const TextStyle body2Medium = TextStyle(
+    fontFamily: TypographyPrimitives.fontFamily,
     fontSize: TypographyPrimitives.size14,
     fontWeight: TypographyPrimitives.medium,
+    height: 1.6,
+    letterSpacing: 0,
   );
 
-  /// 보조 설명 캡션 (size14 / regular)
-  static const TextStyle caption = TextStyle(
-    fontFamily: TypographyPrimitives.notoSansKr,
-    fontSize: TypographyPrimitives.size14,
-    fontWeight: TypographyPrimitives.regular,
+  /// Caption_1(B) — 12/700, height 1.5, letterSpacing 0
+  static const TextStyle caption1Bold = TextStyle(
+    fontFamily: TypographyPrimitives.fontFamily,
+    fontSize: TypographyPrimitives.size12,
+    fontWeight: TypographyPrimitives.bold,
+    height: 1.5,
+    letterSpacing: 0,
+  );
+
+  /// Caption_1(M) — 12/500, height 1.7, letterSpacing 0.36
+  static const TextStyle caption1Medium = TextStyle(
+    fontFamily: TypographyPrimitives.fontFamily,
+    fontSize: TypographyPrimitives.size12,
+    fontWeight: TypographyPrimitives.medium,
+    height: 1.7,
+    letterSpacing: 0.36,
   );
 }
