@@ -1,36 +1,67 @@
 import 'package:flutter/material.dart';
 
-/// 앱 테마와 디자인 토큰의 단일 출처.
+import 'app_colors.dart';
+import 'app_text_styles.dart';
+
+/// Layer 3: AppColors·AppTextStyles를 ThemeData/ColorScheme/TextTheme으로 조립.
 ///
-/// Figma(Framelink MCP)에서 추출한 색·간격·타이포 토큰을 여기로 흡수한다.
-/// 화면 위젯은 색/간격을 하드코딩하지 말고 Theme 또는 [AppSpacing] 을 참조한다.
+/// [AppTheme.light] / [AppTheme.dark] getter 시그니처는 고정 — lib/app/app.dart가 참조.
 class AppTheme {
   const AppTheme._();
 
-  // 디자인 확정 전 placeholder seed. Figma 1차 토큰 도착 시 교체.
-  static const Color _seed = Color(0xFF2E7D32); // 음식/건강 톤
-
   static ThemeData get light => ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: _seed),
         useMaterial3: true,
+        colorScheme: _lightColorScheme,
+        textTheme: _textTheme,
       );
 
+  /// W1에서는 light와 동일하게 유지. 다크 토큰 분리는 추후 진행.
   static ThemeData get dark => ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: _seed,
-          brightness: Brightness.dark,
-        ),
         useMaterial3: true,
+        colorScheme: _lightColorScheme,
+        textTheme: _textTheme,
       );
-}
 
-/// 간격 토큰. Figma 8pt 그리드 기준 placeholder.
-class AppSpacing {
-  const AppSpacing._();
+  static const ColorScheme _lightColorScheme = ColorScheme(
+    brightness: Brightness.light,
+    primary: AppColors.primary,
+    onPrimary: AppColors.onPrimary,
+    primaryContainer: AppColors.surfaceSelected,
+    onPrimaryContainer: AppColors.primary,
+    secondary: AppColors.primary,
+    onSecondary: AppColors.onPrimary,
+    secondaryContainer: AppColors.surfaceSelected,
+    onSecondaryContainer: AppColors.textPrimary,
+    tertiary: AppColors.textTertiary,
+    onTertiary: AppColors.surface,
+    tertiaryContainer: AppColors.surfaceMuted,
+    onTertiaryContainer: AppColors.textPrimary,
+    error: AppColors.verdictDanger, // 실측 #FF383C (verdictDanger 경유 — primitive 교체 시 연동)
+    onError: AppColors.surface,
+    errorContainer: AppColors.disclaimerBg, // disclaimerBg 경유
+    onErrorContainer: AppColors.textPrimary,
+    surface: AppColors.surface,
+    onSurface: AppColors.textPrimary,
+    onSurfaceVariant: AppColors.textSecondary,
+    outline: AppColors.border,
+    outlineVariant: AppColors.divider,
+    shadow: Colors.black,
+    scrim: Colors.black,
+    inverseSurface: AppColors.textPrimary,
+    onInverseSurface: AppColors.surface,
+    inversePrimary: AppColors.surfaceSelected,
+  );
 
-  static const double xs = 4;
-  static const double sm = 8;
-  static const double md = 16;
-  static const double lg = 24;
-  static const double xl = 32;
+  static const TextTheme _textTheme = TextTheme(
+    displaySmall: AppTextStyles.title2,
+    titleLarge: AppTextStyles.header1Bold,
+    titleMedium: AppTextStyles.header2Bold,
+    titleSmall: AppTextStyles.header1Medium,
+    labelLarge: AppTextStyles.body1Bold,
+    labelMedium: AppTextStyles.body2Bold,
+    labelSmall: AppTextStyles.caption1Bold,
+    bodyLarge: AppTextStyles.body1Medium,
+    bodyMedium: AppTextStyles.body2Medium,
+    bodySmall: AppTextStyles.caption1Medium,
+  );
 }
