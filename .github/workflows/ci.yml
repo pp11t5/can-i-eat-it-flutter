@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run build_runner
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Verify generated files are up-to-date
+        run: |
+          if ! git diff --exit-code; then
+            echo ""
+            echo "ERROR: build_runner 생성물이 커밋된 내용과 다릅니다."
+            echo "로컬에서 'dart run build_runner build --delete-conflicting-outputs' 실행 후 생성물을 커밋하세요."
+            exit 1
+          fi
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Custom lint
+        run: dart run custom_lint
+
+      - name: Test (golden 제외)
+        run: flutter test --exclude-tags golden
