@@ -6,9 +6,12 @@ part of 'session_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$sessionStatusHash() => r'bd0fd6d30132031601d15658bc36a06e6129c1f6';
+String _$sessionStatusHash() => r'1b00efe516d8bb85ee2806154b13e067c378f72a';
 
-/// See also [sessionStatus].
+/// [AuthController] 상태에서 파생된 세션 상태.
+/// 로딩 중 valueOrNull == null → unauthenticated(W1 mock은 즉시 resolve).
+///
+/// Copied from [sessionStatus].
 @ProviderFor(sessionStatus)
 final sessionStatusProvider = AutoDisposeProvider<SessionStatus>.internal(
   sessionStatus,

@@ -14,12 +14,16 @@ String? resolveRedirect({
     case SessionStatus.unauthenticated:
       return location == '/login' ? null : '/login';
 
+    case SessionStatus.needsTerms:
+      return location == '/terms' ? null : '/terms';
+
     case SessionStatus.needsOnboarding:
       return location.startsWith('/onboarding') ? null : '/onboarding/intro';
 
     case SessionStatus.ready:
       if (location == '/splash' ||
           location == '/login' ||
+          location == '/terms' ||
           location.startsWith('/onboarding')) {
         return '/';
       }
