@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
@@ -77,10 +78,41 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
       },
       child: Scaffold(
         backgroundColor: AppColors.surface,
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(64 + MediaQuery.paddingOf(context).top),
-          // SafeArea(bottom: false) — TopBar 를 노치/상태바 아래로 밀어준다.
-          child: const SafeArea(bottom: false, child: _TopBar()),
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          surfaceTintColor: AppColors.surface,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          toolbarHeight: 64,
+          centerTitle: true,
+          leadingWidth: 64,
+          // 뒤로가기 — IconButton 으로 표준 hit test 보장.
+          leading: IconButton(
+            iconSize: 32,
+            padding: EdgeInsets.zero,
+            icon: SvgPicture.asset(
+              'assets/figma_extracted/chevron_left.svg',
+              width: 32,
+              height: 32,
+            ),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                // 스택이 없으면 signOut → 가드가 /login 으로 redirect.
+                ref.read(authControllerProvider.notifier).signOut();
+              }
+            },
+          ),
+          title: Text(
+            '약관 동의',
+            style: AppTextStyles.body1Medium.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          shape: const Border(
+            bottom: BorderSide(color: AppColors.surfaceMuted, width: 1),
+          ),
         ),
         body: SafeArea(
           top: false,
@@ -158,54 +190,6 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// TopBar (375×64, bg surface, bottom stroke gray30, chevron-left SVG 32, 타이틀)
-// ---------------------------------------------------------------------------
-
-class _TopBar extends StatelessWidget {
-  const _TopBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 64,
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(
-          bottom: BorderSide(color: AppColors.surfaceMuted, width: 1),
-        ),
-      ),
-      child: Stack(
-        children: [
-          // chevron-left at x:16, y:16, 32×32
-          Positioned(
-            left: AppSpacing.screenPadding,
-            top: AppSpacing.cardPadding,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => Navigator.of(context).maybePop(),
-              child: SvgPicture.asset(
-                'assets/figma_extracted/chevron_left.svg',
-                width: 32,
-                height: 32,
-              ),
-            ),
-          ),
-          // 중앙 타이틀 — Pretendard Medium 16, #1A1A1F
-          Center(
-            child: Text(
-              '약관 동의',
-              style: AppTextStyles.body1Medium.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
