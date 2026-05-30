@@ -39,7 +39,15 @@ GoRouter appRouter(Ref ref) {
     refreshListenable: notifier,
     redirect: (context, state) {
       final status = ref.read(sessionStatusProvider);
-      return resolveRedirect(status: status, location: state.matchedLocation);
+      final result = resolveRedirect(
+        status: status,
+        location: state.matchedLocation,
+      );
+      debugPrint(
+        '[ROUTER] redirect: location=${state.matchedLocation} '
+        'status=$status → ${result ?? "stay"}',
+      );
+      return result;
     },
     routes: [
       GoRoute(

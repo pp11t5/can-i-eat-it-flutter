@@ -72,8 +72,14 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
       canPop: true,
       // 뒤로가기/스와이프-back 어떤 경로로 pop 되든 signOut 으로 가입 취소.
       onPopInvokedWithResult: (didPop, _) {
+        debugPrint('[TERMS] PopScope.onPopInvokedWithResult: didPop=$didPop');
         if (didPop) {
-          ref.read(authControllerProvider.notifier).signOut();
+          // pop 애니메이션이 완전히 끝난 뒤 signOut 실행
+          // → 가드 재평가가 pop 중간에 일어나지 않게.
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            debugPrint('[TERMS] running signOut (post-frame)');
+            ref.read(authControllerProvider.notifier).signOut();
+          });
         }
       },
       child: Scaffold(
@@ -96,10 +102,14 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
               height: 32,
             ),
             onPressed: () {
-              if (context.canPop()) {
-                context.pop();
+              final canPop = context.canPop();
+              debugPrint('[TERMS] back tapped. canPop=$canPop');
+              if (canPop) {
+                Navigator.of(context).maybePop().then((p) {
+                  debugPrint('[TERMS] maybePop returned $p');
+                });
               } else {
-                // 스택이 없으면 signOut → 가드가 /login 으로 redirect.
+                debugPrint('[TERMS] canPop=false → signOut directly');
                 ref.read(authControllerProvider.notifier).signOut();
               }
             },

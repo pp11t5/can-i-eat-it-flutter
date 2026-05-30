@@ -120,19 +120,28 @@ class LoginScreen extends ConsumerWidget {
   /// 로그인 후 라우팅 — 명시적 push 로 Navigator 스택을 쌓아 iOS pop 보장.
   Future<void> _handlePostSignIn(BuildContext context, WidgetRef ref) async {
     final session = ref.read(authControllerProvider).valueOrNull;
+    debugPrint(
+      '[LOGIN] _handlePostSignIn: session=${session == null ? "null" : "user(provider=${session.provider}, '
+      'agreedTerms=${session.hasAgreedTerms}, onboarded=${session.hasCompletedOnboarding}, '
+      'status=${session.accountStatus})"}',
+    );
     if (session == null) return;
 
     if (session.accountStatus == AccountStatus.deletionGrace) {
+      debugPrint('[LOGIN] → showDeletionGraceDialog');
       await showDeletionGraceDialog(context, ref);
       return;
     }
 
     if (!context.mounted) return;
     if (!session.hasAgreedTerms) {
+      debugPrint('[LOGIN] → context.push(/terms)');
       context.push('/terms');
     } else if (!session.hasCompletedOnboarding) {
+      debugPrint('[LOGIN] → context.go(/onboarding/intro)');
       context.go('/onboarding/intro');
     } else {
+      debugPrint('[LOGIN] → context.go(/)');
       context.go('/');
     }
   }
