@@ -30,7 +30,7 @@ abstract final class ColorPrimitives {
 
   // --- Foundation ---
 
-  static const Color white = Color(0xFFFEFEFE);
+  static const Color white = Color(0xFFFFFFFF);
   static const Color black = Color(0xFF222222);
 
   // --- Font color ---
@@ -85,4 +85,7 @@ abstract final class ColorPrimitives {
 
   /// 카카오 버튼 텍스트 색 (카카오 공식 가이드: rgba(0,0,0,0.85) = alpha 0xD9)
   static const Color kakaoText = Color(0xD9000000);
+
+  /// 보라 강조 (Figma 디자인시스템 신규 — 용도 미정, 디자이너 확정 시 semantic 추가)
+  static const Color purple400 = Color(0xFF9321EC);
 }

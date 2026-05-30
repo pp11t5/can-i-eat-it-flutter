@@ -60,7 +60,8 @@ class _DeletionGraceDialog extends StatelessWidget {
             Text(
               '탈퇴를 진행 중인 계정이에요',
               textAlign: TextAlign.center,
-              style: AppTextStyles.header2Bold.copyWith(
+              // Figma 02a: 18 Bold (디자인시스템 외 신규 토큰 header3Bold).
+              style: AppTextStyles.header3Bold.copyWith(
                 color: AppColors.textPrimary,
               ),
             ),
@@ -68,7 +69,8 @@ class _DeletionGraceDialog extends StatelessWidget {
             Text(
               '유예 기간 동안에는 언제든 복구할 수 있어요\n지금 복구하시겠어요?',
               textAlign: TextAlign.center,
-              style: AppTextStyles.body2Medium.copyWith(
+              // Figma 02a: 14 Regular / 150% (body2Regular).
+              style: AppTextStyles.body2Regular.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),
@@ -139,7 +141,8 @@ class _SecondaryCta extends StatelessWidget {
         child: Center(
           child: Text(
             '취소',
-            style: AppTextStyles.body1Medium.copyWith(
+            // Figma 02a: 16 Regular (body1Regular).
+            style: AppTextStyles.body1Regular.copyWith(
               color: AppColors.textSecondary,
             ),
           ),
