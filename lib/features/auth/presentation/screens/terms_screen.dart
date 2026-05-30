@@ -71,13 +71,12 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
     return PopScope<Object?>(
       canPop: true,
       // 뒤로가기/스와이프-back 어떤 경로로 pop 되든 signOut 으로 가입 취소.
+      // signOut 을 **post-frame 콜백으로 지연** 시키는 게 핵심:
+      // 동기 호출 시 pop 애니메이션 중간에 가드 재평가가 일어나 /terms → /login
+      // 으로 redirect 가 끼어들면서 pop 이 중단되고 재진입처럼 보이는 버그가 발생.
       onPopInvokedWithResult: (didPop, _) {
-        debugPrint('[TERMS] PopScope.onPopInvokedWithResult: didPop=$didPop');
         if (didPop) {
-          // pop 애니메이션이 완전히 끝난 뒤 signOut 실행
-          // → 가드 재평가가 pop 중간에 일어나지 않게.
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            debugPrint('[TERMS] running signOut (post-frame)');
             ref.read(authControllerProvider.notifier).signOut();
           });
         }
@@ -102,14 +101,10 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
               height: 32,
             ),
             onPressed: () {
-              final canPop = context.canPop();
-              debugPrint('[TERMS] back tapped. canPop=$canPop');
-              if (canPop) {
-                Navigator.of(context).maybePop().then((p) {
-                  debugPrint('[TERMS] maybePop returned $p');
-                });
+              if (context.canPop()) {
+                Navigator.of(context).maybePop();
               } else {
-                debugPrint('[TERMS] canPop=false → signOut directly');
+                // 스택이 없으면 signOut → 가드가 /login 으로 redirect.
                 ref.read(authControllerProvider.notifier).signOut();
               }
             },
