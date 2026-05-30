@@ -53,6 +53,9 @@ abstract final class AppColors {
   /// 카카오 로그인 버튼 배경
   static const Color kakao = ColorPrimitives.kakaoYellow;
 
+  /// 카카오 로그인 버튼 텍스트 (카카오 공식: rgba(0,0,0,0.85))
+  static const Color kakaoText = ColorPrimitives.kakaoText;
+
   /// 로그인 화면 배경 (Figma 실측 — 연한 민트)
   static const Color loginBackground = ColorPrimitives.loginBg;
 

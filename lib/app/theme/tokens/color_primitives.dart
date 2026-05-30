@@ -82,4 +82,7 @@ abstract final class ColorPrimitives {
 
   /// 로그인 화면 배경 (Figma node 365:1552 실측 #F7FFFB — 연한 민트)
   static const Color loginBg = Color(0xFFF7FFFB);
+
+  /// 카카오 버튼 텍스트 색 (카카오 공식 가이드: rgba(0,0,0,0.85) = alpha 0xD9)
+  static const Color kakaoText = Color(0xD9000000);
 }

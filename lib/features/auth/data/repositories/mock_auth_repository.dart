@@ -8,13 +8,18 @@ import '../../domain/repositories/auth_repository.dart';
 /// 테스트에서 시나리오별 named factory를 사용해 의도를 명확히 표현할 수 있다.
 class MockAuthRepository implements AuthRepository {
   /// [initialSession]: [currentSession]이 최초 반환할 세션(null = 미인증).
-  /// [signInResult]: [signInWithKakao]/[signInWithApple]이 반환·설정할 세션.
-  ///   미지정 시 기본 신규 사용자(hasAgreedTerms=false, hasCompletedOnboarding=false, active).
+  /// [signInResult]: 카카오/Apple 양쪽 공용. 미지정 시 기본 신규 사용자.
+  /// [kakaoSignInResult]/[appleSignInResult]: 프로바이더별 개별 override(W1 데모처럼
+  ///   카카오/Apple 결과를 다르게 하고 싶을 때). 미지정 시 [signInResult] 폴백.
   MockAuthRepository({
     AuthSession? initialSession,
     AuthSession? signInResult,
+    AuthSession? kakaoSignInResult,
+    AuthSession? appleSignInResult,
   })  : _session = initialSession,
-        _signInResult = signInResult;
+        _signInResult = signInResult,
+        _kakaoSignInResult = kakaoSignInResult,
+        _appleSignInResult = appleSignInResult;
 
   // ---------------------------------------------------------------------------
   // 시나리오 named factory
@@ -72,12 +77,36 @@ class MockAuthRepository implements AuthRepository {
         ),
       );
 
+  /// W1 데모용 시나리오.
+  /// - 카카오 탭 → 신규 사용자(약관 동의 화면으로 진입)
+  /// - Apple 탭 → 삭제 유예 계정(02a 다이얼로그 노출)
+  /// 디자이너/PO 가 한 빌드에서 양쪽 플로우 모두 확인 가능.
+  factory MockAuthRepository.w1Demo() => MockAuthRepository(
+        initialSession: null,
+        kakaoSignInResult: const AuthSession(
+          userId: 'mock-demo-new-kakao',
+          provider: AuthProvider.kakao,
+          hasAgreedTerms: false,
+          hasCompletedOnboarding: false,
+          accountStatus: AccountStatus.active,
+        ),
+        appleSignInResult: const AuthSession(
+          userId: 'mock-demo-deletion-apple',
+          provider: AuthProvider.apple,
+          hasAgreedTerms: true,
+          hasCompletedOnboarding: true,
+          accountStatus: AccountStatus.deletionGrace,
+        ),
+      );
+
   // ---------------------------------------------------------------------------
   // 내부 상태
   // ---------------------------------------------------------------------------
 
   AuthSession? _session;
   final AuthSession? _signInResult;
+  final AuthSession? _kakaoSignInResult;
+  final AuthSession? _appleSignInResult;
   TermsAgreement? _lastTermsAgreement;
 
   /// 마지막으로 기록된 약관 동의 이력. 테스트 검증용.
@@ -100,14 +129,14 @@ class MockAuthRepository implements AuthRepository {
 
   @override
   Future<AuthSession> signInWithKakao() async {
-    final base = _signInResult ?? _defaultNewUser;
+    final base = _kakaoSignInResult ?? _signInResult ?? _defaultNewUser;
     _session = base.copyWith(provider: AuthProvider.kakao);
     return _session!;
   }
 
   @override
   Future<AuthSession> signInWithApple() async {
-    final base = _signInResult ?? _defaultNewUser;
+    final base = _appleSignInResult ?? _signInResult ?? _defaultNewUser;
     _session = base.copyWith(provider: AuthProvider.apple);
     return _session!;
   }

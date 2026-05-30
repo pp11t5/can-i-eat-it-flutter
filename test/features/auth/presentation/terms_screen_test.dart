@@ -6,6 +6,7 @@ import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repositor
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/terms_screen.dart';
+import 'package:can_i_eat_it/features/auth/presentation/widgets/figma_checkbox.dart';
 
 /// 약관 동의는 로그인 후 진입하므로, 세션이 있는 mock 으로 감싼다
 /// (recordTermsAgreement 는 세션이 없으면 StateError).
@@ -43,10 +44,10 @@ void main() {
       await tester.pumpWidget(_wrap(repo));
       await tester.pumpAndSettle();
 
-      // Checkbox 순서: 0=전체동의, 1=이용약관, 2=개인정보, 3=민감정보, 4=마케팅
-      await tester.tap(find.byType(Checkbox).at(1));
-      await tester.tap(find.byType(Checkbox).at(2));
-      await tester.tap(find.byType(Checkbox).at(3));
+      // 각 행은 InkWell 로 감싸져 있어 라벨 탭이 체크박스를 토글한다.
+      await tester.tap(find.text('[필수] 서비스 이용약관'));
+      await tester.tap(find.text('[필수] 개인정보 수집·이용 동의'));
+      await tester.tap(find.text('[필수] 민감정보(건강) 수집 동의'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('다음'));
@@ -63,8 +64,10 @@ void main() {
       await tester.tap(find.text('모든 약관에 동의합니다'));
       await tester.pumpAndSettle();
 
-      final checkboxes = tester.widgetList<Checkbox>(find.byType(Checkbox));
-      expect(checkboxes.every((c) => c.value == true), isTrue);
+      // FigmaCheckbox 5개(전체동의 + 필수3 + 선택1) 모두 checked=true.
+      final boxes =
+          tester.widgetList<FigmaCheckbox>(find.byType(FigmaCheckbox));
+      expect(boxes.every((b) => b.checked), isTrue);
     });
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
@@ -10,19 +11,25 @@ import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/widgets/deletion_grace_dialog.dart';
 
-/// 로그인 화면 (02_로그인).
+/// 로그인 화면 (02_로그인) — Figma node 365:1552 기준 시각 충실.
+///
+/// 레이아웃 (375×812 캔버스):
+/// - 배경: #F7FFFB 연한 민트, opacity 15% 배경 이미지(558×838) 깔림
+/// - 로고/일러스트 PNG: x:76, y:141, 218×218
+/// - 슬로건: y:343, Pretendard Bold 16/140%, color #02995B (green200)
+/// - 버튼 컨테이너: x:16, y:518, 342 width, gap 16
+///   - 카카오: #FEE500 / 카카오 심볼 18×18 SVG / 텍스트 Pretendard Medium 16, rgba(0,0,0,0.85)
+///   - Apple: #000000 / Material apple 아이콘(출시 시 공식 위젯으로 교체) / "Apple로 계속하기" (HIG 승인 문구)
 ///
 /// 플랫폼 분기:
-/// - iOS: 카카오 + Apple(Apple App Store Guideline 4.8 충족)
-/// - Android/기타: 카카오만 노출
+/// - iOS: 카카오 + Apple (App Store 4.8 충족)
+/// - Android: 카카오만 노출
 ///
 /// 진입 후 처리:
-/// - 신규(약관 미동의) → 명시적 `context.push('/terms')` (iOS pop 애니메이션 보장)
-/// - 기존(약관 동의, 온보딩 미완료) → `/onboarding/intro` 로 go
-/// - 기존(완전) → `/` 로 go
+/// - 신규(약관 미동의) → context.push('/terms') (iOS pop 애니메이션 보장)
+/// - 기존(미온보딩) → go /onboarding/intro
+/// - 기존(완전) → go /
 /// - 삭제유예 → 02a 다이얼로그
-///
-/// 버튼/로고 비주얼은 디자이너 재디자인 진행 중 — 현재 토큰 기반 placeholder.
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
@@ -33,27 +40,45 @@ class LoginScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.loginBackground,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.screenPadding,
-          ),
-          child: Column(
-            children: [
-              const Spacer(flex: 3),
-              const _LogoSection(),
-              const Spacer(flex: 4),
-              _ButtonSection(
-                isLoading: isLoading,
-                onKakaoPressed: () => _handleKakaoPressed(context, ref),
-                onApplePressed: () => _handleApplePressed(context, ref),
+      body: Stack(
+        children: [
+          // Opacity 15% 배경 사진 (Figma: 558×838 @ x=-32, y=0, opacity 0.15)
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.15,
+              child: Image.asset(
+                'assets/figma_extracted/login_bg_image.png',
+                fit: BoxFit.cover,
               ),
-              const SizedBox(height: AppSpacing.contentGap),
-              const _DisclaimerText(),
-              const SizedBox(height: AppSpacing.sectionGap),
-            ],
+            ),
           ),
-        ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPadding,
+              ),
+              // 비례형 레이아웃 — 디바이스 크기에 강건.
+              // Figma 비율(로고 상단 ~17% / 슬로건 중앙 ~42% / 버튼 ~64%) 근접.
+              child: Column(
+                children: [
+                  const Spacer(flex: 2),
+                  const Flexible(child: _LogoIllustration()),
+                  const SizedBox(height: AppSpacing.contentGap),
+                  const _Slogan(),
+                  const Spacer(flex: 3),
+                  _ButtonSection(
+                    isLoading: isLoading,
+                    onKakaoPressed: () => _handleKakaoPressed(context, ref),
+                    onApplePressed: () => _handleApplePressed(context, ref),
+                  ),
+                  const SizedBox(height: AppSpacing.cardPadding),
+                  const _DisclaimerText(),
+                  const SizedBox(height: AppSpacing.cardPadding),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -70,16 +95,11 @@ class LoginScreen extends ConsumerWidget {
     await _handlePostSignIn(context, ref);
   }
 
-  /// 로그인 후 라우팅을 **명시적으로** 처리한다.
-  ///
-  /// 가드 redirect 에만 맡기면 replace 동작이라 iOS pop 애니메이션이 불가능
-  /// (예: /terms → 뒤로가기 시 자연스러운 슬라이드 out). 따라서 신규 사용자
-  /// 진입은 `context.push('/terms')` 로 Navigator 스택을 쌓는다.
+  /// 로그인 후 라우팅 — 명시적 push 로 Navigator 스택을 쌓아 iOS pop 보장.
   Future<void> _handlePostSignIn(BuildContext context, WidgetRef ref) async {
     final session = ref.read(authControllerProvider).valueOrNull;
     if (session == null) return;
 
-    // 02a 삭제유예: 라우팅 대신 다이얼로그.
     if (session.accountStatus == AccountStatus.deletionGrace) {
       await showDeletionGraceDialog(context, ref);
       return;
@@ -87,58 +107,56 @@ class LoginScreen extends ConsumerWidget {
 
     if (!context.mounted) return;
     if (!session.hasAgreedTerms) {
-      // 신규 — 명시적 push 로 스택 쌓기(뒤로가기 = 자연스러운 pop).
       context.push('/terms');
     } else if (!session.hasCompletedOnboarding) {
-      // 기존-온보딩 미완료 — 앞으로 진행이라 redirect 의미상 go 로 충분.
       context.go('/onboarding/intro');
     } else {
-      // 기존-완전 — 홈으로 replace.
       context.go('/');
     }
   }
 }
 
 // ---------------------------------------------------------------------------
-// 로고 섹션
+// 로고 일러스트 (Figma 다운로드 PNG)
 // ---------------------------------------------------------------------------
 
-class _LogoSection extends StatelessWidget {
-  const _LogoSection();
+class _LogoIllustration extends StatelessWidget {
+  const _LogoIllustration();
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // TODO: 디자이너 일러스트 에셋으로 교체 예정 (Figma node 365:1552 image 225, 218×218).
-        Container(
-          width: 200,
-          height: 200,
-          decoration: BoxDecoration(
-            color: AppColors.surfaceSelected,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
-          ),
-          child: const Icon(
-            Icons.restaurant,
-            size: 96,
-            color: AppColors.primary,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.contentGap),
-        Text(
-          '먹기 전에 물어보고\n먹은 후에 기록하세요',
-          textAlign: TextAlign.center,
-          style: AppTextStyles.body1Bold.copyWith(
-            color: AppColors.brandAccent,
-          ),
-        ),
-      ],
+    return SizedBox(
+      width: 218,
+      height: 218,
+      child: Image.asset(
+        'assets/figma_extracted/login_logo_illust.png',
+        fit: BoxFit.contain,
+      ),
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// 버튼 섹션 (플랫폼 분기)
+// 슬로건 (Figma: Pretendard Bold 16/140%, color green200 #02995B)
+// ---------------------------------------------------------------------------
+
+class _Slogan extends StatelessWidget {
+  const _Slogan();
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      '먹기 전에 물어보고\n먹은 후에 기록하세요',
+      textAlign: TextAlign.center,
+      style: AppTextStyles.body1Bold.copyWith(
+        color: AppColors.brandAccent,
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 버튼 섹션 (플랫폼 분기 + 로딩 시 비활성)
 // ---------------------------------------------------------------------------
 
 class _ButtonSection extends StatelessWidget {
@@ -160,7 +178,6 @@ class _ButtonSection extends StatelessWidget {
           isLoading: isLoading,
           onPressed: isLoading ? null : onKakaoPressed,
         ),
-        // Apple 버튼: iOS에서만 노출 (Apple App Store Guideline 4.8).
         if (defaultTargetPlatform == TargetPlatform.iOS) ...[
           const SizedBox(height: AppSpacing.itemGap),
           _AppleButton(
@@ -178,7 +195,7 @@ class _ButtonSection extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 카카오 버튼
+// 카카오 버튼 (Figma: #FEE500, padding 0/14, gap 8, 공식 카카오 SVG 심볼 18×18)
 // ---------------------------------------------------------------------------
 
 class _KakaoButton extends StatelessWidget {
@@ -194,32 +211,37 @@ class _KakaoButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor:
-              isLoading ? AppColors.surfaceMuted : AppColors.kakao,
-          foregroundColor: AppColors.textPrimary,
-          padding: const EdgeInsets.symmetric(
-            vertical: AppSpacing.cardPadding,
-            horizontal: AppSpacing.sectionGap,
+      child: Material(
+        color: isLoading ? AppColors.surfaceMuted : AppColors.kakao,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: AppSpacing.cardPadding - 2,
+              horizontal: 14,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Figma 공식 카카오 심볼 — 다운로드된 SVG (18×18).
+                SvgPicture.asset(
+                  'assets/figma_extracted/kakao_logo_symbol.svg',
+                  width: 18,
+                  height: 18,
+                ),
+                const SizedBox(width: AppSpacing.itemGap),
+                Text(
+                  '카카오로 시작하기',
+                  // Figma: Pretendard Medium 16 / lineHeight 160% / rgba(0,0,0,0.85)
+                  style: AppTextStyles.body1Medium.copyWith(
+                    color: AppColors.kakaoText,
+                  ),
+                ),
+              ],
+            ),
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-          ),
-          textStyle: AppTextStyles.body1Bold,
-          elevation: 0,
-          minimumSize: Size.zero,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // TODO: 공식 카카오 심볼 에셋(디자이너 제공 예정)으로 교체.
-            Icon(Icons.chat_bubble, size: AppSpacing.cardPadding),
-            SizedBox(width: AppSpacing.itemGap),
-            Text('카카오로 시작하기'),
-          ],
         ),
       ),
     );
@@ -227,7 +249,7 @@ class _KakaoButton extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Apple 버튼 (iOS 전용)
+// Apple 버튼 (HIG 승인 문구. 출시 시 공식 SignInWithAppleButton 으로 교체)
 // ---------------------------------------------------------------------------
 
 class _AppleButton extends StatelessWidget {
@@ -244,37 +266,34 @@ class _AppleButton extends StatelessWidget {
     // TODO: 출시 시 sign_in_with_apple 공식 SignInWithAppleButton 으로 교체(HIG).
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor:
-              isLoading ? AppColors.surfaceMuted : AppColors.textPrimary,
-          foregroundColor: AppColors.surface,
-          padding: const EdgeInsets.symmetric(
-            vertical: AppSpacing.cardPadding,
-            horizontal: AppSpacing.sectionGap,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-          ),
-          textStyle: AppTextStyles.body1Bold,
-          elevation: 0,
-          minimumSize: Size.zero,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // TODO: 출시 시 공식 Apple 로고 에셋으로 교체(HIG: SF 글리프).
-            Icon(
-              Icons.apple,
-              size: AppSpacing.cardPadding,
-              color: AppColors.surface,
+      child: Material(
+        color: isLoading ? AppColors.surfaceMuted : AppColors.textPrimary,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          child: Padding(
+            // Figma: padding 15 / gap 15
+            padding: const EdgeInsets.all(15),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.apple,
+                  size: 22,
+                  color: AppColors.surface,
+                ),
+                const SizedBox(width: 15),
+                // HIG 승인 문구.
+                Text(
+                  'Apple로 계속하기',
+                  style: AppTextStyles.body1Medium.copyWith(
+                    color: AppColors.surface,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(width: AppSpacing.itemGap),
-            // 승인 문구: "Apple로 계속하기" (HIG 준수 — "애플로 시작하기" 비승인)
-            Text('Apple로 계속하기'),
-          ],
+          ),
         ),
       ),
     );
@@ -282,7 +301,7 @@ class _AppleButton extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 하단 면책 텍스트
+// 하단 면책
 // ---------------------------------------------------------------------------
 
 class _DisclaimerText extends StatelessWidget {

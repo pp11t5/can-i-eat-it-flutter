@@ -4,14 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
-import 'package:can_i_eat_it/app/widgets/app_button.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 
 /// 삭제 유예 계정(02a) 로그인 시 복구 여부를 묻는 다이얼로그.
 ///
-/// barrierDismissible: false — 외부 탭·뒤로가기로 닫히지 않으며 명시적 선택을 강제한다.
-/// - [계정 복구하고 계속하기]: recoverAccount() 호출 후 닫기 (가드가 redirect).
-/// - [취소]: signOut() 호출 후 닫기 (미인증 → 로그인 화면 유지).
+/// Figma node 365:1558 정합:
+/// - 외부 dim: rgba(0,0,0,0.5) (Material 기본 barrierColor 와 유사)
+/// - 모달카드: 343 wide, padding 24/24/16, gap 32, radius 16, bg white
+/// - 텍스트 그룹 (gap 16):
+///   - 제목 "탈퇴를 진행 중인 계정이에요" — Bold 18(우리 토큰 header2Bold 20 ≈ 가장 가까움), #1A1A1F, center
+///   - 본문 "유예 기간 동안에는 언제든 복구할 수 있어요\n지금 복구하시겠어요?" — 14, #595966 ≈ textSecondary, center
+/// - 버튼 그룹 (gap 8):
+///   - 주 CTA "계정 복구하고 계속하기" — #00BF72, padding 16, radius 8, Bold 16 white center
+///   - 부 CTA "취소" — transparent, padding 16 0, #737380, Regular 16 center
+///
+/// barrierDismissible: false — 외부 탭·뒤로가기로 닫히지 않으며 명시적 선택을 강제.
 Future<void> showDeletionGraceDialog(
   BuildContext context,
   WidgetRef ref,
@@ -30,42 +37,48 @@ class _DeletionGraceDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return Dialog(
       backgroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
       ),
-      contentPadding: const EdgeInsets.all(AppSpacing.sectionGap),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            '탈퇴를 진행 중인 계정이에요',
-            style: AppTextStyles.header1Bold.copyWith(
-              color: AppColors.textPrimary,
+      insetPadding:
+          const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
+      child: Padding(
+        // Figma: 24/24/16 (top/sides/bottom).
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.sectionGap,
+          AppSpacing.sectionGap,
+          AppSpacing.sectionGap,
+          AppSpacing.cardPadding,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 텍스트 그룹 (gap 16).
+            Text(
+              '탈퇴를 진행 중인 계정이에요',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.header2Bold.copyWith(
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.itemGap),
-          Text(
-            '유예 기간 동안에는 언제든 복구할 수 있어요\n지금 복구하시겠어요?',
-            style: AppTextStyles.body1Medium.copyWith(
-              color: AppColors.textSecondary,
+            const SizedBox(height: AppSpacing.cardPadding),
+            Text(
+              '유예 기간 동안에는 언제든 복구할 수 있어요\n지금 복구하시겠어요?',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.body2Medium.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.sectionGap),
-          AppButton.primary(
-            label: '계정 복구하고 계속하기',
-            isExpanded: true,
-            onPressed: () => _onRecover(context),
-          ),
-          const SizedBox(height: AppSpacing.itemGap),
-          AppButton.secondary(
-            label: '취소',
-            isExpanded: true,
-            onPressed: () => _onCancel(context),
-          ),
-        ],
+            const SizedBox(height: AppSpacing.contentGap),
+            // 버튼 그룹 (gap 8).
+            _PrimaryCta(onTap: () => _onRecover(context)),
+            const SizedBox(height: AppSpacing.itemGap),
+            _SecondaryCta(onTap: () => _onCancel(context)),
+          ],
+        ),
       ),
     );
   }
@@ -80,5 +93,58 @@ class _DeletionGraceDialog extends StatelessWidget {
     await ref.read(authControllerProvider.notifier).signOut();
     if (!context.mounted) return;
     Navigator.of(context).pop();
+  }
+}
+
+/// "계정 복구하고 계속하기" — primary CTA.
+class _PrimaryCta extends StatelessWidget {
+  const _PrimaryCta({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.primary,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.cardPadding),
+          child: Center(
+            child: Text(
+              '계정 복구하고 계속하기',
+              style: AppTextStyles.body1Bold.copyWith(
+                color: AppColors.onPrimary,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "취소" — secondary CTA (전체 너비 탭, 텍스트 only).
+class _SecondaryCta extends StatelessWidget {
+  const _SecondaryCta({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.cardPadding),
+        child: Center(
+          child: Text(
+            '취소',
+            style: AppTextStyles.body1Medium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

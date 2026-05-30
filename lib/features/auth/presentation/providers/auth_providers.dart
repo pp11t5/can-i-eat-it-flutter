@@ -10,10 +10,11 @@ part 'auth_providers.g.dart';
 
 /// [AuthRepository] 공급자.
 ///
-/// 기본값은 미인증 mock — 앱이 /login에서 시작한다.
-/// 실 구현(카카오 SDK + 서버 JWT) 교체 시 ProviderScope override로 주입한다.
+/// W1 데모 기본값: 카카오 탭 → 신규(약관 화면), Apple 탭 → 삭제유예(02a 다이얼로그).
+/// 한 빌드에서 양쪽 플로우를 모두 시연 가능. 실 구현(카카오 SDK + 서버 JWT) 교체 시
+/// ProviderScope override 로 주입한다.
 @riverpod
-AuthRepository authRepository(Ref ref) => MockAuthRepository.signedOut();
+AuthRepository authRepository(Ref ref) => MockAuthRepository.w1Demo();
 
 /// 인증 상태 컨트롤러 (AsyncNotifier).
 ///
