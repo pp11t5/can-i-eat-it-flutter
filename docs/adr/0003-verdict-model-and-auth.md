@@ -104,9 +104,18 @@ VerdictCard
 
 - [ ] `lib/features/food_check/domain/entities/eat_verdict.dart` — `EatVerdict` sealed class 또는 enum(4상태) 정의
 - [ ] `VerdictCard` 위젯 — 3섹션 구조 + `unknown` 분기 + `MedicalDisclaimer` 포함
-- [ ] `AuthRepository` 인터페이스 정의 + Mock impl (W1, Riverpod override)
+- [x] `AuthRepository` 인터페이스 정의 + Mock impl (W1 #4, Riverpod override) — 완료
 - [ ] 실 카카오 JWT AuthRepository 구현 (서버 인증 API 확정 시, W1 말 또는 W2)
-- [ ] Apple App Store 심사 대응 검토 (출시 직전)
+- [ ] Apple App Store 심사 대응 (출시 직전) — 부록 §7
+- [ ] 로그인 버튼 실 SDK + 공식 Apple 위젯 교체 (출시 전, 디자이너 재디자인 반영) — 부록 §7
+
+## 7. 부록 (2026-05-30): 로그인 버튼 컴플라이언스 + 플랫폼 분기
+
+W1 #4 구현 중 확정. 상세 출처: `docs/compliance/login-button-compliance.md`.
+- **플랫폼 분기**: iOS = 카카오 + Apple(4.8 충족), Android = 카카오 단독(Apple 숨김). 구현은 `defaultTargetPlatform` 분기.
+- **Apple 4.8**: 제3자 소셜 로그인(카카오)만 제공 시 App Store 리젝 위험 → 정식 출시 전 Sign in with Apple 동반 필수. **TestFlight 비공개 베타는 허용**(W1은 베타 단계).
+- **버튼 출시 블로커**: Apple 버튼은 공식 위젯(`ASAuthorizationAppleIDButton` / `sign_in_with_apple`) + 승인 문구("Apple로 계속하기")로 교체, 카카오 공식 심볼 확인. W1은 디자인 토큰 기반 placeholder(디자이너 재디자인 진행 중, Figma 코멘트 전달 완료).
+- **계정 삭제(5.1.1(v))**: 02a 삭제유예 복구 + 계정삭제 화면으로 충족 예정.
 
 ---
 
