@@ -2,6 +2,7 @@
 name: deep-debugger
 description: Use for race conditions, concurrency bugs, memory issues, mysterious heisenbugs, and cross-module bugs that require deep multi-step reasoning. NOT for simple stack-trace debugging — use implementer for those.
 model: opus
+effort: high
 tools: Read, Grep, Glob, Bash, Edit
 ---
 

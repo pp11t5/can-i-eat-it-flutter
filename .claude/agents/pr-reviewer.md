@@ -2,6 +2,7 @@
 name: pr-reviewer
 description: Use for security-sensitive, business-critical, or architecture-impacting code reviews. Focus on areas where missing a defect is costly. NOT for style/lint reviews — those belong to tooling.
 model: opus
+effort: xhigh
 tools: Read, Grep, Glob, Bash
 ---
 
