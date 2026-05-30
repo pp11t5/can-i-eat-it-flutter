@@ -77,9 +77,10 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
       },
       child: Scaffold(
         backgroundColor: AppColors.surface,
-        appBar: const PreferredSize(
-          preferredSize: Size.fromHeight(64),
-          child: _TopBar(),
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(64 + MediaQuery.paddingOf(context).top),
+          // SafeArea(bottom: false) — TopBar 를 노치/상태바 아래로 밀어준다.
+          child: const SafeArea(bottom: false, child: _TopBar()),
         ),
         body: SafeArea(
           top: false,
@@ -270,34 +271,48 @@ class _TermRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        // Figma: 8px 상하
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.itemGap),
-        child: Row(
-          children: [
-            // 좌측: checkbox + 라벨 (gap 8).
-            FigmaCheckbox(checked: checked, size: optional ? 20 : 24),
-            const SizedBox(width: AppSpacing.itemGap),
-            Expanded(
-              child: Text(
-                label,
-                style: AppTextStyles.body2Medium.copyWith(
-                  color: optional
-                      ? AppColors.textSecondary
-                      : AppColors.textPrimary,
-                ),
+    return Padding(
+      // Figma: 8px 상하
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.itemGap),
+      child: Row(
+        children: [
+          // 좌측: checkbox + 라벨 — 탭하면 체크박스 토글.
+          Expanded(
+            child: InkWell(
+              onTap: onTap,
+              child: Row(
+                children: [
+                  FigmaCheckbox(checked: checked),
+                  const SizedBox(width: AppSpacing.itemGap),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: AppTextStyles.body2Medium.copyWith(
+                        color: optional
+                            ? AppColors.textSecondary
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            // TODO: 약관 전문 웹뷰(34_개인정보약관)로 연결 — 디자이너/PO 확정 후.
-            SvgPicture.asset(
-              'assets/figma_extracted/chevron_right.svg',
-              width: 24,
-              height: 24,
+          ),
+          // 우측 chevron — 약관 상세 웹뷰 push 영역(W1 placeholder).
+          InkWell(
+            onTap: () {
+              // TODO: 약관 전문 WebView(34_개인정보약관) push — 화면 구현 후 연결.
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: SvgPicture.asset(
+                'assets/figma_extracted/chevron_right.svg',
+                width: 24,
+                height: 24,
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

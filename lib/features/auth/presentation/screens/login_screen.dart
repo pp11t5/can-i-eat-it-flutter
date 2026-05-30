@@ -11,27 +11,31 @@ import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/widgets/deletion_grace_dialog.dart';
 
-/// 로그인 화면 (02_로그인) — Figma node 365:1552 기준 시각 충실.
+/// 로그인 화면 (02_로그인) — Figma node 365:1552 기준 절대 위치 충실.
 ///
-/// 레이아웃 (375×812 캔버스):
-/// - 배경: #F7FFFB 연한 민트, opacity 15% 배경 이미지(558×838) 깔림
-/// - 로고/일러스트 PNG: x:76, y:141, 218×218
-/// - 슬로건: y:343, Pretendard Bold 16/140%, color #02995B (green200)
-/// - 버튼 컨테이너: x:16, y:518, 342 width, gap 16
-///   - 카카오: #FEE500 / 카카오 심볼 18×18 SVG / 텍스트 Pretendard Medium 16, rgba(0,0,0,0.85)
-///   - Apple: #000000 / Material apple 아이콘(출시 시 공식 위젯으로 교체) / "Apple로 계속하기" (HIG 승인 문구)
-///
-/// 플랫폼 분기:
-/// - iOS: 카카오 + Apple (App Store 4.8 충족)
-/// - Android: 카카오만 노출
+/// 캔버스 375×812 기준 절대 좌표:
+/// - 배경: #F7FFFB (loginBg), opacity 15% 배경 사진(위/아래 flip — 흰색이 상단)
+/// - 로고 PNG: x:76, y:141, 218×218
+/// - 슬로건: y:343, Pretendard Bold 16, color brandAccent #02995B
+/// - 버튼 컨테이너: x:16, y:518, 342 wide, gap 16
+/// 화면 비율로 환산해 LayoutBuilder + Positioned 로 매핑.
 ///
 /// 진입 후 처리:
-/// - 신규(약관 미동의) → context.push('/terms') (iOS pop 애니메이션 보장)
+/// - 신규(약관 미동의) → context.push('/terms')
 /// - 기존(미온보딩) → go /onboarding/intro
 /// - 기존(완전) → go /
-/// - 삭제유예 → 02a 다이얼로그
+/// - 삭제유예 → 02a 다이얼로그 (sessionStatusFromSession 에서 unauthenticated 로 묶어
+///   가드가 / 로 redirect 하지 못하게 함 → 다이얼로그가 가려지지 않음)
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
+
+  // Figma 기준 비율 상수 (375×812).
+  static const double _kCanvasW = 375;
+  static const double _kCanvasH = 812;
+  static const double _kLogoY = 141; // → 17.4% from top
+  static const double _kLogoSize = 218;
+  static const double _kSloganY = 343; // → 42.2%
+  static const double _kButtonY = 518; // → 63.8%
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,45 +44,63 @@ class LoginScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.loginBackground,
-      body: Stack(
-        children: [
-          // Opacity 15% 배경 사진 (Figma: 558×838 @ x=-32, y=0, opacity 0.15)
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.15,
-              child: Image.asset(
-                'assets/figma_extracted/login_bg_image.png',
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-              ),
-              // 비례형 레이아웃 — 디바이스 크기에 강건.
-              // Figma 비율(로고 상단 ~17% / 슬로건 중앙 ~42% / 버튼 ~64%) 근접.
-              child: Column(
-                children: [
-                  const Spacer(flex: 2),
-                  const Flexible(child: _LogoIllustration()),
-                  const SizedBox(height: AppSpacing.contentGap),
-                  const _Slogan(),
-                  const Spacer(flex: 3),
-                  _ButtonSection(
-                    isLoading: isLoading,
-                    onKakaoPressed: () => _handleKakaoPressed(context, ref),
-                    onApplePressed: () => _handleApplePressed(context, ref),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final w = constraints.maxWidth;
+          final h = constraints.maxHeight;
+          final logoSize = (w * _kLogoSize / _kCanvasW).clamp(160.0, 280.0);
+          return Stack(
+            children: [
+              // 배경 사진 — 위아래 flip (흰색이 상단으로) + opacity 15%.
+              Positioned.fill(
+                child: Opacity(
+                  opacity: 0.15,
+                  child: Transform.flip(
+                    flipY: true,
+                    child: Image.asset(
+                      'assets/figma_extracted/login_bg_image.png',
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                  const SizedBox(height: AppSpacing.cardPadding),
-                  const _DisclaimerText(),
-                  const SizedBox(height: AppSpacing.cardPadding),
-                ],
+                ),
               ),
-            ),
-          ),
-        ],
+              // 로고 — y 141/812 (17.4%) 중앙 정렬, 크기 218 기준 비례.
+              Positioned(
+                top: h * _kLogoY / _kCanvasH,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: SizedBox(
+                    width: logoSize,
+                    height: logoSize,
+                    child: Image.asset(
+                      'assets/figma_extracted/login_logo_illust.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+              // 슬로건 — y 343/812 (42.2%).
+              Positioned(
+                top: h * _kSloganY / _kCanvasH,
+                left: 0,
+                right: 0,
+                child: const Center(child: _Slogan()),
+              ),
+              // 버튼 컨테이너 — y 518/812 (63.8%), 좌우 16.
+              Positioned(
+                top: h * _kButtonY / _kCanvasH,
+                left: AppSpacing.screenPadding,
+                right: AppSpacing.screenPadding,
+                child: _ButtonSection(
+                  isLoading: isLoading,
+                  onKakaoPressed: () => _handleKakaoPressed(context, ref),
+                  onApplePressed: () => _handleApplePressed(context, ref),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -113,26 +135,6 @@ class LoginScreen extends ConsumerWidget {
     } else {
       context.go('/');
     }
-  }
-}
-
-// ---------------------------------------------------------------------------
-// 로고 일러스트 (Figma 다운로드 PNG)
-// ---------------------------------------------------------------------------
-
-class _LogoIllustration extends StatelessWidget {
-  const _LogoIllustration();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 218,
-      height: 218,
-      child: Image.asset(
-        'assets/figma_extracted/login_logo_illust.png',
-        fit: BoxFit.contain,
-      ),
-    );
   }
 }
 
@@ -173,6 +175,7 @@ class _ButtonSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         _KakaoButton(
           isLoading: isLoading,
@@ -186,7 +189,7 @@ class _ButtonSection extends StatelessWidget {
           ),
         ],
         if (isLoading) ...[
-          const SizedBox(height: AppSpacing.sectionGap),
+          const SizedBox(height: AppSpacing.cardPadding),
           const CircularProgressIndicator(color: AppColors.primary),
         ],
       ],
@@ -225,7 +228,6 @@ class _KakaoButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Figma 공식 카카오 심볼 — 다운로드된 SVG (18×18).
                 SvgPicture.asset(
                   'assets/figma_extracted/kakao_logo_symbol.svg',
                   width: 18,
@@ -234,7 +236,6 @@ class _KakaoButton extends StatelessWidget {
                 const SizedBox(width: AppSpacing.itemGap),
                 Text(
                   '카카오로 시작하기',
-                  // Figma: Pretendard Medium 16 / lineHeight 160% / rgba(0,0,0,0.85)
                   style: AppTextStyles.body1Medium.copyWith(
                     color: AppColors.kakaoText,
                   ),
@@ -273,18 +274,12 @@ class _AppleButton extends StatelessWidget {
           onTap: onPressed,
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
           child: Padding(
-            // Figma: padding 15 / gap 15
             padding: const EdgeInsets.all(15),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.apple,
-                  size: 22,
-                  color: AppColors.surface,
-                ),
+                const Icon(Icons.apple, size: 22, color: AppColors.surface),
                 const SizedBox(width: 15),
-                // HIG 승인 문구.
                 Text(
                   'Apple로 계속하기',
                   style: AppTextStyles.body1Medium.copyWith(
@@ -295,26 +290,6 @@ class _AppleButton extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// 하단 면책
-// ---------------------------------------------------------------------------
-
-class _DisclaimerText extends StatelessWidget {
-  const _DisclaimerText();
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      // provisional, PO 카피 검수 대상.
-      '본 앱은 의료기기가 아니며 진단·치료 목적이 아닙니다',
-      textAlign: TextAlign.center,
-      style: AppTextStyles.caption1Medium.copyWith(
-        color: AppColors.textTertiary,
       ),
     );
   }

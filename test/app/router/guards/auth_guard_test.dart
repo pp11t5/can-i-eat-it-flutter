@@ -167,5 +167,21 @@ void main() {
       );
       expect(sessionStatusFromSession(session), SessionStatus.ready);
     });
+
+    test('삭제유예 상태는 (약관·온보딩과 무관하게) unauthenticated 로 취급된다', () {
+      // 이유: 가드가 ready 로 보고 / 로 redirect 하면 02a 다이얼로그가 가려진다.
+      // LoginScreen 이 다이얼로그를 띄울 때까지 사용자를 /login 에 머물게 한다.
+      const session = AuthSession(
+        userId: 'mock-deletion-grace',
+        provider: AuthProvider.kakao,
+        hasAgreedTerms: true,
+        hasCompletedOnboarding: true,
+        accountStatus: AccountStatus.deletionGrace,
+      );
+      expect(
+        sessionStatusFromSession(session),
+        SessionStatus.unauthenticated,
+      );
+    });
   });
 }
