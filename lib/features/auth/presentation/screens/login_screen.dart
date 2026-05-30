@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
@@ -9,13 +10,19 @@ import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/widgets/deletion_grace_dialog.dart';
 
-/// 로그인 화면.
+/// 로그인 화면 (02_로그인).
 ///
 /// 플랫폼 분기:
 /// - iOS: 카카오 + Apple(Apple App Store Guideline 4.8 충족)
 /// - Android/기타: 카카오만 노출
 ///
-/// 버튼 비주얼은 디자이너 재디자인 예정 — 현재 기능 동작 수준(토큰만 사용).
+/// 진입 후 처리:
+/// - 신규(약관 미동의) → 명시적 `context.push('/terms')` (iOS pop 애니메이션 보장)
+/// - 기존(약관 동의, 온보딩 미완료) → `/onboarding/intro` 로 go
+/// - 기존(완전) → `/` 로 go
+/// - 삭제유예 → 02a 다이얼로그
+///
+/// 버튼/로고 비주얼은 디자이너 재디자인 진행 중 — 현재 토큰 기반 placeholder.
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
@@ -25,7 +32,7 @@ class LoginScreen extends ConsumerWidget {
     final isLoading = authState.isLoading;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.loginBackground,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -33,16 +40,16 @@ class LoginScreen extends ConsumerWidget {
           ),
           child: Column(
             children: [
-              const Spacer(),
-              _LogoSection(),
-              const SizedBox(height: AppSpacing.contentGap),
+              const Spacer(flex: 3),
+              const _LogoSection(),
+              const Spacer(flex: 4),
               _ButtonSection(
                 isLoading: isLoading,
                 onKakaoPressed: () => _handleKakaoPressed(context, ref),
                 onApplePressed: () => _handleApplePressed(context, ref),
               ),
-              const Spacer(),
-              _DisclaimerText(),
+              const SizedBox(height: AppSpacing.contentGap),
+              const _DisclaimerText(),
               const SizedBox(height: AppSpacing.sectionGap),
             ],
           ),
@@ -63,15 +70,31 @@ class LoginScreen extends ConsumerWidget {
     await _handlePostSignIn(context, ref);
   }
 
-  /// 로그인 후 accountStatus 확인.
+  /// 로그인 후 라우팅을 **명시적으로** 처리한다.
   ///
-  /// deletionGrace면 02a 삭제유예 다이얼로그를 표시한다.
-  /// 그 외 상태(active 등)는 가드가 자동으로 redirect한다.
+  /// 가드 redirect 에만 맡기면 replace 동작이라 iOS pop 애니메이션이 불가능
+  /// (예: /terms → 뒤로가기 시 자연스러운 슬라이드 out). 따라서 신규 사용자
+  /// 진입은 `context.push('/terms')` 로 Navigator 스택을 쌓는다.
   Future<void> _handlePostSignIn(BuildContext context, WidgetRef ref) async {
     final session = ref.read(authControllerProvider).valueOrNull;
-    if (session?.accountStatus == AccountStatus.deletionGrace) {
-      if (!context.mounted) return;
+    if (session == null) return;
+
+    // 02a 삭제유예: 라우팅 대신 다이얼로그.
+    if (session.accountStatus == AccountStatus.deletionGrace) {
       await showDeletionGraceDialog(context, ref);
+      return;
+    }
+
+    if (!context.mounted) return;
+    if (!session.hasAgreedTerms) {
+      // 신규 — 명시적 push 로 스택 쌓기(뒤로가기 = 자연스러운 pop).
+      context.push('/terms');
+    } else if (!session.hasCompletedOnboarding) {
+      // 기존-온보딩 미완료 — 앞으로 진행이라 redirect 의미상 go 로 충분.
+      context.go('/onboarding/intro');
+    } else {
+      // 기존-완전 — 홈으로 replace.
+      context.go('/');
     }
   }
 }
@@ -81,30 +104,32 @@ class LoginScreen extends ConsumerWidget {
 // ---------------------------------------------------------------------------
 
 class _LogoSection extends StatelessWidget {
+  const _LogoSection();
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // TODO: 디자이너 제공 일러스트 에셋으로 교체 예정
+        // TODO: 디자이너 일러스트 에셋으로 교체 예정 (Figma node 365:1552 image 225, 218×218).
         Container(
-          width: 80,
-          height: 80,
+          width: 200,
+          height: 200,
           decoration: BoxDecoration(
             color: AppColors.surfaceSelected,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
           ),
           child: const Icon(
             Icons.restaurant,
-            size: 40,
+            size: 96,
             color: AppColors.primary,
           ),
         ),
-        const SizedBox(height: AppSpacing.sectionGap),
+        const SizedBox(height: AppSpacing.contentGap),
         Text(
           '먹기 전에 물어보고\n먹은 후에 기록하세요',
           textAlign: TextAlign.center,
-          style: AppTextStyles.header1Bold.copyWith(
-            color: AppColors.textPrimary,
+          style: AppTextStyles.body1Bold.copyWith(
+            color: AppColors.brandAccent,
           ),
         ),
       ],
@@ -135,7 +160,7 @@ class _ButtonSection extends StatelessWidget {
           isLoading: isLoading,
           onPressed: isLoading ? null : onKakaoPressed,
         ),
-        // Apple 버튼: iOS에서만 노출 (Apple App Store Guideline 4.8)
+        // Apple 버튼: iOS에서만 노출 (Apple App Store Guideline 4.8).
         if (defaultTargetPlatform == TargetPlatform.iOS) ...[
           const SizedBox(height: AppSpacing.itemGap),
           _AppleButton(
@@ -190,7 +215,7 @@ class _KakaoButton extends StatelessWidget {
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // TODO: 공식 카카오 심볼 에셋(디자이너 제공 예정)으로 교체
+            // TODO: 공식 카카오 심볼 에셋(디자이너 제공 예정)으로 교체.
             Icon(Icons.chat_bubble, size: AppSpacing.cardPadding),
             SizedBox(width: AppSpacing.itemGap),
             Text('카카오로 시작하기'),
@@ -216,7 +241,7 @@ class _AppleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: 출시 시 sign_in_with_apple 공식 SignInWithAppleButton으로 교체(HIG)
+    // TODO: 출시 시 sign_in_with_apple 공식 SignInWithAppleButton 으로 교체(HIG).
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -240,8 +265,12 @@ class _AppleButton extends StatelessWidget {
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // TODO: 출시 시 공식 Apple 로고 에셋으로 교체(HIG: SF 글리프 사용)
-            Icon(Icons.apple, size: AppSpacing.cardPadding, color: AppColors.surface),
+            // TODO: 출시 시 공식 Apple 로고 에셋으로 교체(HIG: SF 글리프).
+            Icon(
+              Icons.apple,
+              size: AppSpacing.cardPadding,
+              color: AppColors.surface,
+            ),
             SizedBox(width: AppSpacing.itemGap),
             // 승인 문구: "Apple로 계속하기" (HIG 준수 — "애플로 시작하기" 비승인)
             Text('Apple로 계속하기'),
@@ -257,10 +286,12 @@ class _AppleButton extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _DisclaimerText extends StatelessWidget {
+  const _DisclaimerText();
+
   @override
   Widget build(BuildContext context) {
     return Text(
-      // provisional, PO 카피 검수 대상
+      // provisional, PO 카피 검수 대상.
       '본 앱은 의료기기가 아니며 진단·치료 목적이 아닙니다',
       textAlign: TextAlign.center,
       style: AppTextStyles.caption1Medium.copyWith(

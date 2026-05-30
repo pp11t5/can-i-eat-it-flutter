@@ -42,6 +42,16 @@ void main() {
       );
       expect(result, isNull);
     });
+
+    test('약관 미동의 상태에서 /login 은 허용된다 (LoginScreen 이 명시적 push 로 진입)', () {
+      // 이유: redirect 로 /terms 강제 시 replace 가 되어 iOS pop 애니메이션 불가.
+      // LoginScreen 이 signInWithKakao 후 명시적 context.push('/terms') 로 진입한다.
+      final result = resolveRedirect(
+        status: SessionStatus.needsTerms,
+        location: '/login',
+      );
+      expect(result, isNull);
+    });
   });
 
   group('resolveRedirect — 온보딩 미완료(needsOnboarding)', () {

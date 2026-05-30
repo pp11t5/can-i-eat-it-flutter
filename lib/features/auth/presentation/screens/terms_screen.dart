@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
@@ -59,11 +60,17 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,
-        title: const Text('약관 동의', style: AppTextStyles.header1Medium),
+        // Figma TopBar 타이틀: Pretendard Medium 16 → body1Medium.
+        title: const Text('약관 동의', style: AppTextStyles.body1Medium),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: AppColors.textPrimary,
-          onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+          // 1) pop 으로 Navigator 스택을 뒤로(=iOS Cupertino pop 애니메이션).
+          // 2) signOut 으로 가입 취소(상태 unauthenticated). 가드는 /login 에서 redirect 없음.
+          onPressed: () {
+            context.pop();
+            ref.read(authControllerProvider.notifier).signOut();
+          },
         ),
       ),
       body: SafeArea(

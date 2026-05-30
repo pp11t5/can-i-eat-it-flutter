@@ -15,7 +15,11 @@ String? resolveRedirect({
       return location == '/login' ? null : '/login';
 
     case SessionStatus.needsTerms:
-      return location == '/terms' ? null : '/terms';
+      // /login 도 허용: LoginScreen 이 명시적 push 로 /terms 에 진입해
+      // iOS Cupertino pop 애니메이션을 자연스럽게 만든다.
+      // (가드가 redirect 로 /terms 를 강제하면 replace 라 pop 이 불가능.)
+      if (location == '/terms' || location == '/login') return null;
+      return '/terms';
 
     case SessionStatus.needsOnboarding:
       return location.startsWith('/onboarding') ? null : '/onboarding/intro';

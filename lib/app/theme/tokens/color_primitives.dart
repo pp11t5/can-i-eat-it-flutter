@@ -79,4 +79,7 @@ abstract final class ColorPrimitives {
 
   /// 카카오 로그인 버튼 배경
   static const Color kakaoYellow = Color(0xFFFEE500);
+
+  /// 로그인 화면 배경 (Figma node 365:1552 실측 #F7FFFB — 연한 민트)
+  static const Color loginBg = Color(0xFFF7FFFB);
 }
