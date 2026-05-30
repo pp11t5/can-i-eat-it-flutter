@@ -11,11 +11,16 @@ enum SessionStatus { unauthenticated, needsTerms, needsOnboarding, ready }
 
 /// [AuthSession?]으로부터 [SessionStatus]를 파생하는 순수 함수.
 ///
-/// 로딩 중(null)이면 unauthenticated, 약관 미동의면 needsTerms,
-/// 온보딩 미완료면 needsOnboarding, 그 외 ready.
-/// accountStatus(deletionGrace)는 로그인 UI 다이얼로그에서 처리하므로 여기선 무시.
+/// 로딩/세션없음 → unauthenticated
+/// **삭제유예(02a)** → unauthenticated 으로 취급(라우팅 미진입 — LoginScreen 이
+///   다이얼로그로 처리. 가드가 ready 로 보고 / 로 redirect 해서 다이얼로그가
+///   가려지는 버그 방지.)
+/// 약관 미동의 → needsTerms / 온보딩 미완료 → needsOnboarding / 그 외 → ready.
 SessionStatus sessionStatusFromSession(AuthSession? session) {
   if (session == null) return SessionStatus.unauthenticated;
+  if (session.accountStatus == AccountStatus.deletionGrace) {
+    return SessionStatus.unauthenticated;
+  }
   if (!session.hasAgreedTerms) return SessionStatus.needsTerms;
   if (!session.hasCompletedOnboarding) return SessionStatus.needsOnboarding;
   return SessionStatus.ready;

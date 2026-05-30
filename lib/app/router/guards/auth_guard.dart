@@ -15,7 +15,11 @@ String? resolveRedirect({
       return location == '/login' ? null : '/login';
 
     case SessionStatus.needsTerms:
-      return location == '/terms' ? null : '/terms';
+      // **가드는 절대 /terms 로 redirect 하지 않는다** (모든 location 허용).
+      // 이유: 가드 redirect 는 replace 라 iOS pop 애니메이션 불가능 + pop 직후
+      // 가드 재평가로 인한 /terms 재진입 버그 회피. LoginScreen 이 imperative
+      // context.push('/terms') 로만 진입을 관리한다. pop = signOut(가입취소).
+      return null;
 
     case SessionStatus.needsOnboarding:
       return location.startsWith('/onboarding') ? null : '/onboarding/intro';

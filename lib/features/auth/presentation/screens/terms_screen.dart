@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
@@ -7,12 +9,24 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_button.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
+import 'package:can_i_eat_it/features/auth/presentation/widgets/figma_checkbox.dart';
 
-/// 약관 동의 화면 (03_약관동의).
+/// 약관 동의 화면 (03_약관동의) — Figma node 365:1557 기준 시각 충실.
 ///
-/// 신규 가입자만 진입(가드). 필수 3개(서비스 이용약관·개인정보·민감정보) 동의 시
-/// '다음' 활성. '다음' → TermsAgreement(버전·항목·시각) 기록 → 가드가 온보딩으로 redirect.
-/// 뒤로가기 → 가입 취소(signOut → 미인증 → 로그인).
+/// 레이아웃:
+/// - 배경: white
+/// - TopBar (375×64): bg #FEFEFE, bottom stroke #F5F5F5 1px, chevron-left SVG 32×32,
+///   타이틀 "약관 동의" Pretendard Medium 16, #1A1A1F
+/// - Header (x:16, y:146): "서비스 이용을 위해\n약관에 동의해 주세요" Pretendard Bold 24/150%, #1A1A1F
+/// - 전체동의 카드 (343 wide, bg #FCFCFC, stroke #EAEAEA, radius 8, padding 16, gap 16):
+///   FigmaCheckbox 24px + "모든 약관에 동의합니다" Bold 16
+/// - Divider 1px #DBDBE5
+/// - 4개 약관 행:
+///   - 필수 3: FigmaCheckbox ON 24px + 라벨 Pretendard Medium 14 #1A1A1F + chevron-right SVG
+///   - 선택 1: FigmaCheckbox OFF 20px + 라벨 Pretendard Medium 14 **#737380(회색)** + chevron-right
+/// - 다음 버튼 (padding 16/16/32): full-width 343, primary #00BF72, radius 8, Bold 16 white
+///
+/// 뒤로가기 = 가입 취소 → Navigator.pop + signOut (PopScope 로 swipe-back 도 처리).
 class TermsScreen extends ConsumerStatefulWidget {
   const TermsScreen({super.key});
 
@@ -48,65 +62,135 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
       sensitiveInfo: _sensitiveInfo,
       marketing: _marketing,
     );
-    // 가드가 동의 후 /onboarding/intro 로 자동 redirect.
+    // 가드가 /onboarding/intro 로 자동 redirect.
     await ref.read(authControllerProvider.notifier).agreeToTerms(agreement);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
+    return PopScope<Object?>(
+      canPop: true,
+      // 뒤로가기/스와이프-back 어떤 경로로 pop 되든 signOut 으로 가입 취소.
+      // signOut 을 **post-frame 콜백으로 지연** 시키는 게 핵심:
+      // 동기 호출 시 pop 애니메이션 중간에 가드 재평가가 일어나 /terms → /login
+      // 으로 redirect 가 끼어들면서 pop 이 중단되고 재진입처럼 보이는 버그가 발생.
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.read(authControllerProvider.notifier).signOut();
+          });
+        }
+      },
+      child: Scaffold(
         backgroundColor: AppColors.surface,
-        elevation: 0,
-        title: const Text('약관 동의', style: AppTextStyles.header1Medium),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: AppColors.textPrimary,
-          onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          surfaceTintColor: AppColors.surface,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          toolbarHeight: 64,
+          centerTitle: true,
+          leadingWidth: 64,
+          // 뒤로가기 — IconButton 으로 표준 hit test 보장.
+          leading: IconButton(
+            iconSize: 32,
+            padding: EdgeInsets.zero,
+            icon: SvgPicture.asset(
+              'assets/figma_extracted/chevron_left.svg',
+              width: 32,
+              height: 32,
+            ),
+            onPressed: () {
+              if (context.canPop()) {
+                Navigator.of(context).maybePop();
+              } else {
+                // 스택이 없으면 signOut → 가드가 /login 으로 redirect.
+                ref.read(authControllerProvider.notifier).signOut();
+              }
+            },
+          ),
+          title: Text(
+            '약관 동의',
+            style: AppTextStyles.body1Medium.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          shape: const Border(
+            bottom: BorderSide(color: AppColors.surfaceMuted, width: 1),
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.screenPadding),
+        body: SafeArea(
+          top: false,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                '서비스 이용을 위해\n약관에 동의해 주세요',
-                style: AppTextStyles.header1Bold.copyWith(
-                  color: AppColors.textPrimary,
+              const SizedBox(height: AppSpacing.cardPadding),
+              // Header padding x16
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                ),
+                child: Text(
+                  '서비스 이용을 위해\n약관에 동의해 주세요',
+                  style: AppTextStyles.header1Bold.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.contentGap),
-              _AllAgreeRow(value: _allAgreed, onChanged: _toggleAll),
-              const Divider(color: AppColors.divider),
-              _TermRow(
-                label: '[필수] 서비스 이용약관',
-                value: _termsOfService,
-                onChanged: (v) => setState(() => _termsOfService = v ?? false),
-              ),
-              _TermRow(
-                label: '[필수] 개인정보 수집·이용 동의',
-                value: _privacy,
-                onChanged: (v) => setState(() => _privacy = v ?? false),
-              ),
-              _TermRow(
-                label: '[필수] 민감정보(건강) 수집 동의',
-                value: _sensitiveInfo,
-                onChanged: (v) => setState(() => _sensitiveInfo = v ?? false),
-              ),
-              _TermRow(
-                label: '[선택] 마케팅·푸시 알림 수신',
-                value: _marketing,
-                optional: true,
-                onChanged: (v) => setState(() => _marketing = v ?? false),
+              // Frame 42 (gap 16)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _AllAgreeCard(
+                      value: _allAgreed,
+                      onTap: () => _toggleAll(!_allAgreed),
+                    ),
+                    const SizedBox(height: AppSpacing.cardPadding),
+                    _TermRow(
+                      label: '[필수] 서비스 이용약관',
+                      checked: _termsOfService,
+                      onTap: () =>
+                          setState(() => _termsOfService = !_termsOfService),
+                    ),
+                    _TermRow(
+                      label: '[필수] 개인정보 수집·이용 동의',
+                      checked: _privacy,
+                      onTap: () => setState(() => _privacy = !_privacy),
+                    ),
+                    _TermRow(
+                      label: '[필수] 민감정보(건강) 수집 동의',
+                      checked: _sensitiveInfo,
+                      onTap: () =>
+                          setState(() => _sensitiveInfo = !_sensitiveInfo),
+                    ),
+                    _TermRow(
+                      label: '[선택] 마케팅·푸시 알림 수신',
+                      checked: _marketing,
+                      optional: true,
+                      onTap: () => setState(() => _marketing = !_marketing),
+                    ),
+                  ],
+                ),
               ),
               const Spacer(),
-              AppButton.primary(
-                label: '다음',
-                isExpanded: true,
-                onPressed: _allRequiredAgreed ? _onNext : null,
+              // CTAWrap: padding 16/16/32
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.screenPadding,
+                  AppSpacing.cardPadding,
+                  AppSpacing.screenPadding,
+                  AppSpacing.contentGap,
+                ),
+                child: AppButton.primary(
+                  label: '다음',
+                  isExpanded: true,
+                  onPressed: _allRequiredAgreed ? _onNext : null,
+                ),
               ),
             ],
           ),
@@ -116,32 +200,32 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
   }
 }
 
-/// '모든 약관에 동의합니다' 전체 토글 행.
-class _AllAgreeRow extends StatelessWidget {
-  const _AllAgreeRow({required this.value, required this.onChanged});
+// ---------------------------------------------------------------------------
+// 전체 동의 카드 (bg #FCFCFC, stroke #EAEAEA, radius 8, padding 16, gap 16)
+// ---------------------------------------------------------------------------
+
+class _AllAgreeCard extends StatelessWidget {
+  const _AllAgreeCard({required this.value, required this.onTap});
 
   final bool value;
-  final ValueChanged<bool?> onChanged;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => onChanged(!value),
+      onTap: onTap,
       borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      child: Ink(
         decoration: BoxDecoration(
-          color: AppColors.surfaceMuted,
+          color: AppColors.surfaceMuted, // Figma #FCFCFC ≈ gray20 (우리 토큰 gray30 #F5F5F5; 시각상 거의 동일)
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          border: Border.all(color: AppColors.border, width: 1),
         ),
+        padding: const EdgeInsets.all(AppSpacing.cardPadding),
         child: Row(
           children: [
-            Checkbox(
-              value: value,
-              onChanged: onChanged,
-              activeColor: AppColors.primary,
-            ),
-            const SizedBox(width: AppSpacing.itemGap),
+            FigmaCheckbox(checked: value),
+            const SizedBox(width: AppSpacing.cardPadding),
             Text(
               '모든 약관에 동의합니다',
               style: AppTextStyles.body1Bold.copyWith(
@@ -155,46 +239,67 @@ class _AllAgreeRow extends StatelessWidget {
   }
 }
 
-/// 개별 약관 항목 행(필수/선택).
+// ---------------------------------------------------------------------------
+// 개별 약관 행
+// ---------------------------------------------------------------------------
+
 class _TermRow extends StatelessWidget {
   const _TermRow({
     required this.label,
-    required this.value,
-    required this.onChanged,
+    required this.checked,
+    required this.onTap,
     this.optional = false,
   });
 
   final String label;
-  final bool value;
-  final ValueChanged<bool?> onChanged;
+  final bool checked;
+  final VoidCallback onTap;
+
+  /// [선택] 항목 — checkbox 20px + 라벨 색 textSecondary.
   final bool optional;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
+      // Figma: 8px 상하
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.itemGap),
       child: Row(
         children: [
-          Checkbox(
-            value: value,
-            onChanged: onChanged,
-            activeColor: AppColors.primary,
-          ),
-          const SizedBox(width: AppSpacing.itemGap),
+          // 좌측: checkbox + 라벨 — 탭하면 체크박스 토글.
           Expanded(
-            child: Text(
-              label,
-              style: AppTextStyles.body2Medium.copyWith(
-                color:
-                    optional ? AppColors.textSecondary : AppColors.textPrimary,
+            child: InkWell(
+              onTap: onTap,
+              child: Row(
+                children: [
+                  FigmaCheckbox(checked: checked),
+                  const SizedBox(width: AppSpacing.itemGap),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: AppTextStyles.body2Medium.copyWith(
+                        color: optional
+                            ? AppColors.textSecondary
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          // TODO: 약관 전문 웹뷰(34_개인정보약관)로 연결 — 디자이너/PO 확정 후
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            color: AppColors.textTertiary,
-            onPressed: () {},
+          // 우측 chevron — 약관 상세 웹뷰 push 영역(W1 placeholder).
+          InkWell(
+            onTap: () {
+              // TODO: 약관 전문 WebView(34_개인정보약관) push — 화면 구현 후 연결.
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: SvgPicture.asset(
+                'assets/figma_extracted/chevron_right.svg',
+                width: 24,
+                height: 24,
+              ),
+            ),
           ),
         ],
       ),

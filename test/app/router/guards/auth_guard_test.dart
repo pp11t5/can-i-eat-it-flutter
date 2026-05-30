@@ -27,18 +27,31 @@ void main() {
   });
 
   group('resolveRedirect — 약관 미동의(needsTerms)', () {
-    test('약관 미동의 상태에서 /terms 가 아닌 경로 진입 시 /terms 로 리다이렉트한다', () {
+    // 가드는 needsTerms 에서 절대 redirect 하지 않는다 (모든 location 허용).
+    // 진입은 LoginScreen 이 imperative push 로만 관리.
+
+    test('약관 미동의 상태에서 / 진입은 그대로 둔다(가드 미관여)', () {
       final result = resolveRedirect(
         status: SessionStatus.needsTerms,
         location: '/',
       );
-      expect(result, '/terms');
+      expect(result, isNull);
     });
 
-    test('약관 미동의 상태에서 이미 /terms 이면 리다이렉트하지 않는다', () {
+    test('약관 미동의 상태에서 /terms 도 그대로 둔다', () {
       final result = resolveRedirect(
         status: SessionStatus.needsTerms,
         location: '/terms',
+      );
+      expect(result, isNull);
+    });
+
+    test('약관 미동의 상태에서 /login 도 그대로 둔다 (pop 후 재진입 차단)', () {
+      // LoginScreen 이 push 로 /terms 진입을 관리하므로 가드가 강제하지 않음.
+      // 이로써 pop 후 /login 에 있을 때 가드가 /terms 로 재push 하지 않는다.
+      final result = resolveRedirect(
+        status: SessionStatus.needsTerms,
+        location: '/login',
       );
       expect(result, isNull);
     });
@@ -156,6 +169,22 @@ void main() {
         hasCompletedOnboarding: true,
       );
       expect(sessionStatusFromSession(session), SessionStatus.ready);
+    });
+
+    test('삭제유예 상태는 (약관·온보딩과 무관하게) unauthenticated 로 취급된다', () {
+      // 이유: 가드가 ready 로 보고 / 로 redirect 하면 02a 다이얼로그가 가려진다.
+      // LoginScreen 이 다이얼로그를 띄울 때까지 사용자를 /login 에 머물게 한다.
+      const session = AuthSession(
+        userId: 'mock-deletion-grace',
+        provider: AuthProvider.kakao,
+        hasAgreedTerms: true,
+        hasCompletedOnboarding: true,
+        accountStatus: AccountStatus.deletionGrace,
+      );
+      expect(
+        sessionStatusFromSession(session),
+        SessionStatus.unauthenticated,
+      );
     });
   });
 }
