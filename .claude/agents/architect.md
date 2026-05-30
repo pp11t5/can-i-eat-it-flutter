@@ -2,6 +2,7 @@
 name: architect
 description: Use PROACTIVELY for high-level design, architecture decisions, ADR drafting, API/schema design, and trade-off analysis on irreversible decisions. Read-only — does not modify code.
 model: opus
+effort: high
 tools: Read, Glob, Grep, WebSearch, WebFetch
 ---
 
