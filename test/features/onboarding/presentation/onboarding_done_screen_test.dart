@@ -41,16 +41,21 @@ class _ErrorSubmitNotifier extends OnboardingSubmit {
   Future<void> submit() async {}
 }
 
-/// submit() 호출 여부를 기록하는 spy stub.
+/// submit() 호출 여부를 외부 콜백으로 기록하는 spy stub.
+///
+/// Notifier 공개 프로퍼티 금지(avoid_public_notifier_properties)를 피하기 위해
+/// 호출 기록은 private 콜백으로 외부 변수에 전달한다.
 class _SpySubmitNotifier extends OnboardingSubmit {
-  bool submitCalled = false;
+  _SpySubmitNotifier(this._onSubmit);
+
+  final void Function() _onSubmit;
 
   @override
   AsyncValue<void> build() => const AsyncData(null);
 
   @override
   Future<void> submit() async {
-    submitCalled = true;
+    _onSubmit();
   }
 }
 
@@ -175,19 +180,20 @@ void main() {
 
     testWidgets('"시작하기" 버튼 탭 시 onboardingSubmitProvider.notifier.submit()이 호출된다',
         (tester) async {
-      final spy = _SpySubmitNotifier();
+      var submitCalled = false;
+      final spy = _SpySubmitNotifier(() => submitCalled = true);
 
       await tester.pumpWidget(_wrap([
         onboardingSubmitProvider.overrideWith(() => spy),
       ]));
       await tester.pumpAndSettle();
 
-      expect(spy.submitCalled, isFalse);
+      expect(submitCalled, isFalse);
 
       await tester.tap(find.text('시작하기'));
       await tester.pumpAndSettle();
 
-      expect(spy.submitCalled, isTrue);
+      expect(submitCalled, isTrue);
     });
 
     testWidgets('제출 성공(AsyncLoading→AsyncData) 전이 시 홈("/")으로 이동한다',
