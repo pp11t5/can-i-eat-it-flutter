@@ -6,10 +6,11 @@ part of 'session_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$sessionStatusHash() => r'1b00efe516d8bb85ee2806154b13e067c378f72a';
+String _$sessionStatusHash() => r'3655d4fd45fefd1c0e4239ad486afd84b3d56912';
 
-/// [AuthController] 상태에서 파생된 세션 상태.
-/// 로딩 중 valueOrNull == null → unauthenticated(W1 mock은 즉시 resolve).
+/// [AuthController] + [HealthProfileController] 상태로부터 파생된 세션 상태.
+///
+/// 미인증/약관 미동의 단계에서는 health_profile을 watch하지 않는다(불필요 로딩 회피).
 ///
 /// Copied from [sessionStatus].
 @ProviderFor(sessionStatus)

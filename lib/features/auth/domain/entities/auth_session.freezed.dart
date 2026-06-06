@@ -17,7 +17,6 @@ mixin _$AuthSession {
   String get userId;
   AuthProvider get provider;
   bool get hasAgreedTerms;
-  bool get hasCompletedOnboarding;
   AccountStatus get accountStatus;
 
   /// Create a copy of AuthSession
@@ -37,19 +36,17 @@ mixin _$AuthSession {
                 other.provider == provider) &&
             (identical(other.hasAgreedTerms, hasAgreedTerms) ||
                 other.hasAgreedTerms == hasAgreedTerms) &&
-            (identical(other.hasCompletedOnboarding, hasCompletedOnboarding) ||
-                other.hasCompletedOnboarding == hasCompletedOnboarding) &&
             (identical(other.accountStatus, accountStatus) ||
                 other.accountStatus == accountStatus));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, userId, provider, hasAgreedTerms,
-      hasCompletedOnboarding, accountStatus);
+  int get hashCode =>
+      Object.hash(runtimeType, userId, provider, hasAgreedTerms, accountStatus);
 
   @override
   String toString() {
-    return 'AuthSession(userId: $userId, provider: $provider, hasAgreedTerms: $hasAgreedTerms, hasCompletedOnboarding: $hasCompletedOnboarding, accountStatus: $accountStatus)';
+    return 'AuthSession(userId: $userId, provider: $provider, hasAgreedTerms: $hasAgreedTerms, accountStatus: $accountStatus)';
   }
 }
 
@@ -63,7 +60,6 @@ abstract mixin class $AuthSessionCopyWith<$Res> {
       {String userId,
       AuthProvider provider,
       bool hasAgreedTerms,
-      bool hasCompletedOnboarding,
       AccountStatus accountStatus});
 }
 
@@ -82,7 +78,6 @@ class _$AuthSessionCopyWithImpl<$Res> implements $AuthSessionCopyWith<$Res> {
     Object? userId = null,
     Object? provider = null,
     Object? hasAgreedTerms = null,
-    Object? hasCompletedOnboarding = null,
     Object? accountStatus = null,
   }) {
     return _then(_self.copyWith(
@@ -97,10 +92,6 @@ class _$AuthSessionCopyWithImpl<$Res> implements $AuthSessionCopyWith<$Res> {
       hasAgreedTerms: null == hasAgreedTerms
           ? _self.hasAgreedTerms
           : hasAgreedTerms // ignore: cast_nullable_to_non_nullable
-              as bool,
-      hasCompletedOnboarding: null == hasCompletedOnboarding
-          ? _self.hasCompletedOnboarding
-          : hasCompletedOnboarding // ignore: cast_nullable_to_non_nullable
               as bool,
       accountStatus: null == accountStatus
           ? _self.accountStatus
@@ -204,7 +195,7 @@ extension AuthSessionPatterns on AuthSession {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(String userId, AuthProvider provider, bool hasAgreedTerms,
-            bool hasCompletedOnboarding, AccountStatus accountStatus)?
+            AccountStatus accountStatus)?
         $default, {
     required TResult orElse(),
   }) {
@@ -212,7 +203,7 @@ extension AuthSessionPatterns on AuthSession {
     switch (_that) {
       case _AuthSession() when $default != null:
         return $default(_that.userId, _that.provider, _that.hasAgreedTerms,
-            _that.hasCompletedOnboarding, _that.accountStatus);
+            _that.accountStatus);
       case _:
         return orElse();
     }
@@ -234,14 +225,14 @@ extension AuthSessionPatterns on AuthSession {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(String userId, AuthProvider provider, bool hasAgreedTerms,
-            bool hasCompletedOnboarding, AccountStatus accountStatus)
+            AccountStatus accountStatus)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _AuthSession():
         return $default(_that.userId, _that.provider, _that.hasAgreedTerms,
-            _that.hasCompletedOnboarding, _that.accountStatus);
+            _that.accountStatus);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -262,14 +253,14 @@ extension AuthSessionPatterns on AuthSession {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(String userId, AuthProvider provider, bool hasAgreedTerms,
-            bool hasCompletedOnboarding, AccountStatus accountStatus)?
+            AccountStatus accountStatus)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _AuthSession() when $default != null:
         return $default(_that.userId, _that.provider, _that.hasAgreedTerms,
-            _that.hasCompletedOnboarding, _that.accountStatus);
+            _that.accountStatus);
       case _:
         return null;
     }
@@ -283,7 +274,6 @@ class _AuthSession implements AuthSession {
       {required this.userId,
       required this.provider,
       this.hasAgreedTerms = false,
-      this.hasCompletedOnboarding = false,
       this.accountStatus = AccountStatus.active});
 
   @override
@@ -293,9 +283,6 @@ class _AuthSession implements AuthSession {
   @override
   @JsonKey()
   final bool hasAgreedTerms;
-  @override
-  @JsonKey()
-  final bool hasCompletedOnboarding;
   @override
   @JsonKey()
   final AccountStatus accountStatus;
@@ -318,19 +305,17 @@ class _AuthSession implements AuthSession {
                 other.provider == provider) &&
             (identical(other.hasAgreedTerms, hasAgreedTerms) ||
                 other.hasAgreedTerms == hasAgreedTerms) &&
-            (identical(other.hasCompletedOnboarding, hasCompletedOnboarding) ||
-                other.hasCompletedOnboarding == hasCompletedOnboarding) &&
             (identical(other.accountStatus, accountStatus) ||
                 other.accountStatus == accountStatus));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, userId, provider, hasAgreedTerms,
-      hasCompletedOnboarding, accountStatus);
+  int get hashCode =>
+      Object.hash(runtimeType, userId, provider, hasAgreedTerms, accountStatus);
 
   @override
   String toString() {
-    return 'AuthSession(userId: $userId, provider: $provider, hasAgreedTerms: $hasAgreedTerms, hasCompletedOnboarding: $hasCompletedOnboarding, accountStatus: $accountStatus)';
+    return 'AuthSession(userId: $userId, provider: $provider, hasAgreedTerms: $hasAgreedTerms, accountStatus: $accountStatus)';
   }
 }
 
@@ -346,7 +331,6 @@ abstract mixin class _$AuthSessionCopyWith<$Res>
       {String userId,
       AuthProvider provider,
       bool hasAgreedTerms,
-      bool hasCompletedOnboarding,
       AccountStatus accountStatus});
 }
 
@@ -365,7 +349,6 @@ class __$AuthSessionCopyWithImpl<$Res> implements _$AuthSessionCopyWith<$Res> {
     Object? userId = null,
     Object? provider = null,
     Object? hasAgreedTerms = null,
-    Object? hasCompletedOnboarding = null,
     Object? accountStatus = null,
   }) {
     return _then(_AuthSession(
@@ -380,10 +363,6 @@ class __$AuthSessionCopyWithImpl<$Res> implements _$AuthSessionCopyWith<$Res> {
       hasAgreedTerms: null == hasAgreedTerms
           ? _self.hasAgreedTerms
           : hasAgreedTerms // ignore: cast_nullable_to_non_nullable
-              as bool,
-      hasCompletedOnboarding: null == hasCompletedOnboarding
-          ? _self.hasCompletedOnboarding
-          : hasCompletedOnboarding // ignore: cast_nullable_to_non_nullable
               as bool,
       accountStatus: null == accountStatus
           ? _self.accountStatus

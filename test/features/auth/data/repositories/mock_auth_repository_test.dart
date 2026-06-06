@@ -48,19 +48,18 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
-  group('기존 가입', () {
-    test('기존-온보딩완료 계정은 약관·온보딩이 모두 true 다', () async {
-      final repo = MockAuthRepository.existingOnboarded();
+  group('기존 가입(약관 동의됨)', () {
+    test('existing() 계정은 약관 동의됨, active 상태다', () async {
+      final repo = MockAuthRepository.existing();
       final session = await repo.signInWithKakao();
       expect(session.hasAgreedTerms, isTrue);
-      expect(session.hasCompletedOnboarding, isTrue);
+      expect(session.accountStatus, AccountStatus.active);
     });
 
-    test('기존-온보딩미완료 계정은 약관 true, 온보딩 false 다', () async {
-      final repo = MockAuthRepository.existingNotOnboarded();
+    test('existing() 계정의 provider 가 kakao 다', () async {
+      final repo = MockAuthRepository.existing();
       final session = await repo.signInWithKakao();
-      expect(session.hasAgreedTerms, isTrue);
-      expect(session.hasCompletedOnboarding, isFalse);
+      expect(session.provider, AuthProvider.kakao);
     });
   });
 

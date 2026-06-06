@@ -5,7 +5,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:can_i_eat_it/app/router/guards/auth_guard.dart';
 import 'package:can_i_eat_it/app/widgets/app_shell.dart';
-import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/session_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/login_screen.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/splash_screen.dart';
@@ -20,15 +19,15 @@ part 'app_router.g.dart';
 
 /// 앱 라우터. 인증/온보딩 상태 기반 redirect 가드 + StatefulShellRoute 바텀 내비.
 ///
-/// [authControllerProvider] 변화 시 [refreshListenable]이 go_router의
-/// redirect를 재평가하도록 ValueNotifier 브리지를 사용한다.
+/// [sessionStatusProvider] 값이 의미있게 전이될 때만 go_router redirect를 재평가한다.
+/// 기존 authControllerProvider 직접 listen 대비 중복발화(이슈 #20 S3)를 구조적으로 제거.
 @riverpod
 GoRouter appRouter(Ref ref) {
-  // auth 상태가 바뀔 때마다 go_router redirect 재평가를 트리거하는 브리지.
+  // sessionStatus 전이 시에만 go_router redirect 재평가를 트리거하는 브리지.
   final notifier = ValueNotifier<int>(0);
 
-  ref.listen<AsyncValue<dynamic>>(authControllerProvider, (_, __) {
-    notifier.value++;
+  ref.listen<SessionStatus>(sessionStatusProvider, (prev, next) {
+    if (prev != next) notifier.value++;
   });
 
   // provider가 dispose될 때 notifier도 함께 해제한다.

@@ -11,6 +11,11 @@ String? resolveRedirect({
   required String location,
 }) {
   switch (status) {
+    case SessionStatus.loading:
+      // 로딩 중에는 redirect 없이 현재 화면(splash)에 잔류시킨다.
+      // 이로써 인증/health_profile 로드가 완료되기 전 화면 깜빡임(이슈 #20 S1)을 차단한다.
+      return null;
+
     case SessionStatus.unauthenticated:
       return location == '/login' ? null : '/login';
 

@@ -2,32 +2,55 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
+import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'auth_providers.dart';
 
 part 'session_providers.g.dart';
 
-/// 앱 세션/온보딩 상태 (ADR-0002).
-enum SessionStatus { unauthenticated, needsTerms, needsOnboarding, ready }
-
-/// [AuthSession?]으로부터 [SessionStatus]를 파생하는 순수 함수.
+/// 앱 세션/온보딩 상태 (ADR-0006).
 ///
-/// 로딩/세션없음 → unauthenticated
-/// **삭제유예(02a)** → unauthenticated 으로 취급(라우팅 미진입 — LoginScreen 이
-///   다이얼로그로 처리. 가드가 ready 로 보고 / 로 redirect 해서 다이얼로그가
-///   가려지는 버그 방지.)
-/// 약관 미동의 → needsTerms / 온보딩 미완료 → needsOnboarding / 그 외 → ready.
-SessionStatus sessionStatusFromSession(AuthSession? session) {
-  if (session == null) return SessionStatus.unauthenticated;
-  if (session.accountStatus == AccountStatus.deletionGrace) {
+/// [loading]       → 부팅 시 인증 또는 health_profile 로드 중(화면 깜빡임 차단용).
+/// [unauthenticated] → 미인증(삭제유예 포함, 02a 다이얼로그 보호).
+/// [needsTerms]    → 약관 미동의. 가드는 redirect 안 함(LoginScreen이 imperative push).
+/// [needsOnboarding] → 약관 동의됐지만 health_profile 없음.
+/// [ready]         → 모든 게이트 통과.
+enum SessionStatus { loading, unauthenticated, needsTerms, needsOnboarding, ready }
+
+/// [authSession]: null=미인증. [hasProfile]: null=로딩(아직 모름), false=프로필 없음, true=있음.
+///
+/// 순수 함수 — BuildContext/위젯 비의존, 단위 테스트 가능.
+SessionStatus sessionStatusFrom({
+  required AuthSession? authSession,
+  required bool? hasProfile,
+}) {
+  if (authSession == null) return SessionStatus.unauthenticated;
+  if (authSession.accountStatus == AccountStatus.deletionGrace) {
     return SessionStatus.unauthenticated;
   }
-  if (!session.hasAgreedTerms) return SessionStatus.needsTerms;
-  if (!session.hasCompletedOnboarding) return SessionStatus.needsOnboarding;
-  return SessionStatus.ready;
+  if (!authSession.hasAgreedTerms) return SessionStatus.needsTerms;
+  if (hasProfile == null) return SessionStatus.loading;
+  return hasProfile ? SessionStatus.ready : SessionStatus.needsOnboarding;
 }
 
-/// [AuthController] 상태에서 파생된 세션 상태.
-/// 로딩 중 valueOrNull == null → unauthenticated(W1 mock은 즉시 resolve).
+/// [AuthController] + [HealthProfileController] 상태로부터 파생된 세션 상태.
+///
+/// 미인증/약관 미동의 단계에서는 health_profile을 watch하지 않는다(불필요 로딩 회피).
 @riverpod
-SessionStatus sessionStatus(Ref ref) =>
-    sessionStatusFromSession(ref.watch(authControllerProvider).valueOrNull);
+SessionStatus sessionStatus(Ref ref) {
+  final auth = ref.watch(authControllerProvider);
+  if (auth.isLoading && !auth.hasValue) return SessionStatus.loading;
+  final session = auth.valueOrNull;
+
+  // 게이트 이전 단계(미인증/약관)는 health_profile을 watch하지 않는다.
+  // hasProfile: false 는 임시값 — unauthenticated/needsTerms 판정에만 쓰이며 hasProfile을 실제로 참조하기 전에 early-return 한다.
+  final preGate = sessionStatusFrom(authSession: session, hasProfile: false);
+  if (preGate == SessionStatus.unauthenticated ||
+      preGate == SessionStatus.needsTerms) {
+    return preGate;
+  }
+
+  final profile = ref.watch(healthProfileControllerProvider);
+  if (profile.isLoading && !profile.hasValue) return SessionStatus.loading;
+  final hasProfile = profile.valueOrNull != null;
+  return sessionStatusFrom(authSession: session, hasProfile: hasProfile);
+}
