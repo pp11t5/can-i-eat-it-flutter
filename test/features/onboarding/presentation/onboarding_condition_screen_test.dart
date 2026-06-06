@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:can_i_eat_it/app/widgets/option_card.dart';
 import 'package:can_i_eat_it/app/widgets/step_progress.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
@@ -56,13 +57,31 @@ void main() {
       expect(find.byType(StepProgress), findsOneWidget);
     });
 
-    testWidgets('conditionOptions 항목 라벨이 모두 렌더된다', (tester) async {
+    testWidgets('뒤로 가기 chevron이 렌더된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
+      // chevron을 감싼 32×32 SizedBox가 존재함을 확인
+      final sizedBoxes = tester.widgetList<SizedBox>(find.byType(SizedBox));
+      final has32 = sizedBoxes.any((b) => b.width == 32 && b.height == 32);
+      expect(has32, isTrue);
+    });
+
+    testWidgets('conditionOptions 항목 라벨 4개가 모두 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(conditionOptions.length, 4);
       for (final entry in conditionOptions) {
         expect(find.text(entry.label), findsOneWidget);
       }
+    });
+
+    testWidgets('OptionCard 위젯이 conditionOptions 수만큼 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(OptionCard), findsNWidgets(conditionOptions.length));
     });
 
     testWidgets('GERD 카드는 기본값으로 선택 상태다 (draft starts with [GERD])',
@@ -78,10 +97,37 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 기본값 conditions=['GERD']이므로 GERD 카드가 선택 상태여야 함.
       expect(
         container.read(onboardingControllerProvider).conditions,
         contains('GERD'),
+      );
+    });
+
+    testWidgets('비활성(enabled:false) 카드를 탭해도 conditions가 변경되지 않는다',
+        (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(routerConfig: _testRouter()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final initialConditions =
+          List<String>.from(container.read(onboardingControllerProvider).conditions);
+
+      // 비활성 항목 (gastritis, ibs, functional_dyspepsia) 중 첫 번째를 탭
+      final disabledEntry = conditionOptions.firstWhere((e) => !e.enabled);
+      await tester.tap(find.text(disabledEntry.label));
+      await tester.pumpAndSettle();
+
+      expect(
+        container.read(onboardingControllerProvider).conditions,
+        equals(initialConditions),
+        reason: 'Disabled card tap must not change conditions',
       );
     });
 
@@ -98,9 +144,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 단일 선택: GERD 탭하면 setConditions(['GERD']) → conditions에 GERD 유지
       final label = conditionOptions.first.label; // '역류성 식도염'
-      final code = conditionOptions.first.code;   // 'GERD'
+      final code = conditionOptions.first.code; // 'GERD'
 
       await tester.tap(find.text(label));
       await tester.pumpAndSettle();

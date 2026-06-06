@@ -76,18 +76,18 @@ void main() {
   });
 
   group('resolveRedirect — 온보딩 미완료(needsOnboarding)', () {
-    test('인증됐지만 온보딩 미완료면 /onboarding/intro 로 리다이렉트한다', () {
+    test('인증됐지만 온보딩 미완료면 /onboarding/condition 로 리다이렉트한다', () {
       final result = resolveRedirect(
         status: SessionStatus.needsOnboarding,
         location: '/',
       );
-      expect(result, '/onboarding/intro');
+      expect(result, '/onboarding/condition');
     });
 
-    test('온보딩 미완료 상태에서 이미 /onboarding/intro 이면 리다이렉트하지 않는다', () {
+    test('온보딩 미완료 상태에서 이미 /onboarding/condition 이면 리다이렉트하지 않는다', () {
       final result = resolveRedirect(
         status: SessionStatus.needsOnboarding,
-        location: '/onboarding/intro',
+        location: '/onboarding/condition',
       );
       expect(result, isNull);
     });
@@ -137,7 +137,7 @@ void main() {
     test('인증+온보딩 완료 상태에서 /onboarding 경로는 / 로 리다이렉트한다', () {
       final result = resolveRedirect(
         status: SessionStatus.ready,
-        location: '/onboarding/intro',
+        location: '/onboarding/condition',
       );
       expect(result, '/');
     });

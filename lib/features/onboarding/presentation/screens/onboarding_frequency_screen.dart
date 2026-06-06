@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_button.dart';
-import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
+import 'package:can_i_eat_it/app/widgets/option_card.dart';
 import 'package:can_i_eat_it/app/widgets/step_progress.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
 
-/// 온보딩 Step 2/4: 증상 빈도 + 진단 여부 선택 화면.
+/// 온보딩 Step 2/4: 증상 빈도 선택 화면 (Figma 365:1554).
+///
+/// MedicalDisclaimer 와 diagnosedLabel 타일은 Figma에 없으므로 제거됨.
 class OnboardingFrequencyScreen extends ConsumerWidget {
   const OnboardingFrequencyScreen({super.key});
 
@@ -26,6 +29,7 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── 탑바 ──────────────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.screenPadding,
@@ -34,6 +38,19 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: AppSpacing.sectionGap),
+                  GestureDetector(
+                    onTap: () => context.go('/onboarding/condition'),
+                    child: SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: SvgPicture.asset(
+                        'assets/figma_extracted/chevron_left.svg',
+                        width: 32,
+                        height: 32,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.itemGap),
                   const StepProgress(currentStep: 2, totalSteps: 4),
                   const SizedBox(height: AppSpacing.contentGap),
                   Text(
@@ -53,44 +70,28 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
                 ],
               ),
             ),
+            // ── 증상 빈도 목록 ────────────────────────────────────────────────
             Expanded(
-              child: SingleChildScrollView(
+              child: ListView.separated(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.screenPadding,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 증상 빈도 목록 (multi-select)
-                    ...symptomFrequencyOptions.map((entry) {
-                      final isSelected =
-                          draft.symptomFrequency.contains(entry.code);
-                      return Padding(
-                        padding: const EdgeInsets.only(
-                          bottom: AppSpacing.itemGap,
-                        ),
-                        child: _SelectableTile(
-                          label: entry.label,
-                          isSelected: isSelected,
-                          onTap: () => notifier.toggleSymptom(entry.code),
-                        ),
-                      );
-                    }),
-                    // 진단 여부 단일 선택 타일 (섹션 갭으로 구분)
-                    const SizedBox(height: AppSpacing.sectionGap),
-                    _SelectableTile(
-                      label: diagnosedLabel,
-                      isSelected: draft.diagnosed,
-                      onTap: () => notifier.setDiagnosed(!draft.diagnosed),
-                    ),
-                    const SizedBox(height: AppSpacing.sectionGap),
-                    // 면책 고지
-                    const MedicalDisclaimer(message: kOnboardingDisclaimerText),
-                    const SizedBox(height: AppSpacing.sectionGap),
-                  ],
-                ),
+                itemCount: symptomFrequencyOptions.length,
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  final entry = symptomFrequencyOptions[index];
+                  final isSelected =
+                      draft.symptomFrequency.contains(entry.code);
+                  return OptionCard(
+                    label: entry.label,
+                    selected: isSelected,
+                    onTap: () => notifier.toggleSymptom(entry.code),
+                  );
+                },
               ),
             ),
+            // ── CTA ───────────────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.screenPadding,
@@ -105,75 +106,6 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _SelectableTile extends StatelessWidget {
-  const _SelectableTile({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.all(AppSpacing.cardPadding),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.surfaceSelected : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-          ),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                style: AppTextStyles.body2Regular.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.itemGap),
-            _CheckIcon(isSelected: isSelected),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CheckIcon extends StatelessWidget {
-  const _CheckIcon({required this.isSelected});
-
-  final bool isSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        color: isSelected ? AppColors.primary : AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-        border: Border.all(
-          color: isSelected ? AppColors.primary : AppColors.checkboxBorder,
-        ),
-      ),
-      child: isSelected
-          ? const Icon(Icons.check, size: 16, color: AppColors.onPrimary)
-          : null,
     );
   }
 }

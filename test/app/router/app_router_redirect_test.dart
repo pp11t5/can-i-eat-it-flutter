@@ -8,7 +8,7 @@ import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
-import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_intro_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_condition_screen.dart';
 
 /// 실 라우터(appRouterProvider) + guard 통합 검증 (ADR-0006 §3).
 ///
@@ -47,7 +47,7 @@ void main() {
 
   group('appRouter redirect 통합 — sign-in 후 guard hop', () {
     testWidgets(
-      '기존 사용자(약관 동의) + 프로필 없음 → /onboarding/intro 로 redirect',
+      '기존 사용자(약관 동의) + 프로필 없음 → /onboarding/condition 로 redirect',
       (tester) async {
         final authRepo = MockAuthRepository.existing();
         final profileRepo = MockHealthProfileRepository.noProfile();
@@ -63,15 +63,15 @@ void main() {
         expect(find.text('카카오로 시작하기'), findsOneWidget);
 
         // 카카오 버튼 탭 → signInWithKakao() → context.go('/') →
-        // guard 재평가 → needsOnboarding → /onboarding/intro
+        // guard 재평가 → needsOnboarding → /onboarding/condition
         await tester.tap(find.text('카카오로 시작하기'));
         await tester.pumpAndSettle();
 
-        // OnboardingIntroScreen 위젯 타입으로 확인 (텍스트 충돌 방지).
+        // OnboardingConditionScreen 위젯 타입으로 확인 (텍스트 충돌 방지).
         expect(
-          find.byType(OnboardingIntroScreen),
+          find.byType(OnboardingConditionScreen),
           findsOneWidget,
-          reason: '프로필 없는 기존 사용자는 /onboarding/intro 로 가야 한다',
+          reason: '프로필 없는 기존 사용자는 /onboarding/condition 로 가야 한다',
         );
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),

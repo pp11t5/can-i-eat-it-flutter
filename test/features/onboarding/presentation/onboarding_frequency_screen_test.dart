@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
+import 'package:can_i_eat_it/app/widgets/step_progress.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_frequency_screen.dart';
@@ -15,6 +15,11 @@ import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding
 GoRouter _testRouter() => GoRouter(
       initialLocation: '/onboarding/frequency',
       routes: [
+        GoRoute(
+          path: '/onboarding/condition',
+          builder: (_, __) =>
+              const Scaffold(body: Text('condition stub')),
+        ),
         GoRoute(
           path: '/onboarding/frequency',
           builder: (_, __) => const OnboardingFrequencyScreen(),
@@ -49,14 +54,43 @@ void main() {
       expect(find.text('해당되는 항목을 모두 선택해 주세요'), findsOneWidget);
     });
 
-    testWidgets('symptomFrequencyOptions 5개 항목이 모두 렌더된다', (tester) async {
+    testWidgets('StepProgress 위젯이 렌더된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(symptomFrequencyOptions.length, 5);
+      expect(find.byType(StepProgress), findsOneWidget);
+    });
+
+    testWidgets('뒤로 가기 chevron이 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      final sizedBoxes = tester.widgetList<SizedBox>(find.byType(SizedBox));
+      final has32 = sizedBoxes.any((b) => b.width == 32 && b.height == 32);
+      expect(has32, isTrue);
+    });
+
+    testWidgets('symptomFrequencyOptions 6개 항목이 모두 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(symptomFrequencyOptions.length, 6);
       for (final entry in symptomFrequencyOptions) {
+        await tester.scrollUntilVisible(
+          find.text(entry.label),
+          100,
+          scrollable: find.byType(Scrollable).first,
+        );
         expect(find.text(entry.label), findsOneWidget);
       }
+    });
+
+    testWidgets('MedicalDisclaimer가 렌더되지 않는다 (Figma에서 제거됨)',
+        (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('이 앱은 건강 관리를 돕는'), findsNothing);
     });
 
     testWidgets('항목 탭 시 draft.symptomFrequency에 코드가 추가된다', (tester) async {
@@ -101,7 +135,6 @@ void main() {
 
       final entry = symptomFrequencyOptions.first;
 
-      // 추가
       await tester.tap(find.text(entry.label));
       await tester.pumpAndSettle();
       expect(
@@ -109,102 +142,12 @@ void main() {
         contains(entry.code),
       );
 
-      // 제거
       await tester.tap(find.text(entry.label));
       await tester.pumpAndSettle();
       expect(
         container.read(onboardingControllerProvider).symptomFrequency,
         isNot(contains(entry.code)),
       );
-    });
-
-    testWidgets('diagnosedLabel 타일 탭 시 draft.diagnosed가 true가 된다',
-        (tester) async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp.router(routerConfig: _testRouter()),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(
-        container.read(onboardingControllerProvider).diagnosed,
-        isFalse,
-      );
-
-      // diagnosedLabel 타일은 스크롤 아래에 있을 수 있으므로 스크롤 후 탭한다.
-      await tester.scrollUntilVisible(
-        find.text(diagnosedLabel),
-        100,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.tap(find.text(diagnosedLabel));
-      await tester.pumpAndSettle();
-
-      expect(
-        container.read(onboardingControllerProvider).diagnosed,
-        isTrue,
-      );
-    });
-
-    testWidgets('diagnosedLabel 타일을 두 번 탭하면 draft.diagnosed가 false로 돌아온다',
-        (tester) async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp.router(routerConfig: _testRouter()),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      await tester.scrollUntilVisible(
-        find.text(diagnosedLabel),
-        100,
-        scrollable: find.byType(Scrollable).first,
-      );
-
-      await tester.tap(find.text(diagnosedLabel));
-      await tester.pumpAndSettle();
-      expect(container.read(onboardingControllerProvider).diagnosed, isTrue);
-
-      await tester.tap(find.text(diagnosedLabel));
-      await tester.pumpAndSettle();
-      expect(container.read(onboardingControllerProvider).diagnosed, isFalse);
-    });
-
-    testWidgets('MedicalDisclaimer 위젯이 렌더된다', (tester) async {
-      await tester.pumpWidget(_wrap());
-      await tester.pumpAndSettle();
-
-      // 스크롤해서 면책 고지 확인
-      await tester.scrollUntilVisible(
-        find.byType(MedicalDisclaimer),
-        100,
-        scrollable: find.byType(Scrollable).first,
-      );
-
-      expect(find.byType(MedicalDisclaimer), findsOneWidget);
-    });
-
-    testWidgets('MedicalDisclaimer에 kOnboardingDisclaimerText가 포함된다',
-        (tester) async {
-      await tester.pumpWidget(_wrap());
-      await tester.pumpAndSettle();
-
-      await tester.scrollUntilVisible(
-        find.textContaining('이 앱은 건강 관리를 돕는'),
-        100,
-        scrollable: find.byType(Scrollable).first,
-      );
-
-      expect(find.textContaining('이 앱은 건강 관리를 돕는'), findsOneWidget);
     });
 
     testWidgets('"다음" 버튼 탭 시 /onboarding/triggers로 이동한다', (tester) async {

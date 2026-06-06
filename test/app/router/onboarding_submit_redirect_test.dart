@@ -9,7 +9,7 @@ import 'package:can_i_eat_it/features/health_profile/data/health_profile_provide
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
-import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_intro_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_condition_screen.dart';
 
 /// M3: 온보딩 submit → gate-flip → HomeScreen redirect 통합 검증.
 ///
@@ -18,7 +18,7 @@ import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding
 ///
 /// 검증하는 인과 관계:
 ///   sign-in(기존 사용자 + 프로필 없음)
-///   → guard: needsOnboarding → /onboarding/intro
+///   → guard: needsOnboarding → /onboarding/condition
 ///   → onboardingSubmitProvider.notifier.submit()
 ///   → healthProfileController.state = AsyncData(profile)  ← gate flip
 ///   → sessionStatus: needsOnboarding → ready
@@ -71,21 +71,21 @@ void main() {
         expect(find.text('카카오로 시작하기'), findsOneWidget);
 
         // 2단계: 카카오 버튼 탭 → signInWithKakao() → context.go('/') →
-        //        guard 재평가 → needsOnboarding → /onboarding/intro.
+        //        guard 재평가 → needsOnboarding → /onboarding/condition.
         await tester.tap(find.text('카카오로 시작하기'));
         await tester.pumpAndSettle();
 
         expect(
-          find.byType(OnboardingIntroScreen),
+          find.byType(OnboardingConditionScreen),
           findsOneWidget,
-          reason: '프로필 없는 기존 사용자는 OnboardingIntroScreen으로 가야 한다',
+          reason: '프로필 없는 기존 사용자는 OnboardingConditionScreen으로 가야 한다',
         );
 
         // 3단계: submit() 호출.
         // ProviderScope.containerOf로 실제 컨테이너에서 notifier에 접근한다.
-        // OnboardingIntroScreen이 현재 빌드 트리에 존재하므로 이를 anchor로 사용.
+        // OnboardingConditionScreen이 현재 빌드 트리에 존재하므로 이를 anchor로 사용.
         final container = ProviderScope.containerOf(
-          tester.element(find.byType(OnboardingIntroScreen)),
+          tester.element(find.byType(OnboardingConditionScreen)),
         );
         await container.read(onboardingSubmitProvider.notifier).submit();
         await tester.pumpAndSettle();

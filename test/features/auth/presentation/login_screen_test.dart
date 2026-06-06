@@ -18,7 +18,7 @@ GoRouter _testRouter() => GoRouter(
           builder: (_, __) => const Scaffold(body: Text('terms stub')),
         ),
         GoRoute(
-          path: '/onboarding/intro',
+          path: '/onboarding/condition',
           builder: (_, __) => const Scaffold(body: Text('onboarding stub')),
         ),
         GoRoute(

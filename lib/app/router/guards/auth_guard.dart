@@ -27,7 +27,7 @@ String? resolveRedirect({
       return null;
 
     case SessionStatus.needsOnboarding:
-      return location.startsWith('/onboarding') ? null : '/onboarding/intro';
+      return location.startsWith('/onboarding') ? null : '/onboarding/condition';
 
     case SessionStatus.ready:
       if (location == '/splash' ||

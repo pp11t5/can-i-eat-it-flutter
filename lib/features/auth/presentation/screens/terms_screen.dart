@@ -63,7 +63,7 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
       sensitiveInfo: _sensitiveInfo,
       marketing: _marketing,
     );
-    // 가드가 /onboarding/intro 로 자동 redirect.
+    // 가드가 /onboarding/condition 로 자동 redirect.
     await ref.read(authControllerProvider.notifier).agreeToTerms(agreement);
   }
 

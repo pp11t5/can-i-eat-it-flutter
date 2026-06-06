@@ -1,85 +1,105 @@
 /// 온보딩 선택지 코드↔한국어 라벨 단일 소스.
 ///
-/// 출처: PRD §3 F1 / api-contract.
-/// code 값은 서버 DTO snake_case 계약과 일치한다.
-/// UI 라벨(한국어)은 이 카탈로그가 매핑하며 화면·컨트롤러가 공유한다.
-///
-/// TODO(figma): 알레르기/트리거 칩 라벨은 Figma 82:197/82:358 collapsed —
-///   디자이너 확정 시 정합.
+/// 라벨은 Figma 디자인(365:1555 / 365:1554 / 365:1553 / 1064:12268) verbatim.
+/// code 값은 서버 DTO snake_case 계약 대상.
+/// TODO(enum): 트리거/증상/알레르기 코드값을 Notion MVP enum·서버 Swagger와 정합.
+///   (Notion 미인증으로 미확인 — 현재는 Figma 라벨에서 도출한 코드. 인터페이스 불변이라 추후 교체 가능.)
 library;
 
 // ---------------------------------------------------------------------------
-// 타입 별칭
+// 타입
 // ---------------------------------------------------------------------------
 
-/// 코드-라벨 쌍.
+/// 코드-라벨 쌍 (증상·트리거·알레르기 공용).
 typedef OptionEntry = ({String code, String label});
 
+/// 질환 선택지. 캡션·활성화 여부 포함(현재 GERD만 활성, 나머지는 비활성 표시).
+typedef ConditionOption = ({
+  String code,
+  String label,
+  String? caption,
+  bool enabled,
+});
+
 // ---------------------------------------------------------------------------
-// 질환 (conditions)
+// 질환 (conditions) — 단일 선택 (Figma 365:1555)
 // ---------------------------------------------------------------------------
 
-/// 지원 질환 목록. 현재 GERD 단일, 다중 확장 대비 리스트 구조.
-const List<OptionEntry> conditionOptions = [
-  (code: 'GERD', label: '역류성 식도염'),
+/// 현재 GERD만 지원. 나머지 3종은 비활성 셀로 노출(향후 확장 예고).
+const List<ConditionOption> conditionOptions = [
+  (
+    code: 'GERD',
+    label: '역류성 식도염',
+    caption: '소화가 잘 안 되고 더부룩해요',
+    enabled: true,
+  ),
+  (code: 'gastritis', label: '위염 / 위궤양', caption: null, enabled: false),
+  (
+    code: 'ibs',
+    label: '과민성 대장 증후군',
+    caption: null,
+    enabled: false,
+  ),
+  (
+    code: 'functional_dyspepsia',
+    label: '기능성 소화불량',
+    caption: null,
+    enabled: false,
+  ),
 ];
 
 // ---------------------------------------------------------------------------
-// 증상 빈도 (symptomFrequency) — 복수 선택
+// 증상 빈도 (symptomFrequency) — 복수 선택 (Figma 365:1554, 순서 verbatim)
 // ---------------------------------------------------------------------------
 
-/// PRD §3 F1 카피 verbatim.
 const List<OptionEntry> symptomFrequencyOptions = [
   (code: 'weekly_heartburn', label: '주에 1번 이상 속이 쓰리거나 신물이 올라와요'),
   (code: 'post_meal_cough', label: '밥을 먹고 나면 기침이 나요'),
-  (code: 'sour_taste', label: '입에서 신맛·악취가 느껴져요'),
-  (code: 'lying_chest_tightness', label: '누우면 가슴이 답답해져요'),
   (code: 'throat_lump', label: '목에 이물감이 있어요'),
+  (code: 'sour_taste', label: '입에서 신맛과 악취가 느껴져요'),
+  (code: 'lying_chest_tightness', label: '누우면 가슴이 답답해져요'),
+  (code: 'manage_only', label: '불편함은 딱히 없지만 관리하고 싶어요'),
 ];
 
 // ---------------------------------------------------------------------------
-// 진단 여부 (diagnosed) — 단일 선택 bool
+// 트리거 음식 (triggerFoods) — 복수 선택 칩 (Figma 365:1553, 순서 verbatim)
 // ---------------------------------------------------------------------------
 
-/// 체크 시 diagnosed = true 로 설정한다.
-const String diagnosedLabel = '예전에 진단받았지만 지금은 관리만 하고 있어요';
-
-// ---------------------------------------------------------------------------
-// 트리거 음식 (triggerFoods) — 복수 선택
-// ---------------------------------------------------------------------------
-
-/// PRD "매운 음식·카페인·튀김 등" 기반 8개 항목.
 const List<OptionEntry> triggerFoodOptions = [
-  (code: 'spicy', label: '매운 음식'),
-  (code: 'caffeine', label: '카페인'),
-  (code: 'fried', label: '튀김'),
+  (code: 'coffee_caffeine', label: '커피·카페인'),
   (code: 'carbonated', label: '탄산음료'),
-  (code: 'alcohol', label: '음주'),
-  (code: 'citrus', label: '신 과일·주스'),
+  (code: 'alcohol', label: '술'),
+  (code: 'fried_oily', label: '튀김·기름진 음식'),
   (code: 'chocolate', label: '초콜릿'),
-  (code: 'fatty', label: '기름진 음식'),
+  (code: 'spicy', label: '매운 음식'),
+  (code: 'citrus', label: '감귤류'),
+  (code: 'tomato', label: '토마토'),
+  (code: 'mint', label: '민트'),
+  (code: 'onion_garlic', label: '양파·마늘'),
+  (code: 'cheese_dairy', label: '(생)치즈·유제품'),
+  (code: 'bread_refined_flour', label: '빵·정제 밀가루'),
 ];
 
 // ---------------------------------------------------------------------------
-// 알레르기 (allergies) — 복수 선택 칩
+// 알레르기 (allergies) — 복수 선택 칩 (Figma 1064:12268, 2행 순서 verbatim)
 // ---------------------------------------------------------------------------
 
-/// 일반적 한국 알레르기 항목 6개.
 const List<OptionEntry> allergyOptions = [
+  (code: 'milk_dairy', label: '우유·유제품'),
   (code: 'egg', label: '계란'),
-  (code: 'milk', label: '우유'),
-  (code: 'shellfish', label: '갑각류'),
+  (code: 'wheat', label: '밀'),
+  (code: 'soy', label: '콩(대두)'),
+  (code: 'peanut', label: '땅콩'),
+  (code: 'crustacean', label: '갑각류'),
   (code: 'nuts', label: '견과류'),
-  (code: 'peach', label: '복숭아'),
-  (code: 'soy', label: '대두'),
+  (code: 'fish_shellfish', label: '생선·조개류'),
 ];
 
 // ---------------------------------------------------------------------------
-// 조회 헬퍼
+// 조회 헬퍼 (OptionEntry 카탈로그 전용)
 // ---------------------------------------------------------------------------
 
-/// 주어진 카탈로그에서 [code]에 해당하는 라벨을 반환한다.
-/// 존재하지 않으면 null 반환.
+/// 주어진 카탈로그에서 [code]에 해당하는 라벨을 반환한다. 없으면 null.
 String? labelForCode(List<OptionEntry> catalog, String code) {
   for (final entry in catalog) {
     if (entry.code == code) return entry.label;
@@ -87,8 +107,7 @@ String? labelForCode(List<OptionEntry> catalog, String code) {
   return null;
 }
 
-/// 주어진 카탈로그에서 [label]에 해당하는 코드를 반환한다.
-/// 존재하지 않으면 null 반환.
+/// 주어진 카탈로그에서 [label]에 해당하는 코드를 반환한다. 없으면 null.
 String? codeForLabel(List<OptionEntry> catalog, String label) {
   for (final entry in catalog) {
     if (entry.label == label) return entry.code;

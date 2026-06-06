@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_button.dart';
+import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/app/widgets/step_progress.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
 
-/// 온보딩 Step 3/4: 트리거 음식 선택 화면.
-///
-/// // TODO(figma): 07 헤더 카피 collapsed — 디자이너 확정 시 정합.
+/// 온보딩 Step 3/4: 트리거 음식 선택 화면 (Figma 365:1553).
 class OnboardingTriggersScreen extends ConsumerStatefulWidget {
   const OnboardingTriggersScreen({super.key});
 
@@ -28,7 +28,7 @@ class _OnboardingTriggersScreenState
   @override
   void initState() {
     super.initState();
-    // 뒤로 돌아왔을 때 드래프트에 저장된 기타 입력을 복원한다(입력 보존, #20 H1).
+    // 뒤로 돌아왔을 때 드래프트에 저장된 기타 입력을 복원한다.
     _customController.text =
         ref.read(onboardingControllerProvider).customTriggers ?? '';
   }
@@ -50,7 +50,7 @@ class _OnboardingTriggersScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 상단 바: 스텝 진행 + 건너뛰기
+            // ── 탑바 ──────────────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.screenPadding,
@@ -59,33 +59,30 @@ class _OnboardingTriggersScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: AppSpacing.sectionGap),
-                  Row(
-                    children: [
-                      const Expanded(
-                        child: StepProgress(currentStep: 3, totalSteps: 4),
+                  GestureDetector(
+                    onTap: () => context.go('/onboarding/frequency'),
+                    child: SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: SvgPicture.asset(
+                        'assets/figma_extracted/chevron_left.svg',
+                        width: 32,
+                        height: 32,
                       ),
-                      const SizedBox(width: AppSpacing.sectionGap),
-                      GestureDetector(
-                        onTap: () => context.go('/onboarding/medications'),
-                        child: Text(
-                          '건너뛰기',
-                          style: AppTextStyles.body2Regular.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
+                  const SizedBox(height: AppSpacing.itemGap),
+                  const StepProgress(currentStep: 3, totalSteps: 4),
                   const SizedBox(height: AppSpacing.contentGap),
                   Text(
-                    '어떤 음식이 증상을\n악화시키나요?',
+                    '불편함이 유발되는\n음식이 있나요?',
                     style: AppTextStyles.header1Bold.copyWith(
                       color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.itemGap),
                   Text(
-                    '해당하는 음식을 모두 선택해 주세요 (선택)',
+                    '평소 먹고 나면 속이 불편했던 음식을 선택해 주세요',
                     style: AppTextStyles.body1Regular.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -94,6 +91,7 @@ class _OnboardingTriggersScreenState
                 ],
               ),
             ),
+            // ── 스크롤 영역 ───────────────────────────────────────────────────
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
@@ -109,26 +107,29 @@ class _OnboardingTriggersScreenState
                       children: triggerFoodOptions.map((entry) {
                         final isSelected =
                             draft.triggerFoods.contains(entry.code);
-                        return _TriggerChip(
+                        return SelectableChip(
                           label: entry.label,
-                          isSelected: isSelected,
+                          selected: isSelected,
                           onTap: () => notifier.toggleTrigger(entry.code),
                         );
                       }).toList(),
                     ),
                     const SizedBox(height: AppSpacing.sectionGap),
-                    // 기타 자유 입력 필드
+                    // 기타 섹션
+                    Text(
+                      '해당하는 음식이 없나요?',
+                      style: AppTextStyles.body1Bold.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.itemGap),
                     TextField(
                       controller: _customController,
                       style: AppTextStyles.body1Regular.copyWith(
                         color: AppColors.textPrimary,
                       ),
                       decoration: InputDecoration(
-                        labelText: '기타',
-                        hintText: '직접 입력해 주세요',
-                        labelStyle: AppTextStyles.body2Regular.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                        hintText: '오렌지주스, 라면',
                         hintStyle: AppTextStyles.body1Regular.copyWith(
                           color: AppColors.textTertiary,
                         ),
@@ -139,7 +140,8 @@ class _OnboardingTriggersScreenState
                         enabledBorder: OutlineInputBorder(
                           borderRadius:
                               BorderRadius.circular(AppSpacing.radiusCard),
-                          borderSide: const BorderSide(color: AppColors.border),
+                          borderSide:
+                              const BorderSide(color: AppColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius:
@@ -160,6 +162,7 @@ class _OnboardingTriggersScreenState
                 ),
               ),
             ),
+            // ── CTA ───────────────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.screenPadding,
@@ -172,45 +175,6 @@ class _OnboardingTriggersScreenState
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TriggerChip extends StatelessWidget {
-  const _TriggerChip({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.chipPaddingH,
-          vertical: AppSpacing.chipPaddingV,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-          ),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.body2Medium.copyWith(
-            color: isSelected ? AppColors.onPrimary : AppColors.textPrimary,
-          ),
         ),
       ),
     );

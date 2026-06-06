@@ -23,7 +23,7 @@ import 'package:can_i_eat_it/features/auth/presentation/widgets/deletion_grace_d
 /// 진입 후 처리:
 /// - 신규(약관 미동의) → context.push('/terms')
 /// - 기존(약관 동의됨) → context.go('/') — 가드가 health_profile 기준으로
-///   needsOnboarding이면 /onboarding/intro 로, ready면 / 로 재평가한다.
+///   needsOnboarding이면 /onboarding/condition 로, ready면 / 로 재평가한다.
 /// - 삭제유예 → 02a 다이얼로그 (sessionStatusFrom 에서 unauthenticated 로 묶어
 ///   가드가 / 로 redirect 하지 못하게 함 → 다이얼로그가 가려지지 않음)
 class LoginScreen extends ConsumerWidget {
@@ -132,7 +132,7 @@ class LoginScreen extends ConsumerWidget {
       context.push('/terms');
     } else {
       // 온보딩 완료 여부는 가드가 health_profile 기준으로 재평가한다.
-      // needsOnboarding → /onboarding/intro, ready → /
+      // needsOnboarding → /onboarding/condition, ready → /
       context.go('/');
     }
   }
