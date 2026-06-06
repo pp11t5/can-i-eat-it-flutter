@@ -28,7 +28,7 @@ final onboardingControllerProvider =
 );
 
 typedef _$OnboardingController = AutoDisposeNotifier<OnboardingDraft>;
-String _$onboardingSubmitHash() => r'b8ae01afff194e2cac4a28542f6e7d9739d28615';
+String _$onboardingSubmitHash() => r'3bd890132efc0a77d7eeb5a5af49f361ef0d79b6';
 
 /// 온보딩 완료 제출을 담당하는 AsyncNotifier.
 ///
