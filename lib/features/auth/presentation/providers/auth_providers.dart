@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
@@ -28,17 +30,27 @@ class AuthController extends _$AuthController {
   }
 
   /// 카카오 계정으로 로그인하고 세션 상태를 갱신한다.
+  ///
+  /// 성공 시 [FunnelEvent.signUp] 퍼널 이벤트를 발화한다 (US-SYS-2).
   Future<void> signInWithKakao() async {
     final session =
         await ref.read(authRepositoryProvider).signInWithKakao();
     state = AsyncValue.data(session);
+    await ref
+        .read(analyticsServiceProvider)
+        .logFunnel(FunnelEvent.signUp, params: {'provider': 'kakao'});
   }
 
   /// Apple 계정으로 로그인하고 세션 상태를 갱신한다.
+  ///
+  /// 성공 시 [FunnelEvent.signUp] 퍼널 이벤트를 발화한다 (US-SYS-2).
   Future<void> signInWithApple() async {
     final session =
         await ref.read(authRepositoryProvider).signInWithApple();
     state = AsyncValue.data(session);
+    await ref
+        .read(analyticsServiceProvider)
+        .logFunnel(FunnelEvent.signUp, params: {'provider': 'apple'});
   }
 
   /// 약관 동의를 기록하고 세션 상태를 갱신한다.

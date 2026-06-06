@@ -13,7 +13,12 @@ import 'package:can_i_eat_it/features/food_check/presentation/screens/food_check
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/timeline_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_condition_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_done_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_frequency_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_intro_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_medications_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_triggers_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -60,6 +65,31 @@ GoRouter appRouter(Ref ref) {
         path: '/onboarding/intro',
         name: 'onboarding-intro',
         builder: (context, state) => const OnboardingIntroScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding/condition',
+        name: 'onboarding-condition',
+        builder: (context, state) => const OnboardingConditionScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding/frequency',
+        name: 'onboarding-frequency',
+        builder: (context, state) => const OnboardingFrequencyScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding/triggers',
+        name: 'onboarding-triggers',
+        builder: (context, state) => const OnboardingTriggersScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding/medications',
+        name: 'onboarding-medications',
+        builder: (context, state) => const OnboardingMedicationsScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding/done',
+        name: 'onboarding-done',
+        builder: (context, state) => const OnboardingDoneScreen(),
       ),
       GoRoute(
         path: '/check',
