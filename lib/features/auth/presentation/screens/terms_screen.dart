@@ -7,6 +7,7 @@ import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_button.dart';
+import 'package:can_i_eat_it/core/config/terms_catalog.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/widgets/figma_checkbox.dart';
@@ -55,7 +56,7 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
 
   Future<void> _onNext() async {
     final agreement = TermsAgreement(
-      version: 'v1.0',
+      version: TermsCatalog.currentVersion,
       agreedAt: DateTime.now(),
       termsOfService: _termsOfService,
       privacy: _privacy,

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:can_i_eat_it/core/config/terms_catalog.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
@@ -8,7 +9,7 @@ void main() {
   // 헬퍼: 테스트용 필수 3개 동의 TermsAgreement
   // ---------------------------------------------------------------------------
   TermsAgreement requiredAgreed({bool marketing = false}) => TermsAgreement(
-        version: '1.0.0',
+        version: TermsCatalog.currentVersion,
         agreedAt: DateTime(2026, 1, 1),
         termsOfService: true,
         privacy: true,
@@ -125,7 +126,7 @@ void main() {
 
     test('marketing 이 false 여도 필수 3개가 true 면 allRequiredAgreed 가 true 다', () {
       final agreement = TermsAgreement(
-        version: '1.0.0',
+        version: TermsCatalog.currentVersion,
         agreedAt: DateTime(2026, 1, 1),
         termsOfService: true,
         privacy: true,
@@ -137,7 +138,7 @@ void main() {
 
     test('필수 중 하나라도 false 면 allRequiredAgreed 가 false 다 — termsOfService', () {
       final agreement = TermsAgreement(
-        version: '1.0.0',
+        version: TermsCatalog.currentVersion,
         agreedAt: DateTime(2026, 1, 1),
         termsOfService: false,
         privacy: true,
@@ -149,7 +150,7 @@ void main() {
 
     test('필수 중 하나라도 false 면 allRequiredAgreed 가 false 다 — privacy', () {
       final agreement = TermsAgreement(
-        version: '1.0.0',
+        version: TermsCatalog.currentVersion,
         agreedAt: DateTime(2026, 1, 1),
         termsOfService: true,
         privacy: false,
@@ -161,7 +162,7 @@ void main() {
 
     test('필수 중 하나라도 false 면 allRequiredAgreed 가 false 다 — sensitiveInfo', () {
       final agreement = TermsAgreement(
-        version: '1.0.0',
+        version: TermsCatalog.currentVersion,
         agreedAt: DateTime(2026, 1, 1),
         termsOfService: true,
         privacy: true,
