@@ -26,6 +26,14 @@ class _OnboardingTriggersScreenState
   final _customController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // 뒤로 돌아왔을 때 드래프트에 저장된 기타 입력을 복원한다(입력 보존, #20 H1).
+    _customController.text =
+        ref.read(onboardingControllerProvider).customTriggers ?? '';
+  }
+
+  @override
   void dispose() {
     _customController.dispose();
     super.dispose();
