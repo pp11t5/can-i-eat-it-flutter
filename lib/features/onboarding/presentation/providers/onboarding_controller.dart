@@ -177,6 +177,9 @@ class OnboardingSubmit extends _$OnboardingSubmit {
   /// - 성공: [healthProfileControllerProvider] ready 플립 + onboardingCompleted 발화.
   /// - 실패: [AsyncError]로 전이, 드래프트 보존(재시도 가능).
   Future<void> submit() async {
+    // 재진입 가드: 빠른 더블탭/중복 호출 시 제출·onboardingCompleted 퍼널 중복 방지
+    // (실 서버에서는 중복 POST 방지). pr-reviewer M1.
+    if (state is AsyncLoading) return;
     state = const AsyncLoading();
     final draft = ref.read(onboardingControllerProvider);
     try {
