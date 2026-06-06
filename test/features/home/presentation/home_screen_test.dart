@@ -2,122 +2,125 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:can_i_eat_it/features/food_check/data/repositories/mock_search_history_repository.dart';
-import 'package:can_i_eat_it/features/food_check/data/search_history_providers.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
 
-Widget _wrap(MockSearchHistoryRepository repo) => ProviderScope(
-      // 테스트 루트 ProviderScope override — dependencies 불필요.
-      // ignore: scoped_providers_should_specify_dependencies
-      overrides: [searchHistoryRepositoryProvider.overrideWithValue(repo)],
-      child: const MaterialApp(home: HomeScreen()),
+/// 테스트용 래퍼. HomeScreen은 더 이상 searchHistoryProvider에 의존하지 않으므로
+/// 단순 ProviderScope + MaterialApp으로 충분하다.
+Widget _wrap() => const ProviderScope(
+      child: MaterialApp(home: HomeScreen()),
     );
 
 void main() {
-  group('HomeScreen — 검색 진입 바', () {
-    testWidgets('검색 플레이스홀더 텍스트 "음식을 검색해주세요"가 표시된다', (tester) async {
-      await tester.pumpWidget(_wrap(MockSearchHistoryRepository.empty()));
+  group('HomeScreen — 인사말 블록', () {
+    testWidgets('"이거 먹어도 돼?" 텍스트가 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('음식을 검색해주세요'), findsOneWidget);
+      expect(find.textContaining('이거 먹어도 돼?'), findsOneWidget);
     });
 
-    testWidgets('검색 아이콘(Icons.search)이 표시된다', (tester) async {
-      await tester.pumpWidget(_wrap(MockSearchHistoryRepository.empty()));
+    testWidgets('"식단 기록" 카운터 라벨이 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.search), findsOneWidget);
-    });
-  });
-
-  group('HomeScreen — 빈 검색 기록', () {
-    testWidgets('검색 기록이 없으면 "아직 검색 기록이 없어요"가 표시된다', (tester) async {
-      await tester.pumpWidget(_wrap(MockSearchHistoryRepository.empty()));
-      await tester.pumpAndSettle();
-
-      expect(find.text('아직 검색 기록이 없어요'), findsOneWidget);
+      expect(find.textContaining('식단 기록'), findsOneWidget);
     });
 
-    testWidgets('검색 기록이 없으면 삭제 버튼(Icons.close)이 없다', (tester) async {
-      await tester.pumpWidget(_wrap(MockSearchHistoryRepository.empty()));
+    testWidgets('"증상 기록" 카운터 라벨이 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.close), findsNothing);
+      expect(find.textContaining('증상 기록'), findsOneWidget);
     });
   });
 
-  group('HomeScreen — 검색 기록 있음', () {
-    testWidgets('검색 기록이 있으면 각 항목이 화면에 표시된다', (tester) async {
-      await tester.pumpWidget(
-        _wrap(MockSearchHistoryRepository.withHistory(['된장찌개', '커피'])),
-      );
+  group('HomeScreen — 검색 바', () {
+    testWidgets('"이 음식 먹어도 돼?" 플레이스홀더가 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.text('이 음식 먹어도 돼?'), findsOneWidget);
+    });
+
+    testWidgets('검색 바가 화면에 존재한다 (tappable)', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      // HomeSearchBar 위젯 자체가 렌더링되어 있어야 한다.
+      expect(find.text('이 음식 먹어도 돼?'), findsOneWidget);
+    });
+  });
+
+  group('HomeScreen — 제안 칩', () {
+    testWidgets('"된장찌개" 칩이 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
       expect(find.text('된장찌개'), findsOneWidget);
-      expect(find.text('커피'), findsOneWidget);
     });
 
-    testWidgets('검색 기록이 있으면 "아직 검색 기록이 없어요"는 표시되지 않는다', (tester) async {
-      await tester.pumpWidget(
-        _wrap(MockSearchHistoryRepository.withHistory(['된장찌개'])),
-      );
+    testWidgets('"아메리카노" 칩이 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.text('아메리카노'), findsOneWidget);
+    });
+
+    testWidgets('"김치볶음밥" 칩이 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.text('김치볶음밥'), findsOneWidget);
+    });
+  });
+
+  group('HomeScreen — 내 도감 카드', () {
+    testWidgets('"내 도감" 라벨이 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.text('내 도감'), findsOneWidget);
+    });
+  });
+
+  group('HomeScreen — 최근 식사 섹션', () {
+    testWidgets('"최근 식사" 섹션 헤더가 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.text('최근 식사'), findsOneWidget);
+    });
+
+    testWidgets('"식단을 기록해 보세요" 플레이스홀더가 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.text('식단을 기록해 보세요'), findsOneWidget);
+    });
+  });
+
+  group('HomeScreen — 토스트 카드', () {
+    testWidgets('"검색하신 음식은 드셨어요?" 토스트 제목이 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.text('검색하신 음식은 드셨어요?'), findsOneWidget);
+    });
+  });
+
+  group('HomeScreen — 삭제된 구 홈 요소 부재 확인', () {
+    testWidgets('"아직 검색 기록이 없어요"는 표시되지 않는다', (tester) async {
+      await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
       expect(find.text('아직 검색 기록이 없어요'), findsNothing);
     });
 
-    testWidgets('각 항목 옆에 삭제 버튼(Icons.close)이 표시된다', (tester) async {
-      await tester.pumpWidget(
-        _wrap(MockSearchHistoryRepository.withHistory(['된장찌개', '커피'])),
-      );
+    testWidgets('"오늘의 기록" 카드가 표시되지 않는다', (tester) async {
+      await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.close), findsNWidgets(2));
-    });
-
-    testWidgets('삭제 버튼을 누르면 해당 항목이 목록에서 사라진다', (tester) async {
-      await tester.pumpWidget(
-        _wrap(MockSearchHistoryRepository.withHistory(['된장찌개', '커피'])),
-      );
-      await tester.pumpAndSettle();
-
-      // 된장찌개 항목의 삭제 버튼 — 첫 번째 Icons.close를 탭
-      final closeButtons = find.byIcon(Icons.close);
-      await tester.tap(closeButtons.first);
-      await tester.pumpAndSettle();
-
-      // 된장찌개가 첫 번째이므로 삭제 후 사라져야 한다
-      expect(find.text('된장찌개'), findsNothing);
-      // 커피는 그대로 남아야 한다
-      expect(find.text('커피'), findsOneWidget);
-    });
-  });
-
-  group('HomeScreen — 오늘의 기록 플레이스홀더', () {
-    testWidgets('"오늘의 기록" 카드 제목이 표시된다', (tester) async {
-      await tester.pumpWidget(_wrap(MockSearchHistoryRepository.empty()));
-      await tester.pumpAndSettle();
-
-      expect(find.text('오늘의 기록'), findsOneWidget);
-    });
-
-    testWidgets('"오늘의 기록" 카드 본문 문구가 표시된다', (tester) async {
-      await tester.pumpWidget(_wrap(MockSearchHistoryRepository.empty()));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text('식사와 증상을 기록하면 여기에서 한눈에 볼 수 있어요'),
-        findsOneWidget,
-      );
-    });
-  });
-
-  group('HomeScreen — 최근 검색 섹션 타이틀', () {
-    testWidgets('"최근 검색" 섹션 타이틀이 표시된다', (tester) async {
-      await tester.pumpWidget(_wrap(MockSearchHistoryRepository.empty()));
-      await tester.pumpAndSettle();
-
-      expect(find.text('최근 검색'), findsOneWidget);
+      expect(find.text('오늘의 기록'), findsNothing);
     });
   });
 }

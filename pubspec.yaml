@@ -73,6 +73,7 @@ flutter:
 
   assets:
     - assets/figma_extracted/
+    - assets/illustrations/
 
   fonts:
     - family: Pretendard
