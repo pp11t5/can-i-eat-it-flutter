@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
@@ -45,10 +46,16 @@ class HomeSearchBar extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.all(Radius.circular(999)),
               ),
-              child: const Icon(
-                Icons.search,
-                size: 24,
-                color: AppColors.textPrimary,
+              child: Center(
+                child: SvgPicture.asset(
+                  'assets/figma_extracted/icon_search.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.textPrimary,
+                    BlendMode.srcIn,
+                  ),
+                ),
               ),
             ),
           ],

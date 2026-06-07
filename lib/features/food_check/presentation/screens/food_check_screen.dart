@@ -82,10 +82,14 @@ class _TopBar extends StatelessWidget {
             GestureDetector(
               onTap: onClose,
               behavior: HitTestBehavior.opaque,
-              child: const Icon(
-                Icons.close_rounded,
-                size: 32,
-                color: AppColors.textPrimary,
+              child: SvgPicture.asset(
+                'assets/figma_extracted/icon_close.svg',
+                width: 32,
+                height: 32,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.textPrimary,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
             const SizedBox(width: AppSpacing.screenPadding),
@@ -247,10 +251,14 @@ class _HistoryRow extends StatelessWidget {
           GestureDetector(
             onTap: onRemove,
             behavior: HitTestBehavior.opaque,
-            child: const Icon(
-              Icons.close_rounded,
-              size: 16,
-              color: AppColors.textSecondary,
+            child: SvgPicture.asset(
+              'assets/figma_extracted/icon_close_small.svg',
+              width: 16,
+              height: 16,
+              colorFilter: const ColorFilter.mode(
+                AppColors.textSecondary,
+                BlendMode.srcIn,
+              ),
             ),
           ),
         ],

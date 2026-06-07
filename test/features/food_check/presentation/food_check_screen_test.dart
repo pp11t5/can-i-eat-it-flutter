@@ -42,8 +42,8 @@ void main() {
 
       // 검색 필드 placeholder.
       expect(find.text('음식을 검색해주세요'), findsOneWidget);
-      // 빈 상태 SVG 아이콘.
-      expect(find.byType(SvgPicture), findsOneWidget);
+      // SVG 아이콘(빈 상태 음식 아이콘 + 닫기 X) 렌더.
+      expect(find.byType(SvgPicture), findsWidgets);
       // 빈 상태 문구.
       expect(find.text('아직 검색 기록이 없어요'), findsOneWidget);
     });
@@ -57,7 +57,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.close_rounded), findsWidgets);
+      // 닫기 X 는 Figma SVG(icon_close.svg)로 렌더된다.
+      expect(find.byType(SvgPicture), findsWidgets);
     });
   });
 
@@ -89,22 +90,20 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 된장찌개 행의 close 아이콘을 탭한다.
-      // Icons.close_rounded 가 topbar X + 각 행 X 로 여러 개이므로
-      // 된장찌개 텍스트 오른쪽에 있는 첫 번째 아이콘을 찾는다.
+      // 된장찌개 행의 close(SVG) 아이콘을 탭한다.
       final termFinder = find.text('된장찌개');
       expect(termFinder, findsOneWidget);
 
-      // 된장찌개가 속한 Row 위젯 안의 close 아이콘을 탭.
+      // 된장찌개가 속한 Row 위젯 안의 close SVG 아이콘을 탭.
       final rowFinder = find.ancestor(
         of: termFinder,
         matching: find.byType(Row),
       );
       final closeInRow = find.descendant(
         of: rowFinder.first,
-        matching: find.byIcon(Icons.close_rounded),
+        matching: find.byType(SvgPicture),
       );
-      await tester.tap(closeInRow);
+      await tester.tap(closeInRow.first);
       await tester.pumpAndSettle();
 
       expect(find.text('된장찌개'), findsNothing);

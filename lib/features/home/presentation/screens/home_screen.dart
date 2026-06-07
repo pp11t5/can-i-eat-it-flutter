@@ -112,16 +112,11 @@ class HomeScreen extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      Container(
+                      // Figma heck-fill_small/plus — 초록 disc + 흰 플러스 일체형 SVG.
+                      SvgPicture.asset(
+                        'assets/figma_extracted/icon_plus_circle.svg',
                         width: 24,
                         height: 24,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.primary,
-                        ),
-                        child: const Center(
-                          child: Icon(Icons.add, size: 16, color: Colors.white),
-                        ),
                       ),
                     ],
                   ),
@@ -354,10 +349,14 @@ class _ToastCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
-              Icons.chevron_right,
-              size: 24,
-              color: AppColors.textPrimary,
+            SvgPicture.asset(
+              'assets/figma_extracted/chevron_right.svg',
+              width: 24,
+              height: 24,
+              colorFilter: const ColorFilter.mode(
+                AppColors.textPrimary,
+                BlendMode.srcIn,
+              ),
             ),
           ],
         ),
