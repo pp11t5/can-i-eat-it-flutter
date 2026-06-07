@@ -98,11 +98,11 @@ void main() {
       expect(find.text('최근 식사'), findsOneWidget);
     });
 
-    testWidgets('"식단을 기록해 보세요" 플레이스홀더가 표시된다', (tester) async {
+    testWidgets('"먹은 음식이 있으신가요?" 플레이스홀더가 표시된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('식단을 기록해 보세요'), findsOneWidget);
+      expect(find.text('먹은 음식이 있으신가요?'), findsOneWidget);
     });
   });
 

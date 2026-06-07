@@ -37,27 +37,30 @@ class HomeScreen extends ConsumerWidget {
               HomeSearchBar(onTap: () => context.push('/check')),
               const SizedBox(height: AppSpacing.itemGap),
 
-              // ── 3. 제안 칩 행 ─────────────────────────────────────────
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  HomeSuggestionChip(
-                    label: '된장찌개',
-                    iconAsset: 'assets/illustrations/food_soup.png',
-                    onTap: () => context.push('/check'),
-                  ),
-                  HomeSuggestionChip(
-                    label: '아메리카노',
-                    iconAsset: 'assets/illustrations/food_drink.png',
-                    onTap: () => context.push('/check'),
-                  ),
-                  HomeSuggestionChip(
-                    label: '김치볶음밥',
-                    iconAsset: 'assets/illustrations/food_rice.png',
-                    onTap: () => context.push('/check'),
-                  ),
-                ],
+              // ── 3. 제안 칩 행 — Figma 1207:6604 단일 행 수평 스크롤 ────────
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    HomeSuggestionChip(
+                      label: '된장찌개',
+                      iconAsset: 'assets/illustrations/food_soup.png',
+                      onTap: () => context.push('/check'),
+                    ),
+                    const SizedBox(width: 8),
+                    HomeSuggestionChip(
+                      label: '아메리카노',
+                      iconAsset: 'assets/illustrations/food_drink.png',
+                      onTap: () => context.push('/check'),
+                    ),
+                    const SizedBox(width: 8),
+                    HomeSuggestionChip(
+                      label: '김치볶음밥',
+                      iconAsset: 'assets/illustrations/food_rice.png',
+                      onTap: () => context.push('/check'),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: AppSpacing.contentGap),
 
@@ -74,13 +77,11 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.itemGap),
               // TODO(W4): 식사 기록 데이터 연결 시 실제 목록으로 교체.
+              // Figma 1207:6614
               GestureDetector(
-                onTap: () {}, // TODO(W4): push('/check') or meal-record entry
+                onTap: () {}, // TODO(W4): 식사 기록 진입
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.sectionGap,
-                    horizontal: AppSpacing.cardPadding,
-                  ),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
@@ -89,24 +90,39 @@ class HomeScreen extends ConsumerWidget {
                       width: 1,
                     ),
                   ),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.add,
-                          color: AppColors.textSecondary,
-                          size: 24,
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          '식단을 기록해 보세요',
-                          style: AppTextStyles.body2Regular.copyWith(
-                            color: AppColors.textSecondary,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          Image.asset(
+                            'assets/illustrations/food_regular.png',
+                            width: 32,
+                            height: 32,
+                            fit: BoxFit.contain,
                           ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '먹은 음식이 있으신가요?',
+                            style: AppTextStyles.body1Medium.copyWith(
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        width: 24,
+                        height: 24,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.primary,
                         ),
-                      ],
-                    ),
+                        child: const Center(
+                          child: Icon(Icons.add, size: 16, color: Colors.white),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -237,7 +253,7 @@ class _ToastCard extends StatelessWidget {
             BoxShadow(
               color: Color(0x0A000000),
               blurRadius: 8,
-              offset: Offset(0, 2),
+              offset: Offset(0, 4), // Figma 1207:6704
             ),
           ],
         ),
@@ -254,7 +270,7 @@ class _ToastCard extends StatelessWidget {
                     height: 32,
                     fit: BoxFit.contain,
                   ),
-                  const SizedBox(width: AppSpacing.itemGap),
+                  const SizedBox(width: 16), // Figma 1207:6704 emoji↔text gap
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,7 +294,11 @@ class _ToastCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, size: 24),
+            const Icon(
+              Icons.chevron_right,
+              size: 24,
+              color: AppColors.textPrimary,
+            ),
           ],
         ),
       ),
