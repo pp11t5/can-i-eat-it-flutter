@@ -60,11 +60,11 @@ void main() {
 
         // 시작점은 /splash → guard가 unauthenticated → /login 으로 redirect.
         // sign-in 전이므로 LoginScreen이 보여야 한다.
-        expect(find.text('카카오로 시작하기'), findsOneWidget);
+        expect(find.text('카카오로 로그인'), findsOneWidget);
 
         // 카카오 버튼 탭 → signInWithKakao() → context.go('/') →
         // guard 재평가 → needsOnboarding → /onboarding/condition
-        await tester.tap(find.text('카카오로 시작하기'));
+        await tester.tap(find.text('카카오로 로그인'));
         await tester.pumpAndSettle();
 
         // OnboardingConditionScreen 위젯 타입으로 확인 (텍스트 충돌 방지).
@@ -89,11 +89,11 @@ void main() {
         await tester.pumpAndSettle();
 
         // 미인증 상태 → /login 으로 redirect돼 LoginScreen이 보여야 한다.
-        expect(find.text('카카오로 시작하기'), findsOneWidget);
+        expect(find.text('카카오로 로그인'), findsOneWidget);
 
         // 카카오 버튼 탭 → signInWithKakao() → context.go('/') →
         // guard 재평가 → ready → / (HomeScreen)
-        await tester.tap(find.text('카카오로 시작하기'));
+        await tester.tap(find.text('카카오로 로그인'));
         await tester.pumpAndSettle();
 
         // HomeScreen 위젯 타입으로 확인 (NavigationBar 라벨 '홈'과 충돌 방지).

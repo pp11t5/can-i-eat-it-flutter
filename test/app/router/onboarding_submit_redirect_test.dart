@@ -68,11 +68,11 @@ void main() {
         await tester.pumpAndSettle();
 
         // 1단계: 미인증 → LoginScreen 확인.
-        expect(find.text('카카오로 시작하기'), findsOneWidget);
+        expect(find.text('카카오로 로그인'), findsOneWidget);
 
         // 2단계: 카카오 버튼 탭 → signInWithKakao() → context.go('/') →
         //        guard 재평가 → needsOnboarding → /onboarding/condition.
-        await tester.tap(find.text('카카오로 시작하기'));
+        await tester.tap(find.text('카카오로 로그인'));
         await tester.pumpAndSettle();
 
         expect(

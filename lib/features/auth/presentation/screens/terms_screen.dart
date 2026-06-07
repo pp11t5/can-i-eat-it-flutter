@@ -110,12 +110,6 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
               }
             },
           ),
-          title: Text(
-            '약관 동의',
-            style: AppTextStyles.body1Medium.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
           shape: const Border(
             bottom: BorderSide(color: AppColors.surfaceMuted, width: 1),
           ),

@@ -235,7 +235,7 @@ class _KakaoButton extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.itemGap),
                 Text(
-                  '카카오로 시작하기',
+                  '카카오로 로그인',
                   style: AppTextStyles.body1Medium.copyWith(
                     color: AppColors.kakaoText,
                   ),
@@ -281,7 +281,7 @@ class _AppleButton extends StatelessWidget {
                 const Icon(Icons.apple, size: 22, color: AppColors.surface),
                 const SizedBox(width: 15),
                 Text(
-                  'Apple로 계속하기',
+                  'Apple로 로그인',
                   style: AppTextStyles.body1Medium.copyWith(
                     color: AppColors.surface,
                   ),

@@ -42,16 +42,16 @@ void main() {
       await tester.pumpWidget(_wrap(MockAuthRepository.signedOut()));
       await tester.pumpAndSettle();
 
-      expect(find.text('카카오로 시작하기'), findsOneWidget);
-      expect(find.text('Apple로 계속하기'), findsNothing);
+      expect(find.text('카카오로 로그인'), findsOneWidget);
+      expect(find.text('Apple로 로그인'), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
     testWidgets('iOS 에서는 카카오와 Apple 버튼이 모두 보인다', (tester) async {
       await tester.pumpWidget(_wrap(MockAuthRepository.signedOut()));
       await tester.pumpAndSettle();
 
-      expect(find.text('카카오로 시작하기'), findsOneWidget);
-      expect(find.text('Apple로 계속하기'), findsOneWidget);
+      expect(find.text('카카오로 로그인'), findsOneWidget);
+      expect(find.text('Apple로 로그인'), findsOneWidget);
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
   });
 
@@ -61,7 +61,7 @@ void main() {
       await tester.pumpWidget(_wrap(repo));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('카카오로 시작하기'));
+      await tester.tap(find.text('카카오로 로그인'));
       await tester.pumpAndSettle();
 
       // 세션 생성됨 + /terms 스텁으로 push 됨.
@@ -74,7 +74,7 @@ void main() {
       await tester.pumpWidget(_wrap(MockAuthRepository.deletionGrace()));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('카카오로 시작하기'));
+      await tester.tap(find.text('카카오로 로그인'));
       await tester.pumpAndSettle();
 
       expect(find.text('탈퇴를 진행 중인 계정이에요'), findsOneWidget);
