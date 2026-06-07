@@ -45,6 +45,9 @@ abstract final class AppColors {
   static const Color border = ColorPrimitives.gray40;
   static const Color divider = ColorPrimitives.gray40;
 
+  /// 홈 카드 테두리 (Figma 1207:6590 도감·최근식사 stroke #EDEDF5)
+  static const Color borderCard = ColorPrimitives.cardBorderSubtle;
+
   // --- 컴포넌트 고유 ---
 
   /// MedicalDisclaimer 배경 — 중립 gray30. 디자이너 tint 지정 시 갱신.
@@ -79,4 +82,7 @@ abstract final class AppColors {
 
   /// 비활성 카드 라벨 색 (#D6D6D6)
   static const Color disabledLabel = ColorPrimitives.disabledLabel;
+
+  /// 바텀 내비 비활성 아이콘·레이블 (Figma nav component 실측 #C5C5C6)
+  static const Color navInactive = ColorPrimitives.navInactive;
 }

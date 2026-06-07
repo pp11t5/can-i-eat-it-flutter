@@ -12,25 +12,32 @@ Widget _wrap() => const ProviderScope(
 
 void main() {
   group('HomeScreen — 인사말 블록', () {
-    testWidgets('"이거 먹어도 돼?" 텍스트가 표시된다', (tester) async {
+    testWidgets('"편안하신가요?" 인사말 텍스트가 표시된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('이거 먹어도 돼?'), findsOneWidget);
+      expect(find.textContaining('편안하신가요?'), findsOneWidget);
     });
 
-    testWidgets('"식단 기록" 카운터 라벨이 표시된다', (tester) async {
+    testWidgets('"연속 편안한 날 1일 째" 통계 라벨이 표시된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('식단 기록'), findsOneWidget);
+      expect(find.text('연속 편안한 날 1일 째'), findsOneWidget);
     });
 
-    testWidgets('"증상 기록" 카운터 라벨이 표시된다', (tester) async {
+    testWidgets('구 인사말 "이거 먹어도 돼?"는 표시되지 않는다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('증상 기록'), findsOneWidget);
+      expect(find.textContaining('이거 먹어도 돼?'), findsNothing);
+    });
+
+    testWidgets('구 "식단 기록 0 회" 카운터는 표시되지 않는다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('식단 기록'), findsNothing);
     });
   });
 
@@ -105,6 +112,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('검색하신 음식은 드셨어요?'), findsOneWidget);
+    });
+
+    testWidgets('"식단에 추가하고 상태 기록하기" 토스트 부제목이 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.text('식단에 추가하고 상태 기록하기'), findsOneWidget);
     });
   });
 

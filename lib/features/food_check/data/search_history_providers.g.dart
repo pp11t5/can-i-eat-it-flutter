@@ -7,12 +7,13 @@ part of 'search_history_providers.dart';
 // **************************************************************************
 
 String _$searchHistoryRepositoryHash() =>
-    r'aedd3e34bfd28f4c4a58e929d65f44efc53f0eed';
+    r'fb40dee08f5b54ffff7314e4c7bb53fc65999469';
 
 /// [SearchHistoryRepository] 공급자.
 ///
-/// 기본값: [MockSearchHistoryRepository.empty] (빈 검색 기록).
+/// 기본값: 삭제 버튼 동작 확인용 더미 최근 검색어.
 /// 실 구현(로컬 persistence/서버) 교체 지점: ProviderScope override로 실 구현을 주입한다.
+/// TODO(temp): 서버 데이터 연동 시 [MockSearchHistoryRepository.empty]로 복귀.
 ///
 /// Copied from [searchHistoryRepository].
 @ProviderFor(searchHistoryRepository)

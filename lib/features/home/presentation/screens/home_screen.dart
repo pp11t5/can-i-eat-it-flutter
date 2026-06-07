@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
-import 'package:can_i_eat_it/app/widgets/app_card.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_search_bar.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
 
@@ -28,11 +27,11 @@ class HomeScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: AppSpacing.sectionGap),
+              const SizedBox(height: AppSpacing.contentGap),
 
               // ── 1. 인사말 블록 ─────────────────────────────────────────
-              _GreetingBlock(),
-              const SizedBox(height: AppSpacing.sectionGap),
+              const _GreetingBlock(),
+              const SizedBox(height: AppSpacing.contentGap),
 
               // ── 2. 검색 바 ────────────────────────────────────────────
               HomeSearchBar(onTap: () => context.push('/check')),
@@ -60,11 +59,11 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.sectionGap),
+              const SizedBox(height: AppSpacing.contentGap),
 
               // ── 4. 내 도감 카드 ───────────────────────────────────────
-              _MyDictionaryCard(),
-              const SizedBox(height: AppSpacing.sectionGap),
+              const _MyDictionaryCard(),
+              const SizedBox(height: AppSpacing.contentGap),
 
               // ── 5. 최근 식사 섹션 ─────────────────────────────────────
               Text(
@@ -75,12 +74,22 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.itemGap),
               // TODO(W4): 식사 기록 데이터 연결 시 실제 목록으로 교체.
-              AppCard(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.itemGap,
+              GestureDetector(
+                onTap: () {}, // TODO(W4): push('/check') or meal-record entry
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.sectionGap,
+                    horizontal: AppSpacing.cardPadding,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+                    border: Border.all(
+                      color: AppColors.borderCard, // Figma stroke #EDEDF5
+                      width: 1,
                     ),
+                  ),
+                  child: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -101,11 +110,11 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.sectionGap),
+              const SizedBox(height: AppSpacing.contentGap),
 
               // ── 6. 토스트 카드 ────────────────────────────────────────
-              _ToastCard(),
-              const SizedBox(height: AppSpacing.sectionGap),
+              const _ToastCard(),
+              const SizedBox(height: AppSpacing.contentGap),
             ],
           ),
         ),
@@ -117,6 +126,8 @@ class HomeScreen extends ConsumerWidget {
 // ── 인사말 블록 (캐릭터 이미지 + 텍스트) ────────────────────────────────────
 
 class _GreetingBlock extends StatelessWidget {
+  const _GreetingBlock();
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -126,37 +137,18 @@ class _GreetingBlock extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // TODO(name): '디도' 는 실제 사용자 이름으로 바인딩.
               Text(
-                '디도야\n이거 먹어도 돼?',
+                '오늘 속은\n편안하신가요?',
                 style: AppTextStyles.header1Bold.copyWith(
                   color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
-              // 식단·증상 기록 카운터 — W2는 0/0 static.
-              Text.rich(
-                TextSpan(
-                  style: AppTextStyles.body2Regular.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  children: [
-                    const TextSpan(text: '식단 기록 '),
-                    TextSpan(
-                      text: '0',
-                      style: AppTextStyles.body2Bold.copyWith(
-                        color: const Color(0xFF10111A),
-                      ),
-                    ),
-                    const TextSpan(text: ' 회\n증상 기록 '),
-                    TextSpan(
-                      text: '0',
-                      style: AppTextStyles.body2Bold.copyWith(
-                        color: const Color(0xFF10111A),
-                      ),
-                    ),
-                    const TextSpan(text: ' 회'),
-                  ],
+              // TODO(data): '연속 편안한 날 N일 째' — 데이터 연동 시 실제 연속일수로 교체. (Figma 미존재, 팀 지시 카피)
+              Text(
+                '연속 편안한 날 1일 째',
+                style: AppTextStyles.body2Regular.copyWith(
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -165,7 +157,7 @@ class _GreetingBlock extends StatelessWidget {
         // 캐릭터 이미지 — Figma overlap ~-26px; Row 내 고정 너비로 근사.
         Image.asset(
           'assets/illustrations/character_greeting.png',
-          width: 120,
+          width: 154,
           height: 138,
           fit: BoxFit.contain,
         ),
@@ -177,6 +169,8 @@ class _GreetingBlock extends StatelessWidget {
 // ── 내 도감 카드 ──────────────────────────────────────────────────────────────
 
 class _MyDictionaryCard extends StatelessWidget {
+  const _MyDictionaryCard();
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -188,7 +182,7 @@ class _MyDictionaryCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: const BorderRadius.all(Radius.circular(999)),
           border: Border.all(
-            color: const Color(0xFFEDEDF5), // Figma stroke
+            color: AppColors.borderCard, // Figma stroke #EDEDF5
             width: 1,
           ),
         ),
@@ -223,6 +217,8 @@ class _MyDictionaryCard extends StatelessWidget {
 // ── 토스트 카드 ───────────────────────────────────────────────────────────────
 
 class _ToastCard extends StatelessWidget {
+  const _ToastCard();
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -234,7 +230,7 @@ class _ToastCard extends StatelessWidget {
           color: const Color(0xFFFEFEFE), // Figma #FEFEFE
           borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
           border: Border.all(
-            color: const Color(0xFFEAEAEA), // Figma stroke #EAEAEA
+            color: AppColors.border, // Figma stroke #EAEAEA → AppColors.border
             width: 1.5,
           ),
           boxShadow: const [

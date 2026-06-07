@@ -99,4 +99,10 @@ abstract final class ColorPrimitives {
 
   /// 비활성 카드 라벨 색 (Figma #D6D6D6)
   static const Color disabledLabel = Color(0xFFD6D6D6);
+
+  /// 바텀 내비 비활성 아이콘·레이블 (Figma nav component 실측 #C5C5C6)
+  static const Color navInactive = Color(0xFFC5C5C6);
+
+  /// 홈 카드 테두리 (Figma 1207:6590 도감·최근식사 stroke #EDEDF5)
+  static const Color cardBorderSubtle = Color(0xFFEDEDF5);
 }

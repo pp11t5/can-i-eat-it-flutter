@@ -1,32 +1,123 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
-/// 바텀 내비 + 중앙 플로팅 체크 버튼을 포함한 앱 셸.
+import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
+
+/// 바텀 내비를 포함한 앱 셸.
 /// StatefulShellRoute의 builder가 반환한다.
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
+  static const _tabs = [
+    _TabItem(
+      label: '홈',
+      iconAsset: 'assets/figma_extracted/nav_home.svg',
+    ),
+    _TabItem(
+      label: '타임라인',
+      iconAsset: 'assets/figma_extracted/nav_timeline.svg',
+    ),
+    _TabItem(
+      label: '마이',
+      iconAsset: 'assets/figma_extracted/nav_my.svg',
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) => navigationShell.goBranch(index),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home), label: '홈'),
-          NavigationDestination(icon: Icon(Icons.timeline), label: '타임라인'),
-          NavigationDestination(icon: Icon(Icons.person), label: '마이페이지'),
+      bottomNavigationBar: _BottomNavBar(
+        currentIndex: navigationShell.currentIndex,
+        onTap: (index) => navigationShell.goBranch(
+          index,
+          initialLocation: index == navigationShell.currentIndex,
+        ),
+        tabs: _tabs,
+      ),
+    );
+  }
+}
+
+class _TabItem {
+  const _TabItem({required this.label, required this.iconAsset});
+  final String label;
+  final String iconAsset;
+}
+
+class _BottomNavBar extends StatelessWidget {
+  const _BottomNavBar({
+    required this.currentIndex,
+    required this.onTap,
+    required this.tabs,
+  });
+
+  final int currentIndex;
+  final ValueChanged<int> onTap;
+  final List<_TabItem> tabs;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x0A000000), // black @ 4% opacity
+            blurRadius: 8,
+            offset: Offset(0, -4),
+          ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/check'),
-        tooltip: '체크',
-        child: const Icon(Icons.search),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 64,
+          child: Row(
+            children: List.generate(tabs.length, (index) {
+              final isActive = index == currentIndex;
+              final color =
+                  isActive ? AppColors.primary : AppColors.navInactive;
+              return Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => onTap(index),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                        SvgPicture.asset(
+                          tabs[index].iconAsset,
+                          width: 24,
+                          height: 24,
+                          colorFilter: ColorFilter.mode(
+                            color,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          tabs[index].label,
+                          style: AppTextStyles.caption1Medium.copyWith(
+                            color: color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              );
+            }),
+          ),
+        ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
