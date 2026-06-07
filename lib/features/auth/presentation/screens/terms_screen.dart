@@ -7,6 +7,7 @@ import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_button.dart';
+import 'package:can_i_eat_it/core/config/terms_catalog.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/widgets/figma_checkbox.dart';
@@ -55,15 +56,21 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
 
   Future<void> _onNext() async {
     final agreement = TermsAgreement(
-      version: 'v1.0',
+      version: TermsCatalog.currentVersion,
       agreedAt: DateTime.now(),
       termsOfService: _termsOfService,
       privacy: _privacy,
       sensitiveInfo: _sensitiveInfo,
       marketing: _marketing,
     );
-    // 가드가 /onboarding/intro 로 자동 redirect.
     await ref.read(authControllerProvider.notifier).agreeToTerms(agreement);
+    if (!mounted) return;
+    // 약관은 login 이 context.push 로 띄운 명령형 라우트라, 상태가 needsOnboarding 이
+    // 돼도 가드 redirect 가 이 라우트를 교체하지 못해 그대로 멈춘다. 따라서 명시적으로
+    // pushReplacement 해 약관을 온보딩 1페이지로 교체한다.
+    // pushReplacement 이므로 스택은 [login, condition] — 1페이지 뒤로가기가 login 으로
+    // pop(역방향) 가능하고, 사용자 pop 이 아니라 약관 PopScope(signOut)도 발화하지 않는다.
+    context.pushReplacement('/onboarding/condition');
   }
 
   @override
@@ -108,12 +115,6 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
                 ref.read(authControllerProvider.notifier).signOut();
               }
             },
-          ),
-          title: Text(
-            '약관 동의',
-            style: AppTextStyles.body1Medium.copyWith(
-              color: AppColors.textPrimary,
-            ),
           ),
           shape: const Border(
             bottom: BorderSide(color: AppColors.surfaceMuted, width: 1),
@@ -217,7 +218,8 @@ class _AllAgreeCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
       child: Ink(
         decoration: BoxDecoration(
-          color: AppColors.surfaceMuted, // Figma #FCFCFC ≈ gray20 (우리 토큰 gray30 #F5F5F5; 시각상 거의 동일)
+          color: AppColors
+              .surfaceMuted, // Figma #FCFCFC ≈ gray20 (우리 토큰 gray30 #F5F5F5; 시각상 거의 동일)
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
           border: Border.all(color: AppColors.border, width: 1),
         ),

@@ -1,11 +1,10 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:can_i_eat_it/app/router/guards/auth_guard.dart';
 import 'package:can_i_eat_it/app/widgets/app_shell.dart';
-import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/session_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/login_screen.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/splash_screen.dart';
@@ -14,21 +13,24 @@ import 'package:can_i_eat_it/features/food_check/presentation/screens/food_check
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/timeline_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
-import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_intro_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_condition_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_frequency_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_medications_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_triggers_screen.dart';
 
 part 'app_router.g.dart';
 
 /// 앱 라우터. 인증/온보딩 상태 기반 redirect 가드 + StatefulShellRoute 바텀 내비.
 ///
-/// [authControllerProvider] 변화 시 [refreshListenable]이 go_router의
-/// redirect를 재평가하도록 ValueNotifier 브리지를 사용한다.
+/// [sessionStatusProvider] 값이 의미있게 전이될 때만 go_router redirect를 재평가한다.
+/// 기존 authControllerProvider 직접 listen 대비 중복발화(이슈 #20 S3)를 구조적으로 제거.
 @riverpod
 GoRouter appRouter(Ref ref) {
-  // auth 상태가 바뀔 때마다 go_router redirect 재평가를 트리거하는 브리지.
+  // sessionStatus 전이 시에만 go_router redirect 재평가를 트리거하는 브리지.
   final notifier = ValueNotifier<int>(0);
 
-  ref.listen<AsyncValue<dynamic>>(authControllerProvider, (_, __) {
-    notifier.value++;
+  ref.listen<SessionStatus>(sessionStatusProvider, (prev, next) {
+    if (prev != next) notifier.value++;
   });
 
   // provider가 dispose될 때 notifier도 함께 해제한다.
@@ -58,14 +60,32 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) => const TermsScreen(),
       ),
       GoRoute(
-        path: '/onboarding/intro',
-        name: 'onboarding-intro',
-        builder: (context, state) => const OnboardingIntroScreen(),
+        path: '/onboarding/condition',
+        name: 'onboarding-condition',
+        builder: (context, state) => const OnboardingConditionScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding/frequency',
+        name: 'onboarding-frequency',
+        builder: (context, state) => const OnboardingFrequencyScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding/triggers',
+        name: 'onboarding-triggers',
+        builder: (context, state) => const OnboardingTriggersScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding/medications',
+        name: 'onboarding-medications',
+        builder: (context, state) => const OnboardingMedicationsScreen(),
       ),
       GoRoute(
         path: '/check',
         name: 'food-check',
-        builder: (context, state) => const FoodCheckScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          fullscreenDialog: true,
+          child: FoodCheckScreen(),
+        ),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

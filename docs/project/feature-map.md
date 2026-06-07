@@ -20,7 +20,7 @@
 
 | 도메인 | 위치 | 설명 |
 |---|---|---|
-| **health_profile** | `lib/features/health_profile/{domain,data}` | 질환+증상빈도+트리거+복용약+알레르기 영속 프로필. 프레젠테이션 없음. onboarding·mypage·food_check이 이 repository를 임포트 |
+| **health_profile** | `lib/features/health_profile/{domain,data}` | 질환+증상빈도+트리거+복용약+알레르기 영속 프로필. 프레젠테이션 없음. onboarding·mypage·food_check이 이 repository를 임포트. **(W2 구현 완료)** entity + repository 인터페이스 + Mock impl + providers + 계약 스위트 |
 
 ## 신호등 4상태 (EatVerdict)
 

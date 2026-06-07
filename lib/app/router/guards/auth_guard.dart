@@ -11,6 +11,11 @@ String? resolveRedirect({
   required String location,
 }) {
   switch (status) {
+    case SessionStatus.loading:
+      // 로딩 중에는 redirect 없이 현재 화면(splash)에 잔류시킨다.
+      // 이로써 인증/health_profile 로드가 완료되기 전 화면 깜빡임(이슈 #20 S1)을 차단한다.
+      return null;
+
     case SessionStatus.unauthenticated:
       return location == '/login' ? null : '/login';
 
@@ -22,7 +27,13 @@ String? resolveRedirect({
       return null;
 
     case SessionStatus.needsOnboarding:
-      return location.startsWith('/onboarding') ? null : '/onboarding/intro';
+      // /onboarding 하위 + /login 허용. /login 은 온보딩 1페이지 뒤로가기의 이탈 목적지로,
+      // 스택 아래 /login 으로 pop(역방향 애니)한 직후 post-frame signOut 이 세션을 해제해
+      // unauthenticated 로 정리한다. pop 순간엔 아직 needsOnboarding 이므로 /login 을
+      // 허용해 가드가 pop 을 다시 온보딩으로 튕기지 않게 한다(온보딩은 재로그인 시 재개).
+      return (location.startsWith('/onboarding') || location == '/login')
+          ? null
+          : '/onboarding/condition';
 
     case SessionStatus.ready:
       if (location == '/splash' ||

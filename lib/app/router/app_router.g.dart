@@ -6,12 +6,12 @@ part of 'app_router.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$appRouterHash() => r'4c8da2ad715d9e3968c45238c4df93e86a7e746d';
+String _$appRouterHash() => r'95379b7ffd0b398bac8dec5798d93a7e757312d3';
 
 /// 앱 라우터. 인증/온보딩 상태 기반 redirect 가드 + StatefulShellRoute 바텀 내비.
 ///
-/// [authControllerProvider] 변화 시 [refreshListenable]이 go_router의
-/// redirect를 재평가하도록 ValueNotifier 브리지를 사용한다.
+/// [sessionStatusProvider] 값이 의미있게 전이될 때만 go_router redirect를 재평가한다.
+/// 기존 authControllerProvider 직접 listen 대비 중복발화(이슈 #20 S3)를 구조적으로 제거.
 ///
 /// Copied from [appRouter].
 @ProviderFor(appRouter)

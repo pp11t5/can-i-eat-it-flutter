@@ -14,14 +14,13 @@ enum AccountStatus { active, deletionGrace }
 /// 인증 세션 엔티티.
 ///
 /// [hasAgreedTerms]: 신규 사용자는 false, 기존 가입자는 true.
-/// [hasCompletedOnboarding]: W1 mock 용. W2에서 health_profile 피처가 소유 예정.
+/// 온보딩 완료 여부는 health_profile 피처가 소유한다(ADR-0006).
 @freezed
 abstract class AuthSession with _$AuthSession {
   const factory AuthSession({
     required String userId,
     required AuthProvider provider,
     @Default(false) bool hasAgreedTerms,
-    @Default(false) bool hasCompletedOnboarding,
     @Default(AccountStatus.active) AccountStatus accountStatus,
   }) = _AuthSession;
 }

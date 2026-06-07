@@ -45,6 +45,9 @@ abstract final class AppColors {
   static const Color border = ColorPrimitives.gray40;
   static const Color divider = ColorPrimitives.gray40;
 
+  /// 홈 카드 테두리 (Figma 1207:6590 도감·최근식사 stroke #EDEDF5)
+  static const Color borderCard = ColorPrimitives.cardBorderSubtle;
+
   // --- 컴포넌트 고유 ---
 
   /// MedicalDisclaimer 배경 — 중립 gray30. 디자이너 tint 지정 시 갱신.
@@ -56,6 +59,10 @@ abstract final class AppColors {
   /// 카카오 로그인 버튼 텍스트 (카카오 공식: rgba(0,0,0,0.85))
   static const Color kakaoText = ColorPrimitives.kakaoText;
 
+  /// 파괴적 액션 (삭제·취소) 색 — Figma 13a 전체삭제 #F04545.
+  // TODO(token): 디자이너 확정 후 ColorPrimitives.danger 로 이동.
+  static const Color danger = Color(0xFFF04545);
+
   /// 체크박스 OFF 상태 테두리 — gray50 (Figma 마케팅 행 #D0D0D0 ≈ 우리 #D3D3D3)
   static const Color checkboxBorder = ColorPrimitives.gray50;
 
@@ -64,4 +71,21 @@ abstract final class AppColors {
 
   /// 브랜드 강조 텍스트 색 (예: 로그인 슬로건). green200 다크 그린.
   static const Color brandAccent = ColorPrimitives.green200;
+
+  // --- OptionCard / SelectableChip 전용 (Figma onboarding 실측) ---
+
+  /// 비선택 OptionCard 배경 (#F7F7FA)
+  static const Color cardUnselectedBg = ColorPrimitives.cardUnselectedBg;
+
+  /// 비선택 OptionCard 테두리 (#DBDBE5)
+  static const Color cardUnselectedBorder = ColorPrimitives.cardUnselectedBorder;
+
+  /// 비활성 카드 라벨 색 (#D6D6D6)
+  static const Color disabledLabel = ColorPrimitives.disabledLabel;
+
+  /// 바텀 내비 비활성 아이콘·레이블 (Figma nav component 실측 #C5C5C6)
+  static const Color navInactive = ColorPrimitives.navInactive;
+
+  /// 강조 텍스트 색 (Figma fontColor80 #10111A — 숫자·강조 라벨 등)
+  static const Color textStrong = ColorPrimitives.fontColor80;
 }

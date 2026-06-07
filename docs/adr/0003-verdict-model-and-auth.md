@@ -105,6 +105,7 @@ VerdictCard
 - [ ] `lib/features/food_check/domain/entities/eat_verdict.dart` — `EatVerdict` sealed class 또는 enum(4상태) 정의
 - [ ] `VerdictCard` 위젯 — 3섹션 구조 + `unknown` 분기 + `MedicalDisclaimer` 포함
 - [x] `AuthRepository` 인터페이스 정의 + Mock impl (W1 #4, Riverpod override) — 완료
+- [ ] 온보딩 완료 게이트 (`hasCompletedOnboarding` 제거, `SessionStatus.loading` 추가) — ADR-0006 참조
 - [ ] 실 카카오 JWT AuthRepository 구현 (서버 인증 API 확정 시, W1 말 또는 W2)
 - [ ] Apple App Store 심사 대응 (출시 직전) — 부록 §7
 - [ ] 로그인 버튼 실 SDK + 공식 Apple 위젯 교체 (출시 전, 디자이너 재디자인 반영) — 부록 §7

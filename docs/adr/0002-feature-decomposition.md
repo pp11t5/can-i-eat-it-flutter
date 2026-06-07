@@ -102,7 +102,7 @@ lib/features/health_profile/
 
 - [ ] W1: 8개 피처 폴더 + health_profile 스캐폴드 생성 (샘플 피처 condition_profile·food_check 제거 후)
 - [ ] W1: go_router StatefulShellRoute + redirect 가드 골격 구현 (Figma 10_홈 기준)
-- [ ] W2: health_profile domain entity + repository 인터페이스 + Mock impl 완성
+- [x] W2: health_profile domain entity + repository 인터페이스 + Mock impl 완성
 - [ ] W4: report `data` 레이어에 서버 PDF·배치 stub 추가 (베타후 교체 대비)
 
 ---

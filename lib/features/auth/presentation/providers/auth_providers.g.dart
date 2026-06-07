@@ -29,7 +29,7 @@ final authRepositoryProvider = AutoDisposeProvider<AuthRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AuthRepositoryRef = AutoDisposeProviderRef<AuthRepository>;
-String _$authControllerHash() => r'11954530c3ca47f7f44309d6247716193b2437aa';
+String _$authControllerHash() => r'e0191f6a5d64ac14bb5a96485cdba5f2c959d255';
 
 /// 인증 상태 컨트롤러 (AsyncNotifier).
 ///

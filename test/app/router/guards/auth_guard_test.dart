@@ -8,6 +8,24 @@ void main() {
   // resolveRedirect 가드 테스트
   // ---------------------------------------------------------------------------
 
+  group('resolveRedirect — 로딩(loading)', () {
+    test('loading 상태에서는 어떤 location에서도 redirect 하지 않는다 (/splash)', () {
+      final result = resolveRedirect(
+        status: SessionStatus.loading,
+        location: '/splash',
+      );
+      expect(result, isNull);
+    });
+
+    test('loading 상태에서 보호 화면(/)에서도 redirect 하지 않는다', () {
+      final result = resolveRedirect(
+        status: SessionStatus.loading,
+        location: '/',
+      );
+      expect(result, isNull);
+    });
+  });
+
   group('resolveRedirect — 미인증(unauthenticated)', () {
     test('미인증 상태에서 보호 화면 진입 시 /login 으로 리다이렉트한다', () {
       final result = resolveRedirect(
@@ -58,18 +76,18 @@ void main() {
   });
 
   group('resolveRedirect — 온보딩 미완료(needsOnboarding)', () {
-    test('인증됐지만 온보딩 미완료면 /onboarding/intro 로 리다이렉트한다', () {
+    test('인증됐지만 온보딩 미완료면 /onboarding/condition 로 리다이렉트한다', () {
       final result = resolveRedirect(
         status: SessionStatus.needsOnboarding,
         location: '/',
       );
-      expect(result, '/onboarding/intro');
+      expect(result, '/onboarding/condition');
     });
 
-    test('온보딩 미완료 상태에서 이미 /onboarding/intro 이면 리다이렉트하지 않는다', () {
+    test('온보딩 미완료 상태에서 이미 /onboarding/condition 이면 리다이렉트하지 않는다', () {
       final result = resolveRedirect(
         status: SessionStatus.needsOnboarding,
-        location: '/onboarding/intro',
+        location: '/onboarding/condition',
       );
       expect(result, isNull);
     });
@@ -78,6 +96,25 @@ void main() {
       final result = resolveRedirect(
         status: SessionStatus.needsOnboarding,
         location: '/onboarding/step2',
+      );
+      expect(result, isNull);
+    });
+
+    test('온보딩 미완료 상태에서 /terms 진입 시 /onboarding/condition 으로 리다이렉트한다', () {
+      // 1페이지 뒤로가기는 /login 으로 pop 하므로 /terms 는 허용하지 않는다.
+      final result = resolveRedirect(
+        status: SessionStatus.needsOnboarding,
+        location: '/terms',
+      );
+      expect(result, '/onboarding/condition');
+    });
+
+    test('온보딩 미완료 상태에서 /login 은 리다이렉트하지 않는다 (1페이지 뒤로가기 이탈 허용)', () {
+      // 1페이지 뒤로가기가 스택 아래 /login 으로 pop 할 때, pop 직후 post-frame
+      // signOut 전까지 needsOnboarding 이므로 /login 을 허용해 pop 을 보존한다.
+      final result = resolveRedirect(
+        status: SessionStatus.needsOnboarding,
+        location: '/login',
       );
       expect(result, isNull);
     });
@@ -119,20 +156,28 @@ void main() {
     test('인증+온보딩 완료 상태에서 /onboarding 경로는 / 로 리다이렉트한다', () {
       final result = resolveRedirect(
         status: SessionStatus.ready,
-        location: '/onboarding/intro',
+        location: '/onboarding/condition',
       );
       expect(result, '/');
     });
   });
 
   // ---------------------------------------------------------------------------
-  // sessionStatusFromSession 순수 함수 단위 테스트
+  // sessionStatusFrom 순수 함수 단위 테스트
   // ---------------------------------------------------------------------------
 
-  group('sessionStatusFromSession — 세션 → SessionStatus 파생', () {
-    test('session == null 이면 unauthenticated 를 반환한다', () {
+  group('sessionStatusFrom — (authSession, hasProfile) → SessionStatus 파생', () {
+    test('authSession == null 이면 unauthenticated 를 반환한다 (hasProfile 무관)', () {
       expect(
-        sessionStatusFromSession(null),
+        sessionStatusFrom(authSession: null, hasProfile: false),
+        SessionStatus.unauthenticated,
+      );
+      expect(
+        sessionStatusFrom(authSession: null, hasProfile: true),
+        SessionStatus.unauthenticated,
+      );
+      expect(
+        sessionStatusFrom(authSession: null, hasProfile: null),
         SessionStatus.unauthenticated,
       );
     });
@@ -142,47 +187,60 @@ void main() {
         userId: 'new-user',
         provider: AuthProvider.kakao,
         hasAgreedTerms: false,
-        hasCompletedOnboarding: false,
       );
-      expect(sessionStatusFromSession(session), SessionStatus.needsTerms);
+      expect(
+        sessionStatusFrom(authSession: session, hasProfile: false),
+        SessionStatus.needsTerms,
+      );
     });
 
-    test('약관 동의했지만 온보딩 미완료(hasCompletedOnboarding=false)이면 needsOnboarding 을 반환한다',
-        () {
+    test('약관 동의 + hasProfile==null 이면 loading 을 반환한다', () {
+      const session = AuthSession(
+        userId: 'agreed-loading',
+        provider: AuthProvider.kakao,
+        hasAgreedTerms: true,
+      );
+      expect(
+        sessionStatusFrom(authSession: session, hasProfile: null),
+        SessionStatus.loading,
+      );
+    });
+
+    test('약관 동의 + hasProfile==false 이면 needsOnboarding 을 반환한다', () {
       const session = AuthSession(
         userId: 'existing-not-onboarded',
         provider: AuthProvider.kakao,
         hasAgreedTerms: true,
-        hasCompletedOnboarding: false,
       );
       expect(
-        sessionStatusFromSession(session),
+        sessionStatusFrom(authSession: session, hasProfile: false),
         SessionStatus.needsOnboarding,
       );
     });
 
-    test('약관 동의+온보딩 완료이면 ready 를 반환한다', () {
+    test('약관 동의 + hasProfile==true 이면 ready 를 반환한다', () {
       const session = AuthSession(
         userId: 'existing-onboarded',
         provider: AuthProvider.kakao,
         hasAgreedTerms: true,
-        hasCompletedOnboarding: true,
       );
-      expect(sessionStatusFromSession(session), SessionStatus.ready);
+      expect(
+        sessionStatusFrom(authSession: session, hasProfile: true),
+        SessionStatus.ready,
+      );
     });
 
-    test('삭제유예 상태는 (약관·온보딩과 무관하게) unauthenticated 로 취급된다', () {
+    test('삭제유예 상태는 (약관·hasProfile 무관하게) unauthenticated 로 취급된다', () {
       // 이유: 가드가 ready 로 보고 / 로 redirect 하면 02a 다이얼로그가 가려진다.
       // LoginScreen 이 다이얼로그를 띄울 때까지 사용자를 /login 에 머물게 한다.
       const session = AuthSession(
         userId: 'mock-deletion-grace',
         provider: AuthProvider.kakao,
         hasAgreedTerms: true,
-        hasCompletedOnboarding: true,
         accountStatus: AccountStatus.deletionGrace,
       );
       expect(
-        sessionStatusFromSession(session),
+        sessionStatusFrom(authSession: session, hasProfile: true),
         SessionStatus.unauthenticated,
       );
     });
