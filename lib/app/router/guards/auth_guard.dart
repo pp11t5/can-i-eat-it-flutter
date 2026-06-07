@@ -27,9 +27,13 @@ String? resolveRedirect({
       return null;
 
     case SessionStatus.needsOnboarding:
-      // 온보딩 미완료 → /onboarding 하위만 허용. 1페이지 뒤로가기는 signOut 으로
-      // 세션을 해제해 unauthenticated → /login 으로 이탈한다(온보딩은 재로그인 시 재개).
-      return location.startsWith('/onboarding') ? null : '/onboarding/condition';
+      // /onboarding 하위 + /login 허용. /login 은 온보딩 1페이지 뒤로가기의 이탈 목적지로,
+      // 스택 아래 /login 으로 pop(역방향 애니)한 직후 post-frame signOut 이 세션을 해제해
+      // unauthenticated 로 정리한다. pop 순간엔 아직 needsOnboarding 이므로 /login 을
+      // 허용해 가드가 pop 을 다시 온보딩으로 튕기지 않게 한다(온보딩은 재로그인 시 재개).
+      return (location.startsWith('/onboarding') || location == '/login')
+          ? null
+          : '/onboarding/condition';
 
     case SessionStatus.ready:
       if (location == '/splash' ||

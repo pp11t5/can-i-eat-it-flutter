@@ -213,7 +213,8 @@ class _AllAgreeCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
       child: Ink(
         decoration: BoxDecoration(
-          color: AppColors.surfaceMuted, // Figma #FCFCFC ≈ gray20 (우리 토큰 gray30 #F5F5F5; 시각상 거의 동일)
+          color: AppColors
+              .surfaceMuted, // Figma #FCFCFC ≈ gray20 (우리 토큰 gray30 #F5F5F5; 시각상 거의 동일)
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
           border: Border.all(color: AppColors.border, width: 1),
         ),

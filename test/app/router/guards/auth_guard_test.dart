@@ -101,12 +101,22 @@ void main() {
     });
 
     test('온보딩 미완료 상태에서 /terms 진입 시 /onboarding/condition 으로 리다이렉트한다', () {
-      // 1페이지 뒤로가기는 signOut 으로 /login 이탈하므로 /terms 는 허용하지 않는다.
+      // 1페이지 뒤로가기는 /login 으로 pop 하므로 /terms 는 허용하지 않는다.
       final result = resolveRedirect(
         status: SessionStatus.needsOnboarding,
         location: '/terms',
       );
       expect(result, '/onboarding/condition');
+    });
+
+    test('온보딩 미완료 상태에서 /login 은 리다이렉트하지 않는다 (1페이지 뒤로가기 이탈 허용)', () {
+      // 1페이지 뒤로가기가 스택 아래 /login 으로 pop 할 때, pop 직후 post-frame
+      // signOut 전까지 needsOnboarding 이므로 /login 을 허용해 pop 을 보존한다.
+      final result = resolveRedirect(
+        status: SessionStatus.needsOnboarding,
+        location: '/login',
+      );
+      expect(result, isNull);
     });
   });
 
