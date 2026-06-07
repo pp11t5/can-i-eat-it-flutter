@@ -150,14 +150,27 @@ void main() {
       );
     });
 
-    testWidgets('"다음" 버튼 탭 시 /onboarding/triggers로 이동한다', (tester) async {
+    testWidgets('증상 선택 후 "다음" 버튼 탭 시 /onboarding/triggers로 이동한다',
+        (tester) async {
       await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      // 최소 1개 선택해야 "다음"이 활성화된다.
+      await tester.tap(find.text(symptomFrequencyOptions.first.label));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('다음'));
       await tester.pumpAndSettle();
 
       expect(find.text('triggers stub'), findsOneWidget);
+    });
+
+    testWidgets('아무것도 선택하지 않으면 "다음" 버튼이 비활성화된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      final button = tester.widget<FilledButton>(find.byType(FilledButton));
+      expect(button.onPressed, isNull);
     });
   });
 }

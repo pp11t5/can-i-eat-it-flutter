@@ -111,7 +111,10 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
               ),
               child: AppButton.primary(
                 label: '다음',
-                onPressed: () => context.push('/onboarding/triggers'),
+                // 최소 1개 이상 선택해야 다음으로 진행 가능(1페이지와 동일).
+                onPressed: draft.symptomFrequency.isNotEmpty
+                    ? () => context.push('/onboarding/triggers')
+                    : null,
                 isExpanded: true,
               ),
             ),
