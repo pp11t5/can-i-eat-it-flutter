@@ -29,17 +29,17 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── 탑바 ──────────────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: AppSpacing.sectionGap),
-                  GestureDetector(
-                    onTap: () => context.go('/onboarding/condition'),
+            // ── 탑바 (Figma — 64px-high TopBar, chevron 세로 중앙) ────────────
+            SizedBox(
+              height: 64,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: GestureDetector(
+                    onTap: () => context.pop(),
                     child: SizedBox(
                       width: 32,
                       height: 32,
@@ -50,23 +50,33 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.itemGap),
+                ),
+              ),
+            ),
+            // ── StepProgress (0px gap after TopBar per Figma) ────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPadding,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   const StepProgress(currentStep: 2, totalSteps: 4),
-                  const SizedBox(height: AppSpacing.contentGap),
+                  const SizedBox(height: AppSpacing.sectionGap),
                   Text(
                     '최근 4주간 어떤 불편함이\n있었나요?',
                     style: AppTextStyles.header1Bold.copyWith(
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.itemGap),
+                  const SizedBox(height: 16),
                   Text(
                     '해당되는 항목을 모두 선택해 주세요',
                     style: AppTextStyles.body1Regular.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.sectionGap),
+                  const SizedBox(height: AppSpacing.contentGap),
                 ],
               ),
             ),
@@ -99,7 +109,7 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
               ),
               child: AppButton.primary(
                 label: '다음',
-                onPressed: () => context.go('/onboarding/triggers'),
+                onPressed: () => context.push('/onboarding/triggers'),
                 isExpanded: true,
               ),
             ),

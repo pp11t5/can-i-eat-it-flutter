@@ -63,17 +63,17 @@ class _OnboardingMedicationsScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── 탑바 ──────────────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: AppSpacing.sectionGap),
-                  GestureDetector(
-                    onTap: () => context.go('/onboarding/triggers'),
+            // ── 탑바 (Figma — 64px-high TopBar, chevron 세로 중앙) ────────────
+            SizedBox(
+              height: 64,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: GestureDetector(
+                    onTap: () => context.pop(),
                     child: SizedBox(
                       width: 32,
                       height: 32,
@@ -84,23 +84,33 @@ class _OnboardingMedicationsScreenState
                       ),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.itemGap),
+                ),
+              ),
+            ),
+            // ── StepProgress (0px gap after TopBar per Figma) ────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPadding,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   const StepProgress(currentStep: 4, totalSteps: 4),
-                  const SizedBox(height: AppSpacing.contentGap),
+                  const SizedBox(height: AppSpacing.sectionGap),
                   Text(
                     '알레르기와 복용 중인 약을\n알려주세요',
                     style: AppTextStyles.header1Bold.copyWith(
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.itemGap),
+                  const SizedBox(height: 16),
                   Text(
                     '없으면 완료를 눌러주세요',
                     style: AppTextStyles.body1Regular.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.sectionGap),
+                  const SizedBox(height: AppSpacing.contentGap),
                 ],
               ),
             ),

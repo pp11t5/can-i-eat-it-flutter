@@ -27,19 +27,23 @@ class OnboardingConditionScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── 탑바 ──────────────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: AppSpacing.sectionGap),
-                  // 뒤로 가기: step1은 pop 시도, 불가능하면 무시
-                  GestureDetector(
+            // ── 탑바 (Figma 365:1555 — 64px-high TopBar, chevron 세로 중앙) ───
+            SizedBox(
+              height: 64,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  // 뒤로 가기: push 진입이면 pop → /terms, guard-replace 진입이면 go('/terms')
+                  child: GestureDetector(
                     onTap: () {
-                      if (context.canPop()) context.pop();
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go('/terms');
+                      }
                     },
                     child: SizedBox(
                       width: 32,
@@ -51,23 +55,33 @@ class OnboardingConditionScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.itemGap),
+                ),
+              ),
+            ),
+            // ── StepProgress (0px gap after TopBar per Figma) ────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPadding,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   const StepProgress(currentStep: 1, totalSteps: 4),
-                  const SizedBox(height: AppSpacing.contentGap),
+                  const SizedBox(height: AppSpacing.sectionGap),
                   Text(
                     '어떤 건강 고민이 있으세요?',
                     style: AppTextStyles.header1Bold.copyWith(
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.itemGap),
+                  const SizedBox(height: 16),
                   Text(
                     '현재는 역류성 식도염만 지원해요\n향후 다른 질환도 추가될 예정이에요',
                     style: AppTextStyles.body1Regular.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.sectionGap),
+                  const SizedBox(height: AppSpacing.contentGap),
                 ],
               ),
             ),
@@ -104,7 +118,7 @@ class OnboardingConditionScreen extends ConsumerWidget {
               child: AppButton.primary(
                 label: '다음',
                 onPressed: draft.conditions.isNotEmpty
-                    ? () => context.go('/onboarding/frequency')
+                    ? () => context.push('/onboarding/frequency')
                     : null,
                 isExpanded: true,
               ),

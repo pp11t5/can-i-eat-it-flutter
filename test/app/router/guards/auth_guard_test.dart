@@ -99,6 +99,14 @@ void main() {
       );
       expect(result, isNull);
     });
+
+    test('온보딩 미완료 상태에서 /terms 는 리다이렉트하지 않는다 (step-1 뒤로가기 복귀 허용)', () {
+      final result = resolveRedirect(
+        status: SessionStatus.needsOnboarding,
+        location: '/terms',
+      );
+      expect(result, isNull);
+    });
   });
 
   group('resolveRedirect — 인증+온보딩 완료(ready)', () {
