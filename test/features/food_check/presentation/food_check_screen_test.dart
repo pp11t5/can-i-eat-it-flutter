@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -41,6 +42,8 @@ void main() {
 
       // 검색 필드 placeholder.
       expect(find.text('음식을 검색해주세요'), findsOneWidget);
+      // 빈 상태 SVG 아이콘.
+      expect(find.byType(SvgPicture), findsOneWidget);
       // 빈 상태 문구.
       expect(find.text('아직 검색 기록이 없어요'), findsOneWidget);
     });

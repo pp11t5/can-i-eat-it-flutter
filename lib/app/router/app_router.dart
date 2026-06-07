@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -82,7 +82,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/check',
         name: 'food-check',
-        builder: (context, state) => const FoodCheckScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          fullscreenDialog: true,
+          child: FoodCheckScreen(),
+        ),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

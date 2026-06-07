@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
@@ -175,40 +176,48 @@ class _RecentSection extends StatelessWidget {
         AppSpacing.screenPadding, // right 16
         AppSpacing.screenPadding, // bottom 16
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 헤더 행: "최근 검색" + "전체 삭제"
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '최근 검색',
-                style: AppTextStyles.body1Medium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              GestureDetector(
-                onTap: () => showClearSearchHistoryDialog(context, ref),
-                child: Text(
-                  '전체 삭제',
-                  style: AppTextStyles.body1Medium.copyWith(
-                    color: AppColors.danger,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.itemGap), // inner 8
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 헤더 행: "최근 검색" + "전체 삭제"
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.itemGap),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '최근 검색',
+                    style: AppTextStyles.body1Medium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
+                  GestureDetector(
+                    onTap: () => showClearSearchHistoryDialog(context, ref),
+                    child: Text(
+                      '전체 삭제',
+                      style: AppTextStyles.body1Medium.copyWith(
+                        color: AppColors.danger,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.itemGap),
+            // 검색어 행 목록. 항목 간 8px gap(Figma RecentList gap) + 각 행 vertical 8 padding.
+            for (var i = 0; i < terms.length; i++) ...[
+              if (i > 0) const SizedBox(height: AppSpacing.itemGap),
+              _HistoryRow(
+                term: terms[i],
+                onRemove: () => ref
+                    .read(searchHistoryControllerProvider.notifier)
+                    .removeTerm(terms[i]),
               ),
             ],
-          ),
-          // 검색어 행 목록.
-          ...terms.map(
-            (term) => _HistoryRow(
-              term: term,
-              onRemove: () => ref
-                  .read(searchHistoryControllerProvider.notifier)
-                  .removeTerm(term),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -263,17 +272,22 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.restaurant_menu,
-            size: 48,
-            color: AppColors.textTertiary,
+          SvgPicture.asset(
+            'assets/figma_extracted/icon_food_empty.svg',
+            width: 48,
+            height: 48,
+            colorFilter: const ColorFilter.mode(
+              AppColors.navInactive,
+              BlendMode.srcIn,
+            ),
           ),
-          const SizedBox(height: AppSpacing.itemGap),
+          const SizedBox(height: 16),
           Text(
             '아직 검색 기록이 없어요',
             textAlign: TextAlign.center,
             style: AppTextStyles.body1Regular.copyWith(
-              color: AppColors.textTertiary,
+              fontSize: 18,
+              color: AppColors.navInactive,
             ),
           ),
         ],
