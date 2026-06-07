@@ -31,8 +31,8 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.contentGap),
 
               // ── 1. 인사말 블록 ─────────────────────────────────────────
+              // 캐릭터 하단이 검색바 상단과 맞붙도록 gap 0 (Figma 절대배치 overlap).
               const _GreetingBlock(),
-              const SizedBox(height: AppSpacing.contentGap),
 
               // ── 2. 검색 바 ────────────────────────────────────────────
               HomeSearchBar(onTap: () => context.push('/check')),
@@ -127,7 +127,8 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.contentGap),
+              // 최근 식사 ↔ 토스트 카드 gap 70 (Figma).
+              const SizedBox(height: 70),
 
               // ── 6. 토스트 카드 ────────────────────────────────────────
               const _ToastCard(),
@@ -147,11 +148,15 @@ class _GreetingBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Figma 1207:6593: row justify center — 텍스트+캐릭터를 한 그룹으로 가운데 정렬
+    // (Expanded/space-between 금지 — 좌우로 벌리면 Figma와 패딩 불일치).
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(
+        Flexible(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
