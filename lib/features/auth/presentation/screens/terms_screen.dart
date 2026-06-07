@@ -63,14 +63,9 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
       sensitiveInfo: _sensitiveInfo,
       marketing: _marketing,
     );
+    // 약관 동의 → 상태가 needsOnboarding 으로 전환되면 가드가 /onboarding/condition 으로
+    // 자동 redirect 한다(온보딩 1페이지 뒤로가기는 signOut 으로 /login 이탈).
     await ref.read(authControllerProvider.notifier).agreeToTerms(agreement);
-    if (!mounted) return;
-    // 명시적 push로 온보딩 back-stack을 형성한다(1페이지 뒤로가기 → /terms).
-    // 이 push가 가드 redirect와 충돌하지 않는 이유: agreeToTerms가 상태를
-    // needsOnboarding으로 바꾼 직후 가드가 현재 위치(/terms)를 재평가하는데,
-    // 가드 needsOnboarding 케이스가 /terms를 허용(null 반환)하기 때문이다.
-    // 가드에서 /terms 허용을 제거하면 redirect-vs-push 경쟁이 재발한다(auth_guard.dart 참조).
-    context.push('/onboarding/condition');
   }
 
   @override

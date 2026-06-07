@@ -9,6 +9,7 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_button.dart';
 import 'package:can_i_eat_it/app/widgets/option_card.dart';
 import 'package:can_i_eat_it/app/widgets/step_progress.dart';
+import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
 
@@ -36,15 +37,13 @@ class OnboardingConditionScreen extends ConsumerWidget {
                 ),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  // 뒤로 가기: push 진입이면 pop → /terms, guard-replace 진입이면 go('/terms')
+                  // 1페이지 뒤로가기 = 온보딩 이탈 → signOut(세션 해제) → 가드가 /login 으로.
+                  // 온보딩은 다음 로그인 시 재개되는 단계라 약관이 아닌 로그인으로 복귀한다.
+                  // (/login 으로 직접 go 하면 needsOnboarding 가드가 다시 온보딩으로 튕기므로
+                  //  반드시 signOut 으로 상태를 unauthenticated 로 만들어야 한다.)
                   child: GestureDetector(
-                    onTap: () {
-                      if (context.canPop()) {
-                        context.pop();
-                      } else {
-                        context.go('/terms');
-                      }
-                    },
+                    onTap: () =>
+                        ref.read(authControllerProvider.notifier).signOut(),
                     child: SizedBox(
                       width: 32,
                       height: 32,

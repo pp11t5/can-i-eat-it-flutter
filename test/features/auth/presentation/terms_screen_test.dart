@@ -18,9 +18,9 @@ MockAuthRepository _loggedInRepo() => MockAuthRepository(
       ),
     );
 
-// _onNext 가 context.push('/onboarding/condition') 를 호출하므로
-// GoRouter 컨텍스트가 필요하다. /terms + /onboarding/condition 스텁을 포함한
-// 최소 라우터를 제공한다.
+// 뒤로가기 버튼이 context.canPop() (go_router 확장)을 사용하므로 GoRouter
+// 컨텍스트가 필요하다. /terms + /onboarding/condition 스텁을 포함한 최소 라우터.
+// (_onNext 는 push 하지 않고 가드 redirect 에 위임 — 본 테스트는 약관 기록만 검증.)
 GoRouter _testRouter() => GoRouter(
       initialLocation: '/terms',
       routes: [

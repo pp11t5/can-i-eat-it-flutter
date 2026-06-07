@@ -27,10 +27,9 @@ String? resolveRedirect({
       return null;
 
     case SessionStatus.needsOnboarding:
-      // /terms 도 허용 — 온보딩 1페이지 뒤로가기가 약관 화면으로 복귀 가능하도록.
-      return (location.startsWith('/onboarding') || location == '/terms')
-          ? null
-          : '/onboarding/condition';
+      // 온보딩 미완료 → /onboarding 하위만 허용. 1페이지 뒤로가기는 signOut 으로
+      // 세션을 해제해 unauthenticated → /login 으로 이탈한다(온보딩은 재로그인 시 재개).
+      return location.startsWith('/onboarding') ? null : '/onboarding/condition';
 
     case SessionStatus.ready:
       if (location == '/splash' ||
