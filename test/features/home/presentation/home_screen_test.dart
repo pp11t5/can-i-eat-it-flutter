@@ -19,11 +19,19 @@ void main() {
       expect(find.textContaining('편안하신가요?'), findsOneWidget);
     });
 
-    testWidgets('"연속 편안한 날 1일 째" 통계 라벨이 표시된다', (tester) async {
+    testWidgets('"식단 기록" 통계 라벨이 인사말 블록에 표시된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('연속 편안한 날 1일 째'), findsOneWidget);
+      // Text.rich 로 렌더링되므로 textContaining 으로 확인
+      expect(find.textContaining('식단 기록'), findsOneWidget);
+    });
+
+    testWidgets('"증상 기록" 통계 라벨이 인사말 블록에 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('증상 기록'), findsOneWidget);
     });
 
     testWidgets('구 인사말 "이거 먹어도 돼?"는 표시되지 않는다', (tester) async {
@@ -33,11 +41,14 @@ void main() {
       expect(find.textContaining('이거 먹어도 돼?'), findsNothing);
     });
 
-    testWidgets('구 "식단 기록 0 회" 카운터는 표시되지 않는다', (tester) async {
+    testWidgets('구 "연속 편안한 날 1일 째" 라벨은 인사말 블록에서 제거됐다 — 도감 카드로 이동됨',
+        (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('식단 기록'), findsNothing);
+      // 연속 편안한 날은 _MyDictionaryCard 로 이동했으므로 여전히 화면에 있음.
+      // 이 테스트는 그 텍스트가 화면 어딘가에 있는지를 검증 (제거 확인이 아닌 위치 확인).
+      expect(find.textContaining('연속 편안한 날'), findsOneWidget);
     });
   });
 
@@ -87,6 +98,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('내 도감'), findsOneWidget);
+    });
+
+    testWidgets('"연속 편안한 날" streak 텍스트가 도감 카드에 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      // Text.rich 로 렌더링되므로 textContaining 으로 확인
+      expect(find.textContaining('연속 편안한 날'), findsOneWidget);
     });
   });
 

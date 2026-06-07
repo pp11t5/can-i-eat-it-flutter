@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
@@ -155,16 +156,37 @@ class _GreetingBlock extends StatelessWidget {
             children: [
               Text(
                 '오늘 속은\n편안하신가요?',
-                style: AppTextStyles.header1Bold.copyWith(
+                style: AppTextStyles.header2Bold.copyWith(
                   color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: 8),
-              // TODO(data): '연속 편안한 날 N일 째' — 데이터 연동 시 실제 연속일수로 교체. (Figma 미존재, 팀 지시 카피)
-              Text(
-                '연속 편안한 날 1일 째',
-                style: AppTextStyles.body2Regular.copyWith(
-                  color: AppColors.textSecondary,
+              const SizedBox(height: 16),
+              // TODO(data): 식사·증상 카운트 연동 시 실제 값.
+              Text.rich(
+                TextSpan(
+                  style: AppTextStyles.body2Regular.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                  children: [
+                    const TextSpan(text: '식단 기록 '),
+                    TextSpan(
+                      text: '0',
+                      style: AppTextStyles.body2Regular.copyWith(
+                        color: AppColors.textStrong,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const TextSpan(text: ' 회\n'),
+                    const TextSpan(text: '증상 기록 '),
+                    TextSpan(
+                      text: '0',
+                      style: AppTextStyles.body2Regular.copyWith(
+                        color: AppColors.textStrong,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const TextSpan(text: ' 회'),
+                  ],
                 ),
               ),
             ],
@@ -205,6 +227,7 @@ class _MyDictionaryCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // LEFT: 불꽃 아이콘 + 연속 편안한 날 streak
             Row(
               children: [
                 Image.asset(
@@ -213,16 +236,48 @@ class _MyDictionaryCard extends StatelessWidget {
                   height: 32,
                   fit: BoxFit.contain,
                 ),
-                const SizedBox(width: AppSpacing.itemGap),
-                Text(
-                  '내 도감',
-                  style: AppTextStyles.body1Bold.copyWith(
-                    color: AppColors.textPrimary,
+                const SizedBox(width: 8),
+                // TODO(data): 실제 연속일수.
+                Text.rich(
+                  TextSpan(
+                    style: AppTextStyles.body1Bold.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                    children: [
+                      const TextSpan(text: '연속 편안한 날 '),
+                      TextSpan(
+                        text: '1일',
+                        style: AppTextStyles.body1Bold.copyWith(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const TextSpan(text: ' 째'),
+                    ],
                   ),
                 ),
               ],
             ),
-            const Icon(Icons.chevron_right, size: 24),
+            // RIGHT: '내 도감' 라벨 + chevron
+            Row(
+              children: [
+                Text(
+                  '내 도감',
+                  style: AppTextStyles.body2Medium.copyWith(
+                    color: AppColors.textStrong,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                SvgPicture.asset(
+                  'assets/figma_extracted/chevron_right.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.textPrimary, // #1A1A1F
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
