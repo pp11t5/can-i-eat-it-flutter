@@ -63,9 +63,14 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
       sensitiveInfo: _sensitiveInfo,
       marketing: _marketing,
     );
-    // 약관 동의 → 상태가 needsOnboarding 으로 전환되면 가드가 /onboarding/condition 으로
-    // 자동 redirect 한다(온보딩 1페이지 뒤로가기는 signOut 으로 /login 이탈).
     await ref.read(authControllerProvider.notifier).agreeToTerms(agreement);
+    if (!mounted) return;
+    // 약관은 login 이 context.push 로 띄운 명령형 라우트라, 상태가 needsOnboarding 이
+    // 돼도 가드 redirect 가 이 라우트를 교체하지 못해 그대로 멈춘다. 따라서 명시적으로
+    // pushReplacement 해 약관을 온보딩 1페이지로 교체한다.
+    // pushReplacement 이므로 스택은 [login, condition] — 1페이지 뒤로가기가 login 으로
+    // pop(역방향) 가능하고, 사용자 pop 이 아니라 약관 PopScope(signOut)도 발화하지 않는다.
+    context.pushReplacement('/onboarding/condition');
   }
 
   @override
