@@ -94,25 +94,25 @@ class _BottomNavBar extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                        SvgPicture.asset(
-                          tabs[index].iconAsset,
-                          width: 24,
-                          height: 24,
-                          colorFilter: ColorFilter.mode(
-                            color,
-                            BlendMode.srcIn,
-                          ),
+                      SvgPicture.asset(
+                        tabs[index].iconAsset,
+                        width: 24,
+                        height: 24,
+                        colorFilter: ColorFilter.mode(
+                          color,
+                          BlendMode.srcIn,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          tabs[index].label,
-                          style: AppTextStyles.caption1Medium.copyWith(
-                            color: color,
-                          ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        tabs[index].label,
+                        style: AppTextStyles.caption1Medium.copyWith(
+                          color: color,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+                ),
               );
             }),
           ),

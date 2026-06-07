@@ -73,7 +73,9 @@ class _OnboardingMedicationsScreenState
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: GestureDetector(
-                    onTap: () => context.pop(),
+                    onTap: () => context.canPop()
+                        ? context.pop()
+                        : context.go('/onboarding/condition'),
                     child: SizedBox(
                       width: 32,
                       height: 32,
