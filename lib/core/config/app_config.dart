@@ -1,4 +1,6 @@
-/// 앱 전역 설정. 환경(플레이버)별 값은 추후 --dart-define 또는 .env 로 주입.
+/// 앱 전역 설정. 환경(플레이버)별 값은 --dart-define 으로 주입.
+///
+/// `--dart-define=API_BASE_URL=https://…` 로 override 가능.
 class AppConfig {
   const AppConfig({
     required this.apiBaseUrl,
@@ -6,13 +8,19 @@ class AppConfig {
     this.receiveTimeout = const Duration(seconds: 10),
   });
 
-  /// 서버 API 베이스 URL. 서버 API 확정 전까지 placeholder.
+  /// 서버 API 베이스 URL.
+  ///
+  /// 빌드 시 `--dart-define=API_BASE_URL=<url>` 로 override 가능.
+  /// 지정하지 않으면 `https://can-i-eat-it.com/api/v1` 사용.
   final String apiBaseUrl;
   final Duration connectTimeout;
   final Duration receiveTimeout;
 
-  /// 기본(개발) 설정. 서버 주소 확정 시 교체.
+  /// 개발(기본) 설정.
   static const AppConfig dev = AppConfig(
-    apiBaseUrl: 'https://api.example.com',
+    apiBaseUrl: String.fromEnvironment(
+      'API_BASE_URL',
+      defaultValue: 'https://can-i-eat-it.com/api/v1',
+    ),
   );
 }

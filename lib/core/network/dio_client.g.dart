@@ -6,10 +6,24 @@ part of 'dio_client.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$dioHash() => r'cd53802c9f80e8a513da49608ca025328731a2f4';
+String _$dioHash() => r'b5e9d66f61a55c492a93719fdf9553882dfa6c64';
 
-/// 앱 전역에서 공유하는 Dio 인스턴스.
-/// retrofit datasource 들은 이 provider 를 주입받아 사용한다.
+/// 앱 전역에서 공유하는 Dio 인스턴스 (ADR-0007 §3-1 (1)).
+///
+/// ## validateStatus 정책 (CRITICAL 2)
+/// 메인 instance 에만 적용:
+/// - 401 → throw (AuthInterceptor.onError 가 refresh 큐잉 처리)
+/// - 400/403 → **정상 Response 로 datasource 에 전달** → `unwrap()` 이 봉투
+///   code 를 읽어 [TermsRequiredFailure]/[RecoverableAccountFailure] 로 매핑.
+/// - 5xx → throw → [NetworkFailure] 폴백.
+///
+/// refreshDio 의 validateStatus 는 **건드리지 않는다** — refresh 의 401/4xx 는
+/// throw 돼야 [_performRefresh] catch 가 [SessionExpiredFailure] 로 전이.
+///
+/// ## 인터셉터 구성
+/// - [AuthInterceptor]: 요청에 Bearer 토큰 주입, 401 단일 refresh 큐잉.
+/// - [LogInterceptor]: kDebugMode 에서만 로깅. 토큰 평문 노출 방지를 위해
+///   `requestHeader: false`, 응답 바디는 accessToken/refreshToken 마스킹.
 ///
 /// Copied from [dio].
 @ProviderFor(dio)
