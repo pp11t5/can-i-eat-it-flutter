@@ -90,7 +90,7 @@ void _maskedLogPrint(Object object) {
   var text = object.toString();
   // JSON 필드 값 마스킹: "accessToken":"<값>" / "refreshToken":"<값>"
   text = text.replaceAllMapped(
-    RegExp(r'"(accessToken|refreshToken)"\s*:\s*"[^"]*"'),
+    RegExp(r'"(accessToken|refreshToken|idToken)"\s*:\s*"[^"]*"'),
     (m) => '"${m.group(1)}":"***"',
   );
   // Authorization 헤더 마스킹: Bearer <토큰>

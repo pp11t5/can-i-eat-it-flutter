@@ -7,8 +7,8 @@ import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repositor
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/login_screen.dart';
 
-/// LoginScreen 이 sign-in 후 `context.push('/terms')` 를 호출하므로
-/// 테스트도 GoRouter 컨텍스트가 필요. 최소 라우트만 등록한다.
+/// LoginScreen 이 sign-in 후 SignInOutcome switch 로 분기하는 것을 검증한다.
+/// GoRouter 컨텍스트가 필요해 최소 라우트만 등록한다.
 GoRouter _testRouter() => GoRouter(
       initialLocation: '/login',
       routes: [
@@ -55,8 +55,10 @@ void main() {
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
   });
 
-  group('LoginScreen 로그인 동작', () {
-    testWidgets('신규 사용자가 카카오로 로그인하면 /terms 로 push 된다', (tester) async {
+  group('LoginScreen 로그인 동작 — SignInOutcome 분기', () {
+    testWidgets(
+        'NeedsTerms(newUser) — 카카오 로그인 시 /terms 로 push 된다',
+        (tester) async {
       final repo = MockAuthRepository.newUser();
       await tester.pumpWidget(_wrap(repo));
       await tester.pumpAndSettle();
@@ -64,12 +66,42 @@ void main() {
       await tester.tap(find.text('카카오로 로그인'));
       await tester.pumpAndSettle();
 
-      // 세션 생성됨 + /terms 스텁으로 push 됨.
-      expect(await repo.currentSession(), isNotNull);
+      // /terms stub 이 보인다.
       expect(find.text('terms stub'), findsOneWidget);
+      // home 이나 onboarding 으로 이동하지 않는다.
+      expect(find.text('home stub'), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-    testWidgets('삭제유예 계정으로 로그인하면 복구 다이얼로그가 뜬다 (push 없음)',
+    testWidgets(
+        'Authenticated(onboarded=true) — 카카오 로그인 시 / 로 이동한다',
+        (tester) async {
+      final repo = MockAuthRepository.existing(onboarded: true);
+      await tester.pumpWidget(_wrap(repo));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('카카오로 로그인'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('home stub'), findsOneWidget);
+      expect(find.text('terms stub'), findsNothing);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets(
+        'Authenticated(onboarded=false) — 카카오 로그인 시 /onboarding/condition 으로 이동한다',
+        (tester) async {
+      final repo = MockAuthRepository.existing(onboarded: false);
+      await tester.pumpWidget(_wrap(repo));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('카카오로 로그인'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('onboarding stub'), findsOneWidget);
+      expect(find.text('home stub'), findsNothing);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets(
+        'Recoverable(deletionGrace) — 카카오 로그인 시 복구 다이얼로그가 뜬다',
         (tester) async {
       await tester.pumpWidget(_wrap(MockAuthRepository.deletionGrace()));
       await tester.pumpAndSettle();

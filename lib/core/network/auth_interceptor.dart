@@ -47,8 +47,15 @@ class AuthInterceptor extends QueuedInterceptor {
 
   /// 세션 만료 시그널 콜백 (기본 no-op).
   ///
-  /// 티켓 3 에서 AuthController 가 이 seam 을 통해 세션을 null 로 전이시킨다.
-  final void Function()? onSessionExpired;
+  /// AuthController.build() 에서 [setOnSessionExpired] 로 배선된다 (ADR-0007 §3-1 (4)).
+  void Function()? onSessionExpired;
+
+  /// AuthController 가 seam 을 post-init 으로 배선하는 진입점.
+  ///
+  /// 순환참조 없음: dioProvider → AuthInterceptor(seam=null) → AuthController.build() → setOnSessionExpired.
+  void setOnSessionExpired(void Function() callback) {
+    onSessionExpired = callback;
+  }
 
   // ---------------------------------------------------------------------------
   // 내부 상수

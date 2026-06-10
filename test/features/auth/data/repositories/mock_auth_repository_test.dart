@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:can_i_eat_it/core/config/terms_catalog.dart';
+import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 
 void main() {
@@ -26,41 +28,50 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
-  group('신규 가입(약관 미동의)', () {
-    test('카카오 로그인 시 약관 미동의 신규 세션을 반환한다', () async {
+  group('신규 가입(약관 미동의) — NeedsTerms', () {
+    test('카카오 로그인 시 NeedsTerms 를 반환한다', () async {
       final repo = MockAuthRepository.newUser();
-      final session = await repo.signInWithKakao();
-      expect(session.hasAgreedTerms, isFalse);
-      expect(session.provider, AuthProvider.kakao);
+      final outcome = await repo.signInWithKakao();
+      expect(outcome, isA<NeedsTerms>());
     });
 
-    test('애플 로그인 시 provider 가 apple 이다', () async {
+    test('애플 로그인 시 NeedsTerms 를 반환한다', () async {
       final repo = MockAuthRepository.newUser();
-      final session = await repo.signInWithApple();
-      expect(session.provider, AuthProvider.apple);
+      final outcome = await repo.signInWithApple();
+      expect(outcome, isA<NeedsTerms>());
     });
 
-    test('로그인 후 currentSession 이 해당 세션을 반환한다', () async {
+    test('카카오 로그인 후 currentSession 은 hasAgreedTerms=false 인 임시 세션이다', () async {
       final repo = MockAuthRepository.newUser();
-      final signedIn = await repo.signInWithKakao();
+      await repo.signInWithKakao();
       final current = await repo.currentSession();
-      expect(current, equals(signedIn));
+      expect(current, isNotNull);
+      expect(current!.hasAgreedTerms, isFalse);
+      expect(current.provider, AuthProvider.kakao);
     });
   });
 
   // ---------------------------------------------------------------------------
-  group('기존 가입(약관 동의됨)', () {
-    test('existing() 계정은 약관 동의됨, active 상태다', () async {
+  group('기존 가입(약관 동의됨) — Authenticated', () {
+    test('existing() 카카오 로그인 시 Authenticated 를 반환한다', () async {
       final repo = MockAuthRepository.existing();
-      final session = await repo.signInWithKakao();
-      expect(session.hasAgreedTerms, isTrue);
-      expect(session.accountStatus, AccountStatus.active);
+      final outcome = await repo.signInWithKakao();
+      expect(outcome, isA<Authenticated>());
     });
 
-    test('existing() 계정의 provider 가 kakao 다', () async {
+    test('existing() Authenticated 의 session 은 약관 동의됨, active 상태다', () async {
       final repo = MockAuthRepository.existing();
-      final session = await repo.signInWithKakao();
-      expect(session.provider, AuthProvider.kakao);
+      final outcome = await repo.signInWithKakao();
+      final auth = outcome as Authenticated;
+      expect(auth.session.hasAgreedTerms, isTrue);
+      expect(auth.session.accountStatus, AccountStatus.active);
+    });
+
+    test('existing() Authenticated 의 session.provider 가 kakao 다', () async {
+      final repo = MockAuthRepository.existing();
+      final outcome = await repo.signInWithKakao();
+      final auth = outcome as Authenticated;
+      expect(auth.session.provider, AuthProvider.kakao);
     });
   });
 
@@ -92,27 +103,42 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
-  group('삭제 유예 복구(02a)', () {
-    test('삭제유예 계정 로그인 시 accountStatus 가 deletionGrace 다', () async {
+  group('삭제 유예 복구(02a) — Recoverable', () {
+    test('deletionGrace() 로그인 시 Recoverable 를 반환한다', () async {
       final repo = MockAuthRepository.deletionGrace();
-      final session = await repo.signInWithKakao();
-      expect(session.accountStatus, AccountStatus.deletionGrace);
+      final outcome = await repo.signInWithKakao();
+      expect(outcome, isA<Recoverable>());
+    });
+
+    test('deletionGrace() Recoverable.reason 이 deletionInProgress 다', () async {
+      final repo = MockAuthRepository.deletionGrace();
+      final outcome = await repo.signInWithKakao();
+      final rec = outcome as Recoverable;
+      expect(rec.reason, RecoverReason.deletionInProgress);
     });
 
     test('recoverAccount 후 accountStatus 가 active 가 된다', () async {
       final repo = MockAuthRepository.deletionGrace();
       await repo.signInWithKakao();
-      final recovered = await repo.recoverAccount();
+      // 403 경로는 _session=null 이므로 provider 를 직접 전달
+      final recovered = await repo.recoverAccount(AuthProvider.kakao);
       expect(recovered.accountStatus, AccountStatus.active);
     });
   });
 
   // ---------------------------------------------------------------------------
-  group('signOut', () {
+  group('signOut / logout', () {
     test('signOut 후 currentSession 은 null 이다', () async {
-      final repo = MockAuthRepository.newUser();
+      final repo = MockAuthRepository.existing();
       await repo.signInWithKakao();
       await repo.signOut();
+      expect(await repo.currentSession(), isNull);
+    });
+
+    test('logout 후 currentSession 은 null 이다', () async {
+      final repo = MockAuthRepository.existing();
+      await repo.signInWithKakao();
+      await repo.logout();
       expect(await repo.currentSession(), isNull);
     });
   });

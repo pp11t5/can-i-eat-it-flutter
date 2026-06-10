@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 
 /// 삭제 유예 계정(02a) 로그인 시 복구 여부를 묻는 다이얼로그.
@@ -21,19 +22,22 @@ import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers
 /// barrierDismissible: false — 외부 탭·뒤로가기로 닫히지 않으며 명시적 선택을 강제.
 Future<void> showDeletionGraceDialog(
   BuildContext context,
-  WidgetRef ref,
-) async {
+  WidgetRef ref, {
+  required AuthProvider provider,
+}) async {
   await showDialog<void>(
     context: context,
     barrierDismissible: false,
-    builder: (dialogContext) => _DeletionGraceDialog(ref: ref),
+    builder: (dialogContext) =>
+        _DeletionGraceDialog(ref: ref, provider: provider),
   );
 }
 
 class _DeletionGraceDialog extends StatelessWidget {
-  const _DeletionGraceDialog({required this.ref});
+  const _DeletionGraceDialog({required this.ref, required this.provider});
 
   final WidgetRef ref;
+  final AuthProvider provider;
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +80,7 @@ class _DeletionGraceDialog extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.contentGap),
             // 버튼 그룹 (gap 8).
-            _PrimaryCta(onTap: () => _onRecover(context)),
+            _PrimaryCta(onTap: () => _onRecover(context, provider)),
             const SizedBox(height: AppSpacing.itemGap),
             _SecondaryCta(onTap: () => _onCancel(context)),
           ],
@@ -85,10 +89,24 @@ class _DeletionGraceDialog extends StatelessWidget {
     );
   }
 
-  Future<void> _onRecover(BuildContext context) async {
-    await ref.read(authControllerProvider.notifier).recoverAccount();
-    if (!context.mounted) return;
-    Navigator.of(context).pop();
+  Future<void> _onRecover(BuildContext context, AuthProvider provider) async {
+    try {
+      await ref
+          .read(authControllerProvider.notifier)
+          .recoverAccount(provider);
+      if (!context.mounted) return;
+      // 복구 성공: gate 가 sessionStatus 전이를 감지해 자동 라우팅.
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!context.mounted) return;
+      // 의료성 흐름 — 무증상 실패 금지. 사용자에게 명시적 오류를 표시한다.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('계정 복구에 실패했어요. 잠시 후 다시 시도해 주세요.'),
+          backgroundColor: AppColors.verdictDanger,
+        ),
+      );
+    }
   }
 
   Future<void> _onCancel(BuildContext context) async {
