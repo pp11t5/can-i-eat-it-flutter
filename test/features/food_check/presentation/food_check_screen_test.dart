@@ -206,7 +206,7 @@ void main() {
       expect(find.text('두부조림'), findsOneWidget);
     });
 
-    testWidgets('빈 결과 → 직접 분석하기 버튼 렌더', (tester) async {
+    testWidgets('빈 결과 → 직접분석 CTA 카드(찾는 음식이 없어요) 렌더', (tester) async {
       final repo = MockFoodRepository.withSearchResults([]);
       await tester.pumpWidget(
         _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
@@ -217,7 +217,9 @@ void main() {
       await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('직접 분석하기'), findsOneWidget);
+      // _DirectAnalyzeCta 카드: 제목 + 부제에 쿼리 포함
+      expect(find.text('찾는 음식이 없어요'), findsOneWidget);
+      expect(find.textContaining("'없는음식xyz'로 검색하기"), findsOneWidget);
     });
 
     testWidgets('결과 셀 탭 → addRecent 호출 후 /verdict 라우트 진입', (tester) async {
@@ -241,7 +243,7 @@ void main() {
       expect(find.textContaining('verdict:'), findsOneWidget);
     });
 
-    testWidgets('매칭없음 직접 분석하기 탭 → /verdict 진입 (externalId 없음)', (tester) async {
+    testWidgets('매칭없음 CTA 카드 탭 → /verdict 진입 (externalId 없음)', (tester) async {
       final repo = MockFoodRepository.withSearchResults([]);
       await tester.pumpWidget(
         _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
@@ -252,7 +254,8 @@ void main() {
       await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.textContaining('직접 분석하기'));
+      // _DirectAnalyzeCta 카드 전체를 탭 (GestureDetector 영역)
+      await tester.tap(find.text('찾는 음식이 없어요'));
       await tester.pumpAndSettle();
 
       // /verdict로 이동, extra = '특이한음식'

@@ -283,80 +283,135 @@ class _SearchResultPanel extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
     if (error != null) {
-      return _SearchErrorState(message: error!, onRetry: onDirectAnalyze);
+      return _SearchErrorState(
+        message: error!,
+        query: query,
+        onDirectAnalyze: onDirectAnalyze,
+      );
     }
     final list = results ?? [];
-    if (list.isEmpty) {
-      // 매칭 없음 → 직접 분석 유도 (Figma 365-1849)
-      return _NoResultState(query: query, onDirectAnalyze: onDirectAnalyze);
-    }
-    return _ResultList(items: list, onTap: onTap);
+    // 결과가 있든 없든 항상 직접분석 CTA 카드를 포함한 리스트를 렌더한다
+    // (Figma 554-5322: 리스트 맨 아래 365-1849 카드 상시 노출).
+    return _ResultList(
+      query: query,
+      items: list,
+      onTap: onTap,
+      onDirectAnalyze: onDirectAnalyze,
+    );
   }
 }
 
+/// 검색 결과 카드 리스트 + 하단 직접분석 CTA (Figma 554-5322).
+///
+/// 결과가 없을 때도 직접분석 CTA 카드만 표시한다.
 class _ResultList extends StatelessWidget {
-  const _ResultList({required this.items, required this.onTap});
+  const _ResultList({
+    required this.query,
+    required this.items,
+    required this.onTap,
+    required this.onDirectAnalyze,
+  });
 
+  final String query;
   final List<FoodSummary> items;
   final Future<void> Function(FoodSummary) onTap;
+  final VoidCallback onDirectAnalyze;
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.screenPadding,
-        vertical: AppSpacing.itemGap,
+    // 결과 카드 수 + CTA 카드 1개 + 헤더 1개
+    final itemCount = 1 + items.length + 1; // header + results + cta
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screenPadding,
+        AppSpacing.itemGap,
+        AppSpacing.screenPadding,
+        AppSpacing.screenPadding,
       ),
-      itemCount: items.length,
-      separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1),
+      itemCount: itemCount,
       itemBuilder: (context, index) {
-        final food = items[index];
-        return _ResultCell(food: food, onTap: () => onTap(food));
+        // 0: 헤더
+        if (index == 0) {
+          return Padding(
+            padding: const EdgeInsets.only(
+              bottom: AppSpacing.itemGap,
+            ),
+            child: Text(
+              '검색 결과',
+              style: AppTextStyles.body1Medium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          );
+        }
+        // 1 ~ items.length: 결과 카드
+        if (index <= items.length) {
+          final food = items[index - 1];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _ResultCard(food: food, onTap: () => onTap(food)),
+          );
+        }
+        // 마지막: 직접분석 CTA 카드 (365-1849) — 결과 있든 없든 항상 표시
+        return _DirectAnalyzeCta(
+          query: query,
+          onTap: onDirectAnalyze,
+        );
       },
     );
   }
 }
 
-class _ResultCell extends StatelessWidget {
-  const _ResultCell({required this.food, required this.onTap});
+/// 검색 결과 단일 카드 (Figma 554-5322 결과 항목).
+///
+/// - 흰 배경, #EAEAEA 1px 테두리, radius 16, 내부 패딩 16
+/// - 좌측 placeholder leading 아이콘 (API에 이모지/아이콘 필드 없음)
+/// - 이름 body1Bold/textPrimary
+/// - chevron 없음, category 서브텍스트 없음
+class _ResultCard extends StatelessWidget {
+  const _ResultCard({required this.food, required this.onTap});
 
   final FoodSummary food;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.cardPadding),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border.all(
+            color: const Color(0xFFEAEAEA),
+          ),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
+        ),
+        padding: const EdgeInsets.all(AppSpacing.cardPadding),
         child: Row(
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    food.name,
-                    style: AppTextStyles.body1Medium.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  if (food.category != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      food.category!,
-                      style: AppTextStyles.body2Medium.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ],
+            // DESIGN-GAP: per-food 이모지는 API 미제공 → placeholder. 디자이너 확인 대기.
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceMuted,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+              ),
+              child: const Icon(
+                Icons.restaurant_menu,
+                size: 20,
+                color: AppColors.textSecondary,
               ),
             ),
-            const Icon(
-              Icons.chevron_right,
-              color: AppColors.textTertiary,
-              size: 20,
+            const SizedBox(width: AppSpacing.cardPadding),
+            Expanded(
+              child: Text(
+                food.name,
+                style: AppTextStyles.body1Bold.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
             ),
           ],
         ),
@@ -365,10 +420,91 @@ class _ResultCell extends StatelessWidget {
   }
 }
 
-/// 매칭 없음 상태 — raw text 직접 분석 유도 (Figma 365-1849).
-class _NoResultState extends StatelessWidget {
-  const _NoResultState({required this.query, required this.onDirectAnalyze});
+/// 직접분석 CTA 카드 (Figma 365-1849).
+///
+/// 결과 리스트 맨 아래 항상 표시 — 결과가 있을 때도, 없을 때도.
+/// 탭 → raw query 직접 분석 (/verdict, externalId 없으니 addRecent 생략).
+///
+/// - surfaceMuted(#F4F4F5) 배경, radius 16, 내부 패딩 16~20
+/// - 좌측 placeholder icon (슬픈 표정 아이콘)
+/// - 제목 "찾는 음식이 없어요" body1Bold/textPrimary
+/// - 부제 "'<query>'로 검색하기" + chevron(>) body2Medium/textSecondary
+class _DirectAnalyzeCta extends StatelessWidget {
+  const _DirectAnalyzeCta({required this.query, required this.onTap});
 
+  final String query;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.cardPadding,
+          vertical: 20,
+        ),
+        child: Row(
+          children: [
+            // DESIGN-GAP: per-food 이모지는 API 미제공 → placeholder. 디자이너 확인 대기.
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+              ),
+              child: const Icon(
+                Icons.sentiment_dissatisfied_outlined,
+                size: 22,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.cardPadding),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '찾는 음식이 없어요',
+                    style: AppTextStyles.body1Bold.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    "'$query'로 검색하기",
+                    style: AppTextStyles.body2Medium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right,
+              size: 20,
+              color: AppColors.textSecondary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchErrorState extends StatelessWidget {
+  const _SearchErrorState({
+    required this.message,
+    required this.query,
+    required this.onDirectAnalyze,
+  });
+
+  final String message;
   final String query;
   final VoidCallback onDirectAnalyze;
 
@@ -380,64 +516,15 @@ class _NoResultState extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            '"$query" 검색 결과가 없어요',
+            message,
             textAlign: TextAlign.center,
-            style: AppTextStyles.body1Medium.copyWith(
+            style: AppTextStyles.body1Regular.copyWith(
               color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: AppSpacing.sectionGap),
-          OutlinedButton(
-            onPressed: onDirectAnalyze,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              side: const BorderSide(color: AppColors.primary),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-              ),
-              textStyle: AppTextStyles.body1Medium,
-            ),
-            child: Text('"$query" 직접 분석하기'),
-          ),
+          _DirectAnalyzeCta(query: query, onTap: onDirectAnalyze),
         ],
-      ),
-    );
-  }
-}
-
-class _SearchErrorState extends StatelessWidget {
-  const _SearchErrorState({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.screenPadding),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.body1Regular.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.itemGap),
-            TextButton(
-              onPressed: onRetry,
-              child: Text(
-                '직접 분석하기',
-                style: AppTextStyles.body1Medium.copyWith(
-                  color: AppColors.primary,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
