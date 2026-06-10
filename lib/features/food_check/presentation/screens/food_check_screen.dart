@@ -44,6 +44,9 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
   /// 검색 에러 메시지. null = 에러 없음.
   String? _searchError;
 
+  /// 판정 화면 진입 in-flight 가드 (다중 탭 중복 push 방지).
+  bool _navigating = false;
+
   @override
   void dispose() {
     _debounce?.cancel();
@@ -96,13 +99,14 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
     });
     try {
       final results = await ref.read(foodRepositoryProvider).search(q);
-      if (!mounted) return;
+      // staleness 가드: 응답 도착 사이 더 최신 쿼리가 시작됐으면 덮어쓰지 않는다.
+      if (!mounted || _query != q) return;
       setState(() {
         _searchResults = results;
         _searchLoading = false;
       });
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || _query != q) return;
       setState(() {
         _searchResults = [];
         _searchError = '검색 중 오류가 발생했어요.';
@@ -116,26 +120,36 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
   /// 1. POST /foods/recent 기록 (externalId 있으므로 기록).
   /// 2. 판정 화면 present-modal (go_router /verdict).
   Future<void> _onResultTap(FoodSummary food) async {
-    // POST /foods/recent 기록 (DB 매칭 있으므로 기록)
+    // in-flight 가드: addRecent await 동안 다른 셀 탭으로 /verdict 중복 push 방지.
+    if (_navigating) return;
+    _navigating = true;
     try {
-      await ref
-          .read(recentFoodControllerProvider.notifier)
-          .addRecent(food.externalId);
-    } catch (_) {
-      // 기록 실패는 판정 진입을 막지 않는다.
+      // POST /foods/recent 기록 (DB 매칭 있으므로 기록)
+      try {
+        await ref
+            .read(recentFoodControllerProvider.notifier)
+            .addRecent(food.externalId);
+      } catch (_) {
+        // 기록 실패는 판정 진입을 막지 않는다.
+      }
+      if (!mounted) return;
+      // 판정 화면 present-modal
+      context.push('/verdict', extra: food.name);
+    } finally {
+      _navigating = false;
     }
-    if (!mounted) return;
-    // 판정 화면 present-modal
-    context.push('/verdict', extra: food.name);
   }
 
   /// 매칭 없음 → raw text 직접 분석 진입.
   ///
   /// externalId 없으므로 POST /foods/recent 기록 생략 (ADR-0007 §3-1 (5)).
   void _onDirectAnalyze() {
+    if (_navigating) return;
     final q = _query.trim();
     if (q.isEmpty) return;
+    _navigating = true;
     context.push('/verdict', extra: q);
+    _navigating = false;
   }
 
   @override

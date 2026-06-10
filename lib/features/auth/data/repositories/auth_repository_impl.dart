@@ -41,9 +41,15 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthSession?> currentSession() async {
     if (_session != null) return _session;
-    // 토큰이 있으면 이미 로그인된 것으로 간주 (me 조회 없이 반환)
+    // DESIGN-GAP(cold-start rehydration): secure storage 에 토큰이 남아 있어도
+    // _session 은 in-memory 라 콜드스타트(프로세스 재시작) 시 null → 미인증 처리되어
+    // 매 재실행 재로그인이 강요된다. 토큰→세션 재수화는 GET /auth/me 호출이 필요하고
+    // 오프라인 부팅(NetworkFailure)·만료(SessionExpiredFailure) 분기까지 함께 다뤄야
+    // 하므로 라이브 E2E(실서버) 단계로 이연한다.
+    // TODO(live-e2e): 토큰 존재 시 getMe() 로 세션 재수화 + 오프라인/만료 분기 배선.
     final token = await _tokenStore.readAccessToken();
-    return token != null ? _session : null;
+    if (token == null) return null;
+    return null;
   }
 
   @override
