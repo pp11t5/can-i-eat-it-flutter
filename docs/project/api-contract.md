@@ -1,97 +1,251 @@
 # API 계약 — 엔드포인트 목록 · 요청/응답 스키마
 
-> 근거: PRD v1 §담당별 산출(Backend) · 계획 "핵심 확정 사실"
-> 상태: 1차 계약. 세부 필드는 Figma Description Note + Notion 회의록 확정 후 갱신.
+> **정본**: ADR-0007 + Swagger 실측(2026-06). 이전 초안 엔드포인트(`/auth/kakao`, `/foods/analyze`, `/users/profile`, base `api.can-i-eat-it.com/v1`)는 모두 교체됨.
+> 근거: PRD v1 §담당별 산출(Backend) · ADR-0007 §3-1
 
 ---
 
 ## 기본 규칙
 
-- Base URL: `https://api.can-i-eat-it.com/v1` (서버 미확정 시 Mock)
-- 인증: `Authorization: Bearer <JWT>` 헤더
-- 클라이언트는 서버 API 확정 전 **Mock 구현**으로 선개발. API 확정 시 retrofit datasource만 교체.
-- 변경 격리: 서버 API 변경은 `core/network/` + 해당 피처 `data/` 레이어에만 반영.
+- **Base URL**: `https://can-i-eat-it.com` + prefix `/api/v1`
+  - 전체 예시: `https://can-i-eat-it.com/api/v1/auth/kakao/login`
+- **인증**: `Authorization: Bearer <accessToken>` 헤더 (게이트 이후 모든 요청)
+- **공통 응답 봉투**: 모든 응답(성공·실패 공통)은 아래 봉투로 감싸인다.
+
+```json
+{
+  "isSuccess": true,
+  "code":      "AUTH200_0",
+  "message":   "요청 성공",
+  "traceId":   "abc-123",
+  "result":    { ... }
+}
+```
+
+  - `isSuccess`: 성공 여부 boolean
+  - `code`: 서버 정의 의미 코드 (에러 분기의 기준. 예: `AUTH400_1`, `AUTH403_5`)
+  - `traceId`: 서버 추적용 ID (에러 신고 시 첨부)
+  - `result`: 성공 시 실제 페이로드. 실패 시 null 또는 생략
+  - 클라이언트 언랩 지점: `core/network/failure_mapper.dart` 단일 위치에서 `code` → `Failure` 매핑
+
+- **토큰 만료 전략**: 토큰 응답에 만료 필드 없음 → **401 반응형 refresh**만 수행 (선제 계산 없음)
+- **클라이언트 선개발 규칙**: 서버 미확정 엔드포인트는 Mock 구현으로 선개발. API 확정 시 datasource만 교체(인터페이스 불변).
+- **변경 격리**: 서버 API 변경은 `core/network/` + 해당 피처 `data/` 레이어에만 반영.
+- **의료성 면책**: 판정 결과는 의학적 진단을 대체하지 않는다. 화면에 면책 문구 표기 의무.
 
 ---
 
 ## F0. 인증
 
+### 엔드포인트 목록
+
 | 메서드 | 경로 | 설명 |
 |---|---|---|
-| POST | `/auth/kakao` | 카카오 인가코드 → JWT 발급 |
-| POST | `/auth/logout` | 세션 종료 |
-| DELETE | `/auth/account` | 계정 삭제 (유예 처리) |
+| POST | `/auth/{provider}/login` | 소셜 OIDC idToken → 토큰 발급 |
+| POST | `/auth/refresh` | 액세스 토큰 갱신 |
+| GET | `/auth/me` | 현재 사용자 기본 정보 |
+| DELETE | `/auth/logout` | 세션 종료 (서버 refreshToken 무효화) |
+| DELETE | `/auth/withdraw` | 계정 탈퇴 (유예 처리) |
+| POST | `/auth/{provider}/recover` | 탈퇴처리중·비활성 계정 복구 |
 
-카카오 소셜 로그인 단독 (D2). 클라이언트 Mock 선개발.
+`{provider}` 값: 현재 `kakao` (카카오 OIDC 단독, ADR-0003).
+
+### POST /auth/{provider}/login
+
+**요청**
+
+```json
+{ "idToken": "<카카오 OIDC idToken>" }
+```
+
+**응답 분기 (로그인 4분기)**
+
+| HTTP | `code` | 의미 | result |
+|---|---|---|---|
+| 200 | — | 인증 완료 | `{ accessToken, refreshToken, userId, email, role }` |
+| 400 | `AUTH400_1` | 이메일 동의 누락 (약관필요) | — |
+| 400 | `AUTH400_3` | 닉네임 동의 누락 (약관필요) | — |
+| 403 | `AUTH403_5` | 탈퇴 처리중 계정 (복구가능) | — |
+| 403 | `AUTH403_2` | 비활성 계정 (복구가능) | — |
+| 401 | — | idToken 무효 | — |
+
+> 200 성공 시 `hasAgreedTerms=true`·`accountStatus=active` 보장 (미동의·복구대상은 토큰 없이 400/403으로 빠짐).
+>
+> 토큰 응답에 만료 필드(`expiresIn` 등) 없음 — 클라이언트는 만료를 선제 계산하지 않는다.
+
+**클라이언트 `SignInOutcome` 매핑** (ADR-0007 §3-1 (6)):
+
+```
+sealed SignInOutcome
+  Authenticated(AuthSession session, bool onboarded)   // 200
+  NeedsTerms(Set<TermsRequirement> requirements)        // 400 AUTH400_1·AUTH400_3
+  Recoverable(RecoverReason reason)                     // 403 AUTH403_5·AUTH403_2
+```
+
+> `// ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.`
+
+### POST /auth/refresh
+
+**요청**
+
+```json
+{ "refreshToken": "<refreshToken>" }
+```
+
+**응답** (200): `{ accessToken, refreshToken }`
+
+401 응답 시 → `SessionExpiredFailure` 전이, 자동 로그아웃.
+
+### GET /auth/me
+
+**응답** (200): `{ userId, nickname, email, profileImage }`
+
+### DELETE /auth/logout
+
+**요청 바디**: `{ "refreshToken": "<refreshToken>" }`
+
+### DELETE /auth/withdraw
+
+요청 바디 없음. 계정 탈퇴(유예 처리).
+
+### POST /auth/{provider}/recover
+
+**요청**
+
+```json
+{ "idToken": "<카카오 OIDC idToken>" }
+```
+
+복구 대상 계정 재식별. 로그인과 동일하게 새 idToken을 전송.
 
 ---
 
 ## F1. 사용자 프로필 · 온보딩
 
+### 엔드포인트 목록
+
 | 메서드 | 경로 | 설명 |
 |---|---|---|
-| POST | `/users/profile` | 온보딩 완료 후 일괄 전송 |
-| PUT | `/users/profile` | 프로필·건강정보 수정 |
-| GET | `/users/me/summary` | 마이페이지 요약 카드 (관리 N일째, 이번 주 요약) |
+| POST | `/consent` | 약관 동의 일괄 전송 |
+| POST | `/onboarding` | 온보딩 건강 정보 일괄 전송 |
+| GET | `/onboarding/status` | 온보딩 완료 여부 조회 (게이트 소스) |
 
-### POST /users/profile 요청 스키마 (온보딩 일괄)
+> 전체 프로필 GET 엔드포인트(`GET /users/profile` 등)는 **서버에 없음** — W3에서 `currentProfile()` Mock 유지. 전체 프로필 표시는 엔드포인트 확정 후 후속 이슈로 추적.
+
+### POST /consent
+
+**요청**
 
 ```json
 {
-  "conditions": ["GERD"],
-  "symptom_frequency": ["weekly_heartburn", "post_meal_cough"],
-  "diagnosed": true,
-  "trigger_foods": ["spicy", "caffeine"],
-  "custom_triggers": "탄산음료",
-  "medications": ["omeprazole"],
-  "allergies": ["shellfish"]
+  "tos":             true,
+  "privacy":         true,
+  "healthSensitive": true,
+  "marketing":       false
 }
 ```
+
+### POST /onboarding
+
+**요청** (모든 필드 예시)
+
+```json
+{
+  "conditions":    ["GERD"],
+  "symptoms":      ["weekly_heartburn", "post_meal_cough"],
+  "triggers":      ["spicy", "caffeine"],
+  "allergens":     ["shellfish"],
+  "medications":   ["omeprazole"]
+}
+```
+
+필드명·허용 값은 Swagger 확인 후 갱신. 현재 camelCase 기준(서버 JSON 규칙).
+
+### GET /onboarding/status
+
+**응답** (200): `{ "onboarded": true }`
+
+`onboarded` boolean — 게이트(`sessionStatus` provider)가 이 값으로 온보딩 완료 여부를 판단한다 (ADR-0007 §3-1 (6-D)). 로그인 200 직후 repo 내부에서 자동 호출.
 
 ---
 
-## F2. 신호등 판정 (텍스트 검색 단독, D4)
+## F2. 신호등 판정
+
+### 서버 부재 항목 (중요)
+
+| 항목 | 상태 | 비고 |
+|---|---|---|
+| `POST /foods/analyze` | **서버에 없음 — Mock 유지** | 판정 로직 엔드포인트 미출시. W3 Mock 유지. 출시 시 datasource 교체(인터페이스 불변). |
+| `POST /foods` | **서버에 없음 — Mock 유지** | 사용자 음식 직접 추가(승인 큐). 엔드포인트 부재. |
+
+> `/foods/analyze`·`POST /foods` Mock 유지 근거: ADR-0007 §1 "판정(`/foods/analyze`)·전체 프로필 GET은 서버에 없으므로 W3에서 Mock을 유지한다."
+
+### 실 엔드포인트 (검색 · 최근 검색)
 
 | 메서드 | 경로 | 설명 |
 |---|---|---|
-| POST | `/foods/analyze` | 음식명 텍스트 → 신호등 판정 |
-| POST | `/foods` | 사용자 음식 직접 추가 (승인 큐) |
-| GET | `/foods/search?q=` | 자동완성·검색 결과 리스트 |
+| GET | `/foods/search?q=&size=` | 텍스트 검색 · 자동완성 결과 |
+| GET | `/foods/recent?size=` | 최근 검색 목록 |
+| POST | `/foods/recent` | 최근 검색 항목 추가 |
+| DELETE | `/foods/recent` | 최근 검색 전체 삭제 |
+| DELETE | `/foods/recent/{foodExternalId}` | 최근 검색 단건 삭제 |
 
-### POST /foods/analyze 요청
+### GET /foods/search
+
+**쿼리**: `q` (검색어), `size` (결과 수, 선택)
+
+**응답** (200): `result` 배열
 
 ```json
-{ "text": "된장찌개" }
+[
+  { "externalId": "food-001", "name": "된장찌개", "category": "한식" }
+]
 ```
 
-### POST /foods/analyze 응답
+`category` 필드는 선택적(nullable).
+
+### GET /foods/recent
+
+**쿼리**: `size` (결과 수, 선택)
+
+**응답** (200): `result` 배열
 
 ```json
-{
-  "label": "된장찌개",
-  "confidence": 0.92,
-  "signal": "caution",
-  "reason_general": "나트륨 함량이 높아 위산 역류를 악화할 수 있습니다.",
-  "reason_personal": "트리거 음식 매치: 없음. 알레르기 해당: 없음.",
-  "kcal": 480,
-  "category": "한식",
-  "alternatives": ["저염 된장찌개", "두부국"],
-  "history_summary": {
-    "count": 3,
-    "average_severity": "보통",
-    "records": []
+[
+  {
+    "foodExternalId": "food-001",
+    "name":           "된장찌개",
+    "category":       "한식",
+    "searchedAt":     "2026-06-09T10:30:00+09:00"
   }
-}
+]
 ```
 
-`signal` 값: `"safe"` / `"caution"` / `"danger"` / `"unknown"`
-`confidence` 임계 미만 → `signal: "unknown"` (확인어려움, 18화면)
+`category` 선택적. 정렬은 서버 `searchedAt` 순(클라이언트 재정렬 불필요).
 
-**비기능**: P95 응답 ≤ 3초 / 검색 자동완성 캐시 활용 (LRU + Redis)
+### POST /foods/recent
+
+**요청**: `{ "foodExternalId": "food-001" }`
+
+### DELETE /foods/recent/{foodExternalId}
+
+경로 파라미터로 단건 삭제.
+
+### DELETE /foods/recent
+
+바디 없음. 전체 삭제.
+
+**도메인 엔티티** (ADR-0007 §3-1 (6-C)):
+- `FoodSummary`: `{ externalId, name, category? }` — 검색 결과용
+- `RecentFood`: `{ foodExternalId, name, category?, searchedAt }` — 최근 검색용
+
+**비기능**: 검색 자동완성 캐시 활용 (LRU + Redis, 서버측). P95 응답 목표는 엔드포인트 출시 시 확정.
 
 ---
 
 ## F3. 식사 · 증상 기록
+
+> **미확정/후속 (Swagger 미확인)**: 아래 엔드포인트는 현재 서버에서 확인되지 않았다. 계약 초안을 보존하되, 실 구현 전 Swagger 재확인 필수.
 
 | 메서드 | 경로 | 설명 |
 |---|---|---|
@@ -100,40 +254,42 @@
 | POST | `/symptoms` | 증상 기록 생성 |
 | PATCH | `/symptoms/{id}` | 증상 기록 수정 |
 
-### POST /meals 요청
+### POST /meals 요청 (초안 — Swagger 미확인)
 
 ```json
 {
-  "foods": ["food_id_1", "food_id_2"],
+  "foods":     ["food_id_1", "food_id_2"],
   "photo_url": "https://s3.../...",
-  "eaten_at": "2026-05-24T12:30:00+09:00"
+  "eaten_at":  "2026-05-24T12:30:00+09:00"
 }
 ```
 
-### POST /symptoms 요청
+### POST /symptoms 요청 (초안 — Swagger 미확인)
 
 ```json
 {
-  "meal_id": "meal_uuid",
-  "severity": 2,
-  "types": ["heartburn", "acid_reflux"],
-  "memo": "점심 먹고 30분 뒤부터 불편",
-  "occurred_at": "2026-05-24T13:00:00+09:00"
+  "meal_id":    "meal_uuid",
+  "severity":   2,
+  "types":      ["heartburn", "acid_reflux"],
+  "memo":       "점심 먹고 30분 뒤부터 불편",
+  "occurred_at":"2026-05-24T13:00:00+09:00"
 }
 ```
 
-severity: 0(편안) ~ 5(심함)
+`severity`: 0(편안) ~ 5(심함)
 
 ---
 
 ## F4. 주간 리포트 · 마이페이지
+
+> **미확정/후속 (Swagger 미확인)**: 아래 엔드포인트는 현재 서버에서 확인되지 않았다. 계약 초안을 보존하되, 실 구현 전 Swagger 재확인 필수.
 
 | 메서드 | 경로 | 설명 |
 |---|---|---|
 | GET | `/reports/weekly?week=YYYY-Www` | 주간 리포트 (차트 3종 데이터) |
 | GET | `/users/me/summary` | 마이페이지 요약 카드 |
 
-### GET /reports/weekly 응답 (요약)
+### GET /reports/weekly 응답 (초안 — Swagger 미확인)
 
 ```json
 {
@@ -149,7 +305,15 @@ severity: 0(편안) ~ 5(심함)
 }
 ```
 
-**베타 이후**: 서버사이드 PDF 생성 엔드포인트 별도 추가.
+**베타 이후**: 서버사이드 PDF 생성 엔드포인트 별도 추가 예정.
+
+---
+
+## 기타
+
+| 메서드 | 경로 | 설명 |
+|---|---|---|
+| GET | `/health` | 서버 헬스 체크 |
 
 ---
 
@@ -161,9 +325,15 @@ severity: 0(편안) ~ 5(심함)
   ← Riverpod provider override
 
 API 확정 후 교체
-  data/datasources/<feature>_datasource.dart  (retrofit)
+  data/datasources/<feature>_datasource.dart  (수기 dio, ADR-0007)
   data/repositories/<feature>_repository_impl.dart
   ← 인터페이스(domain) 불변
 ```
 
-retrofit 재도입 시점: retrofit 4.9.x ↔ retrofit_generator 9.7.x 비호환 해소 확인 후. (ADR-0001 후속 액션)
+**우선순위**:
+1. auth (F0) · gate (F1 consent·onboarding) — W3 실 연동 대상
+2. food search · recent (F2 실 엔드포인트) — W3 실 연동 대상
+3. `/foods/analyze` · 전체 프로필 GET — **엔드포인트 부재, Mock 유지** (출시 시 datasource 교체)
+4. F3 (식사·증상) · F4 (리포트) — Swagger 확인 후 착수
+
+수기 dio datasource 재도입 시점: ADR-0007 §2-1 채택(retrofit 보류, 봉투 언랩·인증 분기·401 큐잉이 dio 인터셉터에 자연히 모임). retrofit 재도입은 엔드포인트가 충분히 늘고 봉투 처리 안정화 후 재검토(ADR-0001 후속).
