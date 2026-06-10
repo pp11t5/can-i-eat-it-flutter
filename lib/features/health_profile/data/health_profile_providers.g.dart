@@ -11,8 +11,9 @@ String _$healthProfileRepositoryHash() =>
 
 /// [HealthProfileRepository] 공급자.
 ///
-/// 기본값: [MockHealthProfileRepository.noProfile] (신규 사용자, 온보딩 필요).
-/// 실 구현 교체 지점: ProviderScope override로 retrofit 구현을 주입한다.
+/// 기본값: [MockHealthProfileRepository.noProfile] (테스트·오프라인 안전).
+/// 실 앱에서는 main.dart ProviderScope override 로 [HealthProfileRepositoryImpl] 을 주입한다.
+/// (ADR-0007 §3-1 (6-D): 서버 API 계약 기반 실연동)
 ///
 /// Copied from [healthProfileRepository].
 @ProviderFor(healthProfileRepository)
@@ -31,8 +32,31 @@ final healthProfileRepositoryProvider =
 // ignore: unused_element
 typedef HealthProfileRepositoryRef
     = AutoDisposeProviderRef<HealthProfileRepository>;
+String _$onboardedStatusHash() => r'261b515f4f604aed6b2062c6ad180acde41d874d';
+
+/// 온보딩 완료 여부 AsyncNotifier (ADR-0007 §3-1 (6-D)).
+///
+/// [sessionStatus] provider가 이 값을 `hasProfile` 소스로 사용한다.
+/// [HealthProfileRepository.onboardedStatus]를 호출해 boolean을 반환한다.
+/// 로딩 중에는 hasProfile=null → SessionStatus.loading 유지.
+///
+/// Copied from [onboardedStatus].
+@ProviderFor(onboardedStatus)
+final onboardedStatusProvider = AutoDisposeFutureProvider<bool>.internal(
+  onboardedStatus,
+  name: r'onboardedStatusProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$onboardedStatusHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef OnboardedStatusRef = AutoDisposeFutureProviderRef<bool>;
 String _$healthProfileControllerHash() =>
-    r'10eb3601ff2a37f005f8020ce4a4b65f4cf226e7';
+    r'709031e73cbdd7c1d137a09bdf41050b6fa04925';
 
 /// 건강 프로필 상태 컨트롤러 (AsyncNotifier).
 ///

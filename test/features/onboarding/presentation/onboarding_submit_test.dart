@@ -31,10 +31,13 @@ class SpyAnalyticsService implements AnalyticsService {
   }
 }
 
-/// 항상 예외를 던지는 HealthProfileRepository.
+/// 항상 예외를 던지는 HealthProfileRepository (submitProfile만 throw).
 class ThrowingHealthProfileRepository implements HealthProfileRepository {
   @override
   Future<HealthProfile?> currentProfile() async => null;
+
+  @override
+  Future<bool> onboardedStatus() async => false;
 
   @override
   Future<void> submitProfile(HealthProfile profile) async {

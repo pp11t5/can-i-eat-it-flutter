@@ -6,7 +6,7 @@ part of 'app_router.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$appRouterHash() => r'95379b7ffd0b398bac8dec5798d93a7e757312d3';
+String _$appRouterHash() => r'886799f89b9a313b3b894ba5d7b9d05e290f470e';
 
 /// 앱 라우터. 인증/온보딩 상태 기반 redirect 가드 + StatefulShellRoute 바텀 내비.
 ///

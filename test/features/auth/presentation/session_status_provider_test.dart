@@ -14,11 +14,14 @@ import 'package:can_i_eat_it/features/health_profile/domain/repositories/health_
 /// auth + health_profile 두 override를 조합해 sessionStatusProvider가 올바른
 /// SessionStatus를 반환하는지 검증한다.
 
-// ADR-0006 §4 폴백 검증용: currentProfile()이 throw하는 최소 가짜 저장소.
+// ADR-0006 §4 폴백 검증용: onboardedStatus()가 throw하는 최소 가짜 저장소.
 class _ThrowingHealthProfileRepository implements HealthProfileRepository {
   @override
-  Future<HealthProfile?> currentProfile() async =>
-      throw Exception('profile fetch failed');
+  Future<HealthProfile?> currentProfile() async => null;
+
+  @override
+  Future<bool> onboardedStatus() async =>
+      throw Exception('onboarded status fetch failed');
 
   @override
   Future<void> submitProfile(HealthProfile profile) async {}
@@ -65,7 +68,8 @@ void main() {
       // existing()은 initialSession=null이므로 signIn 후 상태 확인.
       await container.read(authControllerProvider.future);
       await container.read(authControllerProvider.notifier).signInWithKakao();
-      await container.read(healthProfileControllerProvider.future);
+      // sessionStatus는 onboardedStatusProvider를 watch하므로 그 완료를 기다린다.
+      await container.read(onboardedStatusProvider.future);
 
       final status = container.read(sessionStatusProvider);
       expect(status, SessionStatus.needsOnboarding);
@@ -79,7 +83,8 @@ void main() {
 
       await container.read(authControllerProvider.future);
       await container.read(authControllerProvider.notifier).signInWithKakao();
-      await container.read(healthProfileControllerProvider.future);
+      // sessionStatus는 onboardedStatusProvider를 watch하므로 그 완료를 기다린다.
+      await container.read(onboardedStatusProvider.future);
 
       final status = container.read(sessionStatusProvider);
       expect(status, SessionStatus.ready);
@@ -103,12 +108,11 @@ void main() {
     // -------------------------------------------------------------------------
 
     test(
-        'health_profile 로드 지연 중에는 loading, 완료 후에는 ready를 반환한다 '
+        'onboardedStatus 로드 지연 중에는 loading, 완료 후에는 ready를 반환한다 '
         '(short-circuit 제거 시 이 테스트가 실패해야 의미 있음)', () async {
-      // delay: 50ms — signInWithKakao() 이후 healthProfileControllerProvider가
-      // watch되기 시작하고, 그 build()가 50ms 뒤에 완료된다.
-      // sessionStatus short-circuit(session_providers.dart ~line 53)이 그동안
-      // loading을 반환한다.
+      // delay: 50ms — signInWithKakao() 이후 onboardedStatusProvider가
+      // watch되기 시작하고, 그 future가 50ms 뒤에 완료된다.
+      // sessionStatus short-circuit이 그동안 loading을 반환한다.
       final container = makeContainer(
         authRepo: MockAuthRepository.existing(),
         profileRepo: MockHealthProfileRepository.completed(
@@ -131,23 +135,23 @@ void main() {
       await container.read(authControllerProvider.future);
       await container.read(authControllerProvider.notifier).signInWithKakao();
 
-      // signInWithKakao() 직후: healthProfileController가 delay=50ms로 로딩 중
+      // signInWithKakao() 직후: onboardedStatusProvider가 delay=50ms로 로딩 중
       // → sessionStatus는 loading이어야 한다.
       final statusDuringLoad = container.read(sessionStatusProvider);
       expect(
         statusDuringLoad,
         SessionStatus.loading,
-        reason: 'health_profile 로드가 완료되기 전에는 loading이어야 한다',
+        reason: 'onboardedStatus 로드가 완료되기 전에는 loading이어야 한다',
       );
 
-      // 지연(50ms)보다 넉넉하게 기다려 healthProfileController build()가 완료되고
+      // 지연(50ms)보다 넉넉하게 기다려 onboardedStatus future가 완료되고
       // Riverpod이 sessionStatusProvider를 재계산할 시간을 준다.
       await Future<void>.delayed(const Duration(milliseconds: 100));
       final statusAfterLoad = container.read(sessionStatusProvider);
       expect(
         statusAfterLoad,
         SessionStatus.ready,
-        reason: 'health_profile 로드 완료 후에는 ready가 돼야 한다',
+        reason: 'onboardedStatus 로드 완료 후에는 ready가 돼야 한다',
       );
     });
 
@@ -176,10 +180,10 @@ void main() {
       await container.read(authControllerProvider.future);
       await container.read(authControllerProvider.notifier).signInWithKakao();
 
-      // profile 로드가 에러 상태로 정착할 때까지 기다린다.
+      // onboardedStatus 로드가 에러 상태로 정착할 때까지 기다린다.
       // future는 throw하지만 sessionStatus는 needsOnboarding으로 처리해야 한다.
       await expectLater(
-        container.read(healthProfileControllerProvider.future),
+        container.read(onboardedStatusProvider.future),
         throwsException,
       );
 
@@ -187,7 +191,7 @@ void main() {
       expect(
         status,
         SessionStatus.needsOnboarding,
-        reason: 'profile 로드 에러는 needsOnboarding으로 안전하게 폴백해야 한다(ADR-0006 §4)',
+        reason: 'onboardedStatus 로드 에러는 needsOnboarding으로 안전하게 폴백해야 한다(ADR-0006 §4)',
       );
     });
   });

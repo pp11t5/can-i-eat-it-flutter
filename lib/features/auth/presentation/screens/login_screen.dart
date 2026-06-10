@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
-import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/widgets/deletion_grace_dialog.dart';
 
@@ -20,12 +20,14 @@ import 'package:can_i_eat_it/features/auth/presentation/widgets/deletion_grace_d
 /// - 버튼 컨테이너: x:16, y:518, 342 wide, gap 16
 /// 화면 비율로 환산해 LayoutBuilder + Positioned 로 매핑.
 ///
-/// 진입 후 처리:
-/// - 신규(약관 미동의) → context.push('/terms')
-/// - 기존(약관 동의됨) → context.go('/') — 가드가 health_profile 기준으로
-///   needsOnboarding이면 /onboarding/condition 로, ready면 / 로 재평가한다.
-/// - 삭제유예 → 02a 다이얼로그 (sessionStatusFrom 에서 unauthenticated 로 묶어
-///   가드가 / 로 redirect 하지 못하게 함 → 다이얼로그가 가려지지 않음)
+/// ## 로그인 후 분기 (SignInOutcome switch)
+/// - [Authenticated] → onboarded=true: `context.go('/')` (게이트 재평가),
+///   onboarded=false: `context.go('/onboarding/condition')`.
+///   게이트 정합: 세션에 hasAgreedTerms=true 이므로 resolveRedirect 가 needsOnboarding
+///   상태에서 /onboarding/condition 을 허용 → redirect 루프 없음.
+///   실 onboardedStatus() 반영은 티켓 4 (현재는 Authenticated.onboarded 직접 사용).
+/// - [NeedsTerms] → `context.push('/terms')` (imperative push, ADR-0006 보존).
+/// - [Recoverable] → 복구 다이얼로그 (기존 deletion_grace_dialog 재사용).
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
@@ -106,34 +108,54 @@ class LoginScreen extends ConsumerWidget {
   }
 
   Future<void> _handleKakaoPressed(BuildContext context, WidgetRef ref) async {
-    await ref.read(authControllerProvider.notifier).signInWithKakao();
+    final outcome =
+        await ref.read(authControllerProvider.notifier).signInWithKakao();
     if (!context.mounted) return;
-    await _handlePostSignIn(context, ref);
+    await _handlePostSignIn(context, ref, outcome);
   }
 
   Future<void> _handleApplePressed(BuildContext context, WidgetRef ref) async {
-    await ref.read(authControllerProvider.notifier).signInWithApple();
+    final outcome =
+        await ref.read(authControllerProvider.notifier).signInWithApple();
     if (!context.mounted) return;
-    await _handlePostSignIn(context, ref);
+    await _handlePostSignIn(context, ref, outcome);
   }
 
-  /// 로그인 후 라우팅 — 명시적 push 로 Navigator 스택을 쌓아 iOS pop 보장.
-  Future<void> _handlePostSignIn(BuildContext context, WidgetRef ref) async {
-    final session = ref.read(authControllerProvider).valueOrNull;
-    if (session == null) return;
+  /// 로그인 후 라우팅 — [SignInOutcome] exhaustive switch (ADR-0007 §3-1 (6-A)).
+  ///
+  /// ## 게이트 정합 (완료 기준 6번)
+  /// [Authenticated.onboarded] 를 라우팅에 직접 반영:
+  /// - onboarded=true → `context.go('/')`: 가드 sessionStatus=ready → '/' 허용.
+  /// - onboarded=false → `context.go('/onboarding/condition')`:
+  ///   세션 hasAgreedTerms=true 이므로 sessionStatusFrom 이 needsOnboarding 을 반환하고
+  ///   resolveRedirect(needsOnboarding, '/onboarding/condition') = null → redirect 없음.
+  ///
+  /// 실 onboardedStatus() 는 티켓 4 (HealthProfileRepository.onboardedStatus() 실연동).
+  /// 현재는 Authenticated.onboarded (서버 GET /onboarding/status 결과) 를 직접 사용.
+  Future<void> _handlePostSignIn(
+    BuildContext context,
+    WidgetRef ref,
+    SignInOutcome outcome,
+  ) async {
+    switch (outcome) {
+      case Authenticated(:final onboarded):
+        // onboarded=false → 온보딩 1페이지로 직행.
+        // onboarded=true → 홈으로 (가드가 ready 상태로 허용).
+        if (onboarded) {
+          context.go('/');
+        } else {
+          context.go('/onboarding/condition');
+        }
 
-    if (session.accountStatus == AccountStatus.deletionGrace) {
-      await showDeletionGraceDialog(context, ref);
-      return;
-    }
+      case NeedsTerms():
+        // imperative push — iOS pop 애니메이션 보장, 가드 redirect 와 분리 (ADR-0006).
+        // // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
+        context.push('/terms');
 
-    if (!context.mounted) return;
-    if (!session.hasAgreedTerms) {
-      context.push('/terms');
-    } else {
-      // 온보딩 완료 여부는 가드가 health_profile 기준으로 재평가한다.
-      // needsOnboarding → /onboarding/condition, ready → /
-      context.go('/');
+      case Recoverable(:final provider):
+        // 복구 가능 계정 → 기존 deletion_grace_dialog 재사용.
+        // provider 를 전달해 recoverAccount(provider) 에서 새 idToken 을 획득할 수 있도록 한다.
+        await showDeletionGraceDialog(context, ref, provider: provider);
     }
   }
 }

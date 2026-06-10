@@ -5,7 +5,7 @@ import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_button.dart';
-import 'package:can_i_eat_it/features/food_check/data/search_history_providers.dart';
+import 'package:can_i_eat_it/features/food_check/data/recent_food_providers.dart';
 
 /// 검색 기록 전체 삭제 확인 다이얼로그.
 ///
@@ -67,7 +67,7 @@ class _ClearSearchHistoryDialog extends StatelessWidget {
               isExpanded: true,
               onPressed: () async {
                 await ref
-                    .read(searchHistoryControllerProvider.notifier)
+                    .read(recentFoodControllerProvider.notifier)
                     .clear();
                 if (!context.mounted) return;
                 Navigator.of(context).pop();

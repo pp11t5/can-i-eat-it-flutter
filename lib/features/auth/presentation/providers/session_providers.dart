@@ -16,9 +16,9 @@ part 'session_providers.g.dart';
 /// [ready]         → 모든 게이트 통과.
 enum SessionStatus { loading, unauthenticated, needsTerms, needsOnboarding, ready }
 
-/// [authSession]: null=미인증. [hasProfile]: null=로딩(아직 모름), false=프로필 없음, true=있음.
+/// [authSession]: null=미인증. [hasProfile]: null=로딩(아직 모름), false=미완료, true=완료.
 ///
-/// 순수 함수 — BuildContext/위젯 비의존, 단위 테스트 가능.
+/// 순수 함수 — BuildContext/위젯 비의존, 단위 테스트 가능 (ADR-0006 불변).
 SessionStatus sessionStatusFrom({
   required AuthSession? authSession,
   required bool? hasProfile,
@@ -32,9 +32,10 @@ SessionStatus sessionStatusFrom({
   return hasProfile ? SessionStatus.ready : SessionStatus.needsOnboarding;
 }
 
-/// [AuthController] + [HealthProfileController] 상태로부터 파생된 세션 상태.
+/// [AuthController] + [onboardedStatusProvider] 상태로부터 파생된 세션 상태.
 ///
 /// 미인증/약관 미동의 단계에서는 health_profile을 watch하지 않는다(불필요 로딩 회피).
+/// 게이트 소스: `currentProfile() != null` → `onboardedStatus()` (ADR-0007 §3-1 (6-D)).
 @riverpod
 SessionStatus sessionStatus(Ref ref) {
   final auth = ref.watch(authControllerProvider);
@@ -42,15 +43,20 @@ SessionStatus sessionStatus(Ref ref) {
   final session = auth.valueOrNull;
 
   // 게이트 이전 단계(미인증/약관)는 health_profile을 watch하지 않는다.
-  // hasProfile: false 는 임시값 — unauthenticated/needsTerms 판정에만 쓰이며 hasProfile을 실제로 참조하기 전에 early-return 한다.
+  // hasProfile: false 는 임시값 — unauthenticated/needsTerms 판정에만 쓰이며
+  // hasProfile을 실제로 참조하기 전에 early-return 한다.
   final preGate = sessionStatusFrom(authSession: session, hasProfile: false);
   if (preGate == SessionStatus.unauthenticated ||
       preGate == SessionStatus.needsTerms) {
     return preGate;
   }
 
-  final profile = ref.watch(healthProfileControllerProvider);
-  if (profile.isLoading && !profile.hasValue) return SessionStatus.loading;
-  final hasProfile = profile.valueOrNull != null;
+  // 게이트 소스: onboardedStatus() (ADR-0007 §3-1 (6-D))
+  // 로딩 중(isLoading && !hasValue)이면 hasProfile=null → SessionStatus.loading 유지.
+  // 에러 시 hasProfile=false → needsOnboarding 폴백 (ADR-0006 §4).
+  final onboarded = ref.watch(onboardedStatusProvider);
+  if (onboarded.isLoading && !onboarded.hasValue) return SessionStatus.loading;
+  // hasError → false(needsOnboarding 폴백). hasValue → 실제 값 사용.
+  final hasProfile = onboarded.hasError ? false : onboarded.valueOrNull;
   return sessionStatusFrom(authSession: session, hasProfile: hasProfile);
 }

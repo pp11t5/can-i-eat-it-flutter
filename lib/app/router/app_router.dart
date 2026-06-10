@@ -10,6 +10,7 @@ import 'package:can_i_eat_it/features/auth/presentation/screens/login_screen.dar
 import 'package:can_i_eat_it/features/auth/presentation/screens/splash_screen.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/terms_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/food_check_screen.dart';
+import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_screen.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/timeline_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
@@ -86,6 +87,19 @@ GoRouter appRouter(Ref ref) {
           fullscreenDialog: true,
           child: FoodCheckScreen(),
         ),
+      ),
+      // 판정 화면 — FoodCheckScreen에서 present-modal로 진입 (티켓 6).
+      // extra: 분석할 음식명 String (검색 결과 셀 탭 또는 raw text 직접 분석).
+      GoRoute(
+        path: '/verdict',
+        name: 'verdict',
+        pageBuilder: (context, state) {
+          final foodName = state.extra as String? ?? '';
+          return MaterialPage(
+            fullscreenDialog: true,
+            child: VerdictScreen(foodName: foodName),
+          );
+        },
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

@@ -6,13 +6,34 @@ part of 'auth_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$authRepositoryHash() => r'981ac9ec9c1db1bdd62fdad3a9203d11d14add31';
+String _$kakaoAuthServiceHash() => r'9758f86e51a63228dfad03c9ef145f6ca1b7b731';
+
+/// [KakaoAuthService] 공급자.
+///
+/// 테스트에서는 `ProviderScope(overrides: [kakaoAuthServiceProvider.overrideWithValue(...)])` 로
+/// stub 을 주입한다.
+///
+/// Copied from [kakaoAuthService].
+@ProviderFor(kakaoAuthService)
+final kakaoAuthServiceProvider = AutoDisposeProvider<KakaoAuthService>.internal(
+  kakaoAuthService,
+  name: r'kakaoAuthServiceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$kakaoAuthServiceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef KakaoAuthServiceRef = AutoDisposeProviderRef<KakaoAuthService>;
+String _$authRepositoryHash() => r'168be4e7cf75eb13be117e59d3fedaf5bba8dcbd';
 
 /// [AuthRepository] 공급자.
 ///
-/// W1 데모 기본값: 카카오 탭 → 신규(약관 화면), Apple 탭 → 삭제유예(02a 다이얼로그).
-/// 한 빌드에서 양쪽 플로우를 모두 시연 가능. 실 구현(카카오 SDK + 서버 JWT) 교체 시
-/// ProviderScope override 로 주입한다.
+/// 기본값: 실 [AuthRepositoryImpl] (카카오 SDK + 서버 JWT).
+/// 테스트 / 오프라인 환경에서는 [MockAuthRepository] 를 override 로 주입한다.
 ///
 /// Copied from [authRepository].
 @ProviderFor(authRepository)
@@ -29,12 +50,17 @@ final authRepositoryProvider = AutoDisposeProvider<AuthRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AuthRepositoryRef = AutoDisposeProviderRef<AuthRepository>;
-String _$authControllerHash() => r'e0191f6a5d64ac14bb5a96485cdba5f2c959d255';
+String _$authControllerHash() => r'a0fe1dad7fb051f26232b3450d6ecd1b04be2762';
 
 /// 인증 상태 컨트롤러 (AsyncNotifier).
 ///
 /// [build]: [AuthRepository.currentSession]을 호출해 초기 세션을 로드한다.
-/// 공개 메서드로 로그인·약관 동의·계정 복구·로그아웃을 처리한다.
+///
+/// ## onSessionExpired seam 배선 (ADR-0007 §3-1 (4))
+/// [build] 시점에 [dioProvider] 의 [AuthInterceptor.onSessionExpired] 를
+/// [_onSessionExpired] 로 배선한다.
+/// 순환참조 없음: dioProvider → AuthInterceptor(seam=null) 먼저 생성 →
+/// AuthController.build() 가 post-init 으로 seam 주입.
 ///
 /// Copied from [AuthController].
 @ProviderFor(AuthController)
