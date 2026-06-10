@@ -3,20 +3,28 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
+import 'package:can_i_eat_it/core/network/dio_client.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/domain/repositories/food_repository.dart';
+import 'package:can_i_eat_it/features/food_check/data/repositories/food_repository_impl.dart';
 import 'package:can_i_eat_it/features/food_check/data/repositories/mock_food_repository.dart';
 
 part 'food_check_providers.g.dart';
 
 /// [FoodRepository] 공급자.
 ///
-/// 기본값: [MockFoodRepository.empty] (서버 API 미확정, W3 Mock 단계).
-/// 실 구현 교체 지점: 티켓 6에서 retrofit 구현 완성 시
-///   ProviderScope overrides로 실제 datasource 구현을 주입한다.
-///   이 인터페이스(FoodRepository)는 불변 — 교체 시 이 줄만 변경한다.
+/// 기본값: [FoodRepositoryImpl] — 실 서버 연동 (ADR-0007 §3-1 (5), 티켓 6).
+/// - search / recent CRUD: 실 `/foods/*` 엔드포인트.
+/// - analyze: [MockFoodRepository] 위임 (서버 미출시, W3 Mock 유지).
+///   // TODO(server): analyze 서버 출시 시 FoodRepositoryImpl 내부에서 교체.
+///
+/// 테스트 / 오프라인 override:
+///   ProviderScope overrides: [foodRepositoryProvider.overrideWithValue(MockFoodRepository.empty())]
 @riverpod
-FoodRepository foodRepository(Ref ref) => MockFoodRepository.empty();
+FoodRepository foodRepository(Ref ref) {
+  final dio = ref.watch(dioProvider);
+  return FoodRepositoryImpl(dio: dio);
+}
 
 /// 판정 컨트롤러.
 ///
