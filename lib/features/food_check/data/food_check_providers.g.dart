@@ -6,14 +6,17 @@ part of 'food_check_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$foodRepositoryHash() => r'6e65ecf198a55e4b72370bc58bedd101642d18a9';
+String _$foodRepositoryHash() => r'e664a8ae03fdc1a3d465d915680ac8021c06d376';
 
 /// [FoodRepository] 공급자.
 ///
-/// 기본값: [MockFoodRepository.empty] (서버 API 미확정, W3 Mock 단계).
-/// 실 구현 교체 지점: 티켓 6에서 retrofit 구현 완성 시
-///   ProviderScope overrides로 실제 datasource 구현을 주입한다.
-///   이 인터페이스(FoodRepository)는 불변 — 교체 시 이 줄만 변경한다.
+/// 기본값: [FoodRepositoryImpl] — 실 서버 연동 (ADR-0007 §3-1 (5), 티켓 6).
+/// - search / recent CRUD: 실 `/foods/*` 엔드포인트.
+/// - analyze: [MockFoodRepository] 위임 (서버 미출시, W3 Mock 유지).
+///   // TODO(server): analyze 서버 출시 시 FoodRepositoryImpl 내부에서 교체.
+///
+/// 테스트 / 오프라인 override:
+///   ProviderScope overrides: [foodRepositoryProvider.overrideWithValue(MockFoodRepository.empty())]
 ///
 /// Copied from [foodRepository].
 @ProviderFor(foodRepository)
