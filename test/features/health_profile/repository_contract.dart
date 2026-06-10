@@ -18,6 +18,20 @@ void healthProfileRepositoryContract(
   });
 
   // ---------------------------------------------------------------------------
+  group('onboardedStatus — 초기 상태', () {
+    test('초기 noProfile 상태에서 onboardedStatus는 false이다', () async {
+      final repo = create();
+      expect(await repo.onboardedStatus(), isFalse);
+    });
+
+    test('submitProfile 후 onboardedStatus는 true이다', () async {
+      final repo = create();
+      await repo.submitProfile(HealthProfile.sampleGerd());
+      expect(await repo.onboardedStatus(), isTrue);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   group('submitProfile', () {
     test('submitProfile 후 currentProfile이 동일 프로필을 반환한다', () async {
       final repo = create();

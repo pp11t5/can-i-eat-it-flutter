@@ -6,6 +6,7 @@ import 'package:can_i_eat_it/core/network/failure_mapper.dart';
 import 'package:can_i_eat_it/core/security/token_store.dart';
 import 'package:can_i_eat_it/features/auth/data/dtos/auth_login_response_dto.dart';
 import 'package:can_i_eat_it/features/auth/data/dtos/auth_me_response_dto.dart';
+import 'package:can_i_eat_it/features/auth/data/dtos/consent_request_dto.dart';
 import 'package:can_i_eat_it/features/auth/data/dtos/onboarding_status_dto.dart';
 import 'package:can_i_eat_it/features/auth/data/services/kakao_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
@@ -59,11 +60,20 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> recordTermsAgreement(TermsAgreement agreement) async {
-    // TODO(티켓 4): POST /consent 실연동. 현재는 로컬 세션 갱신만.
     if (_session == null) {
       throw StateError(
         'recordTermsAgreement: 활성 세션이 없습니다. signIn 후 호출해야 합니다.',
       );
+    }
+    final dto = ConsentRequestDto.fromEntity(agreement);
+    try {
+      final response = await _dio.post<dynamic>(
+        ApiEndpoints.consent,
+        data: dto.toJson(),
+      );
+      unwrapVoid(response);
+    } on DioException catch (e) {
+      throw FailureMapper.fromDioException(e);
     }
     _session = _session!.copyWith(hasAgreedTerms: true);
   }

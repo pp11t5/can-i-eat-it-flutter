@@ -58,6 +58,12 @@ class MockHealthProfileRepository implements HealthProfileRepository {
   }
 
   @override
+  Future<bool> onboardedStatus() async {
+    if (_delay > Duration.zero) await Future.delayed(_delay);
+    return _profile != null;
+  }
+
+  @override
   Future<void> submitProfile(HealthProfile profile) async {
     _lastSubmittedProfile = profile;
     _profile = profile;
