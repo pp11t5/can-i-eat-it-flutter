@@ -70,8 +70,10 @@ _JudgmentResponseDto _$JudgmentResponseDtoFromJson(Map<String, dynamic> json) =>
               ?.map((e) => JudgmentItemDto.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const <JudgmentItemDto>[],
-      stateRecords: StateRecordsDto.fromJson(
-          json['stateRecords'] as Map<String, dynamic>),
+      stateRecords: json['stateRecords'] == null
+          ? null
+          : StateRecordsDto.fromJson(
+              json['stateRecords'] as Map<String, dynamic>),
       substitutes: (json['substitutes'] as List<dynamic>?)
               ?.map((e) => SubstituteDto.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -101,8 +103,10 @@ _TextJudgmentResponseDto _$TextJudgmentResponseDtoFromJson(
               ?.map((e) => JudgmentItemDto.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const <JudgmentItemDto>[],
-      stateRecords: StateRecordsDto.fromJson(
-          json['stateRecords'] as Map<String, dynamic>),
+      stateRecords: json['stateRecords'] == null
+          ? null
+          : StateRecordsDto.fromJson(
+              json['stateRecords'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$TextJudgmentResponseDtoToJson(

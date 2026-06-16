@@ -1316,7 +1316,7 @@ mixin _$JudgmentResponseDto {
   String get grade; // RECOMMEND|CAUTION|RISK|UNKNOWN
   String get personalTitle;
   List<JudgmentItemDto> get items;
-  StateRecordsDto get stateRecords;
+  StateRecordsDto? get stateRecords; // nullable: 누락/null 방어 (S1)
   List<SubstituteDto> get substitutes;
 
   /// Create a copy of JudgmentResponseDto
@@ -1383,10 +1383,10 @@ abstract mixin class $JudgmentResponseDtoCopyWith<$Res> {
       String grade,
       String personalTitle,
       List<JudgmentItemDto> items,
-      StateRecordsDto stateRecords,
+      StateRecordsDto? stateRecords,
       List<SubstituteDto> substitutes});
 
-  $StateRecordsDtoCopyWith<$Res> get stateRecords;
+  $StateRecordsDtoCopyWith<$Res>? get stateRecords;
 }
 
 /// @nodoc
@@ -1408,7 +1408,7 @@ class _$JudgmentResponseDtoCopyWithImpl<$Res>
     Object? grade = null,
     Object? personalTitle = null,
     Object? items = null,
-    Object? stateRecords = null,
+    Object? stateRecords = freezed,
     Object? substitutes = null,
   }) {
     return _then(_self.copyWith(
@@ -1436,10 +1436,10 @@ class _$JudgmentResponseDtoCopyWithImpl<$Res>
           ? _self.items
           : items // ignore: cast_nullable_to_non_nullable
               as List<JudgmentItemDto>,
-      stateRecords: null == stateRecords
+      stateRecords: freezed == stateRecords
           ? _self.stateRecords
           : stateRecords // ignore: cast_nullable_to_non_nullable
-              as StateRecordsDto,
+              as StateRecordsDto?,
       substitutes: null == substitutes
           ? _self.substitutes
           : substitutes // ignore: cast_nullable_to_non_nullable
@@ -1451,8 +1451,12 @@ class _$JudgmentResponseDtoCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $StateRecordsDtoCopyWith<$Res> get stateRecords {
-    return $StateRecordsDtoCopyWith<$Res>(_self.stateRecords, (value) {
+  $StateRecordsDtoCopyWith<$Res>? get stateRecords {
+    if (_self.stateRecords == null) {
+      return null;
+    }
+
+    return $StateRecordsDtoCopyWith<$Res>(_self.stateRecords!, (value) {
       return _then(_self.copyWith(stateRecords: value));
     });
   }
@@ -1558,7 +1562,7 @@ extension JudgmentResponseDtoPatterns on JudgmentResponseDto {
             String grade,
             String personalTitle,
             List<JudgmentItemDto> items,
-            StateRecordsDto stateRecords,
+            StateRecordsDto? stateRecords,
             List<SubstituteDto> substitutes)?
         $default, {
     required TResult orElse(),
@@ -1602,7 +1606,7 @@ extension JudgmentResponseDtoPatterns on JudgmentResponseDto {
             String grade,
             String personalTitle,
             List<JudgmentItemDto> items,
-            StateRecordsDto stateRecords,
+            StateRecordsDto? stateRecords,
             List<SubstituteDto> substitutes)
         $default,
   ) {
@@ -1644,7 +1648,7 @@ extension JudgmentResponseDtoPatterns on JudgmentResponseDto {
             String grade,
             String personalTitle,
             List<JudgmentItemDto> items,
-            StateRecordsDto stateRecords,
+            StateRecordsDto? stateRecords,
             List<SubstituteDto> substitutes)?
         $default,
   ) {
@@ -1676,7 +1680,7 @@ class _JudgmentResponseDto implements JudgmentResponseDto {
       required this.grade,
       required this.personalTitle,
       final List<JudgmentItemDto> items = const <JudgmentItemDto>[],
-      required this.stateRecords,
+      this.stateRecords,
       final List<SubstituteDto> substitutes = const <SubstituteDto>[]})
       : _items = items,
         _substitutes = substitutes;
@@ -1704,8 +1708,10 @@ class _JudgmentResponseDto implements JudgmentResponseDto {
   }
 
   @override
-  final StateRecordsDto stateRecords;
+  final StateRecordsDto? stateRecords;
+// nullable: 누락/null 방어 (S1)
   final List<SubstituteDto> _substitutes;
+// nullable: 누락/null 방어 (S1)
   @override
   @JsonKey()
   List<SubstituteDto> get substitutes {
@@ -1785,11 +1791,11 @@ abstract mixin class _$JudgmentResponseDtoCopyWith<$Res>
       String grade,
       String personalTitle,
       List<JudgmentItemDto> items,
-      StateRecordsDto stateRecords,
+      StateRecordsDto? stateRecords,
       List<SubstituteDto> substitutes});
 
   @override
-  $StateRecordsDtoCopyWith<$Res> get stateRecords;
+  $StateRecordsDtoCopyWith<$Res>? get stateRecords;
 }
 
 /// @nodoc
@@ -1811,7 +1817,7 @@ class __$JudgmentResponseDtoCopyWithImpl<$Res>
     Object? grade = null,
     Object? personalTitle = null,
     Object? items = null,
-    Object? stateRecords = null,
+    Object? stateRecords = freezed,
     Object? substitutes = null,
   }) {
     return _then(_JudgmentResponseDto(
@@ -1839,10 +1845,10 @@ class __$JudgmentResponseDtoCopyWithImpl<$Res>
           ? _self._items
           : items // ignore: cast_nullable_to_non_nullable
               as List<JudgmentItemDto>,
-      stateRecords: null == stateRecords
+      stateRecords: freezed == stateRecords
           ? _self.stateRecords
           : stateRecords // ignore: cast_nullable_to_non_nullable
-              as StateRecordsDto,
+              as StateRecordsDto?,
       substitutes: null == substitutes
           ? _self._substitutes
           : substitutes // ignore: cast_nullable_to_non_nullable
@@ -1854,8 +1860,12 @@ class __$JudgmentResponseDtoCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $StateRecordsDtoCopyWith<$Res> get stateRecords {
-    return $StateRecordsDtoCopyWith<$Res>(_self.stateRecords, (value) {
+  $StateRecordsDtoCopyWith<$Res>? get stateRecords {
+    if (_self.stateRecords == null) {
+      return null;
+    }
+
+    return $StateRecordsDtoCopyWith<$Res>(_self.stateRecords!, (value) {
       return _then(_self.copyWith(stateRecords: value));
     });
   }
@@ -1867,7 +1877,7 @@ mixin _$TextJudgmentResponseDto {
   String get grade;
   String get personalTitle;
   List<JudgmentItemDto> get items;
-  StateRecordsDto get stateRecords;
+  StateRecordsDto? get stateRecords;
 
   /// Create a copy of TextJudgmentResponseDto
   /// with the given fields replaced by the non-null parameter values.
@@ -1917,9 +1927,9 @@ abstract mixin class $TextJudgmentResponseDtoCopyWith<$Res> {
       String grade,
       String personalTitle,
       List<JudgmentItemDto> items,
-      StateRecordsDto stateRecords});
+      StateRecordsDto? stateRecords});
 
-  $StateRecordsDtoCopyWith<$Res> get stateRecords;
+  $StateRecordsDtoCopyWith<$Res>? get stateRecords;
 }
 
 /// @nodoc
@@ -1939,7 +1949,7 @@ class _$TextJudgmentResponseDtoCopyWithImpl<$Res>
     Object? grade = null,
     Object? personalTitle = null,
     Object? items = null,
-    Object? stateRecords = null,
+    Object? stateRecords = freezed,
   }) {
     return _then(_self.copyWith(
       foodName: null == foodName
@@ -1958,10 +1968,10 @@ class _$TextJudgmentResponseDtoCopyWithImpl<$Res>
           ? _self.items
           : items // ignore: cast_nullable_to_non_nullable
               as List<JudgmentItemDto>,
-      stateRecords: null == stateRecords
+      stateRecords: freezed == stateRecords
           ? _self.stateRecords
           : stateRecords // ignore: cast_nullable_to_non_nullable
-              as StateRecordsDto,
+              as StateRecordsDto?,
     ));
   }
 
@@ -1969,8 +1979,12 @@ class _$TextJudgmentResponseDtoCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $StateRecordsDtoCopyWith<$Res> get stateRecords {
-    return $StateRecordsDtoCopyWith<$Res>(_self.stateRecords, (value) {
+  $StateRecordsDtoCopyWith<$Res>? get stateRecords {
+    if (_self.stateRecords == null) {
+      return null;
+    }
+
+    return $StateRecordsDtoCopyWith<$Res>(_self.stateRecords!, (value) {
       return _then(_self.copyWith(stateRecords: value));
     });
   }
@@ -2070,7 +2084,7 @@ extension TextJudgmentResponseDtoPatterns on TextJudgmentResponseDto {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(String foodName, String grade, String personalTitle,
-            List<JudgmentItemDto> items, StateRecordsDto stateRecords)?
+            List<JudgmentItemDto> items, StateRecordsDto? stateRecords)?
         $default, {
     required TResult orElse(),
   }) {
@@ -2100,7 +2114,7 @@ extension TextJudgmentResponseDtoPatterns on TextJudgmentResponseDto {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(String foodName, String grade, String personalTitle,
-            List<JudgmentItemDto> items, StateRecordsDto stateRecords)
+            List<JudgmentItemDto> items, StateRecordsDto? stateRecords)
         $default,
   ) {
     final _that = this;
@@ -2128,7 +2142,7 @@ extension TextJudgmentResponseDtoPatterns on TextJudgmentResponseDto {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(String foodName, String grade, String personalTitle,
-            List<JudgmentItemDto> items, StateRecordsDto stateRecords)?
+            List<JudgmentItemDto> items, StateRecordsDto? stateRecords)?
         $default,
   ) {
     final _that = this;
@@ -2150,7 +2164,7 @@ class _TextJudgmentResponseDto implements TextJudgmentResponseDto {
       required this.grade,
       required this.personalTitle,
       final List<JudgmentItemDto> items = const <JudgmentItemDto>[],
-      required this.stateRecords})
+      this.stateRecords})
       : _items = items;
   factory _TextJudgmentResponseDto.fromJson(Map<String, dynamic> json) =>
       _$TextJudgmentResponseDtoFromJson(json);
@@ -2171,7 +2185,7 @@ class _TextJudgmentResponseDto implements TextJudgmentResponseDto {
   }
 
   @override
-  final StateRecordsDto stateRecords;
+  final StateRecordsDto? stateRecords;
 
   /// Create a copy of TextJudgmentResponseDto
   /// with the given fields replaced by the non-null parameter values.
@@ -2228,10 +2242,10 @@ abstract mixin class _$TextJudgmentResponseDtoCopyWith<$Res>
       String grade,
       String personalTitle,
       List<JudgmentItemDto> items,
-      StateRecordsDto stateRecords});
+      StateRecordsDto? stateRecords});
 
   @override
-  $StateRecordsDtoCopyWith<$Res> get stateRecords;
+  $StateRecordsDtoCopyWith<$Res>? get stateRecords;
 }
 
 /// @nodoc
@@ -2251,7 +2265,7 @@ class __$TextJudgmentResponseDtoCopyWithImpl<$Res>
     Object? grade = null,
     Object? personalTitle = null,
     Object? items = null,
-    Object? stateRecords = null,
+    Object? stateRecords = freezed,
   }) {
     return _then(_TextJudgmentResponseDto(
       foodName: null == foodName
@@ -2270,10 +2284,10 @@ class __$TextJudgmentResponseDtoCopyWithImpl<$Res>
           ? _self._items
           : items // ignore: cast_nullable_to_non_nullable
               as List<JudgmentItemDto>,
-      stateRecords: null == stateRecords
+      stateRecords: freezed == stateRecords
           ? _self.stateRecords
           : stateRecords // ignore: cast_nullable_to_non_nullable
-              as StateRecordsDto,
+              as StateRecordsDto?,
     ));
   }
 
@@ -2281,8 +2295,12 @@ class __$TextJudgmentResponseDtoCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $StateRecordsDtoCopyWith<$Res> get stateRecords {
-    return $StateRecordsDtoCopyWith<$Res>(_self.stateRecords, (value) {
+  $StateRecordsDtoCopyWith<$Res>? get stateRecords {
+    if (_self.stateRecords == null) {
+      return null;
+    }
+
+    return $StateRecordsDtoCopyWith<$Res>(_self.stateRecords!, (value) {
       return _then(_self.copyWith(stateRecords: value));
     });
   }

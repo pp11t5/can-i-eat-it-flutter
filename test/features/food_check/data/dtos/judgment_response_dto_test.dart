@@ -108,11 +108,12 @@ void main() {
           ),
         ),
       );
-      expect(dto.stateRecords.total, 3);
-      expect(dto.stateRecords.records.length, 1);
-      expect(dto.stateRecords.records[0].label, '속쓰림');
-      expect(dto.stateRecords.records[0].date, '2026-06-10');
-      expect(dto.stateRecords.records[0].timing, '식후 30분');
+      // stateRecords가 명시적으로 제공된 경우 — non-null 보장
+      expect(dto.stateRecords!.total, 3);
+      expect(dto.stateRecords!.records.length, 1);
+      expect(dto.stateRecords!.records[0].label, '속쓰림');
+      expect(dto.stateRecords!.records[0].date, '2026-06-10');
+      expect(dto.stateRecords!.records[0].timing, '식후 30분');
     });
 
     test('substitutes 역직렬화', () {
@@ -217,6 +218,110 @@ void main() {
     test('items 2개 역직렬화', () {
       final dto = TextJudgmentResponseDto.fromJson(_textJudgmentJson());
       expect(dto.items.length, 2);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // S1: stateRecords 누락/null 방어 (grade=UNKNOWN 오분류 차단)
+  // ---------------------------------------------------------------------------
+
+  group('S1 stateRecords 누락 방어 (by-id)', () {
+    /// stateRecords 키 자체가 없는 UNKNOWN 응답 → TypeError 없이 성공해야 한다.
+    test('stateRecords 키 없는 UNKNOWN → fromJson 예외 없음', () {
+      final json = {
+        'foodExternalId': 'food-ext-unknown',
+        'foodName': '정체불명음식',
+        'grade': 'UNKNOWN',
+        'personalTitle': '정체불명음식, 확인이 어려워요',
+        'items': <Map<String, dynamic>>[],
+        'substitutes': <Map<String, dynamic>>[],
+        // stateRecords 키 의도적 누락
+      };
+      expect(() => JudgmentResponseDto.fromJson(json), returnsNormally);
+    });
+
+    test('stateRecords 키 없는 UNKNOWN → toEntity level==unknown, stateRecords.total==0', () {
+      final json = {
+        'foodExternalId': 'food-ext-unknown',
+        'foodName': '정체불명음식',
+        'grade': 'UNKNOWN',
+        'personalTitle': '정체불명음식, 확인이 어려워요',
+        'items': <Map<String, dynamic>>[],
+        'substitutes': <Map<String, dynamic>>[],
+        // stateRecords 키 의도적 누락
+      };
+      final entity = JudgmentResponseDto.fromJson(json).toEntity();
+      expect(entity.level, VerdictLevel.unknown);
+      expect(entity.stateRecords.total, 0);
+      expect(entity.stateRecords.records, isEmpty);
+    });
+
+    test('stateRecords null 값 → fromJson 예외 없음', () {
+      final json = {
+        'foodExternalId': 'food-ext-unknown',
+        'foodName': '정체불명음식',
+        'grade': 'UNKNOWN',
+        'personalTitle': '정체불명음식, 확인이 어려워요',
+        'items': <Map<String, dynamic>>[],
+        'stateRecords': null,
+        'substitutes': <Map<String, dynamic>>[],
+      };
+      expect(() => JudgmentResponseDto.fromJson(json), returnsNormally);
+    });
+
+    test('stateRecords null 값 → toEntity stateRecords 빈 폴백', () {
+      final json = {
+        'foodExternalId': 'food-ext-unknown',
+        'foodName': '정체불명음식',
+        'grade': 'UNKNOWN',
+        'personalTitle': '정체불명음식, 확인이 어려워요',
+        'items': <Map<String, dynamic>>[],
+        'stateRecords': null,
+        'substitutes': <Map<String, dynamic>>[],
+      };
+      final entity = JudgmentResponseDto.fromJson(json).toEntity();
+      expect(entity.stateRecords.total, 0);
+      expect(entity.stateRecords.records, isEmpty);
+    });
+  });
+
+  group('S1 stateRecords 누락 방어 (by-text)', () {
+    test('stateRecords 키 없는 UNKNOWN → fromJson 예외 없음', () {
+      final json = {
+        'foodName': '정체불명음식',
+        'grade': 'UNKNOWN',
+        'personalTitle': '정체불명음식, 확인이 어려워요',
+        'items': <Map<String, dynamic>>[],
+        // stateRecords 키 의도적 누락
+      };
+      expect(() => TextJudgmentResponseDto.fromJson(json), returnsNormally);
+    });
+
+    test('stateRecords 키 없는 UNKNOWN → toEntity level==unknown, stateRecords 빈 폴백', () {
+      final json = {
+        'foodName': '정체불명음식',
+        'grade': 'UNKNOWN',
+        'personalTitle': '정체불명음식, 확인이 어려워요',
+        'items': <Map<String, dynamic>>[],
+        // stateRecords 키 의도적 누락
+      };
+      final entity = TextJudgmentResponseDto.fromJson(json).toEntity();
+      expect(entity.level, VerdictLevel.unknown);
+      expect(entity.stateRecords.total, 0);
+      expect(entity.stateRecords.records, isEmpty);
+    });
+
+    test('stateRecords null 값 → toEntity 빈 폴백', () {
+      final json = {
+        'foodName': '정체불명음식',
+        'grade': 'UNKNOWN',
+        'personalTitle': '정체불명음식, 확인이 어려워요',
+        'items': <Map<String, dynamic>>[],
+        'stateRecords': null,
+      };
+      final entity = TextJudgmentResponseDto.fromJson(json).toEntity();
+      expect(entity.stateRecords.total, 0);
+      expect(entity.stateRecords.records, isEmpty);
     });
   });
 

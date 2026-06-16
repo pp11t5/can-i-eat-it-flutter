@@ -68,6 +68,10 @@ abstract class SubstituteDto with _$SubstituteDto {
 /// 등록 음식 판정 응답 DTO (by-id).
 ///
 /// substitutes·category 포함 완전 응답.
+///
+/// [stateRecords] 는 nullable — 서버가 grade=UNKNOWN 등에서 키를 누락하거나
+/// null로 줄 경우에도 TypeError 없이 역직렬화되어야 한다 (S1 방어).
+/// toEntity() 에서 null이면 빈 VerdictStateRecords(total:0, records:[])로 폴백.
 @freezed
 abstract class JudgmentResponseDto with _$JudgmentResponseDto {
   const factory JudgmentResponseDto({
@@ -77,7 +81,7 @@ abstract class JudgmentResponseDto with _$JudgmentResponseDto {
     required String grade,         // RECOMMEND|CAUTION|RISK|UNKNOWN
     required String personalTitle,
     @Default(<JudgmentItemDto>[]) List<JudgmentItemDto> items,
-    required StateRecordsDto stateRecords,
+    StateRecordsDto? stateRecords, // nullable: 누락/null 방어 (S1)
     @Default(<SubstituteDto>[]) List<SubstituteDto> substitutes,
   }) = _JudgmentResponseDto;
 
@@ -92,6 +96,9 @@ abstract class JudgmentResponseDto with _$JudgmentResponseDto {
 /// 자유 텍스트 판정 응답 DTO (by-text).
 ///
 /// foodExternalId·category 없음, substitutes 항상 빈배열(서버 보장).
+///
+/// [stateRecords] 는 nullable — 서버 누락/null 방어 (S1).
+/// toEntity() 에서 null이면 빈 VerdictStateRecords로 폴백.
 @freezed
 abstract class TextJudgmentResponseDto with _$TextJudgmentResponseDto {
   const factory TextJudgmentResponseDto({
@@ -99,7 +106,7 @@ abstract class TextJudgmentResponseDto with _$TextJudgmentResponseDto {
     required String grade,
     required String personalTitle,
     @Default(<JudgmentItemDto>[]) List<JudgmentItemDto> items,
-    required StateRecordsDto stateRecords,
+    StateRecordsDto? stateRecords, // nullable: 누락/null 방어 (S1)
   }) = _TextJudgmentResponseDto;
 
   factory TextJudgmentResponseDto.fromJson(Map<String, dynamic> j) =>
@@ -121,18 +128,21 @@ extension JudgmentResponseDtoMapper on JudgmentResponseDto {
         items: items
             .map((e) => VerdictItem(emphasis: e.emphasis, body: e.body))
             .toList(),
-        stateRecords: VerdictStateRecords(
-          total: stateRecords.total,
-          records: stateRecords.records
-              .map(
-                (r) => VerdictStateRecord(
-                  label: r.label,
-                  date: r.date,
-                  timing: r.timing,
-                ),
-              )
-              .toList(),
-        ),
+        // stateRecords null 폴백 — 서버 누락/null 시 빈 VerdictStateRecords (S1)
+        stateRecords: stateRecords == null
+            ? const VerdictStateRecords()
+            : VerdictStateRecords(
+                total: stateRecords!.total,
+                records: stateRecords!.records
+                    .map(
+                      (r) => VerdictStateRecord(
+                        label: r.label,
+                        date: r.date,
+                        timing: r.timing,
+                      ),
+                    )
+                    .toList(),
+              ),
         substitutes: substitutes
             .map(
               (s) => VerdictSubstitute(
@@ -157,18 +167,21 @@ extension TextJudgmentResponseDtoMapper on TextJudgmentResponseDto {
         items: items
             .map((e) => VerdictItem(emphasis: e.emphasis, body: e.body))
             .toList(),
-        stateRecords: VerdictStateRecords(
-          total: stateRecords.total,
-          records: stateRecords.records
-              .map(
-                (r) => VerdictStateRecord(
-                  label: r.label,
-                  date: r.date,
-                  timing: r.timing,
-                ),
-              )
-              .toList(),
-        ),
+        // stateRecords null 폴백 — 서버 누락/null 시 빈 VerdictStateRecords (S1)
+        stateRecords: stateRecords == null
+            ? const VerdictStateRecords()
+            : VerdictStateRecords(
+                total: stateRecords!.total,
+                records: stateRecords!.records
+                    .map(
+                      (r) => VerdictStateRecord(
+                        label: r.label,
+                        date: r.date,
+                        timing: r.timing,
+                      ),
+                    )
+                    .toList(),
+              ),
         substitutes: const [],   // by-text 규약: 서버가 항상 빈배열
       );
 }
