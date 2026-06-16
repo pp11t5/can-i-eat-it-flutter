@@ -12,6 +12,7 @@ import 'package:can_i_eat_it/features/food_check/data/food_check_providers.dart'
 import 'package:can_i_eat_it/features/food_check/data/recent_food_providers.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/recent_food.dart';
+import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/widgets/clear_search_history_dialog.dart';
 
 /// 음식 검색 진입 화면 (Figma 554:5328 / 554:5329 / 554:5322).
@@ -133,14 +134,17 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
         // 기록 실패는 판정 진입을 막지 않는다.
       }
       if (!mounted) return;
-      // 판정 화면 present-modal
-      context.push('/verdict', extra: food.name);
+      // 판정 화면 present-modal — by-id 진입 (externalId 보유)
+      context.push(
+        '/verdict',
+        extra: VerdictArgs(externalId: food.externalId, text: food.name),
+      );
     } finally {
       _navigating = false;
     }
   }
 
-  /// 매칭 없음 → raw text 직접 분석 진입.
+  /// 매칭 없음 → raw text 직접 분석 진입 (by-text).
   ///
   /// externalId 없으므로 POST /foods/recent 기록 생략 (ADR-0007 §3-1 (5)).
   void _onDirectAnalyze() {
@@ -148,7 +152,7 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
     final q = _query.trim();
     if (q.isEmpty) return;
     _navigating = true;
-    context.push('/verdict', extra: q);
+    context.push('/verdict', extra: VerdictArgs(text: q));
     _navigating = false;
   }
 

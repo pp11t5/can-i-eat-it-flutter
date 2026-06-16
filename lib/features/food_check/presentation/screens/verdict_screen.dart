@@ -2,27 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/features/food_check/data/food_check_providers.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
+import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_loading_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_result_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_unknown_screen.dart';
 
-/// 판정 오케스트레이션 화면 (티켓 6 — 검색→판정 내비게이션 통합).
+/// 판정 오케스트레이션 화면.
 ///
-/// [foodName] 을 받아 [VerdictController.analyze] 를 호출하고,
+/// [args] 에 따라 진입 경로를 선택한다:
+/// - [VerdictArgs.isById] → [VerdictController.judgeById] (검색 결과 셀 탭)
+/// - 아니면 → [VerdictController.judgeByText] (raw text 직접 분석)
+///
 /// 상태에 따라 하위 화면을 스위칭한다:
-/// - [AsyncLoading]       → [VerdictLoadingScreen]
-/// - [AsyncError]         → 에러 메시지 + 재시도
-/// - [VerdictLevel.unknown] → [VerdictUnknownScreen]
-/// - 그 외               → [VerdictResultScreen]
+/// - [AsyncLoading]              → [VerdictLoadingScreen]
+/// - [AsyncError]                → 에러 메시지 + 재시도 (분석실패)
+/// - [VerdictLevel.unknown] (성공) → [VerdictUnknownScreen]
+/// - 그 외 (recommend/caution/risk) → [VerdictResultScreen]
+///
+/// ⚠️ grade=UNKNOWN은 AsyncData(성공) — AsyncError(분석실패)와 구별(D1, R3).
 ///
 /// 진입 경로: `/verdict` (present fullscreenDialog).
-/// extra: 분석할 음식명 String.
+/// extra: [VerdictArgs].
 class VerdictScreen extends ConsumerStatefulWidget {
-  const VerdictScreen({super.key, required this.foodName});
+  const VerdictScreen({super.key, required this.args});
 
-  final String foodName;
+  final VerdictArgs args;
 
   @override
   ConsumerState<VerdictScreen> createState() => _VerdictScreenState();
@@ -34,7 +41,15 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
     super.initState();
     // 화면 진입 시 즉시 분석 시작.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(verdictControllerProvider.notifier).analyze(widget.foodName);
+      final controller = ref.read(verdictControllerProvider.notifier);
+      if (widget.args.isById) {
+        controller.judgeById(
+          widget.args.externalId!,
+          displayName: widget.args.text,
+        );
+      } else {
+        controller.judgeByText(widget.args.text);
+      }
     });
   }
 
@@ -54,7 +69,9 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
     return verdictAsync.when(
       loading: () => const VerdictLoadingScreen(),
       error: (error, _) => _ErrorScreen(
-        message: error.toString(),
+        message: error is Failure
+            ? error.message
+            : '분석 중 오류가 발생했어요.',
         onRetry: _handleRetry,
       ),
       data: (verdict) {
@@ -64,6 +81,7 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
           return const VerdictLoadingScreen();
         }
         if (verdict.level == VerdictLevel.unknown) {
+          // grade=UNKNOWN은 성공 응답 → VerdictUnknownScreen (D1).
           return VerdictUnknownScreen(onRetry: _handleRetry);
         }
         return VerdictResultScreen(
@@ -76,7 +94,7 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
 }
 
 // ---------------------------------------------------------------------------
-// 에러 화면
+// 에러 화면 (분석실패 — FOOD400_1/FOOD404_1/통신오류)
 // ---------------------------------------------------------------------------
 
 class _ErrorScreen extends StatelessWidget {
@@ -95,7 +113,7 @@ class _ErrorScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '분석 중 오류가 발생했어요.',
+                message,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),

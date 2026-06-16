@@ -33,7 +33,7 @@ class VerdictCard extends StatelessWidget {
     return switch (level) {
       VerdictLevel.recommend => AppColors.verdictRecommend,
       VerdictLevel.caution => AppColors.verdictCaution,
-      VerdictLevel.danger => AppColors.verdictDanger,
+      VerdictLevel.risk => AppColors.verdictDanger,   // 색상 토큰명 유지 (ADR-0003)
       VerdictLevel.unknown => AppColors.verdictUnknown,
     };
   }
@@ -46,7 +46,7 @@ class VerdictCard extends StatelessWidget {
         '전문의와 상담하거나 소량씩 시도해 보세요.',
       VerdictLevel.recommend ||
       VerdictLevel.caution ||
-      VerdictLevel.danger =>
+      VerdictLevel.risk =>
         '분석 결과가 이곳에 표시됩니다.',
     };
   }
