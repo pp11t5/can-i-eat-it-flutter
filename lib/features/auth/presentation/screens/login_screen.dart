@@ -8,6 +8,7 @@ import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/widgets/deletion_grace_dialog.dart';
@@ -134,17 +135,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleKakaoPressed(BuildContext context) async {
-    final outcome =
-        await ref.read(authControllerProvider.notifier).signInWithKakao();
-    if (!context.mounted) return;
-    await _handlePostSignIn(context, outcome);
+    try {
+      final outcome =
+          await ref.read(authControllerProvider.notifier).signInWithKakao();
+      if (!context.mounted) return;
+      await _handlePostSignIn(context, outcome);
+    } catch (e) {
+      if (!context.mounted) return;
+      _showSignInErrorToast(context);
+    }
   }
 
   Future<void> _handleApplePressed(BuildContext context) async {
-    final outcome =
-        await ref.read(authControllerProvider.notifier).signInWithApple();
-    if (!context.mounted) return;
-    await _handlePostSignIn(context, outcome);
+    try {
+      final outcome =
+          await ref.read(authControllerProvider.notifier).signInWithApple();
+      if (!context.mounted) return;
+      await _handlePostSignIn(context, outcome);
+    } catch (e) {
+      if (!context.mounted) return;
+      _showSignInErrorToast(context);
+    }
+  }
+
+  /// 로그인 실패 시 T2 토스트를 표시한다.
+  ///
+  /// [Failure] 서브타입과 기타 예외 모두 동일한 사용자 메시지를 노출한다.
+  /// authControllerProvider 가 AsyncError 로 전환되면 [isLoading] 이 false 로
+  /// 돌아오므로 로딩 스피너·버튼 비활성이 자동 해제된다.
+  void _showSignInErrorToast(BuildContext context) {
+    showAppToast(context, '로그인에 실패했어요. 잠시 후 다시 시도해 주세요.');
   }
 
   /// 로그인 후 라우팅 — [SignInOutcome] exhaustive switch (ADR-0007 §3-1 (6-A)).

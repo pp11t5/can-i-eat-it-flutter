@@ -9,6 +9,38 @@ import 'auth_interceptor.dart';
 
 part 'dio_client.g.dart';
 
+// ---------------------------------------------------------------------------
+// 마스킹 헬퍼 (테스트 접근 가능)
+// ---------------------------------------------------------------------------
+
+/// 로그 텍스트에서 토큰 값을 마스킹한다.
+///
+/// [LogInterceptor] 의 `logPrint` 콜백(_maskedLogPrint) 이 내부적으로 위임한다.
+/// 테스트에서 직접 호출해 마스킹 정규식을 검증한다.
+///
+/// @visibleForTesting — 프로덕션 코드에서 직접 호출하지 않는다.
+@visibleForTesting
+String maskTokensForLog(String text) {
+  var result = text;
+  // JSON 필드 값 마스킹: "accessToken":"<값>" / "refreshToken":"<값>" / "idToken":"<값>"
+  result = result.replaceAllMapped(
+    RegExp(r'"(accessToken|refreshToken|idToken)"\s*:\s*"[^"]*"'),
+    (m) => '"${m.group(1)}":"***"',
+  );
+  // Dart Map toString 마스킹: {idToken: eyJ...} 또는 {idToken: eyJ..., ...}
+  // 값은 쉼표 또는 닫힌 중괄호 전까지 캡처한다.
+  result = result.replaceAllMapped(
+    RegExp(r'\b(accessToken|refreshToken|idToken)\s*:\s*([^,}\s][^,}]*)'),
+    (m) => '${m.group(1)}: ***',
+  );
+  // Authorization 헤더 마스킹: Bearer <토큰>
+  result = result.replaceAllMapped(
+    RegExp(r'(Authorization\s*:\s*Bearer\s+)\S+'),
+    (m) => '${m.group(1)}***',
+  );
+  return result;
+}
+
 /// 앱 전역에서 공유하는 Dio 인스턴스 (ADR-0007 §3-1 (1)).
 ///
 /// ## validateStatus 정책 (CRITICAL 2)
@@ -85,18 +117,7 @@ Dio dio(Ref ref) {
 
 /// [LogInterceptor] 출력에서 토큰 값을 마스킹한다 (HIGH 1).
 ///
-/// `accessToken`, `refreshToken`, `Authorization` 헤더 값을 `***` 로 치환.
+/// 실제 마스킹 로직은 [maskTokensForLog] 에 위임한다.
 void _maskedLogPrint(Object object) {
-  var text = object.toString();
-  // JSON 필드 값 마스킹: "accessToken":"<값>" / "refreshToken":"<값>"
-  text = text.replaceAllMapped(
-    RegExp(r'"(accessToken|refreshToken|idToken)"\s*:\s*"[^"]*"'),
-    (m) => '"${m.group(1)}":"***"',
-  );
-  // Authorization 헤더 마스킹: Bearer <토큰>
-  text = text.replaceAllMapped(
-    RegExp(r'(Authorization\s*:\s*Bearer\s+)\S+'),
-    (m) => '${m.group(1)}***',
-  );
-  debugPrint('[Dio] $text');
+  debugPrint('[Dio] ${maskTokensForLog(object.toString())}');
 }

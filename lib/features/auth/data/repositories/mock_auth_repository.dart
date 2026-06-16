@@ -5,6 +5,57 @@ import '../../domain/entities/sign_in_outcome.dart';
 import '../../domain/entities/terms_agreement.dart';
 import '../../domain/repositories/auth_repository.dart';
 
+// ---------------------------------------------------------------------------
+// 실패 전용 stub Repository (테스트용)
+// ---------------------------------------------------------------------------
+
+/// 카카오/Apple 로그인 시 지정된 [Failure]를 throw 하는 테스트 stub.
+///
+/// Bug A 회귀 테스트에서 unhandled exception 시나리오를 재현하기 위해 사용한다.
+class ThrowingAuthRepository implements AuthRepository {
+  ThrowingAuthRepository({Failure? failure})
+      : _failure = failure ?? const UnexpectedFailure();
+
+  final Failure _failure;
+
+  @override
+  Future<AuthSession?> currentSession() async => null;
+
+  @override
+  bool consumeOfflineRestoreFlag() => false;
+
+  @override
+  Future<SignInOutcome> signInWithKakao() async => throw _failure;
+
+  @override
+  Future<SignInOutcome> signInWithApple() async => throw _failure;
+
+  @override
+  Future<void> recordTermsAgreement(TermsAgreement agreement) async {}
+
+  @override
+  Future<AuthSession> recoverAccount(
+    AuthProvider provider, {
+    required String idToken,
+  }) async =>
+      throw _failure;
+
+  @override
+  Future<void> refresh() async {}
+
+  @override
+  Future<AuthSession> getMe() async => throw _failure;
+
+  @override
+  Future<void> logout() async {}
+
+  @override
+  Future<void> withdraw() async {}
+
+  @override
+  Future<void> signOut() async {}
+}
+
 /// [AuthRepository] 인메모리 Mock 구현.
 ///
 /// 실 구현(카카오 SDK + 서버 JWT)은 이 인터페이스를 구현해 Riverpod override로 교체한다.

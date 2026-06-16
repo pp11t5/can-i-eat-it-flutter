@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/login_screen.dart';
@@ -129,6 +130,76 @@ void main() {
       expect(find.text('탈퇴를 진행 중인 계정이에요'), findsOneWidget);
       // 다이얼로그 분기라 /terms 로 push 되지 않음.
       expect(find.text('terms stub'), findsNothing);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  });
+
+  group('LoginScreen 로그인 실패 T2 토스트 (Bug A 회귀)', () {
+    /// ThrowingAuthRepository: signInWithKakao 가 UnexpectedFailure 를 throw 한다.
+    Widget wrapWithThrowingRepo(Failure failure) => ProviderScope(
+          overrides: [
+            // ignore: scoped_providers_should_specify_dependencies
+            authRepositoryProvider.overrideWithValue(
+              ThrowingAuthRepository(failure: failure),
+            ),
+          ],
+          child: MaterialApp.router(routerConfig: _testRouter()),
+        );
+
+    testWidgets(
+        'signInWithKakao 가 UnexpectedFailure throw → T2 토스트 노출, 화면 유지, unhandled 없음',
+        (tester) async {
+      await tester.pumpWidget(
+        wrapWithThrowingRepo(const UnexpectedFailure()),
+      );
+      await tester.pumpAndSettle();
+
+      // 초기 상태: 로그인 화면 대기
+      expect(find.text('카카오로 로그인'), findsOneWidget);
+
+      // 카카오 버튼 탭
+      await tester.tap(find.text('카카오로 로그인'));
+      // signInWithKakao() throw → catch → showAppToast 호출
+      await tester.pump(); // OverlayEntry 삽입
+      await tester.pump(const Duration(milliseconds: 100)); // 등장 애니메이션 진입
+
+      // (b) T2 토스트 노출
+      expect(
+        find.text('로그인에 실패했어요. 잠시 후 다시 시도해 주세요.'),
+        findsOneWidget,
+      );
+
+      // (c) 화면이 로그인 화면에 잔류 (이동 없음)
+      expect(find.text('home stub'), findsNothing);
+      expect(find.text('terms stub'), findsNothing);
+      expect(find.text('onboarding stub'), findsNothing);
+
+      // 토스트 타이머 소진
+      await tester.pump(const Duration(milliseconds: 200)); // forward 완료
+      await tester.pump(const Duration(milliseconds: 2500)); // delay 완료
+      await tester.pump(const Duration(milliseconds: 300)); // reverse + remove
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets(
+        'signInWithKakao 가 NetworkFailure throw → T2 토스트 노출',
+        (tester) async {
+      await tester.pumpWidget(
+        wrapWithThrowingRepo(const NetworkFailure()),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('카카오로 로그인'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(
+        find.text('로그인에 실패했어요. 잠시 후 다시 시도해 주세요.'),
+        findsOneWidget,
+      );
+
+      // 토스트 타이머 소진
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(const Duration(milliseconds: 2500));
+      await tester.pump(const Duration(milliseconds: 300));
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
   });
 
