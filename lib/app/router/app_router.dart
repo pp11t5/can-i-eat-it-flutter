@@ -9,6 +9,7 @@ import 'package:can_i_eat_it/features/auth/presentation/providers/session_provid
 import 'package:can_i_eat_it/features/auth/presentation/screens/login_screen.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/splash_screen.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/terms_screen.dart';
+import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/food_check_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_screen.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
@@ -89,15 +90,16 @@ GoRouter appRouter(Ref ref) {
         ),
       ),
       // 판정 화면 — FoodCheckScreen에서 present-modal로 진입 (티켓 6).
-      // extra: 분석할 음식명 String (검색 결과 셀 탭 또는 raw text 직접 분석).
+      // extra: VerdictArgs (externalId 있으면 by-id, 없으면 by-text).
       GoRoute(
         path: '/verdict',
         name: 'verdict',
         pageBuilder: (context, state) {
-          final foodName = state.extra as String? ?? '';
+          final args = state.extra as VerdictArgs? ??
+              const VerdictArgs(text: '');
           return MaterialPage(
             fullscreenDialog: true,
-            child: VerdictScreen(foodName: foodName),
+            child: VerdictScreen(args: args),
           );
         },
       ),
