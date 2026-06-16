@@ -42,12 +42,12 @@ void main() {
       );
     });
 
-    testWidgets('VerdictCard danger 상태를 골든과 일치하게 렌더한다', (tester) async {
-      await tester.pumpWidget(_wrap(VerdictLevel.danger));
+    testWidgets('VerdictCard risk 상태를 골든과 일치하게 렌더한다', (tester) async {
+      await tester.pumpWidget(_wrap(VerdictLevel.risk));
       await tester.pump();
       await expectLater(
         find.byType(VerdictCard),
-        matchesGoldenFile('goldens/verdict_card_danger.png'),
+        matchesGoldenFile('goldens/verdict_card_risk.png'),
       );
     });
 
