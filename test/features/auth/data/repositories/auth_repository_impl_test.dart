@@ -30,6 +30,27 @@ class _StubKakaoAuthService implements KakaoAuthService {
   Future<void> signOut() async {}
 }
 
+/// recoverAccount 가 카카오 SDK 를 추가 호출하지 않는지 검증하기 위한 카운팅 stub.
+class _CountingKakaoAuthService implements KakaoAuthService {
+  _CountingKakaoAuthService({required this.idToken, required this.onSignIn});
+
+  final String idToken;
+  final void Function() onSignIn;
+
+  @override
+  Future<KakaoAuthResult> signIn() async {
+    onSignIn();
+    return KakaoAuthResult(
+      idToken: idToken,
+      email: 'test@example.com',
+      nickname: 'testuser',
+    );
+  }
+
+  @override
+  Future<void> signOut() async {}
+}
+
 // ---------------------------------------------------------------------------
 // 공통 봉투 헬퍼
 // ---------------------------------------------------------------------------
@@ -223,6 +244,64 @@ void main() {
       final rec = outcome as Recoverable;
       expect(rec.reason, RecoverReason.inactive);
     });
+
+    test('403 응답 시 Recoverable.idToken 이 카카오 stub idToken 과 일치한다', () async {
+      // _StubKakaoAuthService 가 'test-id-token' 을 반환하므로
+      // Recoverable.idToken 도 'test-id-token' 이어야 한다.
+      dioAdapter.onPost(
+        '/auth/kakao/login',
+        (server) => server.reply(403, _errorEnvelope('AUTH403_5')),
+        data: {'idToken': 'test-id-token'},
+      );
+
+      final outcome = await repo.signInWithKakao();
+
+      expect(outcome, isA<Recoverable>());
+      final rec = outcome as Recoverable;
+      expect(rec.idToken, 'test-id-token');
+    });
+  });
+
+  group('recoverAccount — 카카오 SDK 미호출 검증', () {
+    // recoverAccount 는 전달받은 idToken 을 재사용해야 하며,
+    // 카카오 SDK(signIn)를 추가 호출하지 않아야 한다.
+
+    test('recoverAccount 호출 시 카카오 stub signIn 이 추가 호출되지 않는다', () async {
+      var kakaoSignInCallCount = 0;
+
+      // 호출 횟수를 기록하는 카운팅 stub
+      final countingKakao = _CountingKakaoAuthService(
+        idToken: 'test-id-token',
+        onSignIn: () => kakaoSignInCallCount++,
+      );
+
+      final repoWithCounting = AuthRepositoryImpl(
+        dio: dio,
+        tokenStore: tokenStore,
+        kakaoAuthService: countingKakao,
+      );
+
+      dioAdapter.onPost(
+        '/auth/kakao/recover',
+        (server) => server.reply(200, _envelope({
+          'accessToken': 'rec-access',
+          'refreshToken': 'rec-refresh',
+          'userId': 'rec-user',
+          'email': 'test@example.com',
+          'role': 'USER',
+        })),
+        data: {'idToken': 'passed-token'},
+      );
+
+      // signIn 을 거치지 않고 직접 recoverAccount 를 호출한다.
+      await repoWithCounting.recoverAccount(
+        AuthProvider.kakao,
+        idToken: 'passed-token',
+      );
+
+      // 카카오 SDK signIn 이 한 번도 호출되지 않아야 한다.
+      expect(kakaoSignInCallCount, 0);
+    });
   });
 
   group('logout', () {
@@ -268,10 +347,9 @@ void main() {
     // 이 그룹의 테스트는 수정 전에는 StateError 로 실패해야 하고,
     // recoverAccount(AuthProvider) 재작성 후 통과해야 한다.
 
-    test('recoverAccount 200 → 새 idToken 전송 + 토큰 저장 + active 세션 반환', () async {
+    test('recoverAccount 200 → 전달받은 idToken 전송 + 토큰 저장 + active 세션 반환', () async {
       // 403 경로는 _session=null · 토큰 없음 상태에서 호출됨.
-      // StubKakaoAuthService 가 'test-id-token' 을 반환하므로
-      // POST /auth/kakao/recover 에 {idToken: 'test-id-token'} 이 전송돼야 한다.
+      // 전달된 'test-id-token' 이 POST /auth/kakao/recover 바디에 그대로 전송돼야 한다.
       dioAdapter.onPost(
         '/auth/kakao/recover',
         (server) => server.reply(200, _envelope({
@@ -284,7 +362,7 @@ void main() {
         data: {'idToken': 'test-id-token'},
       );
 
-      final session = await repo.recoverAccount(AuthProvider.kakao);
+      final session = await repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token');
 
       expect(session.userId, 'user-recovered');
       expect(session.accountStatus, AccountStatus.active);
@@ -303,7 +381,7 @@ void main() {
         data: {'idToken': 'test-id-token'},
       );
 
-      await repo.recoverAccount(AuthProvider.kakao);
+      await repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token');
 
       expect(await tokenStore.readAccessToken(), 'recover-access-2');
       expect(await tokenStore.readRefreshToken(), 'recover-refresh-2');
@@ -324,7 +402,10 @@ void main() {
       );
 
       // StateError 없이 완료돼야 한다.
-      await expectLater(repo.recoverAccount(AuthProvider.kakao), completes);
+      await expectLater(
+        repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token'),
+        completes,
+      );
     });
   });
 

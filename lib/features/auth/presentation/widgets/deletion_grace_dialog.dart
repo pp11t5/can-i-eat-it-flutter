@@ -24,20 +24,26 @@ Future<void> showDeletionGraceDialog(
   BuildContext context,
   WidgetRef ref, {
   required AuthProvider provider,
+  required String idToken,
 }) async {
   await showDialog<void>(
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) =>
-        _DeletionGraceDialog(ref: ref, provider: provider),
+        _DeletionGraceDialog(ref: ref, provider: provider, idToken: idToken),
   );
 }
 
 class _DeletionGraceDialog extends StatelessWidget {
-  const _DeletionGraceDialog({required this.ref, required this.provider});
+  const _DeletionGraceDialog({
+    required this.ref,
+    required this.provider,
+    required this.idToken,
+  });
 
   final WidgetRef ref;
   final AuthProvider provider;
+  final String idToken;
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +99,7 @@ class _DeletionGraceDialog extends StatelessWidget {
     try {
       await ref
           .read(authControllerProvider.notifier)
-          .recoverAccount(provider);
+          .recoverAccount(provider, idToken: idToken);
       if (!context.mounted) return;
       // 복구 성공: gate 가 sessionStatus 전이를 감지해 자동 라우팅.
       Navigator.of(context).pop();

@@ -49,7 +49,8 @@ abstract interface class AuthRepository {
   ///
   /// `POST /auth/{provider}/recover` 를 호출한다.
   /// [provider]: 복구할 소셜 제공자. [Recoverable.provider] 에서 전달받는다.
-  Future<AuthSession> recoverAccount(AuthProvider provider);
+  /// [idToken]: 로그인 시 획득한 OIDC idToken. 카카오 SDK 재인증 없이 재사용한다.
+  Future<AuthSession> recoverAccount(AuthProvider provider, {required String idToken});
 
   // ---------------------------------------------------------------------------
   // 토큰 관리

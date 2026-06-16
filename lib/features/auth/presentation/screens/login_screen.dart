@@ -151,10 +151,15 @@ class LoginScreen extends ConsumerWidget {
         // imperative push — iOS pop 애니메이션 보장, 가드 redirect 와 분리 (ADR-0006).
         context.push('/terms');
 
-      case Recoverable(:final provider):
+      case Recoverable(:final provider, :final idToken):
         // 복구 가능 계정 → 기존 deletion_grace_dialog 재사용.
-        // provider 를 전달해 recoverAccount(provider) 에서 새 idToken 을 획득할 수 있도록 한다.
-        await showDeletionGraceDialog(context, ref, provider: provider);
+        // 로그인 시 획득한 idToken 을 전달해 카카오 SDK 재인증 없이 복구한다.
+        await showDeletionGraceDialog(
+          context,
+          ref,
+          provider: provider,
+          idToken: idToken,
+        );
     }
   }
 }

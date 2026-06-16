@@ -85,16 +85,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<AuthSession> recoverAccount(AuthProvider provider) async {
-    // 403 복구 경로는 토큰 미발급 · _session=null 상태이므로,
-    // 로그인과 동일하게 새 idToken 으로 사용자를 재식별한다.
-    final String idToken;
-    if (provider == AuthProvider.kakao) {
-      idToken = (await _kakaoAuthService.signIn()).idToken;
-    } else {
-      throw UnimplementedError('Apple 복구는 아직 미구현');
-    }
-
+  Future<AuthSession> recoverAccount(
+    AuthProvider provider, {
+    required String idToken,
+  }) async {
+    // 403 복구 경로: 로그인 시 획득한 idToken 을 재사용해 카카오 SDK 재인증 없이 복구.
     final response = await _dio.post<dynamic>(
       ApiEndpoints.authRecover(provider.name),
       data: {'idToken': idToken},
@@ -194,9 +189,10 @@ class AuthRepositoryImpl implements AuthRepository {
   /// 4. [TermsRequiredFailure] catch → [NeedsTerms]
   /// 5. [RecoverableAccountFailure] catch → [Recoverable]
   Future<SignInOutcome> _signIn(AuthProvider provider) async {
+    // idToken 을 try 블록 밖에 선언 — RecoverableAccountFailure catch 에서 운반하기 위함.
+    String? idToken;
     try {
       // 1. idToken 획득
-      final String idToken;
       if (provider == AuthProvider.kakao) {
         final kakaoResult = await _kakaoAuthService.signIn();
         idToken = kakaoResult.idToken;
@@ -234,7 +230,8 @@ class AuthRepositoryImpl implements AuthRepository {
     } on TermsRequiredFailure catch (f) {
       return NeedsTerms(requirements: f.requirements);
     } on RecoverableAccountFailure catch (f) {
-      return Recoverable(reason: f.reason, provider: provider);
+      // idToken 은 카카오 획득 직후 대입됐으므로 null 이 아님.
+      return Recoverable(reason: f.reason, provider: provider, idToken: idToken!);
     } on DioException catch (e) {
       throw FailureMapper.fromDioException(e);
     }

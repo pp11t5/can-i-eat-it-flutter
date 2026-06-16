@@ -72,6 +72,7 @@ class MockAuthRepository implements AuthRepository {
         kakaoOutcome: const Recoverable(
           reason: RecoverReason.deletionInProgress,
           provider: AuthProvider.kakao,
+          idToken: 'mock-id-token',
         ),
       );
 
@@ -85,6 +86,7 @@ class MockAuthRepository implements AuthRepository {
         appleOutcome: const Recoverable(
           reason: RecoverReason.deletionInProgress,
           provider: AuthProvider.apple,
+          idToken: 'mock-id-token',
         ),
       );
 
@@ -143,8 +145,12 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AuthSession> recoverAccount(AuthProvider provider) async {
+  Future<AuthSession> recoverAccount(
+    AuthProvider provider, {
+    required String idToken,
+  }) async {
     // 403 경로는 _session=null 상태. Mock 은 새 active 세션을 합성해 반환한다.
+    // idToken 은 실 구현에서 서버로 전달되지만 Mock 에서는 무시한다.
     _session = AuthSession(
       userId: 'mock-recovered',
       provider: provider,

@@ -96,7 +96,7 @@ void main() {
         ),
         data: Matchers.any,
       );
-      await repo.recoverAccount(AuthProvider.kakao);
+      await repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token');
 
       // POST /consent 바디 검증
       dioAdapter.onPost(
@@ -132,7 +132,7 @@ void main() {
         ),
         data: Matchers.any,
       );
-      await repo.recoverAccount(AuthProvider.kakao);
+      await repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token');
 
       dioAdapter.onPost(
         ApiEndpoints.consent,
@@ -169,7 +169,7 @@ void main() {
         ),
         data: Matchers.any,
       );
-      await repo.recoverAccount(AuthProvider.kakao);
+      await repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token');
 
       dioAdapter.onPost(
         ApiEndpoints.consent,
