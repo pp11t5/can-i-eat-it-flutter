@@ -18,10 +18,18 @@ import '../theme/app_text_styles.dart';
 Future<void> showAppToast(BuildContext context, String message) async {
   final overlay = Overlay.of(context);
   late OverlayEntry entry;
+  var removed = false;
+
+  void removeOnce() {
+    if (removed) return;
+    removed = true;
+    entry.remove();
+  }
+
   entry = OverlayEntry(
     builder: (_) => _AppToastWidget(
       message: message,
-      onDismissed: () => entry.remove(),
+      onDismissed: removeOnce,
     ),
   );
   overlay.insert(entry);
@@ -70,6 +78,9 @@ class _AppToastWidgetState extends State<_AppToastWidget>
 
   @override
   void dispose() {
+    // 호스트가 표시 도중 dispose될 때 onDismissed를 한 번 더 호출해
+    // OverlayEntry가 root Overlay에 남지 않도록 한다 (멱등 — L1 수정).
+    widget.onDismissed();
     _controller.dispose();
     super.dispose();
   }

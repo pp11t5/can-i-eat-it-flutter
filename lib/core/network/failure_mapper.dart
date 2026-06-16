@@ -67,12 +67,24 @@ class FailureMapper {
 
   /// [DioException] → [Failure] 변환.
   ///
-  /// 연결 오류·타임아웃 등 HTTP 응답이 없는 케이스.
+  /// - 연결 계열(`connectionError`, `connectionTimeout`, `sendTimeout`,
+  ///   `receiveTimeout`) → [NetworkFailure] (진짜 오프라인/타임아웃).
+  /// - 그 외(`badResponse` 5xx 등 HTTP 응답이 있는 케이스) → [UnexpectedFailure].
+  ///
+  /// 이렇게 분리해야 5xx를 오프라인으로 오분류하지 않는다 (ADR-0007, H1 수정).
   static Failure fromDioException(DioException e) {
     if (kDebugMode) {
       debugPrint('[FailureMapper] DioException: ${e.type} — ${e.message}');
     }
-    return NetworkFailure(e.message ?? '네트워크 오류가 발생했어요.');
+    switch (e.type) {
+      case DioExceptionType.connectionError:
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        return NetworkFailure(e.message ?? '네트워크 오류가 발생했어요.');
+      default:
+        return UnexpectedFailure(e.message ?? '알 수 없는 오류가 발생했어요.');
+    }
   }
 }
 

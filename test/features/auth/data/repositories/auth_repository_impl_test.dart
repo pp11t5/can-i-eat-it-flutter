@@ -522,5 +522,64 @@ void main() {
       expect(await tokenStore.readAccessToken(), isNull);
       expect(await tokenStore.readRefreshToken(), isNull);
     });
+
+    // H1 + O1 회귀 테스트 — 5xx를 오프라인으로 오분류하지 않아야 한다.
+    test('분기5(H1/O1): 토큰 有 + GET /auth/me 500 → null 반환 & offlineFlag=false & 토큰 보존', () async {
+      // 서버 5xx는 일시적 서버 오류이므로:
+      //   - currentSession() == null (세션 미복원)
+      //   - consumeOfflineRestoreFlag() == false (오프라인 플래그 미설정)
+      //   - 토큰은 보존 (강제 로그아웃 안 함)
+      await tokenStore.writeTokens(access: 'live-access-500', refresh: 'live-refresh-500');
+
+      dioAdapter.onGet(
+        '/auth/me',
+        (server) => server.throws(
+          500,
+          DioException(
+            requestOptions: RequestOptions(path: '/auth/me'),
+            type: DioExceptionType.badResponse,
+            response: Response(
+              requestOptions: RequestOptions(path: '/auth/me'),
+              statusCode: 500,
+            ),
+          ),
+        ),
+      );
+
+      final result = await repo.currentSession();
+
+      expect(result, isNull);
+      // 오프라인 플래그가 세워지면 안 된다 (5xx는 오프라인이 아님)
+      expect(repo.consumeOfflineRestoreFlag(), isFalse);
+      // 토큰은 보존돼야 한다 (강제 로그아웃 금지)
+      expect(await tokenStore.readAccessToken(), 'live-access-500');
+      expect(await tokenStore.readRefreshToken(), 'live-refresh-500');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // M1 회귀 테스트 — recoverAccount DioException→Failure 매핑
+  // ---------------------------------------------------------------------------
+
+  group('recoverAccount — DioException→Failure 매핑 (M1)', () {
+    test('recoverAccount 중 연결오류 DioException → NetworkFailure throw (raw DioException 아님)', () async {
+      dioAdapter.onPost(
+        '/auth/kakao/recover',
+        (server) => server.throws(
+          0,
+          DioException(
+            requestOptions: RequestOptions(path: '/auth/kakao/recover'),
+            type: DioExceptionType.connectionError,
+          ),
+        ),
+        data: {'idToken': 'test-id-token'},
+      );
+
+      // raw DioException 이 아니라 Failure(NetworkFailure) 가 throw 돼야 한다.
+      await expectLater(
+        repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token'),
+        throwsA(isA<NetworkFailure>()),
+      );
+    });
   });
 }

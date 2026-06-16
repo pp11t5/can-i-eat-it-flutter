@@ -59,6 +59,11 @@ class AuthRepositoryImpl implements AuthRepository {
     } on AuthFailure {
       await _tokenStore.clear();
       return null;
+    } on Failure {
+      // 미예상 실패(UnexpectedFailure 등 — 예: 5xx·봉투 이상).
+      // 일시적 서버 오류로 간주: 토큰 보존 + 오프라인 플래그 미설정 + null 반환.
+      // build로 예외가 새지 않아 AsyncError 누출 차단 (O1 수정).
+      return null;
     }
   }
 
@@ -107,23 +112,28 @@ class AuthRepositoryImpl implements AuthRepository {
     required String idToken,
   }) async {
     // 403 복구 경로: 로그인 시 획득한 idToken 을 재사용해 카카오 SDK 재인증 없이 복구.
-    final response = await _dio.post<dynamic>(
-      ApiEndpoints.authRecover(provider.name),
-      data: {'idToken': idToken},
-    );
+    try {
+      final response = await _dio.post<dynamic>(
+        ApiEndpoints.authRecover(provider.name),
+        data: {'idToken': idToken},
+      );
 
-    final dto = unwrap<AuthLoginResponseDto>(
-      response,
-      (json) => AuthLoginResponseDto.fromJson(json as Map<String, dynamic>),
-    );
+      final dto = unwrap<AuthLoginResponseDto>(
+        response,
+        (json) => AuthLoginResponseDto.fromJson(json as Map<String, dynamic>),
+      );
 
-    await _tokenStore.writeTokens(
-      access: dto.accessToken,
-      refresh: dto.refreshToken,
-    );
+      await _tokenStore.writeTokens(
+        access: dto.accessToken,
+        refresh: dto.refreshToken,
+      );
 
-    _session = dto.toEntity(provider);
-    return _session!;
+      _session = dto.toEntity(provider);
+      return _session!;
+    } on DioException catch (e) {
+      // _signIn/getMe/recordTermsAgreement 와 동일 계약 유지 (M1 수정).
+      throw FailureMapper.fromDioException(e);
+    }
   }
 
   @override
