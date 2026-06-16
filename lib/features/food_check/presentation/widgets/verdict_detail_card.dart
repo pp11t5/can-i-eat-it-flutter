@@ -3,170 +3,132 @@ import 'package:flutter/material.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
-import 'package:can_i_eat_it/app/widgets/app_card.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
-import 'package:can_i_eat_it/features/food_check/presentation/widgets/verdict_badge.dart';
 
-/// 판정 상세 카드 — 신 구조 (W3-3, ADR-0003).
+/// 판정 상세 카드 — Figma HeroSection 재정합 (W3-3).
 ///
-/// 서버 judgment 계약에 충실 정합:
-/// - HeroSection: personalTitle + VerdictBadge
-/// - PersonalAnalysis: items 2개 (트리거/증상, 알레르기/복용약)
-/// - Substitutes: 대체 음식 칩 (빈배열이면 섹션 숨김)
-/// - StateRecords: 연관 섭취 기록 (total==0이면 빈상태 또는 숨김)
+/// 구조:
+/// 1. AI 분석 카드: "✨ AI 분석" 보라 칩 + 캡션 + items 불릿
+/// 2. 증상 기록 섹션: "N개의 증상 기록" 헤더 + "모두 보기 >" + 카드형 기록 (≤3개)
+/// 3. 대체 음식 섹션: "대체 음식 추천" 헤더 + 카드형 substitute 목록
 ///
-/// unknown 상태는 이 위젯 대신 [VerdictUnknownScreen] 을 사용한다.
+/// unknown 상태는 이 위젯 대신 [VerdictUnknownScreen]을 사용한다.
 class VerdictDetailCard extends StatelessWidget {
-  const VerdictDetailCard({super.key, required this.verdict});
+  const VerdictDetailCard({
+    super.key,
+    required this.verdict,
+    this.onSeeAllRecords,
+  });
 
   final EatVerdict verdict;
 
-  Color _verdictColor() {
-    return switch (verdict.level) {
-      VerdictLevel.recommend => AppColors.verdictRecommend,
-      VerdictLevel.caution => AppColors.verdictCaution,
-      VerdictLevel.risk => AppColors.verdictDanger,   // 색상 토큰명 유지 (ADR-0003)
-      VerdictLevel.unknown => AppColors.verdictUnknown,
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final verdictColor = _verdictColor();
-
-    return AppCard(
-      padding: 0,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 좌측 컬러 바
-              Container(
-                width: AppSpacing.xs,
-                color: verdictColor,
-              ),
-              // 본문 영역
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.cardPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // HeroSection — VerdictBadge + personalTitle
-                      _HeroSection(verdict: verdict),
-                      const SizedBox(height: AppSpacing.itemGap),
-                      const Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: AppColors.divider,
-                      ),
-                      const SizedBox(height: AppSpacing.itemGap),
-
-                      // PersonalAnalysis — items 2개
-                      if (verdict.items.isNotEmpty) ...[
-                        _PersonalAnalysisSection(items: verdict.items),
-                        const SizedBox(height: AppSpacing.sectionGap),
-                      ],
-
-                      // Substitutes — 대체 음식 (빈배열이면 숨김)
-                      if (verdict.substitutes.isNotEmpty) ...[
-                        _SubstitutesSection(
-                          substitutes: verdict.substitutes,
-                        ),
-                        const SizedBox(height: AppSpacing.sectionGap),
-                      ],
-
-                      // StateRecords — 연관 섭취 기록 (total==0이면 숨김)
-                      if (verdict.stateRecords.total > 0) ...[
-                        _StateRecordsSection(
-                          stateRecords: verdict.stateRecords,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// HeroSection
-// ---------------------------------------------------------------------------
-
-class _HeroSection extends StatelessWidget {
-  const _HeroSection({required this.verdict});
-
-  final EatVerdict verdict;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        VerdictBadge(level: verdict.level),
-        const SizedBox(width: AppSpacing.itemGap),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                verdict.foodName,
-                style: AppTextStyles.header2Bold.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              if (verdict.personalTitle.isNotEmpty) ...[
-                const SizedBox(height: 2),
-                Text(
-                  verdict.personalTitle,
-                  style: AppTextStyles.body2Medium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// PersonalAnalysis — items 2개
-// ---------------------------------------------------------------------------
-
-class _PersonalAnalysisSection extends StatelessWidget {
-  const _PersonalAnalysisSection({required this.items});
-
-  final List<VerdictItem> items;
+  /// "모두 보기" 탭 콜백. null이면 탭 무동작(F3 placeholder).
+  final VoidCallback? onSeeAllRecords;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (var i = 0; i < items.length; i++) ...[
-          if (i > 0) const SizedBox(height: AppSpacing.itemGap),
-          _ItemRow(item: items[i]),
+        // 1. AI 분석 카드
+        if (verdict.items.isNotEmpty) ...[
+          _AiAnalysisCard(items: verdict.items),
+          const SizedBox(height: AppSpacing.sectionGap),
+        ],
+
+        // 2. 증상 기록 섹션 (total>0 일 때만)
+        if (verdict.stateRecords.total > 0) ...[
+          _StateRecordsSection(
+            stateRecords: verdict.stateRecords,
+            onSeeAll: onSeeAllRecords,
+          ),
+          const SizedBox(height: AppSpacing.sectionGap),
+        ],
+
+        // 3. 대체 음식 섹션 (빈배열이면 숨김)
+        if (verdict.substitutes.isNotEmpty) ...[
+          _SubstitutesSection(substitutes: verdict.substitutes),
         ],
       ],
     );
   }
 }
 
-class _ItemRow extends StatelessWidget {
-  const _ItemRow({required this.item});
+// ---------------------------------------------------------------------------
+// AI 분석 카드
+// ---------------------------------------------------------------------------
+
+class _AiAnalysisCard extends StatelessWidget {
+  const _AiAnalysisCard({required this.items});
+
+  final List<VerdictItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(color: AppColors.border),
+      ),
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 헤더 행: "✨ AI 분석" 보라 칩 + 캡션
+          Row(
+            children: [
+              // AI 분석 칩
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.itemGap,
+                  vertical: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEDE9FE), // 연보라 배경
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('✨', style: TextStyle(fontSize: 12)),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      'AI 분석',
+                      style: AppTextStyles.caption1Bold.copyWith(
+                        color: const Color(0xFF6D28D9), // 보라
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.itemGap),
+              // 캡션
+              Flexible(
+                child: Text(
+                  '내 정보와 식사 기록을 바탕으로 분석',
+                  style: AppTextStyles.caption1Medium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.cardPadding),
+
+          // 불릿 항목들
+          for (var i = 0; i < items.length; i++) ...[
+            if (i > 0) const SizedBox(height: AppSpacing.cardPadding),
+            _BulletItem(item: items[i]),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _BulletItem extends StatelessWidget {
+  const _BulletItem({required this.item});
 
   final VerdictItem item;
 
@@ -175,17 +137,35 @@ class _ItemRow extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          item.emphasis,
-          style: AppTextStyles.body2Bold.copyWith(
-            color: AppColors.textSecondary,
-          ),
+        // 볼드 emphasis 줄 (• 불릿 포함)
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '• ',
+              style: AppTextStyles.body2Bold.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+            Expanded(
+              child: Text(
+                item.emphasis,
+                style: AppTextStyles.body2Bold.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: AppSpacing.xs),
-        Text(
-          item.body,
-          style: AppTextStyles.body2Medium.copyWith(
-            color: AppColors.textPrimary,
+        // 회색 body 텍스트
+        Padding(
+          padding: const EdgeInsets.only(left: AppSpacing.itemGap),
+          child: Text(
+            item.body,
+            style: AppTextStyles.body2Medium.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
         ),
       ],
@@ -194,7 +174,124 @@ class _ItemRow extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Substitutes — 대체 음식 칩 행
+// 증상 기록 섹션
+// ---------------------------------------------------------------------------
+
+class _StateRecordsSection extends StatelessWidget {
+  const _StateRecordsSection({
+    required this.stateRecords,
+    this.onSeeAll,
+  });
+
+  final VerdictStateRecords stateRecords;
+
+  /// null이면 "모두 보기" 탭 무동작 (F3 placeholder)
+  final VoidCallback? onSeeAll;
+
+  /// label → 심각도 이모지 매핑 (best-effort, Figma 기준)
+  String _severityEmoji(String label) {
+    final lower = label.toLowerCase();
+    if (lower.contains('편안')) return '😊';
+    if (lower.contains('심각')) return '😖';
+    if (lower.contains('불편')) return '😣';
+    // 기타 label은 중립 이모지로 fallback
+    return '😐';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // ≤3개만 표시
+    final displayRecords = stateRecords.records.take(3).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 헤더 행
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '${stateRecords.total}개의 증상 기록',
+              style: AppTextStyles.body1Bold.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+            GestureDetector(
+              onTap: onSeeAll,
+              child: Text(
+                '모두 보기 >',
+                style: AppTextStyles.body2Medium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.itemGap),
+
+        // 기록 카드 (테두리 카드)
+        for (var i = 0; i < displayRecords.length; i++) ...[
+          if (i > 0) const SizedBox(height: AppSpacing.itemGap),
+          _StateRecordCard(
+            record: displayRecords[i],
+            emoji: _severityEmoji(displayRecords[i].label),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _StateRecordCard extends StatelessWidget {
+  const _StateRecordCard({
+    required this.record,
+    required this.emoji,
+  });
+
+  final VerdictStateRecord record;
+  final String emoji;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.cardPadding,
+        vertical: AppSpacing.itemGap + AppSpacing.xs, // 12
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          // 좌측 심각도 이모지
+          Text(emoji, style: const TextStyle(fontSize: 24)),
+          const SizedBox(width: AppSpacing.cardPadding),
+          // label (볼드)
+          Expanded(
+            child: Text(
+              record.label,
+              style: AppTextStyles.body2Bold.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          // 우측 날짜 · 타이밍 (회색)
+          Text(
+            '${record.date} · ${record.timing}',
+            style: AppTextStyles.caption1Medium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 대체 음식 섹션
 // ---------------------------------------------------------------------------
 
 class _SubstitutesSection extends StatelessWidget {
@@ -208,95 +305,64 @@ class _SubstitutesSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '이런 음식은 어때요?',
-          style: AppTextStyles.body2Bold.copyWith(
-            color: AppColors.textSecondary,
+          '대체 음식 추천',
+          style: AppTextStyles.body1Bold.copyWith(
+            color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: AppSpacing.xs),
-        Wrap(
-          spacing: AppSpacing.xs,
-          runSpacing: AppSpacing.xs,
-          children: [
-            for (final sub in substitutes)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.chipPaddingH,
-                  vertical: AppSpacing.chipPaddingV,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceSelected,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-                  border: Border.all(color: AppColors.primary),
-                ),
-                child: Text(
-                  sub.name,
-                  style: AppTextStyles.caption1Medium.copyWith(
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
+        const SizedBox(height: AppSpacing.itemGap),
 
-// ---------------------------------------------------------------------------
-// StateRecords — 연관 섭취 기록
-// ---------------------------------------------------------------------------
-
-class _StateRecordsSection extends StatelessWidget {
-  const _StateRecordsSection({required this.stateRecords});
-
-  final VerdictStateRecords stateRecords;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '최근 먹고 기록한 내역',
-          style: AppTextStyles.body2Bold.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        for (final record in stateRecords.records) ...[
-          _StateRecordRow(record: record),
-          const SizedBox(height: AppSpacing.xs),
+        for (var i = 0; i < substitutes.length; i++) ...[
+          if (i > 0) const SizedBox(height: AppSpacing.itemGap),
+          _SubstituteCard(substitute: substitutes[i]),
         ],
       ],
     );
   }
 }
 
-class _StateRecordRow extends StatelessWidget {
-  const _StateRecordRow({required this.record});
+class _SubstituteCard extends StatelessWidget {
+  const _SubstituteCard({required this.substitute});
 
-  final VerdictStateRecord record;
+  final VerdictSubstitute substitute;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            record.label,
-            style: AppTextStyles.body2Medium.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ),
-        Text(
-          '${record.date} · ${record.timing}',
-          style: AppTextStyles.caption1Medium.copyWith(
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.cardPadding,
+        vertical: AppSpacing.itemGap + AppSpacing.xs, // 12
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          // 음식 이모지 없음 — 일반 아이콘 placeholder (데이터 없음, 보고서에 명시)
+          const Icon(
+            Icons.restaurant_menu,
+            size: 28,
             color: AppColors.textSecondary,
           ),
-        ),
-      ],
+          const SizedBox(width: AppSpacing.cardPadding),
+          Expanded(
+            child: Text(
+              substitute.name,
+              style: AppTextStyles.body2Bold.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          // 우측 녹색 체크 아이콘
+          const Icon(
+            Icons.check_circle,
+            color: AppColors.verdictRecommend,
+            size: 24,
+          ),
+        ],
+      ),
     );
   }
 }

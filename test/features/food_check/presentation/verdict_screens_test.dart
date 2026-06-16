@@ -8,7 +8,6 @@ import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_lo
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_result_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_unknown_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/widgets/verdict_detail_card.dart';
-import 'package:can_i_eat_it/features/food_check/presentation/widgets/verdict_badge.dart';
 
 Widget _wrap(Widget child) {
   return ProviderScope(
@@ -113,8 +112,8 @@ void main() {
       );
       await tester.pump();
 
+      // Figma 재정합: VerdictDetailCard 존재 확인 (VerdictBadge는 새 HeroSection에서 제거됨)
       expect(find.byType(VerdictDetailCard), findsOneWidget);
-      expect(find.byType(VerdictBadge), findsOneWidget);
     });
 
     testWidgets('음식명을 표시한다', (tester) async {
@@ -137,14 +136,15 @@ void main() {
       expect(find.text('트리거/증상 분석'), findsOneWidget);
     });
 
-    testWidgets('personalTitle을 표시한다', (tester) async {
+    testWidgets('등급 헤드라인 문구를 표시한다', (tester) async {
       final verdict = EatVerdict.recommend(foodName: '두부');
       await tester.pumpWidget(
         _wrap(VerdictResultScreen(verdict: verdict, onRetry: () {})),
       );
       await tester.pump();
 
-      expect(find.textContaining('안심하고 드세요'), findsOneWidget);
+      // Figma 재정합: personalTitle 대신 등급별 헤드라인 문구 표시
+      expect(find.text('좋은 선택이에요!'), findsOneWidget);
     });
 
     testWidgets('CTA "다시 검색" 버튼이 존재한다', (tester) async {
@@ -184,7 +184,7 @@ void main() {
       expect(find.text('두부국'), findsOneWidget);
     });
 
-    testWidgets('주의 상태에서 stateRecords 기록이 있으면 "모두 보기" 버튼 노출', (tester) async {
+    testWidgets('주의 상태에서 stateRecords 기록이 있으면 "모두 보기 >" 버튼 노출', (tester) async {
       final verdict = EatVerdict.caution(foodName: '된장찌개');
       // caution 샘플은 total=2
       await tester.pumpWidget(
@@ -192,7 +192,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('모두 보기'), findsOneWidget);
+      // Figma 재정합: "모두 보기 >" 텍스트로 변경
+      expect(find.text('모두 보기 >'), findsOneWidget);
     });
   });
 
@@ -212,14 +213,15 @@ void main() {
       expect(find.text('보리차'), findsOneWidget);
     });
 
-    testWidgets('위험 상태에서 personalTitle을 표시한다', (tester) async {
+    testWidgets('위험 상태에서 등급 헤드라인 문구를 표시한다', (tester) async {
       final verdict = EatVerdict.risk(foodName: '커피');
       await tester.pumpWidget(
         _wrap(VerdictResultScreen(verdict: verdict, onRetry: () {})),
       );
       await tester.pump();
 
-      expect(find.textContaining('피하는 게 좋아요'), findsOneWidget);
+      // Figma 재정합: 위험 등급 헤드라인 문구
+      expect(find.text('속이 많이 불편해질 수 있어요!'), findsOneWidget);
     });
 
     testWidgets('위험 상태에서 CTA 2개("다시 검색" + "내 식단에 추가") 모두 존재', (tester) async {
@@ -288,7 +290,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('최근 먹고 기록한 내역'), findsNothing);
+      // Figma 재정합: 헤더 텍스트 "N개의 증상 기록" 형식으로 변경
+      expect(find.textContaining('증상 기록'), findsNothing);
     });
 
     testWidgets('stateRecords total>0이면 기록 섹션 표시', (tester) async {
@@ -307,7 +310,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('최근 먹고 기록한 내역'), findsOneWidget);
+      // Figma 재정합: "N개의 증상 기록" 형식 (caution 샘플 total=2)
+      expect(find.text('2개의 증상 기록'), findsOneWidget);
     });
 
     testWidgets('substitutes 빈배열이면 대체음식 섹션 숨김', (tester) async {
@@ -324,7 +328,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('이런 음식은 어때요?'), findsNothing);
+      // Figma 재정합: 헤더 텍스트 "대체 음식 추천"으로 변경
+      expect(find.text('대체 음식 추천'), findsNothing);
     });
 
     testWidgets('substitutes 있으면 대체음식 섹션 표시', (tester) async {
@@ -343,7 +348,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('이런 음식은 어때요?'), findsOneWidget);
+      // Figma 재정합: 헤더 텍스트 "대체 음식 추천"으로 변경
+      expect(find.text('대체 음식 추천'), findsOneWidget);
       expect(find.text('디카페인 커피'), findsOneWidget);
     });
   });
