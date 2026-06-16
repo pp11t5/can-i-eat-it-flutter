@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http_mock_adapter/http_mock_adapter.dart';
 
 import 'package:can_i_eat_it/core/network/api_endpoints.dart';
+import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/features/food_check/data/repositories/food_repository_impl.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 
@@ -19,6 +20,14 @@ Map<String, dynamic> _envelope(dynamic result) => {
       'message': 'ok',
       'traceId': null,
       'result': result,
+    };
+
+Map<String, dynamic> _errorEnvelope(String code, String message) => {
+      'isSuccess': false,
+      'code': code,
+      'message': message,
+      'traceId': null,
+      'result': null,
     };
 
 Map<String, dynamic> _foodSummaryJson({
@@ -41,6 +50,51 @@ Map<String, dynamic> _recentFoodJson({
       'searchedAt': searchedAt,
     };
 
+/// by-text 응답 JSON 샘플.
+Map<String, dynamic> _textJudgmentJson({
+  String foodName = '두부',
+  String grade = 'RECOMMEND',
+  String personalTitle = '두부, 안심하고 드세요',
+}) =>
+    {
+      'foodName': foodName,
+      'grade': grade,
+      'personalTitle': personalTitle,
+      'items': [
+        {'emphasis': '트리거/증상 분석', 'body': '역류 트리거에 해당하지 않아요.'},
+        {'emphasis': '알레르기/복용약 분석', 'body': '알레르기 충돌 없어요.'},
+      ],
+      'stateRecords': {'total': 0, 'records': <dynamic>[]},
+    };
+
+/// by-id 응답 JSON 샘플.
+Map<String, dynamic> _idJudgmentJson({
+  String foodExternalId = 'food-ext-1',
+  String foodName = '커피',
+  String grade = 'RISK',
+  String personalTitle = '커피, 지금은 피하는 게 좋아요',
+}) =>
+    {
+      'foodExternalId': foodExternalId,
+      'foodName': foodName,
+      'category': '음료',
+      'grade': grade,
+      'personalTitle': personalTitle,
+      'items': [
+        {'emphasis': '트리거/증상 분석', 'body': '카페인이 위산 분비를 촉진해요.'},
+        {'emphasis': '알레르기/복용약 분석', 'body': '복용약 충돌 없어요.'},
+      ],
+      'stateRecords': {
+        'total': 2,
+        'records': [
+          {'label': '속쓰림', 'date': '2026-06-10', 'timing': '식후 30분'},
+        ],
+      },
+      'substitutes': [
+        {'foodExternalId': 'sub-1', 'name': '디카페인 커피'},
+      ],
+    };
+
 // ---------------------------------------------------------------------------
 // tests
 // ---------------------------------------------------------------------------
@@ -51,7 +105,16 @@ void main() {
   late FoodRepositoryImpl repo;
 
   setUp(() {
-    dio = Dio(BaseOptions(baseUrl: _baseUrl));
+    dio = Dio(
+      BaseOptions(
+        baseUrl: _baseUrl,
+        // 실 앱 dioProvider와 동일하게 400/403을 정상 Response로 전달해
+        // unwrap()이 봉투 code를 읽어 Failure로 매핑하도록 한다.
+        // 401은 throw (AuthInterceptor 담당), 5xx는 throw (NetworkFailure 폴백).
+        validateStatus: (status) =>
+            status != null && status != 401 && status < 500,
+      ),
+    );
     adapter = DioAdapter(dio: dio, matcher: _urlMatcher);
     repo = FoodRepositoryImpl(dio: dio);
   });
@@ -195,32 +258,95 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  group('analyze — MockFoodRepository 위임 (서버 미출시, W3)', () {
-    // analyze 는 네트워크 호출 없이 MockFoodRepository 결정론적 로직에 위임한다.
-    test('두부 → recommend', () async {
-      final result = await repo.analyze('두부');
+  group('judgeByText — DTO 매핑 + 경로 (W3-3)', () {
+    test('GET /foods/judgment?foodTextInput=두부 → EatVerdict recommend 반환', () async {
+      adapter.onGet(
+        ApiEndpoints.foodsJudgmentByText,
+        (server) => server.reply(200, _envelope(_textJudgmentJson())),
+        queryParameters: {'foodTextInput': '두부'},
+      );
+
+      final result = await repo.judgeByText('두부');
+
       expect(result.level, VerdictLevel.recommend);
+      expect(result.foodName, '두부');
+      expect(result.personalTitle, isNotEmpty);
+      expect(result.items.length, 2);
+      expect(result.substitutes, isEmpty);  // by-text 규약
+      expect(result.foodExternalId, isNull); // by-text 규약
     });
 
-    test('커피 → danger', () async {
-      final result = await repo.analyze('커피');
-      expect(result.level, VerdictLevel.danger);
-    });
+    test('grade=UNKNOWN → VerdictLevel.unknown (성공 응답, AsyncData 경로)', () async {
+      adapter.onGet(
+        ApiEndpoints.foodsJudgmentByText,
+        (server) => server.reply(
+          200,
+          _envelope(_textJudgmentJson(
+            foodName: '모름음식',
+            grade: 'UNKNOWN',
+            personalTitle: '모름음식, 확인이 어려워요',
+          )),
+        ),
+        queryParameters: {'foodTextInput': '모름음식'},
+      );
 
-    test('된장 → caution', () async {
-      final result = await repo.analyze('된장');
-      expect(result.level, VerdictLevel.caution);
-    });
+      final result = await repo.judgeByText('모름음식');
 
-    test('모름 → unknown', () async {
-      final result = await repo.analyze('모름');
+      // grade=UNKNOWN은 성공(EatVerdict 반환) — AsyncError로 흘리면 안 됨 (D1, R3)
       expect(result.level, VerdictLevel.unknown);
     });
 
-    test('analyze 결과의 foodName이 입력 텍스트와 동일하다', () async {
-      const input = '두부';
-      final result = await repo.analyze(input);
-      expect(result.foodName, input);
+    test('FOOD400_1 응답 → InvalidFoodQueryFailure throw', () async {
+      adapter.onGet(
+        ApiEndpoints.foodsJudgmentByText,
+        (server) => server.reply(
+          400,
+          _errorEnvelope('FOOD400_1', '잘못된 검색어입니다.'),
+        ),
+        queryParameters: {'foodTextInput': ''},
+      );
+
+      await expectLater(
+        repo.judgeByText(''),
+        throwsA(isA<InvalidFoodQueryFailure>()),
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  group('judgeById — DTO 매핑 + 경로 (W3-3)', () {
+    test('GET /foods/{id}/judgment → EatVerdict risk 반환 (substitutes 포함)', () async {
+      adapter.onGet(
+        ApiEndpoints.foodsJudgmentById('food-ext-1'),
+        (server) => server.reply(200, _envelope(_idJudgmentJson())),
+      );
+
+      final result = await repo.judgeById('food-ext-1');
+
+      expect(result.level, VerdictLevel.risk);
+      expect(result.foodName, '커피');
+      expect(result.foodExternalId, 'food-ext-1');
+      expect(result.category, '음료');
+      expect(result.items.length, 2);
+      expect(result.substitutes.length, 1);
+      expect(result.substitutes.first.name, '디카페인 커피');
+      expect(result.stateRecords.total, 2);
+      expect(result.stateRecords.records.length, 1);
+    });
+
+    test('FOOD404_1 응답 → FoodNotFoundFailure throw', () async {
+      adapter.onGet(
+        ApiEndpoints.foodsJudgmentById('no-such-id'),
+        (server) => server.reply(
+          404,
+          _errorEnvelope('FOOD404_1', '음식을 찾을 수 없어요.'),
+        ),
+      );
+
+      await expectLater(
+        repo.judgeById('no-such-id'),
+        throwsA(isA<FoodNotFoundFailure>()),
+      );
     });
   });
 }

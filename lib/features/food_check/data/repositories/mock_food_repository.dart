@@ -5,12 +5,13 @@ import '../../domain/repositories/food_repository.dart';
 
 /// [FoodRepository] 인메모리 Mock 구현.
 ///
-/// 실 구현(dio datasource)은 이 인터페이스를 구현해 Riverpod override로 교체한다.
-/// [analyze] 는 입력 텍스트 기반으로 4상태를 결정론적으로 반환한다:
-///   - '두부'·'unknown' 이외 + '커피'·'danger' 포함 → danger
-///   - '된장'·'caution' 포함 → caution
-///   - 'unknown'·'모름' 포함 → unknown
+/// [judgeByText] 는 입력 텍스트 기반으로 4상태를 결정론적으로 반환한다:
+///   - 'risk'·'커피'·'위험' 포함 → risk
+///   - 'caution'·'된장'·'주의' 포함 → caution
+///   - 'unknown'·'모름'·'확인어려움' 포함 → unknown
 ///   - 그 외 → recommend
+///
+/// [judgeById] 는 externalId를 foodName처럼 취급해 같은 결정론적 로직을 적용한다.
 class MockFoodRepository implements FoodRepository {
   /// [initialRecent]: 초기 최근검색 목록 (최신순). null이면 빈 목록.
   /// [searchResults]: [search] 호출 시 반환할 고정 목록. null이면 빈 목록.
@@ -46,16 +47,29 @@ class MockFoodRepository implements FoodRepository {
   // FoodRepository 구현
   // ---------------------------------------------------------------------------
 
-  /// 텍스트 기반 결정론적 판정.
+  /// 텍스트 기반 결정론적 판정 (by-text).
   ///
-  /// 키워드 우선순위: danger > caution > unknown > recommend.
+  /// 키워드 우선순위: risk > caution > unknown > recommend.
   @override
-  Future<EatVerdict> analyze(String text) async {
+  Future<EatVerdict> judgeByText(String foodTextInput) async {
+    return _judgeByKeyword(foodTextInput);
+  }
+
+  /// externalId 기반 판정 (by-id).
+  ///
+  /// Mock에서는 externalId를 foodName처럼 취급해 동일 결정론적 로직 적용.
+  @override
+  Future<EatVerdict> judgeById(String foodExternalId) async {
+    return _judgeByKeyword(foodExternalId);
+  }
+
+  /// 키워드 기반 결정론적 판정 내부 로직.
+  EatVerdict _judgeByKeyword(String text) {
     final lower = text.toLowerCase();
-    if (lower.contains('danger') ||
+    if (lower.contains('risk') ||
         lower.contains('커피') ||
         lower.contains('위험')) {
-      return EatVerdict.danger(foodName: text);
+      return EatVerdict.risk(foodName: text);
     }
     if (lower.contains('caution') ||
         lower.contains('된장') ||

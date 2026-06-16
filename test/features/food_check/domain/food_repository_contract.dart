@@ -2,10 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/domain/repositories/food_repository.dart';
 
-/// [FoodRepository] 계약 테스트 스위트.
+/// [FoodRepository] 계약 테스트 스위트 (W3-3 충실 정합).
 ///
 /// Mock·실 구현 모두 이 계약을 통과해야 한다.
-/// dio datasource 구현 추가 시 같은 함수를 재사용한다.
+/// judgeByText/judgeById 2메서드 기반으로 재작성.
 ///
 /// 사용법:
 /// ```dart
@@ -15,68 +15,97 @@ void foodRepositoryContract(
   FoodRepository Function() create,
 ) {
   // ---------------------------------------------------------------------------
-  group('analyze — 4상태 결과', () {
-    test('recommend 키워드 없는 일반 텍스트는 recommend 판정을 반환한다', () async {
+  group('judgeByText — 4상태 결과', () {
+    test('일반 텍스트는 recommend 판정을 반환한다', () async {
       final repo = create();
-      final result = await repo.analyze('두부');
+      final result = await repo.judgeByText('두부');
       expect(result.level, equals(VerdictLevel.recommend));
     });
 
     test('caution 키워드 텍스트는 caution 판정을 반환한다', () async {
       final repo = create();
-      final result = await repo.analyze('된장찌개');
+      final result = await repo.judgeByText('된장찌개');
       expect(result.level, equals(VerdictLevel.caution));
     });
 
-    test('danger 키워드 텍스트는 danger 판정을 반환한다', () async {
+    test('risk 키워드 텍스트는 risk 판정을 반환한다', () async {
       final repo = create();
-      final result = await repo.analyze('커피');
-      expect(result.level, equals(VerdictLevel.danger));
+      final result = await repo.judgeByText('커피');
+      expect(result.level, equals(VerdictLevel.risk));
     });
 
     test('unknown 키워드 텍스트는 unknown 판정을 반환한다', () async {
       final repo = create();
-      final result = await repo.analyze('모름');
+      final result = await repo.judgeByText('모름');
       expect(result.level, equals(VerdictLevel.unknown));
     });
 
-    test('analyze 결과의 foodName이 입력 텍스트와 동일하다', () async {
+    test('judgeByText 결과의 foodName이 입력 텍스트와 동일하다', () async {
       final repo = create();
       const input = '두부';
-      final result = await repo.analyze(input);
+      final result = await repo.judgeByText(input);
       expect(result.foodName, equals(input));
     });
   });
 
   // ---------------------------------------------------------------------------
-  group('analyze — alternatives 규약 (ADR-0003 §4)', () {
-    test('recommend 판정에서 alternatives는 비어 있다', () async {
+  group('judgeByText — substitutes 규약', () {
+    test('recommend 판정에서 substitutes는 비어 있다', () async {
       final repo = create();
-      final result = await repo.analyze('두부');
+      final result = await repo.judgeByText('두부');
       expect(result.level, equals(VerdictLevel.recommend));
-      expect(result.alternatives, isEmpty);
+      expect(result.substitutes, isEmpty);
     });
 
-    test('unknown 판정에서 alternatives는 비어 있다', () async {
+    test('unknown 판정에서 substitutes는 비어 있다', () async {
       final repo = create();
-      final result = await repo.analyze('모름');
+      final result = await repo.judgeByText('모름');
       expect(result.level, equals(VerdictLevel.unknown));
-      expect(result.alternatives, isEmpty);
+      expect(result.substitutes, isEmpty);
     });
 
-    test('caution 판정에서 alternatives는 채워질 수 있다', () async {
+    test('caution 판정에서 substitutes는 List<VerdictSubstitute> 타입이다', () async {
       final repo = create();
-      final result = await repo.analyze('된장찌개');
+      final result = await repo.judgeByText('된장찌개');
       expect(result.level, equals(VerdictLevel.caution));
-      // 계약: alternatives가 List<String> 타입이어야 한다 (비어 있거나 채워짐)
-      expect(result.alternatives, isA<List<String>>());
+      expect(result.substitutes, isA<List<VerdictSubstitute>>());
     });
 
-    test('danger 판정에서 alternatives는 채워질 수 있다', () async {
+    test('risk 판정에서 substitutes는 List<VerdictSubstitute> 타입이다', () async {
       final repo = create();
-      final result = await repo.analyze('커피');
-      expect(result.level, equals(VerdictLevel.danger));
-      expect(result.alternatives, isA<List<String>>());
+      final result = await repo.judgeByText('커피');
+      expect(result.level, equals(VerdictLevel.risk));
+      expect(result.substitutes, isA<List<VerdictSubstitute>>());
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  group('judgeByText — personalTitle·items 구조', () {
+    test('recommend 판정에서 personalTitle이 비어 있지 않다', () async {
+      final repo = create();
+      final result = await repo.judgeByText('두부');
+      expect(result.personalTitle, isNotEmpty);
+    });
+
+    test('recommend 판정에서 items 길이가 2이다', () async {
+      final repo = create();
+      final result = await repo.judgeByText('두부');
+      expect(result.items.length, equals(2));
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  group('judgeById — 결과 반환', () {
+    test('judgeById는 EatVerdict를 반환한다', () async {
+      final repo = create();
+      final result = await repo.judgeById('food-ext-1');
+      expect(result, isA<EatVerdict>());
+    });
+
+    test('judgeById 결과의 level은 VerdictLevel 중 하나이다', () async {
+      final repo = create();
+      final result = await repo.judgeById('food-ext-1');
+      expect(VerdictLevel.values, contains(result.level));
     });
   });
 
@@ -94,7 +123,7 @@ void foodRepositoryContract(
       expect(result, isEmpty);
     });
 
-    test('search 결과는 List<FoodSummary> 타입이다', () async {
+    test('search 결과는 List 타입이다', () async {
       final repo = create();
       final result = await repo.search('두부');
       expect(result, isA<List>());
