@@ -34,6 +34,13 @@ class FailureMapper {
 
     // ── 토큰 무효 (HTTP 401) ──────────────────────────────────────────────────
     'AUTH401': const InvalidTokenFailure(),
+
+    // ── 음식 판정 에러 (F2 judgment — W3-3) ──────────────────────────────────
+    // FOOD400_1: 잘못된 검색어 (by-text 빈 문자열·특수문자 등)
+    'FOOD400_1': const InvalidFoodQueryFailure(),
+    // FOOD404_1: 음식 없음 (by-id 에서 externalId 미존재·삭제된 음식)
+    'FOOD404_1': const FoodNotFoundFailure(),
+    // FOOD404_2: 최근검색 단건 삭제 시 항목 없음 — judgment 무관, NetworkFailure 폴백
   };
 
   // ---------------------------------------------------------------------------
