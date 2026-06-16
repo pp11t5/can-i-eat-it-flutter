@@ -23,8 +23,6 @@ abstract interface class AuthRepository {
   /// 성공 시 [SignInOutcome.Authenticated] (200),
   /// 약관 미동의 시 [NeedsTerms] (400),
   /// 복구 가능 계정 시 [Recoverable] (403) 를 반환한다.
-  ///
-  /// // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
   Future<SignInOutcome> signInWithKakao();
 
   /// Apple 계정으로 로그인한다.

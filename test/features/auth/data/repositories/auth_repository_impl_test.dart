@@ -155,7 +155,6 @@ void main() {
 
   group('signInWithKakao — HTTP 400 → NeedsTerms', () {
     test('400 AUTH400_1 → NeedsTerms(email)', () async {
-      // // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
       dioAdapter.onPost(
         '/auth/kakao/login',
         (server) => server.reply(400, _errorEnvelope('AUTH400_1')),

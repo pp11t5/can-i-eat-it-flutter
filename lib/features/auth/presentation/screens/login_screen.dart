@@ -149,7 +149,6 @@ class LoginScreen extends ConsumerWidget {
 
       case NeedsTerms():
         // imperative push — iOS pop 애니메이션 보장, 가드 redirect 와 분리 (ADR-0006).
-        // // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
         context.push('/terms');
 
       case Recoverable(:final provider):

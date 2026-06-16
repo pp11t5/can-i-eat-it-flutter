@@ -88,7 +88,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AuthSession> recoverAccount(AuthProvider provider) async {
     // 403 복구 경로는 토큰 미발급 · _session=null 상태이므로,
     // 로그인과 동일하게 새 idToken 으로 사용자를 재식별한다.
-    // ASSUMPTION(be-confirm): recover 입력이 {idToken} 인지 백엔드 확인 필요.
     final String idToken;
     if (provider == AuthProvider.kakao) {
       idToken = (await _kakaoAuthService.signIn()).idToken;
@@ -194,8 +193,6 @@ class AuthRepositoryImpl implements AuthRepository {
   /// 3. 성공(200) → 토큰 저장 + `GET /onboarding/status` → [Authenticated]
   /// 4. [TermsRequiredFailure] catch → [NeedsTerms]
   /// 5. [RecoverableAccountFailure] catch → [Recoverable]
-  ///
-  /// // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
   Future<SignInOutcome> _signIn(AuthProvider provider) async {
     try {
       // 1. idToken 획득
@@ -235,7 +232,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Authenticated(session: _session!, onboarded: statusDto.onboarded);
     } on TermsRequiredFailure catch (f) {
-      // // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
       return NeedsTerms(requirements: f.requirements);
     } on RecoverableAccountFailure catch (f) {
       return Recoverable(reason: f.reason, provider: provider);

@@ -133,7 +133,6 @@ class AuthController extends _$AuthController {
       case NeedsTerms():
         // 약관 미동의 — sessionStatusFrom 이 needsTerms 로 평가하도록
         // hasAgreedTerms=false 인 임시 세션을 설정한다.
-        // // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
         state = AsyncValue.data(
           AuthSession(
             userId: 'pending-terms',

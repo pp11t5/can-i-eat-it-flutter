@@ -37,8 +37,6 @@ class MockAuthRepository implements AuthRepository {
       MockAuthRepository(initialSession: null);
 
   /// 로그인 시 신규 사용자(약관 미동의) → [NeedsTerms].
-  ///
-  /// // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
   factory MockAuthRepository.newUser() => MockAuthRepository(
         initialSession: null,
         kakaoOutcome: const NeedsTerms(requirements: {}),

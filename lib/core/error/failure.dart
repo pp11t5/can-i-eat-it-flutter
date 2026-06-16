@@ -28,8 +28,6 @@ sealed class AuthFailure extends Failure {
 /// 약관 동의가 필요한 경우 (HTTP 400: AUTH400_1 이메일, AUTH400_3 닉네임).
 ///
 /// [requirements] 로 어떤 항목의 약관 동의가 필요한지 전달된다.
-///
-/// // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
 class TermsRequiredFailure extends AuthFailure {
   const TermsRequiredFailure({
     required this.requirements,
