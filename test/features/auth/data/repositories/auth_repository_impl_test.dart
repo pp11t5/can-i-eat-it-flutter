@@ -439,4 +439,88 @@ void main() {
       expect(await tokenStore.readRefreshToken(), isNull);
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // currentSession 재수화 — 콜드스타트 4분기 (커밋3 TDD)
+  // ---------------------------------------------------------------------------
+
+  group('currentSession — 콜드스타트 재수화', () {
+    test('분기1: 토큰 없음 → null 반환', () async {
+      // tokenStore 에 토큰 없음 (setUp 에서 빈 InMemoryTokenStore 사용)
+      final result = await repo.currentSession();
+      expect(result, isNull);
+    });
+
+    test('분기2: 토큰 有 + GET /auth/me 200 → 세션 반환, hasAgreedTerms==true, accountStatus==active', () async {
+      await tokenStore.writeTokens(access: 'live-access', refresh: 'live-refresh');
+
+      dioAdapter.onGet(
+        '/auth/me',
+        (server) => server.reply(200, _envelope({
+          'userId': 'user-me',
+          'nickname': 'tester',
+          'email': 'tester@example.com',
+        })),
+      );
+
+      final session = await repo.currentSession();
+
+      expect(session, isNotNull);
+      expect(session!.userId, 'user-me');
+      expect(session.hasAgreedTerms, isTrue);
+      expect(session.accountStatus, AccountStatus.active);
+    });
+
+    test('분기3: 토큰 有 + 연결오류 DioException → null 반환 & consumeOfflineRestoreFlag()==true & 토큰 보존', () async {
+      await tokenStore.writeTokens(access: 'live-access', refresh: 'live-refresh');
+
+      dioAdapter.onGet(
+        '/auth/me',
+        (server) => server.throws(
+          0,
+          DioException(
+            requestOptions: RequestOptions(path: '/auth/me'),
+            type: DioExceptionType.connectionError,
+          ),
+        ),
+      );
+
+      final result = await repo.currentSession();
+
+      expect(result, isNull);
+      // 오프라인 신호 플래그
+      expect(repo.consumeOfflineRestoreFlag(), isTrue);
+      // 두 번째 소비 시 리셋 확인
+      expect(repo.consumeOfflineRestoreFlag(), isFalse);
+      // 토큰은 보존돼야 한다
+      expect(await tokenStore.readAccessToken(), 'live-access');
+      expect(await tokenStore.readRefreshToken(), 'live-refresh');
+    });
+
+    test('분기4: 토큰 有 + 401 + refresh도 401 → null 반환 & 토큰 clear', () async {
+      // AuthInterceptor 없이 직접 SessionExpiredFailure 로 getMe 를 실패시킨다.
+      // 실 구현에서 401→인터셉터→refresh 실패→SessionExpiredFailure 가 e.error에 실려온다.
+      // 여기서는 DioException.error 에 SessionExpiredFailure 를 직접 주입한다.
+      await tokenStore.writeTokens(access: 'expired-access', refresh: 'expired-refresh');
+
+      dioAdapter.onGet(
+        '/auth/me',
+        (server) => server.throws(
+          401,
+          DioException(
+            requestOptions: RequestOptions(path: '/auth/me'),
+            error: const SessionExpiredFailure(),
+            type: DioExceptionType.badResponse,
+          ),
+        ),
+      );
+
+      final result = await repo.currentSession();
+
+      expect(result, isNull);
+      // 만료 시 토큰 clear
+      expect(await tokenStore.readAccessToken(), isNull);
+      expect(await tokenStore.readRefreshToken(), isNull);
+    });
+  });
 }

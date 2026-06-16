@@ -120,6 +120,9 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
+  bool consumeOfflineRestoreFlag() => false; // Mock 에서는 항상 false (오프라인 시나리오 불필요).
+
+  @override
   Future<SignInOutcome> signInWithKakao() async {
     final outcome = _kakaoOutcome ?? _defaultOutcome;
     _applyOutcomeToSession(outcome, AuthProvider.kakao);

@@ -12,7 +12,19 @@ abstract interface class AuthRepository {
   // ---------------------------------------------------------------------------
 
   /// 현재 세션을 반환한다. 미인증 상태이면 null.
+  ///
+  /// 콜드스타트 시 토큰이 있으면 GET /auth/me 로 재수화를 시도한다.
+  /// - 토큰 없음 → null.
+  /// - getMe 성공 → 세션 반환.
+  /// - NetworkFailure(연결오류) → null 반환, 토큰 보존, 오프라인 플래그 set.
+  /// - SessionExpiredFailure / AuthFailure → 토큰 clear, null 반환.
   Future<AuthSession?> currentSession();
+
+  /// 콜드스타트 오프라인 복원 플래그를 소비한다.
+  ///
+  /// true 이면 콜드스타트 시 오프라인으로 토큰 보존 상태임을 의미한다.
+  /// 읽으면 false 로 리셋된다.
+  bool consumeOfflineRestoreFlag();
 
   // ---------------------------------------------------------------------------
   // 소셜 로그인

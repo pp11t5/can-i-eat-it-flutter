@@ -34,6 +34,9 @@ class AuthRepositoryImpl implements AuthRepository {
   /// 현재 로컬 세션 (토큰 기반 in-memory 캐시).
   AuthSession? _session;
 
+  /// 콜드스타트 시 오프라인으로 인해 토큰은 보존됐지만 세션 재수화에 실패했음을 나타내는 플래그.
+  bool _lastRestoreWasOffline = false;
+
   // ---------------------------------------------------------------------------
   // AuthRepository 구현
   // ---------------------------------------------------------------------------
@@ -41,15 +44,29 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthSession?> currentSession() async {
     if (_session != null) return _session;
-    // DESIGN-GAP(cold-start rehydration): secure storage 에 토큰이 남아 있어도
-    // _session 은 in-memory 라 콜드스타트(프로세스 재시작) 시 null → 미인증 처리되어
-    // 매 재실행 재로그인이 강요된다. 토큰→세션 재수화는 GET /auth/me 호출이 필요하고
-    // 오프라인 부팅(NetworkFailure)·만료(SessionExpiredFailure) 분기까지 함께 다뤄야
-    // 하므로 라이브 E2E(실서버) 단계로 이연한다.
-    // TODO(live-e2e): 토큰 존재 시 getMe() 로 세션 재수화 + 오프라인/만료 분기 배선.
+    // 콜드스타트 재수화: 토큰이 있으면 GET /auth/me 로 세션을 복원한다.
     final token = await _tokenStore.readAccessToken();
     if (token == null) return null;
-    return null;
+    try {
+      return await getMe();
+    } on NetworkFailure {
+      // 연결 오류 — 토큰 보존, 오프라인 플래그 set.
+      _lastRestoreWasOffline = true;
+      return null;
+    } on SessionExpiredFailure {
+      await _tokenStore.clear();
+      return null;
+    } on AuthFailure {
+      await _tokenStore.clear();
+      return null;
+    }
+  }
+
+  @override
+  bool consumeOfflineRestoreFlag() {
+    final flag = _lastRestoreWasOffline;
+    _lastRestoreWasOffline = false;
+    return flag;
   }
 
   @override
@@ -133,14 +150,20 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<AuthSession> getMe() async {
-    final response = await _dio.get<dynamic>(ApiEndpoints.authMe);
-    final dto = unwrap<AuthMeResponseDto>(
-      response,
-      (json) => AuthMeResponseDto.fromJson(json as Map<String, dynamic>),
-    );
-    final provider = _session?.provider ?? AuthProvider.kakao;
-    _session = dto.toEntity(provider);
-    return _session!;
+    try {
+      final response = await _dio.get<dynamic>(ApiEndpoints.authMe);
+      final dto = unwrap<AuthMeResponseDto>(
+        response,
+        (json) => AuthMeResponseDto.fromJson(json as Map<String, dynamic>),
+      );
+      final provider = _session?.provider ?? AuthProvider.kakao;
+      _session = dto.toEntity(provider);
+      return _session!;
+    } on DioException catch (e) {
+      // 인터셉터가 SessionExpiredFailure 를 e.error 에 실어 전파한다.
+      if (e.error is Failure) throw e.error as Failure;
+      throw FailureMapper.fromDioException(e);
+    }
   }
 
   @override

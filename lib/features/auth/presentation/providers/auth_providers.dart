@@ -42,6 +42,18 @@ AuthRepository authRepository(Ref ref) => AuthRepositoryImpl(
     );
 
 // ---------------------------------------------------------------------------
+// coldStartOfflineProvider
+// ---------------------------------------------------------------------------
+
+/// 콜드스타트 시 오프라인 복원 플래그를 소비해 반환하는 provider.
+///
+/// true 이면 LoginScreen 이 T1 토스트를 표시한다.
+/// [AuthRepository.consumeOfflineRestoreFlag] 를 1회 소비(읽으면 false 로 리셋).
+@riverpod
+bool coldStartOffline(Ref ref) =>
+    ref.watch(authRepositoryProvider).consumeOfflineRestoreFlag();
+
+// ---------------------------------------------------------------------------
 // AuthController
 // ---------------------------------------------------------------------------
 
