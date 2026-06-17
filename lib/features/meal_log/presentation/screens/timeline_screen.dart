@@ -7,6 +7,7 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/widgets/meal_timeline_list.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/week_nav.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/week_strip.dart';
 
@@ -284,7 +285,7 @@ class _TimelineEmptyView extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 데이터 상태 — 그룹 placeholder 타일 목록 (F3-2b에서 실제 카드로 교체)
+// 데이터 상태 — 타임라인 리스트 (F3-2b: MealTimelineList로 교체 완료)
 // ---------------------------------------------------------------------------
 
 class _TimelineGroupList extends StatelessWidget {
@@ -294,74 +295,14 @@ class _TimelineGroupList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.screenPadding,
-        vertical: AppSpacing.sectionGap,
-      ),
-      itemCount: groups.length,
-      separatorBuilder: (_, __) =>
-          const SizedBox(height: AppSpacing.sectionGap),
-      itemBuilder: (context, index) =>
-          _MealGroupPlaceholderTile(group: groups[index]),
+    return MealTimelineList(
+      groups: groups,
+      onTapRecord: (record) {
+        // TODO(F3-3): context.push('/meal/${record.mealId}')
+      },
+      onAddFood: (group) {
+        // TODO(F3-2c): 음식 추가 흐름 연결
+      },
     );
-  }
-}
-
-/// 끼니 그룹 placeholder 타일.
-///
-/// F3-2b에서 실제 MealGroupCard로 교체 예정.
-class _MealGroupPlaceholderTile extends StatelessWidget {
-  const _MealGroupPlaceholderTile({required this.group});
-
-  final MealGroup group;
-
-  @override
-  Widget build(BuildContext context) {
-    final time = _formatTime(group.eatenAt);
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.cardPadding),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.borderCard),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            time,
-            style: AppTextStyles.caption1Medium.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          ...group.records.map(
-            (r) => Padding(
-              padding:
-                  const EdgeInsets.only(top: AppSpacing.xs),
-              child: Text(
-                r.food.name,
-                style: AppTextStyles.body2Medium.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// ISO-8601 문자열에서 'HH:mm' 포맷 추출.
-  String _formatTime(String isoString) {
-    try {
-      final dt = DateTime.parse(isoString).toLocal();
-      final h = dt.hour.toString().padLeft(2, '0');
-      final m = dt.minute.toString().padLeft(2, '0');
-      return '$h:$m';
-    } catch (_) {
-      return isoString;
-    }
   }
 }
