@@ -86,6 +86,23 @@ class ApiEndpoints {
           '{foodExternalId}', foodExternalId);
 
   // ---------------------------------------------------------------------------
+  // Meal
+  // ---------------------------------------------------------------------------
+
+  /// `GET /meals?date=YYYY-MM-DD` · `POST /meals`
+  static const String meals = '/meals';
+
+  /// `POST /meals/text`
+  static const String mealsText = '/meals/text';
+
+  /// meal 단건 경로 템플릿. [mealItem] 으로 치환.
+  static const String _mealItemTemplate = '/meals/{mealId}';
+
+  /// `GET /meals/{mealId}` · `PATCH /meals/{mealId}` · `DELETE /meals/{mealId}`
+  static String mealItem(String mealId) =>
+      _mealItemTemplate.replaceFirst('{mealId}', mealId);
+
+  // ---------------------------------------------------------------------------
   // Health
   // ---------------------------------------------------------------------------
 
