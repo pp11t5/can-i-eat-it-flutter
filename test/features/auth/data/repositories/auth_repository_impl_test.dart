@@ -30,6 +30,27 @@ class _StubKakaoAuthService implements KakaoAuthService {
   Future<void> signOut() async {}
 }
 
+/// recoverAccount 가 카카오 SDK 를 추가 호출하지 않는지 검증하기 위한 카운팅 stub.
+class _CountingKakaoAuthService implements KakaoAuthService {
+  _CountingKakaoAuthService({required this.idToken, required this.onSignIn});
+
+  final String idToken;
+  final void Function() onSignIn;
+
+  @override
+  Future<KakaoAuthResult> signIn() async {
+    onSignIn();
+    return KakaoAuthResult(
+      idToken: idToken,
+      email: 'test@example.com',
+      nickname: 'testuser',
+    );
+  }
+
+  @override
+  Future<void> signOut() async {}
+}
+
 // ---------------------------------------------------------------------------
 // 공통 봉투 헬퍼
 // ---------------------------------------------------------------------------
@@ -155,7 +176,6 @@ void main() {
 
   group('signInWithKakao — HTTP 400 → NeedsTerms', () {
     test('400 AUTH400_1 → NeedsTerms(email)', () async {
-      // // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
       dioAdapter.onPost(
         '/auth/kakao/login',
         (server) => server.reply(400, _errorEnvelope('AUTH400_1')),
@@ -224,6 +244,64 @@ void main() {
       final rec = outcome as Recoverable;
       expect(rec.reason, RecoverReason.inactive);
     });
+
+    test('403 응답 시 Recoverable.idToken 이 카카오 stub idToken 과 일치한다', () async {
+      // _StubKakaoAuthService 가 'test-id-token' 을 반환하므로
+      // Recoverable.idToken 도 'test-id-token' 이어야 한다.
+      dioAdapter.onPost(
+        '/auth/kakao/login',
+        (server) => server.reply(403, _errorEnvelope('AUTH403_5')),
+        data: {'idToken': 'test-id-token'},
+      );
+
+      final outcome = await repo.signInWithKakao();
+
+      expect(outcome, isA<Recoverable>());
+      final rec = outcome as Recoverable;
+      expect(rec.idToken, 'test-id-token');
+    });
+  });
+
+  group('recoverAccount — 카카오 SDK 미호출 검증', () {
+    // recoverAccount 는 전달받은 idToken 을 재사용해야 하며,
+    // 카카오 SDK(signIn)를 추가 호출하지 않아야 한다.
+
+    test('recoverAccount 호출 시 카카오 stub signIn 이 추가 호출되지 않는다', () async {
+      var kakaoSignInCallCount = 0;
+
+      // 호출 횟수를 기록하는 카운팅 stub
+      final countingKakao = _CountingKakaoAuthService(
+        idToken: 'test-id-token',
+        onSignIn: () => kakaoSignInCallCount++,
+      );
+
+      final repoWithCounting = AuthRepositoryImpl(
+        dio: dio,
+        tokenStore: tokenStore,
+        kakaoAuthService: countingKakao,
+      );
+
+      dioAdapter.onPost(
+        '/auth/kakao/recover',
+        (server) => server.reply(200, _envelope({
+          'accessToken': 'rec-access',
+          'refreshToken': 'rec-refresh',
+          'userId': 'rec-user',
+          'email': 'test@example.com',
+          'role': 'USER',
+        })),
+        data: {'idToken': 'passed-token'},
+      );
+
+      // signIn 을 거치지 않고 직접 recoverAccount 를 호출한다.
+      await repoWithCounting.recoverAccount(
+        AuthProvider.kakao,
+        idToken: 'passed-token',
+      );
+
+      // 카카오 SDK signIn 이 한 번도 호출되지 않아야 한다.
+      expect(kakaoSignInCallCount, 0);
+    });
   });
 
   group('logout', () {
@@ -269,10 +347,9 @@ void main() {
     // 이 그룹의 테스트는 수정 전에는 StateError 로 실패해야 하고,
     // recoverAccount(AuthProvider) 재작성 후 통과해야 한다.
 
-    test('recoverAccount 200 → 새 idToken 전송 + 토큰 저장 + active 세션 반환', () async {
+    test('recoverAccount 200 → 전달받은 idToken 전송 + 토큰 저장 + active 세션 반환', () async {
       // 403 경로는 _session=null · 토큰 없음 상태에서 호출됨.
-      // StubKakaoAuthService 가 'test-id-token' 을 반환하므로
-      // POST /auth/kakao/recover 에 {idToken: 'test-id-token'} 이 전송돼야 한다.
+      // 전달된 'test-id-token' 이 POST /auth/kakao/recover 바디에 그대로 전송돼야 한다.
       dioAdapter.onPost(
         '/auth/kakao/recover',
         (server) => server.reply(200, _envelope({
@@ -285,7 +362,7 @@ void main() {
         data: {'idToken': 'test-id-token'},
       );
 
-      final session = await repo.recoverAccount(AuthProvider.kakao);
+      final session = await repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token');
 
       expect(session.userId, 'user-recovered');
       expect(session.accountStatus, AccountStatus.active);
@@ -304,7 +381,7 @@ void main() {
         data: {'idToken': 'test-id-token'},
       );
 
-      await repo.recoverAccount(AuthProvider.kakao);
+      await repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token');
 
       expect(await tokenStore.readAccessToken(), 'recover-access-2');
       expect(await tokenStore.readRefreshToken(), 'recover-refresh-2');
@@ -325,7 +402,10 @@ void main() {
       );
 
       // StateError 없이 완료돼야 한다.
-      await expectLater(repo.recoverAccount(AuthProvider.kakao), completes);
+      await expectLater(
+        repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token'),
+        completes,
+      );
     });
   });
 
@@ -357,6 +437,149 @@ void main() {
       await expectLater(repo.withdraw(), completes);
       expect(await tokenStore.readAccessToken(), isNull);
       expect(await tokenStore.readRefreshToken(), isNull);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // currentSession 재수화 — 콜드스타트 4분기 (커밋3 TDD)
+  // ---------------------------------------------------------------------------
+
+  group('currentSession — 콜드스타트 재수화', () {
+    test('분기1: 토큰 없음 → null 반환', () async {
+      // tokenStore 에 토큰 없음 (setUp 에서 빈 InMemoryTokenStore 사용)
+      final result = await repo.currentSession();
+      expect(result, isNull);
+    });
+
+    test('분기2: 토큰 有 + GET /auth/me 200 → 세션 반환, hasAgreedTerms==true, accountStatus==active', () async {
+      await tokenStore.writeTokens(access: 'live-access', refresh: 'live-refresh');
+
+      dioAdapter.onGet(
+        '/auth/me',
+        (server) => server.reply(200, _envelope({
+          'userId': 'user-me',
+          'nickname': 'tester',
+          'email': 'tester@example.com',
+        })),
+      );
+
+      final session = await repo.currentSession();
+
+      expect(session, isNotNull);
+      expect(session!.userId, 'user-me');
+      expect(session.hasAgreedTerms, isTrue);
+      expect(session.accountStatus, AccountStatus.active);
+    });
+
+    test('분기3: 토큰 有 + 연결오류 DioException → null 반환 & consumeOfflineRestoreFlag()==true & 토큰 보존', () async {
+      await tokenStore.writeTokens(access: 'live-access', refresh: 'live-refresh');
+
+      dioAdapter.onGet(
+        '/auth/me',
+        (server) => server.throws(
+          0,
+          DioException(
+            requestOptions: RequestOptions(path: '/auth/me'),
+            type: DioExceptionType.connectionError,
+          ),
+        ),
+      );
+
+      final result = await repo.currentSession();
+
+      expect(result, isNull);
+      // 오프라인 신호 플래그
+      expect(repo.consumeOfflineRestoreFlag(), isTrue);
+      // 두 번째 소비 시 리셋 확인
+      expect(repo.consumeOfflineRestoreFlag(), isFalse);
+      // 토큰은 보존돼야 한다
+      expect(await tokenStore.readAccessToken(), 'live-access');
+      expect(await tokenStore.readRefreshToken(), 'live-refresh');
+    });
+
+    test('분기4: 토큰 有 + 401 + refresh도 401 → null 반환 & 토큰 clear', () async {
+      // AuthInterceptor 없이 직접 SessionExpiredFailure 로 getMe 를 실패시킨다.
+      // 실 구현에서 401→인터셉터→refresh 실패→SessionExpiredFailure 가 e.error에 실려온다.
+      // 여기서는 DioException.error 에 SessionExpiredFailure 를 직접 주입한다.
+      await tokenStore.writeTokens(access: 'expired-access', refresh: 'expired-refresh');
+
+      dioAdapter.onGet(
+        '/auth/me',
+        (server) => server.throws(
+          401,
+          DioException(
+            requestOptions: RequestOptions(path: '/auth/me'),
+            error: const SessionExpiredFailure(),
+            type: DioExceptionType.badResponse,
+          ),
+        ),
+      );
+
+      final result = await repo.currentSession();
+
+      expect(result, isNull);
+      // 만료 시 토큰 clear
+      expect(await tokenStore.readAccessToken(), isNull);
+      expect(await tokenStore.readRefreshToken(), isNull);
+    });
+
+    // H1 + O1 회귀 테스트 — 5xx를 오프라인으로 오분류하지 않아야 한다.
+    test('분기5(H1/O1): 토큰 有 + GET /auth/me 500 → null 반환 & offlineFlag=false & 토큰 보존', () async {
+      // 서버 5xx는 일시적 서버 오류이므로:
+      //   - currentSession() == null (세션 미복원)
+      //   - consumeOfflineRestoreFlag() == false (오프라인 플래그 미설정)
+      //   - 토큰은 보존 (강제 로그아웃 안 함)
+      await tokenStore.writeTokens(access: 'live-access-500', refresh: 'live-refresh-500');
+
+      dioAdapter.onGet(
+        '/auth/me',
+        (server) => server.throws(
+          500,
+          DioException(
+            requestOptions: RequestOptions(path: '/auth/me'),
+            type: DioExceptionType.badResponse,
+            response: Response(
+              requestOptions: RequestOptions(path: '/auth/me'),
+              statusCode: 500,
+            ),
+          ),
+        ),
+      );
+
+      final result = await repo.currentSession();
+
+      expect(result, isNull);
+      // 오프라인 플래그가 세워지면 안 된다 (5xx는 오프라인이 아님)
+      expect(repo.consumeOfflineRestoreFlag(), isFalse);
+      // 토큰은 보존돼야 한다 (강제 로그아웃 금지)
+      expect(await tokenStore.readAccessToken(), 'live-access-500');
+      expect(await tokenStore.readRefreshToken(), 'live-refresh-500');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // M1 회귀 테스트 — recoverAccount DioException→Failure 매핑
+  // ---------------------------------------------------------------------------
+
+  group('recoverAccount — DioException→Failure 매핑 (M1)', () {
+    test('recoverAccount 중 연결오류 DioException → NetworkFailure throw (raw DioException 아님)', () async {
+      dioAdapter.onPost(
+        '/auth/kakao/recover',
+        (server) => server.throws(
+          0,
+          DioException(
+            requestOptions: RequestOptions(path: '/auth/kakao/recover'),
+            type: DioExceptionType.connectionError,
+          ),
+        ),
+        data: {'idToken': 'test-id-token'},
+      );
+
+      // raw DioException 이 아니라 Failure(NetworkFailure) 가 throw 돼야 한다.
+      await expectLater(
+        repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token'),
+        throwsA(isA<NetworkFailure>()),
+      );
     });
   });
 }

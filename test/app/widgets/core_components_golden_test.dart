@@ -152,7 +152,7 @@ void main() {
               SizedBox(height: 8),
               VerdictBadge(level: VerdictLevel.caution),
               SizedBox(height: 8),
-              VerdictBadge(level: VerdictLevel.danger),
+              VerdictBadge(level: VerdictLevel.risk),
               SizedBox(height: 8),
               VerdictBadge(level: VerdictLevel.unknown),
             ],

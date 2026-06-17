@@ -34,6 +34,9 @@ class AuthRepositoryImpl implements AuthRepository {
   /// 현재 로컬 세션 (토큰 기반 in-memory 캐시).
   AuthSession? _session;
 
+  /// 콜드스타트 시 오프라인으로 인해 토큰은 보존됐지만 세션 재수화에 실패했음을 나타내는 플래그.
+  bool _lastRestoreWasOffline = false;
+
   // ---------------------------------------------------------------------------
   // AuthRepository 구현
   // ---------------------------------------------------------------------------
@@ -41,15 +44,34 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthSession?> currentSession() async {
     if (_session != null) return _session;
-    // DESIGN-GAP(cold-start rehydration): secure storage 에 토큰이 남아 있어도
-    // _session 은 in-memory 라 콜드스타트(프로세스 재시작) 시 null → 미인증 처리되어
-    // 매 재실행 재로그인이 강요된다. 토큰→세션 재수화는 GET /auth/me 호출이 필요하고
-    // 오프라인 부팅(NetworkFailure)·만료(SessionExpiredFailure) 분기까지 함께 다뤄야
-    // 하므로 라이브 E2E(실서버) 단계로 이연한다.
-    // TODO(live-e2e): 토큰 존재 시 getMe() 로 세션 재수화 + 오프라인/만료 분기 배선.
+    // 콜드스타트 재수화: 토큰이 있으면 GET /auth/me 로 세션을 복원한다.
     final token = await _tokenStore.readAccessToken();
     if (token == null) return null;
-    return null;
+    try {
+      return await getMe();
+    } on NetworkFailure {
+      // 연결 오류 — 토큰 보존, 오프라인 플래그 set.
+      _lastRestoreWasOffline = true;
+      return null;
+    } on SessionExpiredFailure {
+      await _tokenStore.clear();
+      return null;
+    } on AuthFailure {
+      await _tokenStore.clear();
+      return null;
+    } on Failure {
+      // 미예상 실패(UnexpectedFailure 등 — 예: 5xx·봉투 이상).
+      // 일시적 서버 오류로 간주: 토큰 보존 + 오프라인 플래그 미설정 + null 반환.
+      // build로 예외가 새지 않아 AsyncError 누출 차단 (O1 수정).
+      return null;
+    }
+  }
+
+  @override
+  bool consumeOfflineRestoreFlag() {
+    final flag = _lastRestoreWasOffline;
+    _lastRestoreWasOffline = false;
+    return flag;
   }
 
   @override
@@ -85,34 +107,33 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<AuthSession> recoverAccount(AuthProvider provider) async {
-    // 403 복구 경로는 토큰 미발급 · _session=null 상태이므로,
-    // 로그인과 동일하게 새 idToken 으로 사용자를 재식별한다.
-    // ASSUMPTION(be-confirm): recover 입력이 {idToken} 인지 백엔드 확인 필요.
-    final String idToken;
-    if (provider == AuthProvider.kakao) {
-      idToken = (await _kakaoAuthService.signIn()).idToken;
-    } else {
-      throw UnimplementedError('Apple 복구는 아직 미구현');
+  Future<AuthSession> recoverAccount(
+    AuthProvider provider, {
+    required String idToken,
+  }) async {
+    // 403 복구 경로: 로그인 시 획득한 idToken 을 재사용해 카카오 SDK 재인증 없이 복구.
+    try {
+      final response = await _dio.post<dynamic>(
+        ApiEndpoints.authRecover(provider.name),
+        data: {'idToken': idToken},
+      );
+
+      final dto = unwrap<AuthLoginResponseDto>(
+        response,
+        (json) => AuthLoginResponseDto.fromJson(json as Map<String, dynamic>),
+      );
+
+      await _tokenStore.writeTokens(
+        access: dto.accessToken,
+        refresh: dto.refreshToken,
+      );
+
+      _session = dto.toEntity(provider);
+      return _session!;
+    } on DioException catch (e) {
+      // _signIn/getMe/recordTermsAgreement 와 동일 계약 유지 (M1 수정).
+      throw FailureMapper.fromDioException(e);
     }
-
-    final response = await _dio.post<dynamic>(
-      ApiEndpoints.authRecover(provider.name),
-      data: {'idToken': idToken},
-    );
-
-    final dto = unwrap<AuthLoginResponseDto>(
-      response,
-      (json) => AuthLoginResponseDto.fromJson(json as Map<String, dynamic>),
-    );
-
-    await _tokenStore.writeTokens(
-      access: dto.accessToken,
-      refresh: dto.refreshToken,
-    );
-
-    _session = dto.toEntity(provider);
-    return _session!;
   }
 
   @override
@@ -139,14 +160,20 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<AuthSession> getMe() async {
-    final response = await _dio.get<dynamic>(ApiEndpoints.authMe);
-    final dto = unwrap<AuthMeResponseDto>(
-      response,
-      (json) => AuthMeResponseDto.fromJson(json as Map<String, dynamic>),
-    );
-    final provider = _session?.provider ?? AuthProvider.kakao;
-    _session = dto.toEntity(provider);
-    return _session!;
+    try {
+      final response = await _dio.get<dynamic>(ApiEndpoints.authMe);
+      final dto = unwrap<AuthMeResponseDto>(
+        response,
+        (json) => AuthMeResponseDto.fromJson(json as Map<String, dynamic>),
+      );
+      final provider = _session?.provider ?? AuthProvider.kakao;
+      _session = dto.toEntity(provider);
+      return _session!;
+    } on DioException catch (e) {
+      // 인터셉터가 SessionExpiredFailure 를 e.error 에 실어 전파한다.
+      if (e.error is Failure) throw e.error as Failure;
+      throw FailureMapper.fromDioException(e);
+    }
   }
 
   @override
@@ -194,12 +221,11 @@ class AuthRepositoryImpl implements AuthRepository {
   /// 3. 성공(200) → 토큰 저장 + `GET /onboarding/status` → [Authenticated]
   /// 4. [TermsRequiredFailure] catch → [NeedsTerms]
   /// 5. [RecoverableAccountFailure] catch → [Recoverable]
-  ///
-  /// // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
   Future<SignInOutcome> _signIn(AuthProvider provider) async {
+    // idToken 을 try 블록 밖에 선언 — RecoverableAccountFailure catch 에서 운반하기 위함.
+    String? idToken;
     try {
       // 1. idToken 획득
-      final String idToken;
       if (provider == AuthProvider.kakao) {
         final kakaoResult = await _kakaoAuthService.signIn();
         idToken = kakaoResult.idToken;
@@ -235,10 +261,10 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Authenticated(session: _session!, onboarded: statusDto.onboarded);
     } on TermsRequiredFailure catch (f) {
-      // // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
       return NeedsTerms(requirements: f.requirements);
     } on RecoverableAccountFailure catch (f) {
-      return Recoverable(reason: f.reason, provider: provider);
+      // idToken 은 카카오 획득 직후 대입됐으므로 null 이 아님.
+      return Recoverable(reason: f.reason, provider: provider, idToken: idToken!);
     } on DioException catch (e) {
       throw FailureMapper.fromDioException(e);
     }

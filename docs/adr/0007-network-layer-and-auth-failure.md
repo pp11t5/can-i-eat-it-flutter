@@ -138,9 +138,10 @@ W3 실서버(`https://can-i-eat-it.com` + `/api/v1`, 공통 봉투 `{isSuccess, 
 - 마커 반환(`onboarded ? <빈 마커 프로필> : null`) 방식을 기각한 근거: 가짜 마커 프로필은 `currentProfile()`의 계약("프로필 없으면 null, 있으면 그 프로필")을 오염시키고, `repository_contract.dart`의 "submitProfile 후 동일 프로필 반환" 계약과 충돌한다. boolean 의미는 boolean 메서드로 표현하는 편이 계약이 깨끗하다.
 - ADR-0006 게이트는 `hasProfile`(bool?)을 받는 순수 함수이므로, 공급 소스를 `currentProfile()!=null`에서 `onboardedStatus()`로 바꿔도 **`sessionStatusFrom` 시그니처는 불변**(ADR-0006 보존). 단 게이트는 onboarded를 모르는 동안 `bool? hasProfile=null`(로딩)을 전달해 `SessionStatus.loading`을 유지하는 현 합성 규약을 따른다.
 
-#### (7) "신규=400" 가정의 백엔드 확인 대기
-- "신규 사용자 = 로그인 400(약관필요)" 가정은 **백엔드 확인 대기** 상태다(Swagger상 400 사유가 약관 동의 누락으로 보이나, 신규 가입 분기와 동일한지 미검증).
-- 규약: 이 가정에 의존하는 코드(SignInOutcome 매핑, `NeedsTerms` 분기)에 `// ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.` 주석 표식을 남긴다. 확인 완료 시 표식 일괄 grep 제거.
+#### (7) "신규=400" 가정 — 확정(2026-06)
+- "신규 사용자 = 로그인 400(약관필요)" 동작이 **백엔드 확인 완료**됐다(2026-06).
+- 신규=400, recover={idToken} 재사용, access 1h·refresh 3d·rotation·expiresIn없음 모두 확정.
+- `// ASSUMPTION(be-confirm)` 표식은 전체 코드베이스에서 제거 완료.
 
 ## 4. 위험·전제
 
@@ -160,7 +161,8 @@ W3 실서버(`https://can-i-eat-it.com` + `/api/v1`, 공통 봉투 `{isSuccess, 
 - 일부 엔드포인트가 봉투 없이 raw JSON을 반환하기 시작 → 언랩 헬퍼 분기 필요.
 - 토큰 응답에 `expiresIn`이 추가됨 → 선제 refresh 전략 재검토(본 ADR (3)·(4) 수정).
 - 200 응답인데 `hasAgreedTerms=false` 상태가 존재 → (B) 보존 결정 재검토.
-- 신규 가입이 400이 아닌 별도 상태(예: 201/202)로 옴 → (A) SignInOutcome 매핑·(7) 가정 수정.
+
+*(신규=400 가정은 2026-06 백엔드 확인 완료 — 더 이상 깨짐 신호 아님.)*
 
 ## 5. 후속 액션
 
@@ -175,7 +177,7 @@ W3 실서버(`https://can-i-eat-it.com` + `/api/v1`, 공통 봉투 `{isSuccess, 
 - [ ] `FoodRepository` 통합(search+recent) + `RecentFood`/`FoodSummary` 엔티티화 + 기존 `SearchHistoryRepository` 4파일 흡수·마이그레이션 + UI 칩 String→엔티티
 - [ ] 피처별 DTO를 `data/dtos/`에 freezed로 작성 + `toEntity()` 매핑
 - [ ] **api-contract.md 전면 갱신**(STALE): base/prefix, 공통 봉투, 실 엔드포인트(auth 7·gate 3·food 5), 서버 부재 항목(`/foods/analyze`·`POST /foods`·프로필 GET) 명기
-- [ ] "신규=400" 가정에 `// ASSUMPTION(be-confirm)` 표식 삽입, 백엔드 확인 후 제거
+- [x] "신규=400" 가정 — 백엔드 확인 완료(2026-06), `// ASSUMPTION(be-confirm)` 표식 전체 제거 완료
 - [ ] 판정(`/foods/analyze`)·전체 프로필 표시는 엔드포인트 부재로 W3 Mock 유지(후속 이슈로 추적)
 
 ---

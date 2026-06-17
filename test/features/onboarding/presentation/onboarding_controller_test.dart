@@ -52,11 +52,11 @@ void main() {
       final container = makeContainer();
       final notifier = container.read(onboardingControllerProvider.notifier);
 
-      notifier.toggleSymptom('weekly_heartburn');
+      notifier.toggleSymptom('heartburn_reflux');
 
       expect(
         container.read(onboardingControllerProvider).symptomFrequency,
-        ['weekly_heartburn'],
+        ['heartburn_reflux'],
       );
     });
 
@@ -64,8 +64,8 @@ void main() {
       final container = makeContainer();
       final notifier = container.read(onboardingControllerProvider.notifier);
 
-      notifier.toggleSymptom('weekly_heartburn');
-      notifier.toggleSymptom('weekly_heartburn');
+      notifier.toggleSymptom('heartburn_reflux');
+      notifier.toggleSymptom('heartburn_reflux');
 
       expect(
         container.read(onboardingControllerProvider).symptomFrequency,
@@ -77,13 +77,13 @@ void main() {
       final container = makeContainer();
       final notifier = container.read(onboardingControllerProvider.notifier);
 
-      notifier.toggleSymptom('weekly_heartburn');
+      notifier.toggleSymptom('heartburn_reflux');
       notifier.toggleSymptom('post_meal_cough');
-      notifier.toggleSymptom('throat_lump');
+      notifier.toggleSymptom('throat_globus');
 
       expect(
         container.read(onboardingControllerProvider).symptomFrequency,
-        ['weekly_heartburn', 'post_meal_cough', 'throat_lump'],
+        ['heartburn_reflux', 'post_meal_cough', 'throat_globus'],
       );
     });
   });
@@ -263,7 +263,7 @@ void main() {
       final container = makeContainer();
       final notifier = container.read(onboardingControllerProvider.notifier);
 
-      notifier.toggleSymptom('weekly_heartburn');
+      notifier.toggleSymptom('heartburn_reflux');
       notifier.setDiagnosed(true);
       notifier.toggleTrigger('spicy');
       notifier.setCustomTriggers('탄산음료');
@@ -274,7 +274,7 @@ void main() {
       final profile = draft.toHealthProfile();
 
       expect(profile.conditions, ['GERD']);
-      expect(profile.symptomFrequency, ['weekly_heartburn']);
+      expect(profile.symptomFrequency, ['heartburn_reflux']);
       expect(profile.diagnosed, isTrue);
       expect(profile.triggerFoods, ['spicy']);
       expect(profile.customTriggers, '탄산음료');

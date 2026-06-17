@@ -42,6 +42,18 @@ AuthRepository authRepository(Ref ref) => AuthRepositoryImpl(
     );
 
 // ---------------------------------------------------------------------------
+// coldStartOfflineProvider
+// ---------------------------------------------------------------------------
+
+/// 콜드스타트 시 오프라인 복원 플래그를 소비해 반환하는 provider.
+///
+/// true 이면 LoginScreen 이 T1 토스트를 표시한다.
+/// [AuthRepository.consumeOfflineRestoreFlag] 를 1회 소비(읽으면 false 로 리셋).
+@riverpod
+bool coldStartOffline(Ref ref) =>
+    ref.watch(authRepositoryProvider).consumeOfflineRestoreFlag();
+
+// ---------------------------------------------------------------------------
 // AuthController
 // ---------------------------------------------------------------------------
 
@@ -102,10 +114,11 @@ class AuthController extends _$AuthController {
   /// 계정 삭제 유예 상태를 복구하고 세션 상태를 갱신한다.
   ///
   /// [provider]: [Recoverable.provider] 에서 전달받는다.
+  /// [idToken]: [Recoverable.idToken] 에서 전달받는다. 카카오 SDK 재인증 없이 재사용.
   /// 실패 시 예외를 그대로 rethrow 하여 호출자(dialog)가 UI 에러를 표시하도록 한다.
-  Future<void> recoverAccount(AuthProvider provider) async {
+  Future<void> recoverAccount(AuthProvider provider, {required String idToken}) async {
     final repo = ref.read(authRepositoryProvider);
-    final session = await repo.recoverAccount(provider);
+    final session = await repo.recoverAccount(provider, idToken: idToken);
     state = AsyncValue.data(session);
   }
 
@@ -133,7 +146,6 @@ class AuthController extends _$AuthController {
       case NeedsTerms():
         // 약관 미동의 — sessionStatusFrom 이 needsTerms 로 평가하도록
         // hasAgreedTerms=false 인 임시 세션을 설정한다.
-        // // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
         state = AsyncValue.data(
           AuthSession(
             userId: 'pending-terms',

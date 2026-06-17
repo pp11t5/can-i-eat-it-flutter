@@ -119,7 +119,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final entry = allergyOptions.first; // milk_dairy
+      final entry = allergyOptions.first; // milk
 
       expect(
         container.read(onboardingControllerProvider).allergies,

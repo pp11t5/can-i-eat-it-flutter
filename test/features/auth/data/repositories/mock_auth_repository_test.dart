@@ -120,8 +120,11 @@ void main() {
     test('recoverAccount 후 accountStatus 가 active 가 된다', () async {
       final repo = MockAuthRepository.deletionGrace();
       await repo.signInWithKakao();
-      // 403 경로는 _session=null 이므로 provider 를 직접 전달
-      final recovered = await repo.recoverAccount(AuthProvider.kakao);
+      // 403 경로는 _session=null 이므로 provider 와 idToken 을 직접 전달
+      final recovered = await repo.recoverAccount(
+        AuthProvider.kakao,
+        idToken: 'test-id-token',
+      );
       expect(recovered.accountStatus, AccountStatus.active);
     });
   });

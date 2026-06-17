@@ -5,7 +5,7 @@ import 'auth_session.dart';
 ///
 /// 서버 HTTP 상태와 1:1 대응:
 /// - 200 → [Authenticated]
-/// - 400 (약관 미동의) → [NeedsTerms]   // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
+/// - 400 (약관 미동의) → [NeedsTerms]
 /// - 403 (복구 가능) → [Recoverable]
 ///
 /// [login_screen._handlePostSignIn] 에서 exhaustive switch 로 분기한다.
@@ -27,8 +27,6 @@ final class Authenticated extends SignInOutcome {
 /// 약관 동의 필요 (HTTP 400).
 ///
 /// [requirements]: 어떤 항목의 동의가 필요한지.
-///
-/// // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
 final class NeedsTerms extends SignInOutcome {
   const NeedsTerms({required this.requirements});
 
@@ -40,10 +38,17 @@ final class NeedsTerms extends SignInOutcome {
 /// [reason]: 복구 사유 (탈퇴처리중 / 비활성).
 /// [provider]: 로그인 시도한 소셜 제공자.
 ///   403 경로는 토큰 미발급(_session=null)이므로 provider 를 여기서 운반한다.
-///   dialog 가 `recoverAccount(provider)` 에 전달한다.
+///   dialog 가 `recoverAccount(provider, idToken: idToken)` 에 전달한다.
+/// [idToken]: 카카오 로그인 시 획득한 OIDC idToken.
+///   recover 엔드포인트 재호출 시 카카오 SDK 재인증 없이 재사용한다.
 final class Recoverable extends SignInOutcome {
-  const Recoverable({required this.reason, required this.provider});
+  const Recoverable({
+    required this.reason,
+    required this.provider,
+    required this.idToken,
+  });
 
   final RecoverReason reason;
   final AuthProvider provider;
+  final String idToken;
 }

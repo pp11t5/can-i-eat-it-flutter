@@ -5,6 +5,57 @@ import '../../domain/entities/sign_in_outcome.dart';
 import '../../domain/entities/terms_agreement.dart';
 import '../../domain/repositories/auth_repository.dart';
 
+// ---------------------------------------------------------------------------
+// 실패 전용 stub Repository (테스트용)
+// ---------------------------------------------------------------------------
+
+/// 카카오/Apple 로그인 시 지정된 [Failure]를 throw 하는 테스트 stub.
+///
+/// Bug A 회귀 테스트에서 unhandled exception 시나리오를 재현하기 위해 사용한다.
+class ThrowingAuthRepository implements AuthRepository {
+  ThrowingAuthRepository({Failure? failure})
+      : _failure = failure ?? const UnexpectedFailure();
+
+  final Failure _failure;
+
+  @override
+  Future<AuthSession?> currentSession() async => null;
+
+  @override
+  bool consumeOfflineRestoreFlag() => false;
+
+  @override
+  Future<SignInOutcome> signInWithKakao() async => throw _failure;
+
+  @override
+  Future<SignInOutcome> signInWithApple() async => throw _failure;
+
+  @override
+  Future<void> recordTermsAgreement(TermsAgreement agreement) async {}
+
+  @override
+  Future<AuthSession> recoverAccount(
+    AuthProvider provider, {
+    required String idToken,
+  }) async =>
+      throw _failure;
+
+  @override
+  Future<void> refresh() async {}
+
+  @override
+  Future<AuthSession> getMe() async => throw _failure;
+
+  @override
+  Future<void> logout() async {}
+
+  @override
+  Future<void> withdraw() async {}
+
+  @override
+  Future<void> signOut() async {}
+}
+
 /// [AuthRepository] 인메모리 Mock 구현.
 ///
 /// 실 구현(카카오 SDK + 서버 JWT)은 이 인터페이스를 구현해 Riverpod override로 교체한다.
@@ -37,8 +88,6 @@ class MockAuthRepository implements AuthRepository {
       MockAuthRepository(initialSession: null);
 
   /// 로그인 시 신규 사용자(약관 미동의) → [NeedsTerms].
-  ///
-  /// // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
   factory MockAuthRepository.newUser() => MockAuthRepository(
         initialSession: null,
         kakaoOutcome: const NeedsTerms(requirements: {}),
@@ -74,6 +123,7 @@ class MockAuthRepository implements AuthRepository {
         kakaoOutcome: const Recoverable(
           reason: RecoverReason.deletionInProgress,
           provider: AuthProvider.kakao,
+          idToken: 'mock-id-token',
         ),
       );
 
@@ -87,6 +137,7 @@ class MockAuthRepository implements AuthRepository {
         appleOutcome: const Recoverable(
           reason: RecoverReason.deletionInProgress,
           provider: AuthProvider.apple,
+          idToken: 'mock-id-token',
         ),
       );
 
@@ -120,6 +171,9 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
+  bool consumeOfflineRestoreFlag() => false; // Mock 에서는 항상 false (오프라인 시나리오 불필요).
+
+  @override
   Future<SignInOutcome> signInWithKakao() async {
     final outcome = _kakaoOutcome ?? _defaultOutcome;
     _applyOutcomeToSession(outcome, AuthProvider.kakao);
@@ -145,8 +199,12 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AuthSession> recoverAccount(AuthProvider provider) async {
+  Future<AuthSession> recoverAccount(
+    AuthProvider provider, {
+    required String idToken,
+  }) async {
     // 403 경로는 _session=null 상태. Mock 은 새 active 세션을 합성해 반환한다.
+    // idToken 은 실 구현에서 서버로 전달되지만 Mock 에서는 무시한다.
     _session = AuthSession(
       userId: 'mock-recovered',
       provider: provider,

@@ -12,7 +12,19 @@ abstract interface class AuthRepository {
   // ---------------------------------------------------------------------------
 
   /// 현재 세션을 반환한다. 미인증 상태이면 null.
+  ///
+  /// 콜드스타트 시 토큰이 있으면 GET /auth/me 로 재수화를 시도한다.
+  /// - 토큰 없음 → null.
+  /// - getMe 성공 → 세션 반환.
+  /// - NetworkFailure(연결오류) → null 반환, 토큰 보존, 오프라인 플래그 set.
+  /// - SessionExpiredFailure / AuthFailure → 토큰 clear, null 반환.
   Future<AuthSession?> currentSession();
+
+  /// 콜드스타트 오프라인 복원 플래그를 소비한다.
+  ///
+  /// true 이면 콜드스타트 시 오프라인으로 토큰 보존 상태임을 의미한다.
+  /// 읽으면 false 로 리셋된다.
+  bool consumeOfflineRestoreFlag();
 
   // ---------------------------------------------------------------------------
   // 소셜 로그인
@@ -23,8 +35,6 @@ abstract interface class AuthRepository {
   /// 성공 시 [SignInOutcome.Authenticated] (200),
   /// 약관 미동의 시 [NeedsTerms] (400),
   /// 복구 가능 계정 시 [Recoverable] (403) 를 반환한다.
-  ///
-  /// // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
   Future<SignInOutcome> signInWithKakao();
 
   /// Apple 계정으로 로그인한다.
@@ -51,7 +61,8 @@ abstract interface class AuthRepository {
   ///
   /// `POST /auth/{provider}/recover` 를 호출한다.
   /// [provider]: 복구할 소셜 제공자. [Recoverable.provider] 에서 전달받는다.
-  Future<AuthSession> recoverAccount(AuthProvider provider);
+  /// [idToken]: 로그인 시 획득한 OIDC idToken. 카카오 SDK 재인증 없이 재사용한다.
+  Future<AuthSession> recoverAccount(AuthProvider provider, {required String idToken});
 
   // ---------------------------------------------------------------------------
   // 토큰 관리

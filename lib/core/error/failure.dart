@@ -28,8 +28,6 @@ sealed class AuthFailure extends Failure {
 /// 약관 동의가 필요한 경우 (HTTP 400: AUTH400_1 이메일, AUTH400_3 닉네임).
 ///
 /// [requirements] 로 어떤 항목의 약관 동의가 필요한지 전달된다.
-///
-/// // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
 class TermsRequiredFailure extends AuthFailure {
   const TermsRequiredFailure({
     required this.requirements,
@@ -81,4 +79,24 @@ enum RecoverReason {
 
   /// 비활성 계정 (AUTH403_2)
   inactive,
+}
+
+// ---------------------------------------------------------------------------
+// 음식 판정 관련 Failure (F2 judgment — W3-3)
+// ---------------------------------------------------------------------------
+
+/// 음식 판정 요청의 검색어가 잘못됨 (HTTP 400: FOOD400_1).
+///
+/// grade=UNKNOWN(성공)과 다르다 — 이것은 API가 요청 자체를 거부한 에러.
+class InvalidFoodQueryFailure extends Failure {
+  const InvalidFoodQueryFailure(
+      [super.message = '검색어를 확인해 주세요.']);
+}
+
+/// 판정 대상 음식을 찾을 수 없음 (HTTP 404: FOOD404_1).
+///
+/// 음식 등록 해제 또는 잘못된 externalId. grade=UNKNOWN과 무관.
+class FoodNotFoundFailure extends Failure {
+  const FoodNotFoundFailure(
+      [super.message = '해당 음식을 찾을 수 없어요.']);
 }

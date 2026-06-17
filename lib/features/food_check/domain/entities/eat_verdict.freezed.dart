@@ -13,27 +13,1270 @@ part of 'eat_verdict.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
+mixin _$VerdictItem {
+  String get emphasis;
+  String get body;
+
+  /// Create a copy of VerdictItem
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $VerdictItemCopyWith<VerdictItem> get copyWith =>
+      _$VerdictItemCopyWithImpl<VerdictItem>(this as VerdictItem, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is VerdictItem &&
+            (identical(other.emphasis, emphasis) ||
+                other.emphasis == emphasis) &&
+            (identical(other.body, body) || other.body == body));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, emphasis, body);
+
+  @override
+  String toString() {
+    return 'VerdictItem(emphasis: $emphasis, body: $body)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $VerdictItemCopyWith<$Res> {
+  factory $VerdictItemCopyWith(
+          VerdictItem value, $Res Function(VerdictItem) _then) =
+      _$VerdictItemCopyWithImpl;
+  @useResult
+  $Res call({String emphasis, String body});
+}
+
+/// @nodoc
+class _$VerdictItemCopyWithImpl<$Res> implements $VerdictItemCopyWith<$Res> {
+  _$VerdictItemCopyWithImpl(this._self, this._then);
+
+  final VerdictItem _self;
+  final $Res Function(VerdictItem) _then;
+
+  /// Create a copy of VerdictItem
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? emphasis = null,
+    Object? body = null,
+  }) {
+    return _then(_self.copyWith(
+      emphasis: null == emphasis
+          ? _self.emphasis
+          : emphasis // ignore: cast_nullable_to_non_nullable
+              as String,
+      body: null == body
+          ? _self.body
+          : body // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [VerdictItem].
+extension VerdictItemPatterns on VerdictItem {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_VerdictItem value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictItem() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_VerdictItem value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictItem():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_VerdictItem value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictItem() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(String emphasis, String body)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictItem() when $default != null:
+        return $default(_that.emphasis, _that.body);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(String emphasis, String body) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictItem():
+        return $default(_that.emphasis, _that.body);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(String emphasis, String body)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictItem() when $default != null:
+        return $default(_that.emphasis, _that.body);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _VerdictItem implements VerdictItem {
+  const _VerdictItem({required this.emphasis, required this.body});
+
+  @override
+  final String emphasis;
+  @override
+  final String body;
+
+  /// Create a copy of VerdictItem
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$VerdictItemCopyWith<_VerdictItem> get copyWith =>
+      __$VerdictItemCopyWithImpl<_VerdictItem>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _VerdictItem &&
+            (identical(other.emphasis, emphasis) ||
+                other.emphasis == emphasis) &&
+            (identical(other.body, body) || other.body == body));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, emphasis, body);
+
+  @override
+  String toString() {
+    return 'VerdictItem(emphasis: $emphasis, body: $body)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$VerdictItemCopyWith<$Res>
+    implements $VerdictItemCopyWith<$Res> {
+  factory _$VerdictItemCopyWith(
+          _VerdictItem value, $Res Function(_VerdictItem) _then) =
+      __$VerdictItemCopyWithImpl;
+  @override
+  @useResult
+  $Res call({String emphasis, String body});
+}
+
+/// @nodoc
+class __$VerdictItemCopyWithImpl<$Res> implements _$VerdictItemCopyWith<$Res> {
+  __$VerdictItemCopyWithImpl(this._self, this._then);
+
+  final _VerdictItem _self;
+  final $Res Function(_VerdictItem) _then;
+
+  /// Create a copy of VerdictItem
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? emphasis = null,
+    Object? body = null,
+  }) {
+    return _then(_VerdictItem(
+      emphasis: null == emphasis
+          ? _self.emphasis
+          : emphasis // ignore: cast_nullable_to_non_nullable
+              as String,
+      body: null == body
+          ? _self.body
+          : body // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+mixin _$VerdictStateRecord {
+  String get label;
+  String get date; // "YYYY-MM-DD" 문자열 그대로 (표시 전용)
+  String get timing;
+
+  /// Create a copy of VerdictStateRecord
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $VerdictStateRecordCopyWith<VerdictStateRecord> get copyWith =>
+      _$VerdictStateRecordCopyWithImpl<VerdictStateRecord>(
+          this as VerdictStateRecord, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is VerdictStateRecord &&
+            (identical(other.label, label) || other.label == label) &&
+            (identical(other.date, date) || other.date == date) &&
+            (identical(other.timing, timing) || other.timing == timing));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, label, date, timing);
+
+  @override
+  String toString() {
+    return 'VerdictStateRecord(label: $label, date: $date, timing: $timing)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $VerdictStateRecordCopyWith<$Res> {
+  factory $VerdictStateRecordCopyWith(
+          VerdictStateRecord value, $Res Function(VerdictStateRecord) _then) =
+      _$VerdictStateRecordCopyWithImpl;
+  @useResult
+  $Res call({String label, String date, String timing});
+}
+
+/// @nodoc
+class _$VerdictStateRecordCopyWithImpl<$Res>
+    implements $VerdictStateRecordCopyWith<$Res> {
+  _$VerdictStateRecordCopyWithImpl(this._self, this._then);
+
+  final VerdictStateRecord _self;
+  final $Res Function(VerdictStateRecord) _then;
+
+  /// Create a copy of VerdictStateRecord
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? label = null,
+    Object? date = null,
+    Object? timing = null,
+  }) {
+    return _then(_self.copyWith(
+      label: null == label
+          ? _self.label
+          : label // ignore: cast_nullable_to_non_nullable
+              as String,
+      date: null == date
+          ? _self.date
+          : date // ignore: cast_nullable_to_non_nullable
+              as String,
+      timing: null == timing
+          ? _self.timing
+          : timing // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [VerdictStateRecord].
+extension VerdictStateRecordPatterns on VerdictStateRecord {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_VerdictStateRecord value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictStateRecord() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_VerdictStateRecord value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictStateRecord():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_VerdictStateRecord value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictStateRecord() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(String label, String date, String timing)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictStateRecord() when $default != null:
+        return $default(_that.label, _that.date, _that.timing);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(String label, String date, String timing) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictStateRecord():
+        return $default(_that.label, _that.date, _that.timing);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(String label, String date, String timing)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictStateRecord() when $default != null:
+        return $default(_that.label, _that.date, _that.timing);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _VerdictStateRecord implements VerdictStateRecord {
+  const _VerdictStateRecord(
+      {required this.label, required this.date, required this.timing});
+
+  @override
+  final String label;
+  @override
+  final String date;
+// "YYYY-MM-DD" 문자열 그대로 (표시 전용)
+  @override
+  final String timing;
+
+  /// Create a copy of VerdictStateRecord
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$VerdictStateRecordCopyWith<_VerdictStateRecord> get copyWith =>
+      __$VerdictStateRecordCopyWithImpl<_VerdictStateRecord>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _VerdictStateRecord &&
+            (identical(other.label, label) || other.label == label) &&
+            (identical(other.date, date) || other.date == date) &&
+            (identical(other.timing, timing) || other.timing == timing));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, label, date, timing);
+
+  @override
+  String toString() {
+    return 'VerdictStateRecord(label: $label, date: $date, timing: $timing)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$VerdictStateRecordCopyWith<$Res>
+    implements $VerdictStateRecordCopyWith<$Res> {
+  factory _$VerdictStateRecordCopyWith(
+          _VerdictStateRecord value, $Res Function(_VerdictStateRecord) _then) =
+      __$VerdictStateRecordCopyWithImpl;
+  @override
+  @useResult
+  $Res call({String label, String date, String timing});
+}
+
+/// @nodoc
+class __$VerdictStateRecordCopyWithImpl<$Res>
+    implements _$VerdictStateRecordCopyWith<$Res> {
+  __$VerdictStateRecordCopyWithImpl(this._self, this._then);
+
+  final _VerdictStateRecord _self;
+  final $Res Function(_VerdictStateRecord) _then;
+
+  /// Create a copy of VerdictStateRecord
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? label = null,
+    Object? date = null,
+    Object? timing = null,
+  }) {
+    return _then(_VerdictStateRecord(
+      label: null == label
+          ? _self.label
+          : label // ignore: cast_nullable_to_non_nullable
+              as String,
+      date: null == date
+          ? _self.date
+          : date // ignore: cast_nullable_to_non_nullable
+              as String,
+      timing: null == timing
+          ? _self.timing
+          : timing // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+mixin _$VerdictStateRecords {
+  int get total;
+  List<VerdictStateRecord> get records;
+
+  /// Create a copy of VerdictStateRecords
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $VerdictStateRecordsCopyWith<VerdictStateRecords> get copyWith =>
+      _$VerdictStateRecordsCopyWithImpl<VerdictStateRecords>(
+          this as VerdictStateRecords, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is VerdictStateRecords &&
+            (identical(other.total, total) || other.total == total) &&
+            const DeepCollectionEquality().equals(other.records, records));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, total, const DeepCollectionEquality().hash(records));
+
+  @override
+  String toString() {
+    return 'VerdictStateRecords(total: $total, records: $records)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $VerdictStateRecordsCopyWith<$Res> {
+  factory $VerdictStateRecordsCopyWith(
+          VerdictStateRecords value, $Res Function(VerdictStateRecords) _then) =
+      _$VerdictStateRecordsCopyWithImpl;
+  @useResult
+  $Res call({int total, List<VerdictStateRecord> records});
+}
+
+/// @nodoc
+class _$VerdictStateRecordsCopyWithImpl<$Res>
+    implements $VerdictStateRecordsCopyWith<$Res> {
+  _$VerdictStateRecordsCopyWithImpl(this._self, this._then);
+
+  final VerdictStateRecords _self;
+  final $Res Function(VerdictStateRecords) _then;
+
+  /// Create a copy of VerdictStateRecords
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? total = null,
+    Object? records = null,
+  }) {
+    return _then(_self.copyWith(
+      total: null == total
+          ? _self.total
+          : total // ignore: cast_nullable_to_non_nullable
+              as int,
+      records: null == records
+          ? _self.records
+          : records // ignore: cast_nullable_to_non_nullable
+              as List<VerdictStateRecord>,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [VerdictStateRecords].
+extension VerdictStateRecordsPatterns on VerdictStateRecords {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_VerdictStateRecords value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictStateRecords() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_VerdictStateRecords value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictStateRecords():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_VerdictStateRecords value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictStateRecords() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(int total, List<VerdictStateRecord> records)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictStateRecords() when $default != null:
+        return $default(_that.total, _that.records);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(int total, List<VerdictStateRecord> records) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictStateRecords():
+        return $default(_that.total, _that.records);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(int total, List<VerdictStateRecord> records)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictStateRecords() when $default != null:
+        return $default(_that.total, _that.records);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _VerdictStateRecords implements VerdictStateRecords {
+  const _VerdictStateRecords(
+      {this.total = 0,
+      final List<VerdictStateRecord> records = const <VerdictStateRecord>[]})
+      : _records = records;
+
+  @override
+  @JsonKey()
+  final int total;
+  final List<VerdictStateRecord> _records;
+  @override
+  @JsonKey()
+  List<VerdictStateRecord> get records {
+    if (_records is EqualUnmodifiableListView) return _records;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_records);
+  }
+
+  /// Create a copy of VerdictStateRecords
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$VerdictStateRecordsCopyWith<_VerdictStateRecords> get copyWith =>
+      __$VerdictStateRecordsCopyWithImpl<_VerdictStateRecords>(
+          this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _VerdictStateRecords &&
+            (identical(other.total, total) || other.total == total) &&
+            const DeepCollectionEquality().equals(other._records, _records));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, total, const DeepCollectionEquality().hash(_records));
+
+  @override
+  String toString() {
+    return 'VerdictStateRecords(total: $total, records: $records)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$VerdictStateRecordsCopyWith<$Res>
+    implements $VerdictStateRecordsCopyWith<$Res> {
+  factory _$VerdictStateRecordsCopyWith(_VerdictStateRecords value,
+          $Res Function(_VerdictStateRecords) _then) =
+      __$VerdictStateRecordsCopyWithImpl;
+  @override
+  @useResult
+  $Res call({int total, List<VerdictStateRecord> records});
+}
+
+/// @nodoc
+class __$VerdictStateRecordsCopyWithImpl<$Res>
+    implements _$VerdictStateRecordsCopyWith<$Res> {
+  __$VerdictStateRecordsCopyWithImpl(this._self, this._then);
+
+  final _VerdictStateRecords _self;
+  final $Res Function(_VerdictStateRecords) _then;
+
+  /// Create a copy of VerdictStateRecords
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? total = null,
+    Object? records = null,
+  }) {
+    return _then(_VerdictStateRecords(
+      total: null == total
+          ? _self.total
+          : total // ignore: cast_nullable_to_non_nullable
+              as int,
+      records: null == records
+          ? _self._records
+          : records // ignore: cast_nullable_to_non_nullable
+              as List<VerdictStateRecord>,
+    ));
+  }
+}
+
+/// @nodoc
+mixin _$VerdictSubstitute {
+  String get foodExternalId;
+  String get name;
+
+  /// Create a copy of VerdictSubstitute
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $VerdictSubstituteCopyWith<VerdictSubstitute> get copyWith =>
+      _$VerdictSubstituteCopyWithImpl<VerdictSubstitute>(
+          this as VerdictSubstitute, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is VerdictSubstitute &&
+            (identical(other.foodExternalId, foodExternalId) ||
+                other.foodExternalId == foodExternalId) &&
+            (identical(other.name, name) || other.name == name));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, foodExternalId, name);
+
+  @override
+  String toString() {
+    return 'VerdictSubstitute(foodExternalId: $foodExternalId, name: $name)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $VerdictSubstituteCopyWith<$Res> {
+  factory $VerdictSubstituteCopyWith(
+          VerdictSubstitute value, $Res Function(VerdictSubstitute) _then) =
+      _$VerdictSubstituteCopyWithImpl;
+  @useResult
+  $Res call({String foodExternalId, String name});
+}
+
+/// @nodoc
+class _$VerdictSubstituteCopyWithImpl<$Res>
+    implements $VerdictSubstituteCopyWith<$Res> {
+  _$VerdictSubstituteCopyWithImpl(this._self, this._then);
+
+  final VerdictSubstitute _self;
+  final $Res Function(VerdictSubstitute) _then;
+
+  /// Create a copy of VerdictSubstitute
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? foodExternalId = null,
+    Object? name = null,
+  }) {
+    return _then(_self.copyWith(
+      foodExternalId: null == foodExternalId
+          ? _self.foodExternalId
+          : foodExternalId // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _self.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [VerdictSubstitute].
+extension VerdictSubstitutePatterns on VerdictSubstitute {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_VerdictSubstitute value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictSubstitute() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_VerdictSubstitute value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictSubstitute():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_VerdictSubstitute value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictSubstitute() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(String foodExternalId, String name)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictSubstitute() when $default != null:
+        return $default(_that.foodExternalId, _that.name);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(String foodExternalId, String name) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictSubstitute():
+        return $default(_that.foodExternalId, _that.name);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(String foodExternalId, String name)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VerdictSubstitute() when $default != null:
+        return $default(_that.foodExternalId, _that.name);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _VerdictSubstitute implements VerdictSubstitute {
+  const _VerdictSubstitute({required this.foodExternalId, required this.name});
+
+  @override
+  final String foodExternalId;
+  @override
+  final String name;
+
+  /// Create a copy of VerdictSubstitute
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$VerdictSubstituteCopyWith<_VerdictSubstitute> get copyWith =>
+      __$VerdictSubstituteCopyWithImpl<_VerdictSubstitute>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _VerdictSubstitute &&
+            (identical(other.foodExternalId, foodExternalId) ||
+                other.foodExternalId == foodExternalId) &&
+            (identical(other.name, name) || other.name == name));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, foodExternalId, name);
+
+  @override
+  String toString() {
+    return 'VerdictSubstitute(foodExternalId: $foodExternalId, name: $name)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$VerdictSubstituteCopyWith<$Res>
+    implements $VerdictSubstituteCopyWith<$Res> {
+  factory _$VerdictSubstituteCopyWith(
+          _VerdictSubstitute value, $Res Function(_VerdictSubstitute) _then) =
+      __$VerdictSubstituteCopyWithImpl;
+  @override
+  @useResult
+  $Res call({String foodExternalId, String name});
+}
+
+/// @nodoc
+class __$VerdictSubstituteCopyWithImpl<$Res>
+    implements _$VerdictSubstituteCopyWith<$Res> {
+  __$VerdictSubstituteCopyWithImpl(this._self, this._then);
+
+  final _VerdictSubstitute _self;
+  final $Res Function(_VerdictSubstitute) _then;
+
+  /// Create a copy of VerdictSubstitute
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? foodExternalId = null,
+    Object? name = null,
+  }) {
+    return _then(_VerdictSubstitute(
+      foodExternalId: null == foodExternalId
+          ? _self.foodExternalId
+          : foodExternalId // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _self.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
 mixin _$EatVerdict {
-  /// 판정 신호.
+  /// 판정 신호 (grade 매핑).
   VerdictLevel get level;
 
-  /// 분석 대상 음식명.
+  /// 음식명 (foodName).
   String get foodName;
 
-  /// Section 1 — 일반 분석. [unknown]에서는 비어 있을 수 있다.
-  String get reasonGeneral;
+  /// 개인화 헤드라인 (personalTitle) — HeroSection 텍스트.
+  String get personalTitle;
 
-  /// Section 2 — 개인화 맞춤 분석. [unknown]에서는 비어 있을 수 있다.
-  String get reasonPersonal;
+  /// 분석 항목 2종.
+  /// [0] = 트리거/증상 분석, [1] = 알레르기/복용약 분석.
+  List<VerdictItem> get items;
 
-  /// 대체 음식 목록 (Section 2 하단).
-  ///
-  /// [recommend]·[unknown] 에서는 비어 있어야 한다(ADR-0003 §4).
-  /// [caution]·[danger] 에서는 서버가 1~3개를 채울 수 있다.
-  List<String> get alternatives;
+  /// 연관 섭취 기록 요약. 기록 없으면 VerdictStateRecords(total:0).
+  VerdictStateRecords get stateRecords;
 
-  /// Section 3 — 이 음식 섭취 후 기록 요약. 기록 없으면 [VerdictHistorySummary.empty].
-  VerdictHistorySummary get historySummary;
+  /// 대체 음식. RECOMMEND·UNKNOWN·by-text 에서 빈배열.
+  List<VerdictSubstitute> get substitutes;
+
+  /// 서버 음식 식별자. by-text 판정이면 null.
+  String? get foodExternalId;
+
+  /// 음식 분류. by-text 판정이면 null.
+  String? get category;
 
   /// Create a copy of EatVerdict
   /// with the given fields replaced by the non-null parameter values.
@@ -50,14 +1293,17 @@ mixin _$EatVerdict {
             (identical(other.level, level) || other.level == level) &&
             (identical(other.foodName, foodName) ||
                 other.foodName == foodName) &&
-            (identical(other.reasonGeneral, reasonGeneral) ||
-                other.reasonGeneral == reasonGeneral) &&
-            (identical(other.reasonPersonal, reasonPersonal) ||
-                other.reasonPersonal == reasonPersonal) &&
+            (identical(other.personalTitle, personalTitle) ||
+                other.personalTitle == personalTitle) &&
+            const DeepCollectionEquality().equals(other.items, items) &&
+            (identical(other.stateRecords, stateRecords) ||
+                other.stateRecords == stateRecords) &&
             const DeepCollectionEquality()
-                .equals(other.alternatives, alternatives) &&
-            (identical(other.historySummary, historySummary) ||
-                other.historySummary == historySummary));
+                .equals(other.substitutes, substitutes) &&
+            (identical(other.foodExternalId, foodExternalId) ||
+                other.foodExternalId == foodExternalId) &&
+            (identical(other.category, category) ||
+                other.category == category));
   }
 
   @override
@@ -65,14 +1311,16 @@ mixin _$EatVerdict {
       runtimeType,
       level,
       foodName,
-      reasonGeneral,
-      reasonPersonal,
-      const DeepCollectionEquality().hash(alternatives),
-      historySummary);
+      personalTitle,
+      const DeepCollectionEquality().hash(items),
+      stateRecords,
+      const DeepCollectionEquality().hash(substitutes),
+      foodExternalId,
+      category);
 
   @override
   String toString() {
-    return 'EatVerdict(level: $level, foodName: $foodName, reasonGeneral: $reasonGeneral, reasonPersonal: $reasonPersonal, alternatives: $alternatives, historySummary: $historySummary)';
+    return 'EatVerdict(level: $level, foodName: $foodName, personalTitle: $personalTitle, items: $items, stateRecords: $stateRecords, substitutes: $substitutes, foodExternalId: $foodExternalId, category: $category)';
   }
 }
 
@@ -85,12 +1333,14 @@ abstract mixin class $EatVerdictCopyWith<$Res> {
   $Res call(
       {VerdictLevel level,
       String foodName,
-      String reasonGeneral,
-      String reasonPersonal,
-      List<String> alternatives,
-      VerdictHistorySummary historySummary});
+      String personalTitle,
+      List<VerdictItem> items,
+      VerdictStateRecords stateRecords,
+      List<VerdictSubstitute> substitutes,
+      String? foodExternalId,
+      String? category});
 
-  $VerdictHistorySummaryCopyWith<$Res> get historySummary;
+  $VerdictStateRecordsCopyWith<$Res> get stateRecords;
 }
 
 /// @nodoc
@@ -107,10 +1357,12 @@ class _$EatVerdictCopyWithImpl<$Res> implements $EatVerdictCopyWith<$Res> {
   $Res call({
     Object? level = null,
     Object? foodName = null,
-    Object? reasonGeneral = null,
-    Object? reasonPersonal = null,
-    Object? alternatives = null,
-    Object? historySummary = null,
+    Object? personalTitle = null,
+    Object? items = null,
+    Object? stateRecords = null,
+    Object? substitutes = null,
+    Object? foodExternalId = freezed,
+    Object? category = freezed,
   }) {
     return _then(_self.copyWith(
       level: null == level
@@ -121,22 +1373,30 @@ class _$EatVerdictCopyWithImpl<$Res> implements $EatVerdictCopyWith<$Res> {
           ? _self.foodName
           : foodName // ignore: cast_nullable_to_non_nullable
               as String,
-      reasonGeneral: null == reasonGeneral
-          ? _self.reasonGeneral
-          : reasonGeneral // ignore: cast_nullable_to_non_nullable
+      personalTitle: null == personalTitle
+          ? _self.personalTitle
+          : personalTitle // ignore: cast_nullable_to_non_nullable
               as String,
-      reasonPersonal: null == reasonPersonal
-          ? _self.reasonPersonal
-          : reasonPersonal // ignore: cast_nullable_to_non_nullable
-              as String,
-      alternatives: null == alternatives
-          ? _self.alternatives
-          : alternatives // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      historySummary: null == historySummary
-          ? _self.historySummary
-          : historySummary // ignore: cast_nullable_to_non_nullable
-              as VerdictHistorySummary,
+      items: null == items
+          ? _self.items
+          : items // ignore: cast_nullable_to_non_nullable
+              as List<VerdictItem>,
+      stateRecords: null == stateRecords
+          ? _self.stateRecords
+          : stateRecords // ignore: cast_nullable_to_non_nullable
+              as VerdictStateRecords,
+      substitutes: null == substitutes
+          ? _self.substitutes
+          : substitutes // ignore: cast_nullable_to_non_nullable
+              as List<VerdictSubstitute>,
+      foodExternalId: freezed == foodExternalId
+          ? _self.foodExternalId
+          : foodExternalId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      category: freezed == category
+          ? _self.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 
@@ -144,9 +1404,9 @@ class _$EatVerdictCopyWithImpl<$Res> implements $EatVerdictCopyWith<$Res> {
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $VerdictHistorySummaryCopyWith<$Res> get historySummary {
-    return $VerdictHistorySummaryCopyWith<$Res>(_self.historySummary, (value) {
-      return _then(_self.copyWith(historySummary: value));
+  $VerdictStateRecordsCopyWith<$Res> get stateRecords {
+    return $VerdictStateRecordsCopyWith<$Res>(_self.stateRecords, (value) {
+      return _then(_self.copyWith(stateRecords: value));
     });
   }
 }
@@ -247,18 +1507,27 @@ extension EatVerdictPatterns on EatVerdict {
     TResult Function(
             VerdictLevel level,
             String foodName,
-            String reasonGeneral,
-            String reasonPersonal,
-            List<String> alternatives,
-            VerdictHistorySummary historySummary)?
+            String personalTitle,
+            List<VerdictItem> items,
+            VerdictStateRecords stateRecords,
+            List<VerdictSubstitute> substitutes,
+            String? foodExternalId,
+            String? category)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _EatVerdict() when $default != null:
-        return $default(_that.level, _that.foodName, _that.reasonGeneral,
-            _that.reasonPersonal, _that.alternatives, _that.historySummary);
+        return $default(
+            _that.level,
+            _that.foodName,
+            _that.personalTitle,
+            _that.items,
+            _that.stateRecords,
+            _that.substitutes,
+            _that.foodExternalId,
+            _that.category);
       case _:
         return orElse();
     }
@@ -282,17 +1551,26 @@ extension EatVerdictPatterns on EatVerdict {
     TResult Function(
             VerdictLevel level,
             String foodName,
-            String reasonGeneral,
-            String reasonPersonal,
-            List<String> alternatives,
-            VerdictHistorySummary historySummary)
+            String personalTitle,
+            List<VerdictItem> items,
+            VerdictStateRecords stateRecords,
+            List<VerdictSubstitute> substitutes,
+            String? foodExternalId,
+            String? category)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _EatVerdict():
-        return $default(_that.level, _that.foodName, _that.reasonGeneral,
-            _that.reasonPersonal, _that.alternatives, _that.historySummary);
+        return $default(
+            _that.level,
+            _that.foodName,
+            _that.personalTitle,
+            _that.items,
+            _that.stateRecords,
+            _that.substitutes,
+            _that.foodExternalId,
+            _that.category);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -315,17 +1593,26 @@ extension EatVerdictPatterns on EatVerdict {
     TResult? Function(
             VerdictLevel level,
             String foodName,
-            String reasonGeneral,
-            String reasonPersonal,
-            List<String> alternatives,
-            VerdictHistorySummary historySummary)?
+            String personalTitle,
+            List<VerdictItem> items,
+            VerdictStateRecords stateRecords,
+            List<VerdictSubstitute> substitutes,
+            String? foodExternalId,
+            String? category)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _EatVerdict() when $default != null:
-        return $default(_that.level, _that.foodName, _that.reasonGeneral,
-            _that.reasonPersonal, _that.alternatives, _that.historySummary);
+        return $default(
+            _that.level,
+            _that.foodName,
+            _that.personalTitle,
+            _that.items,
+            _that.stateRecords,
+            _that.substitutes,
+            _that.foodExternalId,
+            _that.category);
       case _:
         return null;
     }
@@ -338,52 +1625,66 @@ class _EatVerdict implements EatVerdict {
   const _EatVerdict(
       {required this.level,
       required this.foodName,
-      this.reasonGeneral = '',
-      this.reasonPersonal = '',
-      final List<String> alternatives = const <String>[],
-      this.historySummary = const VerdictHistorySummary()})
-      : _alternatives = alternatives;
+      this.personalTitle = '',
+      final List<VerdictItem> items = const <VerdictItem>[],
+      this.stateRecords = const VerdictStateRecords(),
+      final List<VerdictSubstitute> substitutes = const <VerdictSubstitute>[],
+      this.foodExternalId,
+      this.category})
+      : _items = items,
+        _substitutes = substitutes;
 
-  /// 판정 신호.
+  /// 판정 신호 (grade 매핑).
   @override
   final VerdictLevel level;
 
-  /// 분석 대상 음식명.
+  /// 음식명 (foodName).
   @override
   final String foodName;
 
-  /// Section 1 — 일반 분석. [unknown]에서는 비어 있을 수 있다.
+  /// 개인화 헤드라인 (personalTitle) — HeroSection 텍스트.
   @override
   @JsonKey()
-  final String reasonGeneral;
+  final String personalTitle;
 
-  /// Section 2 — 개인화 맞춤 분석. [unknown]에서는 비어 있을 수 있다.
+  /// 분석 항목 2종.
+  /// [0] = 트리거/증상 분석, [1] = 알레르기/복용약 분석.
+  final List<VerdictItem> _items;
+
+  /// 분석 항목 2종.
+  /// [0] = 트리거/증상 분석, [1] = 알레르기/복용약 분석.
   @override
   @JsonKey()
-  final String reasonPersonal;
-
-  /// 대체 음식 목록 (Section 2 하단).
-  ///
-  /// [recommend]·[unknown] 에서는 비어 있어야 한다(ADR-0003 §4).
-  /// [caution]·[danger] 에서는 서버가 1~3개를 채울 수 있다.
-  final List<String> _alternatives;
-
-  /// 대체 음식 목록 (Section 2 하단).
-  ///
-  /// [recommend]·[unknown] 에서는 비어 있어야 한다(ADR-0003 §4).
-  /// [caution]·[danger] 에서는 서버가 1~3개를 채울 수 있다.
-  @override
-  @JsonKey()
-  List<String> get alternatives {
-    if (_alternatives is EqualUnmodifiableListView) return _alternatives;
+  List<VerdictItem> get items {
+    if (_items is EqualUnmodifiableListView) return _items;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_alternatives);
+    return EqualUnmodifiableListView(_items);
   }
 
-  /// Section 3 — 이 음식 섭취 후 기록 요약. 기록 없으면 [VerdictHistorySummary.empty].
+  /// 연관 섭취 기록 요약. 기록 없으면 VerdictStateRecords(total:0).
   @override
   @JsonKey()
-  final VerdictHistorySummary historySummary;
+  final VerdictStateRecords stateRecords;
+
+  /// 대체 음식. RECOMMEND·UNKNOWN·by-text 에서 빈배열.
+  final List<VerdictSubstitute> _substitutes;
+
+  /// 대체 음식. RECOMMEND·UNKNOWN·by-text 에서 빈배열.
+  @override
+  @JsonKey()
+  List<VerdictSubstitute> get substitutes {
+    if (_substitutes is EqualUnmodifiableListView) return _substitutes;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_substitutes);
+  }
+
+  /// 서버 음식 식별자. by-text 판정이면 null.
+  @override
+  final String? foodExternalId;
+
+  /// 음식 분류. by-text 판정이면 null.
+  @override
+  final String? category;
 
   /// Create a copy of EatVerdict
   /// with the given fields replaced by the non-null parameter values.
@@ -401,14 +1702,17 @@ class _EatVerdict implements EatVerdict {
             (identical(other.level, level) || other.level == level) &&
             (identical(other.foodName, foodName) ||
                 other.foodName == foodName) &&
-            (identical(other.reasonGeneral, reasonGeneral) ||
-                other.reasonGeneral == reasonGeneral) &&
-            (identical(other.reasonPersonal, reasonPersonal) ||
-                other.reasonPersonal == reasonPersonal) &&
+            (identical(other.personalTitle, personalTitle) ||
+                other.personalTitle == personalTitle) &&
+            const DeepCollectionEquality().equals(other._items, _items) &&
+            (identical(other.stateRecords, stateRecords) ||
+                other.stateRecords == stateRecords) &&
             const DeepCollectionEquality()
-                .equals(other._alternatives, _alternatives) &&
-            (identical(other.historySummary, historySummary) ||
-                other.historySummary == historySummary));
+                .equals(other._substitutes, _substitutes) &&
+            (identical(other.foodExternalId, foodExternalId) ||
+                other.foodExternalId == foodExternalId) &&
+            (identical(other.category, category) ||
+                other.category == category));
   }
 
   @override
@@ -416,14 +1720,16 @@ class _EatVerdict implements EatVerdict {
       runtimeType,
       level,
       foodName,
-      reasonGeneral,
-      reasonPersonal,
-      const DeepCollectionEquality().hash(_alternatives),
-      historySummary);
+      personalTitle,
+      const DeepCollectionEquality().hash(_items),
+      stateRecords,
+      const DeepCollectionEquality().hash(_substitutes),
+      foodExternalId,
+      category);
 
   @override
   String toString() {
-    return 'EatVerdict(level: $level, foodName: $foodName, reasonGeneral: $reasonGeneral, reasonPersonal: $reasonPersonal, alternatives: $alternatives, historySummary: $historySummary)';
+    return 'EatVerdict(level: $level, foodName: $foodName, personalTitle: $personalTitle, items: $items, stateRecords: $stateRecords, substitutes: $substitutes, foodExternalId: $foodExternalId, category: $category)';
   }
 }
 
@@ -438,13 +1744,15 @@ abstract mixin class _$EatVerdictCopyWith<$Res>
   $Res call(
       {VerdictLevel level,
       String foodName,
-      String reasonGeneral,
-      String reasonPersonal,
-      List<String> alternatives,
-      VerdictHistorySummary historySummary});
+      String personalTitle,
+      List<VerdictItem> items,
+      VerdictStateRecords stateRecords,
+      List<VerdictSubstitute> substitutes,
+      String? foodExternalId,
+      String? category});
 
   @override
-  $VerdictHistorySummaryCopyWith<$Res> get historySummary;
+  $VerdictStateRecordsCopyWith<$Res> get stateRecords;
 }
 
 /// @nodoc
@@ -461,10 +1769,12 @@ class __$EatVerdictCopyWithImpl<$Res> implements _$EatVerdictCopyWith<$Res> {
   $Res call({
     Object? level = null,
     Object? foodName = null,
-    Object? reasonGeneral = null,
-    Object? reasonPersonal = null,
-    Object? alternatives = null,
-    Object? historySummary = null,
+    Object? personalTitle = null,
+    Object? items = null,
+    Object? stateRecords = null,
+    Object? substitutes = null,
+    Object? foodExternalId = freezed,
+    Object? category = freezed,
   }) {
     return _then(_EatVerdict(
       level: null == level
@@ -475,22 +1785,30 @@ class __$EatVerdictCopyWithImpl<$Res> implements _$EatVerdictCopyWith<$Res> {
           ? _self.foodName
           : foodName // ignore: cast_nullable_to_non_nullable
               as String,
-      reasonGeneral: null == reasonGeneral
-          ? _self.reasonGeneral
-          : reasonGeneral // ignore: cast_nullable_to_non_nullable
+      personalTitle: null == personalTitle
+          ? _self.personalTitle
+          : personalTitle // ignore: cast_nullable_to_non_nullable
               as String,
-      reasonPersonal: null == reasonPersonal
-          ? _self.reasonPersonal
-          : reasonPersonal // ignore: cast_nullable_to_non_nullable
-              as String,
-      alternatives: null == alternatives
-          ? _self._alternatives
-          : alternatives // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      historySummary: null == historySummary
-          ? _self.historySummary
-          : historySummary // ignore: cast_nullable_to_non_nullable
-              as VerdictHistorySummary,
+      items: null == items
+          ? _self._items
+          : items // ignore: cast_nullable_to_non_nullable
+              as List<VerdictItem>,
+      stateRecords: null == stateRecords
+          ? _self.stateRecords
+          : stateRecords // ignore: cast_nullable_to_non_nullable
+              as VerdictStateRecords,
+      substitutes: null == substitutes
+          ? _self._substitutes
+          : substitutes // ignore: cast_nullable_to_non_nullable
+              as List<VerdictSubstitute>,
+      foodExternalId: freezed == foodExternalId
+          ? _self.foodExternalId
+          : foodExternalId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      category: freezed == category
+          ? _self.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 
@@ -498,9 +1816,9 @@ class __$EatVerdictCopyWithImpl<$Res> implements _$EatVerdictCopyWith<$Res> {
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $VerdictHistorySummaryCopyWith<$Res> get historySummary {
-    return $VerdictHistorySummaryCopyWith<$Res>(_self.historySummary, (value) {
-      return _then(_self.copyWith(historySummary: value));
+  $VerdictStateRecordsCopyWith<$Res> get stateRecords {
+    return $VerdictStateRecordsCopyWith<$Res>(_self.stateRecords, (value) {
+      return _then(_self.copyWith(stateRecords: value));
     });
   }
 }

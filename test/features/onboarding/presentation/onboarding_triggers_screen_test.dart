@@ -108,7 +108,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final entry = triggerFoodOptions.first; // coffee_caffeine
+      final entry = triggerFoodOptions.first; // caffeine
 
       expect(
         container.read(onboardingControllerProvider).triggerFoods,

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/session_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
@@ -153,6 +154,90 @@ void main() {
         SessionStatus.ready,
         reason: 'onboardedStatus 로드 완료 후에는 ready가 돼야 한다',
       );
+    });
+
+    // -------------------------------------------------------------------------
+    // 콜드스타트 시나리오 (커밋3 TDD)
+    // -------------------------------------------------------------------------
+
+    test('콜드스타트 토큰有+getMe200(onboarded=true) → ready', () async {
+      // MockAuthRepository.existing() 을 initialSession 있는 형태로 직접 구성.
+      // coldStart 시나리오: currentSession() 이 바로 세션을 반환하는 상황.
+      const sessionFixture = AuthSession(
+        userId: 'cold-user',
+        provider: AuthProvider.kakao,
+        hasAgreedTerms: true,
+        accountStatus: AccountStatus.active,
+      );
+      final container = ProviderContainer(
+        overrides: [
+          // ignore: scoped_providers_should_specify_dependencies
+          authRepositoryProvider.overrideWithValue(
+            MockAuthRepository(initialSession: sessionFixture),
+          ),
+          // ignore: scoped_providers_should_specify_dependencies
+          healthProfileRepositoryProvider.overrideWithValue(
+            MockHealthProfileRepository.completed(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(authControllerProvider.future);
+      await container.read(onboardedStatusProvider.future);
+
+      final status = container.read(sessionStatusProvider);
+      expect(status, SessionStatus.ready);
+    });
+
+    test('콜드스타트 토큰有+getMe200(onboarded=false) → needsOnboarding', () async {
+      const sessionFixture = AuthSession(
+        userId: 'cold-user',
+        provider: AuthProvider.kakao,
+        hasAgreedTerms: true,
+        accountStatus: AccountStatus.active,
+      );
+      final container = ProviderContainer(
+        overrides: [
+          // ignore: scoped_providers_should_specify_dependencies
+          authRepositoryProvider.overrideWithValue(
+            MockAuthRepository(initialSession: sessionFixture),
+          ),
+          // ignore: scoped_providers_should_specify_dependencies
+          healthProfileRepositoryProvider.overrideWithValue(
+            MockHealthProfileRepository.noProfile(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(authControllerProvider.future);
+      await container.read(onboardedStatusProvider.future);
+
+      final status = container.read(sessionStatusProvider);
+      expect(status, SessionStatus.needsOnboarding);
+    });
+
+    test('콜드스타트 오프라인 → unauthenticated', () async {
+      // 오프라인 시 currentSession() 은 null 을 반환(토큰 보존, 세션 null).
+      final container = ProviderContainer(
+        overrides: [
+          // ignore: scoped_providers_should_specify_dependencies
+          authRepositoryProvider.overrideWithValue(
+            MockAuthRepository.signedOut(), // currentSession=null
+          ),
+          // ignore: scoped_providers_should_specify_dependencies
+          healthProfileRepositoryProvider.overrideWithValue(
+            MockHealthProfileRepository.noProfile(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(authControllerProvider.future);
+
+      final status = container.read(sessionStatusProvider);
+      expect(status, SessionStatus.unauthenticated);
     });
 
     // -------------------------------------------------------------------------

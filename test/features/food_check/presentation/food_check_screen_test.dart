@@ -8,6 +8,7 @@ import 'package:can_i_eat_it/features/food_check/data/food_check_providers.dart'
 import 'package:can_i_eat_it/features/food_check/data/repositories/mock_food_repository.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/recent_food.dart';
+import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/food_check_screen.dart';
 
 /// 최소 GoRouter: /check → FoodCheckScreen, / → home stub, /verdict → verdict stub.
@@ -24,9 +25,13 @@ GoRouter _testRouter() => GoRouter(
         ),
         GoRoute(
           path: '/verdict',
-          builder: (_, state) => Scaffold(
-            body: Text('verdict:${state.extra as String? ?? ''}'),
-          ),
+          builder: (_, state) {
+            // extra는 VerdictArgs — text를 표시해 진입 확인
+            final args = state.extra as VerdictArgs?;
+            return Scaffold(
+              body: Text('verdict:${args?.text ?? ''}'),
+            );
+          },
         ),
       ],
     );

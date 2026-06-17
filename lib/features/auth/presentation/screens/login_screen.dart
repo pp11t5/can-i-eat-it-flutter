@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/widgets/deletion_grace_dialog.dart';
@@ -28,9 +30,18 @@ import 'package:can_i_eat_it/features/auth/presentation/widgets/deletion_grace_d
 ///   실 onboardedStatus() 반영은 티켓 4 (현재는 Authenticated.onboarded 직접 사용).
 /// - [NeedsTerms] → `context.push('/terms')` (imperative push, ADR-0006 보존).
 /// - [Recoverable] → 복구 다이얼로그 (기존 deletion_grace_dialog 재사용).
-class LoginScreen extends ConsumerWidget {
+///
+/// ## 콜드스타트 오프라인 토스트 (T1)
+/// initState post-frame 에서 [coldStartOfflineProvider] 를 1회 소비.
+/// true 이면 "네트워크 연결을 확인해 주세요. 다시 로그인이 필요해요." 토스트 표시.
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
+  @override
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   // Figma 기준 비율 상수 (375×812).
   static const double _kCanvasW = 375;
   static const double _kCanvasH = 812;
@@ -40,7 +51,23 @@ class LoginScreen extends ConsumerWidget {
   static const double _kButtonY = 518; // → 63.8%
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    // post-frame: coldStartOfflineProvider 소비 → T1 토스트 트리거.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final isOffline = ref.read(coldStartOfflineProvider);
+      if (isOffline) {
+        showAppToast(
+          context,
+          '네트워크 연결을 확인해 주세요. 다시 로그인이 필요해요.',
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
     final isLoading = authState.isLoading;
 
@@ -96,8 +123,8 @@ class LoginScreen extends ConsumerWidget {
                 right: AppSpacing.screenPadding,
                 child: _ButtonSection(
                   isLoading: isLoading,
-                  onKakaoPressed: () => _handleKakaoPressed(context, ref),
-                  onApplePressed: () => _handleApplePressed(context, ref),
+                  onKakaoPressed: () => _handleKakaoPressed(context),
+                  onApplePressed: () => _handleApplePressed(context),
                 ),
               ),
             ],
@@ -107,18 +134,37 @@ class LoginScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleKakaoPressed(BuildContext context, WidgetRef ref) async {
-    final outcome =
-        await ref.read(authControllerProvider.notifier).signInWithKakao();
-    if (!context.mounted) return;
-    await _handlePostSignIn(context, ref, outcome);
+  Future<void> _handleKakaoPressed(BuildContext context) async {
+    try {
+      final outcome =
+          await ref.read(authControllerProvider.notifier).signInWithKakao();
+      if (!context.mounted) return;
+      await _handlePostSignIn(context, outcome);
+    } catch (e) {
+      if (!context.mounted) return;
+      _showSignInErrorToast(context);
+    }
   }
 
-  Future<void> _handleApplePressed(BuildContext context, WidgetRef ref) async {
-    final outcome =
-        await ref.read(authControllerProvider.notifier).signInWithApple();
-    if (!context.mounted) return;
-    await _handlePostSignIn(context, ref, outcome);
+  Future<void> _handleApplePressed(BuildContext context) async {
+    try {
+      final outcome =
+          await ref.read(authControllerProvider.notifier).signInWithApple();
+      if (!context.mounted) return;
+      await _handlePostSignIn(context, outcome);
+    } catch (e) {
+      if (!context.mounted) return;
+      _showSignInErrorToast(context);
+    }
+  }
+
+  /// 로그인 실패 시 T2 토스트를 표시한다.
+  ///
+  /// [Failure] 서브타입과 기타 예외 모두 동일한 사용자 메시지를 노출한다.
+  /// authControllerProvider 가 AsyncError 로 전환되면 [isLoading] 이 false 로
+  /// 돌아오므로 로딩 스피너·버튼 비활성이 자동 해제된다.
+  void _showSignInErrorToast(BuildContext context) {
+    showAppToast(context, '로그인에 실패했어요. 잠시 후 다시 시도해 주세요.');
   }
 
   /// 로그인 후 라우팅 — [SignInOutcome] exhaustive switch (ADR-0007 §3-1 (6-A)).
@@ -134,7 +180,6 @@ class LoginScreen extends ConsumerWidget {
   /// 현재는 Authenticated.onboarded (서버 GET /onboarding/status 결과) 를 직접 사용.
   Future<void> _handlePostSignIn(
     BuildContext context,
-    WidgetRef ref,
     SignInOutcome outcome,
   ) async {
     switch (outcome) {
@@ -149,13 +194,17 @@ class LoginScreen extends ConsumerWidget {
 
       case NeedsTerms():
         // imperative push — iOS pop 애니메이션 보장, 가드 redirect 와 분리 (ADR-0006).
-        // // ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.
         context.push('/terms');
 
-      case Recoverable(:final provider):
+      case Recoverable(:final provider, :final idToken):
         // 복구 가능 계정 → 기존 deletion_grace_dialog 재사용.
-        // provider 를 전달해 recoverAccount(provider) 에서 새 idToken 을 획득할 수 있도록 한다.
-        await showDeletionGraceDialog(context, ref, provider: provider);
+        // 로그인 시 획득한 idToken 을 전달해 카카오 SDK 재인증 없이 복구한다.
+        await showDeletionGraceDialog(
+          context,
+          ref,
+          provider: provider,
+          idToken: idToken,
+        );
     }
   }
 }

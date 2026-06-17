@@ -23,7 +23,7 @@ class VerdictBadge extends StatelessWidget {
     return switch (level) {
       VerdictLevel.recommend => AppColors.verdictRecommend,
       VerdictLevel.caution => AppColors.verdictCaution,
-      VerdictLevel.danger => AppColors.verdictDanger,
+      VerdictLevel.risk => AppColors.verdictDanger,   // 색상 토큰명 유지 (ADR-0003)
       VerdictLevel.unknown => AppColors.verdictUnknown,
     };
   }

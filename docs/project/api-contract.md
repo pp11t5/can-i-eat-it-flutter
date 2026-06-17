@@ -171,14 +171,95 @@ sealed SignInOutcome
 
 ## F2. 신호등 판정
 
-### 서버 부재 항목 (중요)
+### 실 엔드포인트 (W3-3 충실 정합 — 판정 + 검색 · 최근 검색)
 
-| 항목 | 상태 | 비고 |
+> W3-3 이후 `POST /foods/analyze` Mock은 제거됨. 판정은 아래 두 엔드포인트(실 dio)로 연결.
+
+| 메서드 | 경로 | 설명 |
 |---|---|---|
-| `POST /foods/analyze` | **서버에 없음 — Mock 유지** | 판정 로직 엔드포인트 미출시. W3 Mock 유지. 출시 시 datasource 교체(인터페이스 불변). |
-| `POST /foods` | **서버에 없음 — Mock 유지** | 사용자 음식 직접 추가(승인 큐). 엔드포인트 부재. |
+| GET | `/foods/judgment?foodTextInput=` | 텍스트 직접 입력 판정 |
+| GET | `/foods/{foodExternalId}/judgment` | 검색 결과 ID 기반 판정 |
 
-> `/foods/analyze`·`POST /foods` Mock 유지 근거: ADR-0007 §1 "판정(`/foods/analyze`)·전체 프로필 GET은 서버에 없으므로 W3에서 Mock을 유지한다."
+### GET /foods/judgment (by-text)
+
+**쿼리**: `foodTextInput` (필수 — 판정할 음식 텍스트)
+
+**응답** (200): `result` 객체
+
+```json
+{
+  "foodName":     "두부",
+  "grade":        "RECOMMEND",
+  "personalTitle":"두부, 안심하고 드세요",
+  "items": [
+    { "emphasis": "트리거/증상 분석",    "body": "역류 트리거에 해당하지 않아요." },
+    { "emphasis": "알레르기/복용약 분석", "body": "알레르기·복용약 충돌이 없어요." }
+  ],
+  "stateRecords": {
+    "total":   0,
+    "records": []
+  }
+}
+```
+
+- `foodExternalId`·`category`·`substitutes` 없음 (by-text 규약).
+- 클라이언트는 `substitutes`를 항상 빈배열로 처리한다.
+
+**에러**:
+
+| HTTP | code | Failure 클래스 |
+|---|---|---|
+| 400 | `FOOD400_1` | `InvalidFoodQueryFailure` |
+
+### GET /foods/{foodExternalId}/judgment (by-id)
+
+**경로 파라미터**: `foodExternalId` (검색 결과 `FoodSummary.externalId`)
+
+**응답** (200): `result` 객체
+
+```json
+{
+  "foodExternalId": "food-001",
+  "foodName":       "커피",
+  "category":       "음료",
+  "grade":          "RISK",
+  "personalTitle":  "커피, 지금은 피하는 게 좋아요",
+  "items": [
+    { "emphasis": "트리거/증상 분석",    "body": "카페인이 위산 분비를 촉진해요." },
+    { "emphasis": "알레르기/복용약 분석", "body": "복용약과의 직접 충돌은 없어요." }
+  ],
+  "stateRecords": {
+    "total":   2,
+    "records": [
+      { "label": "속쓰림", "date": "2026-06-10", "timing": "식후 30분" }
+    ]
+  },
+  "substitutes": [
+    { "foodExternalId": "sub-1", "name": "디카페인 커피" }
+  ]
+}
+```
+
+- `category` nullable.
+- `substitutes` 빈배열 가능 (grade=RECOMMEND·UNKNOWN 시 서버가 빈배열 반환).
+
+**에러**:
+
+| HTTP | code | Failure 클래스 |
+|---|---|---|
+| 404 | `FOOD404_1` | `FoodNotFoundFailure` |
+
+### grade 값 정의
+
+| grade | VerdictLevel | 처리 방침 |
+|---|---|---|
+| `RECOMMEND` | `recommend` | AsyncData → VerdictResultScreen |
+| `CAUTION` | `caution` | AsyncData → VerdictResultScreen |
+| `RISK` | `risk` | AsyncData → VerdictResultScreen |
+| `UNKNOWN` | `unknown` | AsyncData → VerdictUnknownScreen (성공 응답 — D1, R3) |
+| 미지값 | `unknown` | 안전 폴백 (AsyncData) |
+
+> `UNKNOWN`은 성공 응답이다. 절대 AsyncError로 흘리지 않는다 (D1, R3).
 
 ### 실 엔드포인트 (검색 · 최근 검색)
 

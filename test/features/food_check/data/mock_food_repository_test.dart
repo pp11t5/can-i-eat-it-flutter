@@ -80,35 +80,44 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
-  group('analyze — Mock 전용 결정론적 매핑', () {
-    test('recommend 판정 named factory와 동일 구조를 반환한다', () async {
+  group('judgeByText — Mock 결정론적 매핑 (W3-3)', () {
+    test('recommend 판정 named factory와 동일 level을 반환한다', () async {
       final repo = MockFoodRepository.empty();
-      final result = await repo.analyze('두부');
+      final result = await repo.judgeByText('두부');
       final sample = EatVerdict.recommend(foodName: '두부');
       expect(result.level, equals(sample.level));
-      expect(result.alternatives, isEmpty);
+      expect(result.substitutes, isEmpty);  // by-text 규약
     });
 
-    test('caution 판정 named factory와 동일 구조를 반환한다', () async {
+    test('caution 판정 named factory와 동일 level을 반환한다', () async {
       final repo = MockFoodRepository.empty();
-      final result = await repo.analyze('된장찌개');
+      final result = await repo.judgeByText('된장찌개');
       final sample = EatVerdict.caution(foodName: '된장찌개');
       expect(result.level, equals(sample.level));
     });
 
-    test('danger 판정 named factory와 동일 구조를 반환한다', () async {
+    test('risk 판정 named factory와 동일 level을 반환한다', () async {
       final repo = MockFoodRepository.empty();
-      final result = await repo.analyze('커피');
-      final sample = EatVerdict.danger(foodName: '커피');
+      final result = await repo.judgeByText('커피');
+      final sample = EatVerdict.risk(foodName: '커피');
       expect(result.level, equals(sample.level));
     });
 
-    test('unknown 판정 named factory와 동일 구조를 반환한다', () async {
+    test('unknown 판정 named factory와 동일 level을 반환한다', () async {
       final repo = MockFoodRepository.empty();
-      final result = await repo.analyze('모름');
+      final result = await repo.judgeByText('모름');
       final sample = EatVerdict.unknown(foodName: '모름');
       expect(result.level, equals(sample.level));
-      expect(result.alternatives, isEmpty);
+      expect(result.substitutes, isEmpty);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  group('judgeById — Mock 결정론적 매핑 (W3-3)', () {
+    test('judgeById는 EatVerdict를 반환한다', () async {
+      final repo = MockFoodRepository.empty();
+      final result = await repo.judgeById('food-ext-1');
+      expect(result, isA<EatVerdict>());
     });
   });
 

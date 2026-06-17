@@ -18,6 +18,24 @@ class FailureMapper {
   // ---------------------------------------------------------------------------
 
   static final Map<String, Failure> _codeToFailure = {
+    // ── 공통 400 (요청 형식 오류) ─────────────────────────────────────────────
+    // COMMON400_1: 필수 파라미터 누락
+    'COMMON400_1': const NetworkFailure('요청 파라미터가 누락됐어요.'),
+    // COMMON400_2: 요청 형식이 올바르지 않음 (페이로드 스키마 불일치 등)
+    'COMMON400_2': const NetworkFailure('요청 형식이 올바르지 않아요.'),
+
+    // ── 공통 401 (인증) ───────────────────────────────────────────────────────
+    'COMMON401_1': const InvalidTokenFailure(),
+
+    // ── 공통 403 (권한) ───────────────────────────────────────────────────────
+    'COMMON403_1': const UnexpectedFailure('접근 권한이 없어요.'),
+
+    // ── 공통 404 (리소스 없음) ────────────────────────────────────────────────
+    'COMMON404_1': const NetworkFailure('요청한 리소스를 찾을 수 없어요.'),
+
+    // ── 공통 500 (서버 오류) ──────────────────────────────────────────────────
+    'COMMON500_1': const UnexpectedFailure('서버 오류가 발생했어요. 잠시 후 다시 시도해 주세요.'),
+
     // ── 약관 필요 (HTTP 400) ──────────────────────────────────────────────────
     'AUTH400_1': const TermsRequiredFailure(
       requirements: {TermsRequirement.email},
@@ -34,6 +52,13 @@ class FailureMapper {
 
     // ── 토큰 무효 (HTTP 401) ──────────────────────────────────────────────────
     'AUTH401': const InvalidTokenFailure(),
+
+    // ── 음식 판정 에러 (F2 judgment — W3-3) ──────────────────────────────────
+    // FOOD400_1: 잘못된 검색어 (by-text 빈 문자열·특수문자 등)
+    'FOOD400_1': const InvalidFoodQueryFailure(),
+    // FOOD404_1: 음식 없음 (by-id 에서 externalId 미존재·삭제된 음식)
+    'FOOD404_1': const FoodNotFoundFailure(),
+    // FOOD404_2: 최근검색 단건 삭제 시 항목 없음 — judgment 무관, NetworkFailure 폴백
   };
 
   // ---------------------------------------------------------------------------
@@ -60,12 +85,24 @@ class FailureMapper {
 
   /// [DioException] → [Failure] 변환.
   ///
-  /// 연결 오류·타임아웃 등 HTTP 응답이 없는 케이스.
+  /// - 연결 계열(`connectionError`, `connectionTimeout`, `sendTimeout`,
+  ///   `receiveTimeout`) → [NetworkFailure] (진짜 오프라인/타임아웃).
+  /// - 그 외(`badResponse` 5xx 등 HTTP 응답이 있는 케이스) → [UnexpectedFailure].
+  ///
+  /// 이렇게 분리해야 5xx를 오프라인으로 오분류하지 않는다 (ADR-0007, H1 수정).
   static Failure fromDioException(DioException e) {
     if (kDebugMode) {
       debugPrint('[FailureMapper] DioException: ${e.type} — ${e.message}');
     }
-    return NetworkFailure(e.message ?? '네트워크 오류가 발생했어요.');
+    switch (e.type) {
+      case DioExceptionType.connectionError:
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        return NetworkFailure(e.message ?? '네트워크 오류가 발생했어요.');
+      default:
+        return UnexpectedFailure(e.message ?? '알 수 없는 오류가 발생했어요.');
+    }
   }
 }
 

@@ -17,7 +17,7 @@ mixin _$HealthProfile {
   /// 질환 코드 목록. 예: ['GERD']. 다중 질환 확장 대비.
   List<String> get conditions;
 
-  /// 증상 빈도 목록. 예: ['weekly_heartburn', 'post_meal_cough'].
+  /// 증상 빈도 목록. 예: ['heartburn_reflux', 'post_meal_cough'].
   List<String> get symptomFrequency;
 
   /// 의사 진단 여부.
@@ -381,10 +381,10 @@ class _HealthProfile implements HealthProfile {
     return EqualUnmodifiableListView(_conditions);
   }
 
-  /// 증상 빈도 목록. 예: ['weekly_heartburn', 'post_meal_cough'].
+  /// 증상 빈도 목록. 예: ['heartburn_reflux', 'post_meal_cough'].
   final List<String> _symptomFrequency;
 
-  /// 증상 빈도 목록. 예: ['weekly_heartburn', 'post_meal_cough'].
+  /// 증상 빈도 목록. 예: ['heartburn_reflux', 'post_meal_cough'].
   @override
   @JsonKey()
   List<String> get symptomFrequency {

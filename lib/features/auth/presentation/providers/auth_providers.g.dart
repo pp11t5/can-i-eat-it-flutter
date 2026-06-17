@@ -50,7 +50,29 @@ final authRepositoryProvider = AutoDisposeProvider<AuthRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AuthRepositoryRef = AutoDisposeProviderRef<AuthRepository>;
-String _$authControllerHash() => r'a0fe1dad7fb051f26232b3450d6ecd1b04be2762';
+String _$coldStartOfflineHash() => r'0465748031e5b0c25e7a655f68622e61e6152293';
+
+/// 콜드스타트 시 오프라인 복원 플래그를 소비해 반환하는 provider.
+///
+/// true 이면 LoginScreen 이 T1 토스트를 표시한다.
+/// [AuthRepository.consumeOfflineRestoreFlag] 를 1회 소비(읽으면 false 로 리셋).
+///
+/// Copied from [coldStartOffline].
+@ProviderFor(coldStartOffline)
+final coldStartOfflineProvider = AutoDisposeProvider<bool>.internal(
+  coldStartOffline,
+  name: r'coldStartOfflineProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$coldStartOfflineHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ColdStartOfflineRef = AutoDisposeProviderRef<bool>;
+String _$authControllerHash() => r'ae3461da0845970dd227f1e9815da8e46942db0b';
 
 /// 인증 상태 컨트롤러 (AsyncNotifier).
 ///
