@@ -5,30 +5,27 @@ import '../../domain/entities/health_profile.dart';
 part 'onboarding_request_dto.freezed.dart';
 part 'onboarding_request_dto.g.dart';
 
-/// `POST /onboarding` 요청 DTO (ADR-0007 §3-1 (5)).
+/// `POST /onboarding` 요청 DTO.
 ///
-/// [HealthProfile] 엔티티를 서버 스키마로 변환한다.
+/// 서버 스키마(OnboardingRequestDTO, Swagger /v3/api-docs) 정합 버전.
 ///
-/// 필드 상이분 흡수 매핑:
-/// - [HealthProfile.conditions]       → [symptoms] (List<String>)
-/// - [HealthProfile.symptomFrequency] → [symptomFrequency] (List<String>)
-/// - [HealthProfile.diagnosed]        → [diagnosed] (bool)
-/// - [HealthProfile.triggerFoods]     → [triggers] (List<String>, conditions + customTriggers 통합)
-/// - [HealthProfile.customTriggers]   → triggers 리스트에 단일 항목으로 병합
-/// - [HealthProfile.medications]      → [medications] (List<String>)
-/// - [HealthProfile.allergies]        → [allergens] (List<String>)
+/// 필드 매핑:
+/// - [HealthProfile.symptomFrequency] → [symptoms]   (서버 symptom enum 값 그대로)
+/// - [HealthProfile.triggerFoods]     → [triggers]   (서버 trigger enum)
+/// - [HealthProfile.allergies]        → [allergens]  (서버 allergen enum)
+/// - [HealthProfile.medications]      → [medications] (자유 텍스트)
+/// - [HealthProfile.customTriggers]   → [customTriggerText] (null 가능)
 ///
-/// 서버 스키마: { symptoms, symptomFrequency, diagnosed, triggers, medications, allergens }
-/// 엔티티 스키마: { conditions, symptomFrequency, diagnosed, triggerFoods, customTriggers, medications, allergies }
+/// **제외 필드**: conditions(GERD 질환), diagnosed, symptomFrequency 키.
+/// 서버에 없는 필드이므로 전송하지 않는다 (COMMON400_2 원인 제거).
 @freezed
 abstract class OnboardingRequestDto with _$OnboardingRequestDto {
   const factory OnboardingRequestDto({
     @Default(<String>[]) List<String> symptoms,
-    @Default(<String>[]) List<String> symptomFrequency,
-    @Default(false) bool diagnosed,
     @Default(<String>[]) List<String> triggers,
-    @Default(<String>[]) List<String> medications,
     @Default(<String>[]) List<String> allergens,
+    @Default(<String>[]) List<String> medications,
+    String? customTriggerText,
   }) = _OnboardingRequestDto;
 
   const OnboardingRequestDto._();
@@ -38,24 +35,24 @@ abstract class OnboardingRequestDto with _$OnboardingRequestDto {
 
   /// [HealthProfile] 엔티티 → DTO.
   ///
-  /// [HealthProfile.triggerFoods] + [HealthProfile.customTriggers]를
-  /// 단일 [triggers] 리스트로 병합한다.
+  /// - [HealthProfile.symptomFrequency] → [symptoms] (서버 symptom enum과 동일 값)
+  /// - [HealthProfile.triggerFoods]     → [triggers]
+  /// - [HealthProfile.allergies]        → [allergens]
+  /// - [HealthProfile.medications]      → [medications]
+  /// - [HealthProfile.customTriggers]   → [customTriggerText] (빈 문자열은 null 처리)
+  /// - [HealthProfile.conditions] / [HealthProfile.diagnosed] 는 전송하지 않는다.
   factory OnboardingRequestDto.fromEntity(HealthProfile entity) {
-    // customTriggers가 있으면 triggers 리스트 끝에 추가
-    final triggers = [
-      ...entity.triggerFoods,
-      if (entity.customTriggers != null &&
-          entity.customTriggers!.isNotEmpty)
-        entity.customTriggers!,
-    ];
+    final customText = entity.customTriggers != null &&
+            entity.customTriggers!.isNotEmpty
+        ? entity.customTriggers
+        : null;
 
     return OnboardingRequestDto(
-      symptoms: entity.conditions,
-      symptomFrequency: entity.symptomFrequency,
-      diagnosed: entity.diagnosed,
-      triggers: triggers,
-      medications: entity.medications,
+      symptoms: entity.symptomFrequency,
+      triggers: entity.triggerFoods,
       allergens: entity.allergies,
+      medications: entity.medications,
+      customTriggerText: customText,
     );
   }
 }

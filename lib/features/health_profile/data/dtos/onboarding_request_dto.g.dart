@@ -13,16 +13,7 @@ _OnboardingRequestDto _$OnboardingRequestDtoFromJson(
               ?.map((e) => e as String)
               .toList() ??
           const <String>[],
-      symptomFrequency: (json['symptomFrequency'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const <String>[],
-      diagnosed: json['diagnosed'] as bool? ?? false,
       triggers: (json['triggers'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const <String>[],
-      medications: (json['medications'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const <String>[],
@@ -30,15 +21,19 @@ _OnboardingRequestDto _$OnboardingRequestDtoFromJson(
               ?.map((e) => e as String)
               .toList() ??
           const <String>[],
+      medications: (json['medications'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
+      customTriggerText: json['customTriggerText'] as String?,
     );
 
 Map<String, dynamic> _$OnboardingRequestDtoToJson(
         _OnboardingRequestDto instance) =>
     <String, dynamic>{
       'symptoms': instance.symptoms,
-      'symptomFrequency': instance.symptomFrequency,
-      'diagnosed': instance.diagnosed,
       'triggers': instance.triggers,
-      'medications': instance.medications,
       'allergens': instance.allergens,
+      'medications': instance.medications,
+      'customTriggerText': instance.customTriggerText,
     };

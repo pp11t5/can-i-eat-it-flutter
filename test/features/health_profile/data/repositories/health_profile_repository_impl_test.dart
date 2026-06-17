@@ -90,55 +90,48 @@ void main() {
   // -------------------------------------------------------------------------
 
   group('submitProfile — POST /onboarding 바디 매핑', () {
-    test('HealthProfile 이 올바른 바디로 변환돼 POST 된다', () async {
-      // HealthProfile 필드 → OnboardingRequestDto 매핑 검증
-      // conditions → symptoms, triggerFoods + customTriggers → triggers,
-      // allergies → allergens
+    test('HealthProfile 이 서버 스키마에 맞는 바디로 변환돼 POST 된다', () async {
+      // 서버 스키마 정합 검증 (W3-4):
+      // symptomFrequency → symptoms, triggerFoods → triggers,
+      // allergies → allergens, customTriggers → customTriggerText.
+      // conditions(GERD)/diagnosed/symptomFrequency 키는 전송하지 않는다.
       dioAdapter.onPost(
         ApiEndpoints.onboarding,
         (server) {
-          // 요청 바디 캡처는 http_mock_adapter 에서 직접 접근 불가 —
-          // 성공 응답 반환하고 별도 검증.
-          return server.reply(
-            200,
-            _envelope(null),
-          );
+          return server.reply(200, _envelope(null));
         },
         data: {
-          'symptoms': ['GERD'],
-          'symptomFrequency': ['weekly_heartburn', 'post_meal_cough'],
-          'diagnosed': true,
-          'triggers': ['spicy', 'caffeine', '탄산음료'],
-          'medications': ['omeprazole'],
+          'symptoms': ['weekly_heartburn', 'post_meal_cough'],
+          'triggers': ['spicy', 'caffeine'],
           'allergens': ['shellfish'],
+          'medications': ['omeprazole'],
+          'customTriggerText': '탄산음료',
         },
       );
 
-      // sampleGerd: conditions=['GERD'], symptomFrequency=[...], diagnosed=true,
-      // triggerFoods=['spicy','caffeine'], customTriggers='탄산음료',
+      // sampleGerd: conditions=['GERD'], symptomFrequency=['weekly_heartburn','post_meal_cough'],
+      // diagnosed=true, triggerFoods=['spicy','caffeine'], customTriggers='탄산음료',
       // medications=['omeprazole'], allergies=['shellfish']
       await repo.submitProfile(HealthProfile.sampleGerd());
 
       // 위 dioAdapter 가 정확한 바디로 매칭됐다면 예외 없이 통과함.
     });
 
-    test('customTriggers 가 null 이면 triggers 에 triggerFoods 만 포함된다', () async {
+    test('customTriggers 가 null 이면 customTriggerText 는 null 로 전송된다', () async {
       dioAdapter.onPost(
         ApiEndpoints.onboarding,
         (server) => server.reply(200, _envelope(null)),
         data: {
-          'symptoms': ['GERD'],
-          'symptomFrequency': <String>[],
-          'diagnosed': false,
+          'symptoms': <String>[],
           'triggers': ['spicy'],
-          'medications': <String>[],
           'allergens': <String>[],
+          'medications': <String>[],
+          'customTriggerText': null,
         },
       );
 
       await repo.submitProfile(
         const HealthProfile(
-          conditions: ['GERD'],
           triggerFoods: ['spicy'],
         ),
       );
@@ -150,11 +143,10 @@ void main() {
         (server) => server.reply(200, _envelope(null)),
         data: {
           'symptoms': <String>[],
-          'symptomFrequency': <String>[],
-          'diagnosed': false,
           'triggers': <String>[],
-          'medications': <String>[],
           'allergens': <String>[],
+          'medications': <String>[],
+          'customTriggerText': null,
         },
       );
 
