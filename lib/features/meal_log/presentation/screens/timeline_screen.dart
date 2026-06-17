@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
@@ -7,6 +8,7 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/widgets/fab_action_sheet.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/meal_timeline_list.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/week_nav.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/week_strip.dart';
@@ -169,12 +171,11 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
           ],
         ),
       ),
-      // FAB 자리 placeholder — F3-2c에서 배선 예정.
-      floatingActionButton: const FloatingActionButton(
-        onPressed: null, // F3-2c에서 연결
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => showFabActionSheet(context),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -301,7 +302,7 @@ class _TimelineGroupList extends StatelessWidget {
         // TODO(F3-3): context.push('/meal/${record.mealId}')
       },
       onAddFood: (group) {
-        // TODO(F3-2c): 음식 추가 흐름 연결
+        context.push('/meal/record', extra: group.mealGroupId);
       },
     );
   }

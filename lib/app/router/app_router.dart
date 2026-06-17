@@ -12,6 +12,7 @@ import 'package:can_i_eat_it/features/auth/presentation/screens/terms_screen.dar
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/food_check_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_screen.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_record_screen.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/timeline_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
@@ -84,10 +85,24 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/check',
         name: 'food-check',
-        pageBuilder: (context, state) => const MaterialPage(
-          fullscreenDialog: true,
-          child: FoodCheckScreen(),
-        ),
+        pageBuilder: (context, state) {
+          final recordContext = state.extra as MealRecordContext?;
+          return MaterialPage(
+            fullscreenDialog: true,
+            child: FoodCheckScreen(recordContext: recordContext),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/meal/record',
+        name: 'meal-record',
+        pageBuilder: (context, state) {
+          final mealGroupId = state.extra as String?;
+          return MaterialPage(
+            fullscreenDialog: true,
+            child: MealRecordScreen(mealGroupId: mealGroupId),
+          );
+        },
       ),
       // 판정 화면 — FoodCheckScreen에서 present-modal로 진입 (티켓 6).
       // extra: VerdictArgs (externalId 있으면 by-id, 없으면 by-text).

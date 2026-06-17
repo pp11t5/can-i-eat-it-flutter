@@ -293,8 +293,7 @@ class _ToastCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      // TODO(W4): 식사 기록 진입 연결.
-      onTap: () {},
+      onTap: () => context.push('/check'),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.cardPadding),
         decoration: BoxDecoration(

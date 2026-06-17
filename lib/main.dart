@@ -4,8 +4,10 @@ import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 import 'app/app.dart';
 import 'core/network/dio_client.dart';
+import 'features/food_check/presentation/providers/add_to_diet_handler_provider.dart';
 import 'features/health_profile/data/health_profile_providers.dart';
 import 'features/health_profile/data/repositories/health_profile_repository_impl.dart';
+import 'features/meal_log/presentation/meal_recording.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +23,8 @@ void main() {
         healthProfileRepositoryProvider.overrideWith(
           (ref) => HealthProfileRepositoryImpl(dio: ref.watch(dioProvider)),
         ),
+        // 식단 추가 핸들러 — meal_log 구현으로 override (acyclic: app이 양쪽 import).
+        addToDietHandlerProvider.overrideWith(makeHandlerFromRef),
       ],
       child: const App(),
     ),
