@@ -4,6 +4,7 @@ import 'package:http_mock_adapter/http_mock_adapter.dart';
 
 import 'package:can_i_eat_it/core/network/api_endpoints.dart';
 import 'package:can_i_eat_it/core/error/failure.dart';
+import 'package:can_i_eat_it/features/food_check/data/dtos/food_summary_dto.dart';
 import 'package:can_i_eat_it/features/food_check/data/repositories/food_repository_impl.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 
@@ -35,7 +36,8 @@ Map<String, dynamic> _foodSummaryJson({
   String name = '두부',
   String? category = '한식',
 }) =>
-    {'foodExternalId': id, 'name': name, 'category': category};
+    // 실서버 GET /foods/search 응답 키는 'externalId' (recent는 'foodExternalId').
+    {'externalId': id, 'name': name, 'category': category};
 
 Map<String, dynamic> _recentFoodJson({
   String id = 'f-1',
@@ -174,6 +176,54 @@ void main() {
       expect(results.length, 2);
       expect(results[0].externalId, 'f-1');
       expect(results[1].name, '된장찌개');
+    });
+
+    // -----------------------------------------------------------------------
+    // W3-4 회귀 테스트: 실서버 응답 형태(externalId 키) 6건 파싱 검증
+    // 실측: {"result":[{"externalId":"...","name":"...","category":"..."},...]}
+    // -----------------------------------------------------------------------
+    test('실서버 응답 형태(externalId 키) 6건 → FoodSummary 6건 정상 파싱', () async {
+      final serverLikePayload = [
+        {'externalId': 'cc948505-46c9-454d-987e-e7577486cede', 'name': '된장찌개', 'category': 'soup_stew'},
+        {'externalId': 'aa111111-0000-0000-0000-000000000001', 'name': '김치찌개', 'category': 'soup_stew'},
+        {'externalId': 'bb222222-0000-0000-0000-000000000002', 'name': '두부', 'category': 'tofu'},
+        {'externalId': 'cc333333-0000-0000-0000-000000000003', 'name': '미역국', 'category': 'soup'},
+        {'externalId': 'dd444444-0000-0000-0000-000000000004', 'name': '고등어구이', 'category': 'fish'},
+        {'externalId': 'ee555555-0000-0000-0000-000000000005', 'name': '바나나', 'category': 'fruit'},
+      ];
+
+      adapter.onGet(
+        ApiEndpoints.foodsSearch,
+        (server) => server.reply(200, _envelope(serverLikePayload)),
+        queryParameters: {'q': '찌개', 'size': 20},
+      );
+
+      final results = await repo.search('찌개');
+
+      expect(results.length, 6, reason: '실서버 externalId 키 파싱 실패 시 빈 목록 반환 버그 재현');
+      expect(results[0].externalId, 'cc948505-46c9-454d-987e-e7577486cede');
+      expect(results[0].name, '된장찌개');
+      expect(results[0].category, 'soup_stew');
+      expect(results[1].externalId, 'aa111111-0000-0000-0000-000000000001');
+      expect(results[1].name, '김치찌개');
+      expect(results[5].externalId, 'ee555555-0000-0000-0000-000000000005');
+      expect(results[5].name, '바나나');
+    });
+
+    test('FoodSummaryDto.fromJson — externalId 키로 직접 역직렬화', () {
+      // DTO 단위: 실서버 JSON을 직접 fromJson에 넣어 externalId 키를 읽는지 검증.
+      const serverJson = {
+        'externalId': 'cc948505-46c9-454d-987e-e7577486cede',
+        'name': '된장찌개',
+        'category': 'soup_stew',
+      };
+
+      final dto = FoodSummaryDto.fromJson(serverJson);
+      final entity = dto.toEntity();
+
+      expect(entity.externalId, 'cc948505-46c9-454d-987e-e7577486cede');
+      expect(entity.name, '된장찌개');
+      expect(entity.category, 'soup_stew');
     });
   });
 

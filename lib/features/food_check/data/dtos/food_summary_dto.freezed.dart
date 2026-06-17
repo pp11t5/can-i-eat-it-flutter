@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$FoodSummaryDto {
-  String get foodExternalId;
+  String get externalId;
   String get name;
   String? get category;
 
@@ -34,8 +34,8 @@ mixin _$FoodSummaryDto {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FoodSummaryDto &&
-            (identical(other.foodExternalId, foodExternalId) ||
-                other.foodExternalId == foodExternalId) &&
+            (identical(other.externalId, externalId) ||
+                other.externalId == externalId) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.category, category) ||
                 other.category == category));
@@ -43,11 +43,11 @@ mixin _$FoodSummaryDto {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, foodExternalId, name, category);
+  int get hashCode => Object.hash(runtimeType, externalId, name, category);
 
   @override
   String toString() {
-    return 'FoodSummaryDto(foodExternalId: $foodExternalId, name: $name, category: $category)';
+    return 'FoodSummaryDto(externalId: $externalId, name: $name, category: $category)';
   }
 }
 
@@ -57,7 +57,7 @@ abstract mixin class $FoodSummaryDtoCopyWith<$Res> {
           FoodSummaryDto value, $Res Function(FoodSummaryDto) _then) =
       _$FoodSummaryDtoCopyWithImpl;
   @useResult
-  $Res call({String foodExternalId, String name, String? category});
+  $Res call({String externalId, String name, String? category});
 }
 
 /// @nodoc
@@ -73,14 +73,14 @@ class _$FoodSummaryDtoCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? foodExternalId = null,
+    Object? externalId = null,
     Object? name = null,
     Object? category = freezed,
   }) {
     return _then(_self.copyWith(
-      foodExternalId: null == foodExternalId
-          ? _self.foodExternalId
-          : foodExternalId // ignore: cast_nullable_to_non_nullable
+      externalId: null == externalId
+          ? _self.externalId
+          : externalId // ignore: cast_nullable_to_non_nullable
               as String,
       name: null == name
           ? _self.name
@@ -187,14 +187,14 @@ extension FoodSummaryDtoPatterns on FoodSummaryDto {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String foodExternalId, String name, String? category)?
+    TResult Function(String externalId, String name, String? category)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _FoodSummaryDto() when $default != null:
-        return $default(_that.foodExternalId, _that.name, _that.category);
+        return $default(_that.externalId, _that.name, _that.category);
       case _:
         return orElse();
     }
@@ -215,13 +215,12 @@ extension FoodSummaryDtoPatterns on FoodSummaryDto {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String foodExternalId, String name, String? category)
-        $default,
+    TResult Function(String externalId, String name, String? category) $default,
   ) {
     final _that = this;
     switch (_that) {
       case _FoodSummaryDto():
-        return $default(_that.foodExternalId, _that.name, _that.category);
+        return $default(_that.externalId, _that.name, _that.category);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -241,13 +240,13 @@ extension FoodSummaryDtoPatterns on FoodSummaryDto {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String foodExternalId, String name, String? category)?
+    TResult? Function(String externalId, String name, String? category)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _FoodSummaryDto() when $default != null:
-        return $default(_that.foodExternalId, _that.name, _that.category);
+        return $default(_that.externalId, _that.name, _that.category);
       case _:
         return null;
     }
@@ -258,12 +257,12 @@ extension FoodSummaryDtoPatterns on FoodSummaryDto {
 @JsonSerializable()
 class _FoodSummaryDto implements FoodSummaryDto {
   const _FoodSummaryDto(
-      {required this.foodExternalId, required this.name, this.category});
+      {required this.externalId, required this.name, this.category});
   factory _FoodSummaryDto.fromJson(Map<String, dynamic> json) =>
       _$FoodSummaryDtoFromJson(json);
 
   @override
-  final String foodExternalId;
+  final String externalId;
   @override
   final String name;
   @override
@@ -289,8 +288,8 @@ class _FoodSummaryDto implements FoodSummaryDto {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _FoodSummaryDto &&
-            (identical(other.foodExternalId, foodExternalId) ||
-                other.foodExternalId == foodExternalId) &&
+            (identical(other.externalId, externalId) ||
+                other.externalId == externalId) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.category, category) ||
                 other.category == category));
@@ -298,11 +297,11 @@ class _FoodSummaryDto implements FoodSummaryDto {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, foodExternalId, name, category);
+  int get hashCode => Object.hash(runtimeType, externalId, name, category);
 
   @override
   String toString() {
-    return 'FoodSummaryDto(foodExternalId: $foodExternalId, name: $name, category: $category)';
+    return 'FoodSummaryDto(externalId: $externalId, name: $name, category: $category)';
   }
 }
 
@@ -314,7 +313,7 @@ abstract mixin class _$FoodSummaryDtoCopyWith<$Res>
       __$FoodSummaryDtoCopyWithImpl;
   @override
   @useResult
-  $Res call({String foodExternalId, String name, String? category});
+  $Res call({String externalId, String name, String? category});
 }
 
 /// @nodoc
@@ -330,14 +329,14 @@ class __$FoodSummaryDtoCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? foodExternalId = null,
+    Object? externalId = null,
     Object? name = null,
     Object? category = freezed,
   }) {
     return _then(_FoodSummaryDto(
-      foodExternalId: null == foodExternalId
-          ? _self.foodExternalId
-          : foodExternalId // ignore: cast_nullable_to_non_nullable
+      externalId: null == externalId
+          ? _self.externalId
+          : externalId // ignore: cast_nullable_to_non_nullable
               as String,
       name: null == name
           ? _self.name

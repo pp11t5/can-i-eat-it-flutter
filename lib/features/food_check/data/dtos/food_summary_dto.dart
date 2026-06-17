@@ -8,11 +8,13 @@ part 'food_summary_dto.g.dart';
 /// GET /foods/search 응답 항목 DTO (ADR-0007 §3-1 (5)).
 ///
 /// 서버 JSON 필드: camelCase.
+/// - 검색(search): 키 이름이 'externalId' → 필드명을 externalId로 선언.
+/// - 최근 조회(recent)는 [RecentFoodDto] 참조 (키 이름 'foodExternalId', 변경 금지).
 /// entity 변환: [toEntity].
 @freezed
 abstract class FoodSummaryDto with _$FoodSummaryDto {
   const factory FoodSummaryDto({
-    required String foodExternalId,
+    required String externalId,
     required String name,
     String? category,
   }) = _FoodSummaryDto;
@@ -23,7 +25,7 @@ abstract class FoodSummaryDto with _$FoodSummaryDto {
 
 extension FoodSummaryDtoMapper on FoodSummaryDto {
   FoodSummary toEntity() => FoodSummary(
-        externalId: foodExternalId,
+        externalId: externalId,
         name: name,
         category: category,
       );
