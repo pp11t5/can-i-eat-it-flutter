@@ -12,7 +12,7 @@ abstract class HealthProfile with _$HealthProfile {
     /// 질환 코드 목록. 예: ['GERD']. 다중 질환 확장 대비.
     @Default(<String>[]) List<String> conditions,
 
-    /// 증상 빈도 목록. 예: ['weekly_heartburn', 'post_meal_cough'].
+    /// 증상 빈도 목록. 예: ['heartburn_reflux', 'post_meal_cough'].
     @Default(<String>[]) List<String> symptomFrequency,
 
     /// 의사 진단 여부.
@@ -40,7 +40,7 @@ abstract class HealthProfile with _$HealthProfile {
   /// GERD 진단 완료, 주요 트리거·복용약·알레르기 포함.
   factory HealthProfile.sampleGerd() => const HealthProfile(
         conditions: ['GERD'],
-        symptomFrequency: ['weekly_heartburn', 'post_meal_cough'],
+        symptomFrequency: ['heartburn_reflux', 'post_meal_cough'],
         diagnosed: true,
         triggerFoods: ['spicy', 'caffeine'],
         customTriggers: '탄산음료',

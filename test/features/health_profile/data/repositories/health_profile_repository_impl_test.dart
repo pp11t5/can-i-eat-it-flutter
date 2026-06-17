@@ -101,7 +101,7 @@ void main() {
           return server.reply(200, _envelope(null));
         },
         data: {
-          'symptoms': ['weekly_heartburn', 'post_meal_cough'],
+          'symptoms': ['heartburn_reflux', 'post_meal_cough'],
           'triggers': ['spicy', 'caffeine'],
           'allergens': ['shellfish'],
           'medications': ['omeprazole'],
@@ -109,7 +109,7 @@ void main() {
         },
       );
 
-      // sampleGerd: conditions=['GERD'], symptomFrequency=['weekly_heartburn','post_meal_cough'],
+      // sampleGerd: conditions=['GERD'], symptomFrequency=['heartburn_reflux','post_meal_cough'],
       // diagnosed=true, triggerFoods=['spicy','caffeine'], customTriggers='탄산음료',
       // medications=['omeprazole'], allergies=['shellfish']
       await repo.submitProfile(HealthProfile.sampleGerd());

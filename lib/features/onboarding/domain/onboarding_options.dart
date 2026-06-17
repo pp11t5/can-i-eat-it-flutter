@@ -11,6 +11,7 @@ library;
 // ---------------------------------------------------------------------------
 
 /// 코드-라벨 쌍 (증상·트리거·알레르기 공용).
+/// code 값은 서버 OnboardingRequestDTO enum과 1:1 일치해야 한다.
 typedef OptionEntry = ({String code, String label});
 
 /// 질환 선택지. 캡션·활성화 여부 포함(현재 GERD만 활성, 나머지는 비활성 표시).
@@ -53,12 +54,12 @@ const List<ConditionOption> conditionOptions = [
 // ---------------------------------------------------------------------------
 
 const List<OptionEntry> symptomFrequencyOptions = [
-  (code: 'weekly_heartburn', label: '주에 1번 이상 속이 쓰리거나 신물이 올라와요'),
+  (code: 'heartburn_reflux', label: '주에 1번 이상 속이 쓰리거나 신물이 올라와요'),
   (code: 'post_meal_cough', label: '밥을 먹고 나면 기침이 나요'),
-  (code: 'throat_lump', label: '목에 이물감이 있어요'),
-  (code: 'sour_taste', label: '입에서 신맛과 악취가 느껴져요'),
-  (code: 'lying_chest_tightness', label: '누우면 가슴이 답답해져요'),
-  (code: 'manage_only', label: '불편함은 딱히 없지만 관리하고 싶어요'),
+  (code: 'throat_globus', label: '목에 이물감이 있어요'),
+  (code: 'sour_mouth_odor', label: '입에서 신맛과 악취가 느껴져요'),
+  (code: 'supine_chest_tight', label: '누우면 가슴이 답답해져요'),
+  (code: 'none_but_manage', label: '불편함은 딱히 없지만 관리하고 싶어요'),
 ];
 
 // ---------------------------------------------------------------------------
@@ -66,18 +67,18 @@ const List<OptionEntry> symptomFrequencyOptions = [
 // ---------------------------------------------------------------------------
 
 const List<OptionEntry> triggerFoodOptions = [
-  (code: 'coffee_caffeine', label: '커피·카페인'),
+  (code: 'caffeine', label: '커피·카페인'),
   (code: 'carbonated', label: '탄산음료'),
   (code: 'alcohol', label: '술'),
-  (code: 'fried_oily', label: '튀김·기름진 음식'),
+  (code: 'fried_fatty', label: '튀김·기름진 음식'),
   (code: 'chocolate', label: '초콜릿'),
   (code: 'spicy', label: '매운 음식'),
   (code: 'citrus', label: '감귤류'),
   (code: 'tomato', label: '토마토'),
   (code: 'mint', label: '민트'),
-  (code: 'onion_garlic', label: '양파·마늘'),
+  (code: 'onion_garlic_raw', label: '양파·마늘'),
   (code: 'cheese_dairy', label: '(생)치즈·유제품'),
-  (code: 'bread_refined_flour', label: '빵·정제 밀가루'),
+  (code: 'refined_flour', label: '빵·정제 밀가루'),
 ];
 
 // ---------------------------------------------------------------------------
@@ -85,13 +86,13 @@ const List<OptionEntry> triggerFoodOptions = [
 // ---------------------------------------------------------------------------
 
 const List<OptionEntry> allergyOptions = [
-  (code: 'milk_dairy', label: '우유·유제품'),
+  (code: 'milk', label: '우유·유제품'),
   (code: 'egg', label: '계란'),
   (code: 'wheat', label: '밀'),
   (code: 'soy', label: '콩(대두)'),
   (code: 'peanut', label: '땅콩'),
   (code: 'crustacean', label: '갑각류'),
-  (code: 'nuts', label: '견과류'),
+  (code: 'tree_nut', label: '견과류'),
   (code: 'fish_shellfish', label: '생선·조개류'),
 ];
 

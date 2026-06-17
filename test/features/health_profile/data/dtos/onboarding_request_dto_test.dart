@@ -106,8 +106,8 @@ void main() {
       final dto = OnboardingRequestDto.fromEntity(HealthProfile.sampleGerd());
       final json = dto.toJson();
 
-      // symptoms = symptomFrequency (weekly_heartburn, post_meal_cough)
-      expect(json['symptoms'], ['weekly_heartburn', 'post_meal_cough']);
+      // symptoms = symptomFrequency (heartburn_reflux, post_meal_cough)
+      expect(json['symptoms'], ['heartburn_reflux', 'post_meal_cough']);
       expect(json['triggers'], ['spicy', 'caffeine']);
       expect(json['allergens'], ['shellfish']);
       expect(json['medications'], ['omeprazole']);

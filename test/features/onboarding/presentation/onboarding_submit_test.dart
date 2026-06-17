@@ -76,7 +76,7 @@ void main() {
 
       // 드래프트에 일부 입력
       final ctrl = container.read(onboardingControllerProvider.notifier);
-      ctrl.toggleSymptom('weekly_heartburn');
+      ctrl.toggleSymptom('heartburn_reflux');
       ctrl.setDiagnosed(true);
 
       await container.read(onboardingSubmitProvider.notifier).submit();
@@ -87,7 +87,7 @@ void main() {
       final profile = profileState.value;
       expect(profile, isNotNull);
       expect(profile!.conditions, ['GERD']);
-      expect(profile.symptomFrequency, ['weekly_heartburn']);
+      expect(profile.symptomFrequency, ['heartburn_reflux']);
       expect(profile.diagnosed, isTrue);
     });
 

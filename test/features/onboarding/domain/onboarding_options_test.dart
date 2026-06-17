@@ -87,9 +87,9 @@ void main() {
   });
 
   group('symptomFrequency 코드↔라벨 라운드트립', () {
-    test('weekly_heartburn 코드가 올바른 라벨로 매핑된다', () {
+    test('heartburn_reflux 코드가 올바른 라벨로 매핑된다', () {
       expect(
-        labelForCode(symptomFrequencyOptions, 'weekly_heartburn'),
+        labelForCode(symptomFrequencyOptions, 'heartburn_reflux'),
         '주에 1번 이상 속이 쓰리거나 신물이 올라와요',
       );
     });
@@ -101,16 +101,16 @@ void main() {
       );
     });
 
-    test('throat_lump 라벨이 코드로 역조회된다', () {
+    test('throat_globus 라벨이 코드로 역조회된다', () {
       expect(
         codeForLabel(symptomFrequencyOptions, '목에 이물감이 있어요'),
-        'throat_lump',
+        'throat_globus',
       );
     });
 
-    test('manage_only 코드가 존재한다', () {
+    test('none_but_manage 코드가 존재한다', () {
       expect(
-        labelForCode(symptomFrequencyOptions, 'manage_only'),
+        labelForCode(symptomFrequencyOptions, 'none_but_manage'),
         isNotNull,
       );
     });
@@ -126,8 +126,8 @@ void main() {
       expect(labelForCode(triggerFoodOptions, 'spicy'), '매운 음식');
     });
 
-    test('coffee_caffeine 코드는 커피·카페인 라벨로 매핑된다', () {
-      expect(labelForCode(triggerFoodOptions, 'coffee_caffeine'), '커피·카페인');
+    test('caffeine 코드는 커피·카페인 라벨로 매핑된다', () {
+      expect(labelForCode(triggerFoodOptions, 'caffeine'), '커피·카페인');
     });
 
     test('초콜릿 라벨은 chocolate 코드로 역조회된다', () {
