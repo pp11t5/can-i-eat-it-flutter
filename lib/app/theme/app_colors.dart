@@ -88,4 +88,15 @@ abstract final class AppColors {
 
   /// 강조 텍스트 색 (Figma fontColor80 #10111A — 숫자·강조 라벨 등)
   static const Color textStrong = ColorPrimitives.fontColor80;
+
+  // --- 타임라인 WeekStrip 전용 ---
+
+  /// 화면 배경 (타임라인 등 카드가 뜨는 화면) — gray30(#F5F5F5)
+  static const Color surfaceBackground = ColorPrimitives.gray30;
+
+  /// 주간 스트립 카드 그림자 색 — black 4% opacity (Figma 타임라인 실측)
+  static const Color weekStripShadow = Color(0x0A000000);
+
+  /// 일요일 요일 라벨 색 — semanticRed(#FF383C)
+  static const Color calendarSunday = ColorPrimitives.semanticRed;
 }

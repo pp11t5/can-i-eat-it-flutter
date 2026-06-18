@@ -326,38 +326,184 @@ sealed SignInOutcome
 
 ## F3. 식사 · 증상 기록
 
-> **미확정/후속 (Swagger 미확인)**: 아래 엔드포인트는 현재 서버에서 확인되지 않았다. 계약 초안을 보존하되, 실 구현 전 Swagger 재확인 필수.
+> 초안 대비 주요 정정: `foods[]`(배열) → `foodExternalId`(단일 문자열), `eaten_at` → `eatenAt`(camelCase), `photo_url` 필드 없음, `from/to` 범위 → 단일 `date`, `severity`/`occurred_at`/`meal_id` 개념 없음.
+
+### 엔드포인트 목록
 
 | 메서드 | 경로 | 설명 |
 |---|---|---|
-| POST | `/meals` | 식사 기록 생성 |
-| GET | `/meals?from=&to=` | 타임라인 조회 (무한 스크롤) |
-| POST | `/symptoms` | 증상 기록 생성 |
-| PATCH | `/symptoms/{id}` | 증상 기록 수정 |
+| GET | `/api/v1/meals?date=` | 특정일 식사 목록 조회 |
+| POST | `/api/v1/meals` | 식사 기록 생성 (foodExternalId 기준) |
+| POST | `/api/v1/meals/text` | 식사 기록 생성 (텍스트 입력 기준) |
+| GET | `/api/v1/meals/{mealId}` | 식사 기록 상세 조회 |
+| PATCH | `/api/v1/meals/{mealId}` | 식사 기록 수정 (memo만 수정 가능) |
+| DELETE | `/api/v1/meals/{mealId}` | 식사 기록 삭제 |
 
-### POST /meals 요청 (초안 — Swagger 미확인)
+### GET /api/v1/meals
+
+**쿼리**: `date` — `YYYY-MM-DD` 형식 (선택, 미전달 시 오늘 Asia/Seoul 기준)
+
+**응답** (200): `result` — `List<MealGroupDTO>`
+
+```json
+[
+  {
+    "mealGroupId": "group-uuid",
+    "eatenAt":     "2026-06-17T12:00:00+09:00",
+    "records": [
+      {
+        "mealId":      "meal-uuid",
+        "mealGroupId": "group-uuid",
+        "eatenAt":     "2026-06-17T12:00:00+09:00",
+        "food": {
+          "externalId": "food-001",
+          "name":       "된장찌개",
+          "category":   "한식"
+        },
+        "judgedGrade": "CAUTION"
+      }
+    ]
+  }
+]
+```
+
+- `eatenAt`(MealGroupDTO): 그룹 내 최솟값(대표 시각).
+- `judgedGrade`(MealRecordSummaryDTO): 생성 시 스냅샷, nullable.
+- `category`: nullable.
+
+### POST /api/v1/meals
+
+**요청**: `CreateMealRecordRequestDTO`
 
 ```json
 {
-  "foods":     ["food_id_1", "food_id_2"],
-  "photo_url": "https://s3.../...",
-  "eaten_at":  "2026-05-24T12:30:00+09:00"
+  "foodExternalId": "food-001",
+  "eatenAt":        "2026-06-17T13:00:00+09:00",
+  "mealGroupId":    "group-uuid",
+  "judgedGrade":    "CAUTION"
 }
 ```
 
-### POST /symptoms 요청 (초안 — Swagger 미확인)
+| 필드 | 타입 | 필수 | 설명 |
+|---|---|---|---|
+| `foodExternalId` | String | 필수 | 단일 음식 ID (배열 아님) |
+| `eatenAt` | String? | 선택 | ISO-8601 offset 형식 (`+09:00` 포함) |
+| `mealGroupId` | String? | 선택 | 기존 끼니 그룹에 묶을 때 지정 |
+| `judgedGrade` | enum? | 선택 | `RECOMMEND` \| `CAUTION` \| `RISK` \| `UNKNOWN` |
+
+**응답** (200): `result` — `MealRecordSummaryDTO`
 
 ```json
 {
-  "meal_id":    "meal_uuid",
-  "severity":   2,
-  "types":      ["heartburn", "acid_reflux"],
-  "memo":       "점심 먹고 30분 뒤부터 불편",
-  "occurred_at":"2026-05-24T13:00:00+09:00"
+  "mealId":      "meal-uuid",
+  "mealGroupId": "group-uuid",
+  "eatenAt":     "2026-06-17T13:00:00+09:00",
+  "food": {
+    "externalId": "food-001",
+    "name":       "된장찌개",
+    "category":   "한식"
+  },
+  "judgedGrade": "CAUTION"
 }
 ```
 
-`severity`: 0(편안) ~ 5(심함)
+### POST /api/v1/meals/text
+
+**요청**: `CreateMealRecordByTextRequestDTO`
+
+```json
+{
+  "foodTextInput": "된장찌개",
+  "eatenAt":       "2026-06-17T13:00:00+09:00",
+  "mealGroupId":   "group-uuid",
+  "judgedGrade":   "CAUTION"
+}
+```
+
+| 필드 | 타입 | 필수 | 설명 |
+|---|---|---|---|
+| `foodTextInput` | String | 필수 | 사용자가 직접 입력한 음식명 |
+| `eatenAt` | String? | 선택 | ISO-8601 offset 형식 |
+| `mealGroupId` | String? | 선택 | 기존 끼니 그룹에 묶을 때 지정 |
+| `judgedGrade` | enum? | 선택 | `RECOMMEND` \| `CAUTION` \| `RISK` \| `UNKNOWN` |
+
+**응답** (200): `result` — `MealRecordSummaryDTO` (POST /meals와 동일 구조)
+
+### GET /api/v1/meals/{mealId}
+
+**응답** (200): `result` — `MealRecordDetailDTO`
+
+```json
+{
+  "mealId":      "meal-uuid",
+  "mealGroupId": "group-uuid",
+  "eatenAt":     "2026-06-17T13:00:00+09:00",
+  "memo":        "점심, 조금 불편했음",
+  "judgedGrade": "CAUTION",
+  "food": {
+    "externalId":  "food-001",
+    "name":        "된장찌개",
+    "category":    "한식",
+    "description": "된장을 끓여 만든 찌개"
+  },
+  "stateRecords": [
+    { "label": "속쓰림", "date": "2026-06-17", "timing": "식후 30분" }
+  ]
+}
+```
+
+- `memo`: nullable (null 또는 빈 문자열 = 메모 없음).
+- `stateRecords`: 읽기전용 — 서버가 주입하는 상태 기록. 클라이언트에서 직접 쓰기 불가.
+- `description`(MealFoodDetailDTO): nullable.
+
+### PATCH /api/v1/meals/{mealId}
+
+**요청**: `UpdateMealMemoRequestDTO`
+
+```json
+{ "memo": "메모 내용" }
+```
+
+- `memo`: 0~200자. `null` 또는 빈 문자열 전달 시 메모 삭제.
+- **수정 가능 필드는 `memo`만**. 음식·시각·판정등급은 불변.
+
+**응답** (200): `result` — `MealRecordDetailDTO` (상세와 동일 구조)
+
+### DELETE /api/v1/meals/{mealId}
+
+**응답** (200): `result` — `Unit` (빈 객체)
+
+### DTO 정의 요약
+
+| DTO | 필드 |
+|---|---|
+| `MealGroupDTO` | `mealGroupId`, `eatenAt`(대표=최솟값), `records: List<MealRecordSummaryDTO>` |
+| `MealRecordSummaryDTO` | `mealId`, `mealGroupId`, `eatenAt`, `food: FoodSummaryDTO`, `judgedGrade?` |
+| `MealRecordDetailDTO` | `mealId`, `mealGroupId`, `eatenAt`, `memo?`, `judgedGrade?`, `food: MealFoodDetailDTO`, `stateRecords: List<StateRecordDTO>` |
+| `FoodSummaryDTO` | `externalId`, `name`, `category?` |
+| `MealFoodDetailDTO` | `externalId`, `name`, `category?`, `description?` |
+| `StateRecordDTO` | `label`, `date`, `timing` (읽기전용) |
+
+**핵심 규칙**: 1식사 = 1음식 (`foodExternalId` 단일). 끼니 묶음은 `mealGroupId`로 관리. `judgedGrade`는 생성 시 스냅샷(이후 변경 불가).
+
+### 에러 코드
+
+| HTTP | code | 설명 |
+|---|---|---|
+| 400 | `MEAL400_1` | 메모 200자 초과 |
+| 400 | `MEAL400_2` | 날짜 형식 오류 |
+| 404 | `MEAL404_1` | 식사 기록 없음 |
+| 404 | `MEAL404_2` | 끼니 그룹 없음 |
+
+---
+
+### /symptoms — 현재 서버 미구현 (예정)
+
+> **서버 미구현**: 증상/상태 독립 CRUD 엔드포인트(`POST /symptoms`, `PATCH /symptoms/{id}` 등)는 현재 서버에 존재하지 않는다. 상태 기록은 식사 상세(`GET /meals/{mealId}`)의 **읽기전용 `stateRecords`** 필드로만 노출된다.
+
+> 백엔드 "곧 추가 예정 · 계약 공유 가능" 상태. **계약 확정 시 이 섹션을 교체할 것 (TODO).**
+
+기존 초안의 `severity`(0~5), `occurred_at`, `meal_id`, `types` 필드는 실서버에 존재하지 않아 삭제됨.
 
 ---
 

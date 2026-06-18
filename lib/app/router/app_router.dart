@@ -12,6 +12,10 @@ import 'package:can_i_eat_it/features/auth/presentation/screens/terms_screen.dar
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/food_check_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_screen.dart';
+import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_detail_screen.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_group_detail_screen.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_record_screen.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/timeline_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
@@ -84,10 +88,48 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/check',
         name: 'food-check',
-        pageBuilder: (context, state) => const MaterialPage(
-          fullscreenDialog: true,
-          child: FoodCheckScreen(),
-        ),
+        pageBuilder: (context, state) {
+          final recordContext = state.extra as MealRecordContext?;
+          return MaterialPage(
+            fullscreenDialog: true,
+            child: FoodCheckScreen(recordContext: recordContext),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/meal/record',
+        name: 'meal-record',
+        pageBuilder: (context, state) {
+          final mealGroupId = state.extra as String?;
+          return MaterialPage(
+            fullscreenDialog: true,
+            child: MealRecordScreen(mealGroupId: mealGroupId),
+          );
+        },
+      ),
+      // 끼니 그룹 상세 — extra: MealGroup
+      GoRoute(
+        path: '/meal/group',
+        name: 'meal-group-detail',
+        pageBuilder: (context, state) {
+          final group = state.extra! as MealGroup;
+          return MaterialPage(
+            fullscreenDialog: true,
+            child: MealGroupDetailScreen(group: group),
+          );
+        },
+      ),
+      // 단일 식사 기록 상세 — :mealId 경로 파라미터
+      GoRoute(
+        path: '/meal/:mealId',
+        name: 'meal-detail',
+        pageBuilder: (context, state) {
+          final mealId = state.pathParameters['mealId']!;
+          return MaterialPage(
+            fullscreenDialog: true,
+            child: MealDetailScreen(mealId: mealId),
+          );
+        },
       ),
       // 판정 화면 — FoodCheckScreen에서 present-modal로 진입 (티켓 6).
       // extra: VerdictArgs (externalId 있으면 by-id, 없으면 by-text).

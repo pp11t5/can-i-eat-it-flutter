@@ -22,8 +22,13 @@ import 'package:can_i_eat_it/features/food_check/presentation/widgets/clear_sear
 /// - 결과 셀 탭 → POST /foods/recent 기록 + 판정 화면 present-modal
 /// - 매칭 없음 → raw text 직접 분석 진입 (Figma 365-1849, externalId 없음 → recent 기록 생략)
 /// - 최근검색 RecentFood 엔티티 기반 (String 기반 SearchHistoryRepository 흡수)
+///
+/// [recordContext]: 식사 기록 흐름에서 진입 시 전달 (FAB→시간선택→검색). null이면 단순 판정.
 class FoodCheckScreen extends ConsumerStatefulWidget {
-  const FoodCheckScreen({super.key});
+  const FoodCheckScreen({super.key, this.recordContext});
+
+  /// 식사 기록 컨텍스트. null이면 단순 판정 흐름.
+  final MealRecordContext? recordContext;
 
   @override
   ConsumerState<FoodCheckScreen> createState() => _FoodCheckScreenState();
@@ -137,7 +142,11 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
       // 판정 화면 present-modal — by-id 진입 (externalId 보유)
       context.push(
         '/verdict',
-        extra: VerdictArgs(externalId: food.externalId, text: food.name),
+        extra: VerdictArgs(
+          externalId: food.externalId,
+          text: food.name,
+          recordContext: widget.recordContext,
+        ),
       );
     } finally {
       _navigating = false;
@@ -152,7 +161,10 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
     final q = _query.trim();
     if (q.isEmpty) return;
     _navigating = true;
-    context.push('/verdict', extra: VerdictArgs(text: q));
+    context.push(
+      '/verdict',
+      extra: VerdictArgs(text: q, recordContext: widget.recordContext),
+    );
     _navigating = false;
   }
 

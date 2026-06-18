@@ -40,6 +40,17 @@ extension VerdictLevelGrade on VerdictLevel {
         'UNKNOWN' => VerdictLevel.unknown,
         _ => VerdictLevel.unknown,
       };
+
+  /// 도메인 [VerdictLevel] 을 서버 grade 문자열로 변환한다 (POST /meals 등).
+  ///
+  /// 서버 계약 고정값: RECOMMEND | CAUTION | RISK | UNKNOWN.
+  /// `.name.toUpperCase()` 대신 명시 switch 사용 — 계약 드리프트 방지.
+  String toServerGrade() => switch (this) {
+        VerdictLevel.recommend => 'RECOMMEND',
+        VerdictLevel.caution => 'CAUTION',
+        VerdictLevel.risk => 'RISK',
+        VerdictLevel.unknown => 'UNKNOWN',
+      };
 }
 
 // ---------------------------------------------------------------------------

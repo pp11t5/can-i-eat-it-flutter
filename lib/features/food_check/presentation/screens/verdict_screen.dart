@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/core/error/failure.dart';
+import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/food_check/data/food_check_providers.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
+import 'package:can_i_eat_it/features/food_check/presentation/providers/add_to_diet_handler_provider.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_loading_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_result_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_unknown_screen.dart';
@@ -84,13 +86,24 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
           // grade=UNKNOWN은 성공 응답 → VerdictUnknownScreen (D1).
           return VerdictUnknownScreen(onRetry: _handleRetry);
         }
+        // addToDietHandler가 주입돼 있으면 항상 배선.
+        // recordContext가 없으면 now(KST)를 컨텍스트로 사용 (홈→검색→판정 경로).
+        final handler = ref.read(addToDietHandlerProvider);
+        VoidCallback? onAddToDiet;
+        if (handler != null) {
+          final ctx = widget.args.recordContext ??
+              MealRecordContext(eatenAt: nowKst());
+          onAddToDiet = () => handler(context, verdict, ctx);
+        }
         return VerdictResultScreen(
           verdict: verdict,
           onRetry: _handleRetry,
+          onAddToDiet: onAddToDiet,
         );
       },
     );
   }
+
 }
 
 // ---------------------------------------------------------------------------
