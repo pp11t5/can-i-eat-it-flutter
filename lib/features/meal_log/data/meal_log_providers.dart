@@ -8,6 +8,38 @@ import 'package:can_i_eat_it/features/meal_log/domain/repositories/meal_reposito
 
 part 'meal_log_providers.g.dart';
 
+// ---------------------------------------------------------------------------
+// MealDetailController
+// ---------------------------------------------------------------------------
+
+/// 식사 기록 상세 컨트롤러.
+///
+/// [mealId] 에 해당하는 [MealDetail] 을 로드하고 수정/삭제 액션을 제공한다.
+///
+/// ProviderScope override 예시 (테스트):
+///   mealRepositoryProvider.overrideWithValue(MockMealRepository.seeded())
+@riverpod
+class MealDetailController extends _$MealDetailController {
+  @override
+  Future<MealDetail> build(String mealId) async {
+    final repo = ref.watch(mealRepositoryProvider);
+    return repo.detail(mealId);
+  }
+
+  /// 메모를 수정한 뒤 상태를 갱신한다.
+  Future<void> updateMemo(String? memo) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => ref.read(mealRepositoryProvider).updateMemo(mealId, memo),
+    );
+  }
+
+  /// 식사 기록을 삭제한다.
+  Future<void> delete() async {
+    await ref.read(mealRepositoryProvider).delete(mealId);
+  }
+}
+
 /// [MealRepository] 공급자.
 ///
 /// 기본값: [MealRepositoryImpl] — 실 서버 연동.

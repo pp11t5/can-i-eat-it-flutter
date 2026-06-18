@@ -299,7 +299,10 @@ class _TimelineGroupList extends StatelessWidget {
     return MealTimelineList(
       groups: groups,
       onTapRecord: (record) {
-        // TODO(F3-3): context.push('/meal/${record.mealId}')
+        context.push('/meal/${record.mealId}');
+      },
+      onTapGroup: (group) {
+        context.push('/meal/group', extra: group);
       },
       onAddFood: (group) {
         context.push('/meal/record', extra: group.mealGroupId);

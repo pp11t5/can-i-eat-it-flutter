@@ -17,17 +17,20 @@ import 'package:can_i_eat_it/features/meal_log/presentation/widgets/meal_record_
 ///
 /// [group]: 표시할 끼니 그룹.
 /// [onTapRecord]: 식사 기록 타일 탭 콜백. null이면 no-op.
+/// [onTapGroup]: 그룹 헤더("먹은 음식 · HH:mm") 탭 콜백 (F3-3 그룹 상세 진입). null이면 no-op.
 /// [onAddFood]: "같이 먹은 음식 추가" 행 탭 콜백. null이면 no-op.
 class MealGroupCard extends StatelessWidget {
   const MealGroupCard({
     super.key,
     required this.group,
     this.onTapRecord,
+    this.onTapGroup,
     this.onAddFood,
   });
 
   final MealGroup group;
   final void Function(MealRecord record)? onTapRecord;
+  final void Function(MealGroup group)? onTapGroup;
   final void Function(MealGroup group)? onAddFood;
 
   /// ISO-8601 문자열 → 'HH:mm' (KST).
@@ -63,11 +66,27 @@ class MealGroupCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 상단 라벨: "먹은 음식 · HH:mm"
-            Text(
-              '먹은 음식 · $timeLabel',
-              style: AppTextStyles.caption1Medium.copyWith(
-                color: AppColors.textSecondary,
+            // 상단 라벨: "먹은 음식 · HH:mm" — 탭 시 그룹 상세 진입 (F3-3)
+            GestureDetector(
+              onTap: onTapGroup != null ? () => onTapGroup!(group) : null,
+              behavior: HitTestBehavior.opaque,
+              child: Row(
+                children: [
+                  Text(
+                    '먹은 음식 · $timeLabel',
+                    style: AppTextStyles.caption1Medium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  if (onTapGroup != null) ...[
+                    const SizedBox(width: 2),
+                    const Icon(
+                      Icons.chevron_right,
+                      size: 14,
+                      color: AppColors.textTertiary,
+                    ),
+                  ],
+                ],
               ),
             ),
             const SizedBox(height: AppSpacing.itemGap),

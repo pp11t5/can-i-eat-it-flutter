@@ -17,17 +17,20 @@ import 'package:can_i_eat_it/features/meal_log/presentation/widgets/meal_group_c
 ///
 /// [groups]: 표시할 끼니 그룹 목록 (비어있지 않아야 함).
 /// [onTapRecord]: 레코드 탭 콜백.
+/// [onTapGroup]: 그룹 헤더 탭 콜백 (F3-3 그룹 상세 진입).
 /// [onAddFood]: 음식 추가 콜백.
 class MealTimelineList extends StatelessWidget {
   const MealTimelineList({
     super.key,
     required this.groups,
     this.onTapRecord,
+    this.onTapGroup,
     this.onAddFood,
   });
 
   final List<MealGroup> groups;
   final void Function(MealRecord record)? onTapRecord;
+  final void Function(MealGroup group)? onTapGroup;
   final void Function(MealGroup group)? onAddFood;
 
   /// eatenAt ISO-8601 → 시(hour) 추출.
@@ -66,6 +69,7 @@ class MealTimelineList extends StatelessWidget {
           child: MealGroupCard(
             group: group,
             onTapRecord: onTapRecord,
+            onTapGroup: onTapGroup,
             onAddFood: onAddFood,
           ),
         );
