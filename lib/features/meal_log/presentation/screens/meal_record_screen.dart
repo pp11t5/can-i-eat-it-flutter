@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
@@ -46,7 +47,7 @@ class _MealRecordScreenState extends State<MealRecordScreen> {
   @override
   void initState() {
     super.initState();
-    final now = _nowKst();
+    final now = nowKst();
     _selectedDateTime = now;
     _selectedOffsetMinutes = 0; // 기본: '지금' 선택
 
@@ -63,22 +64,16 @@ class _MealRecordScreenState extends State<MealRecordScreen> {
     super.dispose();
   }
 
-  static DateTime _nowKst() {
-    final utcNow = DateTime.now().toUtc();
-    final kst = utcNow.add(const Duration(hours: 9));
-    return DateTime(kst.year, kst.month, kst.day, kst.hour, kst.minute);
-  }
-
   /// 날짜 옵션 목록 (오늘 포함 최근 7일).
   List<DateTime> _dateOptions() {
-    final today = _nowKst();
+    final today = nowKst();
     final base = DateTime(today.year, today.month, today.day);
     return List.generate(7, (i) => base.subtract(Duration(days: i)));
   }
 
   /// 날짜 → 휠 표시 레이블.
   String _dateLabel(DateTime date) {
-    final today = _nowKst();
+    final today = nowKst();
     final base = DateTime(today.year, today.month, today.day);
     if (date == base) return '오늘';
     const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
@@ -87,7 +82,7 @@ class _MealRecordScreenState extends State<MealRecordScreen> {
   }
 
   void _onChipTap(int offsetMinutes) {
-    final base = _nowKst();
+    final base = nowKst();
     final newDt = base.subtract(Duration(minutes: offsetMinutes));
     final dates = _dateOptions();
     final targetDate = DateTime(newDt.year, newDt.month, newDt.day);
@@ -131,7 +126,7 @@ class _MealRecordScreenState extends State<MealRecordScreen> {
     final newDt = DateTime(base.year, base.month, base.day, hour, minute);
 
     // '지금' 칩과 일치하는지 확인
-    final now = _nowKst();
+    final now = nowKst();
     final isNow = newDt.year == now.year &&
         newDt.month == now.month &&
         newDt.day == now.day &&

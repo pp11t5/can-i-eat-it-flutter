@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/core/error/failure.dart';
+import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/food_check/data/food_check_providers.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
@@ -91,7 +92,7 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
         VoidCallback? onAddToDiet;
         if (handler != null) {
           final ctx = widget.args.recordContext ??
-              MealRecordContext(eatenAt: _nowKst());
+              MealRecordContext(eatenAt: nowKst());
           onAddToDiet = () => handler(context, verdict, ctx);
         }
         return VerdictResultScreen(
@@ -103,11 +104,6 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
     );
   }
 
-  /// KST 현재 시각 (UTC+9).
-  static DateTime _nowKst() {
-    final utcNow = DateTime.now().toUtc();
-    return utcNow.add(const Duration(hours: 9));
-  }
 }
 
 // ---------------------------------------------------------------------------

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
@@ -51,13 +52,10 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
   }
 
   /// 오늘 날짜. todayOverride가 있으면 그 값을 사용, 없으면 KST 오늘.
-  DateTime _today() => widget.todayOverride ?? _todayKst();
-
-  /// KST 오늘 날짜 (UTC+9).
-  static DateTime _todayKst() {
-    final utcNow = DateTime.now().toUtc();
-    final kst = utcNow.add(const Duration(hours: 9));
-    return DateTime(kst.year, kst.month, kst.day);
+  DateTime _today() {
+    if (widget.todayOverride != null) return widget.todayOverride!;
+    final k = nowKst();
+    return DateTime(k.year, k.month, k.day);
   }
 
   /// 주어진 날짜가 속한 주의 일요일을 반환.

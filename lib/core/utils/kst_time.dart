@@ -1,31 +1,46 @@
 /// KST(Asia/Seoul, UTC+09:00) 시간 직렬화 헬퍼.
 ///
-/// tz 패키지 없이 +09:00 오프셋을 고정 적용한다.
-/// 서버 API 계약: date 파라미터는 'YYYY-MM-DD', eatenAt 은 ISO-8601 +09:00 오프셋.
+/// tz 패키지 없이 KST wall-clock 계약으로 동작한다.
+///
+/// ## 계약
+/// - 호출자는 **KST wall-clock**(isUtc=false, 컴포넌트=KST 시각)을 넘긴다.
+/// - 직렬화는 컴포넌트를 그대로 +09:00 오프셋으로 포맷한다. **시간 연산 없음.**
+/// - 서버 API 계약: date 파라미터는 'YYYY-MM-DD', eatenAt은 ISO-8601 +09:00 오프셋.
 library;
 
-/// [DateTime] 을 서버 date 쿼리 파라미터 형식('YYYY-MM-DD', KST)으로 변환한다.
+/// 현재 KST wall-clock을 **local-flag** [DateTime]으로 반환한다.
 ///
-/// [dt] 는 로컬 또는 UTC 무관하게 +09:00 오프셋을 적용해 날짜를 계산한다.
+/// 머신 TZ에 무관하게 UTC+9 오프셋을 고정 적용한다.
+/// 반환값은 isUtc=false이며, 컴포넌트가 KST 시각과 일치한다.
+DateTime nowKst() {
+  final u = DateTime.now().toUtc();
+  final k = u.add(const Duration(hours: 9));
+  return DateTime(k.year, k.month, k.day, k.hour, k.minute, k.second);
+}
+
+/// [DateTime] 의 컴포넌트를 그대로 'YYYY-MM-DD' 형식으로 반환한다.
+///
+/// [dt] 는 KST wall-clock이어야 한다. 시간 연산을 하지 않으므로
+/// 호출자가 KST 컴포넌트를 보장해야 한다.
 String toServerDate(DateTime dt) {
-  final kst = dt.toUtc().add(const Duration(hours: 9));
-  final y = kst.year.toString().padLeft(4, '0');
-  final m = kst.month.toString().padLeft(2, '0');
-  final d = kst.day.toString().padLeft(2, '0');
+  final y = dt.year.toString().padLeft(4, '0');
+  final m = dt.month.toString().padLeft(2, '0');
+  final d = dt.day.toString().padLeft(2, '0');
   return '$y-$m-$d';
 }
 
-/// [DateTime] 을 ISO-8601 +09:00 오프셋 문자열로 변환한다.
+/// [DateTime] 의 컴포넌트를 그대로 ISO-8601 +09:00 오프셋 문자열로 반환한다.
 ///
-/// 예: '2026-06-17T12:30:00+09:00'
-/// 서버 eatenAt 필드 직렬화에 사용한다.
+/// 예: DateTime(2026,6,17,9,2,0) → '2026-06-17T09:02:00+09:00'
+///
+/// [dt] 는 KST wall-clock이어야 한다. 시간 연산을 하지 않으므로
+/// 호출자가 KST 컴포넌트를 보장해야 한다. 서버 eatenAt 필드 직렬화에 사용한다.
 String toServerOffset(DateTime dt) {
-  final kst = dt.toUtc().add(const Duration(hours: 9));
-  final y = kst.year.toString().padLeft(4, '0');
-  final mo = kst.month.toString().padLeft(2, '0');
-  final d = kst.day.toString().padLeft(2, '0');
-  final h = kst.hour.toString().padLeft(2, '0');
-  final mi = kst.minute.toString().padLeft(2, '0');
-  final s = kst.second.toString().padLeft(2, '0');
+  final y = dt.year.toString().padLeft(4, '0');
+  final mo = dt.month.toString().padLeft(2, '0');
+  final d = dt.day.toString().padLeft(2, '0');
+  final h = dt.hour.toString().padLeft(2, '0');
+  final mi = dt.minute.toString().padLeft(2, '0');
+  final s = dt.second.toString().padLeft(2, '0');
   return '$y-$mo-${d}T$h:$mi:$s+09:00';
 }
