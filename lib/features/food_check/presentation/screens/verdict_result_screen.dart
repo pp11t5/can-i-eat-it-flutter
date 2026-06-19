@@ -251,6 +251,16 @@ class _HeroSection extends StatelessWidget {
     };
   }
 
+  /// 등급별 라벨 텍스트 색상
+  Color _labelColor() {
+    return switch (verdict.level) {
+      VerdictLevel.recommend => const Color(0xFF00875A),
+      VerdictLevel.caution => const Color(0xFFB06000),
+      VerdictLevel.risk => const Color(0xFFD32F2F),
+      VerdictLevel.unknown => AppColors.textSecondary,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final color = _verdictColor();
@@ -310,7 +320,7 @@ class _HeroSection extends StatelessWidget {
               child: Text(
                 _headlineText(),
                 style: AppTextStyles.header3Bold.copyWith(
-                  color: AppColors.textPrimary,
+                  color: _labelColor(),
                 ),
                 textAlign: TextAlign.center,
               ),
