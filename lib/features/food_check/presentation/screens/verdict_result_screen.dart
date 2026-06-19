@@ -545,10 +545,10 @@ class _NutritionInfoSection extends StatelessWidget {
   const _NutritionInfoSection();
 
   static const _items = [
-    ('칼로리', '72kcal'),
-    ('탄수화물', '1.8g'),
-    ('단백질', '8g'),
-    ('지방', '4g'),
+    ('칼로리', '72 kcal'),
+    ('탄수화물', '1.8 g'),
+    ('단백질', '8 g'),
+    ('지방', '4 g'),
   ];
 
   @override

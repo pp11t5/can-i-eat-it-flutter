@@ -52,4 +52,24 @@ void main() {
       expect(find.widgetWithText(ActionChip, '두부'), findsOneWidget);
     });
   });
+
+  group('VerdictResultScreen — 영양 정보 섹션', () {
+    testWidgets("'영양 정보' 타이틀이 렌더된다", (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      expect(find.text('영양 정보'), findsOneWidget);
+    });
+
+    testWidgets("'72 kcal' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      expect(find.text('72 kcal'), findsOneWidget);
+    });
+  });
 }
