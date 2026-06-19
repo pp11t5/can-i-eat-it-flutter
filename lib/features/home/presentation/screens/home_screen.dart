@@ -111,7 +111,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               HomeSearchBar(onTap: () => context.push('/check')),
               const SizedBox(height: AppSpacing.itemGap),
 
-              // ── 2-1. 최근 검색어 섹션 ─────────────────────────────────
+              // ── 2-1. 식사 기록 바로가기 버튼 ──────────────────────────
+              FilledButton.icon(
+                onPressed: () => context.push('/meal-log'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('식사 기록하기'),
+              ),
+              const SizedBox(height: AppSpacing.itemGap),
+
+              // ── 2-2. 최근 검색어 섹션 ─────────────────────────────────
               _RecentSearchSection(),
               const SizedBox(height: AppSpacing.itemGap),
 

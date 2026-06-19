@@ -240,4 +240,20 @@ void main() {
       );
     });
   });
+
+  group('HomeScreen — 식사 기록 바로가기 버튼', () {
+    testWidgets("'식사 기록하기' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.text('식사 기록하기'), findsOneWidget);
+    });
+
+    testWidgets('Icons.add 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.add), findsOneWidget);
+    });
+  });
 }
