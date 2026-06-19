@@ -193,11 +193,8 @@ void main() {
       await tester.pumpWidget(_wrap());
       await _settle(tester);
 
-      // 다크 모드 ListTile의 Switch는 Icons.dark_mode_outlined 아이콘과 함께 존재
-      final darkModeTile = find.ancestor(
-        of: find.byIcon(Icons.dark_mode_outlined),
-        matching: find.byType(ListTile),
-      );
+      // 다크 모드 ListTile의 Switch는 key('darkModeTile')로 특정
+      final darkModeTile = find.byKey(const Key('darkModeTile'));
       final switchInDarkTile = find.descendant(
         of: darkModeTile,
         matching: find.byType(Switch),
@@ -207,6 +204,7 @@ void main() {
       final sw = tester.widget<Switch>(switchInDarkTile);
       expect(sw.value, isFalse);
 
+      await tester.ensureVisible(switchInDarkTile);
       await tester.tap(switchInDarkTile);
       await _settle(tester);
 
@@ -390,6 +388,61 @@ void main() {
       await _settle(tester);
 
       expect(find.text('개인정보 처리방침'), findsOneWidget);
+    });
+  });
+
+  group('MypageScreen — 알림 설정 화면 이동', () {
+    testWidgets('Icons.notifications_outlined 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.notifications_outlined), findsOneWidget);
+    });
+
+    testWidgets("Icons.notifications_outlined 탭 시 /mypage/notifications로 이동한다",
+        (tester) async {
+      final authRepo = MockAuthRepository(initialSession: _testSession);
+      final profileRepo = MockHealthProfileRepository.noProfile();
+
+      final router = GoRouter(
+        initialLocation: '/mypage',
+        routes: [
+          GoRoute(
+            path: '/mypage',
+            builder: (_, __) => const MypageScreen(),
+            routes: [
+              GoRoute(
+                path: 'edit',
+                builder: (_, __) =>
+                    const Scaffold(body: Text('건강 프로필 편집')),
+              ),
+              GoRoute(
+                path: 'notifications',
+                builder: (_, __) =>
+                    const Scaffold(body: Text('알림 설정 화면')),
+              ),
+            ],
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            // ignore: scoped_providers_should_specify_dependencies
+            authRepositoryProvider.overrideWithValue(authRepo),
+            // ignore: scoped_providers_should_specify_dependencies
+            healthProfileRepositoryProvider.overrideWithValue(profileRepo),
+          ],
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+      await _settle(tester);
+
+      await tester.tap(find.byIcon(Icons.notifications_outlined));
+      await _settle(tester);
+
+      expect(find.text('알림 설정 화면'), findsOneWidget);
     });
   });
 }

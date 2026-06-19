@@ -210,6 +210,13 @@ GoRouter appRouter(Ref ref) {
                     name: 'mypage-edit',
                     builder: (context, state) => const EditProfileScreen(),
                   ),
+                  GoRoute(
+                    path: 'notifications',
+                    name: 'mypage-notifications',
+                    builder: (context, state) => const Scaffold(
+                      body: Center(child: Text('알림 설정')),
+                    ),
+                  ),
                 ],
               ),
             ],

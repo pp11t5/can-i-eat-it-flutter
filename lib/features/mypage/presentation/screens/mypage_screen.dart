@@ -144,11 +144,29 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
                   const SizedBox(height: 16),
 
                   // ── ③ 알림 설정 ──────────────────────────────────────
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(
+                      Icons.notifications_outlined,
+                      color: AppColors.textPrimary,
+                    ),
+                    title: Text(
+                      '알림 설정',
+                      style: AppTextStyles.body1Medium
+                          .copyWith(color: AppColors.textPrimary),
+                    ),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: AppColors.textSecondary,
+                    ),
+                    onTap: () => context.push('/mypage/notifications'),
+                  ),
                   const NotificationToggleWidget(),
                   const MealNotificationSettingsWidget(),
 
                   // ── ③-1. 다크 모드 토글 ──────────────────────────────
                   ListTile(
+                    key: const Key('darkModeTile'),
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(
                       Icons.dark_mode_outlined,
@@ -165,7 +183,6 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
                           setState(() => _isDarkMode = value),
                       activeThumbColor: AppColors.primary,
                     ),
-                    onTap: () => setState(() => _isDarkMode = !_isDarkMode),
                   ),
 
                   const Divider(color: AppColors.divider, height: 1),
