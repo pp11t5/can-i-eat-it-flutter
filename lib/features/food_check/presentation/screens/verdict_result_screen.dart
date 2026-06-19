@@ -6,8 +6,9 @@ import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
-import 'package:can_i_eat_it/features/food_check/presentation/widgets/verdict_detail_card.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_unknown_screen.dart';
+import 'package:can_i_eat_it/features/food_check/presentation/utils/verdict_share_util.dart';
+import 'package:can_i_eat_it/features/food_check/presentation/widgets/verdict_detail_card.dart';
 
 /// 판정 결과 화면 (W3-3 Figma HeroSection 정합).
 ///
@@ -86,8 +87,9 @@ class VerdictResultScreen extends ConsumerWidget {
             const MedicalDisclaimer(),
             const SizedBox(height: AppSpacing.sectionGap),
 
-            // CTA 2개
+            // CTA 3개 (공유하기 + 다시 검색 + 내 식단에 추가)
             _CtaSection(
+              verdict: verdict,
               onRetry: onRetry,
               onAddToDiet: onAddToDiet ?? () => _showF3Placeholder(context),
             ),
@@ -251,59 +253,90 @@ class _HeroSection extends StatelessWidget {
 
 class _CtaSection extends StatelessWidget {
   const _CtaSection({
+    required this.verdict,
     required this.onRetry,
     required this.onAddToDiet,
   });
 
+  final EatVerdict verdict;
   final VoidCallback onRetry;
   final VoidCallback onAddToDiet;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // "다시 검색" — 아웃라인 버튼 #00BF72
-        Expanded(
-          child: SizedBox(
-            height: 54,
-            child: OutlinedButton(
-              onPressed: onRetry,
-              style: OutlinedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(
-                  color: AppColors.primary,
-                  width: 1.5,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                ),
-                textStyle: AppTextStyles.body1Bold,
-                padding: EdgeInsets.zero,
+        // "공유하기" — 아웃라인 버튼 full-width
+        SizedBox(
+          height: 54,
+          child: OutlinedButton(
+            onPressed: () => shareVerdict(verdict),
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: AppColors.primary,
+              side: const BorderSide(
+                color: AppColors.primary,
+                width: 1.5,
               ),
-              child: const Text('다시 검색'),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+              ),
+              textStyle: AppTextStyles.body1Bold,
+              padding: EdgeInsets.zero,
             ),
+            child: const Text('공유하기'),
           ),
         ),
-        const SizedBox(width: AppSpacing.itemGap),
-        // "내 식단에 추가" — 채움 버튼 #00BF72 (F3 placeholder)
-        Expanded(
-          child: SizedBox(
-            height: 54,
-            child: FilledButton(
-              onPressed: onAddToDiet,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        const SizedBox(height: AppSpacing.itemGap),
+        Row(
+          children: [
+            // "다시 검색" — 아웃라인 버튼 #00BF72
+            Expanded(
+              child: SizedBox(
+                height: 54,
+                child: OutlinedButton(
+                  onPressed: onRetry,
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(
+                      color: AppColors.primary,
+                      width: 1.5,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusCard),
+                    ),
+                    textStyle: AppTextStyles.body1Bold,
+                    padding: EdgeInsets.zero,
+                  ),
+                  child: const Text('다시 검색'),
                 ),
-                textStyle: AppTextStyles.body1Bold,
-                padding: EdgeInsets.zero,
               ),
-              child: const Text('내 식단에 추가'),
             ),
-          ),
+            const SizedBox(width: AppSpacing.itemGap),
+            // "내 식단에 추가" — 채움 버튼 #00BF72 (F3 placeholder)
+            Expanded(
+              child: SizedBox(
+                height: 54,
+                child: FilledButton(
+                  onPressed: onAddToDiet,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusCard),
+                    ),
+                    textStyle: AppTextStyles.body1Bold,
+                    padding: EdgeInsets.zero,
+                  ),
+                  child: const Text('내 식단에 추가'),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
