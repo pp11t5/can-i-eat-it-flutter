@@ -291,6 +291,28 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
                   const Divider(color: AppColors.divider, height: 1),
                   const SizedBox(height: AppSpacing.sectionGap),
 
+                  // ── ⑦ 개인정보 처리방침 ──────────────────────────────
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(
+                      Icons.privacy_tip_outlined,
+                      color: AppColors.textPrimary,
+                    ),
+                    title: Text(
+                      '개인정보 처리방침',
+                      style: AppTextStyles.body1Medium
+                          .copyWith(color: AppColors.textPrimary),
+                    ),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: AppColors.textSecondary,
+                    ),
+                    onTap: () => _showPrivacyDialog(context),
+                  ),
+
+                  const Divider(color: AppColors.divider, height: 1),
+                  const SizedBox(height: AppSpacing.sectionGap),
+
                   // ── ④ 계정 액션 ──────────────────────────────────────
                   AccountActionsWidget(
                     onLogout: () => _showLogoutDialog(context, ref),
@@ -353,6 +375,22 @@ Future<void> _showLogoutDialog(BuildContext context, WidgetRef ref) {
             foregroundColor: Colors.red,
           ),
           child: const Text('로그아웃'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showPrivacyDialog(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('개인정보 처리방침'),
+      content: const Text('개인정보는 서비스 제공 목적으로만 사용됩니다.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('확인'),
         ),
       ],
     ),

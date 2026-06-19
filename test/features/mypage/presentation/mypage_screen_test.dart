@@ -372,4 +372,24 @@ void main() {
       expect(find.text('버전 1.0.0'), findsOneWidget);
     });
   });
+
+  group('MypageScreen — 개인정보 처리방침', () {
+    testWidgets('Icons.privacy_tip_outlined 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.privacy_tip_outlined), findsOneWidget);
+    });
+
+    testWidgets("Icons.privacy_tip_outlined 탭 시 '개인정보 처리방침' 다이얼로그 타이틀이 표시된다",
+        (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      await tester.tap(find.byIcon(Icons.privacy_tip_outlined));
+      await _settle(tester);
+
+      expect(find.text('개인정보 처리방침'), findsOneWidget);
+    });
+  });
 }
