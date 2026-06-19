@@ -160,14 +160,27 @@ class _BulletItem extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
-          // 회색 body 텍스트
+          // 회색 body 텍스트 (info 아이콘 + 텍스트 Row)
           Padding(
             padding: const EdgeInsets.only(left: AppSpacing.itemGap),
-            child: Text(
-              item.body,
-              style: AppTextStyles.body2Medium.copyWith(
-                color: AppColors.textSecondary,
-              ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    item.body,
+                    style: AppTextStyles.body2Medium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
