@@ -6,7 +6,6 @@ import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:can_i_eat_it/app/widgets/app_button.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/account_actions_widget.dart';
@@ -85,9 +84,26 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      AppButton.secondary(
-                        label: '편집',
+                      OutlinedButton.icon(
                         onPressed: () => context.push('/mypage/edit'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(color: AppColors.primary),
+                          textStyle: AppTextStyles.body2Regular,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusCard,
+                            ),
+                          ),
+                        ),
+                        icon: const Icon(Icons.edit_outlined, size: 14),
+                        label: const Text('편집'),
                       ),
                     ],
                   ),

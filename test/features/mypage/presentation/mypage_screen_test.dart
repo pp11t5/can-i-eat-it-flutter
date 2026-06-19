@@ -214,6 +214,15 @@ void main() {
     });
   });
 
+  group('MypageScreen — 프로필 편집 버튼', () {
+    testWidgets("'편집' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.text('편집'), findsOneWidget);
+    });
+  });
+
   group('MypageScreen — 언어 설정 메뉴', () {
     testWidgets("'언어 설정' 텍스트가 렌더된다", (tester) async {
       await tester.pumpWidget(_wrap());
