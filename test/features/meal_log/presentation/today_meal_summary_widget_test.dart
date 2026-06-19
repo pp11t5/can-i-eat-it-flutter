@@ -28,6 +28,99 @@ String _todayEatenAt(int hour, int minute) {
   return '$y-$mo-${d}T$h:$m:00+09:00';
 }
 
+/// 어제 KST 날짜 기준 eatenAt ISO-8601 문자열 생성.
+String _yesterdayEatenAt(int hour, int minute) {
+  final yesterday = nowKst().subtract(const Duration(days: 1));
+  final h = hour.toString().padLeft(2, '0');
+  final m = minute.toString().padLeft(2, '0');
+  final y = yesterday.year.toString().padLeft(4, '0');
+  final mo = yesterday.month.toString().padLeft(2, '0');
+  final d = yesterday.day.toString().padLeft(2, '0');
+  return '$y-$mo-${d}T$h:$m:00+09:00';
+}
+
+/// 어제 날짜 기록만 있는 MockMealRepository.
+MockMealRepository _yesterdaySeeded() {
+  final group = MealGroup(
+    mealGroupId: 'g-yesterday',
+    eatenAt: _yesterdayEatenAt(8, 0),
+    records: [
+      MealRecord(
+        mealId: 'm-y001',
+        mealGroupId: 'g-yesterday',
+        eatenAt: _yesterdayEatenAt(8, 0),
+        food: const FoodSummary(externalId: 'f-001', name: '두부'),
+        judgedGrade: VerdictLevel.recommend,
+      ),
+      MealRecord(
+        mealId: 'm-y002',
+        mealGroupId: 'g-yesterday',
+        eatenAt: _yesterdayEatenAt(12, 0),
+        food: const FoodSummary(externalId: 'f-002', name: '커피'),
+        judgedGrade: VerdictLevel.risk,
+      ),
+      MealRecord(
+        mealId: 'm-y003',
+        mealGroupId: 'g-yesterday',
+        eatenAt: _yesterdayEatenAt(18, 0),
+        food: const FoodSummary(externalId: 'f-003', name: '된장찌개'),
+        judgedGrade: VerdictLevel.caution,
+      ),
+    ],
+  );
+  return MockMealRepository(initialGroups: [group]);
+}
+
+/// 오늘(2건) + 어제(3건) 혼합 MockMealRepository.
+MockMealRepository _mixedSeeded() {
+  final todayGroup = MealGroup(
+    mealGroupId: 'g-today',
+    eatenAt: _todayEatenAt(8, 0),
+    records: [
+      MealRecord(
+        mealId: 'm-001',
+        mealGroupId: 'g-today',
+        eatenAt: _todayEatenAt(8, 0),
+        food: const FoodSummary(externalId: 'f-001', name: '두부'),
+        judgedGrade: VerdictLevel.recommend,
+      ),
+      MealRecord(
+        mealId: 'm-002',
+        mealGroupId: 'g-today',
+        eatenAt: _todayEatenAt(12, 30),
+        food: const FoodSummary(externalId: 'f-002', name: '된장찌개'),
+        judgedGrade: VerdictLevel.caution,
+      ),
+    ],
+  );
+  final yesterdayGroup = MealGroup(
+    mealGroupId: 'g-yesterday',
+    eatenAt: _yesterdayEatenAt(8, 0),
+    records: [
+      MealRecord(
+        mealId: 'm-y001',
+        mealGroupId: 'g-yesterday',
+        eatenAt: _yesterdayEatenAt(8, 0),
+        food: const FoodSummary(externalId: 'f-003', name: '커피'),
+        judgedGrade: VerdictLevel.risk,
+      ),
+      MealRecord(
+        mealId: 'm-y002',
+        mealGroupId: 'g-yesterday',
+        eatenAt: _yesterdayEatenAt(12, 0),
+        food: const FoodSummary(externalId: 'f-004', name: '라면'),
+      ),
+      MealRecord(
+        mealId: 'm-y003',
+        mealGroupId: 'g-yesterday',
+        eatenAt: _yesterdayEatenAt(18, 0),
+        food: const FoodSummary(externalId: 'f-005', name: '치킨'),
+      ),
+    ],
+  );
+  return MockMealRepository(initialGroups: [todayGroup, yesterdayGroup]);
+}
+
 /// 오늘 날짜 기록이 있는 MockMealRepository.
 MockMealRepository _todaySeeded() {
   final group = MealGroup(
@@ -122,12 +215,45 @@ void main() {
 
       // 헤더
       expect(find.text('오늘의 식사'), findsOneWidget);
-      // 식사 수: RichText 내 "2개" 텍스트 스팬
+      // 식사 수
       expect(find.textContaining('2개'), findsOneWidget);
       // 마지막 식사 시간 (12:30)
       expect(find.text('마지막: 12:30'), findsOneWidget);
       // 더 보기 버튼
       expect(find.text('더 보기'), findsOneWidget);
+    });
+
+    testWidgets('어제 기록은 오늘 카운트에 포함되지 않는다 — 빈 상태 표시', (tester) async {
+      await tester.pumpWidget(_wrap(_yesterdaySeeded()));
+      await _settle(tester);
+
+      // 어제 기록만 있으므로 오늘 빈 상태
+      expect(find.text('오늘 기록된 식사가 없어요.'), findsOneWidget);
+      // 식사 수 표시 없음
+      expect(find.textContaining('개'), findsNothing);
+    });
+
+    testWidgets('오늘(2건)+어제(3건) 혼합 시 오늘 것만 카운트 — "2개" 표시', (tester) async {
+      await tester.pumpWidget(_wrap(_mixedSeeded()));
+      await _settle(tester);
+
+      // 오늘 2건만 카운트
+      expect(find.textContaining('2개'), findsOneWidget);
+      // 어제 건수(3)는 포함되지 않음
+      expect(find.textContaining('5개'), findsNothing);
+      expect(find.textContaining('3개'), findsNothing);
+    });
+
+    testWidgets('"더 보기" 탭 시 /meal-log 라우트로 이동한다', (tester) async {
+      await tester.pumpWidget(_wrap(MockMealRepository.empty()));
+      await _settle(tester);
+
+      // "더 보기" 버튼 탭
+      await tester.tap(find.text('더 보기'));
+      await _settle(tester);
+
+      // /meal-log stub 텍스트 확인
+      expect(find.text('meal-log stub'), findsOneWidget);
     });
   });
 }
