@@ -295,6 +295,17 @@ class _HeroSection extends StatelessWidget {
           ),
           textAlign: TextAlign.center,
         ),
+        // 카테고리 서브텍스트 (있을 때만 표시)
+        if (verdict.category != null && verdict.category!.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            verdict.category!,
+            style: AppTextStyles.body2Regular.copyWith(
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
         const SizedBox(height: AppSpacing.itemGap),
 
         // 등급 헤드라인: 아이콘 + 문구
