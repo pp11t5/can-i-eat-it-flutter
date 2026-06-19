@@ -81,4 +81,18 @@ void main() {
       );
     });
   });
+
+  group('HomeScreen — 인사말 블록 날씨 서브텍스트', () {
+    testWidgets("sunny 조건에서 '오늘은 맑아요. 가벼운 산책 어때요?'가 렌더된다",
+        (tester) async {
+      // HomeScreen은 weatherCondition: 'sunny' 고정으로 _GreetingBlock에 전달
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('오늘은 맑아요. 가벼운 산책 어때요?'),
+        findsOneWidget,
+      );
+    });
+  });
 }

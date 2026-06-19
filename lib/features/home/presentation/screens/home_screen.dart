@@ -78,7 +78,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
               // ── 1. 인사말 블록 ─────────────────────────────────────────
               // 캐릭터 하단이 검색바 상단과 맞붙도록 gap 0 (Figma 절대배치 overlap).
-              _GreetingBlock(nowOverride: widget.nowOverride),
+              _GreetingBlock(
+                nowOverride: widget.nowOverride,
+                weatherCondition: 'sunny',
+              ),
               const SizedBox(height: 8),
 
               // ── 1-1. 날씨 배너 (목 데이터) ──────────────────────────────
@@ -151,10 +154,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 // ── 인사말 블록 (캐릭터 이미지 + 텍스트) ────────────────────────────────────
 
 class _GreetingBlock extends StatelessWidget {
-  const _GreetingBlock({this.nowOverride});
+  const _GreetingBlock({
+    this.nowOverride,
+    this.weatherCondition = 'sunny',
+  });
 
   /// 테스트에서 시각 주입용. null이면 DateTime.now() 사용.
   final DateTime? nowOverride;
+
+  /// 날씨 조건 코드. 목 기본값: 'sunny'.
+  final String weatherCondition;
 
   static const _weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -178,6 +187,15 @@ class _GreetingBlock extends StatelessWidget {
       return '늦은 시간 식사는 속 건강에 좋지 않아요.';
     }
   }
+
+  /// 날씨 조건별 서브텍스트.
+  String get _weatherSubtext => switch (weatherCondition) {
+        'sunny' => '오늘은 맑아요. 가벼운 산책 어때요?',
+        'rainy' => '비가 오네요. 따뜻한 음식이 좋겠어요.',
+        'cloudy' => '흐린 날이에요. 소화 잘 되는 음식을 드세요.',
+        'snowy' => '눈이 와요. 따뜻하게 드세요.',
+        _ => '오늘 날씨에 맞는 식사를 드세요.',
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -203,6 +221,13 @@ class _GreetingBlock extends StatelessWidget {
                 _greetingText,
                 style: AppTextStyles.header2Bold.copyWith(
                   color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _weatherSubtext,
+                style: AppTextStyles.body2Regular.copyWith(
+                  color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 16),
