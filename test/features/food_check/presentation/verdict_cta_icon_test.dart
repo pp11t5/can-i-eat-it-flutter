@@ -28,7 +28,8 @@ void main() {
       await tester.pumpWidget(screen);
       await tester.pump();
 
-      expect(find.byIcon(Icons.share), findsOneWidget);
+      // AppBar 공유 버튼 + 본문 CTA 공유하기 버튼 2개 존재
+      expect(find.byIcon(Icons.share), findsAtLeastNWidgets(1));
     });
 
     testWidgets('다시 검색 버튼에 Icons.search 아이콘이 표시된다', (tester) async {

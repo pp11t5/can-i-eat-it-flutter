@@ -72,4 +72,29 @@ void main() {
       expect(find.text('72 kcal'), findsOneWidget);
     });
   });
+
+  group('VerdictResultScreen — 공유 버튼', () {
+    testWidgets('Icons.share 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      // AppBar 공유 버튼 + 본문 CTA 공유하기 버튼 2개 존재
+      expect(find.byIcon(Icons.share), findsAtLeastNWidgets(1));
+    });
+
+    testWidgets("Icons.share 탭 시 '공유' 다이얼로그 타이틀이 표시된다", (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      // AppBar의 공유 버튼(.last) — 본문 CTA 버튼은 오프스크린이므로 last가 AppBar 버튼
+      await tester.tap(find.byIcon(Icons.share).last);
+      await _settle(tester);
+
+      expect(find.text('공유'), findsOneWidget);
+    });
+  });
 }

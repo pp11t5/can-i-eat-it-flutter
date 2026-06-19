@@ -65,6 +65,11 @@ class VerdictResultScreen extends ConsumerWidget {
         ),
         actions: [
           _BookmarkButton(verdict: verdict),
+          IconButton(
+            icon: const Icon(Icons.share),
+            tooltip: '공유',
+            onPressed: () => _showShareDialog(context),
+          ),
         ],
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1),
@@ -591,4 +596,24 @@ class _NutritionInfoSection extends StatelessWidget {
       ],
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// 공유 다이얼로그
+// ---------------------------------------------------------------------------
+
+void _showShareDialog(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('공유'),
+      content: const Text('판정 결과를 공유합니다.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('닫기'),
+        ),
+      ],
+    ),
+  );
 }
