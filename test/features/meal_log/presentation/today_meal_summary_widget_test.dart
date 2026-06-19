@@ -317,6 +317,33 @@ void main() {
       expect(buildCount, greaterThan(countBefore));
     });
   });
+
+  group('TodayMealSummaryWidget — 진행률 바', () {
+    testWidgets('targetCount:3 mealCount:2일 때 LinearProgressIndicator value ≈ 0.667',
+        (tester) async {
+      // _todaySeeded(): 오늘 기록 2건
+      final repo = _todaySeeded();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            // ignore: scoped_providers_should_specify_dependencies
+            mealRepositoryProvider.overrideWithValue(repo),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: TodayMealSummaryWidget(targetCount: 3),
+            ),
+          ),
+        ),
+      );
+      await _settle(tester);
+
+      final indicator = tester.widget<LinearProgressIndicator>(
+        find.byType(LinearProgressIndicator),
+      );
+      expect(indicator.value, closeTo(2 / 3, 0.01));
+    });
+  });
 }
 
 // ---------------------------------------------------------------------------

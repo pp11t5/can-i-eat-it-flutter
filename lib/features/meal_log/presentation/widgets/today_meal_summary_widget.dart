@@ -18,7 +18,9 @@ import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 /// [RouteAware] mixin을 통해 다른 화면에서 홈으로 복귀할 때
 /// `timelineControllerProvider`를 invalidate해 실시간 갱신한다.
 class TodayMealSummaryWidget extends ConsumerStatefulWidget {
-  const TodayMealSummaryWidget({super.key});
+  const TodayMealSummaryWidget({super.key, this.targetCount = 3});
+
+  final int targetCount;
 
   @override
   ConsumerState<TodayMealSummaryWidget> createState() =>
@@ -97,6 +99,7 @@ class _TodayMealSummaryWidgetState extends ConsumerState<TodayMealSummaryWidget>
         return _SummaryCard(
           totalCount: totalCount,
           lastTime: lastTime,
+          targetCount: widget.targetCount,
         );
       },
     );
@@ -119,10 +122,12 @@ class _SummaryCard extends StatelessWidget {
   const _SummaryCard({
     required this.totalCount,
     this.lastTime,
+    this.targetCount = 3,
   });
 
   final int totalCount;
   final String? lastTime;
+  final int targetCount;
 
   @override
   Widget build(BuildContext context) {
@@ -208,6 +213,17 @@ class _SummaryCard extends StatelessWidget {
               lastTime != null ? '마지막: $lastTime' : '아직 기록 없음',
               style: AppTextStyles.caption1Medium
                   .copyWith(color: AppColors.textTertiary),
+            ),
+            const SizedBox(height: 8),
+            // 목표 대비 진행률 바
+            ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: LinearProgressIndicator(
+                value: (totalCount / targetCount).clamp(0.0, 1.0),
+                backgroundColor: AppColors.border,
+                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                minHeight: 6,
+              ),
             ),
           ],
         ],
