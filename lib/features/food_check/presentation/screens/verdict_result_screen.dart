@@ -494,6 +494,26 @@ class _CtaSection extends StatelessWidget {
             label: const Text('저장하기'),
           ),
         ),
+        const SizedBox(height: 12),
+        // "재판정 요청" — 아웃라인 버튼 full-width
+        SizedBox(
+          width: double.infinity,
+          height: 54,
+          child: OutlinedButton.icon(
+            onPressed: () => _showReJudgeDialog(context),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+              side: const BorderSide(color: AppColors.border),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+              ),
+              textStyle: AppTextStyles.body1Bold,
+              padding: EdgeInsets.zero,
+            ),
+            icon: const Icon(Icons.refresh, size: 18),
+            label: const Text('재판정 요청'),
+          ),
+        ),
       ],
     );
   }
@@ -610,6 +630,26 @@ void _showShareDialog(BuildContext context) {
         TextButton(
           onPressed: () => Navigator.pop(ctx),
           child: const Text('닫기'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showReJudgeDialog(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('재판정 요청'),
+      content: const Text('판정 결과에 이의가 있으신가요?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('취소'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('요청'),
         ),
       ],
     ),

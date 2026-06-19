@@ -108,4 +108,28 @@ void main() {
       expect(find.text('다른 음식 검색하기'), findsOneWidget);
     });
   });
+
+  group('VerdictResultScreen — 재판정 요청 버튼', () {
+    testWidgets('Icons.refresh 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.refresh), findsOneWidget);
+    });
+
+    testWidgets("Icons.refresh 탭 시 '재판정 요청' 다이얼로그 타이틀이 표시된다",
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      await tester.tap(find.byIcon(Icons.refresh));
+      await _settle(tester);
+
+      expect(find.text('재판정 요청'), findsOneWidget);
+    });
+  });
 }
