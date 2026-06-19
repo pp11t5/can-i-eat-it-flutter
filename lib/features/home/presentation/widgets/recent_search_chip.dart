@@ -36,6 +36,12 @@ class RecentSearchChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const Icon(
+              Icons.history,
+              size: 16,
+              color: AppColors.textSecondary,
+            ),
+            const SizedBox(width: 4),
             Text(
               label,
               style: AppTextStyles.body2Medium.copyWith(

@@ -61,5 +61,20 @@ void main() {
 
       expect(deleteCalled, isTrue);
     });
+
+    testWidgets('Icons.history 아이콘이 최근 검색 칩에 표시된다', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          RecentSearchChip(
+            label: '두부',
+            onSearch: () {},
+            onDelete: () {},
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byIcon(Icons.history), findsOneWidget);
+    });
   });
 }
