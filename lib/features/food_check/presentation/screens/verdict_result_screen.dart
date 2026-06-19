@@ -361,28 +361,25 @@ class _CtaSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // "공유하기" — 아웃라인 버튼 full-width
+        // "공유하기" — filled 버튼 full-width (아이콘 추가)
         Semantics(
           button: true,
           label: '판정 결과 공유하기',
           child: SizedBox(
             height: 54,
-            child: OutlinedButton(
+            child: FilledButton.icon(
               onPressed: () => shareVerdict(verdict),
-              style: OutlinedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(
-                  color: AppColors.primary,
-                  width: 1.5,
-                ),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
                 ),
                 textStyle: AppTextStyles.body1Bold,
                 padding: EdgeInsets.zero,
               ),
-              child: const Text('공유하기'),
+              icon: const Icon(Icons.share, size: 18),
+              label: const Text('공유하기'),
             ),
           ),
         ),
@@ -396,7 +393,7 @@ class _CtaSection extends StatelessWidget {
                 label: '다시 검색하기',
                 child: SizedBox(
                   height: 54,
-                  child: OutlinedButton(
+                  child: OutlinedButton.icon(
                     onPressed: onRetry,
                     style: OutlinedButton.styleFrom(
                       backgroundColor: Colors.white,
@@ -412,7 +409,8 @@ class _CtaSection extends StatelessWidget {
                       textStyle: AppTextStyles.body1Bold,
                       padding: EdgeInsets.zero,
                     ),
-                    child: const Text('다시 검색'),
+                    icon: const Icon(Icons.search, size: 18),
+                    label: const Text('다시 검색'),
                   ),
                 ),
               ),
