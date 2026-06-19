@@ -408,4 +408,36 @@ void main() {
       expect(find.text('된장찌개'), findsOneWidget);
     });
   });
+
+  group('FoodCheckScreen — 검색 결과 없음 빈 상태', () {
+    testWidgets("검색어 입력 후 결과 없으면 '검색 결과가 없어요' 텍스트가 표시된다",
+        (tester) async {
+      final repo = MockFoodRepository.withSearchResults([]);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '없는음식xyz');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+
+      expect(find.text('검색 결과가 없어요'), findsOneWidget);
+    });
+
+    testWidgets("검색어 입력 후 결과 없으면 '다른 검색어로 시도해 보세요' 텍스트가 표시된다",
+        (tester) async {
+      final repo = MockFoodRepository.withSearchResults([]);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '없는음식xyz');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+
+      expect(find.text('다른 검색어로 시도해 보세요'), findsOneWidget);
+    });
+  });
 }

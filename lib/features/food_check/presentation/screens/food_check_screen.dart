@@ -415,7 +415,7 @@ class _ResultList extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '다른 음식 이름으로 검색해 보세요.',
+                  '다른 검색어로 시도해 보세요',
                   style: AppTextStyles.body2Regular.copyWith(
                     color: AppColors.textSecondary,
                   ),
