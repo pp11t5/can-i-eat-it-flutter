@@ -145,6 +145,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 class _GreetingBlock extends StatelessWidget {
   const _GreetingBlock();
 
+  static const _weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+
+  String get _todayLabel {
+    final now = DateTime.now();
+    final weekday = _weekdays[now.weekday % 7];
+    return '${now.year}년 ${now.month}월 ${now.day}일 $weekday요일';
+  }
+
   @override
   Widget build(BuildContext context) {
     // Figma 1207:6593: row justify center — 텍스트+캐릭터를 한 그룹으로 가운데 정렬
@@ -158,6 +166,13 @@ class _GreetingBlock extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                _todayLabel,
+                style: AppTextStyles.body2Regular.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 4),
               Text(
                 '오늘 속은\n편안하신가요?',
                 style: AppTextStyles.header2Bold.copyWith(
