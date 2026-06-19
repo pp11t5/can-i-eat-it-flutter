@@ -50,4 +50,16 @@ class VerdictHistoryRepositoryImpl implements VerdictHistoryRepository {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_key);
   }
+
+  @override
+  Future<void> removeAt(int index) async {
+    final current = await getHistory();
+    if (index < 0 || index >= current.length) return;
+    final updated = List.of(current)..removeAt(index);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _key,
+      jsonEncode(updated.map((e) => e.toJson()).toList()),
+    );
+  }
 }

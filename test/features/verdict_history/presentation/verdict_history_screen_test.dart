@@ -79,6 +79,23 @@ void main() {
       expect(find.text('아직 판정 이력이 없어요'), findsOneWidget);
     });
 
+    testWidgets('항목 endToStart 스와이프 시 해당 항목이 목록에서 제거된다', (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [
+          _item('두부', 'safe'),
+          _item('커피', 'avoid'),
+        ],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      // '두부' 항목을 endToStart 방향으로 스와이프
+      await tester.drag(find.text('두부'), const Offset(-500, 0));
+      await tester.pumpAndSettle();
+
+      expect(find.text('두부'), findsNothing);
+    });
+
     testWidgets('verdict 배지 텍스트가 표시된다', (tester) async {
       final repo = MockVerdictHistoryRepository(
         initialItems: [

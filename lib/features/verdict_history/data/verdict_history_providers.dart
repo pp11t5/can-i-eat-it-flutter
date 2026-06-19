@@ -32,4 +32,13 @@ class VerdictHistoryController extends _$VerdictHistoryController {
     await ref.read(verdictHistoryRepositoryProvider).clearHistory();
     ref.invalidateSelf();
   }
+
+  Future<void> removeAt(int index) async {
+    // 낙관적 업데이트: 현재 상태에서 즉시 제거 후 저장소 반영
+    final current = state.valueOrNull;
+    if (current != null && index >= 0 && index < current.length) {
+      state = AsyncData(List.of(current)..removeAt(index));
+    }
+    await ref.read(verdictHistoryRepositoryProvider).removeAt(index);
+  }
 }

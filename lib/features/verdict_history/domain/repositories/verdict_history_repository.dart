@@ -10,4 +10,7 @@ abstract interface class VerdictHistoryRepository {
 
   /// 판정 이력 전체를 삭제한다.
   Future<void> clearHistory();
+
+  /// 지정 인덱스의 항목을 삭제한다.
+  Future<void> removeAt(int index);
 }

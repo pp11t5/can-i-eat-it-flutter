@@ -21,4 +21,9 @@ class MockVerdictHistoryRepository implements VerdictHistoryRepository {
 
   @override
   Future<void> clearHistory() async => _items.clear();
+
+  @override
+  Future<void> removeAt(int index) async {
+    if (index >= 0 && index < _items.length) _items.removeAt(index);
+  }
 }

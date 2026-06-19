@@ -77,8 +77,26 @@ class VerdictHistoryScreen extends ConsumerWidget {
           }
           return ListView.builder(
             itemCount: items.length,
-            itemBuilder: (context, index) =>
-                _VerdictHistoryTile(item: items[index]),
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return Dismissible(
+                key: ValueKey(item.foodName),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 16),
+                  color: const Color(0xFFD32F2F),
+                  child: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.white,
+                  ),
+                ),
+                onDismissed: (_) => ref
+                    .read(verdictHistoryControllerProvider.notifier)
+                    .removeAt(index),
+                child: _VerdictHistoryTile(item: item),
+              );
+            },
           );
         },
       ),
