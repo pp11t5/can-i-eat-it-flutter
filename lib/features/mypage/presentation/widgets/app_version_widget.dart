@@ -12,13 +12,18 @@ import 'package:can_i_eat_it/core/app_info/app_info_provider.dart';
 class AppVersionWidget extends ConsumerWidget {
   const AppVersionWidget({super.key});
 
+  static const _fallback = Text(
+    '버전 1.0.0',
+    textAlign: TextAlign.center,
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final infoAsync = ref.watch(appInfoProvider);
 
     return infoAsync.when(
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      loading: () => _fallback,
+      error: (_, __) => _fallback,
       data: (info) => Text(
         '버전 ${info.version} (${info.buildNumber})',
         textAlign: TextAlign.center,

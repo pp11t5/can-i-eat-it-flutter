@@ -323,4 +323,13 @@ void main() {
       expect(find.text('역류성 식도염 증상 완화'), findsOneWidget);
     });
   });
+
+  group('MypageScreen — 앱 버전 정보', () {
+    testWidgets("'버전 1.0.0' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.text('버전 1.0.0'), findsOneWidget);
+    });
+  });
 }

@@ -11,10 +11,10 @@ import 'package:can_i_eat_it/features/health_profile/data/health_profile_provide
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/account_actions_widget.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/account_header_widget.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/health_profile_summary_widget.dart';
-import 'package:can_i_eat_it/features/mypage/presentation/widgets/app_version_widget.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/meal_notification_settings_widget.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/notification_toggle_widget.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/profile_completeness_badge.dart';
+import 'package:can_i_eat_it/features/mypage/presentation/widgets/app_version_widget.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/withdraw_dialog.dart';
 
 /// 마이페이지 화면.
@@ -297,11 +297,11 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
                     onWithdraw: () => showWithdrawDialog(context, ref),
                   ),
 
-                  const SizedBox(height: AppSpacing.contentGap),
+                  const SizedBox(height: 24),
 
                   // ── ⑤ 앱 버전 ────────────────────────────────────────
                   const Center(child: AppVersionWidget()),
-                  const SizedBox(height: AppSpacing.contentGap),
+                  const SizedBox(height: 16),
                 ],
               ),
             );
