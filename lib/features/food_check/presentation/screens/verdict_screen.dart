@@ -106,6 +106,23 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
     }
   }
 
+  /// API 재시도 — provider를 invalidate 후 판정을 다시 요청한다.
+  void _handleApiRetry() {
+    ref.invalidate(verdictControllerProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final controller = ref.read(verdictControllerProvider.notifier);
+      if (widget.args.isById) {
+        controller.judgeById(
+          widget.args.externalId!,
+          displayName: widget.args.text,
+        );
+      } else {
+        controller.judgeByText(widget.args.text);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final verdictAsync = ref.watch(verdictControllerProvider);
@@ -117,6 +134,7 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
             ? error.message
             : '분석 중 오류가 발생했어요.',
         onRetry: _handleRetry,
+        onApiRetry: _handleApiRetry,
       ),
       data: (verdict) {
         if (verdict.level == VerdictLevel.unknown &&
@@ -155,10 +173,15 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
 // ---------------------------------------------------------------------------
 
 class _ErrorScreen extends StatelessWidget {
-  const _ErrorScreen({required this.message, required this.onRetry});
+  const _ErrorScreen({
+    required this.message,
+    required this.onRetry,
+    required this.onApiRetry,
+  });
 
   final String message;
   final VoidCallback onRetry;
+  final VoidCallback onApiRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -175,6 +198,11 @@ class _ErrorScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 16),
+              FilledButton(
+                onPressed: onApiRetry,
+                child: const Text('다시 시도'),
+              ),
+              const SizedBox(height: 8),
               OutlinedButton(
                 onPressed: onRetry,
                 child: const Text('돌아가기'),
