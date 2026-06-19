@@ -18,6 +18,13 @@ void main() {
       expect(find.text('시작하기'), findsOneWidget);
     });
 
+    testWidgets('"건너뛰기" 버튼이 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pump();
+
+      expect(find.text('건너뛰기'), findsOneWidget);
+    });
+
     testWidgets('"시작하기" 버튼 탭 시 onStart 콜백이 호출된다', (tester) async {
       var called = false;
       await tester.pumpWidget(_wrap(onStart: () => called = true));
