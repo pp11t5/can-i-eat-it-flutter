@@ -107,6 +107,10 @@ class VerdictResultScreen extends ConsumerWidget {
             const _RelatedFoodsSection(),
             const SizedBox(height: AppSpacing.sectionGap),
 
+            // 영양 정보 섹션 (목 데이터)
+            const _NutritionInfoSection(),
+            const SizedBox(height: AppSpacing.sectionGap),
+
             // CTA 3개 (공유하기 + 다시 검색 + 내 식단에 추가)
             _CtaSection(
               verdict: verdict,
@@ -480,6 +484,61 @@ class _RelatedFoodsSection extends StatelessWidget {
                     label: Text(food),
                     onPressed: () {},
                   ))
+              .toList(),
+        ),
+      ],
+    );
+  }
+}
+
+/// 영양 정보 섹션 (목 데이터).
+///
+/// 칼로리·탄수화물·단백질·지방 4개 항목을 Row로 균등 분배해 표시.
+class _NutritionInfoSection extends StatelessWidget {
+  const _NutritionInfoSection();
+
+  static const _items = [
+    ('칼로리', '72kcal'),
+    ('탄수화물', '1.8g'),
+    ('단백질', '8g'),
+    ('지방', '4g'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '영양 정보',
+          style: AppTextStyles.body1Bold.copyWith(
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: _items
+              .map(
+                (item) => Expanded(
+                  child: Column(
+                    children: [
+                      Text(
+                        item.$1,
+                        style: AppTextStyles.body2Regular.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        item.$2,
+                        style: AppTextStyles.body1Bold.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
               .toList(),
         ),
       ],

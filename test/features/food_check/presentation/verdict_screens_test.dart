@@ -436,4 +436,26 @@ void main() {
       );
     });
   });
+
+  group('VerdictResultScreen — 영양 정보 섹션', () {
+    testWidgets('"영양 정보" 타이틀이 표시된다', (tester) async {
+      final verdict = EatVerdict.recommend(foodName: '두부');
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: verdict, onRetry: () {})),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('영양 정보'), findsOneWidget);
+    });
+
+    testWidgets('"72kcal" 값이 표시된다', (tester) async {
+      final verdict = EatVerdict.recommend(foodName: '두부');
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: verdict, onRetry: () {})),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('72kcal'), findsOneWidget);
+    });
+  });
 }
