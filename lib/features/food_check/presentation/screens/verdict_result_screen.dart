@@ -281,6 +281,16 @@ class _HeroSection extends StatelessWidget {
     };
   }
 
+  /// 등급별 라벨 아이콘 (텍스트 옆 표시용)
+  IconData _gradeIcon() {
+    return switch (verdict.level) {
+      VerdictLevel.recommend => Icons.check_circle,
+      VerdictLevel.caution => Icons.warning_amber_rounded,
+      VerdictLevel.risk => Icons.cancel,
+      VerdictLevel.unknown => Icons.help_outline,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final color = _verdictColor();
@@ -337,12 +347,25 @@ class _HeroSection extends StatelessWidget {
             _headlineIcon(color),
             const SizedBox(width: AppSpacing.itemGap),
             Flexible(
-              child: Text(
-                _headlineText(),
-                style: AppTextStyles.header3Bold.copyWith(
-                  color: _labelColor(),
-                ),
-                textAlign: TextAlign.center,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _gradeIcon(),
+                    size: 24,
+                    color: _labelColor(),
+                  ),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      _headlineText(),
+                      style: AppTextStyles.header3Bold.copyWith(
+                        color: _labelColor(),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

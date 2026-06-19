@@ -458,4 +458,16 @@ void main() {
       expect(find.text('72kcal'), findsOneWidget);
     });
   });
+
+  group('VerdictResultScreen — 판정 등급 아이콘', () {
+    testWidgets('recommend 등급 시 Icons.check_circle 아이콘이 렌더된다', (tester) async {
+      final verdict = EatVerdict.recommend(foodName: '두부');
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: verdict, onRetry: () {})),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.check_circle), findsOneWidget);
+    });
+  });
 }
