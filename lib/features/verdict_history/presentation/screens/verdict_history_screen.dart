@@ -123,10 +123,15 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          Icons.history,
-                          size: 48,
-                          color: AppColors.textSecondary,
+                        Image.asset(
+                          'assets/illustrations/emoji_meal_prompt.png',
+                          width: 80,
+                          height: 80,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.history,
+                            size: 48,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                         const SizedBox(height: 12),
                         Text(

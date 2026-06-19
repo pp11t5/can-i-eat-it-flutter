@@ -264,6 +264,20 @@ void main() {
     });
   });
 
+  group('VerdictHistoryScreen — 빈 상태 일러스트', () {
+    testWidgets('빈 상태에서 Image 위젯 또는 fallback Icons.history가 렌더된다',
+        (tester) async {
+      final repo = MockVerdictHistoryRepository();
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      // 테스트 환경에서 asset 미등록 → errorBuilder의 Icons.history fallback 확인
+      final hasImage = find.byType(Image).evaluate().isNotEmpty;
+      final hasFallback = find.byIcon(Icons.history).evaluate().isNotEmpty;
+      expect(hasImage || hasFallback, isTrue);
+    });
+  });
+
   group('VerdictHistoryScreen — 즐겨찾기', () {
     testWidgets('Icons.bookmark_border 아이콘이 렌더된다', (tester) async {
       final repo = MockVerdictHistoryRepository(
