@@ -5,6 +5,7 @@ import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
+import 'package:can_i_eat_it/features/food_check/data/favorite_providers.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_unknown_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/utils/verdict_share_util.dart';
@@ -62,6 +63,9 @@ class VerdictResultScreen extends ConsumerWidget {
             color: AppColors.textPrimary,
           ),
         ),
+        actions: [
+          _BookmarkButton(verdict: verdict),
+        ],
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1),
           child: Divider(height: 1, thickness: 1, color: AppColors.divider),
@@ -104,6 +108,49 @@ class VerdictResultScreen extends ConsumerWidget {
       const SnackBar(
         content: Text('곧 제공돼요'),
         duration: Duration(seconds: 2),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// AppBar 북마크 버튼
+// ---------------------------------------------------------------------------
+
+class _BookmarkButton extends ConsumerWidget {
+  const _BookmarkButton({required this.verdict});
+
+  final EatVerdict verdict;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favoriteAsync =
+        ref.watch(favoriteControllerProvider(verdict.foodName));
+
+    return favoriteAsync.when(
+      loading: () => const IconButton(
+        icon: Icon(Icons.bookmark_border, color: AppColors.textSecondary),
+        onPressed: null, // 로딩 중 비활성화
+      ),
+      error: (_, __) => IconButton(
+        icon: const Icon(Icons.bookmark_border, color: AppColors.textSecondary),
+        onPressed: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('즐겨찾기를 변경할 수 없어요. 잠시 후 다시 시도해주세요.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        },
+      ),
+      data: (isFavorite) => IconButton(
+        icon: Icon(
+          isFavorite ? Icons.bookmark : Icons.bookmark_border,
+          color: isFavorite ? AppColors.primary : AppColors.textSecondary,
+        ),
+        onPressed: () => ref
+            .read(favoriteControllerProvider(verdict.foodName).notifier)
+            .toggle(verdict),
       ),
     );
   }
