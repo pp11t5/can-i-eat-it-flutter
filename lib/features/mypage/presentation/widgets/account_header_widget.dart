@@ -15,14 +15,14 @@ class AccountHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24),
+      padding: const EdgeInsets.only(top: 20, bottom: 16), // Figma 1316:4994
       child: Row(
         children: [
           _Avatar(
             imageUrl: session.profileImageUrl,
             displayName: session.displayName,
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12), // Figma 1316:4994 — 아바타↔텍스트 12px
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,14 +66,14 @@ class _Avatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
-      radius: 32,
+      radius: 28, // Figma 1316:4994 — 아바타 직경 56px
       backgroundColor: AppColors.surfaceSelected,
       child: ClipOval(
         child: imageUrl != null && imageUrl!.isNotEmpty
             ? Image.network(
                 imageUrl!,
-                width: 64,
-                height: 64,
+                width: 56,
+                height: 56,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => _InitialText(initial: _initial),
               )

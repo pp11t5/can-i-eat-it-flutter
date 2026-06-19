@@ -58,7 +58,7 @@ class _ActionButton extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 14), // Figma 1316:4994
         child: Text(
           label,
           style: AppTextStyles.body1Medium.copyWith(

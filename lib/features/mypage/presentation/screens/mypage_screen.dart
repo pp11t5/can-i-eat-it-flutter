@@ -56,7 +56,7 @@ class MypageScreen extends ConsumerWidget {
             }
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
+                horizontal: 20, // Figma 1316:4994 — 마이페이지 좌우 패딩 20px
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
