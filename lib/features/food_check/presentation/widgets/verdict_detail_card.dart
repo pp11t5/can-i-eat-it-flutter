@@ -32,6 +32,13 @@ class VerdictDetailCard extends StatelessWidget {
       children: [
         // 1. AI 분석 카드
         if (verdict.items.isNotEmpty) ...[
+          Text(
+            '판정 근거',
+            style: AppTextStyles.body1Bold.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
           _AiAnalysisCard(items: verdict.items),
           const SizedBox(height: AppSpacing.sectionGap),
         ],

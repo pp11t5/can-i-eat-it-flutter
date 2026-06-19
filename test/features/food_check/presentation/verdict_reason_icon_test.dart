@@ -26,5 +26,24 @@ void main() {
 
       expect(find.byIcon(Icons.info_outline), findsWidgets);
     });
+
+    testWidgets('"판정 근거" 타이틀 텍스트가 화면에 표시된다', (tester) async {
+      final verdict = EatVerdict.recommend(foodName: '두부');
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: VerdictDetailCard(verdict: verdict),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('판정 근거'), findsOneWidget);
+    });
   });
 }
