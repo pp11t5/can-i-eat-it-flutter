@@ -11,6 +11,8 @@ import 'package:can_i_eat_it/features/food_check/presentation/providers/add_to_d
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_loading_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_result_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_unknown_screen.dart';
+import 'package:can_i_eat_it/features/verdict_history/data/verdict_history_providers.dart';
+import 'package:can_i_eat_it/features/verdict_history/domain/entities/verdict_history_item.dart';
 
 /// 판정 오케스트레이션 화면.
 ///
@@ -38,6 +40,28 @@ class VerdictScreen extends ConsumerStatefulWidget {
 }
 
 class _VerdictScreenState extends ConsumerState<VerdictScreen> {
+  bool _historyAdded = false;
+
+  /// [VerdictLevel] → 이력 저장용 verdict 문자열.
+  String _verdictString(VerdictLevel level) => switch (level) {
+        VerdictLevel.recommend => 'safe',
+        VerdictLevel.caution => 'caution',
+        VerdictLevel.risk => 'avoid',
+        VerdictLevel.unknown => 'unknown',
+      };
+
+  void _maybeAddHistory(EatVerdict verdict) {
+    if (_historyAdded || verdict.foodName.isEmpty) return;
+    _historyAdded = true;
+    ref.read(verdictHistoryControllerProvider.notifier).add(
+          VerdictHistoryItem(
+            foodName: verdict.foodName,
+            verdict: _verdictString(verdict.level),
+            checkedAt: DateTime.now(),
+          ),
+        );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -82,6 +106,8 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
           // 초기 idle 상태 — 로딩으로 표시.
           return const VerdictLoadingScreen();
         }
+        // 판정 완료 시 이력 저장 (1회).
+        _maybeAddHistory(verdict);
         if (verdict.level == VerdictLevel.unknown) {
           // grade=UNKNOWN은 성공 응답 → VerdictUnknownScreen (D1).
           return VerdictUnknownScreen(onRetry: _handleRetry);

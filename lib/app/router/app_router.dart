@@ -20,6 +20,7 @@ import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/timeline_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/edit_profile_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
+import 'package:can_i_eat_it/features/verdict_history/presentation/screens/verdict_history_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_condition_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_frequency_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_medications_screen.dart';
@@ -145,6 +146,11 @@ GoRouter appRouter(Ref ref) {
             child: VerdictScreen(args: args),
           );
         },
+      ),
+      GoRoute(
+        path: '/history',
+        name: 'verdict-history',
+        builder: (context, state) => const VerdictHistoryScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

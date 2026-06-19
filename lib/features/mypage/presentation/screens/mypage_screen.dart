@@ -100,7 +100,29 @@ class MypageScreen extends ConsumerWidget {
 
                   const SizedBox(height: AppSpacing.contentGap),
 
-                  // ── ③ 계정 액션 ──────────────────────────────────────
+                  // ── ③ 판정 이력 ──────────────────────────────────────
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(
+                      Icons.history,
+                      color: AppColors.textPrimary,
+                    ),
+                    title: Text(
+                      '판정 이력',
+                      style: AppTextStyles.body1Medium
+                          .copyWith(color: AppColors.textPrimary),
+                    ),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: AppColors.textSecondary,
+                    ),
+                    onTap: () => context.push('/history'),
+                  ),
+
+                  const Divider(color: AppColors.divider, height: 1),
+                  const SizedBox(height: AppSpacing.sectionGap),
+
+                  // ── ④ 계정 액션 ──────────────────────────────────────
                   AccountActionsWidget(
                     onLogout: () =>
                         ref.read(authControllerProvider.notifier).logout(),
