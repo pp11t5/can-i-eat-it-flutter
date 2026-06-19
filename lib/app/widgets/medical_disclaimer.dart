@@ -70,6 +70,19 @@ class _MedicalDisclaimerState extends State<MedicalDisclaimer> {
                   ),
                   child: Text(_isExpanded ? '접기' : '더 보기'),
                 ),
+                if (_isExpanded)
+                  TextButton.icon(
+                    onPressed: () {},
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary,
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      alignment: Alignment.centerLeft,
+                    ),
+                    icon: const Icon(Icons.open_in_new, size: 14),
+                    label: const Text('자세히 보기'),
+                  ),
               ],
             ),
           ),
