@@ -222,6 +222,46 @@ void main() {
 
       expect(find.text('편집'), findsOneWidget);
     });
+
+    testWidgets("'편집' 버튼 탭 시 /mypage/edit 라우트로 이동한다", (tester) async {
+      final authRepo = MockAuthRepository(initialSession: _testSession);
+      final profileRepo = MockHealthProfileRepository.noProfile();
+
+      final router = GoRouter(
+        initialLocation: '/mypage',
+        routes: [
+          GoRoute(
+            path: '/mypage',
+            builder: (_, __) => const MypageScreen(),
+            routes: [
+              GoRoute(
+                path: 'edit',
+                builder: (_, __) =>
+                    const Scaffold(body: Text('건강 프로필 편집')),
+              ),
+            ],
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            // ignore: scoped_providers_should_specify_dependencies
+            authRepositoryProvider.overrideWithValue(authRepo),
+            // ignore: scoped_providers_should_specify_dependencies
+            healthProfileRepositoryProvider.overrideWithValue(profileRepo),
+          ],
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+      await _settle(tester);
+
+      await tester.tap(find.text('편집'));
+      await _settle(tester);
+
+      expect(find.text('건강 프로필 편집'), findsOneWidget);
+    });
   });
 
   group('MypageScreen — 언어 설정 메뉴', () {
