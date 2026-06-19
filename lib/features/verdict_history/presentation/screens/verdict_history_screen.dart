@@ -436,20 +436,23 @@ class _VerdictBadge extends StatelessWidget {
 // 내보내기 다이얼로그
 // ---------------------------------------------------------------------------
 
-Future<void> _showExportDialog(BuildContext context) async {
-  await showDialog<void>(
+void _showExportDialog(BuildContext context) {
+  showDialog<void>(
     context: context,
-    builder: (ctx) => AlertDialog(
-      title: const Text('이력 내보내기'),
-      content: const Text('판정 이력을 파일로 저장할까요?'),
-      actions: [
-        TextButton(
+    builder: (ctx) => SimpleDialog(
+      title: const Text('내보내기 형식 선택'),
+      children: [
+        SimpleDialogOption(
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('취소'),
+          child: const Text('CSV'),
         ),
-        TextButton(
+        SimpleDialogOption(
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('저장'),
+          child: const Text('PDF'),
+        ),
+        SimpleDialogOption(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('텍스트'),
         ),
       ],
     ),

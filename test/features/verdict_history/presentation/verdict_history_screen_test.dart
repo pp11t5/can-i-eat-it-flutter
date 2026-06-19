@@ -312,7 +312,8 @@ void main() {
       expect(find.byIcon(Icons.ios_share), findsOneWidget);
     });
 
-    testWidgets('Icons.ios_share 탭 시 "이력 내보내기" 다이얼로그가 표시된다', (tester) async {
+    testWidgets("Icons.ios_share 탭 시 '내보내기 형식 선택' 다이얼로그 타이틀이 표시된다",
+        (tester) async {
       final repo = MockVerdictHistoryRepository();
       await tester.pumpWidget(_wrap(repo));
       await _settle(tester);
@@ -320,7 +321,18 @@ void main() {
       await tester.tap(find.byIcon(Icons.ios_share));
       await _settle(tester);
 
-      expect(find.text('이력 내보내기'), findsOneWidget);
+      expect(find.text('내보내기 형식 선택'), findsOneWidget);
+    });
+
+    testWidgets("'CSV' 옵션이 표시된다", (tester) async {
+      final repo = MockVerdictHistoryRepository();
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      await tester.tap(find.byIcon(Icons.ios_share));
+      await _settle(tester);
+
+      expect(find.text('CSV'), findsOneWidget);
     });
   });
 
