@@ -63,5 +63,13 @@ void main() {
 
       expect(find.text('앱 내 알림'), findsOneWidget);
     });
+
+    testWidgets('Icons.notifications_outlined 아이콘이 표시된다', (tester) async {
+      final prefs = InMemoryNotificationPrefs(initial: true);
+      await tester.pumpWidget(_wrap(prefs));
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.notifications_outlined), findsOneWidget);
+    });
   });
 }

@@ -34,6 +34,10 @@ class NotificationToggleWidget extends ConsumerWidget {
         label: enabled ? '앱 내 알림 켜짐' : '앱 내 알림 꺼짐',
         child: SwitchListTile(
           contentPadding: EdgeInsets.zero,
+          secondary: const Icon(
+            Icons.notifications_outlined,
+            color: AppColors.textPrimary,
+          ),
           title: Text(
             '앱 내 알림',
             style: AppTextStyles.body1Medium
