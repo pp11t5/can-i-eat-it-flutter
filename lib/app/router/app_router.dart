@@ -152,6 +152,12 @@ GoRouter appRouter(Ref ref) {
         name: 'verdict-history',
         builder: (context, state) => const VerdictHistoryScreen(),
       ),
+      // 홈 "오늘의 식사 > 더 보기" 진입점 — TimelineScreen으로 연결.
+      GoRoute(
+        path: '/meal-log',
+        name: 'meal-log',
+        builder: (context, state) => const TimelineScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),

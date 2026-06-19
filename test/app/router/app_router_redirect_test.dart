@@ -8,6 +8,8 @@ import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
+import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
+import 'package:can_i_eat_it/features/meal_log/data/repositories/mock_meal_repository.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_condition_screen.dart';
 
 /// 실 라우터(appRouterProvider) + guard 통합 검증 (ADR-0006 §3).
@@ -33,6 +35,8 @@ void main() {
         authRepositoryProvider.overrideWithValue(authRepo),
         // ignore: scoped_providers_should_specify_dependencies
         healthProfileRepositoryProvider.overrideWithValue(profileRepo),
+        // ignore: scoped_providers_should_specify_dependencies
+        mealRepositoryProvider.overrideWithValue(MockMealRepository.empty()),
       ],
       child: Consumer(
         builder: (context, ref, _) {

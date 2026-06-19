@@ -3,11 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
+import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
+import 'package:can_i_eat_it/features/meal_log/data/repositories/mock_meal_repository.dart';
 
-/// 테스트용 래퍼. HomeScreen은 더 이상 searchHistoryProvider에 의존하지 않으므로
-/// 단순 ProviderScope + MaterialApp으로 충분하다.
-Widget _wrap() => const ProviderScope(
-      child: MaterialApp(home: HomeScreen()),
+/// 테스트용 래퍼.
+/// - mealRepositoryProvider: MockMealRepository.empty() — 플랫폼 채널 격리
+Widget _wrap() => ProviderScope(
+      overrides: [
+        // ignore: scoped_providers_should_specify_dependencies
+        mealRepositoryProvider.overrideWithValue(MockMealRepository.empty()),
+      ],
+      child: const MaterialApp(home: HomeScreen()),
     );
 
 void main() {
@@ -109,19 +115,26 @@ void main() {
     });
   });
 
-  group('HomeScreen — 최근 식사 섹션', () {
-    testWidgets('"최근 식사" 섹션 헤더가 표시된다', (tester) async {
+  group('HomeScreen — 오늘의 식사 요약 섹션', () {
+    testWidgets('"오늘의 식사" 헤더가 표시된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('최근 식사'), findsOneWidget);
+      expect(find.text('오늘의 식사'), findsOneWidget);
     });
 
-    testWidgets('"먹은 음식이 있으신가요?" 플레이스홀더가 표시된다', (tester) async {
+    testWidgets('빈 상태: "오늘 기록된 식사가 없어요." 문구가 표시된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('먹은 음식이 있으신가요?'), findsOneWidget);
+      expect(find.text('오늘 기록된 식사가 없어요.'), findsOneWidget);
+    });
+
+    testWidgets('"더 보기" 버튼이 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.text('더 보기'), findsOneWidget);
     });
   });
 

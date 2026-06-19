@@ -10,6 +10,7 @@ import 'package:can_i_eat_it/core/prefs/first_visit_prefs.dart';
 import 'package:can_i_eat_it/features/home/presentation/providers/home_providers.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_search_bar.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/widgets/today_meal_summary_widget.dart';
 
 /// W2 홈 화면 — Figma 1207:6590 empty-state 충실 구현.
 ///
@@ -106,61 +107,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const _MyDictionaryCard(),
               const SizedBox(height: AppSpacing.contentGap),
 
-              // ── 5. 최근 식사 섹션 ─────────────────────────────────────
-              Text(
-                '최근 식사',
-                style: AppTextStyles.header2Bold.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.itemGap),
-              // TODO(W4): 식사 기록 데이터 연결 시 실제 목록으로 교체.
-              // Figma 1207:6614
-              GestureDetector(
-                onTap: () {}, // TODO(W4): 식사 기록 진입
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                    border: Border.all(
-                      color: AppColors.borderCard, // Figma stroke #EDEDF5
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Row(
-                        children: [
-                          Image.asset(
-                            'assets/illustrations/food_regular.png',
-                            width: 32,
-                            height: 32,
-                            fit: BoxFit.contain,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '먹은 음식이 있으신가요?',
-                            style: AppTextStyles.body1Medium.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      // Figma heck-fill_small/plus — 초록 disc + 흰 플러스 일체형 SVG.
-                      SvgPicture.asset(
-                        'assets/figma_extracted/icon_plus_circle.svg',
-                        width: 24,
-                        height: 24,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // 최근 식사 ↔ 토스트 카드 gap 70 (Figma).
-              const SizedBox(height: 70),
+              // ── 5. 오늘의 식사 요약 ──────────────────────────────────
+              const TodayMealSummaryWidget(),
+              const SizedBox(height: AppSpacing.contentGap),
 
               // ── 6. 토스트 카드 ────────────────────────────────────────
               const _ToastCard(),
