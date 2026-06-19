@@ -203,4 +203,13 @@ void main() {
       expect(find.text('아직 검색한 음식이 없어요'), findsOneWidget);
     });
   });
+
+  group('HomeScreen — 식사 요약 칼로리', () {
+    testWidgets('"총 칼로리: 0 kcal" 텍스트가 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrapWithEmptyRecent());
+      await tester.pumpAndSettle();
+
+      expect(find.text('총 칼로리: 0 kcal'), findsOneWidget);
+    });
+  });
 }

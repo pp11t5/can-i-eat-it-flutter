@@ -226,6 +226,13 @@ class _SummaryCard extends StatelessWidget {
               ),
             ),
           ],
+          const SizedBox(height: 8),
+          // 총 칼로리 (목 — 실제 연산 미구현)
+          Text(
+            '총 칼로리: 0 kcal',
+            style: AppTextStyles.body2Regular
+                .copyWith(color: AppColors.textSecondary),
+          ),
         ],
       ),
     );
