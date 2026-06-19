@@ -302,4 +302,25 @@ void main() {
       expect(find.byIcon(Icons.bookmark), findsOneWidget);
     });
   });
+
+  group('VerdictHistoryScreen — 내보내기 버튼', () {
+    testWidgets('Icons.ios_share 아이콘이 렌더된다', (tester) async {
+      final repo = MockVerdictHistoryRepository();
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.ios_share), findsOneWidget);
+    });
+
+    testWidgets('Icons.ios_share 탭 시 "이력 내보내기" 다이얼로그가 표시된다', (tester) async {
+      final repo = MockVerdictHistoryRepository();
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      await tester.tap(find.byIcon(Icons.ios_share));
+      await _settle(tester);
+
+      expect(find.text('이력 내보내기'), findsOneWidget);
+    });
+  });
 }

@@ -60,6 +60,11 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
             onPressed: () =>
                 ref.read(verdictHistoryControllerProvider.notifier).clear(),
           ),
+          IconButton(
+            icon: const Icon(Icons.ios_share, color: AppColors.textPrimary),
+            tooltip: '내보내기',
+            onPressed: () => _showExportDialog(context),
+          ),
         ],
       ),
       body: Column(
@@ -386,4 +391,28 @@ class _VerdictBadge extends StatelessWidget {
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// 내보내기 다이얼로그
+// ---------------------------------------------------------------------------
+
+Future<void> _showExportDialog(BuildContext context) async {
+  await showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('이력 내보내기'),
+      content: const Text('판정 이력을 파일로 저장할까요?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('취소'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('저장'),
+        ),
+      ],
+    ),
+  );
 }
