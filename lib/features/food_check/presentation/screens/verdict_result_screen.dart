@@ -474,6 +474,26 @@ class _CtaSection extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: AppSpacing.itemGap),
+        // "저장하기" — 아웃라인 버튼 full-width (목 — 저장 로직 미연결)
+        SizedBox(
+          width: double.infinity,
+          height: 54,
+          child: OutlinedButton.icon(
+            onPressed: () {},
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+              side: const BorderSide(color: AppColors.border),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+              ),
+              textStyle: AppTextStyles.body1Bold,
+              padding: EdgeInsets.zero,
+            ),
+            icon: const Icon(Icons.save_outlined, size: 18),
+            label: const Text('저장하기'),
+          ),
+        ),
       ],
     );
   }
