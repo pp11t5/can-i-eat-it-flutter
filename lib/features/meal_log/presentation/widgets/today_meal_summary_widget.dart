@@ -151,13 +151,17 @@ class _SummaryCard extends StatelessWidget {
                   color: AppColors.textPrimary,
                 ),
               ),
-              GestureDetector(
-                onTap: () => context.push('/meal-log'),
-                child: Text(
-                  '더 보기',
-                  // Figma: Regular 13px, #6B6B8A(textSecondary)
-                  style: AppTextStyles.body2Regular
-                      .copyWith(color: AppColors.textSecondary),
+              Semantics(
+                label: '오늘의 식사 더 보기',
+                button: true,
+                child: GestureDetector(
+                  onTap: () => context.push('/meal-log'),
+                  child: Text(
+                    '더 보기',
+                    // Figma: Regular 13px, #6B6B8A(textSecondary)
+                    style: AppTextStyles.body2Regular
+                        .copyWith(color: AppColors.textSecondary),
+                  ),
                 ),
               ),
             ],

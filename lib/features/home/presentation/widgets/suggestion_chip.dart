@@ -24,7 +24,11 @@ class HomeSuggestionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: '$label 검색하기',
+      button: true,
+      excludeSemantics: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -55,6 +59,7 @@ class HomeSuggestionChip extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

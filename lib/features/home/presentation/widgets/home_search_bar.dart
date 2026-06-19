@@ -16,7 +16,11 @@ class HomeSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: '음식 검색창, 탭하면 음식 이름을 검색할 수 있어요',
+      button: true,
+      excludeSemantics: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.only(
@@ -61,6 +65,7 @@ class HomeSearchBar extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
