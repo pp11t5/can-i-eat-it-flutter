@@ -4,11 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:go_router/go_router.dart';
+
+import 'package:can_i_eat_it/app/widgets/app_button.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/account_actions_widget.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/account_header_widget.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/health_profile_summary_widget.dart';
+import 'package:can_i_eat_it/features/mypage/presentation/widgets/withdraw_dialog.dart';
 
 /// 마이페이지 화면.
 ///
@@ -61,11 +65,20 @@ class MypageScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.sectionGap),
 
                   // ── ② 건강 프로필 요약 ────────────────────────────────
-                  Text(
-                    '건강 프로필',
-                    style: AppTextStyles.body1Bold.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '건강 프로필',
+                        style: AppTextStyles.body1Bold.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      AppButton.secondary(
+                        label: '편집',
+                        onPressed: () => context.push('/mypage/edit'),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: AppSpacing.itemGap),
                   profileAsync.when(
@@ -88,7 +101,7 @@ class MypageScreen extends ConsumerWidget {
                   AccountActionsWidget(
                     onLogout: () =>
                         ref.read(authControllerProvider.notifier).logout(),
-                    onWithdraw: null, // TODO(F4-3): 탈퇴 다이얼로그 연결
+                    onWithdraw: () => showWithdrawDialog(context, ref),
                   ),
 
                   const SizedBox(height: AppSpacing.contentGap),
