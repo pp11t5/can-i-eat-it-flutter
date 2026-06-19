@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
+import 'package:can_i_eat_it/features/food_check/data/favorite_providers.dart';
+import 'package:can_i_eat_it/features/food_check/data/repositories/mock_favorite_repository.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_loading_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_result_screen.dart';
@@ -11,6 +13,19 @@ import 'package:can_i_eat_it/features/food_check/presentation/widgets/verdict_de
 
 Widget _wrap(Widget child) {
   return ProviderScope(
+    child: MaterialApp(
+      theme: AppTheme.light,
+      home: child,
+    ),
+  );
+}
+
+Widget _wrapWithFavorite(Widget child) {
+  return ProviderScope(
+    overrides: [
+      // ignore: scoped_providers_should_specify_dependencies
+      favoriteRepositoryProvider.overrideWithValue(MockFavoriteRepository()),
+    ],
     child: MaterialApp(
       theme: AppTheme.light,
       home: child,
@@ -351,6 +366,29 @@ void main() {
       // Figma 재정합: 헤더 텍스트 "대체 음식 추천"으로 변경
       expect(find.text('대체 음식 추천'), findsOneWidget);
       expect(find.text('디카페인 커피'), findsOneWidget);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // _BookmarkButton — 토글 스낵바 피드백 (W10-F1)
+  // ---------------------------------------------------------------------------
+
+  group('_BookmarkButton 스낵바 피드백', () {
+    testWidgets('북마크 토글 성공 시 "즐겨찾기에 추가됐어요" 스낵바를 표시한다',
+        (tester) async {
+      final verdict = EatVerdict.recommend(foodName: '두부');
+      await tester.pumpWidget(
+        _wrapWithFavorite(
+          VerdictResultScreen(verdict: verdict, onRetry: () {}),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // 북마크 버튼 탭 (초기 상태: 즐겨찾기 아님 → 추가)
+      await tester.tap(find.byIcon(Icons.bookmark_border));
+      await tester.pumpAndSettle();
+
+      expect(find.text('즐겨찾기에 추가됐어요'), findsOneWidget);
     });
   });
 }

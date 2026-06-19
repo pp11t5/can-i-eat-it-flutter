@@ -117,15 +117,50 @@ class VerdictResultScreen extends ConsumerWidget {
 // AppBar 북마크 버튼
 // ---------------------------------------------------------------------------
 
-class _BookmarkButton extends ConsumerWidget {
+class _BookmarkButton extends ConsumerStatefulWidget {
   const _BookmarkButton({required this.verdict});
 
   final EatVerdict verdict;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_BookmarkButton> createState() => _BookmarkButtonState();
+}
+
+class _BookmarkButtonState extends ConsumerState<_BookmarkButton> {
+  bool _isToggling = false;
+
+  Future<void> _onTap(bool currentlyFavorite) async {
+    if (_isToggling) return;
+    setState(() => _isToggling = true);
+    try {
+      await ref
+          .read(favoriteControllerProvider(widget.verdict.foodName).notifier)
+          .toggle(widget.verdict);
+      if (!mounted) return;
+      final added = !currentlyFavorite;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(added ? '즐겨찾기에 추가됐어요' : '즐겨찾기에서 제거됐어요'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('즐겨찾기 변경에 실패했어요'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isToggling = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final favoriteAsync =
-        ref.watch(favoriteControllerProvider(verdict.foodName));
+        ref.watch(favoriteControllerProvider(widget.verdict.foodName));
 
     return favoriteAsync.when(
       loading: () => const IconButton(
@@ -148,9 +183,7 @@ class _BookmarkButton extends ConsumerWidget {
           isFavorite ? Icons.bookmark : Icons.bookmark_border,
           color: isFavorite ? AppColors.primary : AppColors.textSecondary,
         ),
-        onPressed: () => ref
-            .read(favoriteControllerProvider(verdict.foodName).notifier)
-            .toggle(verdict),
+        onPressed: _isToggling ? null : () => _onTap(isFavorite),
       ),
     );
   }
