@@ -29,7 +29,7 @@ class MedicalDisclaimer extends StatefulWidget {
 }
 
 class _MedicalDisclaimerState extends State<MedicalDisclaimer> {
-  bool _isExpanded = false;
+  bool _isExpanded = true;
 
   @override
   Widget build(BuildContext context) {

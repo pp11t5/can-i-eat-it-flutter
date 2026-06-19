@@ -16,40 +16,40 @@ void main() {
       expect(find.byIcon(Icons.info_outline), findsOneWidget);
     });
 
-    testWidgets("초기 상태에서 '더 보기' 텍스트가 렌더된다", (tester) async {
+    testWidgets("초기 상태에서 '접기' 텍스트가 렌더된다 (기본 펼침)", (tester) async {
       await tester.pumpWidget(_wrap());
-      await tester.pump();
-
-      expect(find.text('더 보기'), findsOneWidget);
-    });
-
-    testWidgets("'더 보기' 탭 시 '접기' 텍스트가 렌더된다", (tester) async {
-      await tester.pumpWidget(_wrap());
-      await tester.pump();
-
-      await tester.tap(find.text('더 보기'));
       await tester.pump();
 
       expect(find.text('접기'), findsOneWidget);
     });
+
+    testWidgets("'접기' 탭 시 '더 보기' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pump();
+
+      await tester.tap(find.text('접기'));
+      await tester.pump();
+
+      expect(find.text('더 보기'), findsOneWidget);
+    });
   });
 
   group('MedicalDisclaimer — 자세히 보기 링크', () {
+    testWidgets("초기 펼침 상태에서 '자세히 보기' 텍스트가 표시된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pump();
+
+      expect(find.text('자세히 보기'), findsOneWidget);
+    });
+
     testWidgets("접힌 상태에서 '자세히 보기' 텍스트가 표시되지 않는다", (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pump();
 
+      await tester.tap(find.text('접기'));
+      await tester.pump();
+
       expect(find.text('자세히 보기'), findsNothing);
-    });
-
-    testWidgets("펼침 상태에서 '자세히 보기' 텍스트가 표시된다", (tester) async {
-      await tester.pumpWidget(_wrap());
-      await tester.pump();
-
-      await tester.tap(find.text('더 보기'));
-      await tester.pump();
-
-      expect(find.text('자세히 보기'), findsOneWidget);
     });
   });
 }
