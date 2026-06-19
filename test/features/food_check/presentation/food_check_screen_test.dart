@@ -441,6 +441,20 @@ void main() {
     });
   });
 
+  group('FoodCheckScreen — 자동완성 힌트', () {
+    testWidgets("검색어 '두부' 입력 시 '두부 볶음' 힌트가 표시된다", (tester) async {
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(MockFoodRepository.empty())]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '두부');
+      await tester.pumpAndSettle();
+
+      expect(find.text('두부 볶음'), findsOneWidget);
+    });
+  });
+
   group('FoodCheckScreen — 정렬 옵션', () {
     testWidgets('Icons.sort 아이콘이 렌더된다', (tester) async {
       await tester.pumpWidget(

@@ -232,6 +232,8 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
               onSort: () => _showSortDialog(context),
               sortOrder: _sortOrder,
             ),
+            if (_textController.text.trim().isNotEmpty && !showResults)
+              _AutoCompleteHints(query: _textController.text.trim()),
             Expanded(
               child: showResults
                   ? _SearchResultPanel(
@@ -887,6 +889,33 @@ class _EmptyState extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 자동완성 힌트 패널 (목 데이터)
+// ---------------------------------------------------------------------------
+
+class _AutoCompleteHints extends StatelessWidget {
+  const _AutoCompleteHints({required this.query});
+
+  final String query;
+
+  @override
+  Widget build(BuildContext context) {
+    final hints = ['$query 볶음', '$query 찜', '$query 구이'];
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: hints
+          .map(
+            (hint) => ListTile(
+              leading: const Icon(Icons.search),
+              title: Text(hint),
+              onTap: () {},
+            ),
+          )
+          .toList(),
     );
   }
 }
