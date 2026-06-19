@@ -13,14 +13,31 @@ class WeatherBanner extends StatelessWidget {
     this.weatherCondition = 'sunny',
   });
 
-  /// 날씨 상태 코드. `'sunny'` / `'rainy'` / `'cloudy'` 지원.
+  /// 날씨 상태 코드. `'sunny'` / `'rainy'` / `'cloudy'` / `'snowy'` 지원.
   final String weatherCondition;
 
   String get _description => switch (weatherCondition) {
         'sunny' => '맑은 날엔 산책 후 가벼운 식사가 좋아요.',
         'rainy' => '비 오는 날엔 따뜻한 국물 요리가 좋아요.',
         'cloudy' => '흐린 날엔 소화가 잘 되는 음식을 드세요.',
+        'snowy' => '눈 오는 날엔 따뜻한 음식으로 몸을 녹이세요.',
         _ => '오늘 날씨에 맞는 식사를 드세요.',
+      };
+
+  IconData get _icon => switch (weatherCondition) {
+        'sunny' => Icons.wb_sunny,
+        'cloudy' => Icons.cloud,
+        'rainy' => Icons.umbrella,
+        'snowy' => Icons.ac_unit,
+        _ => Icons.wb_sunny,
+      };
+
+  Color get _iconColor => switch (weatherCondition) {
+        'sunny' => const Color(0xFFFFB300),
+        'cloudy' => AppColors.textSecondary,
+        'rainy' => const Color(0xFF1565C0),
+        'snowy' => const Color(0xFF29B6F6),
+        _ => const Color(0xFFFFB300),
       };
 
   @override
@@ -34,10 +51,10 @@ class WeatherBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.wb_sunny,
-            color: Colors.orange,
-            size: 24,
+          Icon(
+            _icon,
+            color: _iconColor,
+            size: 28,
           ),
           const SizedBox(width: 12),
           Column(
