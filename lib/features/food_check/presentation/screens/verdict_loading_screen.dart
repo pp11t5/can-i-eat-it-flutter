@@ -48,8 +48,52 @@ class VerdictLoadingScreen extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
+            // 스켈레톤 블록 3개
+            const _SkeletonBlocks(),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 스켈레톤 블록
+// ---------------------------------------------------------------------------
+
+class _SkeletonBlocks extends StatelessWidget {
+  const _SkeletonBlocks();
+
+  static const _skeletonColor = Color(0xFFE0E0E0);
+  static const _blockDecoration = BoxDecoration(
+    color: _skeletonColor,
+    borderRadius: BorderRadius.all(Radius.circular(4)),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            height: 20,
+            decoration: _blockDecoration,
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            height: 20,
+            decoration: _blockDecoration,
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            height: 20,
+            decoration: _blockDecoration,
+          ),
+        ],
       ),
     );
   }
