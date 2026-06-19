@@ -45,10 +45,10 @@ void main() {
         findsOneWidget,
       );
 
-      // "다시 검색하기" 버튼 시맨틱
+      // "다른 음식 검색하기" 버튼 시맨틱 (Semantics 위젯 + ElevatedButton 내부 2개 존재)
       expect(
-        find.bySemanticsLabel('다시 검색하기'),
-        findsOneWidget,
+        find.bySemanticsLabel('다른 음식 검색하기'),
+        findsAtLeastNWidgets(1),
       );
 
       // BulletItem 시맨틱: emphasis + body 포함 (recommend items 첫 번째)

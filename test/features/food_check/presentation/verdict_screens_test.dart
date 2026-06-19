@@ -157,14 +157,14 @@ void main() {
       expect(find.text('좋은 선택이에요!'), findsOneWidget);
     });
 
-    testWidgets('CTA "다시 검색" 버튼이 존재한다', (tester) async {
+    testWidgets('CTA "다른 음식 검색하기" 버튼이 존재한다', (tester) async {
       final verdict = EatVerdict.recommend(foodName: '두부');
       await tester.pumpWidget(
         _wrap(VerdictResultScreen(verdict: verdict, onRetry: () {})),
       );
       await tester.pump();
 
-      expect(find.text('다시 검색'), findsOneWidget);
+      expect(find.text('다른 음식 검색하기'), findsOneWidget);
     });
 
     testWidgets('CTA "내 식단에 추가" 버튼이 존재한다', (tester) async {
@@ -234,14 +234,14 @@ void main() {
       expect(find.text('속이 많이 불편해질 수 있어요!'), findsOneWidget);
     });
 
-    testWidgets('위험 상태에서 CTA 2개("다시 검색" + "내 식단에 추가") 모두 존재', (tester) async {
+    testWidgets('위험 상태에서 CTA 2개("다른 음식 검색하기" + "내 식단에 추가") 모두 존재', (tester) async {
       final verdict = EatVerdict.risk(foodName: '커피');
       await tester.pumpWidget(
         _wrap(VerdictResultScreen(verdict: verdict, onRetry: () {})),
       );
       await tester.pump();
 
-      expect(find.text('다시 검색'), findsOneWidget);
+      expect(find.text('다른 음식 검색하기'), findsOneWidget);
       expect(find.text('내 식단에 추가'), findsOneWidget);
     });
   });

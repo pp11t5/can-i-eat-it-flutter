@@ -427,19 +427,17 @@ class _CtaSection extends StatelessWidget {
         const SizedBox(height: AppSpacing.itemGap),
         Row(
           children: [
-            // "다시 검색" — 아웃라인 버튼 #00BF72
+            // "다른 음식 검색하기" — 채움 버튼
             Expanded(
               child: Semantics(
                 button: true,
-                label: '다시 검색하기',
+                label: '다른 음식 검색하기',
                 child: SizedBox(
                   height: 54,
-                  child: OutlinedButton.icon(
+                  child: ElevatedButton.icon(
                     onPressed: onRetry,
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.white,
+                    style: ElevatedButton.styleFrom(
                       foregroundColor: AppColors.textPrimary,
-                      side: const BorderSide(color: AppColors.border),
                       shape: RoundedRectangleBorder(
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusCard),
@@ -448,7 +446,7 @@ class _CtaSection extends StatelessWidget {
                       padding: EdgeInsets.zero,
                     ),
                     icon: const Icon(Icons.search, size: 18),
-                    label: const Text('다시 검색'),
+                    label: const Text('다른 음식 검색하기'),
                   ),
                 ),
               ),

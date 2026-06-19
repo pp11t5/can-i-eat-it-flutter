@@ -97,4 +97,15 @@ void main() {
       expect(find.text('공유'), findsOneWidget);
     });
   });
+
+  group('VerdictResultScreen — 재검색 버튼 개선', () {
+    testWidgets("'다른 음식 검색하기' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      expect(find.text('다른 음식 검색하기'), findsOneWidget);
+    });
+  });
 }
