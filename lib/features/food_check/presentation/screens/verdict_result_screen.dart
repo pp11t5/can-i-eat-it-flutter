@@ -103,6 +103,10 @@ class VerdictResultScreen extends ConsumerWidget {
             const MedicalDisclaimer(),
             const SizedBox(height: AppSpacing.sectionGap),
 
+            // 관련 음식 섹션 (목 데이터)
+            const _RelatedFoodsSection(),
+            const SizedBox(height: AppSpacing.sectionGap),
+
             // CTA 3개 (공유하기 + 다시 검색 + 내 식단에 추가)
             _CtaSection(
               verdict: verdict,
@@ -442,6 +446,41 @@ class _CtaSection extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 관련 음식 섹션 (목 데이터)
+// ---------------------------------------------------------------------------
+
+class _RelatedFoodsSection extends StatelessWidget {
+  const _RelatedFoodsSection();
+
+  static const _foods = ['두부', '바나나', '오트밀'];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '이런 음식은 어때요?',
+          style: AppTextStyles.body1Bold.copyWith(
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: _foods
+              .map((food) => ActionChip(
+                    label: Text(food),
+                    onPressed: () {},
+                  ))
+              .toList(),
         ),
       ],
     );

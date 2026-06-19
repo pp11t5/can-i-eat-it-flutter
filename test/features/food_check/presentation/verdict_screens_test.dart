@@ -407,4 +407,33 @@ void main() {
       expect(find.text('즐겨찾기에 추가됐어요'), findsOneWidget);
     });
   });
+
+  group('VerdictResultScreen — 관련 음식 섹션', () {
+    testWidgets('"이런 음식은 어때요?" 타이틀이 표시된다', (tester) async {
+      final verdict = EatVerdict.recommend(foodName: '두부');
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: verdict, onRetry: () {})),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('이런 음식은 어때요?'), findsOneWidget);
+    });
+
+    testWidgets('ActionChip으로 "두부"가 표시된다', (tester) async {
+      final verdict = EatVerdict.recommend(foodName: '삼겹살');
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: verdict, onRetry: () {})),
+      );
+      await tester.pumpAndSettle();
+
+      // '두부'는 목 관련 음식 목록의 첫 번째 항목
+      expect(
+        find.descendant(
+          of: find.byType(ActionChip),
+          matching: find.text('두부'),
+        ),
+        findsOneWidget,
+      );
+    });
+  });
 }
