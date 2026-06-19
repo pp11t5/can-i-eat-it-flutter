@@ -154,8 +154,7 @@ class MypageScreen extends ConsumerWidget {
 
                   // ── ④ 계정 액션 ──────────────────────────────────────
                   AccountActionsWidget(
-                    onLogout: () =>
-                        ref.read(authControllerProvider.notifier).logout(),
+                    onLogout: () => _showLogoutDialog(context, ref),
                     onWithdraw: () => showWithdrawDialog(context, ref),
                   ),
 
@@ -172,4 +171,33 @@ class MypageScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// 로그아웃 확인 다이얼로그를 표시한다.
+///
+/// "로그아웃" 버튼 탭 시 [authControllerProvider]의 logout()을 호출한다.
+Future<void> _showLogoutDialog(BuildContext context, WidgetRef ref) {
+  return showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('로그아웃'),
+      content: const Text('정말 로그아웃하시겠어요?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(),
+          child: const Text('취소'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(ctx).pop();
+            ref.read(authControllerProvider.notifier).logout();
+          },
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.red,
+          ),
+          child: const Text('로그아웃'),
+        ),
+      ],
+    ),
+  );
 }

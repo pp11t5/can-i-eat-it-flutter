@@ -115,6 +115,32 @@ void main() {
 
       expect(find.text('탈퇴하기'), findsOneWidget);
     });
+
+    testWidgets('로그아웃 버튼 탭 시 확인 다이얼로그가 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      // 로그아웃 버튼은 여러 위젯에 텍스트가 있을 수 있으므로 first 사용
+      await tester.tap(find.text('로그아웃').first);
+      await _settle(tester);
+
+      expect(find.text('정말 로그아웃하시겠어요?'), findsOneWidget);
+      expect(find.text('취소'), findsOneWidget);
+    });
+
+    testWidgets('"취소" 탭 시 다이얼로그가 닫힌다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      await tester.tap(find.text('로그아웃').first);
+      await _settle(tester);
+
+      // 다이얼로그 내 취소 버튼 탭
+      await tester.tap(find.text('취소'));
+      await _settle(tester);
+
+      expect(find.text('정말 로그아웃하시겠어요?'), findsNothing);
+    });
   });
 
   group('MypageScreen — 세션 없음', () {
