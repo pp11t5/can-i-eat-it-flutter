@@ -124,6 +124,21 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
                         HealthProfileSummaryWidget(profile: profile),
                   ),
 
+                  const SizedBox(height: 12),
+                  Text(
+                    '건강 목표',
+                    style: AppTextStyles.body1Bold.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '역류성 식도염 증상 완화',
+                    style: AppTextStyles.body2Regular.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+
                   const SizedBox(height: 16),
                   const Divider(height: 1, color: AppColors.border),
                   const SizedBox(height: 16),

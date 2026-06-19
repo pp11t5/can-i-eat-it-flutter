@@ -307,4 +307,20 @@ void main() {
       expect(find.text('현재 최신 버전을 사용 중이에요.'), findsOneWidget);
     });
   });
+
+  group('MypageScreen — 건강 목표 섹션', () {
+    testWidgets("'건강 목표' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.text('건강 목표'), findsOneWidget);
+    });
+
+    testWidgets("'역류성 식도염 증상 완화' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.text('역류성 식도염 증상 완화'), findsOneWidget);
+    });
+  });
 }
