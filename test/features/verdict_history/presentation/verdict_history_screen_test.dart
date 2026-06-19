@@ -370,4 +370,19 @@ void main() {
       expect(chipAfter.selected, isTrue);
     });
   });
+
+  group('VerdictHistoryScreen — 통계 요약 배너', () {
+    testWidgets("이력이 2개일 때 '총 2개의 판정 기록' 텍스트가 표시된다", (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [
+          _item('두부', 'safe'),
+          _item('커피', 'avoid'),
+        ],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      expect(find.text('총 2개의 판정 기록'), findsOneWidget);
+    });
+  });
 }

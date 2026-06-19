@@ -70,6 +70,20 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
       ),
       body: Column(
         children: [
+          // ── 통계 요약 배너 ────────────────────────────────────────────
+          Container(
+            width: double.infinity,
+            color: AppColors.primary.withValues(alpha: 0.1),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              '총 ${historyAsync.valueOrNull?.length ?? 0}개의 판정 기록',
+              style: AppTextStyles.body2Regular.copyWith(
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+
           // ── 검색 필드 ─────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
