@@ -343,13 +343,12 @@ class _SubstituteCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // 음식 이모지 없음 — 일반 아이콘 placeholder (데이터 없음, 보고서에 명시)
           const Icon(
-            Icons.restaurant_menu,
-            size: 28,
+            Icons.restaurant,
+            size: 16,
             color: AppColors.textSecondary,
           ),
-          const SizedBox(width: AppSpacing.cardPadding),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               substitute.name,
@@ -357,12 +356,6 @@ class _SubstituteCard extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
             ),
-          ),
-          // 우측 녹색 체크 아이콘
-          const Icon(
-            Icons.check_circle,
-            color: AppColors.verdictRecommend,
-            size: 24,
           ),
         ],
       ),
