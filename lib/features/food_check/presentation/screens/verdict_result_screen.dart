@@ -79,8 +79,20 @@ class VerdictResultScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // HeroSection: 원형 placeholder + 음식명 + 등급 헤드라인
-            _HeroSection(verdict: verdict),
+            // HeroSection: 원형 placeholder + 음식명 + 등급 헤드라인 (등급별 배경)
+            Container(
+              decoration: BoxDecoration(
+                color: switch (verdict.level) {
+                  VerdictLevel.recommend => const Color(0xFFE6F7EF),
+                  VerdictLevel.caution => const Color(0xFFFFF8E1),
+                  VerdictLevel.risk => const Color(0xFFFFEBEE),
+                  VerdictLevel.unknown => AppColors.surface,
+                },
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+              ),
+              padding: const EdgeInsets.all(AppSpacing.cardPadding),
+              child: _HeroSection(verdict: verdict),
+            ),
             const SizedBox(height: AppSpacing.sectionGap),
 
             // 상세 판정 카드 (AI분석 칩 카드 + 불릿 items + 대체음식 + 기록)

@@ -359,6 +359,27 @@ void main() {
   // _BookmarkButton — 토글 스낵바 피드백 (W10-F1)
   // ---------------------------------------------------------------------------
 
+  group('VerdictResultScreen — 등급별 배경색', () {
+    testWidgets('recommend 판정 시 연초록(0xFFE6F7EF) 배경 컨테이너가 표시된다',
+        (tester) async {
+      final verdict = EatVerdict.recommend(foodName: '두부');
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: verdict, onRetry: () {})),
+      );
+      await tester.pumpAndSettle();
+
+      final containers = tester.widgetList<Container>(find.byType(Container));
+      final found = containers.any((c) {
+        final decoration = c.decoration;
+        if (decoration is BoxDecoration) {
+          return decoration.color == const Color(0xFFE6F7EF);
+        }
+        return false;
+      });
+      expect(found, isTrue);
+    });
+  });
+
   group('_BookmarkButton 스낵바 피드백', () {
     testWidgets('북마크 토글 성공 시 "즐겨찾기에 추가됐어요" 스낵바를 표시한다',
         (tester) async {
