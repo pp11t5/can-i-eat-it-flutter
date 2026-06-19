@@ -21,26 +21,40 @@ String _gradeLabel(VerdictLevel level) => switch (level) {
 /// 포맷:
 /// ```
 /// [먹어도 돼?] {foodName} 판정 결과
-/// 등급: {gradeLabel}
-/// {reason}          ← personalTitle이 비어 있으면 이 줄 생략
 ///
-/// 앱에서 확인하기: https://can-i-eat-it.app
+/// 판정: {level.label}
+///
+/// {items[0].emphasis}   ← items가 있을 때만
+/// {items[0].body}
+///
+/// {items[1].emphasis}   ← items가 2개 이상일 때만
+/// {items[1].body}
+///
+/// 앱에서 자세히 보기: https://can-i-eat-it.app
 /// ```
 String buildShareText(EatVerdict verdict) {
-  final label = _gradeLabel(verdict.level);
-  final reason = verdict.personalTitle.trim();
-
   final buffer = StringBuffer()
     ..writeln('[먹어도 돼?] ${verdict.foodName} 판정 결과')
-    ..writeln('등급: $label');
+    ..writeln()
+    ..writeln('판정: ${verdict.level.label}');
 
-  if (reason.isNotEmpty) {
-    buffer.writeln(reason);
+  if (verdict.items.isNotEmpty) {
+    for (final item in verdict.items) {
+      buffer
+        ..writeln()
+        ..writeln(item.emphasis)
+        ..write(item.body);
+      // 다음 항목이 있을 경우를 위해 줄바꿈 추가
+      if (verdict.items.last != item) {
+        buffer.writeln();
+      }
+    }
   }
 
   buffer
     ..writeln()
-    ..write('앱에서 확인하기: $_appLink');
+    ..writeln()
+    ..write('앱에서 자세히 보기: $_appLink');
 
   return buffer.toString();
 }
