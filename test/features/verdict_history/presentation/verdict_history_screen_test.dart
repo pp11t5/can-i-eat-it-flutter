@@ -31,12 +31,13 @@ VerdictHistoryItem _item(String name, String verdict) => VerdictHistoryItem(
 
 void main() {
   group('VerdictHistoryScreen', () {
-    testWidgets('이력 없으면 "아직 판정 이력이 없어요." 표시', (tester) async {
+    testWidgets('이력 없으면 "아직 판정 이력이 없어요" 타이틀 표시', (tester) async {
       final repo = MockVerdictHistoryRepository();
       await tester.pumpWidget(_wrap(repo));
       await _settle(tester);
 
-      expect(find.text('아직 판정 이력이 없어요.'), findsOneWidget);
+      expect(find.text('아직 판정 이력이 없어요'), findsOneWidget);
+      expect(find.text('음식을 검색해 판정을 받아보세요'), findsOneWidget);
     });
 
     testWidgets('항목 있으면 foodName이 표시된다', (tester) async {
@@ -64,7 +65,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.delete_outline));
       await _settle(tester);
 
-      expect(find.text('아직 판정 이력이 없어요.'), findsOneWidget);
+      expect(find.text('아직 판정 이력이 없어요'), findsOneWidget);
     });
 
     testWidgets('verdict 배지 텍스트가 표시된다', (tester) async {

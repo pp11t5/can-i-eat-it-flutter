@@ -49,10 +49,29 @@ class VerdictHistoryScreen extends ConsumerWidget {
         data: (items) {
           if (items.isEmpty) {
             return Center(
-              child: Text(
-                '아직 판정 이력이 없어요.',
-                style: AppTextStyles.body2Regular
-                    .copyWith(color: AppColors.textSecondary),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.history,
+                    size: 48,
+                    color: AppColors.textSecondary,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '아직 판정 이력이 없어요',
+                    style: AppTextStyles.body1Bold.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '음식을 검색해 판정을 받아보세요',
+                    style: AppTextStyles.body2Regular.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             );
           }
