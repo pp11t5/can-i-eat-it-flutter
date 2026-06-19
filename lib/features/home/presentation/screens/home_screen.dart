@@ -319,11 +319,25 @@ class _RecentSearchSection extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '최근 검색',
-              style: AppTextStyles.body1Bold.copyWith(
-                color: AppColors.textPrimary,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '최근 검색',
+                  style: AppTextStyles.body1Bold.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => context.push('/check'),
+                  child: Text(
+                    '전체보기',
+                    style: AppTextStyles.body2Regular.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: AppSpacing.itemGap),
             Wrap(
