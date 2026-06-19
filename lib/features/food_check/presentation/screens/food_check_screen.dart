@@ -599,7 +599,10 @@ class _HistoryContent extends StatelessWidget {
         if (items.isEmpty) {
           return const _EmptyState();
         }
-        return _RecentSection(items: items, ref: ref);
+        // searchedAt 기준 최신순 정렬 (뷰 레이어 전용)
+        final sorted = [...items]
+          ..sort((a, b) => b.searchedAt.compareTo(a.searchedAt));
+        return _RecentSection(items: sorted, ref: ref);
       },
     );
   }
