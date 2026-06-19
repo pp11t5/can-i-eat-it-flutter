@@ -25,11 +25,18 @@ import 'package:can_i_eat_it/features/mypage/presentation/widgets/withdraw_dialo
 /// ③ 계정 액션(로그아웃·탈퇴)
 ///
 /// 편집·탈퇴 다이얼로그는 F4-3에서 구현한다.
-class MypageScreen extends ConsumerWidget {
+class MypageScreen extends ConsumerStatefulWidget {
   const MypageScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MypageScreen> createState() => _MypageScreenState();
+}
+
+class _MypageScreenState extends ConsumerState<MypageScreen> {
+  bool _isDarkMode = false;
+
+  @override
+  Widget build(BuildContext context) {
     final sessionAsync = ref.watch(authControllerProvider);
     final profileAsync = ref.watch(healthProfileControllerProvider);
 
@@ -108,6 +115,27 @@ class MypageScreen extends ConsumerWidget {
                   // ── ③ 알림 설정 ──────────────────────────────────────
                   const NotificationToggleWidget(),
                   const MealNotificationSettingsWidget(),
+
+                  // ── ③-1. 다크 모드 토글 ──────────────────────────────
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(
+                      Icons.dark_mode_outlined,
+                      color: AppColors.textPrimary,
+                    ),
+                    title: Text(
+                      '다크 모드',
+                      style: AppTextStyles.body1Medium
+                          .copyWith(color: AppColors.textPrimary),
+                    ),
+                    trailing: Switch(
+                      value: _isDarkMode,
+                      onChanged: (value) =>
+                          setState(() => _isDarkMode = value),
+                      activeThumbColor: AppColors.primary,
+                    ),
+                    onTap: () => setState(() => _isDarkMode = !_isDarkMode),
+                  ),
 
                   const Divider(color: AppColors.divider, height: 1),
                   const SizedBox(height: AppSpacing.sectionGap),

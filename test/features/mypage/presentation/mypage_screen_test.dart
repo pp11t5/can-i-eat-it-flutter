@@ -179,4 +179,38 @@ void main() {
       expect(find.text('공지사항'), findsOneWidget);
     });
   });
+
+  group('MypageScreen — 다크 모드 토글', () {
+    testWidgets("'다크 모드' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.text('다크 모드'), findsOneWidget);
+    });
+
+    testWidgets('Switch를 탭하면 상태가 true로 바뀐다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      // 다크 모드 ListTile의 Switch는 Icons.dark_mode_outlined 아이콘과 함께 존재
+      final darkModeTile = find.ancestor(
+        of: find.byIcon(Icons.dark_mode_outlined),
+        matching: find.byType(ListTile),
+      );
+      final switchInDarkTile = find.descendant(
+        of: darkModeTile,
+        matching: find.byType(Switch),
+      );
+      expect(switchInDarkTile, findsOneWidget);
+
+      final sw = tester.widget<Switch>(switchInDarkTile);
+      expect(sw.value, isFalse);
+
+      await tester.tap(switchInDarkTile);
+      await _settle(tester);
+
+      final swAfter = tester.widget<Switch>(switchInDarkTile);
+      expect(swAfter.value, isTrue);
+    });
+  });
 }
