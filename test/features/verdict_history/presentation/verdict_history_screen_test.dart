@@ -209,4 +209,58 @@ void main() {
       expect(find.text('커피'), findsNothing);
     });
   });
+
+  group('VerdictHistoryScreen — 정렬 기능', () {
+    testWidgets('정렬 아이콘(Icons.sort)이 렌더된다', (tester) async {
+      final repo = MockVerdictHistoryRepository();
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.sort), findsOneWidget);
+    });
+
+    testWidgets('정렬 버튼 탭 시 항목 순서가 뒤집힌다', (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [
+          VerdictHistoryItem(
+            foodName: '두부',
+            verdict: 'safe',
+            checkedAt: DateTime(2026, 6, 17, 8, 0),
+          ),
+          VerdictHistoryItem(
+            foodName: '커피',
+            verdict: 'avoid',
+            checkedAt: DateTime(2026, 6, 17, 10, 0),
+          ),
+        ],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      // 초기 최신순: 커피(10:00) → 두부(08:00)
+      final initialItems = tester.widgetList<Text>(
+        find.descendant(
+          of: find.byType(ListTile),
+          matching: find.byWidgetPredicate(
+            (w) => w is Text && (w.data == '두부' || w.data == '커피'),
+          ),
+        ),
+      ).toList();
+      expect(initialItems.first.data, '커피');
+
+      // 정렬 버튼 탭 → 오래된순
+      await tester.tap(find.byIcon(Icons.sort));
+      await _settle(tester);
+
+      final sortedItems = tester.widgetList<Text>(
+        find.descendant(
+          of: find.byType(ListTile),
+          matching: find.byWidgetPredicate(
+            (w) => w is Text && (w.data == '두부' || w.data == '커피'),
+          ),
+        ),
+      ).toList();
+      expect(sortedItems.first.data, '두부');
+    });
+  });
 }

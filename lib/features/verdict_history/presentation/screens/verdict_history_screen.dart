@@ -23,6 +23,7 @@ class VerdictHistoryScreen extends ConsumerStatefulWidget {
 class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
   String _selectedFilter = '전체';
   String _searchQuery = '';
+  bool _isNewestFirst = true;
 
   static const _filters = ['전체', '권장', '주의', '위험'];
 
@@ -47,6 +48,12 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
           style: AppTextStyles.body1Bold.copyWith(color: AppColors.textPrimary),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.sort, color: AppColors.textPrimary),
+            tooltip: _isNewestFirst ? '오래된순으로 보기' : '최신순으로 보기',
+            onPressed: () =>
+                setState(() => _isNewestFirst = !_isNewestFirst),
+          ),
           IconButton(
             icon: const Icon(Icons.delete_outline, color: AppColors.textPrimary),
             tooltip: '이력 삭제',
@@ -106,7 +113,10 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
                   final searchMatch = _searchQuery.isEmpty ||
                       item.foodName.toLowerCase().contains(_searchQuery);
                   return verdictMatch && searchMatch;
-                }).toList();
+                }).toList()
+                  ..sort((a, b) => _isNewestFirst
+                      ? b.checkedAt.compareTo(a.checkedAt)
+                      : a.checkedAt.compareTo(b.checkedAt));
 
                 if (filtered.isEmpty) {
                   return Center(
