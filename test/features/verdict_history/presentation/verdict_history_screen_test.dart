@@ -323,4 +323,20 @@ void main() {
       expect(find.text('이력 내보내기'), findsOneWidget);
     });
   });
+
+  group('VerdictHistoryScreen — 항목 상세 바텀시트', () {
+    testWidgets('항목 탭 시 foodName이 바텀시트에 표시된다', (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [_item('두부', 'safe')],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      await tester.tap(find.text('두부'));
+      await _settle(tester);
+
+      // 바텀시트에 foodName이 표시됨 (ListTile title + 바텀시트 내부 = 2개 이상)
+      expect(find.text('두부'), findsAtLeastNWidgets(2));
+    });
+  });
 }

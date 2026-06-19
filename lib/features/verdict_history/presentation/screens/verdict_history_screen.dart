@@ -319,6 +319,7 @@ class _VerdictHistoryTileState extends State<_VerdictHistoryTile> {
     final dateStr = '${local.month}월 ${local.day}일 $hh:$min';
 
     return ListTile(
+      onTap: () => _showDetailSheet(context, widget.item),
       title: Text(
         widget.item.foodName,
         style: AppTextStyles.body1Medium.copyWith(color: AppColors.textPrimary),
@@ -413,6 +414,45 @@ Future<void> _showExportDialog(BuildContext context) async {
           child: const Text('저장'),
         ),
       ],
+    ),
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 이력 항목 상세 바텀시트
+// ---------------------------------------------------------------------------
+
+void _showDetailSheet(BuildContext context, VerdictHistoryItem item) {
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (ctx) => Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            item.foodName,
+            style: AppTextStyles.body1Bold.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            item.verdict,
+            style: AppTextStyles.body2Regular.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${item.checkedAt.month}월 ${item.checkedAt.day}일',
+            style: AppTextStyles.body2Regular.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }
