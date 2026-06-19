@@ -366,7 +366,26 @@ class _RecentSearchSection extends ConsumerWidget {
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
       data: (recentList) {
-        if (recentList.isEmpty) return const SizedBox.shrink();
+        if (recentList.isEmpty) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.search,
+                size: 32,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '아직 검색한 음식이 없어요',
+                style: AppTextStyles.body2Regular.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          );
+        }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
