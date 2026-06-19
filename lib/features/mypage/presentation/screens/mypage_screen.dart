@@ -232,6 +232,28 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
                   const Divider(color: AppColors.divider, height: 1),
                   const SizedBox(height: AppSpacing.sectionGap),
 
+                  // ── ⑤-2. 업데이트 확인 ──────────────────────────────
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(
+                      Icons.system_update_outlined,
+                      color: AppColors.textPrimary,
+                    ),
+                    title: Text(
+                      '업데이트 확인',
+                      style: AppTextStyles.body1Medium
+                          .copyWith(color: AppColors.textPrimary),
+                    ),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: AppColors.textSecondary,
+                    ),
+                    onTap: () => _showUpdateCheckDialog(context),
+                  ),
+
+                  const Divider(color: AppColors.divider, height: 1),
+                  const SizedBox(height: AppSpacing.sectionGap),
+
                   // ── ⑥ 판정 이력 ──────────────────────────────────────
                   ListTile(
                     contentPadding: EdgeInsets.zero,
@@ -273,6 +295,23 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
       ),
     );
   }
+}
+
+/// 업데이트 확인 다이얼로그를 표시한다.
+Future<void> _showUpdateCheckDialog(BuildContext context) async {
+  await showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('업데이트 확인'),
+      content: const Text('현재 최신 버전을 사용 중이에요.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('확인'),
+        ),
+      ],
+    ),
+  );
 }
 
 /// 로그아웃 확인 다이얼로그를 표시한다.

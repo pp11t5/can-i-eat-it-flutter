@@ -238,4 +238,25 @@ void main() {
       expect(find.text('한국어'), findsOneWidget);
     });
   });
+
+  group('MypageScreen — 업데이트 확인 메뉴', () {
+    testWidgets("'업데이트 확인' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.text('업데이트 확인'), findsOneWidget);
+    });
+
+    testWidgets("'업데이트 확인' 탭 시 '현재 최신 버전을 사용 중이에요.' 다이얼로그가 표시된다",
+        (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      await tester.scrollUntilVisible(find.text('업데이트 확인'), 100);
+      await tester.tap(find.text('업데이트 확인'));
+      await _settle(tester);
+
+      expect(find.text('현재 최신 버전을 사용 중이에요.'), findsOneWidget);
+    });
+  });
 }
