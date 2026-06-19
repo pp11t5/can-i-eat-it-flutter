@@ -289,21 +289,28 @@ class _FilterChipRow extends StatelessWidget {
 // 이력 항목 타일
 // ---------------------------------------------------------------------------
 
-class _VerdictHistoryTile extends StatelessWidget {
+class _VerdictHistoryTile extends StatefulWidget {
   const _VerdictHistoryTile({required this.item});
 
   final VerdictHistoryItem item;
 
   @override
+  State<_VerdictHistoryTile> createState() => _VerdictHistoryTileState();
+}
+
+class _VerdictHistoryTileState extends State<_VerdictHistoryTile> {
+  bool _isFavorited = false;
+
+  @override
   Widget build(BuildContext context) {
-    final local = item.checkedAt.toLocal();
+    final local = widget.item.checkedAt.toLocal();
     final hh = local.hour.toString().padLeft(2, '0');
     final min = local.minute.toString().padLeft(2, '0');
     final dateStr = '${local.month}월 ${local.day}일 $hh:$min';
 
     return ListTile(
       title: Text(
-        item.foodName,
+        widget.item.foodName,
         style: AppTextStyles.body1Medium.copyWith(color: AppColors.textPrimary),
       ),
       subtitle: Text(
@@ -311,7 +318,21 @@ class _VerdictHistoryTile extends StatelessWidget {
         style:
             AppTextStyles.caption1Medium.copyWith(color: AppColors.textSecondary),
       ),
-      trailing: _VerdictBadge(verdict: item.verdict),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: Icon(
+              _isFavorited ? Icons.bookmark : Icons.bookmark_border,
+              color: _isFavorited ? AppColors.primary : AppColors.textSecondary,
+            ),
+            onPressed: () => setState(() => _isFavorited = !_isFavorited),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+          _VerdictBadge(verdict: widget.item.verdict),
+        ],
+      ),
     );
   }
 }
