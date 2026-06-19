@@ -9,6 +9,7 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/core/prefs/first_visit_prefs.dart';
 import 'package:can_i_eat_it/features/home/presentation/providers/home_providers.dart';
 import 'package:can_i_eat_it/features/food_check/data/recent_food_providers.dart';
+import 'package:can_i_eat_it/features/home/presentation/widgets/home_empty_state_widget.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_search_bar.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/recent_search_chip.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
@@ -116,7 +117,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const _MyDictionaryCard(),
               const SizedBox(height: AppSpacing.contentGap),
 
-              // ── 5. 오늘의 식사 요약 ──────────────────────────────────
+              // ── 5. 빈 상태 유도 위젯 (최근 검색 없을 때만) ──────────────
+              _HomeEmptyState(),
+              // ── 6. 오늘의 식사 요약 ──────────────────────────────────
               const TodayMealSummaryWidget(),
               const SizedBox(height: AppSpacing.contentGap),
 
@@ -322,6 +325,18 @@ class _RecentSearchSection extends ConsumerWidget {
         );
       },
     );
+  }
+}
+
+// ── 빈 상태 위젯 래퍼 (최근 검색 없을 때만 표시) ──────────────────────────────────
+
+class _HomeEmptyState extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final recentAsync = ref.watch(recentFoodControllerProvider);
+    final isEmpty = recentAsync.valueOrNull?.isEmpty ?? true;
+    if (!isEmpty) return const SizedBox.shrink();
+    return const HomeEmptyStateWidget();
   }
 }
 
