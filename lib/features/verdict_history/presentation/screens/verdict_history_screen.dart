@@ -98,11 +98,9 @@ class _VerdictHistoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final local = item.checkedAt.toLocal();
-    final mm = local.month.toString().padLeft(2, '0');
-    final dd = local.day.toString().padLeft(2, '0');
     final hh = local.hour.toString().padLeft(2, '0');
     final min = local.minute.toString().padLeft(2, '0');
-    final dateStr = '$mm/$dd $hh:$min';
+    final dateStr = '${local.month}월 ${local.day}일 $hh:$min';
 
     return ListTile(
       title: Text(

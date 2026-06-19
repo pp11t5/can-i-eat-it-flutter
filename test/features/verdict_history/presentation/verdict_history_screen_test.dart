@@ -54,6 +54,17 @@ void main() {
       expect(find.text('커피'), findsOneWidget);
     });
 
+    testWidgets('날짜가 "M월 D일 HH:mm" 포맷으로 표시된다', (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [_item('두부', 'safe')],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      // _item의 checkedAt: DateTime(2026, 6, 20, 12, 0) → "6월 20일 12:00"
+      expect(find.text('6월 20일 12:00'), findsOneWidget);
+    });
+
     testWidgets('삭제 버튼 탭 시 clear가 호출되어 목록이 비워진다', (tester) async {
       final repo = MockVerdictHistoryRepository(
         initialItems: [_item('두부', 'safe')],
