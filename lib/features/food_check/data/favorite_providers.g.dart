@@ -31,6 +31,27 @@ final favoriteRepositoryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FavoriteRepositoryRef = AutoDisposeProviderRef<FavoriteRepository>;
+String _$favoriteListHash() => r'9dcaadc44efad7abe1e19c80668df08789bd7e79';
+
+/// 즐겨찾기 전체 목록 provider.
+///
+/// `ref.invalidate(favoriteListProvider)` 로 삭제 후 갱신한다.
+///
+/// Copied from [favoriteList].
+@ProviderFor(favoriteList)
+final favoriteListProvider =
+    AutoDisposeFutureProvider<List<FavoriteItem>>.internal(
+  favoriteList,
+  name: r'favoriteListProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$favoriteListHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef FavoriteListRef = AutoDisposeFutureProviderRef<List<FavoriteItem>>;
 String _$favoriteControllerHash() =>
     r'cb7905dd17a7d9fc36c00dc840006a30b1abb341';
 

@@ -20,6 +20,7 @@ import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/timeline_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/edit_profile_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
+import 'package:can_i_eat_it/features/food_check/presentation/screens/favorites_screen.dart';
 import 'package:can_i_eat_it/features/verdict_history/presentation/screens/verdict_history_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_condition_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_frequency_screen.dart';
@@ -157,6 +158,11 @@ GoRouter appRouter(Ref ref) {
         path: '/meal-log',
         name: 'meal-log',
         builder: (context, state) => const TimelineScreen(),
+      ),
+      GoRoute(
+        path: '/favorites',
+        name: 'favorites',
+        builder: (context, state) => const FavoritesScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

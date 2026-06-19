@@ -108,7 +108,29 @@ class MypageScreen extends ConsumerWidget {
                   const Divider(color: AppColors.divider, height: 1),
                   const SizedBox(height: AppSpacing.sectionGap),
 
-                  // ── ④ 판정 이력 ──────────────────────────────────────
+                  // ── ④ 즐겨찾기 ──────────────────────────────────────
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(
+                      Icons.bookmark_border,
+                      color: AppColors.textPrimary,
+                    ),
+                    title: Text(
+                      '즐겨찾기',
+                      style: AppTextStyles.body1Medium
+                          .copyWith(color: AppColors.textPrimary),
+                    ),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: AppColors.textSecondary,
+                    ),
+                    onTap: () => context.push('/favorites'),
+                  ),
+
+                  const Divider(color: AppColors.divider, height: 1),
+                  const SizedBox(height: AppSpacing.sectionGap),
+
+                  // ── ⑤ 판정 이력 ──────────────────────────────────────
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(

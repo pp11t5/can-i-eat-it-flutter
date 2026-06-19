@@ -16,6 +16,13 @@ part 'favorite_providers.g.dart';
 @riverpod
 FavoriteRepository favoriteRepository(Ref ref) => LocalFavoriteRepository();
 
+/// 즐겨찾기 전체 목록 provider.
+///
+/// `ref.invalidate(favoriteListProvider)` 로 삭제 후 갱신한다.
+@riverpod
+Future<List<FavoriteItem>> favoriteList(Ref ref) =>
+    ref.watch(favoriteRepositoryProvider).getAll();
+
 /// 즐겨찾기 토글 컨트롤러.
 ///
 /// build: [foodName] 기준 현재 즐겨찾기 여부(bool) 반환.
