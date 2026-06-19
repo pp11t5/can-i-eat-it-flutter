@@ -22,7 +22,10 @@ import 'package:can_i_eat_it/features/meal_log/presentation/widgets/today_meal_s
 /// AppShell(하단 탭) 내부에 포함되므로 자체 bottomNavigationBar를 갖지 않는다.
 /// 최근 검색은 /check 검색 화면으로 이동했으므로 홈에서 제거됨.
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.nowOverride});
+
+  /// 테스트에서 시각 주입용. null이면 DateTime.now() 사용.
+  final DateTime? nowOverride;
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -75,7 +78,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
               // ── 1. 인사말 블록 ─────────────────────────────────────────
               // 캐릭터 하단이 검색바 상단과 맞붙도록 gap 0 (Figma 절대배치 overlap).
-              const _GreetingBlock(),
+              _GreetingBlock(nowOverride: widget.nowOverride),
               const SizedBox(height: 8),
 
               // ── 1-1. 날씨 배너 (목 데이터) ──────────────────────────────
@@ -148,14 +151,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 // ── 인사말 블록 (캐릭터 이미지 + 텍스트) ────────────────────────────────────
 
 class _GreetingBlock extends StatelessWidget {
-  const _GreetingBlock();
+  const _GreetingBlock({this.nowOverride});
+
+  /// 테스트에서 시각 주입용. null이면 DateTime.now() 사용.
+  final DateTime? nowOverride;
 
   static const _weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 
   String get _todayLabel {
-    final now = DateTime.now();
+    final now = nowOverride ?? DateTime.now();
     final weekday = _weekdays[now.weekday % 7];
     return '${now.year}년 ${now.month}월 ${now.day}일 $weekday요일';
+  }
+
+  String get _greetingText {
+    final hour = (nowOverride ?? DateTime.now()).hour;
+    if (hour >= 5 && hour < 11) {
+      return '좋은 아침이에요! 오늘도 건강한 식사 시작해볼까요?';
+    } else if (hour >= 11 && hour < 14) {
+      return '점심 시간이에요! 오늘 점심은 속이 편안한 메뉴로 드세요.';
+    } else if (hour >= 14 && hour < 18) {
+      return '오후도 건강하게 보내세요!';
+    } else if (hour >= 18 && hour < 22) {
+      return '저녁 시간이에요! 과식은 역류 증상을 악화시킬 수 있어요.';
+    } else {
+      return '늦은 시간 식사는 속 건강에 좋지 않아요.';
+    }
   }
 
   @override
@@ -179,7 +200,7 @@ class _GreetingBlock extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '오늘 속은\n편안하신가요?',
+                _greetingText,
                 style: AppTextStyles.header2Bold.copyWith(
                   color: AppColors.textPrimary,
                 ),

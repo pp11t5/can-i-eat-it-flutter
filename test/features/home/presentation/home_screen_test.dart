@@ -18,11 +18,22 @@ Widget _wrap() => ProviderScope(
 
 void main() {
   group('HomeScreen — 인사말 블록', () {
-    testWidgets('"편안하신가요?" 인사말 텍스트가 표시된다', (tester) async {
+    testWidgets('시간대에 맞는 인사말 텍스트가 표시된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('편안하신가요?'), findsOneWidget);
+      // 시간대별 문구 중 하나가 반드시 표시된다
+      const greetings = [
+        '좋은 아침이에요!',
+        '점심 시간이에요!',
+        '오후도 건강하게',
+        '저녁 시간이에요!',
+        '늦은 시간 식사는',
+      ];
+      final anyFound = greetings.any(
+        (g) => find.textContaining(g).evaluate().isNotEmpty,
+      );
+      expect(anyFound, isTrue);
     });
 
     testWidgets('"식단 기록" 통계 라벨이 인사말 블록에 표시된다', (tester) async {
