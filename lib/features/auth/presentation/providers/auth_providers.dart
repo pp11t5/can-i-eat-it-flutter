@@ -12,6 +12,7 @@ import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 import 'package:can_i_eat_it/features/auth/domain/repositories/auth_repository.dart';
+import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
 
 part 'auth_providers.g.dart';
 
@@ -122,15 +123,34 @@ class AuthController extends _$AuthController {
     state = AsyncValue.data(session);
   }
 
-  /// 서버 로그아웃 + 로컬 세션 초기화.
-  Future<void> logout() async {
-    await ref.read(authRepositoryProvider).logout();
+  /// GET /auth/me 를 호출해 계정 식별정보(displayName·email·profileImageUrl)를 갱신한다.
+  ///
+  /// 성공 시 state 를 갱신된 세션으로 교체한다.
+  /// 실패 시 예외를 그대로 rethrow 하여 호출자가 처리하도록 한다.
+  Future<AuthSession> getMe() async {
+    final session = await ref.read(authRepositoryProvider).getMe();
+    state = AsyncValue.data(session);
+    return session;
+  }
+
+  /// 계정 탈퇴: 서버 withdraw + 로컬 세션·프로필 캐시 초기화.
+  Future<void> withdraw() async {
+    await ref.read(authRepositoryProvider).withdraw();
+    await ref.read(profileCacheProvider).clear();
     state = const AsyncValue.data(null);
   }
 
-  /// 로컬 세션만 초기화 (오프라인 signOut).
+  /// 서버 로그아웃 + 로컬 세션·프로필 캐시 초기화.
+  Future<void> logout() async {
+    await ref.read(authRepositoryProvider).logout();
+    await ref.read(profileCacheProvider).clear();
+    state = const AsyncValue.data(null);
+  }
+
+  /// 로컬 세션만 초기화 (오프라인 signOut) + 프로필 캐시 초기화.
   Future<void> signOut() async {
     await ref.read(authRepositoryProvider).signOut();
+    await ref.read(profileCacheProvider).clear();
     state = const AsyncValue.data(null);
   }
 
