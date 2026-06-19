@@ -409,14 +409,14 @@ void main() {
   });
 
   group('VerdictResultScreen — 관련 음식 섹션', () {
-    testWidgets('"이런 음식은 어때요?" 타이틀이 표시된다', (tester) async {
+    testWidgets('"관련 음식" 타이틀이 표시된다', (tester) async {
       final verdict = EatVerdict.recommend(foodName: '두부');
       await tester.pumpWidget(
         _wrap(VerdictResultScreen(verdict: verdict, onRetry: () {})),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('이런 음식은 어때요?'), findsOneWidget);
+      expect(find.text('관련 음식'), findsOneWidget);
     });
 
     testWidgets('ActionChip으로 "두부"가 표시된다', (tester) async {

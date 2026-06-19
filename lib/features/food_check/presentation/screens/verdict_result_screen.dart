@@ -503,29 +503,36 @@ class _CtaSection extends StatelessWidget {
 class _RelatedFoodsSection extends StatelessWidget {
   const _RelatedFoodsSection();
 
-  static const _foods = ['두부', '바나나', '오트밀'];
+  static const _foods = ['두부', '연두부', '순두부찌개'];
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: AppSpacing.itemGap),
         Text(
-          '이런 음식은 어때요?',
+          '관련 음식',
           style: AppTextStyles.body1Bold.copyWith(
             color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          children: _foods
-              .map((food) => ActionChip(
-                    label: Text(food),
-                    onPressed: () {},
-                  ))
-              .toList(),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: _foods
+                .map((food) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ActionChip(
+                        label: Text(food),
+                        onPressed: () {},
+                      ),
+                    ))
+                .toList(),
+          ),
         ),
+        const SizedBox(height: AppSpacing.itemGap),
       ],
     );
   }
