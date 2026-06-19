@@ -30,17 +30,17 @@ class AccountActionsWidget extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: onLogout,
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.textSecondary,
-              side: const BorderSide(color: AppColors.border),
+              foregroundColor: AppColors.danger,
+              side: const BorderSide(color: AppColors.danger),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
               ),
             ),
-            icon: const Icon(Icons.logout, color: AppColors.textSecondary),
+            icon: const Icon(Icons.logout),
             label: Text(
               '로그아웃',
               style: AppTextStyles.body1Medium.copyWith(
-                color: AppColors.textSecondary,
+                color: AppColors.danger,
               ),
             ),
           ),
