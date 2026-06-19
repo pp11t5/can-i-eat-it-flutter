@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/core/prefs/first_visit_prefs.dart';
+import 'package:can_i_eat_it/features/home/presentation/providers/home_providers.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_search_bar.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
 
@@ -13,11 +15,46 @@ import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.
 ///
 /// AppShell(하단 탭) 내부에 포함되므로 자체 bottomNavigationBar를 갖지 않는다.
 /// 최근 검색은 /check 검색 화면으로 이동했으므로 홈에서 제거됨.
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool _toastShown = false;
+
+  void _showToast() {
+    if (_toastShown || !mounted) return;
+    _toastShown = true;
+    ref.read(firstVisitPrefsProvider).markToastShown();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:
+              const Text('프로필을 완성하면 더 정확한 판정을 받을 수 있어요'),
+          action: SnackBarAction(
+            label: '편집하기',
+            onPressed: () => context.push('/mypage/edit'),
+          ),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // 토스트 표시 여부를 listen — data(true) 수신 시 1회 표시.
+    ref.listen<AsyncValue<bool>>(
+      shouldShowProfileToastProvider,
+      (_, next) {
+        if (next.valueOrNull == true) _showToast();
+      },
+    );
+
     return Scaffold(
       backgroundColor: const Color(0xFFFBFBFB), // Figma bg #FBFBFB
       body: SafeArea(

@@ -12,6 +12,7 @@ import 'package:can_i_eat_it/features/health_profile/data/health_profile_provide
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/account_actions_widget.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/account_header_widget.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/health_profile_summary_widget.dart';
+import 'package:can_i_eat_it/features/mypage/presentation/widgets/profile_completeness_badge.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/withdraw_dialog.dart';
 
 /// 마이페이지 화면.
@@ -80,6 +81,8 @@ class MypageScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 6),
+                  const ProfileCompletenessBadge(),
                   const SizedBox(height: AppSpacing.itemGap),
                   profileAsync.when(
                     loading: () => const Padding(
