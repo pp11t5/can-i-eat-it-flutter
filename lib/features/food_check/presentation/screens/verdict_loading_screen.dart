@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
@@ -6,8 +8,41 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 /// 판정 로딩 화면 (Figma node 554-5332).
 ///
 /// 배경 흰색, 화면 중앙에 스피너 + 로딩 안내 텍스트.
-class VerdictLoadingScreen extends StatelessWidget {
+/// [Timer.periodic]으로 2초마다 로딩 메시지를 순환한다.
+class VerdictLoadingScreen extends StatefulWidget {
   const VerdictLoadingScreen({super.key});
+
+  @override
+  State<VerdictLoadingScreen> createState() => _VerdictLoadingScreenState();
+}
+
+class _VerdictLoadingScreenState extends State<VerdictLoadingScreen> {
+  static const _messages = [
+    'AI가 분석 중이에요...',
+    '건강 프로필을 확인하고 있어요...',
+    '판정 결과를 준비하고 있어요...',
+  ];
+
+  int _messageIndex = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 2), (_) {
+      if (mounted) {
+        setState(() {
+          _messageIndex = (_messageIndex + 1) % _messages.length;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +73,15 @@ class VerdictLoadingScreen extends StatelessWidget {
             ),
             // 스켈레톤 블록 3개
             const _SkeletonBlocks(),
+            const SizedBox(height: 16),
+            // 순환 로딩 메시지
+            Text(
+              _messages[_messageIndex],
+              style: AppTextStyles.body1Medium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),

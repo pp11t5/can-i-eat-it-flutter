@@ -48,6 +48,15 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.text('내 몸에 맞는지\n확인하고 있어요'), findsOneWidget);
     });
+
+    testWidgets('초기 상태에서 "AI가 분석 중이에요..." 메시지가 표시된다', (tester) async {
+      await tester.pumpWidget(
+        _wrap(const VerdictLoadingScreen()),
+      );
+      await tester.pump();
+
+      expect(find.text('AI가 분석 중이에요...'), findsOneWidget);
+    });
   });
 
   // ---------------------------------------------------------------------------
