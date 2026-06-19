@@ -110,15 +110,20 @@ class _SummaryCard extends StatelessWidget {
             children: [
               Text(
                 '오늘의 식사',
-                style: AppTextStyles.body1Bold
-                    .copyWith(color: AppColors.textPrimary),
+                // Figma: 15px SemiBold — body1Medium(16px)에서 size·weight 보정
+                style: AppTextStyles.body1Medium.copyWith(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
               ),
               GestureDetector(
                 onTap: () => context.push('/meal-log'),
                 child: Text(
                   '더 보기',
+                  // Figma: Regular 13px, #6B6B8A(textSecondary)
                   style: AppTextStyles.body2Regular
-                      .copyWith(color: AppColors.primary),
+                      .copyWith(color: AppColors.textSecondary),
                 ),
               ),
             ],
@@ -133,18 +138,18 @@ class _SummaryCard extends StatelessWidget {
                   .copyWith(color: AppColors.textSecondary),
             )
           else ...[
-            // 식사 수
+            // 식사 수 — Figma: "N개" 20px SemiBold primary, " 기록됨" 13px Regular tertiary
             Row(
               children: [
                 Text(
                   '$totalCount개',
-                  style: AppTextStyles.body1Bold
+                  style: AppTextStyles.header2Bold
                       .copyWith(color: AppColors.primary),
                 ),
                 Text(
                   ' 기록됨',
                   style: AppTextStyles.body2Regular
-                      .copyWith(color: AppColors.textSecondary),
+                      .copyWith(color: AppColors.textTertiary),
                 ),
               ],
             ),
