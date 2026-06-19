@@ -27,7 +27,7 @@ class MedicalDisclaimer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.disclaimerBg,
+        color: const Color(0xFFFFF8E1),
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
       ),
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
