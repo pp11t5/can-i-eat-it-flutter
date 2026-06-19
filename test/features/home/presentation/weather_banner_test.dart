@@ -44,5 +44,15 @@ void main() {
 
       expect(find.text('흐린 날엔 소화가 잘 되는 음식을 드세요.'), findsOneWidget);
     });
+
+    testWidgets('sunny 조건에서 날씨 아이콘(Icons.wb_sunny)이 렌더된다', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: WeatherBanner(weatherCondition: 'sunny')),
+        ),
+      );
+
+      expect(find.byIcon(Icons.wb_sunny), findsOneWidget);
+    });
   });
 }
