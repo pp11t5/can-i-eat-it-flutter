@@ -230,7 +230,9 @@ class _HeroSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _verdictColor();
 
-    return Column(
+    return Semantics(
+      label: '${verdict.foodName}, 판정: ${verdict.level.label}',
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // 원형 컨테이너 — 음식 이미지 없음 → 등급색 배경 + 등급 아이콘 placeholder
@@ -280,6 +282,7 @@ class _HeroSection extends StatelessWidget {
           ],
         ),
       ],
+    ),
     );
   }
 
@@ -315,24 +318,28 @@ class _CtaSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // "공유하기" — 아웃라인 버튼 full-width
-        SizedBox(
-          height: 54,
-          child: OutlinedButton(
-            onPressed: () => shareVerdict(verdict),
-            style: OutlinedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.primary,
-              side: const BorderSide(
-                color: AppColors.primary,
-                width: 1.5,
+        Semantics(
+          button: true,
+          label: '판정 결과 공유하기',
+          child: SizedBox(
+            height: 54,
+            child: OutlinedButton(
+              onPressed: () => shareVerdict(verdict),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.primary,
+                side: const BorderSide(
+                  color: AppColors.primary,
+                  width: 1.5,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+                ),
+                textStyle: AppTextStyles.body1Bold,
+                padding: EdgeInsets.zero,
               ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-              ),
-              textStyle: AppTextStyles.body1Bold,
-              padding: EdgeInsets.zero,
+              child: const Text('공유하기'),
             ),
-            child: const Text('공유하기'),
           ),
         ),
         const SizedBox(height: AppSpacing.itemGap),
@@ -340,25 +347,29 @@ class _CtaSection extends StatelessWidget {
           children: [
             // "다시 검색" — 아웃라인 버튼 #00BF72
             Expanded(
-              child: SizedBox(
-                height: 54,
-                child: OutlinedButton(
-                  onPressed: onRetry,
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(
-                      color: AppColors.primary,
-                      width: 1.5,
+              child: Semantics(
+                button: true,
+                label: '다시 검색하기',
+                child: SizedBox(
+                  height: 54,
+                  child: OutlinedButton(
+                    onPressed: onRetry,
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppColors.primary,
+                      side: const BorderSide(
+                        color: AppColors.primary,
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusCard),
+                      ),
+                      textStyle: AppTextStyles.body1Bold,
+                      padding: EdgeInsets.zero,
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusCard),
-                    ),
-                    textStyle: AppTextStyles.body1Bold,
-                    padding: EdgeInsets.zero,
+                    child: const Text('다시 검색'),
                   ),
-                  child: const Text('다시 검색'),
                 ),
               ),
             ),

@@ -134,41 +134,44 @@ class _BulletItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 볼드 emphasis 줄 (• 불릿 포함)
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '• ',
-              style: AppTextStyles.body2Bold.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-            Expanded(
-              child: Text(
-                item.emphasis,
+    return Semantics(
+      label: '${item.emphasis}: ${item.body}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 볼드 emphasis 줄 (• 불릿 포함)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '• ',
                 style: AppTextStyles.body2Bold.copyWith(
                   color: AppColors.textPrimary,
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        // 회색 body 텍스트
-        Padding(
-          padding: const EdgeInsets.only(left: AppSpacing.itemGap),
-          child: Text(
-            item.body,
-            style: AppTextStyles.body2Medium.copyWith(
-              color: AppColors.textSecondary,
+              Expanded(
+                child: Text(
+                  item.emphasis,
+                  style: AppTextStyles.body2Bold.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          // 회색 body 텍스트
+          Padding(
+            padding: const EdgeInsets.only(left: AppSpacing.itemGap),
+            child: Text(
+              item.body,
+              style: AppTextStyles.body2Medium.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
