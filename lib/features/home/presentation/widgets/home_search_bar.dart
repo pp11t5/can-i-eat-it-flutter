@@ -30,7 +30,7 @@ class HomeSearchBar extends StatelessWidget {
           right: 8,
         ),
         decoration: BoxDecoration(
-          color: AppColors.primary,
+          color: AppColors.surfaceMuted,
           borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
         ),
         child: Row(
@@ -42,23 +42,23 @@ class HomeSearchBar extends StatelessWidget {
                 const Icon(
                   Icons.search,
                   size: 20,
-                  color: Colors.white,
+                  color: AppColors.textSecondary,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '음식 이름을 검색해 보세요',
                   style: AppTextStyles.body1Medium.copyWith(
-                    color: Colors.white,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
             ),
-            // 흰 원형 검색 아이콘 버튼 (36×38, radius 999, white fill)
+            // 원형 검색 아이콘 버튼 (36×38, radius 999)
             Container(
               width: 36,
               height: 38,
               decoration: const BoxDecoration(
-                color: Colors.white,
+                color: AppColors.primary,
                 borderRadius: BorderRadius.all(Radius.circular(999)),
               ),
               child: Center(
@@ -67,7 +67,7 @@ class HomeSearchBar extends StatelessWidget {
                   width: 24,
                   height: 24,
                   colorFilter: const ColorFilter.mode(
-                    AppColors.primary,
+                    Colors.white,
                     BlendMode.srcIn,
                   ),
                 ),
