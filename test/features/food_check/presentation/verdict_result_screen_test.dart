@@ -43,13 +43,13 @@ void main() {
       expect(find.text('관련 음식'), findsOneWidget);
     });
 
-    testWidgets("목 데이터 '두부' 칩이 렌더된다", (tester) async {
+    testWidgets("목 데이터 '두부' 텍스트가 렌더된다", (tester) async {
       await tester.pumpWidget(
         _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
       );
       await _settle(tester);
 
-      expect(find.widgetWithText(ActionChip, '두부'), findsOneWidget);
+      expect(find.widgetWithText(ListTile, '두부'), findsOneWidget);
     });
   });
 
@@ -130,6 +130,17 @@ void main() {
       await _settle(tester);
 
       expect(find.text('재판정 요청'), findsOneWidget);
+    });
+  });
+
+  group('VerdictResultScreen — 관련 음식 즐겨찾기', () {
+    testWidgets('Icons.favorite_border 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.favorite_border), findsAtLeastNWidgets(1));
     });
   });
 }

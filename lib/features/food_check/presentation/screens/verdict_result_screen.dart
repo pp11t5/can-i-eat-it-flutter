@@ -541,19 +541,24 @@ class _RelatedFoodsSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: _foods
-                .map((food) => Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ActionChip(
-                        label: Text(food),
-                        onPressed: () {},
-                      ),
-                    ))
-                .toList(),
-          ),
+        Column(
+          children: _foods
+              .map(
+                (food) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(
+                    Icons.restaurant,
+                    color: AppColors.textSecondary,
+                  ),
+                  title: Text(food),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.favorite_border),
+                    tooltip: '즐겨찾기',
+                    onPressed: () {},
+                  ),
+                ),
+              )
+              .toList(),
         ),
         const SizedBox(height: AppSpacing.itemGap),
       ],

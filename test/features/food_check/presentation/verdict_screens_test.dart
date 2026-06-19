@@ -419,7 +419,7 @@ void main() {
       expect(find.text('관련 음식'), findsOneWidget);
     });
 
-    testWidgets('ActionChip으로 "두부"가 표시된다', (tester) async {
+    testWidgets('ListTile으로 "두부"가 표시된다', (tester) async {
       final verdict = EatVerdict.recommend(foodName: '삼겹살');
       await tester.pumpWidget(
         _wrap(VerdictResultScreen(verdict: verdict, onRetry: () {})),
@@ -427,13 +427,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // '두부'는 목 관련 음식 목록의 첫 번째 항목
-      expect(
-        find.descendant(
-          of: find.byType(ActionChip),
-          matching: find.text('두부'),
-        ),
-        findsOneWidget,
-      );
+      expect(find.widgetWithText(ListTile, '두부'), findsOneWidget);
     });
   });
 
