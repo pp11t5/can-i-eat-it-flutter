@@ -170,10 +170,21 @@ class _SummaryCard extends StatelessWidget {
 
           // ── 본문 ─────────────────────────────────────────────────────
           if (isEmpty)
-            Text(
-              '오늘 기록된 식사가 없어요.',
-              style: AppTextStyles.body2Regular
-                  .copyWith(color: AppColors.textSecondary),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.restaurant_menu,
+                  size: 32,
+                  color: AppColors.textSecondary,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '오늘 기록된 식사가 없어요.',
+                  style: AppTextStyles.body2Regular
+                      .copyWith(color: AppColors.textSecondary),
+                ),
+              ],
             )
           else ...[
             // 식사 수 — Figma: "N개" 20px SemiBold primary, " 기록됨" 13px Regular tertiary

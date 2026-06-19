@@ -210,6 +210,13 @@ void main() {
       expect(find.text('더 보기'), findsOneWidget);
     });
 
+    testWidgets('빈 상태: Icons.restaurant_menu 아이콘이 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap(MockMealRepository.empty()));
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.restaurant_menu), findsOneWidget);
+    });
+
     testWidgets('데이터 있음: 식사 수·마지막 시간·헤더·더보기 표시', (tester) async {
       await tester.pumpWidget(_wrap(_todaySeeded()));
       await _settle(tester);
