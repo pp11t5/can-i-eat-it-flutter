@@ -24,6 +24,7 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
   String _selectedFilter = '전체';
   String _searchQuery = '';
   bool _isNewestFirst = true;
+  bool _showFavoritesOnly = false;
 
   static const _filters = ['전체', '권장', '주의', '위험'];
 
@@ -96,6 +97,9 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
             filters: _filters,
             selectedFilter: _selectedFilter,
             onSelected: (filter) => setState(() => _selectedFilter = filter),
+            showFavoritesOnly: _showFavoritesOnly,
+            onFavoritesToggle: (v) =>
+                setState(() => _showFavoritesOnly = v),
           ),
 
           // ── 이력 목록 ─────────────────────────────────────────────────
@@ -258,11 +262,15 @@ class _FilterChipRow extends StatelessWidget {
     required this.filters,
     required this.selectedFilter,
     required this.onSelected,
+    required this.showFavoritesOnly,
+    required this.onFavoritesToggle,
   });
 
   final List<String> filters;
   final String selectedFilter;
   final ValueChanged<String> onSelected;
+  final bool showFavoritesOnly;
+  final ValueChanged<bool> onFavoritesToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -270,26 +278,42 @@ class _FilterChipRow extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
-        children: filters.map((filter) {
-          final isSelected = filter == selectedFilter;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: FilterChip(
-              label: Text(filter),
-              selected: isSelected,
-              onSelected: (_) => onSelected(filter),
-              backgroundColor: AppColors.surface,
-              selectedColor: AppColors.primary,
-              labelStyle: AppTextStyles.caption1Medium.copyWith(
-                color: isSelected ? Colors.white : AppColors.textSecondary,
+        children: [
+          ...filters.map((filter) {
+            final isSelected = filter == selectedFilter;
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: Text(filter),
+                selected: isSelected,
+                onSelected: (_) => onSelected(filter),
+                backgroundColor: AppColors.surface,
+                selectedColor: AppColors.primary,
+                labelStyle: AppTextStyles.caption1Medium.copyWith(
+                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                ),
+                checkmarkColor: Colors.white,
+                side: BorderSide(
+                  color: isSelected ? AppColors.primary : AppColors.border,
+                ),
               ),
-              checkmarkColor: Colors.white,
-              side: BorderSide(
-                color: isSelected ? AppColors.primary : AppColors.border,
-              ),
+            );
+          }),
+          FilterChip(
+            label: const Text('즐겨찾기'),
+            selected: showFavoritesOnly,
+            onSelected: onFavoritesToggle,
+            backgroundColor: AppColors.surface,
+            selectedColor: AppColors.primary,
+            labelStyle: AppTextStyles.caption1Medium.copyWith(
+              color: showFavoritesOnly ? Colors.white : AppColors.textSecondary,
             ),
-          );
-        }).toList(),
+            checkmarkColor: Colors.white,
+            side: BorderSide(
+              color: showFavoritesOnly ? AppColors.primary : AppColors.border,
+            ),
+          ),
+        ],
       ),
     );
   }

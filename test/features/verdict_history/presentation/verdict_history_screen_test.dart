@@ -339,4 +339,35 @@ void main() {
       expect(find.text('두부'), findsAtLeastNWidgets(2));
     });
   });
+
+  group('VerdictHistoryScreen — 즐겨찾기 필터 칩', () {
+    testWidgets("'즐겨찾기' 텍스트가 렌더된다", (tester) async {
+      final repo = MockVerdictHistoryRepository();
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      expect(find.text('즐겨찾기'), findsOneWidget);
+    });
+
+    testWidgets("'즐겨찾기' 칩 탭 시 selected 상태가 토글된다", (tester) async {
+      final repo = MockVerdictHistoryRepository();
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      // 초기에는 미선택 상태
+      final chipBefore = tester.widget<FilterChip>(
+        find.widgetWithText(FilterChip, '즐겨찾기'),
+      );
+      expect(chipBefore.selected, isFalse);
+
+      // 탭 후 선택 상태
+      await tester.tap(find.widgetWithText(FilterChip, '즐겨찾기'));
+      await _settle(tester);
+
+      final chipAfter = tester.widget<FilterChip>(
+        find.widgetWithText(FilterChip, '즐겨찾기'),
+      );
+      expect(chipAfter.selected, isTrue);
+    });
+  });
 }
