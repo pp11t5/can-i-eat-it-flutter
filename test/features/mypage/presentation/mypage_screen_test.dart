@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
@@ -236,6 +237,53 @@ void main() {
       await _settle(tester);
 
       expect(find.text('한국어'), findsOneWidget);
+    });
+  });
+
+  group('MypageScreen — 로그아웃 실행', () {
+    testWidgets("다이얼로그 '로그아웃' 버튼 탭 시 authController logout이 호출된다",
+        (tester) async {
+      final authRepo = MockAuthRepository(initialSession: _testSession);
+      final profileRepo = MockHealthProfileRepository.noProfile();
+
+      final router = GoRouter(
+        initialLocation: '/mypage',
+        routes: [
+          GoRoute(
+            path: '/mypage',
+            builder: (_, __) => const MypageScreen(),
+          ),
+          GoRoute(
+            path: '/login',
+            builder: (_, __) =>
+                const Scaffold(body: Text('login stub')),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            // ignore: scoped_providers_should_specify_dependencies
+            authRepositoryProvider.overrideWithValue(authRepo),
+            // ignore: scoped_providers_should_specify_dependencies
+            healthProfileRepositoryProvider.overrideWithValue(profileRepo),
+          ],
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+      await _settle(tester);
+
+      await tester.scrollUntilVisible(find.text('로그아웃').first, 100);
+      await tester.tap(find.text('로그아웃').first);
+      await _settle(tester);
+
+      // 다이얼로그 내 '로그아웃' 버튼 탭
+      await tester.tap(find.text('로그아웃').last);
+      await _settle(tester);
+
+      // logout() 호출 후 세션이 null이 됨
+      expect(await authRepo.currentSession(), isNull);
     });
   });
 

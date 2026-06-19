@@ -332,6 +332,7 @@ Future<void> _showLogoutDialog(BuildContext context, WidgetRef ref) {
           onPressed: () {
             Navigator.of(ctx).pop();
             ref.read(authControllerProvider.notifier).logout();
+            context.go('/login');
           },
           style: TextButton.styleFrom(
             foregroundColor: Colors.red,
