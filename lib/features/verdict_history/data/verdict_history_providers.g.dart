@@ -28,7 +28,7 @@ final verdictHistoryRepositoryProvider =
 // ignore: unused_element
 typedef VerdictHistoryRepositoryRef = ProviderRef<VerdictHistoryRepository>;
 String _$verdictHistoryControllerHash() =>
-    r'373c40b1b0695dc19dff8e96aa1d319c6906cbb2';
+    r'667fe20f8280841308489d9b2b1471b63ebc795c';
 
 /// 판정 이력 컨트롤러.
 ///
