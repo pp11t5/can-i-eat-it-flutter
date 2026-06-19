@@ -209,41 +209,33 @@ class _HeroSection extends StatelessWidget {
 
   /// 등급별 헤드라인 아이콘
   Widget _headlineIcon(Color color) {
+    final decoration = BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(24),
+    );
     return switch (verdict.level) {
       VerdictLevel.recommend => Container(
           width: 32,
           height: 32,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: decoration,
           child: const Icon(Icons.check, color: Colors.white, size: 20),
         ),
       VerdictLevel.caution => Container(
           width: 32,
           height: 32,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: decoration,
           child: const Icon(Icons.priority_high, color: Colors.white, size: 20),
         ),
       VerdictLevel.risk => Container(
           width: 32,
           height: 32,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: decoration,
           child: const Icon(Icons.close, color: Colors.white, size: 20),
         ),
       VerdictLevel.unknown => Container(
           width: 32,
           height: 32,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: decoration,
           child: const Icon(Icons.help_outline, color: Colors.white, size: 20),
         ),
     };
