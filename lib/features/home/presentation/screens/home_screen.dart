@@ -33,6 +33,16 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _toastShown = false;
+  String _selectedCategory = '전체';
+
+  static const _categories = ['전체', '채소', '단백질', '유제품'];
+
+  // 제안 칩 목 데이터 — (label, iconAsset, category)
+  static const _suggestionItems = [
+    (label: '된장찌개', icon: 'assets/illustrations/food_soup.png',    category: '채소'),
+    (label: '아메리카노', icon: 'assets/illustrations/food_drink.png', category: '유제품'),
+    (label: '김치볶음밥', icon: 'assets/illustrations/food_rice.png',  category: '채소'),
+  ];
 
   void _showToast() {
     if (_toastShown || !mounted) return;
@@ -100,32 +110,57 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               _RecentSearchSection(),
               const SizedBox(height: AppSpacing.itemGap),
 
-              // ── 3. 제안 칩 행 — Figma 1207:6604 단일 행 수평 스크롤 ────────
+              // ── 3. 제안 칩 행 — 카테고리 필터 + Figma 1207:6604 단일 행 ─
+              // 카테고리 필터 행
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  children: [
-                    HomeSuggestionChip(
-                      label: '된장찌개',
-                      iconAsset: 'assets/illustrations/food_soup.png',
-                      onTap: () =>
-                          context.push('/check?initialQuery=된장찌개'),
-                    ),
-                    const SizedBox(width: 8),
-                    HomeSuggestionChip(
-                      label: '아메리카노',
-                      iconAsset: 'assets/illustrations/food_drink.png',
-                      onTap: () =>
-                          context.push('/check?initialQuery=아메리카노'),
-                    ),
-                    const SizedBox(width: 8),
-                    HomeSuggestionChip(
-                      label: '김치볶음밥',
-                      iconAsset: 'assets/illustrations/food_rice.png',
-                      onTap: () =>
-                          context.push('/check?initialQuery=김치볶음밥'),
-                    ),
-                  ],
+                  children: _categories.map((cat) {
+                    final isSelected = cat == _selectedCategory;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: FilterChip(
+                        label: Text(cat),
+                        selected: isSelected,
+                        onSelected: (_) =>
+                            setState(() => _selectedCategory = cat),
+                        selectedColor: AppColors.primary,
+                        backgroundColor: AppColors.surface,
+                        labelStyle: AppTextStyles.caption1Medium.copyWith(
+                          color: isSelected
+                              ? Colors.white
+                              : AppColors.textSecondary,
+                        ),
+                        checkmarkColor: Colors.white,
+                        side: BorderSide(
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.border,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // 제안 칩 행 (카테고리 필터 적용)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: _suggestionItems
+                      .where((item) =>
+                          _selectedCategory == '전체' ||
+                          item.category == _selectedCategory)
+                      .expand((item) => [
+                            HomeSuggestionChip(
+                              label: item.label,
+                              iconAsset: item.icon,
+                              onTap: () => context.push(
+                                  '/check?initialQuery=${Uri.encodeComponent(item.label)}'),
+                            ),
+                            const SizedBox(width: 8),
+                          ])
+                      .toList(),
                 ),
               ),
               const SizedBox(height: AppSpacing.contentGap),

@@ -194,6 +194,22 @@ void main() {
     });
   });
 
+  group('HomeScreen — 제안 칩 카테고리 필터', () {
+    testWidgets("'전체' 카테고리 칩이 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrapWithEmptyRecent());
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(FilterChip, '전체'), findsOneWidget);
+    });
+
+    testWidgets("'채소' 카테고리 칩이 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrapWithEmptyRecent());
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(FilterChip, '채소'), findsOneWidget);
+    });
+  });
+
   group('HomeScreen — 최근 검색어 빈 상태', () {
     testWidgets('최근 검색어가 없을 때 "아직 검색한 음식이 없어요"가 렌더된다',
         (tester) async {
