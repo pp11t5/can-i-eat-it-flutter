@@ -440,4 +440,27 @@ void main() {
       expect(find.text('다른 검색어로 시도해 보세요'), findsOneWidget);
     });
   });
+
+  group('FoodCheckScreen — 정렬 옵션', () {
+    testWidgets('Icons.sort 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(MockFoodRepository.empty())]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.sort), findsOneWidget);
+    });
+
+    testWidgets("Icons.sort 탭 시 '정렬 기준' 다이얼로그가 표시된다", (tester) async {
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(MockFoodRepository.empty())]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.sort));
+      await tester.pumpAndSettle();
+
+      expect(find.text('정렬 기준'), findsOneWidget);
+    });
+  });
 }

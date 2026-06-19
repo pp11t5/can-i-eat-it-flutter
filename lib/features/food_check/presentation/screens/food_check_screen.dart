@@ -57,6 +57,9 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
   /// 판정 화면 진입 in-flight 가드 (다중 탭 중복 push 방지).
   bool _navigating = false;
 
+  /// 검색 결과 정렬 기준.
+  String _sortOrder = '관련도순';
+
   @override
   void initState() {
     super.initState();
@@ -186,6 +189,31 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
     _navigating = false;
   }
 
+  void _showSortDialog(BuildContext ctx) {
+    showDialog<void>(
+      context: ctx,
+      builder: (dialogCtx) => SimpleDialog(
+        title: const Text('정렬 기준'),
+        children: [
+          SimpleDialogOption(
+            onPressed: () {
+              setState(() => _sortOrder = '관련도순');
+              Navigator.pop(dialogCtx);
+            },
+            child: const Text('관련도순'),
+          ),
+          SimpleDialogOption(
+            onPressed: () {
+              setState(() => _sortOrder = '이름순');
+              Navigator.pop(dialogCtx);
+            },
+            child: const Text('이름순'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool showResults = _query.isNotEmpty;
@@ -201,6 +229,8 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
               onClose: _handleClose,
               onChanged: _onTextChanged,
               onSubmit: _onSubmit,
+              onSort: () => _showSortDialog(context),
+              sortOrder: _sortOrder,
             ),
             Expanded(
               child: showResults
@@ -231,12 +261,16 @@ class _TopBar extends StatelessWidget {
     required this.onClose,
     required this.onChanged,
     required this.onSubmit,
+    required this.onSort,
+    required this.sortOrder,
   });
 
   final TextEditingController controller;
   final VoidCallback onClose;
   final ValueChanged<String> onChanged;
   final ValueChanged<String> onSubmit;
+  final VoidCallback onSort;
+  final String sortOrder;
 
   @override
   Widget build(BuildContext context) {
@@ -296,6 +330,12 @@ class _TopBar extends StatelessWidget {
                   color: AppColors.textPrimary,
                 ),
               ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.sort),
+              tooltip: '정렬: $sortOrder',
+              onPressed: onSort,
+              color: AppColors.textPrimary,
             ),
           ],
         ),
@@ -812,6 +852,7 @@ Future<void> _showDeleteConfirmDialog(
     ),
   );
 }
+
 
 // ---------------------------------------------------------------------------
 // 빈 상태
