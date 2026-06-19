@@ -21,9 +21,39 @@ class HealthTipCard extends StatelessWidget {
   String get _tip =>
       _tips[DateTime.now().millisecondsSinceEpoch % _tips.length];
 
+  void _showBottomSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _tip,
+              style: AppTextStyles.body1Bold.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '건강한 식습관을 위한 팁이에요. 매일 조금씩 실천해보세요.',
+              style: AppTextStyles.body2Regular.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: () => _showBottomSheet(context),
+      child: Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border.all(color: AppColors.border),
@@ -59,6 +89,7 @@ class HealthTipCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }
