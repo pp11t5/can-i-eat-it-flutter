@@ -433,11 +433,8 @@ class _CtaSection extends StatelessWidget {
                     onPressed: onRetry,
                     style: OutlinedButton.styleFrom(
                       backgroundColor: Colors.white,
-                      foregroundColor: AppColors.primary,
-                      side: const BorderSide(
-                        color: AppColors.primary,
-                        width: 1.5,
-                      ),
+                      foregroundColor: AppColors.textPrimary,
+                      side: const BorderSide(color: AppColors.border),
                       shape: RoundedRectangleBorder(
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusCard),
