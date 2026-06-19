@@ -277,11 +277,11 @@ class _HeroSection extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: color.withValues(alpha: 0.25), width: 2),
           ),
-          child: Center(
+          child: const Center(
             child: Icon(
-              _foodIconData(),
-              size: 52,
-              color: color,
+              Icons.restaurant,
+              size: 32,
+              color: Colors.white,
             ),
           ),
         ),
@@ -330,15 +330,6 @@ class _HeroSection extends StatelessWidget {
     );
   }
 
-  /// 음식 일러스트 없음 → 등급별 아이콘으로 placeholder (보고서에 명시)
-  IconData _foodIconData() {
-    return switch (verdict.level) {
-      VerdictLevel.recommend => Icons.restaurant,
-      VerdictLevel.caution => Icons.restaurant,
-      VerdictLevel.risk => Icons.restaurant,
-      VerdictLevel.unknown => Icons.help_outline,
-    };
-  }
 }
 
 // ---------------------------------------------------------------------------
