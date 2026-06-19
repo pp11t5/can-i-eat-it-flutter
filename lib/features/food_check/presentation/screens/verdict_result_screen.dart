@@ -282,7 +282,7 @@ class _HeroSection extends StatelessWidget {
         // 음식명 — 가운데 정렬, 큰 볼드
         Text(
           verdict.foodName,
-          style: AppTextStyles.header2Bold.copyWith(
+          style: AppTextStyles.header1Bold.copyWith(
             color: AppColors.textPrimary,
           ),
           textAlign: TextAlign.center,
