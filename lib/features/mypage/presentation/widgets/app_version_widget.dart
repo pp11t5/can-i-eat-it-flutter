@@ -20,10 +20,10 @@ class AppVersionWidget extends ConsumerWidget {
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
       data: (info) => Text(
-        '버전 ${info.version} (${info.buildNumber})',
+        'v${info.version}',
         textAlign: TextAlign.center,
-        style: AppTextStyles.caption1Medium.copyWith(
-          color: AppColors.textTertiary,
+        style: AppTextStyles.body2Regular.copyWith(
+          color: AppColors.textSecondary,
         ),
       ),
     );
