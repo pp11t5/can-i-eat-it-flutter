@@ -184,6 +184,38 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
                   const Divider(color: AppColors.divider, height: 1),
                   const SizedBox(height: AppSpacing.sectionGap),
 
+                  // ── ⑤-1. 언어 설정 ──────────────────────────────────
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(
+                      Icons.language_outlined,
+                      color: AppColors.textPrimary,
+                    ),
+                    title: Text(
+                      '언어 설정',
+                      style: AppTextStyles.body1Medium
+                          .copyWith(color: AppColors.textPrimary),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '한국어',
+                          style: AppTextStyles.body2Regular
+                              .copyWith(color: AppColors.textSecondary),
+                        ),
+                        const Icon(
+                          Icons.chevron_right,
+                          color: AppColors.textSecondary,
+                        ),
+                      ],
+                    ),
+                    onTap: () {},
+                  ),
+
+                  const Divider(color: AppColors.divider, height: 1),
+                  const SizedBox(height: AppSpacing.sectionGap),
+
                   // ── ⑥ 판정 이력 ──────────────────────────────────────
                   ListTile(
                     contentPadding: EdgeInsets.zero,

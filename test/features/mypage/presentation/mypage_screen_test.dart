@@ -213,4 +213,20 @@ void main() {
       expect(swAfter.value, isTrue);
     });
   });
+
+  group('MypageScreen — 언어 설정 메뉴', () {
+    testWidgets("'언어 설정' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.text('언어 설정'), findsOneWidget);
+    });
+
+    testWidgets("'한국어' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.text('한국어'), findsOneWidget);
+    });
+  });
 }
