@@ -158,4 +158,13 @@ void main() {
       expect(find.text('로그인 정보가 없어요.'), findsOneWidget);
     });
   });
+
+  group('MypageScreen — 프로필/설정 구분선', () {
+    testWidgets('Divider 가 마이페이지 화면에 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.byType(Divider), findsWidgets);
+    });
+  });
 }

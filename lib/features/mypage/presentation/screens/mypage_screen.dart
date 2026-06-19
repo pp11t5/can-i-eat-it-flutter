@@ -100,7 +100,9 @@ class MypageScreen extends ConsumerWidget {
                         HealthProfileSummaryWidget(profile: profile),
                   ),
 
-                  const SizedBox(height: AppSpacing.contentGap),
+                  const SizedBox(height: 16),
+                  const Divider(height: 1, color: AppColors.border),
+                  const SizedBox(height: 16),
 
                   // ── ③ 알림 설정 ──────────────────────────────────────
                   const NotificationToggleWidget(),
