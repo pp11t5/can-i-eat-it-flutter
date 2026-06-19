@@ -482,4 +482,16 @@ void main() {
       expect(find.text('저장하기'), findsOneWidget);
     });
   });
+
+  group('VerdictResultScreen — 공유 버튼', () {
+    testWidgets("'공유하기' 텍스트가 렌더된다", (tester) async {
+      final verdict = EatVerdict.recommend(foodName: '두부');
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: verdict, onRetry: () {})),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('공유하기'), findsAtLeastNWidgets(1));
+    });
+  });
 }
