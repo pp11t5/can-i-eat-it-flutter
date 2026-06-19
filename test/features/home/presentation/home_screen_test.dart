@@ -228,4 +228,16 @@ void main() {
       expect(find.text('총 칼로리: 0 kcal'), findsOneWidget);
     });
   });
+
+  group('HomeScreen — 알림 배너', () {
+    testWidgets('NoticeBanner 메시지 텍스트가 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('오늘의 건강 팁: 식사 후 바로 눕지 마세요.'),
+        findsOneWidget,
+      );
+    });
+  });
 }

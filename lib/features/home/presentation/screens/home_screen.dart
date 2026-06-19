@@ -12,6 +12,7 @@ import 'package:can_i_eat_it/features/food_check/data/recent_food_providers.dart
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_empty_state_widget.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_search_bar.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/health_tip_card.dart';
+import 'package:can_i_eat_it/features/home/presentation/widgets/notice_banner.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/weather_banner.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/recent_search_chip.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
@@ -93,6 +94,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 weatherCondition: 'sunny',
               ),
               const SizedBox(height: 8),
+
+              // ── 1-0. 알림 배너 ──────────────────────────────────────────
+              const NoticeBanner(),
+              const SizedBox(height: AppSpacing.itemGap),
 
               // ── 1-1. 날씨 배너 (목 데이터) ──────────────────────────────
               const WeatherBanner(),
