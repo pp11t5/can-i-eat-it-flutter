@@ -30,17 +30,28 @@ class HomeSearchBar extends StatelessWidget {
           right: 8,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surfaceMuted, // #F5F5F5
+          color: AppColors.primary,
           borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              '이 음식 먹어도 돼?',
-              style: AppTextStyles.body1Medium.copyWith(
-                color: AppColors.textPrimary,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.search,
+                  size: 20,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '이 음식 먹어도 돼?',
+                  style: AppTextStyles.body1Medium.copyWith(
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
             // 흰 원형 검색 아이콘 버튼 (36×38, radius 999, white fill)
             Container(
@@ -56,7 +67,7 @@ class HomeSearchBar extends StatelessWidget {
                   width: 24,
                   height: 24,
                   colorFilter: const ColorFilter.mode(
-                    AppColors.textPrimary,
+                    AppColors.primary,
                     BlendMode.srcIn,
                   ),
                 ),
