@@ -84,19 +84,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     HomeSuggestionChip(
                       label: '된장찌개',
                       iconAsset: 'assets/illustrations/food_soup.png',
-                      onTap: () => context.push('/check'),
+                      onTap: () =>
+                          context.push('/check?initialQuery=된장찌개'),
                     ),
                     const SizedBox(width: 8),
                     HomeSuggestionChip(
                       label: '아메리카노',
                       iconAsset: 'assets/illustrations/food_drink.png',
-                      onTap: () => context.push('/check'),
+                      onTap: () =>
+                          context.push('/check?initialQuery=아메리카노'),
                     ),
                     const SizedBox(width: 8),
                     HomeSuggestionChip(
                       label: '김치볶음밥',
                       iconAsset: 'assets/illustrations/food_rice.png',
-                      onTap: () => context.push('/check'),
+                      onTap: () =>
+                          context.push('/check?initialQuery=김치볶음밥'),
                     ),
                   ],
                 ),

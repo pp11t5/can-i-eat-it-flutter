@@ -93,9 +93,13 @@ GoRouter appRouter(Ref ref) {
         name: 'food-check',
         pageBuilder: (context, state) {
           final recordContext = state.extra as MealRecordContext?;
+          final initialQuery = state.uri.queryParameters['initialQuery'];
           return MaterialPage(
             fullscreenDialog: true,
-            child: FoodCheckScreen(recordContext: recordContext),
+            child: FoodCheckScreen(
+              recordContext: recordContext,
+              initialQuery: initialQuery,
+            ),
           );
         },
       ),
