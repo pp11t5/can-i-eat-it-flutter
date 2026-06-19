@@ -30,26 +30,29 @@ class NotificationToggleWidget extends ConsumerWidget {
               .copyWith(color: AppColors.textSecondary),
         ),
       ),
-      data: (enabled) => SwitchListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(
-          '앱 내 알림',
-          style:
-              AppTextStyles.body1Medium.copyWith(color: AppColors.textPrimary),
+      data: (enabled) => Semantics(
+        label: enabled ? '앱 내 알림 켜짐' : '앱 내 알림 꺼짐',
+        child: SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(
+            '앱 내 알림',
+            style: AppTextStyles.body1Medium
+                .copyWith(color: AppColors.textPrimary),
+          ),
+          subtitle: Text(
+            '편집 유도 등 앱 내 안내 메시지',
+            style: AppTextStyles.caption1Medium
+                .copyWith(color: AppColors.textSecondary),
+          ),
+          value: enabled,
+          activeColor: AppColors.primary,
+          onChanged: (value) async {
+            await ref
+                .read(notificationPrefsProvider)
+                .setNotificationEnabled(value);
+            ref.invalidate(notificationEnabledProvider);
+          },
         ),
-        subtitle: Text(
-          '편집 유도 등 앱 내 안내 메시지',
-          style: AppTextStyles.caption1Medium
-              .copyWith(color: AppColors.textSecondary),
-        ),
-        value: enabled,
-        activeColor: AppColors.primary,
-        onChanged: (value) async {
-          await ref
-              .read(notificationPrefsProvider)
-              .setNotificationEnabled(value);
-          ref.invalidate(notificationEnabledProvider);
-        },
       ),
     );
   }

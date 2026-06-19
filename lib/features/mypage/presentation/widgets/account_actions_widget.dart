@@ -54,15 +54,19 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14), // Figma 1316:4994
-        child: Text(
-          label,
-          style: AppTextStyles.body1Medium.copyWith(
-            color: onTap != null ? textColor : AppColors.textTertiary,
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14), // Figma 1316:4994
+          child: Text(
+            label,
+            style: AppTextStyles.body1Medium.copyWith(
+              color: onTap != null ? textColor : AppColors.textTertiary,
+            ),
           ),
         ),
       ),

@@ -17,22 +17,25 @@ class ProfileCompletenessBadge extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isComplete = ref.watch(profileCompleteProvider);
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          isComplete ? Icons.check_circle : Icons.radio_button_unchecked,
-          size: 18,
-          color: isComplete ? AppColors.primary : AppColors.textTertiary,
-        ),
-        const SizedBox(width: 6),
-        Text(
-          isComplete ? '프로필 완성' : '프로필 미완성',
-          style: AppTextStyles.caption1Medium.copyWith(
+    return Semantics(
+      label: isComplete ? '프로필 완성' : '프로필 미완성',
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isComplete ? Icons.check_circle : Icons.radio_button_unchecked,
+            size: 18,
             color: isComplete ? AppColors.primary : AppColors.textTertiary,
           ),
-        ),
-      ],
+          const SizedBox(width: 6),
+          Text(
+            isComplete ? '프로필 완성' : '프로필 미완성',
+            style: AppTextStyles.caption1Medium.copyWith(
+              color: isComplete ? AppColors.primary : AppColors.textTertiary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

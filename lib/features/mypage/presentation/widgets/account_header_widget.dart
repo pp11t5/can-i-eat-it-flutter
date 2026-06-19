@@ -65,19 +65,22 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: 28, // Figma 1316:4994 — 아바타 직경 56px
-      backgroundColor: AppColors.surfaceSelected,
-      child: ClipOval(
-        child: imageUrl != null && imageUrl!.isNotEmpty
-            ? Image.network(
-                imageUrl!,
-                width: 56,
-                height: 56,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _InitialText(initial: _initial),
-              )
-            : _InitialText(initial: _initial),
+    return Semantics(
+      label: '${displayName ?? '사용자'} 프로필 사진',
+      child: CircleAvatar(
+        radius: 28, // Figma 1316:4994 — 아바타 직경 56px
+        backgroundColor: AppColors.surfaceSelected,
+        child: ClipOval(
+          child: imageUrl != null && imageUrl!.isNotEmpty
+              ? Image.network(
+                  imageUrl!,
+                  width: 56,
+                  height: 56,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _InitialText(initial: _initial),
+                )
+              : _InitialText(initial: _initial),
+        ),
       ),
     );
   }
