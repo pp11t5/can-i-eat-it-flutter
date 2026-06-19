@@ -110,6 +110,7 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
     _debounce?.cancel();
     final trimmed = value.trim();
     if (trimmed.isEmpty) return;
+    FocusScope.of(context).unfocus();
     _runSearch(trimmed);
   }
 
