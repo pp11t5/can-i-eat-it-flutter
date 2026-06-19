@@ -25,10 +25,25 @@ class AccountActionsWidget extends StatelessWidget {
       children: [
         const Divider(color: AppColors.divider, height: 1),
         const SizedBox(height: AppSpacing.sectionGap),
-        _ActionButton(
-          label: '로그아웃',
-          onTap: onLogout,
-          textColor: AppColors.textPrimary,
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: onLogout,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+              side: const BorderSide(color: AppColors.border),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+              ),
+            ),
+            icon: const Icon(Icons.logout, color: AppColors.textSecondary),
+            label: Text(
+              '로그아웃',
+              style: AppTextStyles.body1Medium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
         ),
         const SizedBox(height: AppSpacing.itemGap),
         _ActionButton(

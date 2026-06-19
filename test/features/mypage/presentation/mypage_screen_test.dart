@@ -109,6 +109,13 @@ void main() {
       expect(find.text('로그아웃'), findsOneWidget);
     });
 
+    testWidgets('로그아웃 버튼에 Icons.logout 아이콘이 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.logout), findsOneWidget);
+    });
+
     testWidgets('탈퇴하기 버튼이 표시된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await _settle(tester);
