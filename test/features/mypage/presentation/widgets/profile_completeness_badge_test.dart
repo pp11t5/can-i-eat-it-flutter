@@ -63,6 +63,21 @@ void main() {
     });
   });
 
+  group('ProfileCompletenessBadge — 완성도 퍼센트 텍스트', () {
+    testWidgets("'프로필 완성도' 텍스트가 렌더된다", (tester) async {
+      final repo = MockHealthProfileRepository(
+        initialProfile: HealthProfile.sampleGerd().copyWith(
+          conditions: ['GERD'],
+          triggerFoods: [],
+        ),
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      expect(find.textContaining('프로필 완성도'), findsOneWidget);
+    });
+  });
+
   group('ProfileCompletenessBadge — 진행률 바', () {
     testWidgets('completeness:60일 때 LinearProgressIndicator value가 0.6이다',
         (tester) async {

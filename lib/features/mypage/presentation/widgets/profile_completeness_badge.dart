@@ -42,6 +42,13 @@ class ProfileCompletenessBadge extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 8),
+          Text(
+            '프로필 완성도 $completeness%',
+            style: AppTextStyles.body2Regular.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 4),
           ClipRRect(
             borderRadius: BorderRadius.circular(3),
             child: LinearProgressIndicator(
