@@ -109,7 +109,7 @@ void main() {
       expect(find.text('판정 이력'), findsOneWidget);
 
       // 앱 버전
-      expect(find.text('v1.0.0'), findsOneWidget);
+      expect(find.text('버전 1.0.0 (1)'), findsOneWidget);
     });
   });
 

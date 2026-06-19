@@ -26,7 +26,7 @@ Future<void> _settle(WidgetTester tester) async {
 
 void main() {
   group('AppVersionWidget', () {
-    testWidgets('"v1.2.3" 텍스트가 표시된다', (tester) async {
+    testWidgets('"버전 1.2.3 (42)" 텍스트가 표시된다', (tester) async {
       final info = PackageInfo(
         appName: 'can_i_eat_it',
         packageName: 'com.example.can_i_eat_it',
@@ -37,7 +37,21 @@ void main() {
       await tester.pumpWidget(_wrap(info));
       await _settle(tester);
 
-      expect(find.text('v1.2.3'), findsOneWidget);
+      expect(find.text('버전 1.2.3 (42)'), findsOneWidget);
+    });
+
+    testWidgets('"버전 1.0.0 (1)" 텍스트가 렌더된다', (tester) async {
+      final info = PackageInfo(
+        appName: 'can_i_eat_it',
+        packageName: 'com.example.can_i_eat_it',
+        version: '1.0.0',
+        buildNumber: '1',
+        buildSignature: '',
+      );
+      await tester.pumpWidget(_wrap(info));
+      await _settle(tester);
+
+      expect(find.text('버전 1.0.0 (1)'), findsOneWidget);
     });
   });
 }
