@@ -33,7 +33,7 @@ String? resolveRedirect({
       // 허용해 가드가 pop 을 다시 온보딩으로 튕기지 않게 한다(온보딩은 재로그인 시 재개).
       return (location.startsWith('/onboarding') || location == '/login')
           ? null
-          : '/onboarding/condition';
+          : '/onboarding/intro';
 
     case SessionStatus.ready:
       if (location == '/splash' ||

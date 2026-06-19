@@ -76,12 +76,12 @@ void main() {
   });
 
   group('resolveRedirect — 온보딩 미완료(needsOnboarding)', () {
-    test('인증됐지만 온보딩 미완료면 /onboarding/condition 로 리다이렉트한다', () {
+    test('인증됐지만 온보딩 미완료면 /onboarding/intro 로 리다이렉트한다', () {
       final result = resolveRedirect(
         status: SessionStatus.needsOnboarding,
         location: '/',
       );
-      expect(result, '/onboarding/condition');
+      expect(result, '/onboarding/intro');
     });
 
     test('온보딩 미완료 상태에서 이미 /onboarding/condition 이면 리다이렉트하지 않는다', () {
@@ -100,13 +100,13 @@ void main() {
       expect(result, isNull);
     });
 
-    test('온보딩 미완료 상태에서 /terms 진입 시 /onboarding/condition 으로 리다이렉트한다', () {
+    test('온보딩 미완료 상태에서 /terms 진입 시 /onboarding/intro 으로 리다이렉트한다', () {
       // 1페이지 뒤로가기는 /login 으로 pop 하므로 /terms 는 허용하지 않는다.
       final result = resolveRedirect(
         status: SessionStatus.needsOnboarding,
         location: '/terms',
       );
-      expect(result, '/onboarding/condition');
+      expect(result, '/onboarding/intro');
     });
 
     test('온보딩 미완료 상태에서 /login 은 리다이렉트하지 않는다 (1페이지 뒤로가기 이탈 허용)', () {

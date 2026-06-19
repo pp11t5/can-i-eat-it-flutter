@@ -25,6 +25,7 @@ import 'package:can_i_eat_it/features/food_check/presentation/screens/favorites_
 import 'package:can_i_eat_it/features/verdict_history/presentation/screens/verdict_history_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_condition_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_frequency_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_intro_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_medications_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_triggers_screen.dart';
 
@@ -69,6 +70,11 @@ GoRouter appRouter(Ref ref) {
         path: '/terms',
         name: 'terms',
         builder: (context, state) => const TermsScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding/intro',
+        name: 'onboarding-intro',
+        builder: (context, state) => const OnboardingIntroScreen(),
       ),
       GoRoute(
         path: '/onboarding/condition',
