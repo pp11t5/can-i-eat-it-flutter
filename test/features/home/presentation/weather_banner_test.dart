@@ -5,12 +5,13 @@ import 'package:can_i_eat_it/features/home/presentation/widgets/weather_banner.d
 
 void main() {
   group('WeatherBanner', () {
-    testWidgets('"맑음 · 23°C" 텍스트가 표시된다', (tester) async {
+    testWidgets('"오늘의 날씨" + "23°C" 텍스트가 표시된다', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(home: Scaffold(body: WeatherBanner())),
       );
 
-      expect(find.text('맑음 · 23°C'), findsOneWidget);
+      expect(find.text('오늘의 날씨'), findsOneWidget);
+      expect(find.text('23°C'), findsOneWidget);
       expect(find.text('맑은 날엔 산책 후 가벼운 식사가 좋아요.'), findsOneWidget);
     });
 

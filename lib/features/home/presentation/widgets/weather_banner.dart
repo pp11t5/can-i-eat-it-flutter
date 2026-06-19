@@ -57,23 +57,36 @@ class WeatherBanner extends StatelessWidget {
             size: 28,
           ),
           const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '맑음 · 23°C',
-                style: AppTextStyles.body1Medium.copyWith(
-                  color: AppColors.textPrimary,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '오늘의 날씨',
+                      style: AppTextStyles.body1Medium.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      '23°C',
+                      style: AppTextStyles.body1Bold.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              Text(
-                _description,
-                style: AppTextStyles.body2Regular.copyWith(
-                  color: AppColors.textSecondary,
+                Text(
+                  _description,
+                  style: AppTextStyles.body2Regular.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

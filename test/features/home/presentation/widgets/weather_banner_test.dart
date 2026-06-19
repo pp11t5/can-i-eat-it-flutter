@@ -47,4 +47,15 @@ void main() {
       expect(find.byIcon(Icons.ac_unit), findsOneWidget);
     });
   });
+
+  group('WeatherBanner — 온도 표시', () {
+    testWidgets("'23°C'가 렌더된다", (tester) async {
+      await tester.pumpWidget(
+        _wrap(const WeatherBanner(weatherCondition: 'sunny')),
+      );
+      await tester.pump();
+
+      expect(find.text('23°C'), findsOneWidget);
+    });
+  });
 }
