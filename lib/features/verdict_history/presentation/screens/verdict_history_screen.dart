@@ -22,6 +22,7 @@ class VerdictHistoryScreen extends ConsumerStatefulWidget {
 
 class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
   String _selectedFilter = '전체';
+  String _searchQuery = '';
 
   static const _filters = ['전체', '권장', '주의', '위험'];
 
@@ -56,6 +57,28 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
       ),
       body: Column(
         children: [
+          // ── 검색 필드 ─────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              onChanged: (value) =>
+                  setState(() => _searchQuery = value.toLowerCase()),
+              decoration: InputDecoration(
+                hintText: '음식 이름으로 검색',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderSide: const BorderSide(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ),
+
           // ── 필터 칩 행 ────────────────────────────────────────────────
           _FilterChipRow(
             filters: _filters,
@@ -75,13 +98,15 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
                 ),
               ),
               data: (items) {
-                // 필터 적용
+                // 등급 필터 + 검색어 AND 조건
                 final verdictFilter = _filterToVerdict[_selectedFilter];
-                final filtered = verdictFilter == null
-                    ? items
-                    : items
-                        .where((item) => item.verdict == verdictFilter)
-                        .toList();
+                final filtered = items.where((item) {
+                  final verdictMatch = verdictFilter == null ||
+                      item.verdict == verdictFilter;
+                  final searchMatch = _searchQuery.isEmpty ||
+                      item.foodName.toLowerCase().contains(_searchQuery);
+                  return verdictMatch && searchMatch;
+                }).toList();
 
                 if (filtered.isEmpty) {
                   return Center(

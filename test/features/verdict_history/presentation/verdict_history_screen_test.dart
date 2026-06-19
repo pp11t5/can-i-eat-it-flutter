@@ -182,4 +182,31 @@ void main() {
       expect(find.text('6월 18일'), findsOneWidget);
     });
   });
+
+  group('VerdictHistoryScreen — 검색 기능', () {
+    testWidgets("'음식 이름으로 검색' 힌트 텍스트가 렌더된다", (tester) async {
+      final repo = MockVerdictHistoryRepository();
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      expect(find.widgetWithText(TextField, '음식 이름으로 검색'), findsOneWidget);
+    });
+
+    testWidgets("검색어 '두' 입력 시 '두부'가 표시되고 '커피'는 숨겨진다", (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [
+          _item('두부', 'safe'),
+          _item('커피', 'avoid'),
+        ],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      await tester.enterText(find.byType(TextField).first, '두');
+      await _settle(tester);
+
+      expect(find.text('두부'), findsOneWidget);
+      expect(find.text('커피'), findsNothing);
+    });
+  });
 }
