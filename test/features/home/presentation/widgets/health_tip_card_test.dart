@@ -18,7 +18,7 @@ void main() {
       await tester.pumpWidget(_wrap());
       await tester.pump();
 
-      await tester.tap(find.byType(GestureDetector));
+      await tester.tap(find.byType(GestureDetector).first);
       await tester.pumpAndSettle();
 
       expect(

@@ -6,10 +6,15 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 /// 홈 화면 건강 팁 카드 (목 데이터).
 ///
 /// 아이콘 + 제목 Row + 내용 텍스트 구조.
-/// 위젯 생성 시 [DateTime.now().millisecondsSinceEpoch] % 5 인덱스로 팁을 선택한다.
-class HealthTipCard extends StatelessWidget {
+/// 우상단 새로고침 버튼 탭 시 다음 팁으로 순환한다.
+class HealthTipCard extends StatefulWidget {
   const HealthTipCard({super.key});
 
+  @override
+  State<HealthTipCard> createState() => _HealthTipCardState();
+}
+
+class _HealthTipCardState extends State<HealthTipCard> {
   static const _tips = [
     '식사 후 바로 눕지 않고 30분 이상 앉아 있으면 역류 증상을 줄일 수 있어요.',
     '물은 식사 중보다 식사 30분 전이나 후에 마시는 것이 소화에 도움이 돼요.',
@@ -18,8 +23,13 @@ class HealthTipCard extends StatelessWidget {
     '카페인과 알코올은 하부식도괄약근을 느슨하게 해 역류를 유발할 수 있어요.',
   ];
 
-  String get _tip =>
-      _tips[DateTime.now().millisecondsSinceEpoch % _tips.length];
+  int _tipIndex = DateTime.now().millisecondsSinceEpoch % _tips.length;
+
+  String get _tip => _tips[_tipIndex];
+
+  void _nextTip() {
+    setState(() => _tipIndex = (_tipIndex + 1) % _tips.length);
+  }
 
   void _showBottomSheet(BuildContext context) {
     showModalBottomSheet<void>(
@@ -54,42 +64,52 @@ class HealthTipCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => _showBottomSheet(context),
       child: Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 아이콘 + 제목 Row
-          Row(
-            children: [
-              const Icon(
-                Icons.lightbulb_outline,
-                size: 24,
-                color: Colors.amber,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '오늘의 건강 팁',
-                style: AppTextStyles.body1Bold.copyWith(
-                  color: AppColors.textPrimary,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 아이콘 + 제목 Row + 새로고침 버튼
+            Row(
+              children: [
+                const Icon(
+                  Icons.lightbulb_outline,
+                  size: 24,
+                  color: Colors.amber,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          // 내용 텍스트 (5개 팁 중 하나를 무작위 선택)
-          Text(
-            _tip,
-            style: AppTextStyles.body2Regular.copyWith(
-              color: AppColors.textSecondary,
+                const SizedBox(width: 8),
+                Text(
+                  '오늘의 건강 팁',
+                  style: AppTextStyles.body1Bold.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.refresh),
+                  color: AppColors.textSecondary,
+                  iconSize: 20,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  tooltip: '다른 팁 보기',
+                  onPressed: _nextTip,
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
+            const SizedBox(height: 8),
+            // 내용 텍스트
+            Text(
+              _tip,
+              style: AppTextStyles.body2Regular.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
