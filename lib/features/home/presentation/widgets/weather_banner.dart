@@ -42,7 +42,9 @@ class WeatherBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: () => _showWeatherDetailSheet(context),
+      child: Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -90,6 +92,27 @@ class WeatherBanner extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
+}
+
+void _showWeatherDetailSheet(BuildContext context) {
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (ctx) => const Padding(
+      padding: EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '날씨 식이 안내',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          SizedBox(height: 8),
+          Text('오늘 날씨에 맞는 음식 섭취를 권장합니다.'),
+        ],
+      ),
+    ),
+  );
 }

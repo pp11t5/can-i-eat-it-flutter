@@ -55,4 +55,19 @@ void main() {
       expect(find.byIcon(Icons.wb_sunny), findsOneWidget);
     });
   });
+
+  group('WeatherBanner — 날씨 식이 안내 바텀시트', () {
+    testWidgets("배너 탭 시 '날씨 식이 안내' 텍스트가 바텀시트에 표시된다", (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: WeatherBanner()),
+        ),
+      );
+
+      await tester.tap(find.byType(WeatherBanner));
+      await tester.pumpAndSettle();
+
+      expect(find.text('날씨 식이 안내'), findsOneWidget);
+    });
+  });
 }
