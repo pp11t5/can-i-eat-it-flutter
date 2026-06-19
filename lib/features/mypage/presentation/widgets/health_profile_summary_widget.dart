@@ -31,20 +31,20 @@ class HealthProfileSummaryWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (profile!.conditions.isNotEmpty)
-          _ProfileSection(
-            label: '질환',
-            items: profile!.conditions,
-            chipColor: AppColors.surfaceSelected,
-            chipTextColor: AppColors.primary,
-          ),
-        if (profile!.triggerFoods.isNotEmpty)
-          _ProfileSection(
-            label: '트리거 음식',
-            items: profile!.triggerFoods,
-            chipColor: const Color(0xFFFFF3F3),
-            chipTextColor: AppColors.danger,
-          ),
+        // 질환: 빈 목록이어도 섹션 표시 (빈 목록 → '없음')
+        _ProfileSection(
+          label: '질환',
+          items: profile!.conditions,
+          chipColor: AppColors.surfaceSelected,
+          chipTextColor: AppColors.primary,
+        ),
+        // 트리거 음식: 빈 목록이어도 섹션 표시 (빈 목록 → '없음')
+        _ProfileSection(
+          label: '트리거 음식',
+          items: profile!.triggerFoods,
+          chipColor: const Color(0xFFFFF3F3),
+          chipTextColor: AppColors.danger,
+        ),
         if (profile!.medications.isNotEmpty)
           _ProfileSection(
             label: '복용약',
@@ -102,17 +102,25 @@ class _ProfileSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: items
-                .map((item) => _Chip(
-                      label: item,
-                      bgColor: chipColor,
-                      textColor: chipTextColor,
-                    ))
-                .toList(),
-          ),
+          if (items.isEmpty)
+            Text(
+              '없음',
+              style: AppTextStyles.body2Regular.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: items
+                  .map((item) => _Chip(
+                        label: item,
+                        bgColor: chipColor,
+                        textColor: chipTextColor,
+                      ))
+                  .toList(),
+            ),
         ],
       ),
     );
