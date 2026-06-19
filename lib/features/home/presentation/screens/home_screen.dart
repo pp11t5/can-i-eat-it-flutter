@@ -8,7 +8,9 @@ import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/core/prefs/first_visit_prefs.dart';
 import 'package:can_i_eat_it/features/home/presentation/providers/home_providers.dart';
+import 'package:can_i_eat_it/features/food_check/data/recent_food_providers.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_search_bar.dart';
+import 'package:can_i_eat_it/features/home/presentation/widgets/recent_search_chip.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/today_meal_summary_widget.dart';
 
@@ -74,6 +76,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
               // ── 2. 검색 바 ────────────────────────────────────────────
               HomeSearchBar(onTap: () => context.push('/check')),
+              const SizedBox(height: AppSpacing.itemGap),
+
+              // ── 2-1. 최근 검색어 섹션 ─────────────────────────────────
+              _RecentSearchSection(),
               const SizedBox(height: AppSpacing.itemGap),
 
               // ── 3. 제안 칩 행 — Figma 1207:6604 단일 행 수평 스크롤 ────────
@@ -270,6 +276,51 @@ class _MyDictionaryCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── 최근 검색어 섹션 ───────────────────────────────────────────────────────────
+
+class _RecentSearchSection extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final recentAsync = ref.watch(recentFoodControllerProvider);
+
+    return recentAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (recentList) {
+        if (recentList.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '최근 검색',
+              style: AppTextStyles.body1Bold.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.itemGap),
+            Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: recentList
+                  .map(
+                    (food) => RecentSearchChip(
+                      label: food.name,
+                      onSearch: () => context
+                          .push('/check?initialQuery=${Uri.encodeComponent(food.name)}'),
+                      onDelete: () => ref
+                          .read(recentFoodControllerProvider.notifier)
+                          .removeRecent(food.foodExternalId),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
+        );
+      },
     );
   }
 }
