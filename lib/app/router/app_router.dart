@@ -20,6 +20,7 @@ import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/timeline_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/edit_profile_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
+import 'package:can_i_eat_it/app/observers/route_observer.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/favorites_screen.dart';
 import 'package:can_i_eat_it/features/verdict_history/presentation/screens/verdict_history_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_condition_screen.dart';
@@ -48,6 +49,7 @@ GoRouter appRouter(Ref ref) {
   return GoRouter(
     initialLocation: '/splash',
     refreshListenable: notifier,
+    observers: [routeObserver],
     redirect: (context, state) {
       final status = ref.read(sessionStatusProvider);
       return resolveRedirect(status: status, location: state.matchedLocation);

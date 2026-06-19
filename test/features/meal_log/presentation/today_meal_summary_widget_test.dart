@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:can_i_eat_it/app/observers/route_observer.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
@@ -254,6 +255,59 @@ void main() {
 
       // /meal-log stub 텍스트 확인
       expect(find.text('meal-log stub'), findsOneWidget);
+    });
+
+    testWidgets('didPopNext: 다른 라우트에서 홈으로 돌아오면 provider가 invalidate된다',
+        (tester) async {
+      // Navigator + RouteObserver를 사용하는 테스트.
+      // ProviderScope는 단일 루트에만 두어 scoped provider 충돌 방지.
+      final repo = MockMealRepository.empty();
+      int buildCount = 0;
+
+      final testRouter = GoRouter(
+        observers: [routeObserver],
+        initialLocation: '/',
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (_, __) => Scaffold(
+              body: Builder(builder: (ctx) {
+                buildCount++;
+                return const TodayMealSummaryWidget();
+              }),
+            ),
+          ),
+          GoRoute(
+            path: '/other',
+            builder: (_, __) =>
+                const Scaffold(body: Text('other screen')),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            // ignore: scoped_providers_should_specify_dependencies
+            mealRepositoryProvider.overrideWithValue(repo),
+          ],
+          child: MaterialApp.router(routerConfig: testRouter),
+        ),
+      );
+      await _settle(tester);
+
+      final countBefore = buildCount;
+
+      // /other로 push
+      testRouter.push('/other');
+      await _settle(tester);
+
+      // /other에서 pop → 홈으로 복귀 → didPopNext 호출
+      testRouter.pop();
+      await _settle(tester);
+
+      // didPopNext 후 provider invalidate → widget rebuild
+      expect(buildCount, greaterThan(countBefore));
     });
   });
 }

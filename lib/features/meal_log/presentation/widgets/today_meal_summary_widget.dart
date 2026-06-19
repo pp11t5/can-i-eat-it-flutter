@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:can_i_eat_it/app/observers/route_observer.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
@@ -13,11 +14,44 @@ import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 /// 오늘(KST) 기준으로 [TimelineController]를 watch해
 /// 기록된 식사 수·마지막 식사 시간을 표시한다.
 /// "더 보기" 버튼 탭 시 `/meal-log` 라우트로 push한다.
-class TodayMealSummaryWidget extends ConsumerWidget {
+///
+/// [RouteAware] mixin을 통해 다른 화면에서 홈으로 복귀할 때
+/// `timelineControllerProvider`를 invalidate해 실시간 갱신한다.
+class TodayMealSummaryWidget extends ConsumerStatefulWidget {
   const TodayMealSummaryWidget({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TodayMealSummaryWidget> createState() =>
+      _TodayMealSummaryWidgetState();
+}
+
+class _TodayMealSummaryWidgetState extends ConsumerState<TodayMealSummaryWidget>
+    with RouteAware {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route != null) {
+      routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  /// 다른 화면에서 이 화면(홈)으로 pop해 돌아올 때 호출.
+  /// provider를 invalidate해 오늘의 식사 데이터를 갱신한다.
+  @override
+  void didPopNext() {
+    final today = nowKst();
+    ref.invalidate(timelineControllerProvider(today));
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final today = nowKst();
     final timelineAsync = ref.watch(timelineControllerProvider(today));
 
