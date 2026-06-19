@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -9,6 +11,7 @@ import 'package:can_i_eat_it/app/widgets/app_button.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
+import 'package:can_i_eat_it/features/mypage/presentation/widgets/profile_image_picker.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 
 /// 마이페이지 프로필 편집 화면 (`/mypage/edit`).
@@ -25,6 +28,7 @@ class EditProfileScreen extends ConsumerStatefulWidget {
 
 class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   // ── 편집 로컬 state ──────────────────────────────────────────────────────
+  File? _selectedImage;
   List<String> _conditions = [];
   List<String> _triggerFoods = [];
   String? _customTriggers;
@@ -100,6 +104,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         allergies: _allergies,
       );
       await ref.read(healthProfileControllerProvider.notifier).submit(updated);
+      if (mounted && _selectedImage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('프로필 이미지가 업데이트됐어요 (서버 연동 준비 중)'),
+          ),
+        );
+      }
       if (mounted) Navigator.of(context).maybePop();
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -170,6 +181,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const SizedBox(height: AppSpacing.sectionGap),
+
+                        // ── 프로필 이미지 ─────────────────────────────────────
+                        Center(
+                          child: ProfileImagePicker(
+                            image: _selectedImage,
+                            onImageSelected: (file) {
+                              setState(() => _selectedImage = file);
+                            },
+                          ),
+                        ),
                         const SizedBox(height: AppSpacing.sectionGap),
 
                         // ── 질환 (단일 선택) ──────────────────────────────────
