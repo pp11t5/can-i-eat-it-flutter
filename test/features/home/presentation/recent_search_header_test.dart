@@ -74,7 +74,10 @@ void main() {
       await tester.pumpWidget(_wrap());
       await _settle(tester);
 
-      await tester.tap(find.text('전체보기'));
+      // 홈 화면 콘텐츠가 길어져 스크롤 필요
+      await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -300));
+      await _settle(tester);
+      await tester.tap(find.text('전체보기').first);
       await _settle(tester);
 
       expect(_lastLocation, '/check');

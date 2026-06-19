@@ -12,6 +12,7 @@ import 'package:can_i_eat_it/features/food_check/data/recent_food_providers.dart
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_empty_state_widget.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_search_bar.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/health_tip_card.dart';
+import 'package:can_i_eat_it/features/home/presentation/widgets/daily_quote_widget.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/notice_banner.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/weather_banner.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/recent_search_chip.dart';
@@ -105,6 +106,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
               // ── 1-2. 건강 팁 카드 (목 데이터) ────────────────────────────
               const HealthTipCard(),
+              const SizedBox(height: AppSpacing.itemGap),
+
+              // ── 1-3. 오늘의 한마디 ──────────────────────────────────────
+              const DailyQuoteWidget(),
               const SizedBox(height: AppSpacing.itemGap),
 
               // ── 2. 검색 바 ────────────────────────────────────────────
