@@ -145,7 +145,8 @@ void main() {
       await tester.tap(find.text('전체 삭제'));
       await tester.pumpAndSettle();
 
-      expect(find.text('검색 기록을 삭제하시겠어요?'), findsOneWidget);
+      expect(find.text('최근 검색 삭제'), findsOneWidget);
+      expect(find.text('최근 검색 기록을 모두 삭제하시겠어요?'), findsOneWidget);
     });
 
     testWidgets('다이얼로그에서 삭제하기 탭 시 기록이 전부 사라진다', (tester) async {
@@ -161,10 +162,10 @@ void main() {
       await tester.tap(find.text('전체 삭제'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('삭제하기'));
+      await tester.tap(find.text('삭제'));
       await tester.pumpAndSettle();
 
-      expect(find.text('검색 기록을 삭제하시겠어요?'), findsNothing);
+      expect(find.text('최근 검색 기록을 모두 삭제하시겠어요?'), findsNothing);
       expect(find.text('아직 검색 기록이 없어요'), findsOneWidget);
     });
 
