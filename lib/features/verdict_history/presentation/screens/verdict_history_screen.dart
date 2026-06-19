@@ -111,11 +111,35 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
                     ),
                   );
                 }
+                // 날짜별 그룹화
+                final grouped = _groupByDate(filtered);
+                final dateKeys = grouped.keys.toList();
+
+                // 각 날짜 헤더 + 항목을 단일 슬롯 목록으로 펼침
+                final slots = <_HistorySlot>[];
+                for (final dateKey in dateKeys) {
+                  slots.add(_HistorySlot.header(dateKey));
+                  for (final item in grouped[dateKey]!) {
+                    slots.add(_HistorySlot.item(item));
+                  }
+                }
+
                 return ListView.builder(
-                  itemCount: filtered.length,
+                  itemCount: slots.length,
                   itemBuilder: (context, index) {
-                    final item = filtered[index];
-                    // 원본 인덱스 계산 (삭제 시 필요)
+                    final slot = slots[index];
+                    if (slot.isHeader) {
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                        child: Text(
+                          slot.dateLabel!,
+                          style: AppTextStyles.body2Regular.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      );
+                    }
+                    final item = slot.item!;
                     final originalIndex = items.indexOf(item);
                     return Dismissible(
                       key: ValueKey(item.foodName),
@@ -143,6 +167,41 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// 날짜별 그룹화 헬퍼
+// ---------------------------------------------------------------------------
+
+/// 이력 항목을 날짜(M월 D일) 기준으로 그룹화한다.
+///
+/// 반환 Map의 키는 `'M월 D일'` 포맷 문자열, 값은 해당 날짜의 항목 목록.
+/// 순서는 items의 원본 순서를 유지한다(최신순 정렬은 상위 레이어 책임).
+Map<String, List<VerdictHistoryItem>> _groupByDate(
+  List<VerdictHistoryItem> items,
+) {
+  final result = <String, List<VerdictHistoryItem>>{};
+  for (final item in items) {
+    final local = item.checkedAt.toLocal();
+    final key = '${local.month}월 ${local.day}일';
+    result.putIfAbsent(key, () => []).add(item);
+  }
+  return result;
+}
+
+/// ListView 슬롯 — 날짜 헤더 또는 이력 항목.
+class _HistorySlot {
+  const _HistorySlot._({this.dateLabel, this.item})
+      : isHeader = dateLabel != null;
+
+  factory _HistorySlot.header(String label) =>
+      _HistorySlot._(dateLabel: label);
+  factory _HistorySlot.item(VerdictHistoryItem item) =>
+      _HistorySlot._(item: item);
+
+  final bool isHeader;
+  final String? dateLabel;
+  final VerdictHistoryItem? item;
 }
 
 // ---------------------------------------------------------------------------

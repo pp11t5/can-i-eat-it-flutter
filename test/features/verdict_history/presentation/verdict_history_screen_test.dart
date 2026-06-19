@@ -157,4 +157,29 @@ void main() {
       expect(find.text('된장찌개'), findsOneWidget);
     });
   });
+
+  group('VerdictHistoryScreen — 날짜별 그룹화', () {
+    testWidgets('서로 다른 날짜의 항목 2개가 있을 때 각 날짜 헤더가 표시된다',
+        (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [
+          VerdictHistoryItem(
+            foodName: '두부',
+            verdict: 'safe',
+            checkedAt: DateTime(2026, 6, 17, 12, 0),
+          ),
+          VerdictHistoryItem(
+            foodName: '커피',
+            verdict: 'avoid',
+            checkedAt: DateTime(2026, 6, 18, 9, 0),
+          ),
+        ],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      expect(find.text('6월 17일'), findsOneWidget);
+      expect(find.text('6월 18일'), findsOneWidget);
+    });
+  });
 }
