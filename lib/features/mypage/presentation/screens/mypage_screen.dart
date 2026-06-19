@@ -134,7 +134,29 @@ class MypageScreen extends ConsumerWidget {
                   const Divider(color: AppColors.divider, height: 1),
                   const SizedBox(height: AppSpacing.sectionGap),
 
-                  // ── ⑤ 판정 이력 ──────────────────────────────────────
+                  // ── ⑤ 공지사항 ──────────────────────────────────────
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(
+                      Icons.campaign_outlined,
+                      color: AppColors.textPrimary,
+                    ),
+                    title: Text(
+                      '공지사항',
+                      style: AppTextStyles.body1Medium
+                          .copyWith(color: AppColors.textPrimary),
+                    ),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: AppColors.textSecondary,
+                    ),
+                    onTap: () {},
+                  ),
+
+                  const Divider(color: AppColors.divider, height: 1),
+                  const SizedBox(height: AppSpacing.sectionGap),
+
+                  // ── ⑥ 판정 이력 ──────────────────────────────────────
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(

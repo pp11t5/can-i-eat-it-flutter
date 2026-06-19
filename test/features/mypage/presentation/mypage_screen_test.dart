@@ -170,4 +170,13 @@ void main() {
       expect(find.byType(Divider), findsWidgets);
     });
   });
+
+  group('MypageScreen — 공지사항 메뉴', () {
+    testWidgets("'공지사항' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.text('공지사항'), findsOneWidget);
+    });
+  });
 }
