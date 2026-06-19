@@ -6,25 +6,32 @@ import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dar
 ///
 /// [buildShareText] 순수 함수로 공유 텍스트를 생성하고,
 /// [shareVerdict] 로 OS 네이티브 공유 시트를 연다.
-const String _appLink = 'https://can-i-eat-it.app';
+/// 등급 한글명 (공유용).
+String _levelLabel(VerdictLevel level) => switch (level) {
+      VerdictLevel.recommend => '권장',
+      VerdictLevel.caution => '주의',
+      VerdictLevel.risk => '위험',
+      VerdictLevel.unknown => '확인 어려움',
+    };
 
 /// 공유 텍스트 생성.
 ///
 /// 포맷:
 /// ```
-/// [먹어도 돼?] {foodName} 판정 결과
-/// 판정: {level.label}
-///
-/// 내 건강에 맞는 음식을 확인해보세요.
-/// https://can-i-eat-it.app
+/// 🍽️ {foodName} 판정 결과
+/// 등급: {levelLabel}
+/// 근거: {items.first.body | "정보 없음"}
+/// #먹어도돼 #건강식단
 /// ```
 String buildShareText(EatVerdict verdict) {
+  final levelLabel = _levelLabel(verdict.level);
+  final basis = verdict.items.isNotEmpty ? verdict.items.first.body : '정보 없음';
+
   final buffer = StringBuffer()
-    ..writeln('[먹어도 돼?] ${verdict.foodName} 판정 결과')
-    ..writeln('판정: ${verdict.level.label}')
-    ..writeln()
-    ..writeln('내 건강에 맞는 음식을 확인해보세요.')
-    ..write(_appLink);
+    ..writeln('🍽️ ${verdict.foodName} 판정 결과')
+    ..writeln('등급: $levelLabel')
+    ..writeln('근거: $basis')
+    ..write('#먹어도돼 #건강식단');
 
   return buffer.toString();
 }
