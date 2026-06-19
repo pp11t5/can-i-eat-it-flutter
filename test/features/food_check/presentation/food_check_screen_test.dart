@@ -208,8 +208,19 @@ void main() {
       await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
 
-      expect(find.text('두부'), findsWidgets);
-      expect(find.text('두부조림'), findsOneWidget);
+      // RichText로 렌더되므로 toPlainText()로 확인
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is RichText && w.text.toPlainText().contains('두부'),
+        ),
+        findsWidgets,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is RichText && w.text.toPlainText() == '두부조림',
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('빈 결과 → 직접분석 CTA 카드(찾는 음식이 없어요) 렌더', (tester) async {
@@ -255,8 +266,11 @@ void main() {
       await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
 
-      // 결과 셀 탭
-      await tester.tap(find.text('두부').last);
+      // 결과 셀 탭 (음식 이름이 RichText로 렌더되므로 toPlainText로 찾기)
+      final cardRichText = find.byWidgetPredicate(
+        (w) => w is RichText && w.text.toPlainText() == '두부',
+      );
+      await tester.tap(cardRichText.first);
       await tester.pumpAndSettle();
 
       // /verdict 라우트로 이동했음을 확인
@@ -297,6 +311,41 @@ void main() {
       await repo.addRecent('f-1');
       final results = await repo.recentSearches();
       expect(results.map((r) => r.foodExternalId), contains('f-1'));
+    });
+  });
+
+  group('FoodCheckScreen — 검색어 하이라이트', () {
+    testWidgets('검색어 "두"로 검색 시 "두부" 결과에서 "두" 부분이 FontWeight.bold로 렌더된다',
+        (tester) async {
+      final repo = MockFoodRepository.withSearchResults([
+        _foodSummary('f-1', '두부'),
+      ]);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '두');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+
+      // RichText 위젯이 렌더된다
+      final richTexts = tester.widgetList<RichText>(find.byType(RichText));
+      // '두부' 결과 카드의 RichText 중 bold TextSpan이 있는지 확인
+      final hasBoldSpan = richTexts.any((rt) {
+        final root = rt.text;
+        if (root is TextSpan && root.children != null) {
+          return root.children!.any((span) {
+            if (span is TextSpan) {
+              return span.style?.fontWeight == FontWeight.bold &&
+                  span.text == '두';
+            }
+            return false;
+          });
+        }
+        return false;
+      });
+      expect(hasBoldSpan, isTrue);
     });
   });
 }

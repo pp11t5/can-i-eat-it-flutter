@@ -429,7 +429,11 @@ class _ResultList extends StatelessWidget {
           final food = items[index - 1];
           return Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: _ResultCard(food: food, onTap: () => onTap(food)),
+            child: _ResultCard(
+              food: food,
+              query: query,
+              onTap: () => onTap(food),
+            ),
           );
         }
         // 마지막: 직접분석 CTA 카드 (365-1849) — 결과 있든 없든 항상 표시
@@ -449,10 +453,46 @@ class _ResultList extends StatelessWidget {
 /// - 이름 body1Bold/textPrimary
 /// - chevron 없음, category 서브텍스트 없음
 class _ResultCard extends StatelessWidget {
-  const _ResultCard({required this.food, required this.onTap});
+  const _ResultCard({
+    required this.food,
+    required this.onTap,
+    this.query = '',
+  });
 
   final FoodSummary food;
   final VoidCallback onTap;
+  final String query;
+
+  /// 음식 이름에서 검색어와 일치하는 부분을 굵게 강조한 TextSpan 목록을 반환한다.
+  List<TextSpan> _buildSpans(TextStyle baseStyle) {
+    final name = food.name;
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) {
+      return [TextSpan(text: name, style: baseStyle)];
+    }
+    final spans = <TextSpan>[];
+    int start = 0;
+    final lowerName = name.toLowerCase();
+    while (true) {
+      final idx = lowerName.indexOf(q, start);
+      if (idx == -1) {
+        spans.add(TextSpan(text: name.substring(start), style: baseStyle));
+        break;
+      }
+      if (idx > start) {
+        spans.add(TextSpan(text: name.substring(start, idx), style: baseStyle));
+      }
+      spans.add(TextSpan(
+        text: name.substring(idx, idx + q.length),
+        style: baseStyle.copyWith(
+          fontWeight: FontWeight.bold,
+          color: AppColors.primary,
+        ),
+      ));
+      start = idx + q.length;
+    }
+    return spans;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -485,10 +525,13 @@ class _ResultCard extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.cardPadding),
             Expanded(
-              child: Text(
-                food.name,
-                style: AppTextStyles.body1Bold.copyWith(
-                  color: AppColors.textPrimary,
+              child: RichText(
+                text: TextSpan(
+                  children: _buildSpans(
+                    AppTextStyles.body1Bold.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
                 ),
               ),
             ),
