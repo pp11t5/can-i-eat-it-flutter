@@ -765,7 +765,7 @@ class _HistoryRow extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: onRemove,
+            onTap: () => _showDeleteConfirmDialog(context, onRemove),
             behavior: HitTestBehavior.opaque,
             child: SvgPicture.asset(
               'assets/figma_extracted/icon_close_small.svg',
@@ -781,6 +781,36 @@ class _HistoryRow extends StatelessWidget {
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// 검색어 삭제 확인 다이얼로그
+// ---------------------------------------------------------------------------
+
+Future<void> _showDeleteConfirmDialog(
+  BuildContext context,
+  VoidCallback onDelete,
+) async {
+  await showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('검색어 삭제'),
+      content: const Text('이 검색어를 삭제할까요?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('취소'),
+        ),
+        TextButton(
+          onPressed: () {
+            onDelete();
+            Navigator.pop(ctx);
+          },
+          child: const Text('삭제'),
+        ),
+      ],
+    ),
+  );
 }
 
 // ---------------------------------------------------------------------------

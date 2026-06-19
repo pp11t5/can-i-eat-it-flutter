@@ -125,6 +125,11 @@ void main() {
       await tester.tap(closeInRow.first);
       await tester.pumpAndSettle();
 
+      // 삭제 확인 다이얼로그가 표시됨 — '삭제' 버튼 탭
+      expect(find.text('검색어 삭제'), findsOneWidget);
+      await tester.tap(find.text('삭제'));
+      await tester.pumpAndSettle();
+
       expect(find.text('된장찌개'), findsNothing);
       expect(find.text('오렌지주스'), findsOneWidget);
     });
@@ -346,6 +351,61 @@ void main() {
         return false;
       });
       expect(hasBoldSpan, isTrue);
+    });
+  });
+
+  group('FoodCheckScreen — 검색어 삭제 확인 다이얼로그', () {
+    testWidgets('삭제 버튼 탭 시 "검색어 삭제" 다이얼로그 타이틀이 표시된다',
+        (tester) async {
+      final repo = MockFoodRepository.withRecent([
+        _recentFood('r-1', '된장찌개'),
+      ]);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      final rowFinder = find.ancestor(
+        of: find.text('된장찌개'),
+        matching: find.byType(Row),
+      );
+      final closeInRow = find.descendant(
+        of: rowFinder.first,
+        matching: find.byType(SvgPicture),
+      );
+      await tester.tap(closeInRow.first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('검색어 삭제'), findsOneWidget);
+    });
+
+    testWidgets("'취소' 탭 시 다이얼로그가 닫힌다", (tester) async {
+      final repo = MockFoodRepository.withRecent([
+        _recentFood('r-1', '된장찌개'),
+      ]);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      final rowFinder = find.ancestor(
+        of: find.text('된장찌개'),
+        matching: find.byType(Row),
+      );
+      final closeInRow = find.descendant(
+        of: rowFinder.first,
+        matching: find.byType(SvgPicture),
+      );
+      await tester.tap(closeInRow.first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('검색어 삭제'), findsOneWidget);
+
+      await tester.tap(find.text('취소'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('검색어 삭제'), findsNothing);
+      expect(find.text('된장찌개'), findsOneWidget);
     });
   });
 }
