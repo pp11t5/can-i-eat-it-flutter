@@ -39,28 +39,14 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('VerdictLoadingScreen', () {
-    testWidgets('스피너와 닉네임 텍스트를 렌더한다', (tester) async {
+    testWidgets('스피너와 로딩 텍스트를 렌더한다', (tester) async {
       await tester.pumpWidget(
-        _wrap(const VerdictLoadingScreen(nickname: '철수')),
+        _wrap(const VerdictLoadingScreen()),
       );
       await tester.pump();
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.text('철수님에게 맞는 음식 분석 중이에요'), findsOneWidget);
-    });
-
-    testWidgets('닉네임 없을 때 기본값 "회원"을 사용한다', (tester) async {
-      await tester.pumpWidget(_wrap(const VerdictLoadingScreen()));
-      await tester.pump();
-
-      expect(find.text('회원님에게 맞는 음식 분석 중이에요'), findsOneWidget);
-    });
-
-    testWidgets('빈 닉네임일 때 기본값 "회원"을 사용한다', (tester) async {
-      await tester.pumpWidget(_wrap(const VerdictLoadingScreen(nickname: '')));
-      await tester.pump();
-
-      expect(find.text('회원님에게 맞는 음식 분석 중이에요'), findsOneWidget);
+      expect(find.text('내 몸에 맞는지\n확인하고 있어요'), findsOneWidget);
     });
   });
 

@@ -5,21 +5,9 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 
 /// 판정 로딩 화면 (Figma node 554-5332).
 ///
-/// 배경 흰색, 화면 중앙에 스피너 + "○○님에게 맞는 음식 분석 중이에요" 텍스트.
-///
-/// 파라미터:
-/// - [nickname]: 사용자 닉네임. null·빈 문자열이면 기본 문구("회원")로 표시.
+/// 배경 흰색, 화면 중앙에 스피너 + 로딩 안내 텍스트.
 class VerdictLoadingScreen extends StatelessWidget {
-  const VerdictLoadingScreen({super.key, this.nickname});
-
-  /// 표시할 사용자 닉네임 (선택). null이면 기본값 "회원" 사용.
-  final String? nickname;
-
-  String get _displayName {
-    final name = nickname?.trim();
-    if (name == null || name.isEmpty) return '회원';
-    return name;
-  }
+  const VerdictLoadingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +30,7 @@ class VerdictLoadingScreen extends StatelessWidget {
             // "○○님에게 맞는 음식 분석 중이에요"
             // Body_1(M): Pretendard Medium 16, lineHeight 160%, color #10111A
             Text(
-              '$_displayName님에게 맞는 음식 분석 중이에요',
+              '내 몸에 맞는지\n확인하고 있어요',
               style: AppTextStyles.body1Medium.copyWith(
                 color: AppColors.textPrimary,
               ),

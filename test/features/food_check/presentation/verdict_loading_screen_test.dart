@@ -5,6 +5,14 @@ import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_lo
 
 void main() {
   group('VerdictLoadingScreen — 스켈레톤', () {
+    testWidgets('로딩 안내 텍스트가 표시된다', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: VerdictLoadingScreen()),
+      );
+
+      expect(find.text('내 몸에 맞는지\n확인하고 있어요'), findsOneWidget);
+    });
+
     testWidgets('스켈레톤 블록(color 0xFFE0E0E0)이 3개 표시된다', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(home: VerdictLoadingScreen()),
