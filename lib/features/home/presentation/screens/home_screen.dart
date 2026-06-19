@@ -11,6 +11,7 @@ import 'package:can_i_eat_it/features/home/presentation/providers/home_providers
 import 'package:can_i_eat_it/features/food_check/data/recent_food_providers.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_empty_state_widget.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_search_bar.dart';
+import 'package:can_i_eat_it/features/home/presentation/widgets/weather_banner.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/recent_search_chip.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/today_meal_summary_widget.dart';
@@ -74,6 +75,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // ── 1. 인사말 블록 ─────────────────────────────────────────
               // 캐릭터 하단이 검색바 상단과 맞붙도록 gap 0 (Figma 절대배치 overlap).
               const _GreetingBlock(),
+              const SizedBox(height: 8),
+
+              // ── 1-1. 날씨 배너 (목 데이터) ──────────────────────────────
+              const WeatherBanner(),
+              const SizedBox(height: AppSpacing.itemGap),
 
               // ── 2. 검색 바 ────────────────────────────────────────────
               HomeSearchBar(onTap: () => context.push('/check')),
