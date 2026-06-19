@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -43,23 +45,39 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
   bool _historyAdded = false;
 
   /// [VerdictLevel] → 이력 저장용 verdict 문자열.
+  ///
+  /// unknown은 이 메서드에 도달하기 전에 early-return되므로 매핑 불필요.
   String _verdictString(VerdictLevel level) => switch (level) {
         VerdictLevel.recommend => 'safe',
         VerdictLevel.caution => 'caution',
         VerdictLevel.risk => 'avoid',
-        VerdictLevel.unknown => 'unknown',
+        VerdictLevel.unknown => 'unknown', // 실제론 저장 전 필터됨
       };
 
-  void _maybeAddHistory(EatVerdict verdict) {
+  Future<void> _maybeAddHistory(EatVerdict verdict) async {
+    // unknown 판정은 판정 불가 상태이므로 이력에 저장하지 않는다.
+    if (verdict.level == VerdictLevel.unknown) return;
+
+    // foodName이 비어있으면 idle 상태이므로 저장 불필요.
     if (_historyAdded || verdict.foodName.isEmpty) return;
+
+    // _historyAdded 플래그는 이 State 인스턴스 수명 내 1회만 저장한다.
+    // GoRouter가 화면을 pop 후 다시 push하면 새 인스턴스가 생성되어 플래그가
+    // 리셋되지만, 이는 새 판정 결과이므로 저장하는 것이 올바른 동작이다.
     _historyAdded = true;
-    ref.read(verdictHistoryControllerProvider.notifier).add(
-          VerdictHistoryItem(
-            foodName: verdict.foodName,
-            verdict: _verdictString(verdict.level),
-            checkedAt: DateTime.now(),
-          ),
-        );
+
+    try {
+      await ref.read(verdictHistoryControllerProvider.notifier).add(
+            VerdictHistoryItem(
+              foodName: verdict.foodName,
+              verdict: _verdictString(verdict.level),
+              checkedAt: DateTime.now(),
+            ),
+          );
+    } catch (e) {
+      // 이력 저장 실패는 판정 화면 UX에 영향을 주지 않는다.
+      debugPrint('[VerdictScreen] 이력 저장 실패 (무시): $e');
+    }
   }
 
   @override
@@ -107,7 +125,7 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
           return const VerdictLoadingScreen();
         }
         // 판정 완료 시 이력 저장 (1회).
-        _maybeAddHistory(verdict);
+        unawaited(_maybeAddHistory(verdict));
         if (verdict.level == VerdictLevel.unknown) {
           // grade=UNKNOWN은 성공 응답 → VerdictUnknownScreen (D1).
           return VerdictUnknownScreen(onRetry: _handleRetry);
