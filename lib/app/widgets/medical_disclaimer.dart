@@ -17,11 +17,19 @@ const String kOnboardingDisclaimerText =
 ///
 /// ADR-0005: disclaimerBg 배경 + radiusCard 반경 + cardPadding 적용.
 /// [message] 미지정 시 판별 결과용 기본 문구([kResultDisclaimerText])를 사용한다.
-class MedicalDisclaimer extends StatelessWidget {
+/// 초기 상태는 접힘(1줄 표시). '더 보기' / '접기' 버튼으로 토글 가능.
+class MedicalDisclaimer extends StatefulWidget {
   const MedicalDisclaimer({super.key, this.message = kResultDisclaimerText});
 
   /// 노출할 면책 문구. 화면 맥락에 맞게 교체 가능.
   final String message;
+
+  @override
+  State<MedicalDisclaimer> createState() => _MedicalDisclaimerState();
+}
+
+class _MedicalDisclaimerState extends State<MedicalDisclaimer> {
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +49,28 @@ class MedicalDisclaimer extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.iconTextGap),
           Expanded(
-            child: Text(
-              message,
-              style: AppTextStyles.caption1Medium.copyWith(
-                color: AppColors.textSecondary,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.message,
+                  maxLines: _isExpanded ? null : 1,
+                  overflow: _isExpanded ? null : TextOverflow.ellipsis,
+                  style: AppTextStyles.caption1Medium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => setState(() => _isExpanded = !_isExpanded),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.textSecondary,
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(_isExpanded ? '접기' : '더 보기'),
+                ),
+              ],
             ),
           ),
         ],

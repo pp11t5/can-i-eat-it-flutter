@@ -15,5 +15,22 @@ void main() {
 
       expect(find.byIcon(Icons.info_outline), findsOneWidget);
     });
+
+    testWidgets("초기 상태에서 '더 보기' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pump();
+
+      expect(find.text('더 보기'), findsOneWidget);
+    });
+
+    testWidgets("'더 보기' 탭 시 '접기' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pump();
+
+      await tester.tap(find.text('더 보기'));
+      await tester.pump();
+
+      expect(find.text('접기'), findsOneWidget);
+    });
   });
 }
