@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
@@ -34,12 +35,24 @@ class AccountHeaderWidget extends StatelessWidget {
                     color: AppColors.textPrimary,
                   ),
                 ),
-                if (session.email != null) ...[
+                if (session.email != null && session.email!.isNotEmpty) ...[
                   const SizedBox(height: 2),
-                  Text(
-                    session.email!,
-                    style: AppTextStyles.body2Regular.copyWith(
-                      color: AppColors.textSecondary,
+                  GestureDetector(
+                    onLongPress: () {
+                      Clipboard.setData(
+                        ClipboardData(text: session.email!),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('이메일이 복사됐어요'),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      session.email!,
+                      style: AppTextStyles.body2Regular.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
                 ],
