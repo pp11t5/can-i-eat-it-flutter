@@ -46,7 +46,7 @@ class HomeSearchBar extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '이 음식 먹어도 돼?',
+                  '음식 이름을 검색해 보세요',
                   style: AppTextStyles.body1Medium.copyWith(
                     color: Colors.white,
                   ),

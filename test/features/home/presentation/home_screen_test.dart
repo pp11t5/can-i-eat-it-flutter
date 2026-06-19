@@ -70,11 +70,11 @@ void main() {
   });
 
   group('HomeScreen — 검색 바', () {
-    testWidgets('"이 음식 먹어도 돼?" 플레이스홀더가 표시된다', (tester) async {
+    testWidgets('"음식 이름을 검색해 보세요" 텍스트가 표시된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('이 음식 먹어도 돼?'), findsOneWidget);
+      expect(find.text('음식 이름을 검색해 보세요'), findsOneWidget);
     });
 
     testWidgets('검색 바가 화면에 존재한다 (tappable)', (tester) async {
@@ -82,7 +82,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // HomeSearchBar 위젯 자체가 렌더링되어 있어야 한다.
-      expect(find.text('이 음식 먹어도 돼?'), findsOneWidget);
+      expect(find.text('음식 이름을 검색해 보세요'), findsOneWidget);
     });
   });
 

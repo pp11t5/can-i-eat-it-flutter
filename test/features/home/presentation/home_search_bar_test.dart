@@ -18,11 +18,11 @@ void main() {
       expect(find.byIcon(Icons.search), findsOneWidget);
     });
 
-    testWidgets('"이 음식 먹어도 돼?" 텍스트가 표시된다', (tester) async {
+    testWidgets('"음식 이름을 검색해 보세요" 텍스트가 표시된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pump();
 
-      expect(find.text('이 음식 먹어도 돼?'), findsOneWidget);
+      expect(find.text('음식 이름을 검색해 보세요'), findsOneWidget);
     });
 
     testWidgets('탭 시 onTap 콜백이 호출된다', (tester) async {
@@ -36,7 +36,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.text('이 음식 먹어도 돼?'));
+      await tester.tap(find.text('음식 이름을 검색해 보세요'));
       await tester.pump();
 
       expect(tapped, isTrue);
