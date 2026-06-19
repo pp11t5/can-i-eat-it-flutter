@@ -107,9 +107,54 @@ void main() {
       await tester.pumpWidget(_wrap(repo));
       await _settle(tester);
 
-      expect(find.text('권장'), findsOneWidget);
-      expect(find.text('위험'), findsOneWidget);
-      expect(find.text('주의'), findsOneWidget);
+      // 필터 칩(권장/주의/위험)과 배지가 동시에 존재하므로 1개 이상 확인
+      expect(find.text('권장'), findsAtLeastNWidgets(1));
+      expect(find.text('위험'), findsAtLeastNWidgets(1));
+      expect(find.text('주의'), findsAtLeastNWidgets(1));
+    });
+
+    testWidgets('권장 필터 선택 시 safe 항목만 표시된다', (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [
+          _item('두부', 'safe'),
+          _item('커피', 'avoid'),
+          _item('된장찌개', 'caution'),
+        ],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      // '권장' 필터 칩 탭
+      await tester.tap(find.text('권장').first);
+      await _settle(tester);
+
+      expect(find.text('두부'), findsOneWidget);
+      expect(find.text('커피'), findsNothing);
+      expect(find.text('된장찌개'), findsNothing);
+    });
+
+    testWidgets('전체 필터로 돌아오면 모든 항목이 표시된다', (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [
+          _item('두부', 'safe'),
+          _item('커피', 'avoid'),
+          _item('된장찌개', 'caution'),
+        ],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      // 먼저 '권장' 필터 선택
+      await tester.tap(find.text('권장').first);
+      await _settle(tester);
+
+      // '전체' 필터로 복귀
+      await tester.tap(find.text('전체'));
+      await _settle(tester);
+
+      expect(find.text('두부'), findsOneWidget);
+      expect(find.text('커피'), findsOneWidget);
+      expect(find.text('된장찌개'), findsOneWidget);
     });
   });
 }
