@@ -269,7 +269,7 @@ class _TopBar extends StatelessWidget {
                 onSubmitted: onSubmit,
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
-                  hintText: '음식을 검색해주세요',
+                  hintText: '음식 이름을 입력해 주세요',
                   hintStyle: AppTextStyles.body1Medium.copyWith(
                     color: AppColors.textTertiary,
                   ),

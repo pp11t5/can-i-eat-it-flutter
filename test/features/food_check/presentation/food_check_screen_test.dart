@@ -65,7 +65,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('음식을 검색해주세요'), findsOneWidget);
+      expect(find.text('음식 이름을 입력해 주세요'), findsOneWidget);
       expect(find.byType(SvgPicture), findsWidgets);
       expect(find.text('아직 검색 기록이 없어요'), findsOneWidget);
     });
