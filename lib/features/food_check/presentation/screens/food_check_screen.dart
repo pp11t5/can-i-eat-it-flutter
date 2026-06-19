@@ -367,8 +367,9 @@ class _ResultList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 결과 카드 수 + CTA 카드 1개 + 헤더 1개
-    final itemCount = 1 + items.length + 1; // header + results + cta
+    // 결과 카드 수 + CTA 카드 1개 + 헤더 1개 (+ 빈 상태 1개)
+    final isEmpty = items.isEmpty;
+    final itemCount = 1 + (isEmpty ? 1 : items.length) + 1;
 
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(
@@ -393,8 +394,38 @@ class _ResultList extends StatelessWidget {
             ),
           );
         }
-        // 1 ~ items.length: 결과 카드
-        if (index <= items.length) {
+        // 1: 결과 없음 빈 상태
+        if (isEmpty && index == 1) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.itemGap),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.search_off,
+                  size: 48,
+                  color: AppColors.textSecondary,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '검색 결과가 없어요',
+                  style: AppTextStyles.body1Bold.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '다른 음식 이름으로 검색해 보세요.',
+                  style: AppTextStyles.body2Regular.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        // 1 ~ items.length: 결과 카드 (결과 있을 때)
+        if (!isEmpty && index <= items.length) {
           final food = items[index - 1];
           return Padding(
             padding: const EdgeInsets.only(bottom: 10),

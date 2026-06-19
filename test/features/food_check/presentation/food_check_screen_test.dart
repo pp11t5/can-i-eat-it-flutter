@@ -228,6 +228,20 @@ void main() {
       expect(find.textContaining("'없는음식xyz'로 검색하기"), findsOneWidget);
     });
 
+    testWidgets('빈 결과 → Icons.search_off 아이콘이 표시된다', (tester) async {
+      final repo = MockFoodRepository.withSearchResults([]);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '없는음식xyz');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.search_off), findsOneWidget);
+    });
+
     testWidgets('결과 셀 탭 → addRecent 호출 후 /verdict 라우트 진입', (tester) async {
       final repo = MockFoodRepository.withSearchResults([
         _foodSummary('f-1', '두부'),
