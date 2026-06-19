@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
-import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 
 /// 홈 화면 최근 검색어 칩.
 ///
@@ -21,46 +20,25 @@ class RecentSearchChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onSearch,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: const BorderRadius.all(Radius.circular(999)),
-          border: Border.all(
-            color: const Color(0xFFE9E9E9),
-            width: 1,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ActionChip(
+          label: Text(label),
+          onPressed: onSearch,
+          backgroundColor: AppColors.surfaceMuted,
+          side: BorderSide.none,
+          avatar: const Icon(Icons.history, size: 16),
+        ),
+        GestureDetector(
+          onTap: onDelete,
+          behavior: HitTestBehavior.opaque,
+          child: const Padding(
+            padding: EdgeInsets.only(left: 2),
+            child: Icon(Icons.close, size: 14, color: AppColors.textSecondary),
           ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.history,
-              size: 16,
-              color: AppColors.textSecondary,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: AppTextStyles.body2Medium.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(width: 4),
-            GestureDetector(
-              onTap: onDelete,
-              behavior: HitTestBehavior.opaque,
-              child: const Icon(
-                Icons.close,
-                size: 14,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
+      ],
     );
   }
 }
