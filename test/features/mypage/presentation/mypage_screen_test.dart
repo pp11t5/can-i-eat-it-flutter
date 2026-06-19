@@ -127,7 +127,8 @@ void main() {
       await tester.pumpWidget(_wrap());
       await _settle(tester);
 
-      // 로그아웃 버튼은 여러 위젯에 텍스트가 있을 수 있으므로 first 사용
+      // 진행률 바 추가로 콘텐츠 높이가 늘어날 수 있으므로 스크롤 후 탭
+      await tester.scrollUntilVisible(find.text('로그아웃').first, 100);
       await tester.tap(find.text('로그아웃').first);
       await _settle(tester);
 
@@ -139,6 +140,8 @@ void main() {
       await tester.pumpWidget(_wrap());
       await _settle(tester);
 
+      // 진행률 바 추가로 콘텐츠 높이가 늘어날 수 있으므로 스크롤 후 탭
+      await tester.scrollUntilVisible(find.text('로그아웃').first, 100);
       await tester.tap(find.text('로그아웃').first);
       await _settle(tester);
 

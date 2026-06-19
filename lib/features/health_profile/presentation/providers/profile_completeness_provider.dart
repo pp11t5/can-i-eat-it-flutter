@@ -15,3 +15,16 @@ bool profileComplete(Ref ref) {
   final profileAsync = ref.watch(healthProfileControllerProvider);
   return profileAsync.whenData((p) => isProfileComplete(p)).valueOrNull ?? false;
 }
+
+/// 현재 건강 프로필 완성도 (0–100) computed provider.
+///
+/// [healthProfileControllerProvider]를 watch해 [profileCompletenessPercent]로 계산한다.
+/// 로딩 중·에러·프로필 없음 → 0.
+@riverpod
+int profileCompletenessPercentage(Ref ref) {
+  final profileAsync = ref.watch(healthProfileControllerProvider);
+  return profileAsync
+          .whenData((p) => profileCompletenessPercent(p))
+          .valueOrNull ??
+      0;
+}

@@ -16,22 +16,40 @@ class ProfileCompletenessBadge extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isComplete = ref.watch(profileCompleteProvider);
+    final completeness = ref.watch(profileCompletenessPercentageProvider);
 
     return Semantics(
       label: isComplete ? '프로필 완성' : '프로필 미완성',
-      child: Row(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            isComplete ? Icons.check_circle : Icons.radio_button_unchecked,
-            size: 18,
-            color: isComplete ? AppColors.primary : AppColors.textTertiary,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isComplete ? Icons.check_circle : Icons.radio_button_unchecked,
+                size: 18,
+                color: isComplete ? AppColors.primary : AppColors.textTertiary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                isComplete ? '프로필 완성' : '프로필 미완성',
+                style: AppTextStyles.caption1Medium.copyWith(
+                  color: isComplete ? AppColors.primary : AppColors.textTertiary,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 6),
-          Text(
-            isComplete ? '프로필 완성' : '프로필 미완성',
-            style: AppTextStyles.caption1Medium.copyWith(
-              color: isComplete ? AppColors.primary : AppColors.textTertiary,
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: completeness / 100.0,
+              backgroundColor: AppColors.border,
+              valueColor:
+                  const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              minHeight: 6,
             ),
           ),
         ],

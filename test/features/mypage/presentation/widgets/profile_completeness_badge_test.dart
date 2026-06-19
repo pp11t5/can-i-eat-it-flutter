@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
+import 'package:can_i_eat_it/features/health_profile/presentation/providers/profile_completeness_provider.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/widgets/profile_completeness_badge.dart';
 
 Widget _wrap(MockHealthProfileRepository repo) {
@@ -59,6 +60,38 @@ void main() {
       await _settle(tester);
 
       expect(find.text('프로필 미완성'), findsOneWidget);
+    });
+  });
+
+  group('ProfileCompletenessBadge — 진행률 바', () {
+    testWidgets('completeness:60일 때 LinearProgressIndicator value가 0.6이다',
+        (tester) async {
+      final repo = MockHealthProfileRepository(
+        initialProfile: HealthProfile.sampleGerd().copyWith(
+          conditions: ['GERD'],
+          triggerFoods: [],
+        ),
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            // ignore: scoped_providers_should_specify_dependencies
+            healthProfileRepositoryProvider.overrideWithValue(repo),
+            // completeness를 60으로 직접 주입
+            // ignore: scoped_providers_should_specify_dependencies
+            profileCompletenessPercentageProvider.overrideWith((_) => 60),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(body: ProfileCompletenessBadge()),
+          ),
+        ),
+      );
+      await _settle(tester);
+
+      final indicator = tester.widget<LinearProgressIndicator>(
+        find.byType(LinearProgressIndicator),
+      );
+      expect(indicator.value, closeTo(0.6, 0.001));
     });
   });
 }
