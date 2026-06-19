@@ -41,11 +41,12 @@ MockFavoriteRepository _seeded() {
 
 void main() {
   group('FavoritesScreen', () {
-    testWidgets('빈 상태: "저장된 즐겨찾기가 없어요." 표시', (tester) async {
+    testWidgets('빈 상태: "아직 즐겨찾기가 없어요" 타이틀 표시', (tester) async {
       await tester.pumpWidget(_wrap(MockFavoriteRepository()));
       await tester.pumpAndSettle();
 
-      expect(find.text('저장된 즐겨찾기가 없어요.'), findsOneWidget);
+      expect(find.text('아직 즐겨찾기가 없어요'), findsOneWidget);
+      expect(find.text('판정 결과에서 북마크를 탭해 저장해보세요'), findsOneWidget);
     });
 
     testWidgets('데이터 있음: foodName + gradeLabel 표시', (tester) async {

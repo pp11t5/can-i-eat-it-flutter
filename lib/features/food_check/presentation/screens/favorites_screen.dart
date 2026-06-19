@@ -54,10 +54,29 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
         ),
         data: (items) => items.isEmpty
             ? Center(
-                child: Text(
-                  '저장된 즐겨찾기가 없어요.',
-                  style: AppTextStyles.body2Regular
-                      .copyWith(color: AppColors.textSecondary),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.bookmark_border,
+                      size: 48,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '아직 즐겨찾기가 없어요',
+                      style: AppTextStyles.body1Bold.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '판정 결과에서 북마크를 탭해 저장해보세요',
+                      style: AppTextStyles.body2Regular.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               )
             : ListView.separated(
