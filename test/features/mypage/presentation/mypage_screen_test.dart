@@ -480,4 +480,56 @@ void main() {
       expect(find.text('테마 색상 선택'), findsOneWidget);
     });
   });
+
+  group('MypageScreen — 프로필 편집 화면 이동', () {
+    testWidgets('프로필 영역 탭 시 /mypage/profile-edit로 이동한다', (tester) async {
+      final authRepo = MockAuthRepository(initialSession: _testSession);
+      final profileRepo = MockHealthProfileRepository.noProfile();
+
+      final router = GoRouter(
+        initialLocation: '/mypage',
+        routes: [
+          GoRoute(
+            path: '/mypage',
+            builder: (_, __) => const MypageScreen(),
+            routes: [
+              GoRoute(
+                path: 'edit',
+                builder: (_, __) =>
+                    const Scaffold(body: Text('건강 프로필 편집')),
+              ),
+              GoRoute(
+                path: 'notifications',
+                builder: (_, __) =>
+                    const Scaffold(body: Text('알림 설정 화면')),
+              ),
+              GoRoute(
+                path: 'profile-edit',
+                builder: (_, __) =>
+                    const Scaffold(body: Text('프로필 편집 화면')),
+              ),
+            ],
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            // ignore: scoped_providers_should_specify_dependencies
+            authRepositoryProvider.overrideWithValue(authRepo),
+            // ignore: scoped_providers_should_specify_dependencies
+            healthProfileRepositoryProvider.overrideWithValue(profileRepo),
+          ],
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+      await _settle(tester);
+
+      await tester.tap(find.text('홍길동'));
+      await _settle(tester);
+
+      expect(find.text('프로필 편집 화면'), findsOneWidget);
+    });
+  });
 }

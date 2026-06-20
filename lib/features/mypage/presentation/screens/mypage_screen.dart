@@ -69,7 +69,10 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ── ① 계정 헤더 ──────────────────────────────────────
-                  AccountHeaderWidget(session: session),
+                  GestureDetector(
+                    onTap: () => context.push('/mypage/profile-edit'),
+                    child: AccountHeaderWidget(session: session),
+                  ),
 
                   const Divider(color: AppColors.divider, height: 1),
                   const SizedBox(height: AppSpacing.sectionGap),

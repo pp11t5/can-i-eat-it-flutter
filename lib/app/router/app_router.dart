@@ -217,6 +217,13 @@ GoRouter appRouter(Ref ref) {
                       body: Center(child: Text('알림 설정')),
                     ),
                   ),
+                  GoRoute(
+                    path: 'profile-edit',
+                    name: 'mypage-profile-edit',
+                    builder: (context, state) => const Scaffold(
+                      body: Center(child: Text('프로필 편집 화면')),
+                    ),
+                  ),
                 ],
               ),
             ],
