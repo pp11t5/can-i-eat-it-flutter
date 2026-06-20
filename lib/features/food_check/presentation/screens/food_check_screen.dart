@@ -529,6 +529,7 @@ class _ResultCard extends StatelessWidget {
         style: baseStyle.copyWith(
           fontWeight: FontWeight.bold,
           color: AppColors.primary,
+          backgroundColor: AppColors.primary.withValues(alpha: 0.3),
         ),
       ));
       start = idx + q.length;

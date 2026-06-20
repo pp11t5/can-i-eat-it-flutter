@@ -477,4 +477,23 @@ void main() {
       expect(find.text('정렬 기준'), findsOneWidget);
     });
   });
+
+  group('FoodCheckScreen — 검색어 강조 색상', () {
+    testWidgets("검색어 '두부' 입력 후 검색 결과에서 RichText 위젯이 렌더된다", (tester) async {
+      final repo = MockFoodRepository.withSearchResults([
+        _foodSummary('f-1', '두부'),
+        _foodSummary('f-2', '두부조림'),
+      ]);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '두부');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(RichText), findsAtLeastNWidgets(1));
+    });
+  });
 }
