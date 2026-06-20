@@ -349,6 +349,25 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
                     onTap: () => _showPrivacyDialog(context),
                   ),
 
+                  // ── ⑧ 문의하기 ──────────────────────────────────────
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(
+                      Icons.chat_bubble_outline,
+                      color: AppColors.textPrimary,
+                    ),
+                    title: Text(
+                      '문의하기',
+                      style: AppTextStyles.body1Medium
+                          .copyWith(color: AppColors.textPrimary),
+                    ),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: AppColors.textSecondary,
+                    ),
+                    onTap: () => _showInquiryDialog(context),
+                  ),
+
                   const Divider(color: AppColors.divider, height: 1),
                   const SizedBox(height: AppSpacing.sectionGap),
 
@@ -467,6 +486,22 @@ void _showThemeColorDialog(BuildContext context) {
         TextButton(
           onPressed: () => Navigator.pop(ctx),
           child: const Text('닫기'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showInquiryDialog(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('문의하기'),
+      content: const Text('support@canieatiit.com으로 문의해주세요.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('확인'),
         ),
       ],
     ),

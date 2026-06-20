@@ -532,4 +532,25 @@ void main() {
       expect(find.text('프로필 편집 화면'), findsOneWidget);
     });
   });
+
+  group('MypageScreen — 문의하기 메뉴', () {
+    testWidgets('Icons.chat_bubble_outline 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.chat_bubble_outline), findsOneWidget);
+    });
+
+    testWidgets("Icons.chat_bubble_outline 탭 시 '문의하기' 텍스트가 표시된다",
+        (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      await tester.ensureVisible(find.byIcon(Icons.chat_bubble_outline));
+      await tester.tap(find.byIcon(Icons.chat_bubble_outline));
+      await _settle(tester);
+
+      expect(find.text('문의하기'), findsAtLeastNWidgets(1));
+    });
+  });
 }
