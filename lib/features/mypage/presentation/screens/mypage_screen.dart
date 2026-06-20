@@ -33,6 +33,7 @@ class MypageScreen extends ConsumerStatefulWidget {
 
 class _MypageScreenState extends ConsumerState<MypageScreen> {
   bool _isDarkMode = false;
+  bool _notificationsEnabled = true;
 
   @override
   Widget build(BuildContext context) {
@@ -186,6 +187,25 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
                           setState(() => _isDarkMode = value),
                       activeThumbColor: AppColors.primary,
                     ),
+                  ),
+
+                  // ── ③-1-1. 알림 설정 토글 ──────────────────────────────
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      '알림',
+                      style: AppTextStyles.body1Medium
+                          .copyWith(color: AppColors.textPrimary),
+                    ),
+                    subtitle: Text(
+                      '판정 결과 알림을 받습니다.',
+                      style: AppTextStyles.body2Regular
+                          .copyWith(color: AppColors.textSecondary),
+                    ),
+                    value: _notificationsEnabled,
+                    onChanged: (v) =>
+                        setState(() => _notificationsEnabled = v),
+                    activeThumbColor: AppColors.primary,
                   ),
 
                   // ── ③-2. 테마 색상 선택 ──────────────────────────────

@@ -567,4 +567,20 @@ void main() {
       expect(find.textContaining('로그인 정보가 초기화됩니다.'), findsOneWidget);
     });
   });
+
+  group('MypageScreen — 알림 설정 토글', () {
+    testWidgets("'알림' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.text('알림'), findsOneWidget);
+    });
+
+    testWidgets("'판정 결과 알림을 받습니다.' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.text('판정 결과 알림을 받습니다.'), findsOneWidget);
+    });
+  });
 }
