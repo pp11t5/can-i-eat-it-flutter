@@ -7,7 +7,8 @@ import 'package:can_i_eat_it/features/verdict_history/data/verdict_history_provi
 import 'package:can_i_eat_it/features/verdict_history/domain/entities/verdict_history_item.dart';
 import 'package:can_i_eat_it/features/verdict_history/presentation/screens/verdict_history_screen.dart';
 
-Widget _wrap(MockVerdictHistoryRepository repo) {
+Widget _wrap([MockVerdictHistoryRepository? repo]) {
+  repo ??= MockVerdictHistoryRepository();
   return ProviderScope(
     overrides: [
       // ignore: scoped_providers_should_specify_dependencies
@@ -395,6 +396,34 @@ void main() {
       await _settle(tester);
 
       expect(find.text('총 2개의 판정 기록'), findsOneWidget);
+    });
+  });
+
+  group('VerdictHistoryScreen — 필터 초기화 버튼', () {
+    testWidgets('Icons.filter_list_off 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.filter_list_off), findsOneWidget);
+    });
+
+    testWidgets('필터 초기화 버튼 탭 시 필터가 초기화된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      // '즐겨찾기' 필터 선택
+      await tester.tap(find.text('즐겨찾기'));
+      await _settle(tester);
+
+      // 필터 초기화
+      await tester.tap(find.byIcon(Icons.filter_list_off));
+      await _settle(tester);
+
+      // '전체' 칩이 selected 상태여야 함
+      final allChip = tester.widget<FilterChip>(
+        find.widgetWithText(FilterChip, '전체'),
+      );
+      expect(allChip.selected, isTrue);
     });
   });
 }

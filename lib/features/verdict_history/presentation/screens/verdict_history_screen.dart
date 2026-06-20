@@ -34,6 +34,13 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
     '위험': 'avoid',
   };
 
+  void _resetFilters() {
+    setState(() {
+      _selectedFilter = '전체';
+      _showFavoritesOnly = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final historyAsync = ref.watch(verdictHistoryControllerProvider);
@@ -49,6 +56,11 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
           style: AppTextStyles.body1Bold.copyWith(color: AppColors.textPrimary),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list_off, color: AppColors.textPrimary),
+            tooltip: '필터 초기화',
+            onPressed: _resetFilters,
+          ),
           IconButton(
             icon: const Icon(Icons.sort, color: AppColors.textPrimary),
             tooltip: _isNewestFirst ? '오래된순으로 보기' : '최신순으로 보기',
