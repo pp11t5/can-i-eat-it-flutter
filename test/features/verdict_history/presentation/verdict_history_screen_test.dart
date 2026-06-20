@@ -505,4 +505,16 @@ void main() {
       expect(find.textContaining('즐겨찾기한 판정 결과를 내보냅니다.'), findsOneWidget);
     });
   });
+
+  group('VerdictHistoryScreen — 스와이프 삭제', () {
+    testWidgets('항목이 있을 때 Dismissible 위젯이 렌더된다', (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [_item('두부', 'safe')],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      expect(find.byType(Dismissible), findsAtLeastNWidgets(1));
+    });
+  });
 }

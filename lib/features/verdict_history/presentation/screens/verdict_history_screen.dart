@@ -227,9 +227,9 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
                       background: Container(
                         alignment: Alignment.centerRight,
                         padding: const EdgeInsets.only(right: 16),
-                        color: const Color(0xFFD32F2F),
+                        color: AppColors.danger,
                         child: const Icon(
-                          Icons.delete_outline,
+                          Icons.delete,
                           color: Colors.white,
                         ),
                       ),
