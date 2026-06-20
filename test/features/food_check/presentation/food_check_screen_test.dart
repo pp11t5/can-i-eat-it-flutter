@@ -425,7 +425,7 @@ void main() {
       expect(find.text('검색 결과가 없어요'), findsOneWidget);
     });
 
-    testWidgets("검색어 입력 후 결과 없으면 '다른 검색어로 시도해 보세요' 텍스트가 표시된다",
+    testWidgets("검색어 입력 후 결과 없으면 '다른 검색어를 입력해보세요' 텍스트가 표시된다",
         (tester) async {
       final repo = MockFoodRepository.withSearchResults([]);
       await tester.pumpWidget(
@@ -437,7 +437,38 @@ void main() {
       await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
 
-      expect(find.text('다른 검색어로 시도해 보세요'), findsOneWidget);
+      expect(find.text('다른 검색어를 입력해보세요'), findsOneWidget);
+    });
+  });
+
+  group('FoodCheckScreen — 검색 결과 없음 빈 상태 개선', () {
+    testWidgets('검색 결과 없을 때 Icons.search_off 아이콘이 렌더된다', (tester) async {
+      final repo = MockFoodRepository.withSearchResults([]);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '없는음식xyz');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.search_off), findsOneWidget);
+    });
+
+    testWidgets("검색 결과 없을 때 '다른 검색어를 입력해보세요' 텍스트가 렌더된다",
+        (tester) async {
+      final repo = MockFoodRepository.withSearchResults([]);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '없는음식xyz');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+
+      expect(find.text('다른 검색어를 입력해보세요'), findsOneWidget);
     });
   });
 

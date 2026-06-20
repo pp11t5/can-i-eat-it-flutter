@@ -445,19 +445,19 @@ class _ResultList extends StatelessWidget {
               children: [
                 const Icon(
                   Icons.search_off,
-                  size: 48,
-                  color: AppColors.textSecondary,
+                  size: 64,
+                  color: AppColors.textTertiary,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Text(
                   '검색 결과가 없어요',
-                  style: AppTextStyles.body1Bold.copyWith(
+                  style: AppTextStyles.header3Bold.copyWith(
                     color: AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Text(
-                  '다른 검색어로 시도해 보세요',
+                  '다른 검색어를 입력해보세요',
                   style: AppTextStyles.body2Regular.copyWith(
                     color: AppColors.textSecondary,
                   ),
