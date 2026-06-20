@@ -336,15 +336,21 @@ class _HeroSection extends StatelessWidget {
           ),
           textAlign: TextAlign.center,
         ),
-        // 카테고리 서브텍스트 (있을 때만 표시)
+        // 카테고리 태그 (있을 때만 표시)
         if (verdict.category != null && verdict.category!.isNotEmpty) ...[
           const SizedBox(height: 4),
-          Text(
-            verdict.category!,
-            style: AppTextStyles.body2Regular.copyWith(
-              color: AppColors.textSecondary,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceMuted,
+              borderRadius: BorderRadius.circular(20),
             ),
-            textAlign: TextAlign.center,
+            child: Text(
+              verdict.category!,
+              style: AppTextStyles.caption1Medium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
           ),
         ],
         const SizedBox(height: AppSpacing.itemGap),

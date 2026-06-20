@@ -209,4 +209,42 @@ void main() {
       expect(find.byIcon(Icons.expand_less), findsNothing);
     });
   });
+
+  group('VerdictResultScreen — 카테고리 태그', () {
+    const _kVerdictWithCategory = EatVerdict(
+      level: VerdictLevel.recommend,
+      foodName: '두부',
+      category: '두부류',
+    );
+
+    testWidgets('카테고리 태그 Container가 렌더된다', (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(
+          verdict: _kVerdictWithCategory,
+          onRetry: () {},
+        )),
+      );
+      await _settle(tester);
+
+      // BoxDecoration(borderRadius: 20) Container 존재 확인
+      final containers = tester.widgetList<Container>(find.byType(Container));
+      final hasTag = containers.any((c) {
+        final d = c.decoration;
+        return d is BoxDecoration && d.borderRadius != null;
+      });
+      expect(hasTag, isTrue);
+    });
+
+    testWidgets("카테고리 텍스트 '두부류'가 렌더된다", (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(
+          verdict: _kVerdictWithCategory,
+          onRetry: () {},
+        )),
+      );
+      await _settle(tester);
+
+      expect(find.text('두부류'), findsOneWidget);
+    });
+  });
 }
