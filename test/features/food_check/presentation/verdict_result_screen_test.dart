@@ -271,4 +271,16 @@ void main() {
       expect(find.text('저장'), findsAtLeastNWidgets(1));
     });
   });
+
+  group('VerdictResultScreen — 관련 음식 빈 상태', () {
+    testWidgets('목 데이터가 있을 때 관련 음식이 없습니다. 텍스트가 표시되지 않는다',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      expect(find.text('관련 음식이 없습니다.'), findsNothing);
+    });
+  });
 }
