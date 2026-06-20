@@ -116,6 +116,10 @@ class VerdictResultScreen extends ConsumerWidget {
             const _NutritionInfoSection(),
             const SizedBox(height: AppSpacing.sectionGap),
 
+            // 판정 근거 섹션 (접기/펼치기)
+            const _ReasonSection(),
+            const SizedBox(height: AppSpacing.sectionGap),
+
             // CTA 3개 (공유하기 + 다시 검색 + 내 식단에 추가)
             _CtaSection(
               verdict: verdict,
@@ -713,4 +717,58 @@ void _showNutritionDetailDialog(
       ],
     ),
   );
+}
+
+// ---------------------------------------------------------------------------
+// 판정 근거 섹션 (접기/펼치기)
+// ---------------------------------------------------------------------------
+
+class _ReasonSection extends StatefulWidget {
+  const _ReasonSection();
+
+  @override
+  State<_ReasonSection> createState() => _ReasonSectionState();
+}
+
+class _ReasonSectionState extends State<_ReasonSection> {
+  bool _isExpanded = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                '판정 근거',
+                style: AppTextStyles.body1Bold.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            IconButton(
+              icon: Icon(
+                _isExpanded ? Icons.expand_less : Icons.expand_more,
+                color: AppColors.textSecondary,
+              ),
+              onPressed: () => setState(() => _isExpanded = !_isExpanded),
+            ),
+          ],
+        ),
+        _isExpanded
+            ? Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  '전문 의료진의 검토를 바탕으로 판정 결과를 제공합니다.',
+                  style: AppTextStyles.body2Regular.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              )
+            : const SizedBox.shrink(),
+      ],
+    );
+  }
 }

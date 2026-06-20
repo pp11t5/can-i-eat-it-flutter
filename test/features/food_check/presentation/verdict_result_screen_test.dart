@@ -183,4 +183,30 @@ void main() {
       expect(find.text('공유 방법 선택'), findsOneWidget);
     });
   });
+
+  group('VerdictResultScreen — 판정 근거 섹션 접기/펼치기', () {
+    testWidgets('Icons.expand_less 아이콘이 초기 상태에서 렌더된다', (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.expand_less), findsOneWidget);
+    });
+
+    testWidgets('Icons.expand_less 탭 시 Icons.expand_more로 변경된다',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      await tester.ensureVisible(find.byIcon(Icons.expand_less));
+      await tester.tap(find.byIcon(Icons.expand_less));
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.expand_more), findsOneWidget);
+      expect(find.byIcon(Icons.expand_less), findsNothing);
+    });
+  });
 }
