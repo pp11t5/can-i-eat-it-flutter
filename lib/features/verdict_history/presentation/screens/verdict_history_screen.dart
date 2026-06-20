@@ -209,8 +209,12 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
                   itemBuilder: (context, index) {
                     final slot = slots[index];
                     if (slot.isHeader) {
-                      return Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                      return Container(
+                        color: AppColors.surfaceMuted,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 6,
+                        ),
                         child: Text(
                           slot.dateLabel!,
                           style: AppTextStyles.body2Regular.copyWith(

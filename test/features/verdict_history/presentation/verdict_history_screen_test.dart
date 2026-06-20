@@ -533,6 +533,19 @@ void main() {
     });
   });
 
+  group('VerdictHistoryScreen — W91-F2 날짜 그룹 헤더 스타일', () {
+    testWidgets('날짜 헤더 텍스트가 렌더된다', (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [_item('두부', 'safe')],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      // DateTime(2026, 6, 20) → "6월 20일" 헤더
+      expect(find.textContaining('6월'), findsOneWidget);
+    });
+  });
+
   group('VerdictHistoryScreen — W88-F2 즐겨찾기 토글', () {
     testWidgets('Icons.favorite_border 아이콘이 렌더된다', (tester) async {
       final repo = MockVerdictHistoryRepository(
