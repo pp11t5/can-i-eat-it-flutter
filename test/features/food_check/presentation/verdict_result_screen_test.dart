@@ -247,4 +247,28 @@ void main() {
       expect(find.text('두부류'), findsOneWidget);
     });
   });
+
+  group('VerdictResultScreen — 저장 버튼', () {
+    testWidgets('저장 tooltip을 가진 Icons.bookmark_border 아이콘이 렌더된다',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      expect(find.byTooltip('저장'), findsOneWidget);
+    });
+
+    testWidgets("저장 버튼 탭 시 '저장' 텍스트가 표시된다", (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      await tester.tap(find.byTooltip('저장'));
+      await _settle(tester);
+
+      expect(find.text('저장'), findsAtLeastNWidgets(1));
+    });
+  });
 }

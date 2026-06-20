@@ -70,6 +70,11 @@ class VerdictResultScreen extends ConsumerWidget {
             tooltip: '공유',
             onPressed: () => _showShareDialog(context),
           ),
+          IconButton(
+            icon: const Icon(Icons.bookmark_border),
+            tooltip: '저장',
+            onPressed: () => _showSaveDialog(context),
+          ),
         ],
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1),
@@ -777,4 +782,24 @@ class _ReasonSectionState extends State<_ReasonSection> {
       ],
     );
   }
+}
+
+void _showSaveDialog(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('저장'),
+      content: const Text('판정 결과를 저장하시겠어요?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('취소'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('저장'),
+        ),
+      ],
+    ),
+  );
 }

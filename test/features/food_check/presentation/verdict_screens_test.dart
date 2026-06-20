@@ -400,8 +400,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 북마크 버튼 탭 (초기 상태: 즐겨찾기 아님 → 추가)
-      await tester.tap(find.byIcon(Icons.bookmark_border));
+      // 북마크 버튼 탭 (초기 상태: 즐겨찾기 아님 → 추가) — 저장 버튼과 구분하기 위해 first 사용
+      await tester.tap(find.byIcon(Icons.bookmark_border).first);
       await tester.pumpAndSettle();
 
       expect(find.text('즐겨찾기에 추가됐어요'), findsOneWidget);
