@@ -236,7 +236,10 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
                       onDismissed: (_) => ref
                           .read(verdictHistoryControllerProvider.notifier)
                           .removeAt(originalIndex),
-                      child: _VerdictHistoryTile(item: item),
+                      child: GestureDetector(
+                        onLongPress: () => _showItemMenu(context, item),
+                        child: _VerdictHistoryTile(item: item),
+                      ),
                     );
                   },
                 );
@@ -529,6 +532,27 @@ void _showSearchDialog(BuildContext context) {
         TextButton(
           onPressed: () => Navigator.pop(ctx),
           child: const Text('검색'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showItemMenu(BuildContext context, VerdictHistoryItem item) {
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (ctx) => Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.share_outlined),
+          title: const Text('공유하기'),
+          onTap: () => Navigator.pop(ctx),
+        ),
+        ListTile(
+          leading: const Icon(Icons.delete_outline),
+          title: const Text('삭제'),
+          onTap: () => Navigator.pop(ctx),
         ),
       ],
     ),

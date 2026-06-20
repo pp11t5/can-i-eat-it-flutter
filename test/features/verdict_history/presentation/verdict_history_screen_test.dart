@@ -517,4 +517,19 @@ void main() {
       expect(find.byType(Dismissible), findsAtLeastNWidgets(1));
     });
   });
+
+  group('VerdictHistoryScreen — 롱프레스 메뉴', () {
+    testWidgets('항목 롱프레스 시 Icons.share_outlined 아이콘이 표시된다', (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [_item('두부', 'safe')],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      await tester.longPress(find.text('두부'));
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.share_outlined), findsOneWidget);
+    });
+  });
 }
