@@ -445,4 +445,18 @@ void main() {
       expect(find.text('알림 설정 화면'), findsOneWidget);
     });
   });
+
+  group('MypageScreen — 탈퇴 사유 선택', () {
+    testWidgets("탈퇴 다이얼로그에 '서비스가 불편해요' 텍스트가 표시된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      // '탈퇴하기' 버튼 탭
+      await tester.ensureVisible(find.text('탈퇴하기'));
+      await tester.tap(find.text('탈퇴하기'));
+      await _settle(tester);
+
+      expect(find.text('서비스가 불편해요'), findsOneWidget);
+    });
+  });
 }

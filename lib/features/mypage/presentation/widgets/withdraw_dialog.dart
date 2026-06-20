@@ -28,6 +28,14 @@ class _WithdrawDialog extends StatefulWidget {
 
 class _WithdrawDialogState extends State<_WithdrawDialog> {
   bool _isWithdrawing = false;
+  String? _selectedReason;
+
+  static const _reasons = [
+    '서비스가 불편해요',
+    '개인정보 우려',
+    '다른 앱으로 이동',
+    '기타',
+  ];
 
   Future<void> _onWithdraw() async {
     if (_isWithdrawing) return;
@@ -51,11 +59,45 @@ class _WithdrawDialogState extends State<_WithdrawDialog> {
         '정말 탈퇴하시겠어요?',
         style: AppTextStyles.header3Bold.copyWith(color: AppColors.textPrimary),
       ),
-      content: Text(
-        '탈퇴 후 30일 이내에 다시 로그인하면 계정을 복구할 수 있어요. '
-        '30일이 지나면 모든 데이터가 삭제되며 복구가 불가능해요.',
-        style:
-            AppTextStyles.body2Regular.copyWith(color: AppColors.textSecondary),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '탈퇴 후 30일 이내에 다시 로그인하면 계정을 복구할 수 있어요. '
+            '30일이 지나면 모든 데이터가 삭제되며 복구가 불가능해요.',
+            style: AppTextStyles.body2Regular
+                .copyWith(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 12),
+          ..._reasons.map(
+            (reason) => InkWell(
+              onTap: () => setState(() => _selectedReason = reason),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    Icon(
+                      _selectedReason == reason
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_unchecked,
+                      color: _selectedReason == reason
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      reason,
+                      style: AppTextStyles.body2Regular
+                          .copyWith(color: AppColors.textPrimary),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       actions: [
         TextButton(
