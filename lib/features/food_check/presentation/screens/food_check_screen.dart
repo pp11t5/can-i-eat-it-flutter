@@ -45,6 +45,9 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
   /// 현재 검색 쿼리 (디바운스 후 갱신).
   String _query = '';
 
+  /// 선택된 검색 필터 칩 (초기값: 전체).
+  String _selectedFilter = '전체';
+
   /// 검색 결과 로딩 중 여부.
   bool _searchLoading = false;
 
@@ -231,6 +234,29 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
               onSubmit: _onSubmit,
               onSort: () => _showSortDialog(context),
               sortOrder: _sortOrder,
+            ),
+            // ── 검색 필터 칩 ────────────────────────────────────────────
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPadding,
+                vertical: 4,
+              ),
+              child: Row(
+                children: ['전체', '음식', '성분', '영양소']
+                    .map(
+                      (label) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(label),
+                          selected: _selectedFilter == label,
+                          onSelected: (_) =>
+                              setState(() => _selectedFilter = label),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
             if (_textController.text.trim().isNotEmpty && !showResults)
               _AutoCompleteHints(query: _textController.text.trim()),

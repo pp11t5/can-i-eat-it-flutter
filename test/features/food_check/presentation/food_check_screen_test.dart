@@ -556,4 +556,38 @@ void main() {
       expect(find.text('검색 기록 삭제'), findsNothing);
     });
   });
+
+  group('FoodCheckScreen — W87-F1 검색 필터 칩', () {
+    Future<void> settle(WidgetTester t) async {
+      for (var i = 0; i < 10; i++) {
+        await t.pump(const Duration(milliseconds: 50));
+      }
+    }
+
+    testWidgets('FilterChip이 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap([]));
+      await settle(tester);
+
+      expect(find.byType(FilterChip), findsAtLeastNWidgets(1));
+    });
+
+    testWidgets("'음식' FilterChip 탭 시 selected 상태가 된다", (tester) async {
+      await tester.pumpWidget(_wrap([]));
+      await settle(tester);
+
+      // 탭 전: '음식'은 unselected
+      final beforeChip = tester.widget<FilterChip>(
+        find.widgetWithText(FilterChip, '음식'),
+      );
+      expect(beforeChip.selected, isFalse);
+
+      await tester.tap(find.widgetWithText(FilterChip, '음식'));
+      await settle(tester);
+
+      final afterChip = tester.widget<FilterChip>(
+        find.widgetWithText(FilterChip, '음식'),
+      );
+      expect(afterChip.selected, isTrue);
+    });
+  });
 }
