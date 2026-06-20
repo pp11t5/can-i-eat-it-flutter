@@ -143,4 +143,19 @@ void main() {
       expect(find.byIcon(Icons.favorite_border), findsAtLeastNWidgets(1));
     });
   });
+
+  group('VerdictResultScreen — 영양 성분 상세 팝업', () {
+    testWidgets('영양소 항목 탭 시 영양소 이름이 다이얼로그 타이틀로 표시된다', (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      // '칼로리'는 목 영양 정보 첫 번째 항목
+      await tester.tap(find.text('칼로리'));
+      await _settle(tester);
+
+      expect(find.text('칼로리'), findsAtLeastNWidgets(1));
+    });
+  });
 }

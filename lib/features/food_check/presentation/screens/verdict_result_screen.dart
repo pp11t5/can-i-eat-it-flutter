@@ -595,22 +595,29 @@ class _NutritionInfoSection extends StatelessWidget {
           children: _items
               .map(
                 (item) => Expanded(
-                  child: Column(
-                    children: [
-                      Text(
-                        item.$1,
-                        style: AppTextStyles.body2Regular.copyWith(
-                          color: AppColors.textSecondary,
+                  child: GestureDetector(
+                    onTap: () => _showNutritionDetailDialog(
+                      context,
+                      item.$1,
+                      item.$2,
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          item.$1,
+                          style: AppTextStyles.body2Regular.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        item.$2,
-                        style: AppTextStyles.body1Bold.copyWith(
-                          color: AppColors.textPrimary,
+                        const SizedBox(height: 2),
+                        Text(
+                          item.$2,
+                          style: AppTextStyles.body1Bold.copyWith(
+                            color: AppColors.textPrimary,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               )
@@ -655,6 +662,26 @@ void _showReJudgeDialog(BuildContext context) {
         TextButton(
           onPressed: () => Navigator.pop(ctx),
           child: const Text('요청'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showNutritionDetailDialog(
+  BuildContext context,
+  String label,
+  String value,
+) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(label),
+      content: Text('$label: $value'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('확인'),
         ),
       ],
     ),
