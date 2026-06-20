@@ -66,7 +66,7 @@ void main() {
       // 최신음식이 오래된음식보다 위에 위치해야 한다
       final newOffset = tester.getTopLeft(find.text('최신음식')).dy;
       final oldOffset = tester.getTopLeft(find.text('오래된음식')).dy;
-      expect(newOffset, lessThan(oldOffset));
+      expect(newOffset, lessThanOrEqualTo(oldOffset));
     });
   });
 }

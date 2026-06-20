@@ -114,20 +114,16 @@ void main() {
       final termFinder = find.text('된장찌개');
       expect(termFinder, findsOneWidget);
 
-      final rowFinder = find.ancestor(
+      // InputChip deleteIcon(Icons.close) 탭 → 즉시 삭제
+      final chipFinder = find.ancestor(
         of: termFinder,
-        matching: find.byType(Row),
+        matching: find.byType(InputChip),
       );
-      final closeInRow = find.descendant(
-        of: rowFinder.first,
-        matching: find.byType(SvgPicture),
+      final closeInChip = find.descendant(
+        of: chipFinder.first,
+        matching: find.byIcon(Icons.close),
       );
-      await tester.tap(closeInRow.first);
-      await tester.pumpAndSettle();
-
-      // 삭제 확인 다이얼로그가 표시됨 — '삭제' 버튼 탭
-      expect(find.text('검색어 삭제'), findsOneWidget);
-      await tester.tap(find.text('삭제'));
+      await tester.tap(closeInChip.first);
       await tester.pumpAndSettle();
 
       expect(find.text('된장찌개'), findsNothing);
@@ -354,9 +350,8 @@ void main() {
     });
   });
 
-  group('FoodCheckScreen — 검색어 삭제 확인 다이얼로그', () {
-    testWidgets('삭제 버튼 탭 시 "검색어 삭제" 다이얼로그 타이틀이 표시된다',
-        (tester) async {
+  group('FoodCheckScreen — 검색어 삭제 (InputChip)', () {
+    testWidgets('Icons.close 탭 시 해당 항목이 즉시 삭제된다', (tester) async {
       final repo = MockFoodRepository.withRecent([
         _recentFood('r-1', '된장찌개'),
       ]);
@@ -365,21 +360,21 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final rowFinder = find.ancestor(
+      final chipFinder = find.ancestor(
         of: find.text('된장찌개'),
-        matching: find.byType(Row),
+        matching: find.byType(InputChip),
       );
-      final closeInRow = find.descendant(
-        of: rowFinder.first,
-        matching: find.byType(SvgPicture),
+      final closeInChip = find.descendant(
+        of: chipFinder.first,
+        matching: find.byIcon(Icons.close),
       );
-      await tester.tap(closeInRow.first);
+      await tester.tap(closeInChip.first);
       await tester.pumpAndSettle();
 
-      expect(find.text('검색어 삭제'), findsOneWidget);
+      expect(find.text('된장찌개'), findsNothing);
     });
 
-    testWidgets("'취소' 탭 시 다이얼로그가 닫힌다", (tester) async {
+    testWidgets('InputChip이 렌더된다', (tester) async {
       final repo = MockFoodRepository.withRecent([
         _recentFood('r-1', '된장찌개'),
       ]);
@@ -388,24 +383,22 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final rowFinder = find.ancestor(
-        of: find.text('된장찌개'),
-        matching: find.byType(Row),
+      expect(find.byType(InputChip), findsAtLeastNWidgets(1));
+    });
+  });
+
+  group('FoodCheckScreen — W85-F1 최근 검색어 태그 디자인', () {
+    testWidgets('최근 검색어 ActionChip/InputChip이 렌더된다', (tester) async {
+      final repo = MockFoodRepository.withRecent([
+        _recentFood('r-1', '된장찌개'),
+        _recentFood('r-2', '두부'),
+      ]);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
       );
-      final closeInRow = find.descendant(
-        of: rowFinder.first,
-        matching: find.byType(SvgPicture),
-      );
-      await tester.tap(closeInRow.first);
       await tester.pumpAndSettle();
 
-      expect(find.text('검색어 삭제'), findsOneWidget);
-
-      await tester.tap(find.text('취소'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('검색어 삭제'), findsNothing);
-      expect(find.text('된장찌개'), findsOneWidget);
+      expect(find.byType(InputChip), findsAtLeastNWidgets(1));
     });
   });
 

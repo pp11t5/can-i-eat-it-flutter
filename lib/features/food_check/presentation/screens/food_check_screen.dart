@@ -770,90 +770,32 @@ class _RecentSection extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.itemGap),
-            for (var i = 0; i < items.length; i++) ...[
-              if (i > 0) const SizedBox(height: AppSpacing.itemGap),
-              _HistoryRow(
-                item: items[i],
-                onRemove: () => ref
-                    .read(recentFoodControllerProvider.notifier)
-                    .removeRecent(items[i].foodExternalId),
-              ),
-            ],
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: items
+                  .map<Widget>(
+                    (item) => InputChip(
+                      label: Text(item.name),
+                      backgroundColor: AppColors.surfaceMuted,
+                      labelStyle: AppTextStyles.body2Regular.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                      side: BorderSide.none,
+                      deleteIcon: const Icon(Icons.close, size: 16),
+                      onDeleted: () => ref
+                          .read(recentFoodControllerProvider.notifier)
+                          .removeRecent(item.foodExternalId),
+                      onPressed: () {},
+                    ),
+                  )
+                  .toList(),
+            ),
           ],
         ),
       ),
     );
   }
-}
-
-class _HistoryRow extends StatelessWidget {
-  const _HistoryRow({required this.item, required this.onRemove});
-
-  final RecentFood item;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.itemGap),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              item.name,
-              style: AppTextStyles.body1Medium.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-          GestureDetector(
-            onTap: () => _showDeleteConfirmDialog(context, onRemove),
-            behavior: HitTestBehavior.opaque,
-            child: SvgPicture.asset(
-              'assets/figma_extracted/icon_close_small.svg',
-              width: 16,
-              height: 16,
-              colorFilter: const ColorFilter.mode(
-                AppColors.textSecondary,
-                BlendMode.srcIn,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// 검색어 삭제 확인 다이얼로그
-// ---------------------------------------------------------------------------
-
-Future<void> _showDeleteConfirmDialog(
-  BuildContext context,
-  VoidCallback onDelete,
-) async {
-  await showDialog<void>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: const Text('검색어 삭제'),
-      content: const Text('이 검색어를 삭제할까요?'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('취소'),
-        ),
-        TextButton(
-          onPressed: () {
-            onDelete();
-            Navigator.pop(ctx);
-          },
-          child: const Text('삭제'),
-        ),
-      ],
-    ),
-  );
 }
 
 
