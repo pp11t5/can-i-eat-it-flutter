@@ -495,6 +495,26 @@ class _CtaSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
+        // "공유하기" — 아웃라인 버튼 full-width
+        SizedBox(
+          width: double.infinity,
+          height: 54,
+          child: OutlinedButton.icon(
+            onPressed: () => _showShareDialog(context),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+              side: const BorderSide(color: AppColors.border),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+              ),
+              textStyle: AppTextStyles.body1Bold,
+              padding: EdgeInsets.zero,
+            ),
+            icon: const Icon(Icons.share_outlined, size: 18),
+            label: const Text('공유하기'),
+          ),
+        ),
+        const SizedBox(height: 12),
         // "재판정 요청" — 아웃라인 버튼 full-width
         SizedBox(
           width: double.infinity,
@@ -635,13 +655,20 @@ class _NutritionInfoSection extends StatelessWidget {
 void _showShareDialog(BuildContext context) {
   showDialog<void>(
     context: context,
-    builder: (ctx) => AlertDialog(
-      title: const Text('공유'),
-      content: const Text('판정 결과를 공유합니다.'),
-      actions: [
-        TextButton(
+    builder: (ctx) => SimpleDialog(
+      title: const Text('공유 방법 선택'),
+      children: [
+        SimpleDialogOption(
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('닫기'),
+          child: const Text('링크 복사'),
+        ),
+        SimpleDialogOption(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('카카오톡'),
+        ),
+        SimpleDialogOption(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('인스타그램'),
         ),
       ],
     ),

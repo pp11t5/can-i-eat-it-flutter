@@ -84,7 +84,7 @@ void main() {
       expect(find.byIcon(Icons.share), findsAtLeastNWidgets(1));
     });
 
-    testWidgets("Icons.share 탭 시 '공유' 다이얼로그 타이틀이 표시된다", (tester) async {
+    testWidgets("Icons.share 탭 시 '공유 방법 선택' 다이얼로그 타이틀이 표시된다", (tester) async {
       await tester.pumpWidget(
         _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
       );
@@ -94,7 +94,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.share).last);
       await _settle(tester);
 
-      expect(find.text('공유'), findsOneWidget);
+      expect(find.text('공유 방법 선택'), findsOneWidget);
     });
   });
 
@@ -156,6 +156,31 @@ void main() {
       await _settle(tester);
 
       expect(find.text('칼로리'), findsAtLeastNWidgets(1));
+    });
+  });
+
+  group('VerdictResultScreen — 공유하기 버튼', () {
+    testWidgets('Icons.share_outlined 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.share_outlined), findsOneWidget);
+    });
+
+    testWidgets("Icons.share_outlined 탭 시 '공유 방법 선택' 텍스트가 표시된다",
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      await tester.ensureVisible(find.byIcon(Icons.share_outlined));
+      await tester.tap(find.byIcon(Icons.share_outlined));
+      await _settle(tester);
+
+      expect(find.text('공유 방법 선택'), findsOneWidget);
     });
   });
 }
