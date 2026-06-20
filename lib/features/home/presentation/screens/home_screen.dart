@@ -17,6 +17,7 @@ import 'package:can_i_eat_it/features/home/presentation/widgets/notice_banner.da
 import 'package:can_i_eat_it/features/home/presentation/widgets/weather_banner.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/recent_search_chip.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
+import 'package:can_i_eat_it/features/home/presentation/widgets/goal_progress_widget.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/weather_diet_widget.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/today_meal_summary_widget.dart';
 
@@ -228,7 +229,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
               // ── 5. 빈 상태 유도 위젯 (최근 검색 없을 때만) ──────────────
               _HomeEmptyState(),
-              // ── 6. 날씨 기반 식단 추천 ───────────────────────────────
+              // ── 6. 오늘의 목표 달성률 ────────────────────────────────
+              const GoalProgressWidget(),
+              const SizedBox(height: AppSpacing.contentGap),
+
+              // ── 6-1. 날씨 기반 식단 추천 ─────────────────────────────
               const WeatherDietWidget(),
               const SizedBox(height: AppSpacing.contentGap),
 
