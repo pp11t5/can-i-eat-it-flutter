@@ -340,7 +340,7 @@ void main() {
       expect(find.byIcon(Icons.ios_share), findsOneWidget);
     });
 
-    testWidgets("Icons.ios_share 탭 시 '내보내기 형식 선택' 다이얼로그 타이틀이 표시된다",
+    testWidgets("Icons.ios_share 탭 시 '내보내기' 다이얼로그 타이틀이 표시된다",
         (tester) async {
       final repo = MockVerdictHistoryRepository();
       await tester.pumpWidget(_wrap(repo));
@@ -349,10 +349,10 @@ void main() {
       await tester.tap(find.byIcon(Icons.ios_share));
       await _settle(tester);
 
-      expect(find.text('내보내기 형식 선택'), findsOneWidget);
+      expect(find.text('내보내기'), findsAtLeastNWidgets(1));
     });
 
-    testWidgets("'CSV' 옵션이 표시된다", (tester) async {
+    testWidgets("'파일 형식: CSV' 텍스트가 표시된다", (tester) async {
       final repo = MockVerdictHistoryRepository();
       await tester.pumpWidget(_wrap(repo));
       await _settle(tester);
@@ -360,7 +360,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.ios_share));
       await _settle(tester);
 
-      expect(find.text('CSV'), findsOneWidget);
+      expect(find.textContaining('CSV'), findsOneWidget);
     });
   });
 
@@ -489,6 +489,20 @@ void main() {
       await _settle(tester);
 
       expect(find.text('검색'), findsAtLeastNWidgets(1));
+    });
+  });
+
+  group('VerdictHistoryScreen — 즐겨찾기 내보내기', () {
+    testWidgets(
+        "Icons.ios_share 탭 시 '즐겨찾기한 판정 결과를 내보냅니다.' 텍스트가 표시된다",
+        (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      await tester.tap(find.byTooltip('내보내기'));
+      await _settle(tester);
+
+      expect(find.textContaining('즐겨찾기한 판정 결과를 내보냅니다.'), findsOneWidget);
     });
   });
 }
