@@ -397,6 +397,17 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
                     onTap: () => _showAccountLinkDialog(context),
                   ),
 
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.restart_alt, color: AppColors.danger),
+                    title: const Text(
+                      '데이터 초기화',
+                      style: TextStyle(color: AppColors.danger),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _showDataResetDialog(context),
+                  ),
+
                   const Divider(color: AppColors.divider, height: 1),
                   const SizedBox(height: AppSpacing.sectionGap),
 
@@ -550,6 +561,27 @@ void _showAccountLinkDialog(BuildContext context) {
         TextButton(
           onPressed: () => Navigator.pop(ctx),
           child: const Text('닫기'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showDataResetDialog(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('데이터 초기화'),
+      content: const Text('모든 판정 이력과 설정이 삭제됩니다. 계속하시겠습니까?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('취소'),
+        ),
+        TextButton(
+          style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('초기화'),
         ),
       ],
     ),

@@ -629,4 +629,30 @@ void main() {
       expect(find.text('연동할 계정을 선택하세요.'), findsOneWidget);
     });
   });
+
+  group('MypageScreen — 데이터 초기화', () {
+    testWidgets('Icons.restart_alt 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      await tester.ensureVisible(find.byIcon(Icons.restart_alt));
+      expect(find.byIcon(Icons.restart_alt), findsOneWidget);
+    });
+
+    testWidgets("Icons.restart_alt 탭 시 '데이터 초기화' 다이얼로그 타이틀이 표시된다",
+        (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      await tester.ensureVisible(find.byIcon(Icons.restart_alt));
+      await tester.tap(find.byIcon(Icons.restart_alt));
+      await _settle(tester);
+
+      expect(find.text('데이터 초기화'), findsAtLeastNWidgets(1));
+      expect(
+        find.text('모든 판정 이력과 설정이 삭제됩니다. 계속하시겠습니까?'),
+        findsOneWidget,
+      );
+    });
+  });
 }
