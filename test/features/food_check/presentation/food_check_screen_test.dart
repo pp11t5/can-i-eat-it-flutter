@@ -590,4 +590,39 @@ void main() {
       expect(afterChip.selected, isTrue);
     });
   });
+
+  group('FoodCheckScreen — W90-F1 검색 히스토리 전체 삭제', () {
+    Future<void> settle(WidgetTester t) async {
+      for (var i = 0; i < 10; i++) {
+        await t.pump(const Duration(milliseconds: 50));
+      }
+    }
+
+    testWidgets("'전체 삭제' 텍스트가 렌더된다", (tester) async {
+      final repo = MockFoodRepository.withRecent([
+        _recentFood('r-1', '된장찌개'),
+      ]);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await settle(tester);
+
+      expect(find.text('전체 삭제'), findsOneWidget);
+    });
+
+    testWidgets("'전체 삭제' 탭 시 '전체 삭제' 다이얼로그 타이틀이 표시된다", (tester) async {
+      final repo = MockFoodRepository.withRecent([
+        _recentFood('r-1', '된장찌개'),
+      ]);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await settle(tester);
+
+      await tester.tap(find.text('전체 삭제'));
+      await settle(tester);
+
+      expect(find.text('모든 최근 검색어를 삭제합니다.'), findsOneWidget);
+    });
+  });
 }

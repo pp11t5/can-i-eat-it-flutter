@@ -783,14 +783,23 @@ class _RecentSection extends StatelessWidget {
                       color: AppColors.textSecondary,
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      color: AppColors.danger,
-                    ),
-                    tooltip: '검색 기록 삭제',
-                    onPressed: () =>
-                        showClearSearchHistoryDialog(context, ref),
+                  Row(
+                    children: [
+                      TextButton(
+                        onPressed: () =>
+                            _showClearAllDialog(context, ref),
+                        child: const Text('전체 삭제'),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: AppColors.danger,
+                        ),
+                        tooltip: '검색 기록 삭제',
+                        onPressed: () =>
+                            showClearSearchHistoryDialog(context, ref),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -887,4 +896,27 @@ class _AutoCompleteHints extends StatelessWidget {
           .toList(),
     );
   }
+}
+
+void _showClearAllDialog(BuildContext context, WidgetRef ref) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('전체 삭제'),
+      content: const Text('모든 최근 검색어를 삭제합니다.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('취소'),
+        ),
+        TextButton(
+          onPressed: () {
+            ref.read(recentFoodControllerProvider.notifier).clear();
+            Navigator.pop(ctx);
+          },
+          child: const Text('삭제'),
+        ),
+      ],
+    ),
+  );
 }
