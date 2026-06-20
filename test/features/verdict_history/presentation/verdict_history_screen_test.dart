@@ -179,8 +179,8 @@ void main() {
       await tester.pumpWidget(_wrap(repo));
       await _settle(tester);
 
-      expect(find.text('6월 17일'), findsOneWidget);
-      expect(find.text('6월 18일'), findsOneWidget);
+      expect(find.text('2026.06.17'), findsOneWidget);
+      expect(find.text('2026.06.18'), findsOneWidget);
     });
   });
 
@@ -424,6 +424,24 @@ void main() {
         find.widgetWithText(FilterChip, '전체'),
       );
       expect(allChip.selected, isTrue);
+    });
+  });
+
+  group('VerdictHistoryScreen — 날짜 헤더 포맷', () {
+    testWidgets("날짜 헤더 '2026.06.20'이 렌더된다", (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [
+          VerdictHistoryItem(
+            foodName: '두부',
+            verdict: 'safe',
+            checkedAt: DateTime(2026, 6, 20, 12, 0),
+          ),
+        ],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      expect(find.text('2026.06.20'), findsOneWidget);
     });
   });
 }

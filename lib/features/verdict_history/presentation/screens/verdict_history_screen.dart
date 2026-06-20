@@ -258,7 +258,8 @@ Map<String, List<VerdictHistoryItem>> _groupByDate(
   final result = <String, List<VerdictHistoryItem>>{};
   for (final item in items) {
     final local = item.checkedAt.toLocal();
-    final key = '${local.month}월 ${local.day}일';
+    final key =
+        '${local.year}.${local.month.toString().padLeft(2, '0')}.${local.day.toString().padLeft(2, '0')}';
     result.putIfAbsent(key, () => []).add(item);
   }
   return result;
