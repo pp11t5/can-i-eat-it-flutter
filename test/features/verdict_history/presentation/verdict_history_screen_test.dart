@@ -532,4 +532,33 @@ void main() {
       expect(find.byIcon(Icons.share_outlined), findsOneWidget);
     });
   });
+
+  group('VerdictHistoryScreen — W88-F2 즐겨찾기 토글', () {
+    testWidgets('Icons.favorite_border 아이콘이 렌더된다', (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [_item('두부', 'safe')],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+    });
+
+    testWidgets('Icons.favorite_border 탭 시 Icons.favorite로 변경된다', (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [_item('두부', 'safe')],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+      expect(find.byIcon(Icons.favorite), findsNothing);
+
+      await tester.tap(find.byIcon(Icons.favorite_border));
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
+      expect(find.byIcon(Icons.favorite_border), findsNothing);
+    });
+  });
 }
