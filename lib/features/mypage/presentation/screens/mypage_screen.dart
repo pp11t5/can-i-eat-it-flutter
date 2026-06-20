@@ -388,6 +388,15 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
                     onTap: () => _showInquiryDialog(context),
                   ),
 
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.link),
+                    title: const Text('계정 연동'),
+                    subtitle: const Text('Google · Apple'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _showAccountLinkDialog(context),
+                  ),
+
                   const Divider(color: AppColors.divider, height: 1),
                   const SizedBox(height: AppSpacing.sectionGap),
 
@@ -525,6 +534,22 @@ void _showInquiryDialog(BuildContext context) {
         TextButton(
           onPressed: () => Navigator.pop(ctx),
           child: const Text('확인'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showAccountLinkDialog(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('계정 연동'),
+      content: const Text('연동할 계정을 선택하세요.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('닫기'),
         ),
       ],
     ),

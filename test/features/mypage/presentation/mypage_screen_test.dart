@@ -605,4 +605,28 @@ void main() {
       expect(find.text('최신 버전을 사용 중입니다.'), findsOneWidget);
     });
   });
+
+  group('MypageScreen — 계정 연동 섹션', () {
+    testWidgets('Icons.link 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      await tester.ensureVisible(find.byIcon(Icons.link));
+      expect(find.byIcon(Icons.link), findsOneWidget);
+    });
+
+    testWidgets("Icons.link 탭 시 '계정 연동' 다이얼로그 타이틀이 표시된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      await tester.ensureVisible(find.byIcon(Icons.link));
+      await tester.tap(find.byIcon(Icons.link));
+      await _settle(tester);
+
+      // ListTile 타이틀 + 다이얼로그 타이틀 2개 모두 '계정 연동'
+      expect(find.text('계정 연동'), findsAtLeastNWidgets(1));
+      // 다이얼로그 content 텍스트로 다이얼로그 노출 확인
+      expect(find.text('연동할 계정을 선택하세요.'), findsOneWidget);
+    });
+  });
 }
