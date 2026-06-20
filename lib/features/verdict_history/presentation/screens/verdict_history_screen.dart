@@ -101,6 +101,37 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
             ),
           ),
 
+          // ── 통계 차트 섹션 ───────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _StatChip(
+                  label: '권장',
+                  count: historyAsync.valueOrNull
+                          ?.where((i) => i.verdict == 'safe')
+                          .length ??
+                      0,
+                ),
+                _StatChip(
+                  label: '주의',
+                  count: historyAsync.valueOrNull
+                          ?.where((i) => i.verdict == 'caution')
+                          .length ??
+                      0,
+                ),
+                _StatChip(
+                  label: '위험',
+                  count: historyAsync.valueOrNull
+                          ?.where((i) => i.verdict == 'avoid')
+                          .length ??
+                      0,
+                ),
+              ],
+            ),
+          ),
+
           // ── 검색 필드 ─────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -561,4 +592,16 @@ void _showItemMenu(BuildContext context, VerdictHistoryItem item) {
       ],
     ),
   );
+}
+
+class _StatChip extends StatelessWidget {
+  const _StatChip({required this.label, required this.count});
+
+  final String label;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Chip(label: Text('$label $count'));
+  }
 }

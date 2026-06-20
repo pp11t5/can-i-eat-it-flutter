@@ -533,6 +533,18 @@ void main() {
     });
   });
 
+  group('VerdictHistoryScreen — W93-F2 통계 차트 섹션', () {
+    testWidgets('항목이 있을 때 Chip 위젯이 렌더된다', (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [_item('두부', 'safe')],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      expect(find.byType(Chip), findsAtLeastNWidgets(1));
+    });
+  });
+
   group('VerdictHistoryScreen — W91-F2 날짜 그룹 헤더 스타일', () {
     testWidgets('날짜 헤더 텍스트가 렌더된다', (tester) async {
       final repo = MockVerdictHistoryRepository(
