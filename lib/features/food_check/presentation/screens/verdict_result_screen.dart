@@ -75,6 +75,11 @@ class VerdictResultScreen extends ConsumerWidget {
             tooltip: '저장',
             onPressed: () => _showSaveDialog(context),
           ),
+          IconButton(
+            icon: const Icon(Icons.print_outlined),
+            tooltip: '인쇄',
+            onPressed: () => _showPrintDialog(context),
+          ),
         ],
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1),
@@ -852,6 +857,22 @@ void _showFeedbackDialog(BuildContext context) {
     builder: (ctx) => AlertDialog(
       title: const Text('피드백'),
       content: const Text('소중한 의견 감사합니다.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('닫기'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showPrintDialog(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('인쇄'),
+      content: const Text('인쇄 기능은 준비 중입니다.'),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx),
