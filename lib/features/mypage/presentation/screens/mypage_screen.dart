@@ -417,10 +417,13 @@ Future<void> _showLogoutDialog(BuildContext context, WidgetRef ref) {
     context: context,
     builder: (ctx) => AlertDialog(
       title: const Text('로그아웃'),
-      content: const Text('정말 로그아웃하시겠어요?'),
+      content: const Text('정말 로그아웃 하시겠어요?\n로그인 정보가 초기화됩니다.'),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(),
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.textSecondary,
+          ),
           child: const Text('취소'),
         ),
         TextButton(
@@ -430,7 +433,7 @@ Future<void> _showLogoutDialog(BuildContext context, WidgetRef ref) {
             context.go('/login');
           },
           style: TextButton.styleFrom(
-            foregroundColor: Colors.red,
+            foregroundColor: AppColors.danger,
           ),
           child: const Text('로그아웃'),
         ),

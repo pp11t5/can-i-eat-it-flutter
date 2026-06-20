@@ -133,7 +133,7 @@ void main() {
       await tester.tap(find.text('로그아웃').first);
       await _settle(tester);
 
-      expect(find.text('정말 로그아웃하시겠어요?'), findsOneWidget);
+      expect(find.textContaining('정말 로그아웃 하시겠어요?'), findsOneWidget);
       expect(find.text('취소'), findsOneWidget);
     });
 
@@ -150,7 +150,7 @@ void main() {
       await tester.tap(find.text('취소'));
       await _settle(tester);
 
-      expect(find.text('정말 로그아웃하시겠어요?'), findsNothing);
+      expect(find.textContaining('정말 로그아웃 하시겠어요?'), findsNothing);
     });
   });
 
@@ -551,6 +551,20 @@ void main() {
       await _settle(tester);
 
       expect(find.text('문의하기'), findsAtLeastNWidgets(1));
+    });
+  });
+
+  group('MypageScreen — 로그아웃 다이얼로그 개선', () {
+    testWidgets("로그아웃 다이얼로그 '로그인 정보가 초기화됩니다.' 텍스트가 표시된다",
+        (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      await tester.ensureVisible(find.text('로그아웃'));
+      await tester.tap(find.text('로그아웃'));
+      await _settle(tester);
+
+      expect(find.textContaining('로그인 정보가 초기화됩니다.'), findsOneWidget);
     });
   });
 }
