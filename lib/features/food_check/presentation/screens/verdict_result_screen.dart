@@ -561,6 +561,26 @@ class _CtaSection extends StatelessWidget {
             label: const Text('재판정 요청'),
           ),
         ),
+        const SizedBox(height: 8),
+        // "도움이 됐어요" — 피드백 버튼 full-width
+        SizedBox(
+          width: double.infinity,
+          height: 54,
+          child: OutlinedButton.icon(
+            onPressed: () => _showFeedbackDialog(context),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+              side: const BorderSide(color: AppColors.border),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+              ),
+              textStyle: AppTextStyles.body1Bold,
+              padding: EdgeInsets.zero,
+            ),
+            icon: const Icon(Icons.thumb_up_outlined, size: 18),
+            label: const Text('도움이 됐어요'),
+          ),
+        ),
       ],
     );
   }
@@ -820,6 +840,22 @@ void _showSaveDialog(BuildContext context) {
         TextButton(
           onPressed: () => Navigator.pop(ctx),
           child: const Text('저장'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showFeedbackDialog(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('피드백'),
+      content: const Text('소중한 의견 감사합니다.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('닫기'),
         ),
       ],
     ),
