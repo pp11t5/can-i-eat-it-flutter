@@ -55,11 +55,11 @@ void main() {
       );
       await _settle(tester);
 
-      await tester.tap(find.text('전체 삭제'));
+      await tester.tap(find.byIcon(Icons.delete_outline));
       await _settle(tester);
 
-      expect(find.text('최근 검색 삭제'), findsOneWidget);
-      expect(find.text('최근 검색 기록을 모두 삭제하시겠어요?'), findsOneWidget);
+      expect(find.text('검색 기록 삭제'), findsOneWidget);
+      expect(find.text('모든 검색 기록을 삭제하시겠어요?'), findsOneWidget);
       expect(find.text('취소'), findsOneWidget);
       expect(find.text('삭제'), findsOneWidget);
     });

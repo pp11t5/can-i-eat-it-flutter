@@ -17,8 +17,8 @@ Future<void> showClearSearchHistoryDialog(
     barrierColor: Colors.black.withValues(alpha: 0.35),
     barrierDismissible: true,
     builder: (ctx) => AlertDialog(
-      title: const Text('최근 검색 삭제'),
-      content: const Text('최근 검색 기록을 모두 삭제하시겠어요?'),
+      title: const Text('검색 기록 삭제'),
+      content: const Text('모든 검색 기록을 삭제하시겠어요?'),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(),

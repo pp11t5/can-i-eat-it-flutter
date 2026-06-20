@@ -102,7 +102,7 @@ void main() {
 
       expect(find.text('된장찌개'), findsOneWidget);
       expect(find.text('오렌지주스'), findsOneWidget);
-      expect(find.text('전체 삭제'), findsOneWidget);
+      expect(find.byIcon(Icons.delete_outline), findsOneWidget);
     });
 
     testWidgets('행의 X를 탭하면 해당 항목이 목록에서 사라진다', (tester) async {
@@ -147,11 +147,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('전체 삭제'));
+      await tester.tap(find.byIcon(Icons.delete_outline));
       await tester.pumpAndSettle();
 
-      expect(find.text('최근 검색 삭제'), findsOneWidget);
-      expect(find.text('최근 검색 기록을 모두 삭제하시겠어요?'), findsOneWidget);
+      expect(find.text('검색 기록 삭제'), findsOneWidget);
+      expect(find.text('모든 검색 기록을 삭제하시겠어요?'), findsOneWidget);
     });
 
     testWidgets('다이얼로그에서 삭제하기 탭 시 기록이 전부 사라진다', (tester) async {
@@ -164,13 +164,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('전체 삭제'));
+      await tester.tap(find.byIcon(Icons.delete_outline));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('삭제'));
       await tester.pumpAndSettle();
 
-      expect(find.text('최근 검색 기록을 모두 삭제하시겠어요?'), findsNothing);
+      expect(find.text('모든 검색 기록을 삭제하시겠어요?'), findsNothing);
       expect(find.text('아직 검색 기록이 없어요'), findsOneWidget);
     });
 
@@ -184,13 +184,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('전체 삭제'));
+      await tester.tap(find.byIcon(Icons.delete_outline));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('취소'));
       await tester.pumpAndSettle();
 
-      expect(find.text('검색 기록을 삭제하시겠어요?'), findsNothing);
+      expect(find.text('모든 검색 기록을 삭제하시겠어요?'), findsNothing);
       expect(find.text('된장찌개'), findsOneWidget);
       expect(find.text('오렌지주스'), findsOneWidget);
     });
@@ -494,6 +494,42 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(RichText), findsAtLeastNWidgets(1));
+    });
+  });
+
+  group('FoodCheckScreen — 검색 기록 삭제 확인 다이얼로그', () {
+    testWidgets("Icons.delete_outline 탭 시 '검색 기록 삭제' 텍스트가 표시된다",
+        (tester) async {
+      final repo = MockFoodRepository.withRecent([
+        _recentFood('r-1', '된장찌개'),
+      ]);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
+
+      expect(find.text('검색 기록 삭제'), findsOneWidget);
+    });
+
+    testWidgets("다이얼로그 '삭제' 탭 시 다이얼로그가 닫힌다", (tester) async {
+      final repo = MockFoodRepository.withRecent([
+        _recentFood('r-1', '된장찌개'),
+      ]);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('삭제'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('검색 기록 삭제'), findsNothing);
     });
   });
 }

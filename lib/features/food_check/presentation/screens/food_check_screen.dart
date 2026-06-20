@@ -757,14 +757,14 @@ class _RecentSection extends StatelessWidget {
                       color: AppColors.textSecondary,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () => showClearSearchHistoryDialog(context, ref),
-                    child: Text(
-                      '전체 삭제',
-                      style: AppTextStyles.body1Medium.copyWith(
-                        color: AppColors.danger,
-                      ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: AppColors.danger,
                     ),
+                    tooltip: '검색 기록 삭제',
+                    onPressed: () =>
+                        showClearSearchHistoryDialog(context, ref),
                   ),
                 ],
               ),
