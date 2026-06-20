@@ -283,4 +283,15 @@ void main() {
       expect(find.text('관련 음식이 없습니다.'), findsNothing);
     });
   });
+
+  group('VerdictResultScreen — 음식 이미지 플레이스홀더', () {
+    testWidgets("'음식 이미지' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: _kVerdict, onRetry: () {})),
+      );
+      await _settle(tester);
+
+      expect(find.text('음식 이미지'), findsOneWidget);
+    });
+  });
 }

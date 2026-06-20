@@ -323,11 +323,23 @@ class _HeroSection extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: color.withValues(alpha: 0.25), width: 2),
           ),
-          child: const Center(
-            child: Icon(
-              Icons.restaurant,
-              size: 32,
-              color: Colors.white,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.restaurant,
+                  size: 32,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '음식 이미지',
+                  style: AppTextStyles.caption1Medium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
