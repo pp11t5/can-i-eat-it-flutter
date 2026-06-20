@@ -27,9 +27,26 @@ class HealthScoreWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
+              Row(
+                children: [
+                  Text(
+                    '85',
+                    style: AppTextStyles.header2Bold.copyWith(
+                      color: AppColors.primary,
+                      fontSize: 48,
+                    ),
+                  ),
+                  Text(
+                    ' / 100',
+                    style: AppTextStyles.body2Regular.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
               Text(
-                '85점',
-                style: AppTextStyles.header2Bold.copyWith(
+                '매우 좋음',
+                style: AppTextStyles.body2Regular.copyWith(
                   color: AppColors.primary,
                 ),
               ),

@@ -13,12 +13,12 @@ void main() {
       expect(find.text('오늘의 건강 점수'), findsOneWidget);
     });
 
-    testWidgets("'85점' 텍스트가 렌더된다", (tester) async {
+    testWidgets("'85점' 텍스트 대신 '85' 텍스트가 렌더된다", (tester) async {
       await tester.pumpWidget(
         const MaterialApp(home: Scaffold(body: HealthScoreWidget())),
       );
 
-      expect(find.text('85점'), findsOneWidget);
+      expect(find.text('85'), findsOneWidget);
     });
 
     testWidgets('CircularProgressIndicator가 렌더된다', (tester) async {
@@ -27,6 +27,22 @@ void main() {
       );
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    });
+
+    testWidgets("'85' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: HealthScoreWidget())),
+      );
+
+      expect(find.text('85'), findsOneWidget);
+    });
+
+    testWidgets("'매우 좋음' 텍스트가 렌더된다", (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: HealthScoreWidget())),
+      );
+
+      expect(find.text('매우 좋음'), findsOneWidget);
     });
   });
 }

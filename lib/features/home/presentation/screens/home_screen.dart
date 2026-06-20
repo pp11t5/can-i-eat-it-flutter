@@ -18,6 +18,7 @@ import 'package:can_i_eat_it/features/home/presentation/widgets/weather_banner.d
 import 'package:can_i_eat_it/features/home/presentation/widgets/recent_search_chip.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/goal_progress_widget.dart';
+import 'package:can_i_eat_it/features/home/presentation/widgets/health_score_widget.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/restricted_food_banner_widget.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/weather_diet_widget.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/today_meal_summary_widget.dart';
@@ -230,7 +231,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
               // ── 5. 빈 상태 유도 위젯 (최근 검색 없을 때만) ──────────────
               _HomeEmptyState(),
-              // ── 6. 섭취 제한 음식 경고 배너 ──────────────────────────
+              // ── 6. 건강 점수 위젯 ─────────────────────────────────────
+              const HealthScoreWidget(),
+              const SizedBox(height: AppSpacing.contentGap),
+
+              // ── 6-1. 섭취 제한 음식 경고 배너 ────────────────────────
               const RestrictedFoodBannerWidget(),
               const SizedBox(height: AppSpacing.contentGap),
 
