@@ -74,6 +74,13 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
                     onTap: () => context.push('/mypage/profile-edit'),
                     child: AccountHeaderWidget(session: session),
                   ),
+                  Center(
+                    child: TextButton.icon(
+                      icon: const Icon(Icons.camera_alt_outlined),
+                      label: const Text('프로필 사진 변경'),
+                      onPressed: () => _showProfilePhotoDialog(context),
+                    ),
+                  ),
 
                   const Divider(color: AppColors.divider, height: 1),
                   const SizedBox(height: AppSpacing.sectionGap),
@@ -582,6 +589,27 @@ void _showDataResetDialog(BuildContext context) {
           style: TextButton.styleFrom(foregroundColor: AppColors.danger),
           onPressed: () => Navigator.pop(ctx),
           child: const Text('초기화'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showProfilePhotoDialog(BuildContext context) {
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (ctx) => Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.photo_library_outlined),
+          title: const Text('갤러리에서 선택'),
+          onTap: () => Navigator.pop(ctx),
+        ),
+        ListTile(
+          leading: const Icon(Icons.camera_alt_outlined),
+          title: const Text('카메라로 촬영'),
+          onTap: () => Navigator.pop(ctx),
         ),
       ],
     ),

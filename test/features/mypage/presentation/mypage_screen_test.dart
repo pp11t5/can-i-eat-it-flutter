@@ -630,6 +630,27 @@ void main() {
     });
   });
 
+  group('MypageScreen — W92-F2 프로필 사진 변경', () {
+    testWidgets('Icons.camera_alt_outlined 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.camera_alt_outlined), findsAtLeastNWidgets(1));
+    });
+
+    testWidgets("Icons.camera_alt_outlined 탭 시 '갤러리에서 선택' 텍스트가 표시된다",
+        (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      // TextButton.icon의 camera_alt_outlined 탭
+      await tester.tap(find.byIcon(Icons.camera_alt_outlined).first);
+      await _settle(tester);
+
+      expect(find.text('갤러리에서 선택'), findsOneWidget);
+    });
+  });
+
   group('MypageScreen — 데이터 초기화', () {
     testWidgets('Icons.restart_alt 아이콘이 렌더된다', (tester) async {
       await tester.pumpWidget(_wrap());
