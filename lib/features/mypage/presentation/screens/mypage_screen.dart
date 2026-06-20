@@ -185,6 +185,25 @@ class _MypageScreenState extends ConsumerState<MypageScreen> {
                     ),
                   ),
 
+                  // ── ③-2. 테마 색상 선택 ──────────────────────────────
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(
+                      Icons.palette_outlined,
+                      color: AppColors.textPrimary,
+                    ),
+                    title: Text(
+                      '테마 색상',
+                      style: AppTextStyles.body1Medium
+                          .copyWith(color: AppColors.textPrimary),
+                    ),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: AppColors.textSecondary,
+                    ),
+                    onTap: () => _showThemeColorDialog(context),
+                  ),
+
                   const Divider(color: AppColors.divider, height: 1),
                   const SizedBox(height: AppSpacing.sectionGap),
 
@@ -408,6 +427,43 @@ void _showPrivacyDialog(BuildContext context) {
         TextButton(
           onPressed: () => Navigator.pop(ctx),
           child: const Text('확인'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showThemeColorDialog(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('테마 색상 선택'),
+      content: Wrap(
+        spacing: 8,
+        children: [
+          AppColors.primary,
+          Colors.green,
+          Colors.orange,
+        ]
+            .map(
+              (color) => GestureDetector(
+                onTap: () => Navigator.pop(ctx),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: color,
+                  ),
+                ),
+              ),
+            )
+            .toList(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('닫기'),
         ),
       ],
     ),

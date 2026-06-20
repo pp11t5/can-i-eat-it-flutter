@@ -459,4 +459,25 @@ void main() {
       expect(find.text('서비스가 불편해요'), findsOneWidget);
     });
   });
+
+  group('MypageScreen — 테마 색상 선택', () {
+    testWidgets('Icons.palette_outlined 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.palette_outlined), findsOneWidget);
+    });
+
+    testWidgets("Icons.palette_outlined 탭 시 '테마 색상 선택' 텍스트가 표시된다",
+        (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      await tester.ensureVisible(find.byIcon(Icons.palette_outlined));
+      await tester.tap(find.byIcon(Icons.palette_outlined));
+      await _settle(tester);
+
+      expect(find.text('테마 색상 선택'), findsOneWidget);
+    });
+  });
 }
