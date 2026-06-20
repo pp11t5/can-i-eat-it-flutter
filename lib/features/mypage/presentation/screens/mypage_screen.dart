@@ -418,7 +418,7 @@ Future<void> _showUpdateCheckDialog(BuildContext context) async {
     context: context,
     builder: (ctx) => AlertDialog(
       title: const Text('업데이트 확인'),
-      content: const Text('현재 최신 버전을 사용 중이에요.'),
+      content: const Text('최신 버전을 사용 중입니다.'),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx),

@@ -342,7 +342,7 @@ void main() {
       await tester.tap(find.text('업데이트 확인'));
       await _settle(tester);
 
-      expect(find.text('현재 최신 버전을 사용 중이에요.'), findsOneWidget);
+      expect(find.text('최신 버전을 사용 중입니다.'), findsOneWidget);
     });
   });
 
@@ -581,6 +581,28 @@ void main() {
       await _settle(tester);
 
       expect(find.text('판정 결과 알림을 받습니다.'), findsOneWidget);
+    });
+  });
+
+  group('MypageScreen — 앱 업데이트 확인 기능', () {
+    testWidgets('Icons.system_update_outlined 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.system_update_outlined), findsOneWidget);
+    });
+
+    testWidgets(
+        "Icons.system_update_outlined 탭 시 '최신 버전을 사용 중입니다.' 텍스트가 표시된다",
+        (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      await tester.ensureVisible(find.byIcon(Icons.system_update_outlined));
+      await tester.tap(find.byIcon(Icons.system_update_outlined));
+      await _settle(tester);
+
+      expect(find.text('최신 버전을 사용 중입니다.'), findsOneWidget);
     });
   });
 }
