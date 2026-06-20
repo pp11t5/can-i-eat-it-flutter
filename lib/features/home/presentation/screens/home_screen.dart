@@ -67,6 +67,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
+  void _showNotificationPanel(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => const ListTile(
+        title: Text('새로운 판정 알림이 없습니다.'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // 토스트 표시 여부를 listen — data(true) 수신 시 1회 표시.
@@ -79,6 +88,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFFBFBFB), // Figma bg #FBFBFB
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFFBFBFB),
+        elevation: 0,
+        actions: [
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                onPressed: () => _showNotificationPanel(context),
+              ),
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: AppColors.danger,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(

@@ -256,4 +256,25 @@ void main() {
       expect(find.byIcon(Icons.add), findsOneWidget);
     });
   });
+
+  group('HomeScreen — W88-F1 알림 뱃지', () {
+    testWidgets('Icons.notifications_outlined 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.notifications_outlined), findsOneWidget);
+    });
+
+    testWidgets(
+        "Icons.notifications_outlined 탭 시 '새로운 판정 알림이 없습니다.' 텍스트가 표시된다",
+        (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.notifications_outlined));
+      await tester.pumpAndSettle();
+
+      expect(find.text('새로운 판정 알림이 없습니다.'), findsOneWidget);
+    });
+  });
 }
