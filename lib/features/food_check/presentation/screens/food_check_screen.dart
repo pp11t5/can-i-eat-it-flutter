@@ -883,17 +883,25 @@ class _AutoCompleteHints extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hints = ['$query 볶음', '$query 찜', '$query 구이'];
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: hints
-          .map(
-            (hint) => ListTile(
-              leading: const Icon(Icons.search),
-              title: Text(hint),
-              onTap: () {},
-            ),
-          )
-          .toList(),
+    return Card(
+      elevation: 4,
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      child: ListView(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        children: hints
+            .map(
+              (hint) => ListTile(
+                leading: const Icon(
+                  Icons.search,
+                  color: AppColors.textSecondary,
+                ),
+                title: Text(hint),
+                onTap: () {},
+              ),
+            )
+            .toList(),
+      ),
     );
   }
 }

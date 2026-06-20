@@ -591,6 +591,26 @@ void main() {
     });
   });
 
+  group('FoodCheckScreen — W92-F1 자동완성 드롭다운 스타일', () {
+    Future<void> settle(WidgetTester t) async {
+      for (var i = 0; i < 10; i++) {
+        await t.pump(const Duration(milliseconds: 50));
+      }
+    }
+
+    testWidgets('검색어 입력 시 Icons.search 아이콘이 자동완성 힌트 항목에 렌더된다',
+        (tester) async {
+      await tester.pumpWidget(_wrap([]));
+      await settle(tester);
+
+      await tester.enterText(find.byType(TextField), '두부');
+      await settle(tester);
+
+      // _AutoCompleteHints의 ListTile leading Icons.search
+      expect(find.byIcon(Icons.search), findsAtLeastNWidgets(1));
+    });
+  });
+
   group('FoodCheckScreen — W90-F1 검색 히스토리 전체 삭제', () {
     Future<void> settle(WidgetTester t) async {
       for (var i = 0; i < 10; i++) {
