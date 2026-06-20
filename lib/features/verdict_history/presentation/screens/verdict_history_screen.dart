@@ -385,7 +385,7 @@ class _VerdictHistoryTileState extends State<_VerdictHistoryTile> {
         children: [
           IconButton(
             icon: Icon(
-              _isFavorited ? Icons.bookmark : Icons.bookmark_border,
+              _isFavorited ? Icons.favorite : Icons.favorite_border,
               color: _isFavorited ? AppColors.primary : AppColors.textSecondary,
             ),
             onPressed: () => setState(() => _isFavorited = !_isFavorited),

@@ -280,27 +280,54 @@ void main() {
   });
 
   group('VerdictHistoryScreen — 즐겨찾기', () {
-    testWidgets('Icons.bookmark_border 아이콘이 렌더된다', (tester) async {
+    testWidgets('Icons.favorite_border 아이콘이 렌더된다', (tester) async {
       final repo = MockVerdictHistoryRepository(
         initialItems: [_item('두부', 'safe')],
       );
       await tester.pumpWidget(_wrap(repo));
       await _settle(tester);
 
-      expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
+      expect(find.byIcon(Icons.favorite_border), findsOneWidget);
     });
 
-    testWidgets('즐겨찾기 버튼 탭 시 Icons.bookmark로 변경된다', (tester) async {
+    testWidgets('즐겨찾기 버튼 탭 시 Icons.favorite로 변경된다', (tester) async {
       final repo = MockVerdictHistoryRepository(
         initialItems: [_item('두부', 'safe')],
       );
       await tester.pumpWidget(_wrap(repo));
       await _settle(tester);
 
-      await tester.tap(find.byIcon(Icons.bookmark_border));
+      await tester.tap(find.byIcon(Icons.favorite_border));
       await _settle(tester);
 
-      expect(find.byIcon(Icons.bookmark), findsOneWidget);
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
+    });
+  });
+
+  group('VerdictHistoryScreen — 즐겨찾기 토글', () {
+    testWidgets('Icons.favorite_border 아이콘이 초기 상태에서 렌더된다', (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [_item('두부', 'safe')],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+    });
+
+    testWidgets('Icons.favorite_border 탭 시 Icons.favorite로 변경된다',
+        (tester) async {
+      final repo = MockVerdictHistoryRepository(
+        initialItems: [_item('두부', 'safe')],
+      );
+      await tester.pumpWidget(_wrap(repo));
+      await _settle(tester);
+
+      await tester.tap(find.byIcon(Icons.favorite_border));
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
+      expect(find.byIcon(Icons.favorite_border), findsNothing);
     });
   });
 
