@@ -78,6 +78,11 @@ class _VerdictHistoryScreenState extends ConsumerState<VerdictHistoryScreen> {
             tooltip: '내보내기',
             onPressed: () => _showExportDialog(context),
           ),
+          IconButton(
+            icon: const Icon(Icons.search, color: AppColors.textPrimary),
+            tooltip: '검색',
+            onPressed: () => _showSearchDialog(context),
+          ),
         ],
       ),
       body: Column(
@@ -507,6 +512,28 @@ void _showDetailSheet(BuildContext context, VerdictHistoryItem item) {
           ),
         ],
       ),
+    ),
+  );
+}
+
+void _showSearchDialog(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('검색'),
+      content: const TextField(
+        decoration: InputDecoration(hintText: '음식 이름 검색'),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('취소'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('검색'),
+        ),
+      ],
     ),
   );
 }

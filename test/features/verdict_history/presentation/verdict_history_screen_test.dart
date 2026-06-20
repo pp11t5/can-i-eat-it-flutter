@@ -471,4 +471,24 @@ void main() {
       expect(find.text('2026.06.20'), findsOneWidget);
     });
   });
+
+  group('VerdictHistoryScreen — 검색 기능', () {
+    testWidgets('Icons.search 아이콘이 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      expect(find.byIcon(Icons.search), findsAtLeastNWidgets(1));
+    });
+
+    testWidgets("Icons.search AppBar 버튼 탭 시 '검색' 텍스트가 표시된다", (tester) async {
+      await tester.pumpWidget(_wrap());
+      await _settle(tester);
+
+      // AppBar의 search IconButton — tooltip '검색'으로 특정
+      await tester.tap(find.byTooltip('검색'));
+      await _settle(tester);
+
+      expect(find.text('검색'), findsAtLeastNWidgets(1));
+    });
+  });
 }
