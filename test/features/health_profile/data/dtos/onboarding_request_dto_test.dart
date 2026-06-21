@@ -109,7 +109,7 @@ void main() {
       // symptoms = symptomFrequency (heartburn_reflux, post_meal_cough)
       expect(json['symptoms'], ['heartburn_reflux', 'post_meal_cough']);
       expect(json['triggers'], ['spicy', 'caffeine']);
-      expect(json['allergens'], ['shellfish']);
+      expect(json['allergens'], ['crustacean']);
       expect(json['medications'], ['omeprazole']);
       expect(json['customTriggerText'], '탄산음료');
 

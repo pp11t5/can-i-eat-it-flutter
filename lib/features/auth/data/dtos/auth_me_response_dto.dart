@@ -23,10 +23,14 @@ extension AuthMeResponseDtoX on AuthMeResponseDto {
   /// DTO → domain [AuthSession] 매핑.
   ///
   /// me 엔드포인트에서 provider 를 알 수 없으므로 호출자가 [provider] 를 주입한다.
+  /// nickname → displayName, email, profileImage → profileImageUrl 을 실어 반환한다.
   AuthSession toEntity(AuthProvider provider) => AuthSession(
         userId: userId,
         provider: provider,
         hasAgreedTerms: true,
         accountStatus: AccountStatus.active,
+        displayName: nickname,
+        email: email,
+        profileImageUrl: profileImage,
       );
 }

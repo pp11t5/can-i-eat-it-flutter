@@ -1,0 +1,144 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:can_i_eat_it/app/theme/app_theme.dart';
+import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
+import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
+import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
+import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
+import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
+import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
+
+// ---------------------------------------------------------------------------
+// Stubs
+// ---------------------------------------------------------------------------
+
+class _NoopAnalytics implements AnalyticsService {
+  @override
+  Future<void> logFunnel(FunnelEvent event,
+      {Map<String, Object?> params = const {}}) async {}
+  @override
+  Future<void> logEvent(String name,
+      {Map<String, Object?> params = const {}}) async {}
+}
+
+// ---------------------------------------------------------------------------
+// 헬퍼
+// ---------------------------------------------------------------------------
+
+Widget _buildMypageScreen({
+  AuthSession? session,
+  bool withProfile = true,
+}) {
+  final repo = MockAuthRepository(initialSession: session);
+  final profileRepo = withProfile
+      ? MockHealthProfileRepository.completed()
+      : MockHealthProfileRepository.noProfile();
+
+  return ProviderScope(
+    overrides: [
+      // ignore: scoped_providers_should_specify_dependencies
+      authRepositoryProvider.overrideWithValue(repo),
+      // ignore: scoped_providers_should_specify_dependencies
+      healthProfileRepositoryProvider.overrideWithValue(profileRepo),
+      // ignore: scoped_providers_should_specify_dependencies
+      analyticsServiceProvider.overrideWithValue(_NoopAnalytics()),
+      // ignore: scoped_providers_should_specify_dependencies
+      profileCacheProvider.overrideWithValue(InMemoryProfileCache()),
+    ],
+    child: MaterialApp(
+      theme: AppTheme.light,
+      debugShowCheckedModeBanner: false,
+      home: const MypageScreen(),
+    ),
+  );
+}
+
+void main() {
+  group('MypageScreen', () {
+    testWidgets('앱바에 "마이페이지" 타이틀이 표시된다', (tester) async {
+      await tester.pumpWidget(_buildMypageScreen());
+      await tester.pumpAndSettle();
+
+      expect(find.text('마이페이지'), findsOneWidget);
+    });
+
+    testWidgets('session이 null일 때 닉네임이 "사용자"로 표시된다', (tester) async {
+      await tester.pumpWidget(_buildMypageScreen(session: null));
+      await tester.pumpAndSettle();
+
+      expect(find.text('사용자'), findsOneWidget);
+    });
+
+    testWidgets('displayName이 있으면 해당 닉네임이 표시된다', (tester) async {
+      const session = AuthSession(
+        userId: 'test-user',
+        provider: AuthProvider.kakao,
+        hasAgreedTerms: true,
+        displayName: '홍길동',
+      );
+      await tester.pumpWidget(_buildMypageScreen(session: session));
+      await tester.pumpAndSettle();
+
+      expect(find.text('홍길동'), findsOneWidget);
+    });
+
+    testWidgets('프로필이 있을 때 질환 라벨 "역류성 식도염 관리중"이 표시된다', (tester) async {
+      const session = AuthSession(
+        userId: 'test-user',
+        provider: AuthProvider.kakao,
+        hasAgreedTerms: true,
+      );
+      await tester.pumpWidget(
+        _buildMypageScreen(session: session, withProfile: true),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('역류성 식도염 관리중'), findsOneWidget);
+    });
+
+    testWidgets('프로필이 없을 때 "건강 정보 미설정"이 표시된다', (tester) async {
+      await tester.pumpWidget(
+        _buildMypageScreen(withProfile: false),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('건강 정보 미설정'), findsOneWidget);
+    });
+
+    testWidgets('음식 히스토리 placeholder "—"가 표시된다', (tester) async {
+      await tester.pumpWidget(_buildMypageScreen());
+      await tester.pumpAndSettle();
+
+      // 안전 음식, 주의 음식 "—" 2개 표시
+      expect(find.text('—'), findsWidgets);
+    });
+
+    testWidgets('주간 기록 "전체보기" 버튼이 표시된다', (tester) async {
+      await tester.pumpWidget(_buildMypageScreen());
+      await tester.pumpAndSettle();
+
+      expect(find.text('전체보기'), findsOneWidget);
+    });
+
+    testWidgets('알림 설정 항목이 표시된다', (tester) async {
+      await tester.pumpWidget(_buildMypageScreen());
+      await tester.pumpAndSettle();
+
+      expect(find.text('알림 설정'), findsOneWidget);
+    });
+
+    testWidgets('약관 항목 2개가 표시된다', (tester) async {
+      await tester.pumpWidget(_buildMypageScreen());
+      await tester.pumpAndSettle();
+
+      expect(find.text('개인정보 보호 약관'), findsOneWidget);
+      expect(find.text('서비스 이용 약관'), findsOneWidget);
+    });
+  });
+}

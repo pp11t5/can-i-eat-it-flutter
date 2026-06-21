@@ -4,26 +4,28 @@ import 'package:can_i_eat_it/core/network/api_endpoints.dart';
 import 'package:can_i_eat_it/core/network/failure_mapper.dart';
 import 'package:can_i_eat_it/features/auth/data/dtos/onboarding_status_dto.dart';
 import 'package:can_i_eat_it/features/health_profile/data/dtos/onboarding_request_dto.dart';
+import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/repositories/health_profile_repository.dart';
 
 /// [HealthProfileRepository] 실 구현 (ADR-0007 §3-1 (6-D)).
 ///
 /// - [onboardedStatus]: `GET /onboarding/status` → boolean.
-/// - [submitProfile]: `POST /onboarding` → void.
-/// - [currentProfile]: 실서버에 전체 프로필 GET 엔드포인트 부재로 W3에서 항상 null 반환.
-///   게이트 판정에는 [onboardedStatus]를 사용한다 (ADR-0007 §3-1 (6-D)).
+/// - [submitProfile]: `POST /onboarding` → 서버 성공 후 [ProfileCache] 에 저장.
+/// - [currentProfile]: 서버 GET 엔드포인트 부재 → [ProfileCache] 우선, 없으면 null.
 class HealthProfileRepositoryImpl implements HealthProfileRepository {
-  HealthProfileRepositoryImpl({required Dio dio}) : _dio = dio;
+  HealthProfileRepositoryImpl({
+    required Dio dio,
+    required ProfileCache cache,
+  })  : _dio = dio,
+        _cache = cache;
 
   final Dio _dio;
+  final ProfileCache _cache;
 
-  /// W3에서 전체 프로필 GET 엔드포인트 부재 — null 반환.
-  ///
-  /// 게이트는 [onboardedStatus]를 사용하므로 이 메서드가 null을 반환해도
-  /// 세션 상태 판정에 영향 없다 (ADR-0007 §3-1 (6-D)).
+  /// 캐시 우선 반환. 캐시 미존재 시 null (서버 GET 엔드포인트 부재).
   @override
-  Future<HealthProfile?> currentProfile() async => null;
+  Future<HealthProfile?> currentProfile() async => _cache.read();
 
   @override
   Future<bool> onboardedStatus() async {
@@ -39,6 +41,7 @@ class HealthProfileRepositoryImpl implements HealthProfileRepository {
     }
   }
 
+  /// 서버 POST 성공 후에만 캐시에 저장한다 (낙관적 갱신 금지).
   @override
   Future<void> submitProfile(HealthProfile profile) async {
     try {
@@ -48,6 +51,8 @@ class HealthProfileRepositoryImpl implements HealthProfileRepository {
         data: dto.toJson(),
       );
       unwrapVoid(response);
+      // 서버 성공 확인 후 캐시 저장 — 서버 실패 시 캐시 불변
+      await _cache.write(profile);
     } on DioException catch (e) {
       throw FailureMapper.fromDioException(e);
     }

@@ -15,6 +15,8 @@ enum AccountStatus { active, deletionGrace }
 ///
 /// [hasAgreedTerms]: 신규 사용자는 false, 기존 가입자는 true.
 /// 온보딩 완료 여부는 health_profile 피처가 소유한다(ADR-0006).
+/// [displayName]/[email]/[profileImageUrl]: GET /auth/me 로부터 채워지는 계정 식별정보.
+/// 기존 생성처는 nullable 이므로 지정 없이 null 유지 가능.
 @freezed
 abstract class AuthSession with _$AuthSession {
   const factory AuthSession({
@@ -22,5 +24,8 @@ abstract class AuthSession with _$AuthSession {
     required AuthProvider provider,
     @Default(false) bool hasAgreedTerms,
     @Default(AccountStatus.active) AccountStatus accountStatus,
+    String? displayName,
+    String? email,
+    String? profileImageUrl,
   }) = _AuthSession;
 }

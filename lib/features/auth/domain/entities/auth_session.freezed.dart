@@ -18,6 +18,9 @@ mixin _$AuthSession {
   AuthProvider get provider;
   bool get hasAgreedTerms;
   AccountStatus get accountStatus;
+  String? get displayName;
+  String? get email;
+  String? get profileImageUrl;
 
   /// Create a copy of AuthSession
   /// with the given fields replaced by the non-null parameter values.
@@ -37,16 +40,21 @@ mixin _$AuthSession {
             (identical(other.hasAgreedTerms, hasAgreedTerms) ||
                 other.hasAgreedTerms == hasAgreedTerms) &&
             (identical(other.accountStatus, accountStatus) ||
-                other.accountStatus == accountStatus));
+                other.accountStatus == accountStatus) &&
+            (identical(other.displayName, displayName) ||
+                other.displayName == displayName) &&
+            (identical(other.email, email) || other.email == email) &&
+            (identical(other.profileImageUrl, profileImageUrl) ||
+                other.profileImageUrl == profileImageUrl));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, userId, provider, hasAgreedTerms, accountStatus);
+  int get hashCode => Object.hash(runtimeType, userId, provider, hasAgreedTerms,
+      accountStatus, displayName, email, profileImageUrl);
 
   @override
   String toString() {
-    return 'AuthSession(userId: $userId, provider: $provider, hasAgreedTerms: $hasAgreedTerms, accountStatus: $accountStatus)';
+    return 'AuthSession(userId: $userId, provider: $provider, hasAgreedTerms: $hasAgreedTerms, accountStatus: $accountStatus, displayName: $displayName, email: $email, profileImageUrl: $profileImageUrl)';
   }
 }
 
@@ -60,7 +68,10 @@ abstract mixin class $AuthSessionCopyWith<$Res> {
       {String userId,
       AuthProvider provider,
       bool hasAgreedTerms,
-      AccountStatus accountStatus});
+      AccountStatus accountStatus,
+      String? displayName,
+      String? email,
+      String? profileImageUrl});
 }
 
 /// @nodoc
@@ -79,6 +90,9 @@ class _$AuthSessionCopyWithImpl<$Res> implements $AuthSessionCopyWith<$Res> {
     Object? provider = null,
     Object? hasAgreedTerms = null,
     Object? accountStatus = null,
+    Object? displayName = freezed,
+    Object? email = freezed,
+    Object? profileImageUrl = freezed,
   }) {
     return _then(_self.copyWith(
       userId: null == userId
@@ -97,6 +111,18 @@ class _$AuthSessionCopyWithImpl<$Res> implements $AuthSessionCopyWith<$Res> {
           ? _self.accountStatus
           : accountStatus // ignore: cast_nullable_to_non_nullable
               as AccountStatus,
+      displayName: freezed == displayName
+          ? _self.displayName
+          : displayName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      email: freezed == email
+          ? _self.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String?,
+      profileImageUrl: freezed == profileImageUrl
+          ? _self.profileImageUrl
+          : profileImageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -194,16 +220,28 @@ extension AuthSessionPatterns on AuthSession {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String userId, AuthProvider provider, bool hasAgreedTerms,
-            AccountStatus accountStatus)?
+    TResult Function(
+            String userId,
+            AuthProvider provider,
+            bool hasAgreedTerms,
+            AccountStatus accountStatus,
+            String? displayName,
+            String? email,
+            String? profileImageUrl)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _AuthSession() when $default != null:
-        return $default(_that.userId, _that.provider, _that.hasAgreedTerms,
-            _that.accountStatus);
+        return $default(
+            _that.userId,
+            _that.provider,
+            _that.hasAgreedTerms,
+            _that.accountStatus,
+            _that.displayName,
+            _that.email,
+            _that.profileImageUrl);
       case _:
         return orElse();
     }
@@ -224,15 +262,27 @@ extension AuthSessionPatterns on AuthSession {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String userId, AuthProvider provider, bool hasAgreedTerms,
-            AccountStatus accountStatus)
+    TResult Function(
+            String userId,
+            AuthProvider provider,
+            bool hasAgreedTerms,
+            AccountStatus accountStatus,
+            String? displayName,
+            String? email,
+            String? profileImageUrl)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _AuthSession():
-        return $default(_that.userId, _that.provider, _that.hasAgreedTerms,
-            _that.accountStatus);
+        return $default(
+            _that.userId,
+            _that.provider,
+            _that.hasAgreedTerms,
+            _that.accountStatus,
+            _that.displayName,
+            _that.email,
+            _that.profileImageUrl);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -252,15 +302,27 @@ extension AuthSessionPatterns on AuthSession {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String userId, AuthProvider provider, bool hasAgreedTerms,
-            AccountStatus accountStatus)?
+    TResult? Function(
+            String userId,
+            AuthProvider provider,
+            bool hasAgreedTerms,
+            AccountStatus accountStatus,
+            String? displayName,
+            String? email,
+            String? profileImageUrl)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _AuthSession() when $default != null:
-        return $default(_that.userId, _that.provider, _that.hasAgreedTerms,
-            _that.accountStatus);
+        return $default(
+            _that.userId,
+            _that.provider,
+            _that.hasAgreedTerms,
+            _that.accountStatus,
+            _that.displayName,
+            _that.email,
+            _that.profileImageUrl);
       case _:
         return null;
     }
@@ -274,7 +336,10 @@ class _AuthSession implements AuthSession {
       {required this.userId,
       required this.provider,
       this.hasAgreedTerms = false,
-      this.accountStatus = AccountStatus.active});
+      this.accountStatus = AccountStatus.active,
+      this.displayName,
+      this.email,
+      this.profileImageUrl});
 
   @override
   final String userId;
@@ -286,6 +351,12 @@ class _AuthSession implements AuthSession {
   @override
   @JsonKey()
   final AccountStatus accountStatus;
+  @override
+  final String? displayName;
+  @override
+  final String? email;
+  @override
+  final String? profileImageUrl;
 
   /// Create a copy of AuthSession
   /// with the given fields replaced by the non-null parameter values.
@@ -306,16 +377,21 @@ class _AuthSession implements AuthSession {
             (identical(other.hasAgreedTerms, hasAgreedTerms) ||
                 other.hasAgreedTerms == hasAgreedTerms) &&
             (identical(other.accountStatus, accountStatus) ||
-                other.accountStatus == accountStatus));
+                other.accountStatus == accountStatus) &&
+            (identical(other.displayName, displayName) ||
+                other.displayName == displayName) &&
+            (identical(other.email, email) || other.email == email) &&
+            (identical(other.profileImageUrl, profileImageUrl) ||
+                other.profileImageUrl == profileImageUrl));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, userId, provider, hasAgreedTerms, accountStatus);
+  int get hashCode => Object.hash(runtimeType, userId, provider, hasAgreedTerms,
+      accountStatus, displayName, email, profileImageUrl);
 
   @override
   String toString() {
-    return 'AuthSession(userId: $userId, provider: $provider, hasAgreedTerms: $hasAgreedTerms, accountStatus: $accountStatus)';
+    return 'AuthSession(userId: $userId, provider: $provider, hasAgreedTerms: $hasAgreedTerms, accountStatus: $accountStatus, displayName: $displayName, email: $email, profileImageUrl: $profileImageUrl)';
   }
 }
 
@@ -331,7 +407,10 @@ abstract mixin class _$AuthSessionCopyWith<$Res>
       {String userId,
       AuthProvider provider,
       bool hasAgreedTerms,
-      AccountStatus accountStatus});
+      AccountStatus accountStatus,
+      String? displayName,
+      String? email,
+      String? profileImageUrl});
 }
 
 /// @nodoc
@@ -350,6 +429,9 @@ class __$AuthSessionCopyWithImpl<$Res> implements _$AuthSessionCopyWith<$Res> {
     Object? provider = null,
     Object? hasAgreedTerms = null,
     Object? accountStatus = null,
+    Object? displayName = freezed,
+    Object? email = freezed,
+    Object? profileImageUrl = freezed,
   }) {
     return _then(_AuthSession(
       userId: null == userId
@@ -368,6 +450,18 @@ class __$AuthSessionCopyWithImpl<$Res> implements _$AuthSessionCopyWith<$Res> {
           ? _self.accountStatus
           : accountStatus // ignore: cast_nullable_to_non_nullable
               as AccountStatus,
+      displayName: freezed == displayName
+          ? _self.displayName
+          : displayName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      email: freezed == email
+          ? _self.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String?,
+      profileImageUrl: freezed == profileImageUrl
+          ? _self.profileImageUrl
+          : profileImageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
