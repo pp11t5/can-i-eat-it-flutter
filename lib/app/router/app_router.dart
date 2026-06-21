@@ -19,6 +19,7 @@ import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_record_
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/timeline_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
+import 'package:can_i_eat_it/features/mypage/presentation/screens/profile_info_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_condition_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_frequency_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_medications_screen.dart';
@@ -173,6 +174,13 @@ GoRouter appRouter(Ref ref) {
                 path: '/mypage',
                 name: 'mypage',
                 builder: (context, state) => const MypageScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'profile',
+                    name: 'mypage-profile',
+                    builder: (context, state) => const ProfileInfoScreen(),
+                  ),
+                ],
               ),
             ],
           ),
