@@ -72,7 +72,7 @@ void main() {
       expect(result.triggerFoods, equals(['spicy', 'caffeine']));
       expect(result.customTriggers, equals('탄산음료'));
       expect(result.medications, equals(['omeprazole']));
-      expect(result.allergies, equals(['shellfish']));
+      expect(result.allergies, equals(['crustacean']));
     });
 
     test('triggerFoods/customTriggers/medications/allergies 누락 없음', () async {

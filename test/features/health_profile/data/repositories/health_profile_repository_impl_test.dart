@@ -108,7 +108,7 @@ void main() {
         data: {
           'symptoms': ['heartburn_reflux', 'post_meal_cough'],
           'triggers': ['spicy', 'caffeine'],
-          'allergens': ['shellfish'],
+          'allergens': ['crustacean'],
           'medications': ['omeprazole'],
           'customTriggerText': '탄산음료',
         },
@@ -116,7 +116,7 @@ void main() {
 
       // sampleGerd: conditions=['GERD'], symptomFrequency=['heartburn_reflux','post_meal_cough'],
       // diagnosed=true, triggerFoods=['spicy','caffeine'], customTriggers='탄산음료',
-      // medications=['omeprazole'], allergies=['shellfish']
+      // medications=['omeprazole'], allergies=['crustacean']
       await repo.submitProfile(HealthProfile.sampleGerd());
 
       // 위 dioAdapter 가 정확한 바디로 매칭됐다면 예외 없이 통과함.

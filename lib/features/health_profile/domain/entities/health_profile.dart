@@ -27,7 +27,7 @@ abstract class HealthProfile with _$HealthProfile {
     /// 복용약 목록. 예: ['omeprazole'].
     @Default(<String>[]) List<String> medications,
 
-    /// 알레르기 목록. 예: ['shellfish'].
+    /// 알레르기 목록. 예: ['crustacean']. allergyOptions 카탈로그 코드 기준.
     @Default(<String>[]) List<String> allergies,
   }) = _HealthProfile;
 
@@ -45,6 +45,6 @@ abstract class HealthProfile with _$HealthProfile {
         triggerFoods: ['spicy', 'caffeine'],
         customTriggers: '탄산음료',
         medications: ['omeprazole'],
-        allergies: ['shellfish'],
+        allergies: ['crustacean'],
       );
 }

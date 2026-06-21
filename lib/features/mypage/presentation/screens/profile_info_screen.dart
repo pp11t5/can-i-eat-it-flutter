@@ -263,11 +263,8 @@ class _HealthInfoCard extends StatelessWidget {
           const Divider(height: 1, color: AppColors.divider),
 
           // 알레르기·복용약 행 — 가로 ListTile: [선행아이콘] [라벨] …Spacer… [값] [chevron]
-          // TODO(F4-3): 알레르기·복용약 편집 화면 연결
           InkWell(
-            onTap: () {
-              // TODO(F4-3): 알레르기·복용약 편집 화면
-            },
+            onTap: () => context.push('/mypage/profile/allergy-med'),
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(AppSpacing.radiusCard),
               bottomRight: Radius.circular(AppSpacing.radiusCard),
