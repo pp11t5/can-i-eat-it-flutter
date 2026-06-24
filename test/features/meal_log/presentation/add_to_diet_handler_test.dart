@@ -1,76 +1,153 @@
+// ignore_for_file: deprecated_member_use
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
-import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
+import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/repositories/meal_repository.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/meal_recording.dart';
 
 // ---------------------------------------------------------------------------
-// Mock MealRepository — 인자 캡처용
+// Spy MealRepository — 호출 횟수·인자 기록용
 // ---------------------------------------------------------------------------
 
-class _CapturingMealRepository implements MealRepository {
+class _SpyMealRepository implements MealRepository {
   String? lastFoodExternalId;
-  String? lastFoodTextInput;
   DateTime? lastEatenAt;
-  String? lastMealGroupId;
-  VerdictLevel? lastGrade;
-  int createCallCount = 0;
-  int createByTextCallCount = 0;
+  String? lastMealRecordId;
+  int appendFoodCallCount = 0;
+  int appendFoodByTextCallCount = 0;
 
   @override
-  Future<MealRecord> create({
+  Future<MealFood> appendFood({
     required String foodExternalId,
     DateTime? eatenAt,
-    String? mealGroupId,
-    VerdictLevel? grade,
+    String? mealRecordId,
   }) async {
-    createCallCount++;
+    appendFoodCallCount++;
     lastFoodExternalId = foodExternalId;
     lastEatenAt = eatenAt;
-    lastMealGroupId = mealGroupId;
-    lastGrade = grade;
-    return MealRecord(
-      mealId: 'mock-1',
-      mealGroupId: mealGroupId ?? 'grp-1',
+    lastMealRecordId = mealRecordId;
+    return MealFood(
+      mealFoodId: 'mock-1',
+      name: foodExternalId,
       eatenAt: (eatenAt ?? DateTime.now()).toIso8601String(),
-      food: const FoodSummary(externalId: 'f-0', name: '스텁'),
+      mealRecordExternalId: mealRecordId ?? 'mr-1',
     );
   }
 
   @override
-  Future<MealRecord> createByText({
+  Future<MealFood> appendFoodByText({
     required String foodTextInput,
     DateTime? eatenAt,
-    String? mealGroupId,
-    VerdictLevel? grade,
+    String? mealRecordId,
   }) async {
-    createByTextCallCount++;
-    lastFoodTextInput = foodTextInput;
-    lastEatenAt = eatenAt;
-    lastMealGroupId = mealGroupId;
-    lastGrade = grade;
-    return MealRecord(
-      mealId: 'mock-2',
-      mealGroupId: mealGroupId ?? 'grp-2',
-      eatenAt: (eatenAt ?? DateTime.now()).toIso8601String(),
-      food: const FoodSummary(externalId: 'f-0', name: '스텁'),
-    );
+    appendFoodByTextCallCount++;
+    throw UnimplementedError('텍스트 음식 추가는 서버 준비중입니다');
   }
 
   @override
-  Future<List<MealGroup>> timeline(DateTime date) async => [];
+  Future<List<TimelineItem>> timeline(DateTime date) async => [];
 
   @override
-  Future<MealDetail> detail(String mealId) => throw UnimplementedError();
+  Future<List<WeeklyDay>> weekly(DateTime date) async => [];
 
   @override
-  Future<MealDetail> updateMemo(String mealId, String? memo) =>
+  Future<MealRecord> mealDetail(String mealRecordId) =>
       throw UnimplementedError();
 
   @override
-  Future<void> delete(String mealId) async {}
+  Future<MealFood> foodDetail(String mealFoodId) => throw UnimplementedError();
+
+  @override
+  Future<void> deleteMeal(String mealRecordId) async {}
+
+  @override
+  Future<void> deleteFood(String mealFoodId) async {}
+
+  @override
+  Future<List<MealCandidatesDay>> candidates() async => [];
+}
+
+// ---------------------------------------------------------------------------
+// _FakeRef — makeHandlerFromRef가 사용하는 read/invalidate만 구현.
+//
+// Ref<Object?>는 abstract이므로 ProviderContainer를 래핑해 최소 구현한다.
+// read()는 container에 위임, invalidate()는 no-op(테스트에서 검증 불필요).
+// 나머지 abstract 메서드는 UnimplementedError(실제로 호출되지 않음).
+// ---------------------------------------------------------------------------
+
+class _FakeRef implements Ref<Object?> {
+  _FakeRef(this._container);
+
+  final ProviderContainer _container;
+
+  @override
+  ProviderContainer get container => _container;
+
+  @override
+  T read<T>(ProviderListenable<T> provider) => _container.read(provider);
+
+  @override
+  void invalidate(ProviderOrFamily provider) {
+    // no-op: 테스트에서 invalidation 부작용을 검증하지 않는다.
+  }
+
+  // ---- 아래는 makeHandlerFromRef에서 호출되지 않는 메서드들 ----
+
+  @override
+  T refresh<T>(Refreshable<T> provider) => throw UnimplementedError();
+
+  @override
+  T watch<T>(ProviderListenable<T> provider) => throw UnimplementedError();
+
+  @override
+  ProviderSubscription<T> listen<T>(
+    ProviderListenable<T> provider,
+    void Function(T?, T) listener, {
+    bool fireImmediately = false,
+    void Function(Object, StackTrace)? onError,
+  }) =>
+      throw UnimplementedError();
+
+  @override
+  void listenSelf(
+    void Function(Object?, Object?) listener, {
+    void Function(Object, StackTrace)? onError,
+  }) =>
+      throw UnimplementedError();
+
+  @override
+  void invalidateSelf() => throw UnimplementedError();
+
+  @override
+  void notifyListeners() => throw UnimplementedError();
+
+  @override
+  void onDispose(void Function() cb) {}
+
+  @override
+  void onCancel(void Function() cb) {}
+
+  @override
+  void onResume(void Function() cb) {}
+
+  @override
+  void onAddListener(void Function() cb) {}
+
+  @override
+  void onRemoveListener(void Function() cb) {}
+
+  @override
+  bool exists(ProviderBase<Object?> provider) => throw UnimplementedError();
+
+  @override
+  KeepAliveLink keepAlive() => throw UnimplementedError();
+
+  bool mounted = true;
 }
 
 // ---------------------------------------------------------------------------
@@ -92,112 +169,101 @@ const _kVerdictByText = EatVerdict(
 );
 
 // ---------------------------------------------------------------------------
-// 핸들러 분기 로직 테스트 (직접 repo 호출로 분기 재현)
+// 헬퍼: 실제 makeHandlerFromRef를 _FakeRef 경유로 실행.
+//
+// BuildContext는 최소 위젯 트리에서 획득한다.
 // ---------------------------------------------------------------------------
 
-Future<void> _dispatchToRepo(
-  _CapturingMealRepository repo,
-  EatVerdict verdict,
-  MealRecordContext ctx,
-) async {
-  if (verdict.foodExternalId != null) {
-    await repo.create(
-      foodExternalId: verdict.foodExternalId!,
-      eatenAt: ctx.eatenAt,
-      mealGroupId: ctx.mealGroupId,
-      grade: verdict.level,
-    );
-  } else {
-    await repo.createByText(
-      foodTextInput: verdict.foodName,
-      eatenAt: ctx.eatenAt,
-      mealGroupId: ctx.mealGroupId,
-      grade: verdict.level,
-    );
-  }
+Future<void> _runHandler({
+  required WidgetTester tester,
+  required _SpyMealRepository spy,
+  required EatVerdict verdict,
+  required MealRecordContext ctx,
+}) async {
+  final container = ProviderContainer(
+    overrides: [mealRepositoryProvider.overrideWithValue(spy)],
+  );
+  addTearDown(container.dispose);
+
+  // 실제 makeHandlerFromRef를 _FakeRef(container 래핑)로 호출한다.
+  final handler = makeHandlerFromRef(_FakeRef(container));
+
+  bool called = false;
+  await tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(
+        home: Builder(
+          builder: (innerCtx) {
+            if (!called) {
+              called = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) async {
+                await handler(innerCtx, verdict, ctx);
+              });
+            }
+            return const Scaffold(body: SizedBox.shrink());
+          },
+        ),
+      ),
+    ),
+  );
+  // showAppToast 내부의 2.5초 타이머를 소진한다.
+  // pumpAndSettle은 pending timer가 있으면 실패하므로 pump로 직접 진행한다.
+  await tester.pump(const Duration(seconds: 3));
 }
 
+// ---------------------------------------------------------------------------
+// 테스트
+// ---------------------------------------------------------------------------
+
 void main() {
-  group('MealRepository 분기 — foodExternalId 유무', () {
-    late _CapturingMealRepository repo;
+  group('makeHandlerFromRef — by-id 케이스 (foodExternalId != null)', () {
+    testWidgets(
+        'appendFood가 1회 호출되고 foodExternalId·eatenAt·mealRecordId가 전달된다',
+        (tester) async {
+      final spy = _SpyMealRepository();
+      await _runHandler(
+        tester: tester,
+        spy: spy,
+        verdict: _kVerdictById,
+        ctx: MealRecordContext(eatenAt: _kEatAt),
+      );
 
-    setUp(() => repo = _CapturingMealRepository());
-
-    test('foodExternalId 있음 → create 호출, createByText 미호출', () async {
-      final ctx = MealRecordContext(eatenAt: _kEatAt);
-      await _dispatchToRepo(repo, _kVerdictById, ctx);
-
-      expect(repo.createCallCount, 1);
-      expect(repo.createByTextCallCount, 0);
-      expect(repo.lastFoodExternalId, 'food-ext-1');
-      expect(repo.lastEatenAt, _kEatAt);
-      expect(repo.lastMealGroupId, isNull);
-      expect(repo.lastGrade, VerdictLevel.recommend);
+      expect(spy.appendFoodCallCount, 1);
+      expect(spy.appendFoodByTextCallCount, 0);
+      expect(spy.lastFoodExternalId, 'food-ext-1');
+      expect(spy.lastEatenAt, _kEatAt);
+      expect(spy.lastMealRecordId, isNull);
     });
 
-    test('foodExternalId null → createByText 호출, create 미호출', () async {
-      final ctx = MealRecordContext(eatenAt: _kEatAt, mealGroupId: 'g-1');
-      await _dispatchToRepo(repo, _kVerdictByText, ctx);
+    testWidgets('mealRecordId 있으면 appendFood에 mealRecordId가 전달된다',
+        (tester) async {
+      final spy = _SpyMealRepository();
+      await _runHandler(
+        tester: tester,
+        spy: spy,
+        verdict: _kVerdictById,
+        ctx: MealRecordContext(eatenAt: _kEatAt, mealRecordId: 'mr-42'),
+      );
 
-      expect(repo.createByTextCallCount, 1);
-      expect(repo.createCallCount, 0);
-      expect(repo.lastFoodTextInput, '된장찌개');
-      expect(repo.lastEatenAt, _kEatAt);
-      expect(repo.lastMealGroupId, 'g-1');
-      expect(repo.lastGrade, VerdictLevel.caution);
-    });
-
-    test('mealGroupId 있음 → create에 mealGroupId 전달', () async {
-      final ctx = MealRecordContext(eatenAt: _kEatAt, mealGroupId: 'g-42');
-      await _dispatchToRepo(repo, _kVerdictById, ctx);
-
-      expect(repo.lastMealGroupId, 'g-42');
-    });
-
-    test('mealGroupId null → create에 null 전달', () async {
-      final ctx = MealRecordContext(eatenAt: _kEatAt);
-      await _dispatchToRepo(repo, _kVerdictById, ctx);
-
-      expect(repo.lastMealGroupId, isNull);
+      expect(spy.appendFoodCallCount, 1);
+      expect(spy.lastMealRecordId, 'mr-42');
     });
   });
 
-  group('토스트 메시지 분기 (T6/T7)', () {
-    String toastMessage(MealRecordContext ctx) => ctx.mealGroupId != null
-        ? '현재 식사에 음식을 추가했어요.'
-        : '식사를 기록했어요. 식후 2시간 뒤 증상 확인 알림을 보내드릴게요.';
-
-    test('mealGroupId 있음 → T6 메시지', () {
-      final ctx = MealRecordContext(eatenAt: _kEatAt, mealGroupId: 'g-1');
-      expect(toastMessage(ctx), '현재 식사에 음식을 추가했어요.');
-    });
-
-    test('mealGroupId null → T7 메시지', () {
-      final ctx = MealRecordContext(eatenAt: _kEatAt);
-      expect(
-        toastMessage(ctx),
-        '식사를 기록했어요. 식후 2시간 뒤 증상 확인 알림을 보내드릴게요.',
+  group('makeHandlerFromRef — by-text 케이스 (foodExternalId == null)', () {
+    testWidgets('appendFood·appendFoodByText 모두 호출되지 않는다 (준비중 단락)',
+        (tester) async {
+      final spy = _SpyMealRepository();
+      await _runHandler(
+        tester: tester,
+        spy: spy,
+        verdict: _kVerdictByText,
+        ctx: MealRecordContext(eatenAt: _kEatAt, mealRecordId: 'mr-1'),
       );
-    });
-  });
 
-  group('MealRecordContext — recordContext null 시 nowKst 사용', () {
-    test('eatenAt이 현재 시각 근방이다', () {
-      final before = DateTime.now().toUtc().add(const Duration(hours: 9));
-      final ctx = MealRecordContext(
-        eatenAt: DateTime.now().toUtc().add(const Duration(hours: 9)),
-      );
-      final after = DateTime.now().toUtc().add(const Duration(hours: 9));
-
-      expect(
-        ctx.eatenAt.isAfter(before.subtract(const Duration(seconds: 1))),
-        isTrue,
-      );
-      expect(
-        ctx.eatenAt.isBefore(after.add(const Duration(seconds: 1))),
-        isTrue,
-      );
-      expect(ctx.mealGroupId, isNull);
+      expect(spy.appendFoodCallCount, 0);
+      expect(spy.appendFoodByTextCallCount, 0);
     });
   });
 }

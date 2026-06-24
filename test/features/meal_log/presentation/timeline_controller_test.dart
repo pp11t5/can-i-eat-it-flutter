@@ -12,30 +12,25 @@ void main() {
     return ProviderContainer(
       overrides: [
         mealRepositoryProvider.overrideWithValue(
-          seeded
-              ? MockMealRepository.seeded()
-              : MockMealRepository.empty(),
+          seeded ? MockMealRepository.seeded() : MockMealRepository.empty(),
         ),
       ],
     );
   }
 
   group('TimelineController — 로딩 → data', () {
-    test('seeded mock: AsyncData<List<MealGroup>> 반환', () async {
+    test('seeded mock: AsyncData<List<TimelineItem>> 반환', () async {
       final container = makeContainer(seeded: true);
       addTearDown(container.dispose);
 
       final provider = timelineControllerProvider(today);
-      // 초기 로딩 상태 확인
-      expect(container.read(provider), isA<AsyncLoading<List<MealGroup>>>());
+      expect(container.read(provider), isA<AsyncLoading<List<TimelineItem>>>());
 
-      // 비동기 완료 대기
       await container.read(provider.future);
 
       final state = container.read(provider);
-      expect(state, isA<AsyncData<List<MealGroup>>>());
-      final groups = state.value!;
-      expect(groups, isNotEmpty);
+      expect(state, isA<AsyncData<List<TimelineItem>>>());
+      expect(state.value!, isNotEmpty);
     });
 
     test('empty mock: AsyncData<[]> 반환', () async {
@@ -46,7 +41,7 @@ void main() {
       await container.read(provider.future);
 
       final state = container.read(provider);
-      expect(state, isA<AsyncData<List<MealGroup>>>());
+      expect(state, isA<AsyncData<List<TimelineItem>>>());
       expect(state.value!, isEmpty);
     });
   });
@@ -65,8 +60,7 @@ void main() {
       await notifier.changeDate(yesterday);
 
       final state = container.read(provider);
-      // MockMealRepository는 날짜 무관 동일 데이터 반환하므로 AsyncData 확인
-      expect(state, isA<AsyncData<List<MealGroup>>>());
+      expect(state, isA<AsyncData<List<TimelineItem>>>());
     });
   });
 
@@ -82,7 +76,21 @@ void main() {
       await notifier.refresh(today);
 
       final state = container.read(provider);
-      expect(state, isA<AsyncData<List<MealGroup>>>());
+      expect(state, isA<AsyncData<List<TimelineItem>>>());
+    });
+  });
+
+  group('WeeklyController — 도트 데이터', () {
+    test('seeded mock: AsyncData<List<WeeklyDay>> 반환', () async {
+      final container = makeContainer(seeded: true);
+      addTearDown(container.dispose);
+
+      final provider = weeklyControllerProvider(today);
+      await container.read(provider.future);
+
+      final state = container.read(provider);
+      expect(state, isA<AsyncData<List<WeeklyDay>>>());
+      expect(state.value!, isNotEmpty);
     });
   });
 
@@ -96,14 +104,13 @@ void main() {
       addTearDown(container.dispose);
 
       final provider = timelineControllerProvider(today);
-      // future가 에러로 완료됨을 확인
       await expectLater(
         container.read(provider.future),
         throwsA(isA<Exception>()),
       );
 
       final state = container.read(provider);
-      expect(state, isA<AsyncError<List<MealGroup>>>());
+      expect(state, isA<AsyncError<List<TimelineItem>>>());
     });
   });
 }
@@ -113,7 +120,7 @@ class _ThrowingMealRepository extends MockMealRepository {
   _ThrowingMealRepository() : super();
 
   @override
-  Future<List<MealGroup>> timeline(DateTime date) async {
+  Future<List<TimelineItem>> timeline(DateTime date) async {
     throw Exception('network error');
   }
 }

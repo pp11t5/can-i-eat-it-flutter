@@ -13,15 +13,731 @@ part of 'meal_entities.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
+mixin _$MealAnalysis {
+  /// analysis.judgmentGrade (대문자 grade → fromGrade).
+  VerdictLevel get judgmentGrade;
+
+  /// analysis.triggerAnalysis. grade=UNKNOWN 등 누락 가능 → nullable.
+  AnalysisSection? get trigger;
+
+  /// analysis.allergyAnalysis. 누락 가능 → nullable.
+  AnalysisSection? get allergy;
+
+  /// Create a copy of MealAnalysis
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $MealAnalysisCopyWith<MealAnalysis> get copyWith =>
+      _$MealAnalysisCopyWithImpl<MealAnalysis>(
+          this as MealAnalysis, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is MealAnalysis &&
+            (identical(other.judgmentGrade, judgmentGrade) ||
+                other.judgmentGrade == judgmentGrade) &&
+            (identical(other.trigger, trigger) || other.trigger == trigger) &&
+            (identical(other.allergy, allergy) || other.allergy == allergy));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, judgmentGrade, trigger, allergy);
+
+  @override
+  String toString() {
+    return 'MealAnalysis(judgmentGrade: $judgmentGrade, trigger: $trigger, allergy: $allergy)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $MealAnalysisCopyWith<$Res> {
+  factory $MealAnalysisCopyWith(
+          MealAnalysis value, $Res Function(MealAnalysis) _then) =
+      _$MealAnalysisCopyWithImpl;
+  @useResult
+  $Res call(
+      {VerdictLevel judgmentGrade,
+      AnalysisSection? trigger,
+      AnalysisSection? allergy});
+
+  $AnalysisSectionCopyWith<$Res>? get trigger;
+  $AnalysisSectionCopyWith<$Res>? get allergy;
+}
+
+/// @nodoc
+class _$MealAnalysisCopyWithImpl<$Res> implements $MealAnalysisCopyWith<$Res> {
+  _$MealAnalysisCopyWithImpl(this._self, this._then);
+
+  final MealAnalysis _self;
+  final $Res Function(MealAnalysis) _then;
+
+  /// Create a copy of MealAnalysis
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? judgmentGrade = null,
+    Object? trigger = freezed,
+    Object? allergy = freezed,
+  }) {
+    return _then(_self.copyWith(
+      judgmentGrade: null == judgmentGrade
+          ? _self.judgmentGrade
+          : judgmentGrade // ignore: cast_nullable_to_non_nullable
+              as VerdictLevel,
+      trigger: freezed == trigger
+          ? _self.trigger
+          : trigger // ignore: cast_nullable_to_non_nullable
+              as AnalysisSection?,
+      allergy: freezed == allergy
+          ? _self.allergy
+          : allergy // ignore: cast_nullable_to_non_nullable
+              as AnalysisSection?,
+    ));
+  }
+
+  /// Create a copy of MealAnalysis
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $AnalysisSectionCopyWith<$Res>? get trigger {
+    if (_self.trigger == null) {
+      return null;
+    }
+
+    return $AnalysisSectionCopyWith<$Res>(_self.trigger!, (value) {
+      return _then(_self.copyWith(trigger: value));
+    });
+  }
+
+  /// Create a copy of MealAnalysis
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $AnalysisSectionCopyWith<$Res>? get allergy {
+    if (_self.allergy == null) {
+      return null;
+    }
+
+    return $AnalysisSectionCopyWith<$Res>(_self.allergy!, (value) {
+      return _then(_self.copyWith(allergy: value));
+    });
+  }
+}
+
+/// Adds pattern-matching-related methods to [MealAnalysis].
+extension MealAnalysisPatterns on MealAnalysis {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_MealAnalysis value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _MealAnalysis() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_MealAnalysis value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealAnalysis():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_MealAnalysis value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealAnalysis() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(VerdictLevel judgmentGrade, AnalysisSection? trigger,
+            AnalysisSection? allergy)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _MealAnalysis() when $default != null:
+        return $default(_that.judgmentGrade, _that.trigger, _that.allergy);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(VerdictLevel judgmentGrade, AnalysisSection? trigger,
+            AnalysisSection? allergy)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealAnalysis():
+        return $default(_that.judgmentGrade, _that.trigger, _that.allergy);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(VerdictLevel judgmentGrade, AnalysisSection? trigger,
+            AnalysisSection? allergy)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealAnalysis() when $default != null:
+        return $default(_that.judgmentGrade, _that.trigger, _that.allergy);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _MealAnalysis implements MealAnalysis {
+  const _MealAnalysis(
+      {required this.judgmentGrade, this.trigger, this.allergy});
+
+  /// analysis.judgmentGrade (대문자 grade → fromGrade).
+  @override
+  final VerdictLevel judgmentGrade;
+
+  /// analysis.triggerAnalysis. grade=UNKNOWN 등 누락 가능 → nullable.
+  @override
+  final AnalysisSection? trigger;
+
+  /// analysis.allergyAnalysis. 누락 가능 → nullable.
+  @override
+  final AnalysisSection? allergy;
+
+  /// Create a copy of MealAnalysis
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$MealAnalysisCopyWith<_MealAnalysis> get copyWith =>
+      __$MealAnalysisCopyWithImpl<_MealAnalysis>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _MealAnalysis &&
+            (identical(other.judgmentGrade, judgmentGrade) ||
+                other.judgmentGrade == judgmentGrade) &&
+            (identical(other.trigger, trigger) || other.trigger == trigger) &&
+            (identical(other.allergy, allergy) || other.allergy == allergy));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, judgmentGrade, trigger, allergy);
+
+  @override
+  String toString() {
+    return 'MealAnalysis(judgmentGrade: $judgmentGrade, trigger: $trigger, allergy: $allergy)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$MealAnalysisCopyWith<$Res>
+    implements $MealAnalysisCopyWith<$Res> {
+  factory _$MealAnalysisCopyWith(
+          _MealAnalysis value, $Res Function(_MealAnalysis) _then) =
+      __$MealAnalysisCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {VerdictLevel judgmentGrade,
+      AnalysisSection? trigger,
+      AnalysisSection? allergy});
+
+  @override
+  $AnalysisSectionCopyWith<$Res>? get trigger;
+  @override
+  $AnalysisSectionCopyWith<$Res>? get allergy;
+}
+
+/// @nodoc
+class __$MealAnalysisCopyWithImpl<$Res>
+    implements _$MealAnalysisCopyWith<$Res> {
+  __$MealAnalysisCopyWithImpl(this._self, this._then);
+
+  final _MealAnalysis _self;
+  final $Res Function(_MealAnalysis) _then;
+
+  /// Create a copy of MealAnalysis
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? judgmentGrade = null,
+    Object? trigger = freezed,
+    Object? allergy = freezed,
+  }) {
+    return _then(_MealAnalysis(
+      judgmentGrade: null == judgmentGrade
+          ? _self.judgmentGrade
+          : judgmentGrade // ignore: cast_nullable_to_non_nullable
+              as VerdictLevel,
+      trigger: freezed == trigger
+          ? _self.trigger
+          : trigger // ignore: cast_nullable_to_non_nullable
+              as AnalysisSection?,
+      allergy: freezed == allergy
+          ? _self.allergy
+          : allergy // ignore: cast_nullable_to_non_nullable
+              as AnalysisSection?,
+    ));
+  }
+
+  /// Create a copy of MealAnalysis
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $AnalysisSectionCopyWith<$Res>? get trigger {
+    if (_self.trigger == null) {
+      return null;
+    }
+
+    return $AnalysisSectionCopyWith<$Res>(_self.trigger!, (value) {
+      return _then(_self.copyWith(trigger: value));
+    });
+  }
+
+  /// Create a copy of MealAnalysis
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $AnalysisSectionCopyWith<$Res>? get allergy {
+    if (_self.allergy == null) {
+      return null;
+    }
+
+    return $AnalysisSectionCopyWith<$Res>(_self.allergy!, (value) {
+      return _then(_self.copyWith(allergy: value));
+    });
+  }
+}
+
+/// @nodoc
+mixin _$AnalysisSection {
+  /// 강조 문구.
+  String get ment;
+
+  /// 본문.
+  String get content;
+
+  /// Create a copy of AnalysisSection
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $AnalysisSectionCopyWith<AnalysisSection> get copyWith =>
+      _$AnalysisSectionCopyWithImpl<AnalysisSection>(
+          this as AnalysisSection, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is AnalysisSection &&
+            (identical(other.ment, ment) || other.ment == ment) &&
+            (identical(other.content, content) || other.content == content));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, ment, content);
+
+  @override
+  String toString() {
+    return 'AnalysisSection(ment: $ment, content: $content)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $AnalysisSectionCopyWith<$Res> {
+  factory $AnalysisSectionCopyWith(
+          AnalysisSection value, $Res Function(AnalysisSection) _then) =
+      _$AnalysisSectionCopyWithImpl;
+  @useResult
+  $Res call({String ment, String content});
+}
+
+/// @nodoc
+class _$AnalysisSectionCopyWithImpl<$Res>
+    implements $AnalysisSectionCopyWith<$Res> {
+  _$AnalysisSectionCopyWithImpl(this._self, this._then);
+
+  final AnalysisSection _self;
+  final $Res Function(AnalysisSection) _then;
+
+  /// Create a copy of AnalysisSection
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? ment = null,
+    Object? content = null,
+  }) {
+    return _then(_self.copyWith(
+      ment: null == ment
+          ? _self.ment
+          : ment // ignore: cast_nullable_to_non_nullable
+              as String,
+      content: null == content
+          ? _self.content
+          : content // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [AnalysisSection].
+extension AnalysisSectionPatterns on AnalysisSection {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_AnalysisSection value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _AnalysisSection() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_AnalysisSection value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _AnalysisSection():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_AnalysisSection value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _AnalysisSection() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(String ment, String content)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _AnalysisSection() when $default != null:
+        return $default(_that.ment, _that.content);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(String ment, String content) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _AnalysisSection():
+        return $default(_that.ment, _that.content);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(String ment, String content)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _AnalysisSection() when $default != null:
+        return $default(_that.ment, _that.content);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _AnalysisSection implements AnalysisSection {
+  const _AnalysisSection({required this.ment, required this.content});
+
+  /// 강조 문구.
+  @override
+  final String ment;
+
+  /// 본문.
+  @override
+  final String content;
+
+  /// Create a copy of AnalysisSection
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$AnalysisSectionCopyWith<_AnalysisSection> get copyWith =>
+      __$AnalysisSectionCopyWithImpl<_AnalysisSection>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _AnalysisSection &&
+            (identical(other.ment, ment) || other.ment == ment) &&
+            (identical(other.content, content) || other.content == content));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, ment, content);
+
+  @override
+  String toString() {
+    return 'AnalysisSection(ment: $ment, content: $content)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$AnalysisSectionCopyWith<$Res>
+    implements $AnalysisSectionCopyWith<$Res> {
+  factory _$AnalysisSectionCopyWith(
+          _AnalysisSection value, $Res Function(_AnalysisSection) _then) =
+      __$AnalysisSectionCopyWithImpl;
+  @override
+  @useResult
+  $Res call({String ment, String content});
+}
+
+/// @nodoc
+class __$AnalysisSectionCopyWithImpl<$Res>
+    implements _$AnalysisSectionCopyWith<$Res> {
+  __$AnalysisSectionCopyWithImpl(this._self, this._then);
+
+  final _AnalysisSection _self;
+  final $Res Function(_AnalysisSection) _then;
+
+  /// Create a copy of AnalysisSection
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? ment = null,
+    Object? content = null,
+  }) {
+    return _then(_AnalysisSection(
+      ment: null == ment
+          ? _self.ment
+          : ment // ignore: cast_nullable_to_non_nullable
+              as String,
+      content: null == content
+          ? _self.content
+          : content // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
 mixin _$StateRecord {
+  /// 서버 stateRecordId.
+  String get stateRecordId;
+
   /// 증상 라벨 (예: '속쓰림').
   String get label;
 
   /// 기록 날짜 ('YYYY-MM-DD' 문자열 그대로).
   String get date;
 
-  /// 섭취 시점 (예: '식후 30분').
-  String get timing;
+  /// 식후 경과 분. "식후 N분" 포맷은 표시 레이어 책임.
+  int get timingMinutes;
 
   /// Create a copy of StateRecord
   /// with the given fields replaced by the non-null parameter values.
@@ -35,17 +751,21 @@ mixin _$StateRecord {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is StateRecord &&
+            (identical(other.stateRecordId, stateRecordId) ||
+                other.stateRecordId == stateRecordId) &&
             (identical(other.label, label) || other.label == label) &&
             (identical(other.date, date) || other.date == date) &&
-            (identical(other.timing, timing) || other.timing == timing));
+            (identical(other.timingMinutes, timingMinutes) ||
+                other.timingMinutes == timingMinutes));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, label, date, timing);
+  int get hashCode =>
+      Object.hash(runtimeType, stateRecordId, label, date, timingMinutes);
 
   @override
   String toString() {
-    return 'StateRecord(label: $label, date: $date, timing: $timing)';
+    return 'StateRecord(stateRecordId: $stateRecordId, label: $label, date: $date, timingMinutes: $timingMinutes)';
   }
 }
 
@@ -55,7 +775,8 @@ abstract mixin class $StateRecordCopyWith<$Res> {
           StateRecord value, $Res Function(StateRecord) _then) =
       _$StateRecordCopyWithImpl;
   @useResult
-  $Res call({String label, String date, String timing});
+  $Res call(
+      {String stateRecordId, String label, String date, int timingMinutes});
 }
 
 /// @nodoc
@@ -70,11 +791,16 @@ class _$StateRecordCopyWithImpl<$Res> implements $StateRecordCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? stateRecordId = null,
     Object? label = null,
     Object? date = null,
-    Object? timing = null,
+    Object? timingMinutes = null,
   }) {
     return _then(_self.copyWith(
+      stateRecordId: null == stateRecordId
+          ? _self.stateRecordId
+          : stateRecordId // ignore: cast_nullable_to_non_nullable
+              as String,
       label: null == label
           ? _self.label
           : label // ignore: cast_nullable_to_non_nullable
@@ -83,10 +809,10 @@ class _$StateRecordCopyWithImpl<$Res> implements $StateRecordCopyWith<$Res> {
           ? _self.date
           : date // ignore: cast_nullable_to_non_nullable
               as String,
-      timing: null == timing
-          ? _self.timing
-          : timing // ignore: cast_nullable_to_non_nullable
-              as String,
+      timingMinutes: null == timingMinutes
+          ? _self.timingMinutes
+          : timingMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -184,13 +910,16 @@ extension StateRecordPatterns on StateRecord {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String label, String date, String timing)? $default, {
+    TResult Function(
+            String stateRecordId, String label, String date, int timingMinutes)?
+        $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _StateRecord() when $default != null:
-        return $default(_that.label, _that.date, _that.timing);
+        return $default(
+            _that.stateRecordId, _that.label, _that.date, _that.timingMinutes);
       case _:
         return orElse();
     }
@@ -211,12 +940,15 @@ extension StateRecordPatterns on StateRecord {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String label, String date, String timing) $default,
+    TResult Function(
+            String stateRecordId, String label, String date, int timingMinutes)
+        $default,
   ) {
     final _that = this;
     switch (_that) {
       case _StateRecord():
-        return $default(_that.label, _that.date, _that.timing);
+        return $default(
+            _that.stateRecordId, _that.label, _that.date, _that.timingMinutes);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -236,12 +968,15 @@ extension StateRecordPatterns on StateRecord {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String label, String date, String timing)? $default,
+    TResult? Function(
+            String stateRecordId, String label, String date, int timingMinutes)?
+        $default,
   ) {
     final _that = this;
     switch (_that) {
       case _StateRecord() when $default != null:
-        return $default(_that.label, _that.date, _that.timing);
+        return $default(
+            _that.stateRecordId, _that.label, _that.date, _that.timingMinutes);
       case _:
         return null;
     }
@@ -252,7 +987,14 @@ extension StateRecordPatterns on StateRecord {
 
 class _StateRecord implements StateRecord {
   const _StateRecord(
-      {required this.label, required this.date, required this.timing});
+      {required this.stateRecordId,
+      required this.label,
+      required this.date,
+      required this.timingMinutes});
+
+  /// 서버 stateRecordId.
+  @override
+  final String stateRecordId;
 
   /// 증상 라벨 (예: '속쓰림').
   @override
@@ -262,9 +1004,9 @@ class _StateRecord implements StateRecord {
   @override
   final String date;
 
-  /// 섭취 시점 (예: '식후 30분').
+  /// 식후 경과 분. "식후 N분" 포맷은 표시 레이어 책임.
   @override
-  final String timing;
+  final int timingMinutes;
 
   /// Create a copy of StateRecord
   /// with the given fields replaced by the non-null parameter values.
@@ -279,17 +1021,21 @@ class _StateRecord implements StateRecord {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _StateRecord &&
+            (identical(other.stateRecordId, stateRecordId) ||
+                other.stateRecordId == stateRecordId) &&
             (identical(other.label, label) || other.label == label) &&
             (identical(other.date, date) || other.date == date) &&
-            (identical(other.timing, timing) || other.timing == timing));
+            (identical(other.timingMinutes, timingMinutes) ||
+                other.timingMinutes == timingMinutes));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, label, date, timing);
+  int get hashCode =>
+      Object.hash(runtimeType, stateRecordId, label, date, timingMinutes);
 
   @override
   String toString() {
-    return 'StateRecord(label: $label, date: $date, timing: $timing)';
+    return 'StateRecord(stateRecordId: $stateRecordId, label: $label, date: $date, timingMinutes: $timingMinutes)';
   }
 }
 
@@ -301,7 +1047,8 @@ abstract mixin class _$StateRecordCopyWith<$Res>
       __$StateRecordCopyWithImpl;
   @override
   @useResult
-  $Res call({String label, String date, String timing});
+  $Res call(
+      {String stateRecordId, String label, String date, int timingMinutes});
 }
 
 /// @nodoc
@@ -316,11 +1063,16 @@ class __$StateRecordCopyWithImpl<$Res> implements _$StateRecordCopyWith<$Res> {
   @override
   @pragma('vm:prefer-inline')
   $Res call({
+    Object? stateRecordId = null,
     Object? label = null,
     Object? date = null,
-    Object? timing = null,
+    Object? timingMinutes = null,
   }) {
     return _then(_StateRecord(
+      stateRecordId: null == stateRecordId
+          ? _self.stateRecordId
+          : stateRecordId // ignore: cast_nullable_to_non_nullable
+              as String,
       label: null == label
           ? _self.label
           : label // ignore: cast_nullable_to_non_nullable
@@ -329,27 +1081,33 @@ class __$StateRecordCopyWithImpl<$Res> implements _$StateRecordCopyWith<$Res> {
           ? _self.date
           : date // ignore: cast_nullable_to_non_nullable
               as String,
-      timing: null == timing
-          ? _self.timing
-          : timing // ignore: cast_nullable_to_non_nullable
-              as String,
+      timingMinutes: null == timingMinutes
+          ? _self.timingMinutes
+          : timingMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
 
 /// @nodoc
 mixin _$MealFood {
-  /// 서버측 음식 식별자.
-  String get externalId;
+  /// 음식 식별자 (구 mealId 대체).
+  String get mealFoodId;
 
   /// 음식 표시 이름.
   String get name;
 
-  /// 음식 카테고리. 서버가 없으면 null.
+  /// 음식 카테고리. 서버가 없으면 null → FoodThumbnail 기본.
   String? get category;
 
-  /// 음식 설명. 서버가 없으면 null.
-  String? get description;
+  /// 섭취 시각 (ISO-8601 문자열 그대로, 표시 전용).
+  String get eatenAt;
+
+  /// food.mealRecordExternalId (POST 응답에만 존재, append/재판정용).
+  String? get mealRecordExternalId;
+
+  /// analysis. 상세·foodDetail·POST 응답에만. 타임라인/목록엔 null.
+  MealAnalysis? get analysis;
 
   /// Create a copy of MealFood
   /// with the given fields replaced by the non-null parameter values.
@@ -363,22 +1121,25 @@ mixin _$MealFood {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MealFood &&
-            (identical(other.externalId, externalId) ||
-                other.externalId == externalId) &&
+            (identical(other.mealFoodId, mealFoodId) ||
+                other.mealFoodId == mealFoodId) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.category, category) ||
                 other.category == category) &&
-            (identical(other.description, description) ||
-                other.description == description));
+            (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt) &&
+            (identical(other.mealRecordExternalId, mealRecordExternalId) ||
+                other.mealRecordExternalId == mealRecordExternalId) &&
+            (identical(other.analysis, analysis) ||
+                other.analysis == analysis));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, externalId, name, category, description);
+  int get hashCode => Object.hash(runtimeType, mealFoodId, name, category,
+      eatenAt, mealRecordExternalId, analysis);
 
   @override
   String toString() {
-    return 'MealFood(externalId: $externalId, name: $name, category: $category, description: $description)';
+    return 'MealFood(mealFoodId: $mealFoodId, name: $name, category: $category, eatenAt: $eatenAt, mealRecordExternalId: $mealRecordExternalId, analysis: $analysis)';
   }
 }
 
@@ -388,7 +1149,14 @@ abstract mixin class $MealFoodCopyWith<$Res> {
       _$MealFoodCopyWithImpl;
   @useResult
   $Res call(
-      {String externalId, String name, String? category, String? description});
+      {String mealFoodId,
+      String name,
+      String? category,
+      String eatenAt,
+      String? mealRecordExternalId,
+      MealAnalysis? analysis});
+
+  $MealAnalysisCopyWith<$Res>? get analysis;
 }
 
 /// @nodoc
@@ -403,15 +1171,17 @@ class _$MealFoodCopyWithImpl<$Res> implements $MealFoodCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? externalId = null,
+    Object? mealFoodId = null,
     Object? name = null,
     Object? category = freezed,
-    Object? description = freezed,
+    Object? eatenAt = null,
+    Object? mealRecordExternalId = freezed,
+    Object? analysis = freezed,
   }) {
     return _then(_self.copyWith(
-      externalId: null == externalId
-          ? _self.externalId
-          : externalId // ignore: cast_nullable_to_non_nullable
+      mealFoodId: null == mealFoodId
+          ? _self.mealFoodId
+          : mealFoodId // ignore: cast_nullable_to_non_nullable
               as String,
       name: null == name
           ? _self.name
@@ -421,11 +1191,33 @@ class _$MealFoodCopyWithImpl<$Res> implements $MealFoodCopyWith<$Res> {
           ? _self.category
           : category // ignore: cast_nullable_to_non_nullable
               as String?,
-      description: freezed == description
-          ? _self.description
-          : description // ignore: cast_nullable_to_non_nullable
+      eatenAt: null == eatenAt
+          ? _self.eatenAt
+          : eatenAt // ignore: cast_nullable_to_non_nullable
+              as String,
+      mealRecordExternalId: freezed == mealRecordExternalId
+          ? _self.mealRecordExternalId
+          : mealRecordExternalId // ignore: cast_nullable_to_non_nullable
               as String?,
+      analysis: freezed == analysis
+          ? _self.analysis
+          : analysis // ignore: cast_nullable_to_non_nullable
+              as MealAnalysis?,
     ));
+  }
+
+  /// Create a copy of MealFood
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $MealAnalysisCopyWith<$Res>? get analysis {
+    if (_self.analysis == null) {
+      return null;
+    }
+
+    return $MealAnalysisCopyWith<$Res>(_self.analysis!, (value) {
+      return _then(_self.copyWith(analysis: value));
+    });
   }
 }
 
@@ -522,16 +1314,21 @@ extension MealFoodPatterns on MealFood {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String externalId, String name, String? category,
-            String? description)?
+    TResult Function(
+            String mealFoodId,
+            String name,
+            String? category,
+            String eatenAt,
+            String? mealRecordExternalId,
+            MealAnalysis? analysis)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _MealFood() when $default != null:
-        return $default(
-            _that.externalId, _that.name, _that.category, _that.description);
+        return $default(_that.mealFoodId, _that.name, _that.category,
+            _that.eatenAt, _that.mealRecordExternalId, _that.analysis);
       case _:
         return orElse();
     }
@@ -552,15 +1349,20 @@ extension MealFoodPatterns on MealFood {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String externalId, String name, String? category,
-            String? description)
+    TResult Function(
+            String mealFoodId,
+            String name,
+            String? category,
+            String eatenAt,
+            String? mealRecordExternalId,
+            MealAnalysis? analysis)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _MealFood():
-        return $default(
-            _that.externalId, _that.name, _that.category, _that.description);
+        return $default(_that.mealFoodId, _that.name, _that.category,
+            _that.eatenAt, _that.mealRecordExternalId, _that.analysis);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -580,15 +1382,20 @@ extension MealFoodPatterns on MealFood {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String externalId, String name, String? category,
-            String? description)?
+    TResult? Function(
+            String mealFoodId,
+            String name,
+            String? category,
+            String eatenAt,
+            String? mealRecordExternalId,
+            MealAnalysis? analysis)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _MealFood() when $default != null:
-        return $default(
-            _that.externalId, _that.name, _that.category, _that.description);
+        return $default(_that.mealFoodId, _that.name, _that.category,
+            _that.eatenAt, _that.mealRecordExternalId, _that.analysis);
       case _:
         return null;
     }
@@ -599,26 +1406,36 @@ extension MealFoodPatterns on MealFood {
 
 class _MealFood implements MealFood {
   const _MealFood(
-      {required this.externalId,
+      {required this.mealFoodId,
       required this.name,
       this.category,
-      this.description});
+      required this.eatenAt,
+      this.mealRecordExternalId,
+      this.analysis});
 
-  /// 서버측 음식 식별자.
+  /// 음식 식별자 (구 mealId 대체).
   @override
-  final String externalId;
+  final String mealFoodId;
 
   /// 음식 표시 이름.
   @override
   final String name;
 
-  /// 음식 카테고리. 서버가 없으면 null.
+  /// 음식 카테고리. 서버가 없으면 null → FoodThumbnail 기본.
   @override
   final String? category;
 
-  /// 음식 설명. 서버가 없으면 null.
+  /// 섭취 시각 (ISO-8601 문자열 그대로, 표시 전용).
   @override
-  final String? description;
+  final String eatenAt;
+
+  /// food.mealRecordExternalId (POST 응답에만 존재, append/재판정용).
+  @override
+  final String? mealRecordExternalId;
+
+  /// analysis. 상세·foodDetail·POST 응답에만. 타임라인/목록엔 null.
+  @override
+  final MealAnalysis? analysis;
 
   /// Create a copy of MealFood
   /// with the given fields replaced by the non-null parameter values.
@@ -633,22 +1450,25 @@ class _MealFood implements MealFood {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _MealFood &&
-            (identical(other.externalId, externalId) ||
-                other.externalId == externalId) &&
+            (identical(other.mealFoodId, mealFoodId) ||
+                other.mealFoodId == mealFoodId) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.category, category) ||
                 other.category == category) &&
-            (identical(other.description, description) ||
-                other.description == description));
+            (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt) &&
+            (identical(other.mealRecordExternalId, mealRecordExternalId) ||
+                other.mealRecordExternalId == mealRecordExternalId) &&
+            (identical(other.analysis, analysis) ||
+                other.analysis == analysis));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, externalId, name, category, description);
+  int get hashCode => Object.hash(runtimeType, mealFoodId, name, category,
+      eatenAt, mealRecordExternalId, analysis);
 
   @override
   String toString() {
-    return 'MealFood(externalId: $externalId, name: $name, category: $category, description: $description)';
+    return 'MealFood(mealFoodId: $mealFoodId, name: $name, category: $category, eatenAt: $eatenAt, mealRecordExternalId: $mealRecordExternalId, analysis: $analysis)';
   }
 }
 
@@ -660,7 +1480,15 @@ abstract mixin class _$MealFoodCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String externalId, String name, String? category, String? description});
+      {String mealFoodId,
+      String name,
+      String? category,
+      String eatenAt,
+      String? mealRecordExternalId,
+      MealAnalysis? analysis});
+
+  @override
+  $MealAnalysisCopyWith<$Res>? get analysis;
 }
 
 /// @nodoc
@@ -675,15 +1503,17 @@ class __$MealFoodCopyWithImpl<$Res> implements _$MealFoodCopyWith<$Res> {
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? externalId = null,
+    Object? mealFoodId = null,
     Object? name = null,
     Object? category = freezed,
-    Object? description = freezed,
+    Object? eatenAt = null,
+    Object? mealRecordExternalId = freezed,
+    Object? analysis = freezed,
   }) {
     return _then(_MealFood(
-      externalId: null == externalId
-          ? _self.externalId
-          : externalId // ignore: cast_nullable_to_non_nullable
+      mealFoodId: null == mealFoodId
+          ? _self.mealFoodId
+          : mealFoodId // ignore: cast_nullable_to_non_nullable
               as String,
       name: null == name
           ? _self.name
@@ -693,30 +1523,49 @@ class __$MealFoodCopyWithImpl<$Res> implements _$MealFoodCopyWith<$Res> {
           ? _self.category
           : category // ignore: cast_nullable_to_non_nullable
               as String?,
-      description: freezed == description
-          ? _self.description
-          : description // ignore: cast_nullable_to_non_nullable
+      eatenAt: null == eatenAt
+          ? _self.eatenAt
+          : eatenAt // ignore: cast_nullable_to_non_nullable
+              as String,
+      mealRecordExternalId: freezed == mealRecordExternalId
+          ? _self.mealRecordExternalId
+          : mealRecordExternalId // ignore: cast_nullable_to_non_nullable
               as String?,
+      analysis: freezed == analysis
+          ? _self.analysis
+          : analysis // ignore: cast_nullable_to_non_nullable
+              as MealAnalysis?,
     ));
+  }
+
+  /// Create a copy of MealFood
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $MealAnalysisCopyWith<$Res>? get analysis {
+    if (_self.analysis == null) {
+      return null;
+    }
+
+    return $MealAnalysisCopyWith<$Res>(_self.analysis!, (value) {
+      return _then(_self.copyWith(analysis: value));
+    });
   }
 }
 
 /// @nodoc
 mixin _$MealRecord {
   /// 식사 기록 식별자.
-  String get mealId;
+  String get mealRecordId;
 
-  /// 소속 끼니 그룹 식별자.
-  String get mealGroupId;
-
-  /// 섭취 시각 (ISO-8601 문자열 그대로).
+  /// 식사 대표 섭취 시각 (ISO 그대로).
   String get eatenAt;
 
-  /// 음식 요약 정보.
-  FoodSummary get food;
+  /// 식사 내 음식 목록 (서버 meals[]). 각 음식의 analysis는 null.
+  List<MealFood> get foods;
 
-  /// 판정 등급. 미판정이면 null.
-  VerdictLevel? get judgedGrade;
+  /// 연관 상태기록 목록.
+  List<StateRecord> get stateRecords;
 
   /// Create a copy of MealRecord
   /// with the given fields replaced by the non-null parameter values.
@@ -730,22 +1579,25 @@ mixin _$MealRecord {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MealRecord &&
-            (identical(other.mealId, mealId) || other.mealId == mealId) &&
-            (identical(other.mealGroupId, mealGroupId) ||
-                other.mealGroupId == mealGroupId) &&
+            (identical(other.mealRecordId, mealRecordId) ||
+                other.mealRecordId == mealRecordId) &&
             (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt) &&
-            (identical(other.food, food) || other.food == food) &&
-            (identical(other.judgedGrade, judgedGrade) ||
-                other.judgedGrade == judgedGrade));
+            const DeepCollectionEquality().equals(other.foods, foods) &&
+            const DeepCollectionEquality()
+                .equals(other.stateRecords, stateRecords));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, mealId, mealGroupId, eatenAt, food, judgedGrade);
+  int get hashCode => Object.hash(
+      runtimeType,
+      mealRecordId,
+      eatenAt,
+      const DeepCollectionEquality().hash(foods),
+      const DeepCollectionEquality().hash(stateRecords));
 
   @override
   String toString() {
-    return 'MealRecord(mealId: $mealId, mealGroupId: $mealGroupId, eatenAt: $eatenAt, food: $food, judgedGrade: $judgedGrade)';
+    return 'MealRecord(mealRecordId: $mealRecordId, eatenAt: $eatenAt, foods: $foods, stateRecords: $stateRecords)';
   }
 }
 
@@ -756,13 +1608,10 @@ abstract mixin class $MealRecordCopyWith<$Res> {
       _$MealRecordCopyWithImpl;
   @useResult
   $Res call(
-      {String mealId,
-      String mealGroupId,
+      {String mealRecordId,
       String eatenAt,
-      FoodSummary food,
-      VerdictLevel? judgedGrade});
-
-  $FoodSummaryCopyWith<$Res> get food;
+      List<MealFood> foods,
+      List<StateRecord> stateRecords});
 }
 
 /// @nodoc
@@ -777,44 +1626,29 @@ class _$MealRecordCopyWithImpl<$Res> implements $MealRecordCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? mealId = null,
-    Object? mealGroupId = null,
+    Object? mealRecordId = null,
     Object? eatenAt = null,
-    Object? food = null,
-    Object? judgedGrade = freezed,
+    Object? foods = null,
+    Object? stateRecords = null,
   }) {
     return _then(_self.copyWith(
-      mealId: null == mealId
-          ? _self.mealId
-          : mealId // ignore: cast_nullable_to_non_nullable
-              as String,
-      mealGroupId: null == mealGroupId
-          ? _self.mealGroupId
-          : mealGroupId // ignore: cast_nullable_to_non_nullable
+      mealRecordId: null == mealRecordId
+          ? _self.mealRecordId
+          : mealRecordId // ignore: cast_nullable_to_non_nullable
               as String,
       eatenAt: null == eatenAt
           ? _self.eatenAt
           : eatenAt // ignore: cast_nullable_to_non_nullable
               as String,
-      food: null == food
-          ? _self.food
-          : food // ignore: cast_nullable_to_non_nullable
-              as FoodSummary,
-      judgedGrade: freezed == judgedGrade
-          ? _self.judgedGrade
-          : judgedGrade // ignore: cast_nullable_to_non_nullable
-              as VerdictLevel?,
+      foods: null == foods
+          ? _self.foods
+          : foods // ignore: cast_nullable_to_non_nullable
+              as List<MealFood>,
+      stateRecords: null == stateRecords
+          ? _self.stateRecords
+          : stateRecords // ignore: cast_nullable_to_non_nullable
+              as List<StateRecord>,
     ));
-  }
-
-  /// Create a copy of MealRecord
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $FoodSummaryCopyWith<$Res> get food {
-    return $FoodSummaryCopyWith<$Res>(_self.food, (value) {
-      return _then(_self.copyWith(food: value));
-    });
   }
 }
 
@@ -911,16 +1745,16 @@ extension MealRecordPatterns on MealRecord {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String mealId, String mealGroupId, String eatenAt,
-            FoodSummary food, VerdictLevel? judgedGrade)?
+    TResult Function(String mealRecordId, String eatenAt, List<MealFood> foods,
+            List<StateRecord> stateRecords)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _MealRecord() when $default != null:
-        return $default(_that.mealId, _that.mealGroupId, _that.eatenAt,
-            _that.food, _that.judgedGrade);
+        return $default(
+            _that.mealRecordId, _that.eatenAt, _that.foods, _that.stateRecords);
       case _:
         return orElse();
     }
@@ -941,15 +1775,15 @@ extension MealRecordPatterns on MealRecord {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String mealId, String mealGroupId, String eatenAt,
-            FoodSummary food, VerdictLevel? judgedGrade)
+    TResult Function(String mealRecordId, String eatenAt, List<MealFood> foods,
+            List<StateRecord> stateRecords)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _MealRecord():
-        return $default(_that.mealId, _that.mealGroupId, _that.eatenAt,
-            _that.food, _that.judgedGrade);
+        return $default(
+            _that.mealRecordId, _that.eatenAt, _that.foods, _that.stateRecords);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -969,15 +1803,15 @@ extension MealRecordPatterns on MealRecord {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String mealId, String mealGroupId, String eatenAt,
-            FoodSummary food, VerdictLevel? judgedGrade)?
+    TResult? Function(String mealRecordId, String eatenAt, List<MealFood> foods,
+            List<StateRecord> stateRecords)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _MealRecord() when $default != null:
-        return $default(_that.mealId, _that.mealGroupId, _that.eatenAt,
-            _that.food, _that.judgedGrade);
+        return $default(
+            _that.mealRecordId, _that.eatenAt, _that.foods, _that.stateRecords);
       case _:
         return null;
     }
@@ -988,31 +1822,44 @@ extension MealRecordPatterns on MealRecord {
 
 class _MealRecord implements MealRecord {
   const _MealRecord(
-      {required this.mealId,
-      required this.mealGroupId,
+      {required this.mealRecordId,
       required this.eatenAt,
-      required this.food,
-      this.judgedGrade});
+      final List<MealFood> foods = const <MealFood>[],
+      final List<StateRecord> stateRecords = const <StateRecord>[]})
+      : _foods = foods,
+        _stateRecords = stateRecords;
 
   /// 식사 기록 식별자.
   @override
-  final String mealId;
+  final String mealRecordId;
 
-  /// 소속 끼니 그룹 식별자.
-  @override
-  final String mealGroupId;
-
-  /// 섭취 시각 (ISO-8601 문자열 그대로).
+  /// 식사 대표 섭취 시각 (ISO 그대로).
   @override
   final String eatenAt;
 
-  /// 음식 요약 정보.
-  @override
-  final FoodSummary food;
+  /// 식사 내 음식 목록 (서버 meals[]). 각 음식의 analysis는 null.
+  final List<MealFood> _foods;
 
-  /// 판정 등급. 미판정이면 null.
+  /// 식사 내 음식 목록 (서버 meals[]). 각 음식의 analysis는 null.
   @override
-  final VerdictLevel? judgedGrade;
+  @JsonKey()
+  List<MealFood> get foods {
+    if (_foods is EqualUnmodifiableListView) return _foods;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_foods);
+  }
+
+  /// 연관 상태기록 목록.
+  final List<StateRecord> _stateRecords;
+
+  /// 연관 상태기록 목록.
+  @override
+  @JsonKey()
+  List<StateRecord> get stateRecords {
+    if (_stateRecords is EqualUnmodifiableListView) return _stateRecords;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_stateRecords);
+  }
 
   /// Create a copy of MealRecord
   /// with the given fields replaced by the non-null parameter values.
@@ -1027,22 +1874,25 @@ class _MealRecord implements MealRecord {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _MealRecord &&
-            (identical(other.mealId, mealId) || other.mealId == mealId) &&
-            (identical(other.mealGroupId, mealGroupId) ||
-                other.mealGroupId == mealGroupId) &&
+            (identical(other.mealRecordId, mealRecordId) ||
+                other.mealRecordId == mealRecordId) &&
             (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt) &&
-            (identical(other.food, food) || other.food == food) &&
-            (identical(other.judgedGrade, judgedGrade) ||
-                other.judgedGrade == judgedGrade));
+            const DeepCollectionEquality().equals(other._foods, _foods) &&
+            const DeepCollectionEquality()
+                .equals(other._stateRecords, _stateRecords));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, mealId, mealGroupId, eatenAt, food, judgedGrade);
+  int get hashCode => Object.hash(
+      runtimeType,
+      mealRecordId,
+      eatenAt,
+      const DeepCollectionEquality().hash(_foods),
+      const DeepCollectionEquality().hash(_stateRecords));
 
   @override
   String toString() {
-    return 'MealRecord(mealId: $mealId, mealGroupId: $mealGroupId, eatenAt: $eatenAt, food: $food, judgedGrade: $judgedGrade)';
+    return 'MealRecord(mealRecordId: $mealRecordId, eatenAt: $eatenAt, foods: $foods, stateRecords: $stateRecords)';
   }
 }
 
@@ -1055,14 +1905,10 @@ abstract mixin class _$MealRecordCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String mealId,
-      String mealGroupId,
+      {String mealRecordId,
       String eatenAt,
-      FoodSummary food,
-      VerdictLevel? judgedGrade});
-
-  @override
-  $FoodSummaryCopyWith<$Res> get food;
+      List<MealFood> foods,
+      List<StateRecord> stateRecords});
 }
 
 /// @nodoc
@@ -1077,633 +1923,658 @@ class __$MealRecordCopyWithImpl<$Res> implements _$MealRecordCopyWith<$Res> {
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? mealId = null,
-    Object? mealGroupId = null,
+    Object? mealRecordId = null,
     Object? eatenAt = null,
-    Object? food = null,
-    Object? judgedGrade = freezed,
+    Object? foods = null,
+    Object? stateRecords = null,
   }) {
     return _then(_MealRecord(
-      mealId: null == mealId
-          ? _self.mealId
-          : mealId // ignore: cast_nullable_to_non_nullable
-              as String,
-      mealGroupId: null == mealGroupId
-          ? _self.mealGroupId
-          : mealGroupId // ignore: cast_nullable_to_non_nullable
+      mealRecordId: null == mealRecordId
+          ? _self.mealRecordId
+          : mealRecordId // ignore: cast_nullable_to_non_nullable
               as String,
       eatenAt: null == eatenAt
           ? _self.eatenAt
           : eatenAt // ignore: cast_nullable_to_non_nullable
               as String,
-      food: null == food
-          ? _self.food
-          : food // ignore: cast_nullable_to_non_nullable
-              as FoodSummary,
-      judgedGrade: freezed == judgedGrade
-          ? _self.judgedGrade
-          : judgedGrade // ignore: cast_nullable_to_non_nullable
-              as VerdictLevel?,
-    ));
-  }
-
-  /// Create a copy of MealRecord
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $FoodSummaryCopyWith<$Res> get food {
-    return $FoodSummaryCopyWith<$Res>(_self.food, (value) {
-      return _then(_self.copyWith(food: value));
-    });
-  }
-}
-
-/// @nodoc
-mixin _$MealDetail {
-  /// 식사 기록 식별자.
-  String get mealId;
-
-  /// 소속 끼니 그룹 식별자.
-  String get mealGroupId;
-
-  /// 섭취 시각 (ISO-8601 문자열 그대로).
-  String get eatenAt;
-
-  /// 메모. null 또는 빈 문자열이면 미작성 상태.
-  String? get memo;
-
-  /// 판정 등급. 미판정이면 null.
-  VerdictLevel? get judgedGrade;
-
-  /// 음식 상세 정보.
-  MealFood get food;
-
-  /// 연관 증상 기록 목록 (읽기전용).
-  List<StateRecord> get stateRecords;
-
-  /// Create a copy of MealDetail
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  $MealDetailCopyWith<MealDetail> get copyWith =>
-      _$MealDetailCopyWithImpl<MealDetail>(this as MealDetail, _$identity);
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is MealDetail &&
-            (identical(other.mealId, mealId) || other.mealId == mealId) &&
-            (identical(other.mealGroupId, mealGroupId) ||
-                other.mealGroupId == mealGroupId) &&
-            (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt) &&
-            (identical(other.memo, memo) || other.memo == memo) &&
-            (identical(other.judgedGrade, judgedGrade) ||
-                other.judgedGrade == judgedGrade) &&
-            (identical(other.food, food) || other.food == food) &&
-            const DeepCollectionEquality()
-                .equals(other.stateRecords, stateRecords));
-  }
-
-  @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      mealId,
-      mealGroupId,
-      eatenAt,
-      memo,
-      judgedGrade,
-      food,
-      const DeepCollectionEquality().hash(stateRecords));
-
-  @override
-  String toString() {
-    return 'MealDetail(mealId: $mealId, mealGroupId: $mealGroupId, eatenAt: $eatenAt, memo: $memo, judgedGrade: $judgedGrade, food: $food, stateRecords: $stateRecords)';
-  }
-}
-
-/// @nodoc
-abstract mixin class $MealDetailCopyWith<$Res> {
-  factory $MealDetailCopyWith(
-          MealDetail value, $Res Function(MealDetail) _then) =
-      _$MealDetailCopyWithImpl;
-  @useResult
-  $Res call(
-      {String mealId,
-      String mealGroupId,
-      String eatenAt,
-      String? memo,
-      VerdictLevel? judgedGrade,
-      MealFood food,
-      List<StateRecord> stateRecords});
-
-  $MealFoodCopyWith<$Res> get food;
-}
-
-/// @nodoc
-class _$MealDetailCopyWithImpl<$Res> implements $MealDetailCopyWith<$Res> {
-  _$MealDetailCopyWithImpl(this._self, this._then);
-
-  final MealDetail _self;
-  final $Res Function(MealDetail) _then;
-
-  /// Create a copy of MealDetail
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? mealId = null,
-    Object? mealGroupId = null,
-    Object? eatenAt = null,
-    Object? memo = freezed,
-    Object? judgedGrade = freezed,
-    Object? food = null,
-    Object? stateRecords = null,
-  }) {
-    return _then(_self.copyWith(
-      mealId: null == mealId
-          ? _self.mealId
-          : mealId // ignore: cast_nullable_to_non_nullable
-              as String,
-      mealGroupId: null == mealGroupId
-          ? _self.mealGroupId
-          : mealGroupId // ignore: cast_nullable_to_non_nullable
-              as String,
-      eatenAt: null == eatenAt
-          ? _self.eatenAt
-          : eatenAt // ignore: cast_nullable_to_non_nullable
-              as String,
-      memo: freezed == memo
-          ? _self.memo
-          : memo // ignore: cast_nullable_to_non_nullable
-              as String?,
-      judgedGrade: freezed == judgedGrade
-          ? _self.judgedGrade
-          : judgedGrade // ignore: cast_nullable_to_non_nullable
-              as VerdictLevel?,
-      food: null == food
-          ? _self.food
-          : food // ignore: cast_nullable_to_non_nullable
-              as MealFood,
-      stateRecords: null == stateRecords
-          ? _self.stateRecords
-          : stateRecords // ignore: cast_nullable_to_non_nullable
-              as List<StateRecord>,
-    ));
-  }
-
-  /// Create a copy of MealDetail
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $MealFoodCopyWith<$Res> get food {
-    return $MealFoodCopyWith<$Res>(_self.food, (value) {
-      return _then(_self.copyWith(food: value));
-    });
-  }
-}
-
-/// Adds pattern-matching-related methods to [MealDetail].
-extension MealDetailPatterns on MealDetail {
-  /// A variant of `map` that fallback to returning `orElse`.
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case final Subclass value:
-  ///     return ...;
-  ///   case _:
-  ///     return orElse();
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>(
-    TResult Function(_MealDetail value)? $default, {
-    required TResult orElse(),
-  }) {
-    final _that = this;
-    switch (_that) {
-      case _MealDetail() when $default != null:
-        return $default(_that);
-      case _:
-        return orElse();
-    }
-  }
-
-  /// A `switch`-like method, using callbacks.
-  ///
-  /// Callbacks receives the raw object, upcasted.
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case final Subclass value:
-  ///     return ...;
-  ///   case final Subclass2 value:
-  ///     return ...;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>(
-    TResult Function(_MealDetail value) $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _MealDetail():
-        return $default(_that);
-      case _:
-        throw StateError('Unexpected subclass');
-    }
-  }
-
-  /// A variant of `map` that fallback to returning `null`.
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case final Subclass value:
-  ///     return ...;
-  ///   case _:
-  ///     return null;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_MealDetail value)? $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _MealDetail() when $default != null:
-        return $default(_that);
-      case _:
-        return null;
-    }
-  }
-
-  /// A variant of `when` that fallback to an `orElse` callback.
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case Subclass(:final field):
-  ///     return ...;
-  ///   case _:
-  ///     return orElse();
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>(
-    TResult Function(
-            String mealId,
-            String mealGroupId,
-            String eatenAt,
-            String? memo,
-            VerdictLevel? judgedGrade,
-            MealFood food,
-            List<StateRecord> stateRecords)?
-        $default, {
-    required TResult orElse(),
-  }) {
-    final _that = this;
-    switch (_that) {
-      case _MealDetail() when $default != null:
-        return $default(_that.mealId, _that.mealGroupId, _that.eatenAt,
-            _that.memo, _that.judgedGrade, _that.food, _that.stateRecords);
-      case _:
-        return orElse();
-    }
-  }
-
-  /// A `switch`-like method, using callbacks.
-  ///
-  /// As opposed to `map`, this offers destructuring.
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case Subclass(:final field):
-  ///     return ...;
-  ///   case Subclass2(:final field2):
-  ///     return ...;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>(
-    TResult Function(
-            String mealId,
-            String mealGroupId,
-            String eatenAt,
-            String? memo,
-            VerdictLevel? judgedGrade,
-            MealFood food,
-            List<StateRecord> stateRecords)
-        $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _MealDetail():
-        return $default(_that.mealId, _that.mealGroupId, _that.eatenAt,
-            _that.memo, _that.judgedGrade, _that.food, _that.stateRecords);
-      case _:
-        throw StateError('Unexpected subclass');
-    }
-  }
-
-  /// A variant of `when` that fallback to returning `null`
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case Subclass(:final field):
-  ///     return ...;
-  ///   case _:
-  ///     return null;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(
-            String mealId,
-            String mealGroupId,
-            String eatenAt,
-            String? memo,
-            VerdictLevel? judgedGrade,
-            MealFood food,
-            List<StateRecord> stateRecords)?
-        $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _MealDetail() when $default != null:
-        return $default(_that.mealId, _that.mealGroupId, _that.eatenAt,
-            _that.memo, _that.judgedGrade, _that.food, _that.stateRecords);
-      case _:
-        return null;
-    }
-  }
-}
-
-/// @nodoc
-
-class _MealDetail implements MealDetail {
-  const _MealDetail(
-      {required this.mealId,
-      required this.mealGroupId,
-      required this.eatenAt,
-      this.memo,
-      this.judgedGrade,
-      required this.food,
-      final List<StateRecord> stateRecords = const <StateRecord>[]})
-      : _stateRecords = stateRecords;
-
-  /// 식사 기록 식별자.
-  @override
-  final String mealId;
-
-  /// 소속 끼니 그룹 식별자.
-  @override
-  final String mealGroupId;
-
-  /// 섭취 시각 (ISO-8601 문자열 그대로).
-  @override
-  final String eatenAt;
-
-  /// 메모. null 또는 빈 문자열이면 미작성 상태.
-  @override
-  final String? memo;
-
-  /// 판정 등급. 미판정이면 null.
-  @override
-  final VerdictLevel? judgedGrade;
-
-  /// 음식 상세 정보.
-  @override
-  final MealFood food;
-
-  /// 연관 증상 기록 목록 (읽기전용).
-  final List<StateRecord> _stateRecords;
-
-  /// 연관 증상 기록 목록 (읽기전용).
-  @override
-  @JsonKey()
-  List<StateRecord> get stateRecords {
-    if (_stateRecords is EqualUnmodifiableListView) return _stateRecords;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_stateRecords);
-  }
-
-  /// Create a copy of MealDetail
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  _$MealDetailCopyWith<_MealDetail> get copyWith =>
-      __$MealDetailCopyWithImpl<_MealDetail>(this, _$identity);
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _MealDetail &&
-            (identical(other.mealId, mealId) || other.mealId == mealId) &&
-            (identical(other.mealGroupId, mealGroupId) ||
-                other.mealGroupId == mealGroupId) &&
-            (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt) &&
-            (identical(other.memo, memo) || other.memo == memo) &&
-            (identical(other.judgedGrade, judgedGrade) ||
-                other.judgedGrade == judgedGrade) &&
-            (identical(other.food, food) || other.food == food) &&
-            const DeepCollectionEquality()
-                .equals(other._stateRecords, _stateRecords));
-  }
-
-  @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      mealId,
-      mealGroupId,
-      eatenAt,
-      memo,
-      judgedGrade,
-      food,
-      const DeepCollectionEquality().hash(_stateRecords));
-
-  @override
-  String toString() {
-    return 'MealDetail(mealId: $mealId, mealGroupId: $mealGroupId, eatenAt: $eatenAt, memo: $memo, judgedGrade: $judgedGrade, food: $food, stateRecords: $stateRecords)';
-  }
-}
-
-/// @nodoc
-abstract mixin class _$MealDetailCopyWith<$Res>
-    implements $MealDetailCopyWith<$Res> {
-  factory _$MealDetailCopyWith(
-          _MealDetail value, $Res Function(_MealDetail) _then) =
-      __$MealDetailCopyWithImpl;
-  @override
-  @useResult
-  $Res call(
-      {String mealId,
-      String mealGroupId,
-      String eatenAt,
-      String? memo,
-      VerdictLevel? judgedGrade,
-      MealFood food,
-      List<StateRecord> stateRecords});
-
-  @override
-  $MealFoodCopyWith<$Res> get food;
-}
-
-/// @nodoc
-class __$MealDetailCopyWithImpl<$Res> implements _$MealDetailCopyWith<$Res> {
-  __$MealDetailCopyWithImpl(this._self, this._then);
-
-  final _MealDetail _self;
-  final $Res Function(_MealDetail) _then;
-
-  /// Create a copy of MealDetail
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $Res call({
-    Object? mealId = null,
-    Object? mealGroupId = null,
-    Object? eatenAt = null,
-    Object? memo = freezed,
-    Object? judgedGrade = freezed,
-    Object? food = null,
-    Object? stateRecords = null,
-  }) {
-    return _then(_MealDetail(
-      mealId: null == mealId
-          ? _self.mealId
-          : mealId // ignore: cast_nullable_to_non_nullable
-              as String,
-      mealGroupId: null == mealGroupId
-          ? _self.mealGroupId
-          : mealGroupId // ignore: cast_nullable_to_non_nullable
-              as String,
-      eatenAt: null == eatenAt
-          ? _self.eatenAt
-          : eatenAt // ignore: cast_nullable_to_non_nullable
-              as String,
-      memo: freezed == memo
-          ? _self.memo
-          : memo // ignore: cast_nullable_to_non_nullable
-              as String?,
-      judgedGrade: freezed == judgedGrade
-          ? _self.judgedGrade
-          : judgedGrade // ignore: cast_nullable_to_non_nullable
-              as VerdictLevel?,
-      food: null == food
-          ? _self.food
-          : food // ignore: cast_nullable_to_non_nullable
-              as MealFood,
+      foods: null == foods
+          ? _self._foods
+          : foods // ignore: cast_nullable_to_non_nullable
+              as List<MealFood>,
       stateRecords: null == stateRecords
           ? _self._stateRecords
           : stateRecords // ignore: cast_nullable_to_non_nullable
               as List<StateRecord>,
     ));
   }
+}
 
-  /// Create a copy of MealDetail
-  /// with the given fields replaced by the non-null parameter values.
+/// @nodoc
+mixin _$TimelineItem {
   @override
-  @pragma('vm:prefer-inline')
-  $MealFoodCopyWith<$Res> get food {
-    return $MealFoodCopyWith<$Res>(_self.food, (value) {
-      return _then(_self.copyWith(food: value));
-    });
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is TimelineItem);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() {
+    return 'TimelineItem()';
   }
 }
 
 /// @nodoc
-mixin _$MealGroup {
-  /// 끼니 그룹 식별자.
-  String get mealGroupId;
+class $TimelineItemCopyWith<$Res> {
+  $TimelineItemCopyWith(TimelineItem _, $Res Function(TimelineItem) __);
+}
 
-  /// 섭취 시각 (ISO-8601 문자열 그대로).
-  String get eatenAt;
+/// Adds pattern-matching-related methods to [TimelineItem].
+extension TimelineItemPatterns on TimelineItem {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
 
-  /// 그룹 내 식사 기록 목록.
-  List<MealRecord> get records;
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(TimelineSingle value)? single,
+    TResult Function(TimelineGroup value)? group,
+    TResult Function(TimelineSymptom value)? symptom,
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case TimelineSingle() when single != null:
+        return single(_that);
+      case TimelineGroup() when group != null:
+        return group(_that);
+      case TimelineSymptom() when symptom != null:
+        return symptom(_that);
+      case _:
+        return orElse();
+    }
+  }
 
-  /// Create a copy of MealGroup
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(TimelineSingle value) single,
+    required TResult Function(TimelineGroup value) group,
+    required TResult Function(TimelineSymptom value) symptom,
+  }) {
+    final _that = this;
+    switch (_that) {
+      case TimelineSingle():
+        return single(_that);
+      case TimelineGroup():
+        return group(_that);
+      case TimelineSymptom():
+        return symptom(_that);
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(TimelineSingle value)? single,
+    TResult? Function(TimelineGroup value)? group,
+    TResult? Function(TimelineSymptom value)? symptom,
+  }) {
+    final _that = this;
+    switch (_that) {
+      case TimelineSingle() when single != null:
+        return single(_that);
+      case TimelineGroup() when group != null:
+        return group(_that);
+      case TimelineSymptom() when symptom != null:
+        return symptom(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String mealRecordId, String mealRecordDateTime,
+            String mealFoodName, VerdictLevel grade, int etcCount)?
+        single,
+    TResult Function(String mealRecordId, String mealRecordDateTime,
+            List<String> representativeFoods, int etcCount)?
+        group,
+    TResult Function(
+            SymptomState symptomState, int afterMealMinutes, String occurredAt)?
+        symptom,
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case TimelineSingle() when single != null:
+        return single(_that.mealRecordId, _that.mealRecordDateTime,
+            _that.mealFoodName, _that.grade, _that.etcCount);
+      case TimelineGroup() when group != null:
+        return group(_that.mealRecordId, _that.mealRecordDateTime,
+            _that.representativeFoods, _that.etcCount);
+      case TimelineSymptom() when symptom != null:
+        return symptom(
+            _that.symptomState, _that.afterMealMinutes, _that.occurredAt);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(String mealRecordId, String mealRecordDateTime,
+            String mealFoodName, VerdictLevel grade, int etcCount)
+        single,
+    required TResult Function(String mealRecordId, String mealRecordDateTime,
+            List<String> representativeFoods, int etcCount)
+        group,
+    required TResult Function(
+            SymptomState symptomState, int afterMealMinutes, String occurredAt)
+        symptom,
+  }) {
+    final _that = this;
+    switch (_that) {
+      case TimelineSingle():
+        return single(_that.mealRecordId, _that.mealRecordDateTime,
+            _that.mealFoodName, _that.grade, _that.etcCount);
+      case TimelineGroup():
+        return group(_that.mealRecordId, _that.mealRecordDateTime,
+            _that.representativeFoods, _that.etcCount);
+      case TimelineSymptom():
+        return symptom(
+            _that.symptomState, _that.afterMealMinutes, _that.occurredAt);
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String mealRecordId, String mealRecordDateTime,
+            String mealFoodName, VerdictLevel grade, int etcCount)?
+        single,
+    TResult? Function(String mealRecordId, String mealRecordDateTime,
+            List<String> representativeFoods, int etcCount)?
+        group,
+    TResult? Function(
+            SymptomState symptomState, int afterMealMinutes, String occurredAt)?
+        symptom,
+  }) {
+    final _that = this;
+    switch (_that) {
+      case TimelineSingle() when single != null:
+        return single(_that.mealRecordId, _that.mealRecordDateTime,
+            _that.mealFoodName, _that.grade, _that.etcCount);
+      case TimelineGroup() when group != null:
+        return group(_that.mealRecordId, _that.mealRecordDateTime,
+            _that.representativeFoods, _that.etcCount);
+      case TimelineSymptom() when symptom != null:
+        return symptom(
+            _that.symptomState, _that.afterMealMinutes, _that.occurredAt);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class TimelineSingle extends TimelineItem {
+  const TimelineSingle(
+      {required this.mealRecordId,
+      required this.mealRecordDateTime,
+      required this.mealFoodName,
+      required this.grade,
+      this.etcCount = 0})
+      : super._();
+
+  final String mealRecordId;
+  final String mealRecordDateTime;
+  final String mealFoodName;
+  final VerdictLevel grade;
+  @JsonKey()
+  final int etcCount;
+
+  /// Create a copy of TimelineItem
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $MealGroupCopyWith<MealGroup> get copyWith =>
-      _$MealGroupCopyWithImpl<MealGroup>(this as MealGroup, _$identity);
+  $TimelineSingleCopyWith<TimelineSingle> get copyWith =>
+      _$TimelineSingleCopyWithImpl<TimelineSingle>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is MealGroup &&
-            (identical(other.mealGroupId, mealGroupId) ||
-                other.mealGroupId == mealGroupId) &&
-            (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt) &&
-            const DeepCollectionEquality().equals(other.records, records));
+            other is TimelineSingle &&
+            (identical(other.mealRecordId, mealRecordId) ||
+                other.mealRecordId == mealRecordId) &&
+            (identical(other.mealRecordDateTime, mealRecordDateTime) ||
+                other.mealRecordDateTime == mealRecordDateTime) &&
+            (identical(other.mealFoodName, mealFoodName) ||
+                other.mealFoodName == mealFoodName) &&
+            (identical(other.grade, grade) || other.grade == grade) &&
+            (identical(other.etcCount, etcCount) ||
+                other.etcCount == etcCount));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, mealGroupId, eatenAt,
-      const DeepCollectionEquality().hash(records));
+  int get hashCode => Object.hash(runtimeType, mealRecordId, mealRecordDateTime,
+      mealFoodName, grade, etcCount);
 
   @override
   String toString() {
-    return 'MealGroup(mealGroupId: $mealGroupId, eatenAt: $eatenAt, records: $records)';
+    return 'TimelineItem.single(mealRecordId: $mealRecordId, mealRecordDateTime: $mealRecordDateTime, mealFoodName: $mealFoodName, grade: $grade, etcCount: $etcCount)';
   }
 }
 
 /// @nodoc
-abstract mixin class $MealGroupCopyWith<$Res> {
-  factory $MealGroupCopyWith(MealGroup value, $Res Function(MealGroup) _then) =
-      _$MealGroupCopyWithImpl;
+abstract mixin class $TimelineSingleCopyWith<$Res>
+    implements $TimelineItemCopyWith<$Res> {
+  factory $TimelineSingleCopyWith(
+          TimelineSingle value, $Res Function(TimelineSingle) _then) =
+      _$TimelineSingleCopyWithImpl;
   @useResult
-  $Res call({String mealGroupId, String eatenAt, List<MealRecord> records});
+  $Res call(
+      {String mealRecordId,
+      String mealRecordDateTime,
+      String mealFoodName,
+      VerdictLevel grade,
+      int etcCount});
 }
 
 /// @nodoc
-class _$MealGroupCopyWithImpl<$Res> implements $MealGroupCopyWith<$Res> {
-  _$MealGroupCopyWithImpl(this._self, this._then);
+class _$TimelineSingleCopyWithImpl<$Res>
+    implements $TimelineSingleCopyWith<$Res> {
+  _$TimelineSingleCopyWithImpl(this._self, this._then);
 
-  final MealGroup _self;
-  final $Res Function(MealGroup) _then;
+  final TimelineSingle _self;
+  final $Res Function(TimelineSingle) _then;
 
-  /// Create a copy of MealGroup
+  /// Create a copy of TimelineItem
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  @override
   $Res call({
-    Object? mealGroupId = null,
-    Object? eatenAt = null,
-    Object? records = null,
+    Object? mealRecordId = null,
+    Object? mealRecordDateTime = null,
+    Object? mealFoodName = null,
+    Object? grade = null,
+    Object? etcCount = null,
   }) {
-    return _then(_self.copyWith(
-      mealGroupId: null == mealGroupId
-          ? _self.mealGroupId
-          : mealGroupId // ignore: cast_nullable_to_non_nullable
+    return _then(TimelineSingle(
+      mealRecordId: null == mealRecordId
+          ? _self.mealRecordId
+          : mealRecordId // ignore: cast_nullable_to_non_nullable
               as String,
-      eatenAt: null == eatenAt
-          ? _self.eatenAt
-          : eatenAt // ignore: cast_nullable_to_non_nullable
+      mealRecordDateTime: null == mealRecordDateTime
+          ? _self.mealRecordDateTime
+          : mealRecordDateTime // ignore: cast_nullable_to_non_nullable
               as String,
-      records: null == records
-          ? _self.records
-          : records // ignore: cast_nullable_to_non_nullable
-              as List<MealRecord>,
+      mealFoodName: null == mealFoodName
+          ? _self.mealFoodName
+          : mealFoodName // ignore: cast_nullable_to_non_nullable
+              as String,
+      grade: null == grade
+          ? _self.grade
+          : grade // ignore: cast_nullable_to_non_nullable
+              as VerdictLevel,
+      etcCount: null == etcCount
+          ? _self.etcCount
+          : etcCount // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
 
-/// Adds pattern-matching-related methods to [MealGroup].
-extension MealGroupPatterns on MealGroup {
+/// @nodoc
+
+class TimelineGroup extends TimelineItem {
+  const TimelineGroup(
+      {required this.mealRecordId,
+      required this.mealRecordDateTime,
+      final List<String> representativeFoods = const <String>[],
+      this.etcCount = 0})
+      : _representativeFoods = representativeFoods,
+        super._();
+
+  final String mealRecordId;
+  final String mealRecordDateTime;
+  final List<String> _representativeFoods;
+  @JsonKey()
+  List<String> get representativeFoods {
+    if (_representativeFoods is EqualUnmodifiableListView)
+      return _representativeFoods;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_representativeFoods);
+  }
+
+  @JsonKey()
+  final int etcCount;
+
+  /// Create a copy of TimelineItem
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $TimelineGroupCopyWith<TimelineGroup> get copyWith =>
+      _$TimelineGroupCopyWithImpl<TimelineGroup>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is TimelineGroup &&
+            (identical(other.mealRecordId, mealRecordId) ||
+                other.mealRecordId == mealRecordId) &&
+            (identical(other.mealRecordDateTime, mealRecordDateTime) ||
+                other.mealRecordDateTime == mealRecordDateTime) &&
+            const DeepCollectionEquality()
+                .equals(other._representativeFoods, _representativeFoods) &&
+            (identical(other.etcCount, etcCount) ||
+                other.etcCount == etcCount));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, mealRecordId, mealRecordDateTime,
+      const DeepCollectionEquality().hash(_representativeFoods), etcCount);
+
+  @override
+  String toString() {
+    return 'TimelineItem.group(mealRecordId: $mealRecordId, mealRecordDateTime: $mealRecordDateTime, representativeFoods: $representativeFoods, etcCount: $etcCount)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $TimelineGroupCopyWith<$Res>
+    implements $TimelineItemCopyWith<$Res> {
+  factory $TimelineGroupCopyWith(
+          TimelineGroup value, $Res Function(TimelineGroup) _then) =
+      _$TimelineGroupCopyWithImpl;
+  @useResult
+  $Res call(
+      {String mealRecordId,
+      String mealRecordDateTime,
+      List<String> representativeFoods,
+      int etcCount});
+}
+
+/// @nodoc
+class _$TimelineGroupCopyWithImpl<$Res>
+    implements $TimelineGroupCopyWith<$Res> {
+  _$TimelineGroupCopyWithImpl(this._self, this._then);
+
+  final TimelineGroup _self;
+  final $Res Function(TimelineGroup) _then;
+
+  /// Create a copy of TimelineItem
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? mealRecordId = null,
+    Object? mealRecordDateTime = null,
+    Object? representativeFoods = null,
+    Object? etcCount = null,
+  }) {
+    return _then(TimelineGroup(
+      mealRecordId: null == mealRecordId
+          ? _self.mealRecordId
+          : mealRecordId // ignore: cast_nullable_to_non_nullable
+              as String,
+      mealRecordDateTime: null == mealRecordDateTime
+          ? _self.mealRecordDateTime
+          : mealRecordDateTime // ignore: cast_nullable_to_non_nullable
+              as String,
+      representativeFoods: null == representativeFoods
+          ? _self._representativeFoods
+          : representativeFoods // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      etcCount: null == etcCount
+          ? _self.etcCount
+          : etcCount // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+
+class TimelineSymptom extends TimelineItem {
+  const TimelineSymptom(
+      {required this.symptomState,
+      required this.afterMealMinutes,
+      required this.occurredAt})
+      : super._();
+
+  final SymptomState symptomState;
+  final int afterMealMinutes;
+  final String occurredAt;
+
+  /// Create a copy of TimelineItem
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $TimelineSymptomCopyWith<TimelineSymptom> get copyWith =>
+      _$TimelineSymptomCopyWithImpl<TimelineSymptom>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is TimelineSymptom &&
+            (identical(other.symptomState, symptomState) ||
+                other.symptomState == symptomState) &&
+            (identical(other.afterMealMinutes, afterMealMinutes) ||
+                other.afterMealMinutes == afterMealMinutes) &&
+            (identical(other.occurredAt, occurredAt) ||
+                other.occurredAt == occurredAt));
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, symptomState, afterMealMinutes, occurredAt);
+
+  @override
+  String toString() {
+    return 'TimelineItem.symptom(symptomState: $symptomState, afterMealMinutes: $afterMealMinutes, occurredAt: $occurredAt)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $TimelineSymptomCopyWith<$Res>
+    implements $TimelineItemCopyWith<$Res> {
+  factory $TimelineSymptomCopyWith(
+          TimelineSymptom value, $Res Function(TimelineSymptom) _then) =
+      _$TimelineSymptomCopyWithImpl;
+  @useResult
+  $Res call(
+      {SymptomState symptomState, int afterMealMinutes, String occurredAt});
+}
+
+/// @nodoc
+class _$TimelineSymptomCopyWithImpl<$Res>
+    implements $TimelineSymptomCopyWith<$Res> {
+  _$TimelineSymptomCopyWithImpl(this._self, this._then);
+
+  final TimelineSymptom _self;
+  final $Res Function(TimelineSymptom) _then;
+
+  /// Create a copy of TimelineItem
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? symptomState = null,
+    Object? afterMealMinutes = null,
+    Object? occurredAt = null,
+  }) {
+    return _then(TimelineSymptom(
+      symptomState: null == symptomState
+          ? _self.symptomState
+          : symptomState // ignore: cast_nullable_to_non_nullable
+              as SymptomState,
+      afterMealMinutes: null == afterMealMinutes
+          ? _self.afterMealMinutes
+          : afterMealMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
+      occurredAt: null == occurredAt
+          ? _self.occurredAt
+          : occurredAt // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+mixin _$WeeklyDay {
+  /// 'YYYY-MM-DD'.
+  String get date;
+
+  /// SAT|SUN|MON… (표시 안 쓰면 보관만).
+  String get dayOfWeek;
+
+  /// judgementList[], ≤3, 대문자 grade → VerdictLevel.
+  List<VerdictLevel> get judgements;
+
+  /// Create a copy of WeeklyDay
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $WeeklyDayCopyWith<WeeklyDay> get copyWith =>
+      _$WeeklyDayCopyWithImpl<WeeklyDay>(this as WeeklyDay, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is WeeklyDay &&
+            (identical(other.date, date) || other.date == date) &&
+            (identical(other.dayOfWeek, dayOfWeek) ||
+                other.dayOfWeek == dayOfWeek) &&
+            const DeepCollectionEquality()
+                .equals(other.judgements, judgements));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, date, dayOfWeek,
+      const DeepCollectionEquality().hash(judgements));
+
+  @override
+  String toString() {
+    return 'WeeklyDay(date: $date, dayOfWeek: $dayOfWeek, judgements: $judgements)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $WeeklyDayCopyWith<$Res> {
+  factory $WeeklyDayCopyWith(WeeklyDay value, $Res Function(WeeklyDay) _then) =
+      _$WeeklyDayCopyWithImpl;
+  @useResult
+  $Res call({String date, String dayOfWeek, List<VerdictLevel> judgements});
+}
+
+/// @nodoc
+class _$WeeklyDayCopyWithImpl<$Res> implements $WeeklyDayCopyWith<$Res> {
+  _$WeeklyDayCopyWithImpl(this._self, this._then);
+
+  final WeeklyDay _self;
+  final $Res Function(WeeklyDay) _then;
+
+  /// Create a copy of WeeklyDay
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? date = null,
+    Object? dayOfWeek = null,
+    Object? judgements = null,
+  }) {
+    return _then(_self.copyWith(
+      date: null == date
+          ? _self.date
+          : date // ignore: cast_nullable_to_non_nullable
+              as String,
+      dayOfWeek: null == dayOfWeek
+          ? _self.dayOfWeek
+          : dayOfWeek // ignore: cast_nullable_to_non_nullable
+              as String,
+      judgements: null == judgements
+          ? _self.judgements
+          : judgements // ignore: cast_nullable_to_non_nullable
+              as List<VerdictLevel>,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [WeeklyDay].
+extension WeeklyDayPatterns on WeeklyDay {
   /// A variant of `map` that fallback to returning `orElse`.
   ///
   /// It is equivalent to doing:
@@ -1718,12 +2589,12 @@ extension MealGroupPatterns on MealGroup {
 
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>(
-    TResult Function(_MealGroup value)? $default, {
+    TResult Function(_WeeklyDay value)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _MealGroup() when $default != null:
+      case _WeeklyDay() when $default != null:
         return $default(_that);
       case _:
         return orElse();
@@ -1745,11 +2616,11 @@ extension MealGroupPatterns on MealGroup {
 
   @optionalTypeArgs
   TResult map<TResult extends Object?>(
-    TResult Function(_MealGroup value) $default,
+    TResult Function(_WeeklyDay value) $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _MealGroup():
+      case _WeeklyDay():
         return $default(_that);
       case _:
         throw StateError('Unexpected subclass');
@@ -1770,11 +2641,11 @@ extension MealGroupPatterns on MealGroup {
 
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_MealGroup value)? $default,
+    TResult? Function(_WeeklyDay value)? $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _MealGroup() when $default != null:
+      case _WeeklyDay() when $default != null:
         return $default(_that);
       case _:
         return null;
@@ -1796,14 +2667,14 @@ extension MealGroupPatterns on MealGroup {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            String mealGroupId, String eatenAt, List<MealRecord> records)?
+            String date, String dayOfWeek, List<VerdictLevel> judgements)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _MealGroup() when $default != null:
-        return $default(_that.mealGroupId, _that.eatenAt, _that.records);
+      case _WeeklyDay() when $default != null:
+        return $default(_that.date, _that.dayOfWeek, _that.judgements);
       case _:
         return orElse();
     }
@@ -1825,13 +2696,13 @@ extension MealGroupPatterns on MealGroup {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            String mealGroupId, String eatenAt, List<MealRecord> records)
+            String date, String dayOfWeek, List<VerdictLevel> judgements)
         $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _MealGroup():
-        return $default(_that.mealGroupId, _that.eatenAt, _that.records);
+      case _WeeklyDay():
+        return $default(_that.date, _that.dayOfWeek, _that.judgements);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -1852,13 +2723,13 @@ extension MealGroupPatterns on MealGroup {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            String mealGroupId, String eatenAt, List<MealRecord> records)?
+            String date, String dayOfWeek, List<VerdictLevel> judgements)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _MealGroup() when $default != null:
-        return $default(_that.mealGroupId, _that.eatenAt, _that.records);
+      case _WeeklyDay() when $default != null:
+        return $default(_that.date, _that.dayOfWeek, _that.judgements);
       case _:
         return null;
     }
@@ -1867,102 +2738,854 @@ extension MealGroupPatterns on MealGroup {
 
 /// @nodoc
 
-class _MealGroup implements MealGroup {
-  const _MealGroup(
-      {required this.mealGroupId,
-      required this.eatenAt,
-      final List<MealRecord> records = const <MealRecord>[]})
-      : _records = records;
+class _WeeklyDay implements WeeklyDay {
+  const _WeeklyDay(
+      {required this.date,
+      required this.dayOfWeek,
+      final List<VerdictLevel> judgements = const <VerdictLevel>[]})
+      : _judgements = judgements;
 
-  /// 끼니 그룹 식별자.
+  /// 'YYYY-MM-DD'.
   @override
-  final String mealGroupId;
+  final String date;
 
-  /// 섭취 시각 (ISO-8601 문자열 그대로).
+  /// SAT|SUN|MON… (표시 안 쓰면 보관만).
   @override
-  final String eatenAt;
+  final String dayOfWeek;
 
-  /// 그룹 내 식사 기록 목록.
-  final List<MealRecord> _records;
+  /// judgementList[], ≤3, 대문자 grade → VerdictLevel.
+  final List<VerdictLevel> _judgements;
 
-  /// 그룹 내 식사 기록 목록.
+  /// judgementList[], ≤3, 대문자 grade → VerdictLevel.
   @override
   @JsonKey()
-  List<MealRecord> get records {
-    if (_records is EqualUnmodifiableListView) return _records;
+  List<VerdictLevel> get judgements {
+    if (_judgements is EqualUnmodifiableListView) return _judgements;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_records);
+    return EqualUnmodifiableListView(_judgements);
   }
 
-  /// Create a copy of MealGroup
+  /// Create a copy of WeeklyDay
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  _$MealGroupCopyWith<_MealGroup> get copyWith =>
-      __$MealGroupCopyWithImpl<_MealGroup>(this, _$identity);
+  _$WeeklyDayCopyWith<_WeeklyDay> get copyWith =>
+      __$WeeklyDayCopyWithImpl<_WeeklyDay>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _MealGroup &&
-            (identical(other.mealGroupId, mealGroupId) ||
-                other.mealGroupId == mealGroupId) &&
-            (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt) &&
-            const DeepCollectionEquality().equals(other._records, _records));
+            other is _WeeklyDay &&
+            (identical(other.date, date) || other.date == date) &&
+            (identical(other.dayOfWeek, dayOfWeek) ||
+                other.dayOfWeek == dayOfWeek) &&
+            const DeepCollectionEquality()
+                .equals(other._judgements, _judgements));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, mealGroupId, eatenAt,
-      const DeepCollectionEquality().hash(_records));
+  int get hashCode => Object.hash(runtimeType, date, dayOfWeek,
+      const DeepCollectionEquality().hash(_judgements));
 
   @override
   String toString() {
-    return 'MealGroup(mealGroupId: $mealGroupId, eatenAt: $eatenAt, records: $records)';
+    return 'WeeklyDay(date: $date, dayOfWeek: $dayOfWeek, judgements: $judgements)';
   }
 }
 
 /// @nodoc
-abstract mixin class _$MealGroupCopyWith<$Res>
-    implements $MealGroupCopyWith<$Res> {
-  factory _$MealGroupCopyWith(
-          _MealGroup value, $Res Function(_MealGroup) _then) =
-      __$MealGroupCopyWithImpl;
+abstract mixin class _$WeeklyDayCopyWith<$Res>
+    implements $WeeklyDayCopyWith<$Res> {
+  factory _$WeeklyDayCopyWith(
+          _WeeklyDay value, $Res Function(_WeeklyDay) _then) =
+      __$WeeklyDayCopyWithImpl;
   @override
   @useResult
-  $Res call({String mealGroupId, String eatenAt, List<MealRecord> records});
+  $Res call({String date, String dayOfWeek, List<VerdictLevel> judgements});
 }
 
 /// @nodoc
-class __$MealGroupCopyWithImpl<$Res> implements _$MealGroupCopyWith<$Res> {
-  __$MealGroupCopyWithImpl(this._self, this._then);
+class __$WeeklyDayCopyWithImpl<$Res> implements _$WeeklyDayCopyWith<$Res> {
+  __$WeeklyDayCopyWithImpl(this._self, this._then);
 
-  final _MealGroup _self;
-  final $Res Function(_MealGroup) _then;
+  final _WeeklyDay _self;
+  final $Res Function(_WeeklyDay) _then;
 
-  /// Create a copy of MealGroup
+  /// Create a copy of WeeklyDay
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? mealGroupId = null,
-    Object? eatenAt = null,
-    Object? records = null,
+    Object? date = null,
+    Object? dayOfWeek = null,
+    Object? judgements = null,
   }) {
-    return _then(_MealGroup(
-      mealGroupId: null == mealGroupId
-          ? _self.mealGroupId
-          : mealGroupId // ignore: cast_nullable_to_non_nullable
+    return _then(_WeeklyDay(
+      date: null == date
+          ? _self.date
+          : date // ignore: cast_nullable_to_non_nullable
               as String,
+      dayOfWeek: null == dayOfWeek
+          ? _self.dayOfWeek
+          : dayOfWeek // ignore: cast_nullable_to_non_nullable
+              as String,
+      judgements: null == judgements
+          ? _self._judgements
+          : judgements // ignore: cast_nullable_to_non_nullable
+              as List<VerdictLevel>,
+    ));
+  }
+}
+
+/// @nodoc
+mixin _$MealCandidatesDay {
+  /// 'yyyy-MM-dd'.
+  String get date;
+  List<MealCandidate> get meals;
+
+  /// Create a copy of MealCandidatesDay
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $MealCandidatesDayCopyWith<MealCandidatesDay> get copyWith =>
+      _$MealCandidatesDayCopyWithImpl<MealCandidatesDay>(
+          this as MealCandidatesDay, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is MealCandidatesDay &&
+            (identical(other.date, date) || other.date == date) &&
+            const DeepCollectionEquality().equals(other.meals, meals));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, date, const DeepCollectionEquality().hash(meals));
+
+  @override
+  String toString() {
+    return 'MealCandidatesDay(date: $date, meals: $meals)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $MealCandidatesDayCopyWith<$Res> {
+  factory $MealCandidatesDayCopyWith(
+          MealCandidatesDay value, $Res Function(MealCandidatesDay) _then) =
+      _$MealCandidatesDayCopyWithImpl;
+  @useResult
+  $Res call({String date, List<MealCandidate> meals});
+}
+
+/// @nodoc
+class _$MealCandidatesDayCopyWithImpl<$Res>
+    implements $MealCandidatesDayCopyWith<$Res> {
+  _$MealCandidatesDayCopyWithImpl(this._self, this._then);
+
+  final MealCandidatesDay _self;
+  final $Res Function(MealCandidatesDay) _then;
+
+  /// Create a copy of MealCandidatesDay
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? date = null,
+    Object? meals = null,
+  }) {
+    return _then(_self.copyWith(
+      date: null == date
+          ? _self.date
+          : date // ignore: cast_nullable_to_non_nullable
+              as String,
+      meals: null == meals
+          ? _self.meals
+          : meals // ignore: cast_nullable_to_non_nullable
+              as List<MealCandidate>,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [MealCandidatesDay].
+extension MealCandidatesDayPatterns on MealCandidatesDay {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_MealCandidatesDay value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _MealCandidatesDay() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_MealCandidatesDay value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealCandidatesDay():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_MealCandidatesDay value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealCandidatesDay() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(String date, List<MealCandidate> meals)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _MealCandidatesDay() when $default != null:
+        return $default(_that.date, _that.meals);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(String date, List<MealCandidate> meals) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealCandidatesDay():
+        return $default(_that.date, _that.meals);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(String date, List<MealCandidate> meals)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealCandidatesDay() when $default != null:
+        return $default(_that.date, _that.meals);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _MealCandidatesDay implements MealCandidatesDay {
+  const _MealCandidatesDay(
+      {required this.date,
+      final List<MealCandidate> meals = const <MealCandidate>[]})
+      : _meals = meals;
+
+  /// 'yyyy-MM-dd'.
+  @override
+  final String date;
+  final List<MealCandidate> _meals;
+  @override
+  @JsonKey()
+  List<MealCandidate> get meals {
+    if (_meals is EqualUnmodifiableListView) return _meals;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_meals);
+  }
+
+  /// Create a copy of MealCandidatesDay
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$MealCandidatesDayCopyWith<_MealCandidatesDay> get copyWith =>
+      __$MealCandidatesDayCopyWithImpl<_MealCandidatesDay>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _MealCandidatesDay &&
+            (identical(other.date, date) || other.date == date) &&
+            const DeepCollectionEquality().equals(other._meals, _meals));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, date, const DeepCollectionEquality().hash(_meals));
+
+  @override
+  String toString() {
+    return 'MealCandidatesDay(date: $date, meals: $meals)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$MealCandidatesDayCopyWith<$Res>
+    implements $MealCandidatesDayCopyWith<$Res> {
+  factory _$MealCandidatesDayCopyWith(
+          _MealCandidatesDay value, $Res Function(_MealCandidatesDay) _then) =
+      __$MealCandidatesDayCopyWithImpl;
+  @override
+  @useResult
+  $Res call({String date, List<MealCandidate> meals});
+}
+
+/// @nodoc
+class __$MealCandidatesDayCopyWithImpl<$Res>
+    implements _$MealCandidatesDayCopyWith<$Res> {
+  __$MealCandidatesDayCopyWithImpl(this._self, this._then);
+
+  final _MealCandidatesDay _self;
+  final $Res Function(_MealCandidatesDay) _then;
+
+  /// Create a copy of MealCandidatesDay
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? date = null,
+    Object? meals = null,
+  }) {
+    return _then(_MealCandidatesDay(
+      date: null == date
+          ? _self.date
+          : date // ignore: cast_nullable_to_non_nullable
+              as String,
+      meals: null == meals
+          ? _self._meals
+          : meals // ignore: cast_nullable_to_non_nullable
+              as List<MealCandidate>,
+    ));
+  }
+}
+
+/// @nodoc
+mixin _$MealCandidate {
+  String get mealRecordId;
+
+  /// representativeFood.name.
+  String get representativeFoodName;
+
+  /// representativeFood.category.
+  String? get representativeFoodCategory;
+
+  /// 대표 외 추가 음식 수.
+  int get otherFoodCount;
+
+  /// ISO.
+  String get eatenAt;
+
+  /// Create a copy of MealCandidate
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $MealCandidateCopyWith<MealCandidate> get copyWith =>
+      _$MealCandidateCopyWithImpl<MealCandidate>(
+          this as MealCandidate, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is MealCandidate &&
+            (identical(other.mealRecordId, mealRecordId) ||
+                other.mealRecordId == mealRecordId) &&
+            (identical(other.representativeFoodName, representativeFoodName) ||
+                other.representativeFoodName == representativeFoodName) &&
+            (identical(other.representativeFoodCategory,
+                    representativeFoodCategory) ||
+                other.representativeFoodCategory ==
+                    representativeFoodCategory) &&
+            (identical(other.otherFoodCount, otherFoodCount) ||
+                other.otherFoodCount == otherFoodCount) &&
+            (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      mealRecordId,
+      representativeFoodName,
+      representativeFoodCategory,
+      otherFoodCount,
+      eatenAt);
+
+  @override
+  String toString() {
+    return 'MealCandidate(mealRecordId: $mealRecordId, representativeFoodName: $representativeFoodName, representativeFoodCategory: $representativeFoodCategory, otherFoodCount: $otherFoodCount, eatenAt: $eatenAt)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $MealCandidateCopyWith<$Res> {
+  factory $MealCandidateCopyWith(
+          MealCandidate value, $Res Function(MealCandidate) _then) =
+      _$MealCandidateCopyWithImpl;
+  @useResult
+  $Res call(
+      {String mealRecordId,
+      String representativeFoodName,
+      String? representativeFoodCategory,
+      int otherFoodCount,
+      String eatenAt});
+}
+
+/// @nodoc
+class _$MealCandidateCopyWithImpl<$Res>
+    implements $MealCandidateCopyWith<$Res> {
+  _$MealCandidateCopyWithImpl(this._self, this._then);
+
+  final MealCandidate _self;
+  final $Res Function(MealCandidate) _then;
+
+  /// Create a copy of MealCandidate
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? mealRecordId = null,
+    Object? representativeFoodName = null,
+    Object? representativeFoodCategory = freezed,
+    Object? otherFoodCount = null,
+    Object? eatenAt = null,
+  }) {
+    return _then(_self.copyWith(
+      mealRecordId: null == mealRecordId
+          ? _self.mealRecordId
+          : mealRecordId // ignore: cast_nullable_to_non_nullable
+              as String,
+      representativeFoodName: null == representativeFoodName
+          ? _self.representativeFoodName
+          : representativeFoodName // ignore: cast_nullable_to_non_nullable
+              as String,
+      representativeFoodCategory: freezed == representativeFoodCategory
+          ? _self.representativeFoodCategory
+          : representativeFoodCategory // ignore: cast_nullable_to_non_nullable
+              as String?,
+      otherFoodCount: null == otherFoodCount
+          ? _self.otherFoodCount
+          : otherFoodCount // ignore: cast_nullable_to_non_nullable
+              as int,
       eatenAt: null == eatenAt
           ? _self.eatenAt
           : eatenAt // ignore: cast_nullable_to_non_nullable
               as String,
-      records: null == records
-          ? _self._records
-          : records // ignore: cast_nullable_to_non_nullable
-              as List<MealRecord>,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [MealCandidate].
+extension MealCandidatePatterns on MealCandidate {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_MealCandidate value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _MealCandidate() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_MealCandidate value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealCandidate():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_MealCandidate value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealCandidate() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(
+            String mealRecordId,
+            String representativeFoodName,
+            String? representativeFoodCategory,
+            int otherFoodCount,
+            String eatenAt)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _MealCandidate() when $default != null:
+        return $default(
+            _that.mealRecordId,
+            _that.representativeFoodName,
+            _that.representativeFoodCategory,
+            _that.otherFoodCount,
+            _that.eatenAt);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(
+            String mealRecordId,
+            String representativeFoodName,
+            String? representativeFoodCategory,
+            int otherFoodCount,
+            String eatenAt)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealCandidate():
+        return $default(
+            _that.mealRecordId,
+            _that.representativeFoodName,
+            _that.representativeFoodCategory,
+            _that.otherFoodCount,
+            _that.eatenAt);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(
+            String mealRecordId,
+            String representativeFoodName,
+            String? representativeFoodCategory,
+            int otherFoodCount,
+            String eatenAt)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealCandidate() when $default != null:
+        return $default(
+            _that.mealRecordId,
+            _that.representativeFoodName,
+            _that.representativeFoodCategory,
+            _that.otherFoodCount,
+            _that.eatenAt);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _MealCandidate implements MealCandidate {
+  const _MealCandidate(
+      {required this.mealRecordId,
+      required this.representativeFoodName,
+      this.representativeFoodCategory,
+      this.otherFoodCount = 0,
+      required this.eatenAt});
+
+  @override
+  final String mealRecordId;
+
+  /// representativeFood.name.
+  @override
+  final String representativeFoodName;
+
+  /// representativeFood.category.
+  @override
+  final String? representativeFoodCategory;
+
+  /// 대표 외 추가 음식 수.
+  @override
+  @JsonKey()
+  final int otherFoodCount;
+
+  /// ISO.
+  @override
+  final String eatenAt;
+
+  /// Create a copy of MealCandidate
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$MealCandidateCopyWith<_MealCandidate> get copyWith =>
+      __$MealCandidateCopyWithImpl<_MealCandidate>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _MealCandidate &&
+            (identical(other.mealRecordId, mealRecordId) ||
+                other.mealRecordId == mealRecordId) &&
+            (identical(other.representativeFoodName, representativeFoodName) ||
+                other.representativeFoodName == representativeFoodName) &&
+            (identical(other.representativeFoodCategory,
+                    representativeFoodCategory) ||
+                other.representativeFoodCategory ==
+                    representativeFoodCategory) &&
+            (identical(other.otherFoodCount, otherFoodCount) ||
+                other.otherFoodCount == otherFoodCount) &&
+            (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      mealRecordId,
+      representativeFoodName,
+      representativeFoodCategory,
+      otherFoodCount,
+      eatenAt);
+
+  @override
+  String toString() {
+    return 'MealCandidate(mealRecordId: $mealRecordId, representativeFoodName: $representativeFoodName, representativeFoodCategory: $representativeFoodCategory, otherFoodCount: $otherFoodCount, eatenAt: $eatenAt)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$MealCandidateCopyWith<$Res>
+    implements $MealCandidateCopyWith<$Res> {
+  factory _$MealCandidateCopyWith(
+          _MealCandidate value, $Res Function(_MealCandidate) _then) =
+      __$MealCandidateCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {String mealRecordId,
+      String representativeFoodName,
+      String? representativeFoodCategory,
+      int otherFoodCount,
+      String eatenAt});
+}
+
+/// @nodoc
+class __$MealCandidateCopyWithImpl<$Res>
+    implements _$MealCandidateCopyWith<$Res> {
+  __$MealCandidateCopyWithImpl(this._self, this._then);
+
+  final _MealCandidate _self;
+  final $Res Function(_MealCandidate) _then;
+
+  /// Create a copy of MealCandidate
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? mealRecordId = null,
+    Object? representativeFoodName = null,
+    Object? representativeFoodCategory = freezed,
+    Object? otherFoodCount = null,
+    Object? eatenAt = null,
+  }) {
+    return _then(_MealCandidate(
+      mealRecordId: null == mealRecordId
+          ? _self.mealRecordId
+          : mealRecordId // ignore: cast_nullable_to_non_nullable
+              as String,
+      representativeFoodName: null == representativeFoodName
+          ? _self.representativeFoodName
+          : representativeFoodName // ignore: cast_nullable_to_non_nullable
+              as String,
+      representativeFoodCategory: freezed == representativeFoodCategory
+          ? _self.representativeFoodCategory
+          : representativeFoodCategory // ignore: cast_nullable_to_non_nullable
+              as String?,
+      otherFoodCount: null == otherFoodCount
+          ? _self.otherFoodCount
+          : otherFoodCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      eatenAt: null == eatenAt
+          ? _self.eatenAt
+          : eatenAt // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }

@@ -4,14 +4,14 @@
 class MealRecordContext {
   const MealRecordContext({
     required this.eatenAt,
-    this.mealGroupId,
+    this.mealRecordId,
   });
 
   /// 섭취 시각 (KST DateTime).
   final DateTime eatenAt;
 
-  /// 기존 끼니 그룹에 추가할 때 지정. null이면 신규 그룹.
-  final String? mealGroupId;
+  /// 기존 식사에 음식을 추가(append)할 때 지정. null이면 신규 식사.
+  final String? mealRecordId;
 }
 
 /// 판정 화면 진입 인자 (go_router /verdict extra).

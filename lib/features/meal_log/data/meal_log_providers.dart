@@ -9,36 +9,8 @@ import 'package:can_i_eat_it/features/meal_log/domain/repositories/meal_reposito
 part 'meal_log_providers.g.dart';
 
 // ---------------------------------------------------------------------------
-// MealDetailController
+// MealRepository 공급자
 // ---------------------------------------------------------------------------
-
-/// 식사 기록 상세 컨트롤러.
-///
-/// [mealId] 에 해당하는 [MealDetail] 을 로드하고 수정/삭제 액션을 제공한다.
-///
-/// ProviderScope override 예시 (테스트):
-///   mealRepositoryProvider.overrideWithValue(MockMealRepository.seeded())
-@riverpod
-class MealDetailController extends _$MealDetailController {
-  @override
-  Future<MealDetail> build(String mealId) async {
-    final repo = ref.watch(mealRepositoryProvider);
-    return repo.detail(mealId);
-  }
-
-  /// 메모를 수정한 뒤 상태를 갱신한다.
-  Future<void> updateMemo(String? memo) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => ref.read(mealRepositoryProvider).updateMemo(mealId, memo),
-    );
-  }
-
-  /// 식사 기록을 삭제한다.
-  Future<void> delete() async {
-    await ref.read(mealRepositoryProvider).delete(mealId);
-  }
-}
 
 /// [MealRepository] 공급자.
 ///
@@ -52,20 +24,17 @@ MealRepository mealRepository(Ref ref) {
   return MealRepositoryImpl(dio: dio);
 }
 
+// ---------------------------------------------------------------------------
+// TimelineController
+// ---------------------------------------------------------------------------
+
 /// 타임라인 컨트롤러.
 ///
-/// 선택된 날짜([date])의 끼니 그룹 목록을 조회한다.
-///
-/// - 기본 선택일: 오늘(KST).
-/// - [changeDate]: 선택일 변경 → 즉시 재조회.
-/// - [refresh]: 현재 선택일 강제 재조회.
-///
-/// ProviderScope override 예시 (테스트):
-///   mealRepositoryProvider.overrideWithValue(MockMealRepository.seeded())
+/// 선택된 날짜([date])의 [TimelineItem] 목록(single/group/symptom)을 조회한다.
 @riverpod
 class TimelineController extends _$TimelineController {
   @override
-  Future<List<MealGroup>> build(DateTime date) async {
+  Future<List<TimelineItem>> build(DateTime date) async {
     final repo = ref.watch(mealRepositoryProvider);
     return repo.timeline(date);
   }
@@ -84,5 +53,65 @@ class TimelineController extends _$TimelineController {
     state = await AsyncValue.guard(
       () => ref.read(mealRepositoryProvider).timeline(currentDate),
     );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// WeeklyController
+// ---------------------------------------------------------------------------
+
+/// 주간 도트 컨트롤러.
+///
+/// [weekStart] 가 속한 주의 [WeeklyDay] 목록을 조회한다.
+@riverpod
+class WeeklyController extends _$WeeklyController {
+  @override
+  Future<List<WeeklyDay>> build(DateTime weekStart) async {
+    final repo = ref.watch(mealRepositoryProvider);
+    return repo.weekly(weekStart);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// MealRecordDetailController
+// ---------------------------------------------------------------------------
+
+/// 식사 상세 컨트롤러.
+///
+/// [mealRecordId] 에 해당하는 [MealRecord](음식 목록 + 상태기록)를 로드하고
+/// 삭제 액션을 제공한다.
+@riverpod
+class MealRecordDetailController extends _$MealRecordDetailController {
+  @override
+  Future<MealRecord> build(String mealRecordId) async {
+    final repo = ref.watch(mealRepositoryProvider);
+    return repo.mealDetail(mealRecordId);
+  }
+
+  /// 식사를 삭제한다.
+  Future<void> deleteMeal() async {
+    await ref.read(mealRepositoryProvider).deleteMeal(mealRecordId);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// MealFoodDetailController
+// ---------------------------------------------------------------------------
+
+/// 음식 상세 컨트롤러.
+///
+/// [mealFoodId] 에 해당하는 [MealFood](analysis 포함)를 로드하고 삭제 액션을
+/// 제공한다.
+@riverpod
+class MealFoodDetailController extends _$MealFoodDetailController {
+  @override
+  Future<MealFood> build(String mealFoodId) async {
+    final repo = ref.watch(mealRepositoryProvider);
+    return repo.foodDetail(mealFoodId);
+  }
+
+  /// 음식을 삭제한다 (마지막 음식이면 서버가 식사도 함께 삭제).
+  Future<void> deleteFood() async {
+    await ref.read(mealRepositoryProvider).deleteFood(mealFoodId);
   }
 }

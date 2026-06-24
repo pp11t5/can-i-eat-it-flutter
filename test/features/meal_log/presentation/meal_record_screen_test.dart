@@ -12,7 +12,7 @@ import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_record_
 
 /// 테스트용 라우터 — /meal/record → MealRecordScreen, /check → 캡처
 GoRouter _makeRouter({
-  String? mealGroupId,
+  String? mealRecordId,
   void Function(MealRecordContext ctx)? onCheckPush,
 }) {
   return GoRouter(
@@ -21,7 +21,7 @@ GoRouter _makeRouter({
       GoRoute(
         path: '/meal/record',
         pageBuilder: (context, state) => MaterialPage(
-          child: MealRecordScreen(mealGroupId: mealGroupId),
+          child: MealRecordScreen(mealRecordId: mealRecordId),
         ),
       ),
       GoRoute(
@@ -36,11 +36,11 @@ GoRouter _makeRouter({
   );
 }
 
-Widget _wrap({String? mealGroupId, void Function(MealRecordContext)? onCheckPush}) {
+Widget _wrap({String? mealRecordId, void Function(MealRecordContext)? onCheckPush}) {
   return MaterialApp.router(
     theme: AppTheme.light,
     routerConfig: _makeRouter(
-      mealGroupId: mealGroupId,
+      mealRecordId: mealRecordId,
       onCheckPush: onCheckPush,
     ),
   );
@@ -125,7 +125,7 @@ void main() {
   });
 
   group('MealRecordScreen — 다음 버튼', () {
-    testWidgets('mealGroupId 없이 "다음" → /check extra에 mealGroupId null', (tester) async {
+    testWidgets('mealRecordId 없이 "다음" → /check extra에 mealRecordId null', (tester) async {
       MealRecordContext? captured;
       await tester.pumpWidget(_wrap(onCheckPush: (ctx) => captured = ctx));
       await tester.pumpAndSettle();
@@ -134,13 +134,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(captured, isNotNull);
-      expect(captured!.mealGroupId, isNull);
+      expect(captured!.mealRecordId, isNull);
     });
 
-    testWidgets('mealGroupId="g-1" 전달 시 → /check extra에 mealGroupId="g-1"', (tester) async {
+    testWidgets('mealRecordId="mr-1" 전달 시 → /check extra에 mealRecordId="mr-1"', (tester) async {
       MealRecordContext? captured;
       await tester.pumpWidget(
-        _wrap(mealGroupId: 'g-1', onCheckPush: (ctx) => captured = ctx),
+        _wrap(mealRecordId: 'mr-1', onCheckPush: (ctx) => captured = ctx),
       );
       await tester.pumpAndSettle();
 
@@ -148,7 +148,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(captured, isNotNull);
-      expect(captured!.mealGroupId, 'g-1');
+      expect(captured!.mealRecordId, 'mr-1');
     });
   });
 }

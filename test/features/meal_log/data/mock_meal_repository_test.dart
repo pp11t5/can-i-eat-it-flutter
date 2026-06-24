@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/meal_log/data/repositories/mock_meal_repository.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 
@@ -20,144 +19,161 @@ void main() {
       final repo = MockMealRepository.empty();
       expect(await repo.timeline(DateTime(2026, 6, 17)), isEmpty);
     });
+
+    test('empty 팩토리는 weekly가 빈 목록이다', () async {
+      final repo = MockMealRepository.empty();
+      expect(await repo.weekly(DateTime(2026, 6, 17)), isEmpty);
+    });
   });
 
   // -------------------------------------------------------------------------
   group('seeded 팩토리', () {
-    test('seeded 팩토리는 timeline이 2그룹을 반환한다', () async {
+    test('seeded 팩토리는 timeline에 single/group/symptom 변형이 모두 있다', () async {
       final repo = MockMealRepository.seeded();
-      final groups = await repo.timeline(DateTime(2026, 6, 17));
-      expect(groups.length, 2);
+      final items = await repo.timeline(DateTime(2026, 6, 17));
+      expect(items.whereType<TimelineSingle>(), isNotEmpty);
+      expect(items.whereType<TimelineGroup>(), isNotEmpty);
+      expect(items.whereType<TimelineSymptom>(), isNotEmpty);
     });
 
-    test('seeded 팩토리 첫 그룹에 2건의 식사 기록이 있다', () async {
+    test('seeded mealDetail record-002는 음식 3건을 보유한다', () async {
       final repo = MockMealRepository.seeded();
-      final groups = await repo.timeline(DateTime(2026, 6, 17));
-      expect(groups[0].records.length, 2);
+      final record = await repo.mealDetail('record-002');
+      expect(record.foods.length, 3);
     });
 
-    test('seeded 팩토리 두 번째 그룹에 1건의 식사 기록이 있다', () async {
+    test('seeded mealDetail record-002는 stateRecords 1건을 보유한다', () async {
       final repo = MockMealRepository.seeded();
-      final groups = await repo.timeline(DateTime(2026, 6, 17));
-      expect(groups[1].records.length, 1);
+      final record = await repo.mealDetail('record-002');
+      expect(record.stateRecords.length, 1);
+      expect(record.stateRecords[0].timingMinutes, 30);
     });
 
-    test('seeded detail meal-002는 stateRecords 2건을 보유한다', () async {
+    test('seeded foodDetail food-001은 analysis를 보유한다', () async {
       final repo = MockMealRepository.seeded();
-      final detail = await repo.detail('meal-002');
-      expect(detail.stateRecords.length, 2);
+      final food = await repo.foodDetail('food-001');
+      expect(food.analysis, isNotNull);
+      expect(food.analysis!.trigger, isNotNull);
+      expect(food.analysis!.allergy, isNotNull);
     });
 
-    test('seeded detail meal-003은 memo를 보유한다', () async {
+    test('seeded weekly는 judgements를 보유한다', () async {
       final repo = MockMealRepository.seeded();
-      final detail = await repo.detail('meal-003');
-      expect(detail.memo, isNotNull);
-      expect(detail.memo, isNotEmpty);
+      final weekly = await repo.weekly(DateTime(2026, 6, 17));
+      expect(weekly, isNotEmpty);
+      expect(weekly[0].judgements, isNotEmpty);
+    });
+
+    test('seeded candidates는 후보를 보유한다', () async {
+      final repo = MockMealRepository.seeded();
+      final candidates = await repo.candidates();
+      expect(candidates, isNotEmpty);
+      expect(candidates[0].meals, isNotEmpty);
     });
   });
 
   // -------------------------------------------------------------------------
-  group('delete', () {
-    test('delete 후 timeline에서 해당 기록이 사라진다', () async {
+  group('deleteMeal', () {
+    test('deleteMeal 후 timeline에서 해당 식사가 사라진다', () async {
       final repo = MockMealRepository.seeded();
-      await repo.delete('meal-001');
-      final groups = await repo.timeline(DateTime(2026, 6, 17));
-      final allMealIds =
-          groups.expand((g) => g.records).map((r) => r.mealId).toList();
-      expect(allMealIds, isNot(contains('meal-001')));
+      await repo.deleteMeal('record-001');
+      final items = await repo.timeline(DateTime(2026, 6, 17));
+      final singleIds = items
+          .whereType<TimelineSingle>()
+          .map((i) => i.mealRecordId)
+          .toList();
+      expect(singleIds, isNot(contains('record-001')));
     });
 
-    test('그룹의 모든 기록을 삭제하면 해당 그룹도 사라진다', () async {
-      // group-002에는 meal-003 하나뿐
+    test('deleteMeal 후 해당 mealDetail 조회 시 예외', () async {
       final repo = MockMealRepository.seeded();
-      await repo.delete('meal-003');
-      final groups = await repo.timeline(DateTime(2026, 6, 17));
-      expect(
-        groups.map((g) => g.mealGroupId),
-        isNot(contains('group-002')),
-      );
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  group('updateMemo — 빈 문자열은 null로 처리된다', () {
-    test('빈 문자열 memo는 null로 저장된다', () async {
-      final repo = MockMealRepository.seeded();
-      await repo.updateMemo('meal-003', '');
-      final detail = await repo.detail('meal-003');
-      expect(detail.memo, isNull);
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  group('create — judgedGrade 전달', () {
-    test('risk grade로 create한 결과의 judgedGrade는 risk이다', () async {
-      final repo = MockMealRepository.empty();
-      final record = await repo.create(
-        foodExternalId: 'f-coffee',
-        grade: VerdictLevel.risk,
-      );
-      expect(record.judgedGrade, VerdictLevel.risk);
-    });
-
-    test('grade 없이 create한 결과의 judgedGrade는 null이다', () async {
-      final repo = MockMealRepository.empty();
-      final record = await repo.create(foodExternalId: 'f-water');
-      expect(record.judgedGrade, isNull);
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  group('detail — 존재하지 않는 mealId는 예외를 던진다', () {
-    test('없는 mealId로 detail 호출 시 예외가 발생한다', () async {
-      final repo = MockMealRepository.empty();
+      await repo.deleteMeal('record-001');
       await expectLater(
-        repo.detail('no-such-meal'),
+        repo.mealDetail('record-001'),
         throwsA(isA<Exception>()),
       );
     });
   });
 
   // -------------------------------------------------------------------------
-  group('create → mealGroupId 지정', () {
-    test('mealGroupId를 지정하면 같은 그룹에 기록이 추가된다', () async {
+  group('deleteFood', () {
+    test('deleteFood 후 식사에서 해당 음식이 사라진다', () async {
+      final repo = MockMealRepository.seeded();
+      await repo.deleteFood('food-002');
+      final record = await repo.mealDetail('record-002');
+      expect(
+        record.foods.map((f) => f.mealFoodId),
+        isNot(contains('food-002')),
+      );
+    });
+
+    test('마지막 음식 삭제 시 식사도 함께 삭제된다', () async {
+      final repo = MockMealRepository.seeded();
+      // record-001은 food-001 하나뿐.
+      await repo.deleteFood('food-001');
+      await expectLater(
+        repo.mealDetail('record-001'),
+        throwsA(isA<Exception>()),
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  group('appendFood', () {
+    test('mealRecordId 없이 appendFood 시 신규 식사가 생성된다', () async {
       final repo = MockMealRepository.empty();
-      final first = await repo.create(foodExternalId: 'f-1');
-      await repo.create(
-        foodExternalId: 'f-2',
-        mealGroupId: first.mealGroupId,
+      final food = await repo.appendFood(foodExternalId: 'f-tofu');
+      final record = await repo.mealDetail(food.mealRecordExternalId!);
+      expect(record.foods.length, 1);
+    });
+
+    test('mealRecordId 지정 시 같은 식사에 음식이 추가된다', () async {
+      final repo = MockMealRepository.empty();
+      final first = await repo.appendFood(foodExternalId: 'f-1');
+      final recordId = first.mealRecordExternalId!;
+      await repo.appendFood(foodExternalId: 'f-2', mealRecordId: recordId);
+      final record = await repo.mealDetail(recordId);
+      expect(record.foods.length, 2);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  group('appendFoodByText — 미지원', () {
+    test('appendFoodByText는 UnimplementedError를 던진다', () async {
+      final repo = MockMealRepository.empty();
+      await expectLater(
+        repo.appendFoodByText(foodTextInput: '아메리카노'),
+        throwsA(isA<UnimplementedError>()),
       );
-      final groups = await repo.timeline(DateTime(2026, 6, 17));
-      final targetGroup = groups.firstWhere(
-        (g) => g.mealGroupId == first.mealGroupId,
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  group('mealDetail — 존재하지 않는 id는 예외를 던진다', () {
+    test('없는 mealRecordId로 mealDetail 호출 시 예외가 발생한다', () async {
+      final repo = MockMealRepository.empty();
+      await expectLater(
+        repo.mealDetail('no-such-record'),
+        throwsA(isA<Exception>()),
       );
-      expect(targetGroup.records.length, 2);
+    });
+
+    test('없는 mealFoodId로 foodDetail 호출 시 예외가 발생한다', () async {
+      final repo = MockMealRepository.empty();
+      await expectLater(
+        repo.foodDetail('no-such-food'),
+        throwsA(isA<Exception>()),
+      );
     });
   });
 
   // -------------------------------------------------------------------------
   group('timeline — 날짜 인수 무관 동작 (mock은 날짜 무시)', () {
-    test('다른 날짜를 넘겨도 동일한 그룹 목록을 반환한다', () async {
+    test('다른 날짜를 넘겨도 동일한 항목 목록을 반환한다', () async {
       final repo = MockMealRepository.seeded();
       final a = await repo.timeline(DateTime(2026, 6, 17));
       final b = await repo.timeline(DateTime(2026, 1, 1));
       expect(a.length, b.length);
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  group('createByText — 기본 동작', () {
-    test('createByText 결과의 mealId는 비어 있지 않다', () async {
-      final repo = MockMealRepository.empty();
-      final result = await repo.createByText(foodTextInput: '아메리카노');
-      expect(result.mealId, isNotEmpty);
-    });
-
-    test('createByText 후 detail을 조회할 수 있다', () async {
-      final repo = MockMealRepository.empty();
-      final result = await repo.createByText(foodTextInput: '아메리카노');
-      final detail = await repo.detail(result.mealId);
-      expect(detail, isA<MealDetail>());
     });
   });
 }
