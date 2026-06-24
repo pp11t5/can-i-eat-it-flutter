@@ -6,6 +6,7 @@ import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/food_thumbnail.dart';
@@ -26,10 +27,10 @@ class MealRecordDetailScreen extends ConsumerWidget {
 
   final String mealRecordId;
 
-  /// ISO-8601 문자열 → 'HH:mm' (Local).
+  /// ISO-8601 문자열 → 'HH:mm' (KST, 머신 TZ 무관).
   static String _formatTime(String isoString) {
     try {
-      final dt = DateTime.parse(isoString).toLocal();
+      final dt = parseKst(isoString);
       final h = dt.hour.toString().padLeft(2, '0');
       final m = dt.minute.toString().padLeft(2, '0');
       return '$h:$m';
