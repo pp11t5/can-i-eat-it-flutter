@@ -86,21 +86,26 @@ class ApiEndpoints {
           '{foodExternalId}', foodExternalId);
 
   // ---------------------------------------------------------------------------
-  // Meal
+  // Meal (신 계약: /meal-records + /timeline)
   // ---------------------------------------------------------------------------
 
-  /// `GET /meals?date=YYYY-MM-DD` · `POST /meals`
-  static const String meals = '/meals';
+  /// `POST /meal-records` (음식 추가)
+  static const String mealRecords = '/meal-records';
 
-  /// `POST /meals/text`
-  static const String mealsText = '/meals/text';
+  /// `GET /meal-records/{id}` · `DELETE /meal-records/{id}`
+  static String mealRecordItem(String id) => '/meal-records/$id';
 
-  /// meal 단건 경로 템플릿. [mealItem] 으로 치환.
-  static const String _mealItemTemplate = '/meals/{mealId}';
+  /// `GET /meal-records/foods/{foodId}` · `DELETE /meal-records/foods/{foodId}`
+  static String mealRecordFood(String foodId) => '/meal-records/foods/$foodId';
 
-  /// `GET /meals/{mealId}` · `PATCH /meals/{mealId}` · `DELETE /meals/{mealId}`
-  static String mealItem(String mealId) =>
-      _mealItemTemplate.replaceFirst('{mealId}', mealId);
+  /// `GET /meal-records/candidates`
+  static const String mealRecordCandidates = '/meal-records/candidates';
+
+  /// `GET /timeline?date=YYYY-MM-DD`
+  static const String timeline = '/timeline';
+
+  /// `GET /timeline/weekly?date=YYYY-MM-DD`
+  static const String timelineWeekly = '/timeline/weekly';
 
   // ---------------------------------------------------------------------------
   // Health

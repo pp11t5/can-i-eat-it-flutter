@@ -15,30 +15,32 @@ import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 AddToDietHandler makeHandlerFromRef(Ref ref) {
   return (BuildContext context, EatVerdict verdict, MealRecordContext ctx) async {
     final repo = ref.read(mealRepositoryProvider);
-    try {
-      if (verdict.foodExternalId != null) {
-        await repo.create(
-          foodExternalId: verdict.foodExternalId!,
-          eatenAt: ctx.eatenAt,
-          mealGroupId: ctx.mealGroupId,
-          grade: verdict.level,
-        );
-      } else {
-        await repo.createByText(
-          foodTextInput: verdict.foodName,
-          eatenAt: ctx.eatenAt,
-          mealGroupId: ctx.mealGroupId,
-          grade: verdict.level,
-        );
-      }
 
-      // 타임라인 invalidate
+    // by-text seam: 서버 준비중 → repo 호출하지 않고 "준비중" 토스트로 단락.
+    // (appendFoodByText의 UnimplementedError가 실제 사용자 경로에 도달하지 않게 한다.)
+    if (verdict.foodExternalId == null) {
+      if (context.mounted) {
+        await showAppToast(context, '직접 입력한 음식 기록은 준비 중이에요.');
+      }
+      return;
+    }
+
+    try {
+      // grade 미전송 — 서버가 analysis 를 계산한다(F-10).
+      await repo.appendFood(
+        foodExternalId: verdict.foodExternalId!,
+        eatenAt: ctx.eatenAt,
+        mealRecordId: ctx.mealRecordId,
+      );
+
+      // 타임라인 + weekly invalidate
       final dateKey = DateTime(
         ctx.eatenAt.year,
         ctx.eatenAt.month,
         ctx.eatenAt.day,
       );
       ref.invalidate(timelineControllerProvider(dateKey));
+      ref.invalidate(weeklyControllerProvider);
 
       // 모달 스택 pop — /verdict + /check + /meal/record 최대 3단
       if (context.mounted) {
@@ -51,7 +53,7 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
 
       // 토스트
       if (context.mounted) {
-        final message = ctx.mealGroupId != null
+        final message = ctx.mealRecordId != null
             ? '현재 식사에 음식을 추가했어요.'
             : '식사를 기록했어요. 식후 2시간 뒤 증상 확인 알림을 보내드릴게요.';
         await showAppToast(context, message);

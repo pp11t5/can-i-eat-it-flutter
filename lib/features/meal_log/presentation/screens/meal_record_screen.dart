@@ -12,15 +12,15 @@ import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_arg
 /// Figma node 554-7335.
 ///
 /// 진입 경로:
-/// - FAB 액션시트 → '/meal/record' (mealGroupId null)
-/// - MealGroupCard "같이 먹은 음식" → '/meal/record' extra=mealGroupId
+/// - FAB 액션시트 → '/meal/record' (mealRecordId null)
+/// - 타임라인 타일 "같이 먹은 음식" → '/meal/record' extra=mealRecordId
 ///
-/// '다음' 버튼 → context.push('/check', extra: MealRecordContext(eatenAt, mealGroupId))
+/// '다음' 버튼 → context.push('/check', extra: MealRecordContext(eatenAt, mealRecordId))
 class MealRecordScreen extends StatefulWidget {
-  const MealRecordScreen({super.key, this.mealGroupId});
+  const MealRecordScreen({super.key, this.mealRecordId});
 
-  /// 기존 끼니 그룹에 추가할 때 지정. null이면 신규 그룹.
-  final String? mealGroupId;
+  /// 기존 식사에 음식을 추가(append)할 때 지정. null이면 신규 식사.
+  final String? mealRecordId;
 
   @override
   State<MealRecordScreen> createState() => _MealRecordScreenState();
@@ -142,7 +142,7 @@ class _MealRecordScreenState extends State<MealRecordScreen> {
   void _onNext() {
     final ctx = MealRecordContext(
       eatenAt: _selectedDateTime,
-      mealGroupId: widget.mealGroupId,
+      mealRecordId: widget.mealRecordId,
     );
     context.push('/check', extra: ctx);
   }

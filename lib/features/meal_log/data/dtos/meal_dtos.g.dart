@@ -6,98 +6,181 @@ part of 'meal_dtos.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+_AnalysisSectionDto _$AnalysisSectionDtoFromJson(Map<String, dynamic> json) =>
+    _AnalysisSectionDto(
+      ment: json['ment'] as String,
+      content: json['content'] as String,
+    );
+
+Map<String, dynamic> _$AnalysisSectionDtoToJson(_AnalysisSectionDto instance) =>
+    <String, dynamic>{
+      'ment': instance.ment,
+      'content': instance.content,
+    };
+
+_MealAnalysisDto _$MealAnalysisDtoFromJson(Map<String, dynamic> json) =>
+    _MealAnalysisDto(
+      judgmentGrade: json['judgmentGrade'] as String,
+      triggerAnalysis: json['triggerAnalysis'] == null
+          ? null
+          : AnalysisSectionDto.fromJson(
+              json['triggerAnalysis'] as Map<String, dynamic>),
+      allergyAnalysis: json['allergyAnalysis'] == null
+          ? null
+          : AnalysisSectionDto.fromJson(
+              json['allergyAnalysis'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$MealAnalysisDtoToJson(_MealAnalysisDto instance) =>
+    <String, dynamic>{
+      'judgmentGrade': instance.judgmentGrade,
+      'triggerAnalysis': instance.triggerAnalysis,
+      'allergyAnalysis': instance.allergyAnalysis,
+    };
+
 _StateRecordDto _$StateRecordDtoFromJson(Map<String, dynamic> json) =>
     _StateRecordDto(
+      stateRecordId: json['stateRecordId'] as String,
       label: json['label'] as String,
       date: json['date'] as String,
-      timing: json['timing'] as String,
+      timingMinutes: (json['timingMinutes'] as num).toInt(),
     );
 
 Map<String, dynamic> _$StateRecordDtoToJson(_StateRecordDto instance) =>
     <String, dynamic>{
+      'stateRecordId': instance.stateRecordId,
       'label': instance.label,
       'date': instance.date,
-      'timing': instance.timing,
+      'timingMinutes': instance.timingMinutes,
     };
 
-_MealFoodDetailDto _$MealFoodDetailDtoFromJson(Map<String, dynamic> json) =>
-    _MealFoodDetailDto(
-      externalId: json['externalId'] as String,
+_MealFoodNestedDto _$MealFoodNestedDtoFromJson(Map<String, dynamic> json) =>
+    _MealFoodNestedDto(
+      mealRecordExternalId: json['mealRecordExternalId'] as String?,
       name: json['name'] as String,
       category: json['category'] as String?,
-      description: json['description'] as String?,
     );
 
-Map<String, dynamic> _$MealFoodDetailDtoToJson(_MealFoodDetailDto instance) =>
+Map<String, dynamic> _$MealFoodNestedDtoToJson(_MealFoodNestedDto instance) =>
     <String, dynamic>{
-      'externalId': instance.externalId,
+      'mealRecordExternalId': instance.mealRecordExternalId,
       'name': instance.name,
       'category': instance.category,
-      'description': instance.description,
     };
 
-_MealRecordSummaryDto _$MealRecordSummaryDtoFromJson(
+_MealFoodRecordDetailDto _$MealFoodRecordDetailDtoFromJson(
         Map<String, dynamic> json) =>
-    _MealRecordSummaryDto(
-      mealId: json['mealId'] as String,
-      mealGroupId: json['mealGroupId'] as String,
+    _MealFoodRecordDetailDto(
+      mealFoodId: json['mealFoodId'] as String,
       eatenAt: json['eatenAt'] as String,
-      food: FoodSummaryDto.fromJson(json['food'] as Map<String, dynamic>),
-      judgedGrade: json['judgedGrade'] as String?,
+      food: MealFoodNestedDto.fromJson(json['food'] as Map<String, dynamic>),
+      analysis: json['analysis'] == null
+          ? null
+          : MealAnalysisDto.fromJson(json['analysis'] as Map<String, dynamic>),
+      stateRecord: json['stateRecord'] == null
+          ? null
+          : StateRecordDto.fromJson(
+              json['stateRecord'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$MealRecordSummaryDtoToJson(
-        _MealRecordSummaryDto instance) =>
+Map<String, dynamic> _$MealFoodRecordDetailDtoToJson(
+        _MealFoodRecordDetailDto instance) =>
     <String, dynamic>{
-      'mealId': instance.mealId,
-      'mealGroupId': instance.mealGroupId,
+      'mealFoodId': instance.mealFoodId,
       'eatenAt': instance.eatenAt,
       'food': instance.food,
-      'judgedGrade': instance.judgedGrade,
+      'analysis': instance.analysis,
+      'stateRecord': instance.stateRecord,
+    };
+
+_MealDetailFoodDto _$MealDetailFoodDtoFromJson(Map<String, dynamic> json) =>
+    _MealDetailFoodDto(
+      mealFoodId: json['mealFoodId'] as String,
+      name: json['name'] as String,
+      category: json['category'] as String?,
+      eatenAt: json['eatenAt'] as String,
+    );
+
+Map<String, dynamic> _$MealDetailFoodDtoToJson(_MealDetailFoodDto instance) =>
+    <String, dynamic>{
+      'mealFoodId': instance.mealFoodId,
+      'name': instance.name,
+      'category': instance.category,
+      'eatenAt': instance.eatenAt,
     };
 
 _MealRecordDetailDto _$MealRecordDetailDtoFromJson(Map<String, dynamic> json) =>
     _MealRecordDetailDto(
-      mealId: json['mealId'] as String,
-      mealGroupId: json['mealGroupId'] as String,
+      mealRecordId: json['mealRecordId'] as String,
       eatenAt: json['eatenAt'] as String,
-      memo: json['memo'] as String?,
-      judgedGrade: json['judgedGrade'] as String?,
-      food: MealFoodDetailDto.fromJson(json['food'] as Map<String, dynamic>),
-      stateRecords: (json['stateRecords'] as List<dynamic>?)
-              ?.map((e) => StateRecordDto.fromJson(e as Map<String, dynamic>))
+      meals: (json['meals'] as List<dynamic>?)
+              ?.map(
+                  (e) => MealDetailFoodDto.fromJson(e as Map<String, dynamic>))
               .toList() ??
-          const <StateRecordDto>[],
+          const <MealDetailFoodDto>[],
+      stateRecords: (json['stateRecords'] as List<dynamic>?)
+          ?.map((e) => StateRecordDto.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$MealRecordDetailDtoToJson(
         _MealRecordDetailDto instance) =>
     <String, dynamic>{
-      'mealId': instance.mealId,
-      'mealGroupId': instance.mealGroupId,
+      'mealRecordId': instance.mealRecordId,
       'eatenAt': instance.eatenAt,
-      'memo': instance.memo,
-      'judgedGrade': instance.judgedGrade,
-      'food': instance.food,
+      'meals': instance.meals,
       'stateRecords': instance.stateRecords,
     };
 
-_MealGroupDto _$MealGroupDtoFromJson(Map<String, dynamic> json) =>
-    _MealGroupDto(
-      mealGroupId: json['mealGroupId'] as String,
-      eatenAt: json['eatenAt'] as String,
-      records: (json['records'] as List<dynamic>?)
-              ?.map((e) =>
-                  MealRecordSummaryDto.fromJson(e as Map<String, dynamic>))
+_WeeklyDayDto _$WeeklyDayDtoFromJson(Map<String, dynamic> json) =>
+    _WeeklyDayDto(
+      date: json['date'] as String,
+      dayOfWeek: json['dayOfWeek'] as String,
+      judgementList: (json['judgementList'] as List<dynamic>?)
+              ?.map((e) => e as String)
               .toList() ??
-          const <MealRecordSummaryDto>[],
+          const <String>[],
     );
 
-Map<String, dynamic> _$MealGroupDtoToJson(_MealGroupDto instance) =>
+Map<String, dynamic> _$WeeklyDayDtoToJson(_WeeklyDayDto instance) =>
     <String, dynamic>{
-      'mealGroupId': instance.mealGroupId,
+      'date': instance.date,
+      'dayOfWeek': instance.dayOfWeek,
+      'judgementList': instance.judgementList,
+    };
+
+_MealCandidateDto _$MealCandidateDtoFromJson(Map<String, dynamic> json) =>
+    _MealCandidateDto(
+      mealRecordId: json['mealRecordId'] as String,
+      representativeFood: MealFoodNestedDto.fromJson(
+          json['representativeFood'] as Map<String, dynamic>),
+      otherFoodCount: (json['otherFoodCount'] as num?)?.toInt() ?? 0,
+      eatenAt: json['eatenAt'] as String,
+    );
+
+Map<String, dynamic> _$MealCandidateDtoToJson(_MealCandidateDto instance) =>
+    <String, dynamic>{
+      'mealRecordId': instance.mealRecordId,
+      'representativeFood': instance.representativeFood,
+      'otherFoodCount': instance.otherFoodCount,
       'eatenAt': instance.eatenAt,
-      'records': instance.records,
+    };
+
+_MealCandidatesDayDto _$MealCandidatesDayDtoFromJson(
+        Map<String, dynamic> json) =>
+    _MealCandidatesDayDto(
+      date: json['date'] as String,
+      meals: (json['meals'] as List<dynamic>?)
+              ?.map((e) => MealCandidateDto.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const <MealCandidateDto>[],
+    );
+
+Map<String, dynamic> _$MealCandidatesDayDtoToJson(
+        _MealCandidatesDayDto instance) =>
+    <String, dynamic>{
+      'date': instance.date,
+      'meals': instance.meals,
     };
 
 _CreateMealRecordRequestDto _$CreateMealRecordRequestDtoFromJson(
@@ -105,8 +188,7 @@ _CreateMealRecordRequestDto _$CreateMealRecordRequestDtoFromJson(
     _CreateMealRecordRequestDto(
       foodExternalId: json['foodExternalId'] as String,
       eatenAt: json['eatenAt'] as String?,
-      mealGroupId: json['mealGroupId'] as String?,
-      judgedGrade: json['judgedGrade'] as String?,
+      mealRecordId: json['mealRecordId'] as String?,
     );
 
 Map<String, dynamic> _$CreateMealRecordRequestDtoToJson(
@@ -114,36 +196,5 @@ Map<String, dynamic> _$CreateMealRecordRequestDtoToJson(
     <String, dynamic>{
       'foodExternalId': instance.foodExternalId,
       'eatenAt': instance.eatenAt,
-      'mealGroupId': instance.mealGroupId,
-      'judgedGrade': instance.judgedGrade,
-    };
-
-_CreateMealByTextRequestDto _$CreateMealByTextRequestDtoFromJson(
-        Map<String, dynamic> json) =>
-    _CreateMealByTextRequestDto(
-      foodTextInput: json['foodTextInput'] as String,
-      eatenAt: json['eatenAt'] as String?,
-      mealGroupId: json['mealGroupId'] as String?,
-      judgedGrade: json['judgedGrade'] as String?,
-    );
-
-Map<String, dynamic> _$CreateMealByTextRequestDtoToJson(
-        _CreateMealByTextRequestDto instance) =>
-    <String, dynamic>{
-      'foodTextInput': instance.foodTextInput,
-      'eatenAt': instance.eatenAt,
-      'mealGroupId': instance.mealGroupId,
-      'judgedGrade': instance.judgedGrade,
-    };
-
-_UpdateMealMemoRequestDto _$UpdateMealMemoRequestDtoFromJson(
-        Map<String, dynamic> json) =>
-    _UpdateMealMemoRequestDto(
-      memo: json['memo'] as String?,
-    );
-
-Map<String, dynamic> _$UpdateMealMemoRequestDtoToJson(
-        _UpdateMealMemoRequestDto instance) =>
-    <String, dynamic>{
-      'memo': instance.memo,
+      'mealRecordId': instance.mealRecordId,
     };

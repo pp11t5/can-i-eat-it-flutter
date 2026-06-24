@@ -30,8 +30,8 @@ final mealRepositoryProvider = AutoDisposeProvider<MealRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef MealRepositoryRef = AutoDisposeProviderRef<MealRepository>;
-String _$mealDetailControllerHash() =>
-    r'91e64b44d2d7ce2d35148f439a8f58d3d1bdb9df';
+String _$timelineControllerHash() =>
+    r'659823fb009836e6a5b84cc430dd30f4ada28ba7';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -54,215 +54,18 @@ class _SystemHash {
   }
 }
 
-abstract class _$MealDetailController
-    extends BuildlessAutoDisposeAsyncNotifier<MealDetail> {
-  late final String mealId;
-
-  FutureOr<MealDetail> build(
-    String mealId,
-  );
-}
-
-/// 식사 기록 상세 컨트롤러.
-///
-/// [mealId] 에 해당하는 [MealDetail] 을 로드하고 수정/삭제 액션을 제공한다.
-///
-/// ProviderScope override 예시 (테스트):
-///   mealRepositoryProvider.overrideWithValue(MockMealRepository.seeded())
-///
-/// Copied from [MealDetailController].
-@ProviderFor(MealDetailController)
-const mealDetailControllerProvider = MealDetailControllerFamily();
-
-/// 식사 기록 상세 컨트롤러.
-///
-/// [mealId] 에 해당하는 [MealDetail] 을 로드하고 수정/삭제 액션을 제공한다.
-///
-/// ProviderScope override 예시 (테스트):
-///   mealRepositoryProvider.overrideWithValue(MockMealRepository.seeded())
-///
-/// Copied from [MealDetailController].
-class MealDetailControllerFamily extends Family<AsyncValue<MealDetail>> {
-  /// 식사 기록 상세 컨트롤러.
-  ///
-  /// [mealId] 에 해당하는 [MealDetail] 을 로드하고 수정/삭제 액션을 제공한다.
-  ///
-  /// ProviderScope override 예시 (테스트):
-  ///   mealRepositoryProvider.overrideWithValue(MockMealRepository.seeded())
-  ///
-  /// Copied from [MealDetailController].
-  const MealDetailControllerFamily();
-
-  /// 식사 기록 상세 컨트롤러.
-  ///
-  /// [mealId] 에 해당하는 [MealDetail] 을 로드하고 수정/삭제 액션을 제공한다.
-  ///
-  /// ProviderScope override 예시 (테스트):
-  ///   mealRepositoryProvider.overrideWithValue(MockMealRepository.seeded())
-  ///
-  /// Copied from [MealDetailController].
-  MealDetailControllerProvider call(
-    String mealId,
-  ) {
-    return MealDetailControllerProvider(
-      mealId,
-    );
-  }
-
-  @override
-  MealDetailControllerProvider getProviderOverride(
-    covariant MealDetailControllerProvider provider,
-  ) {
-    return call(
-      provider.mealId,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'mealDetailControllerProvider';
-}
-
-/// 식사 기록 상세 컨트롤러.
-///
-/// [mealId] 에 해당하는 [MealDetail] 을 로드하고 수정/삭제 액션을 제공한다.
-///
-/// ProviderScope override 예시 (테스트):
-///   mealRepositoryProvider.overrideWithValue(MockMealRepository.seeded())
-///
-/// Copied from [MealDetailController].
-class MealDetailControllerProvider extends AutoDisposeAsyncNotifierProviderImpl<
-    MealDetailController, MealDetail> {
-  /// 식사 기록 상세 컨트롤러.
-  ///
-  /// [mealId] 에 해당하는 [MealDetail] 을 로드하고 수정/삭제 액션을 제공한다.
-  ///
-  /// ProviderScope override 예시 (테스트):
-  ///   mealRepositoryProvider.overrideWithValue(MockMealRepository.seeded())
-  ///
-  /// Copied from [MealDetailController].
-  MealDetailControllerProvider(
-    String mealId,
-  ) : this._internal(
-          () => MealDetailController()..mealId = mealId,
-          from: mealDetailControllerProvider,
-          name: r'mealDetailControllerProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$mealDetailControllerHash,
-          dependencies: MealDetailControllerFamily._dependencies,
-          allTransitiveDependencies:
-              MealDetailControllerFamily._allTransitiveDependencies,
-          mealId: mealId,
-        );
-
-  MealDetailControllerProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.mealId,
-  }) : super.internal();
-
-  final String mealId;
-
-  @override
-  FutureOr<MealDetail> runNotifierBuild(
-    covariant MealDetailController notifier,
-  ) {
-    return notifier.build(
-      mealId,
-    );
-  }
-
-  @override
-  Override overrideWith(MealDetailController Function() create) {
-    return ProviderOverride(
-      origin: this,
-      override: MealDetailControllerProvider._internal(
-        () => create()..mealId = mealId,
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        mealId: mealId,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeAsyncNotifierProviderElement<MealDetailController, MealDetail>
-      createElement() {
-    return _MealDetailControllerProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is MealDetailControllerProvider && other.mealId == mealId;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, mealId.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin MealDetailControllerRef
-    on AutoDisposeAsyncNotifierProviderRef<MealDetail> {
-  /// The parameter `mealId` of this provider.
-  String get mealId;
-}
-
-class _MealDetailControllerProviderElement
-    extends AutoDisposeAsyncNotifierProviderElement<MealDetailController,
-        MealDetail> with MealDetailControllerRef {
-  _MealDetailControllerProviderElement(super.provider);
-
-  @override
-  String get mealId => (origin as MealDetailControllerProvider).mealId;
-}
-
-String _$timelineControllerHash() =>
-    r'a433f908f80626b55bf0b9947b7ae1408103c616';
-
 abstract class _$TimelineController
-    extends BuildlessAutoDisposeAsyncNotifier<List<MealGroup>> {
+    extends BuildlessAutoDisposeAsyncNotifier<List<TimelineItem>> {
   late final DateTime date;
 
-  FutureOr<List<MealGroup>> build(
+  FutureOr<List<TimelineItem>> build(
     DateTime date,
   );
 }
 
 /// 타임라인 컨트롤러.
 ///
-/// 선택된 날짜([date])의 끼니 그룹 목록을 조회한다.
-///
-/// - 기본 선택일: 오늘(KST).
-/// - [changeDate]: 선택일 변경 → 즉시 재조회.
-/// - [refresh]: 현재 선택일 강제 재조회.
-///
-/// ProviderScope override 예시 (테스트):
-///   mealRepositoryProvider.overrideWithValue(MockMealRepository.seeded())
+/// 선택된 날짜([date])의 [TimelineItem] 목록(single/group/symptom)을 조회한다.
 ///
 /// Copied from [TimelineController].
 @ProviderFor(TimelineController)
@@ -270,41 +73,20 @@ const timelineControllerProvider = TimelineControllerFamily();
 
 /// 타임라인 컨트롤러.
 ///
-/// 선택된 날짜([date])의 끼니 그룹 목록을 조회한다.
-///
-/// - 기본 선택일: 오늘(KST).
-/// - [changeDate]: 선택일 변경 → 즉시 재조회.
-/// - [refresh]: 현재 선택일 강제 재조회.
-///
-/// ProviderScope override 예시 (테스트):
-///   mealRepositoryProvider.overrideWithValue(MockMealRepository.seeded())
+/// 선택된 날짜([date])의 [TimelineItem] 목록(single/group/symptom)을 조회한다.
 ///
 /// Copied from [TimelineController].
-class TimelineControllerFamily extends Family<AsyncValue<List<MealGroup>>> {
+class TimelineControllerFamily extends Family<AsyncValue<List<TimelineItem>>> {
   /// 타임라인 컨트롤러.
   ///
-  /// 선택된 날짜([date])의 끼니 그룹 목록을 조회한다.
-  ///
-  /// - 기본 선택일: 오늘(KST).
-  /// - [changeDate]: 선택일 변경 → 즉시 재조회.
-  /// - [refresh]: 현재 선택일 강제 재조회.
-  ///
-  /// ProviderScope override 예시 (테스트):
-  ///   mealRepositoryProvider.overrideWithValue(MockMealRepository.seeded())
+  /// 선택된 날짜([date])의 [TimelineItem] 목록(single/group/symptom)을 조회한다.
   ///
   /// Copied from [TimelineController].
   const TimelineControllerFamily();
 
   /// 타임라인 컨트롤러.
   ///
-  /// 선택된 날짜([date])의 끼니 그룹 목록을 조회한다.
-  ///
-  /// - 기본 선택일: 오늘(KST).
-  /// - [changeDate]: 선택일 변경 → 즉시 재조회.
-  /// - [refresh]: 현재 선택일 강제 재조회.
-  ///
-  /// ProviderScope override 예시 (테스트):
-  ///   mealRepositoryProvider.overrideWithValue(MockMealRepository.seeded())
+  /// 선택된 날짜([date])의 [TimelineItem] 목록(single/group/symptom)을 조회한다.
   ///
   /// Copied from [TimelineController].
   TimelineControllerProvider call(
@@ -341,28 +123,14 @@ class TimelineControllerFamily extends Family<AsyncValue<List<MealGroup>>> {
 
 /// 타임라인 컨트롤러.
 ///
-/// 선택된 날짜([date])의 끼니 그룹 목록을 조회한다.
-///
-/// - 기본 선택일: 오늘(KST).
-/// - [changeDate]: 선택일 변경 → 즉시 재조회.
-/// - [refresh]: 현재 선택일 강제 재조회.
-///
-/// ProviderScope override 예시 (테스트):
-///   mealRepositoryProvider.overrideWithValue(MockMealRepository.seeded())
+/// 선택된 날짜([date])의 [TimelineItem] 목록(single/group/symptom)을 조회한다.
 ///
 /// Copied from [TimelineController].
 class TimelineControllerProvider extends AutoDisposeAsyncNotifierProviderImpl<
-    TimelineController, List<MealGroup>> {
+    TimelineController, List<TimelineItem>> {
   /// 타임라인 컨트롤러.
   ///
-  /// 선택된 날짜([date])의 끼니 그룹 목록을 조회한다.
-  ///
-  /// - 기본 선택일: 오늘(KST).
-  /// - [changeDate]: 선택일 변경 → 즉시 재조회.
-  /// - [refresh]: 현재 선택일 강제 재조회.
-  ///
-  /// ProviderScope override 예시 (테스트):
-  ///   mealRepositoryProvider.overrideWithValue(MockMealRepository.seeded())
+  /// 선택된 날짜([date])의 [TimelineItem] 목록(single/group/symptom)을 조회한다.
   ///
   /// Copied from [TimelineController].
   TimelineControllerProvider(
@@ -394,7 +162,7 @@ class TimelineControllerProvider extends AutoDisposeAsyncNotifierProviderImpl<
   final DateTime date;
 
   @override
-  FutureOr<List<MealGroup>> runNotifierBuild(
+  FutureOr<List<TimelineItem>> runNotifierBuild(
     covariant TimelineController notifier,
   ) {
     return notifier.build(
@@ -419,8 +187,8 @@ class TimelineControllerProvider extends AutoDisposeAsyncNotifierProviderImpl<
   }
 
   @override
-  AutoDisposeAsyncNotifierProviderElement<TimelineController, List<MealGroup>>
-      createElement() {
+  AutoDisposeAsyncNotifierProviderElement<TimelineController,
+      List<TimelineItem>> createElement() {
     return _TimelineControllerProviderElement(this);
   }
 
@@ -441,18 +209,551 @@ class TimelineControllerProvider extends AutoDisposeAsyncNotifierProviderImpl<
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 mixin TimelineControllerRef
-    on AutoDisposeAsyncNotifierProviderRef<List<MealGroup>> {
+    on AutoDisposeAsyncNotifierProviderRef<List<TimelineItem>> {
   /// The parameter `date` of this provider.
   DateTime get date;
 }
 
 class _TimelineControllerProviderElement
     extends AutoDisposeAsyncNotifierProviderElement<TimelineController,
-        List<MealGroup>> with TimelineControllerRef {
+        List<TimelineItem>> with TimelineControllerRef {
   _TimelineControllerProviderElement(super.provider);
 
   @override
   DateTime get date => (origin as TimelineControllerProvider).date;
+}
+
+String _$weeklyControllerHash() => r'0db06eb54d1c43b92a1d74e4c81297b49dc56822';
+
+abstract class _$WeeklyController
+    extends BuildlessAutoDisposeAsyncNotifier<List<WeeklyDay>> {
+  late final DateTime weekStart;
+
+  FutureOr<List<WeeklyDay>> build(
+    DateTime weekStart,
+  );
+}
+
+/// 주간 도트 컨트롤러.
+///
+/// [weekStart] 가 속한 주의 [WeeklyDay] 목록을 조회한다.
+///
+/// Copied from [WeeklyController].
+@ProviderFor(WeeklyController)
+const weeklyControllerProvider = WeeklyControllerFamily();
+
+/// 주간 도트 컨트롤러.
+///
+/// [weekStart] 가 속한 주의 [WeeklyDay] 목록을 조회한다.
+///
+/// Copied from [WeeklyController].
+class WeeklyControllerFamily extends Family<AsyncValue<List<WeeklyDay>>> {
+  /// 주간 도트 컨트롤러.
+  ///
+  /// [weekStart] 가 속한 주의 [WeeklyDay] 목록을 조회한다.
+  ///
+  /// Copied from [WeeklyController].
+  const WeeklyControllerFamily();
+
+  /// 주간 도트 컨트롤러.
+  ///
+  /// [weekStart] 가 속한 주의 [WeeklyDay] 목록을 조회한다.
+  ///
+  /// Copied from [WeeklyController].
+  WeeklyControllerProvider call(
+    DateTime weekStart,
+  ) {
+    return WeeklyControllerProvider(
+      weekStart,
+    );
+  }
+
+  @override
+  WeeklyControllerProvider getProviderOverride(
+    covariant WeeklyControllerProvider provider,
+  ) {
+    return call(
+      provider.weekStart,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'weeklyControllerProvider';
+}
+
+/// 주간 도트 컨트롤러.
+///
+/// [weekStart] 가 속한 주의 [WeeklyDay] 목록을 조회한다.
+///
+/// Copied from [WeeklyController].
+class WeeklyControllerProvider extends AutoDisposeAsyncNotifierProviderImpl<
+    WeeklyController, List<WeeklyDay>> {
+  /// 주간 도트 컨트롤러.
+  ///
+  /// [weekStart] 가 속한 주의 [WeeklyDay] 목록을 조회한다.
+  ///
+  /// Copied from [WeeklyController].
+  WeeklyControllerProvider(
+    DateTime weekStart,
+  ) : this._internal(
+          () => WeeklyController()..weekStart = weekStart,
+          from: weeklyControllerProvider,
+          name: r'weeklyControllerProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$weeklyControllerHash,
+          dependencies: WeeklyControllerFamily._dependencies,
+          allTransitiveDependencies:
+              WeeklyControllerFamily._allTransitiveDependencies,
+          weekStart: weekStart,
+        );
+
+  WeeklyControllerProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.weekStart,
+  }) : super.internal();
+
+  final DateTime weekStart;
+
+  @override
+  FutureOr<List<WeeklyDay>> runNotifierBuild(
+    covariant WeeklyController notifier,
+  ) {
+    return notifier.build(
+      weekStart,
+    );
+  }
+
+  @override
+  Override overrideWith(WeeklyController Function() create) {
+    return ProviderOverride(
+      origin: this,
+      override: WeeklyControllerProvider._internal(
+        () => create()..weekStart = weekStart,
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        weekStart: weekStart,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeAsyncNotifierProviderElement<WeeklyController, List<WeeklyDay>>
+      createElement() {
+    return _WeeklyControllerProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WeeklyControllerProvider && other.weekStart == weekStart;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, weekStart.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin WeeklyControllerRef
+    on AutoDisposeAsyncNotifierProviderRef<List<WeeklyDay>> {
+  /// The parameter `weekStart` of this provider.
+  DateTime get weekStart;
+}
+
+class _WeeklyControllerProviderElement
+    extends AutoDisposeAsyncNotifierProviderElement<WeeklyController,
+        List<WeeklyDay>> with WeeklyControllerRef {
+  _WeeklyControllerProviderElement(super.provider);
+
+  @override
+  DateTime get weekStart => (origin as WeeklyControllerProvider).weekStart;
+}
+
+String _$mealRecordDetailControllerHash() =>
+    r'1e952c17a225b07ed46f85f907dccd34cb650d23';
+
+abstract class _$MealRecordDetailController
+    extends BuildlessAutoDisposeAsyncNotifier<MealRecord> {
+  late final String mealRecordId;
+
+  FutureOr<MealRecord> build(
+    String mealRecordId,
+  );
+}
+
+/// 식사 상세 컨트롤러.
+///
+/// [mealRecordId] 에 해당하는 [MealRecord](음식 목록 + 상태기록)를 로드하고
+/// 삭제 액션을 제공한다.
+///
+/// Copied from [MealRecordDetailController].
+@ProviderFor(MealRecordDetailController)
+const mealRecordDetailControllerProvider = MealRecordDetailControllerFamily();
+
+/// 식사 상세 컨트롤러.
+///
+/// [mealRecordId] 에 해당하는 [MealRecord](음식 목록 + 상태기록)를 로드하고
+/// 삭제 액션을 제공한다.
+///
+/// Copied from [MealRecordDetailController].
+class MealRecordDetailControllerFamily extends Family<AsyncValue<MealRecord>> {
+  /// 식사 상세 컨트롤러.
+  ///
+  /// [mealRecordId] 에 해당하는 [MealRecord](음식 목록 + 상태기록)를 로드하고
+  /// 삭제 액션을 제공한다.
+  ///
+  /// Copied from [MealRecordDetailController].
+  const MealRecordDetailControllerFamily();
+
+  /// 식사 상세 컨트롤러.
+  ///
+  /// [mealRecordId] 에 해당하는 [MealRecord](음식 목록 + 상태기록)를 로드하고
+  /// 삭제 액션을 제공한다.
+  ///
+  /// Copied from [MealRecordDetailController].
+  MealRecordDetailControllerProvider call(
+    String mealRecordId,
+  ) {
+    return MealRecordDetailControllerProvider(
+      mealRecordId,
+    );
+  }
+
+  @override
+  MealRecordDetailControllerProvider getProviderOverride(
+    covariant MealRecordDetailControllerProvider provider,
+  ) {
+    return call(
+      provider.mealRecordId,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'mealRecordDetailControllerProvider';
+}
+
+/// 식사 상세 컨트롤러.
+///
+/// [mealRecordId] 에 해당하는 [MealRecord](음식 목록 + 상태기록)를 로드하고
+/// 삭제 액션을 제공한다.
+///
+/// Copied from [MealRecordDetailController].
+class MealRecordDetailControllerProvider
+    extends AutoDisposeAsyncNotifierProviderImpl<MealRecordDetailController,
+        MealRecord> {
+  /// 식사 상세 컨트롤러.
+  ///
+  /// [mealRecordId] 에 해당하는 [MealRecord](음식 목록 + 상태기록)를 로드하고
+  /// 삭제 액션을 제공한다.
+  ///
+  /// Copied from [MealRecordDetailController].
+  MealRecordDetailControllerProvider(
+    String mealRecordId,
+  ) : this._internal(
+          () => MealRecordDetailController()..mealRecordId = mealRecordId,
+          from: mealRecordDetailControllerProvider,
+          name: r'mealRecordDetailControllerProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$mealRecordDetailControllerHash,
+          dependencies: MealRecordDetailControllerFamily._dependencies,
+          allTransitiveDependencies:
+              MealRecordDetailControllerFamily._allTransitiveDependencies,
+          mealRecordId: mealRecordId,
+        );
+
+  MealRecordDetailControllerProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.mealRecordId,
+  }) : super.internal();
+
+  final String mealRecordId;
+
+  @override
+  FutureOr<MealRecord> runNotifierBuild(
+    covariant MealRecordDetailController notifier,
+  ) {
+    return notifier.build(
+      mealRecordId,
+    );
+  }
+
+  @override
+  Override overrideWith(MealRecordDetailController Function() create) {
+    return ProviderOverride(
+      origin: this,
+      override: MealRecordDetailControllerProvider._internal(
+        () => create()..mealRecordId = mealRecordId,
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        mealRecordId: mealRecordId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeAsyncNotifierProviderElement<MealRecordDetailController,
+      MealRecord> createElement() {
+    return _MealRecordDetailControllerProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is MealRecordDetailControllerProvider &&
+        other.mealRecordId == mealRecordId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, mealRecordId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin MealRecordDetailControllerRef
+    on AutoDisposeAsyncNotifierProviderRef<MealRecord> {
+  /// The parameter `mealRecordId` of this provider.
+  String get mealRecordId;
+}
+
+class _MealRecordDetailControllerProviderElement
+    extends AutoDisposeAsyncNotifierProviderElement<MealRecordDetailController,
+        MealRecord> with MealRecordDetailControllerRef {
+  _MealRecordDetailControllerProviderElement(super.provider);
+
+  @override
+  String get mealRecordId =>
+      (origin as MealRecordDetailControllerProvider).mealRecordId;
+}
+
+String _$mealFoodDetailControllerHash() =>
+    r'1ceef4a4d01313921c62351964e7b75459406b90';
+
+abstract class _$MealFoodDetailController
+    extends BuildlessAutoDisposeAsyncNotifier<MealFood> {
+  late final String mealFoodId;
+
+  FutureOr<MealFood> build(
+    String mealFoodId,
+  );
+}
+
+/// 음식 상세 컨트롤러.
+///
+/// [mealFoodId] 에 해당하는 [MealFood](analysis 포함)를 로드하고 삭제 액션을
+/// 제공한다.
+///
+/// Copied from [MealFoodDetailController].
+@ProviderFor(MealFoodDetailController)
+const mealFoodDetailControllerProvider = MealFoodDetailControllerFamily();
+
+/// 음식 상세 컨트롤러.
+///
+/// [mealFoodId] 에 해당하는 [MealFood](analysis 포함)를 로드하고 삭제 액션을
+/// 제공한다.
+///
+/// Copied from [MealFoodDetailController].
+class MealFoodDetailControllerFamily extends Family<AsyncValue<MealFood>> {
+  /// 음식 상세 컨트롤러.
+  ///
+  /// [mealFoodId] 에 해당하는 [MealFood](analysis 포함)를 로드하고 삭제 액션을
+  /// 제공한다.
+  ///
+  /// Copied from [MealFoodDetailController].
+  const MealFoodDetailControllerFamily();
+
+  /// 음식 상세 컨트롤러.
+  ///
+  /// [mealFoodId] 에 해당하는 [MealFood](analysis 포함)를 로드하고 삭제 액션을
+  /// 제공한다.
+  ///
+  /// Copied from [MealFoodDetailController].
+  MealFoodDetailControllerProvider call(
+    String mealFoodId,
+  ) {
+    return MealFoodDetailControllerProvider(
+      mealFoodId,
+    );
+  }
+
+  @override
+  MealFoodDetailControllerProvider getProviderOverride(
+    covariant MealFoodDetailControllerProvider provider,
+  ) {
+    return call(
+      provider.mealFoodId,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'mealFoodDetailControllerProvider';
+}
+
+/// 음식 상세 컨트롤러.
+///
+/// [mealFoodId] 에 해당하는 [MealFood](analysis 포함)를 로드하고 삭제 액션을
+/// 제공한다.
+///
+/// Copied from [MealFoodDetailController].
+class MealFoodDetailControllerProvider
+    extends AutoDisposeAsyncNotifierProviderImpl<MealFoodDetailController,
+        MealFood> {
+  /// 음식 상세 컨트롤러.
+  ///
+  /// [mealFoodId] 에 해당하는 [MealFood](analysis 포함)를 로드하고 삭제 액션을
+  /// 제공한다.
+  ///
+  /// Copied from [MealFoodDetailController].
+  MealFoodDetailControllerProvider(
+    String mealFoodId,
+  ) : this._internal(
+          () => MealFoodDetailController()..mealFoodId = mealFoodId,
+          from: mealFoodDetailControllerProvider,
+          name: r'mealFoodDetailControllerProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$mealFoodDetailControllerHash,
+          dependencies: MealFoodDetailControllerFamily._dependencies,
+          allTransitiveDependencies:
+              MealFoodDetailControllerFamily._allTransitiveDependencies,
+          mealFoodId: mealFoodId,
+        );
+
+  MealFoodDetailControllerProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.mealFoodId,
+  }) : super.internal();
+
+  final String mealFoodId;
+
+  @override
+  FutureOr<MealFood> runNotifierBuild(
+    covariant MealFoodDetailController notifier,
+  ) {
+    return notifier.build(
+      mealFoodId,
+    );
+  }
+
+  @override
+  Override overrideWith(MealFoodDetailController Function() create) {
+    return ProviderOverride(
+      origin: this,
+      override: MealFoodDetailControllerProvider._internal(
+        () => create()..mealFoodId = mealFoodId,
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        mealFoodId: mealFoodId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeAsyncNotifierProviderElement<MealFoodDetailController, MealFood>
+      createElement() {
+    return _MealFoodDetailControllerProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is MealFoodDetailControllerProvider &&
+        other.mealFoodId == mealFoodId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, mealFoodId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin MealFoodDetailControllerRef
+    on AutoDisposeAsyncNotifierProviderRef<MealFood> {
+  /// The parameter `mealFoodId` of this provider.
+  String get mealFoodId;
+}
+
+class _MealFoodDetailControllerProviderElement
+    extends AutoDisposeAsyncNotifierProviderElement<MealFoodDetailController,
+        MealFood> with MealFoodDetailControllerRef {
+  _MealFoodDetailControllerProviderElement(super.provider);
+
+  @override
+  String get mealFoodId =>
+      (origin as MealFoodDetailControllerProvider).mealFoodId;
 }
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

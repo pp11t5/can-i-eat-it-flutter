@@ -4,11 +4,13 @@ import 'package:http_mock_adapter/http_mock_adapter.dart';
 
 import 'package:can_i_eat_it/core/network/api_endpoints.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
+import 'package:can_i_eat_it/features/meal_log/data/dtos/meal_dtos.dart';
 import 'package:can_i_eat_it/features/meal_log/data/repositories/meal_repository_impl.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
+import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
 
 // ---------------------------------------------------------------------------
-// 헬퍼 — food_repository_impl_test 패턴 동일
+// 헬퍼
 // ---------------------------------------------------------------------------
 
 const _baseUrl = 'https://test.example.com';
@@ -22,74 +24,35 @@ Map<String, dynamic> _envelope(dynamic result) => {
       'result': result,
     };
 
-/// MealRecordSummary JSON (POST /meals 응답 대응).
-Map<String, dynamic> _mealRecordSummaryJson({
-  String mealId = 'm1',
-  String mealGroupId = 'g1',
-  String eatenAt = '2026-06-17T09:02:00+09:00',
-  String foodExternalId = 'f1',
-  String foodName = '아메리카노',
-  String? foodCategory = 'beverage',
-  String? judgedGrade = 'CAUTION',
-}) =>
-    {
-      'mealId': mealId,
-      'mealGroupId': mealGroupId,
-      'eatenAt': eatenAt,
+/// 타임라인 single 항목.
+Map<String, dynamic> _timelineSingle() => {
+      'timeLineType': 'single',
+      'mealRecordId': 'mr1',
+      'mealRecordDateTime': '2026-06-17T08:00:00+09:00',
+      'mealFoodName': '두부',
+      'grade': 'RECOMMEND',
+    };
+
+/// 타임라인 group 항목.
+Map<String, dynamic> _timelineGroup() => {
+      'timeLineType': 'group',
+      'mealRecordId': 'mr2',
+      'mealRecordDateTime': '2026-06-17T12:30:00+09:00',
+      'representativeFoods': ['된장찌개', '커피'],
+      'etcCount': 1,
+    };
+
+/// POST /meal-records · foodDetail 응답.
+Map<String, dynamic> _foodDetailJson() => {
+      'mealFoodId': 'mf1',
+      'eatenAt': '2026-06-17T09:02:00+09:00',
       'food': {
-        'externalId': foodExternalId,
-        'name': foodName,
-        'category': foodCategory,
+        'mealRecordExternalId': 'mr1',
+        'name': '커피',
+        'category': 'beverage',
       },
-      'judgedGrade': judgedGrade,
+      'analysis': {'judgmentGrade': 'RISK'},
     };
-
-/// MealGroup JSON (GET /meals?date= 응답 항목).
-Map<String, dynamic> _mealGroupJson({
-  String mealGroupId = 'g1',
-  String eatenAt = '2026-06-17T09:02:00+09:00',
-  List<Map<String, dynamic>>? records,
-}) =>
-    {
-      'mealGroupId': mealGroupId,
-      'eatenAt': eatenAt,
-      'records': records ??
-          [
-            _mealRecordSummaryJson(),
-          ],
-    };
-
-/// MealRecordDetail JSON (GET /meals/{id} 응답).
-Map<String, dynamic> _mealRecordDetailJson({
-  String mealId = 'm1',
-  String mealGroupId = 'g1',
-  String eatenAt = '2026-06-17T09:02:00+09:00',
-  String? memo,
-  String? judgedGrade = 'RISK',
-  String foodExternalId = 'f1',
-  String foodName = '커피',
-  String? foodCategory = 'beverage',
-  String? foodDescription,
-  List<Map<String, dynamic>>? stateRecords,
-}) =>
-    {
-      'mealId': mealId,
-      'mealGroupId': mealGroupId,
-      'eatenAt': eatenAt,
-      'memo': memo,
-      'judgedGrade': judgedGrade,
-      'food': {
-        'externalId': foodExternalId,
-        'name': foodName,
-        'category': foodCategory,
-        'description': foodDescription,
-      },
-      'stateRecords': stateRecords ?? <dynamic>[],
-    };
-
-// ---------------------------------------------------------------------------
-// 테스트
-// ---------------------------------------------------------------------------
 
 void main() {
   late Dio dio;
@@ -109,148 +72,450 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  group('timeline — GET /meals?date= 직렬화·unwrap', () {
-    test('date 쿼리 파라미터가 "YYYY-MM-DD" 형식으로 전달된다', () async {
+  group('timeline — GET /timeline?date= (result.items[] 객체 래핑, F-9)', () {
+    test('date 쿼리가 "YYYY-MM-DD" 형식으로 전달된다', () async {
       adapter.onGet(
-        ApiEndpoints.meals,
-        (server) => server.reply(200, _envelope([_mealGroupJson()])),
+        ApiEndpoints.timeline,
+        (server) => server.reply(200, _envelope({'items': <dynamic>[]})),
         queryParameters: {'date': '2026-06-17'},
       );
-
-      // UTC 2026-06-17T00:00:00 → KST 2026-06-17T09:00:00 → '2026-06-17'
+      // UTC 2026-06-17T00:00 → KST 09:00 → '2026-06-17'
       final result = await repo.timeline(DateTime.utc(2026, 6, 17));
-      expect(result, isA<List<MealGroup>>());
+      expect(result, isA<List<TimelineItem>>());
     });
 
-    test('봉투 unwrap 후 List<MealGroup>이 반환된다', () async {
+    test('result.items[] 를 TimelineItem 목록으로 unwrap한다', () async {
       adapter.onGet(
-        ApiEndpoints.meals,
-        (server) => server.reply(200, _envelope([_mealGroupJson()])),
+        ApiEndpoints.timeline,
+        (server) => server.reply(
+          200,
+          _envelope({
+            'items': [_timelineSingle(), _timelineGroup()],
+          }),
+        ),
         queryParameters: {'date': '2026-06-17'},
       );
+      final result = await repo.timeline(DateTime.utc(2026, 6, 17));
+      expect(result.length, 2);
+      expect(result[0], isA<TimelineSingle>());
+      expect(result[1], isA<TimelineGroup>());
+    });
 
+    test('알 수 없는 timeLineType은 스킵된다', () async {
+      adapter.onGet(
+        ApiEndpoints.timeline,
+        (server) => server.reply(
+          200,
+          _envelope({
+            'items': [
+              _timelineSingle(),
+              {'timeLineType': 'futureType', 'mealRecordId': 'x'},
+            ],
+          }),
+        ),
+        queryParameters: {'date': '2026-06-17'},
+      );
       final result = await repo.timeline(DateTime.utc(2026, 6, 17));
       expect(result.length, 1);
-      expect(result[0], isA<MealGroup>());
+      expect(result[0], isA<TimelineSingle>());
     });
 
-    test('MealGroup 필드가 올바르게 매핑된다', () async {
+    test('items 누락 시 빈 목록을 반환한다', () async {
       adapter.onGet(
-        ApiEndpoints.meals,
-        (server) => server.reply(200, _envelope([_mealGroupJson()])),
+        ApiEndpoints.timeline,
+        (server) => server.reply(200, _envelope(<String, dynamic>{})),
         queryParameters: {'date': '2026-06-17'},
       );
-
-      final result = await repo.timeline(DateTime.utc(2026, 6, 17));
-      expect(result[0].mealGroupId, 'g1');
-      expect(result[0].eatenAt, '2026-06-17T09:02:00+09:00');
-    });
-
-    test('records[0].judgedGrade "CAUTION" → VerdictLevel.caution', () async {
-      adapter.onGet(
-        ApiEndpoints.meals,
-        (server) => server.reply(200, _envelope([_mealGroupJson()])),
-        queryParameters: {'date': '2026-06-17'},
-      );
-
-      final result = await repo.timeline(DateTime.utc(2026, 6, 17));
-      expect(result[0].records[0].judgedGrade, VerdictLevel.caution);
-    });
-
-    test('빈 배열 응답은 빈 List<MealGroup>을 반환한다', () async {
-      adapter.onGet(
-        ApiEndpoints.meals,
-        (server) => server.reply(200, _envelope(<dynamic>[])),
-        queryParameters: {'date': '2026-06-17'},
-      );
-
       final result = await repo.timeline(DateTime.utc(2026, 6, 17));
       expect(result, isEmpty);
     });
 
-    test('KST 일자 경계: UTC 15:00 → date 쿼리가 다음날 날짜이다', () async {
-      // UTC 2026-06-17T15:00 = KST 2026-06-18T00:00 → '2026-06-18'
+    test('KST 일자 경계: UTC 15:00 → 다음날 date 쿼리', () async {
       adapter.onGet(
-        ApiEndpoints.meals,
-        (server) => server.reply(200, _envelope(<dynamic>[])),
+        ApiEndpoints.timeline,
+        (server) => server.reply(200, _envelope({'items': <dynamic>[]})),
         queryParameters: {'date': '2026-06-18'},
       );
-
       final result = await repo.timeline(DateTime.utc(2026, 6, 17, 15, 0, 0));
       expect(result, isEmpty);
     });
+
+    // 계약 verbatim: symptom variant 매핑
+    test('symptom variant → TimelineSymptom, symptomState·afterMealMinutes 매핑', () async {
+      adapter.onGet(
+        ApiEndpoints.timeline,
+        (server) => server.reply(
+          200,
+          _envelope({
+            'items': [
+              {
+                'timeLineType': 'symptom',
+                'symptomState': 'uncomfortable',
+                'afterMealMinutes': 90,
+                'occurredAt': '2026-06-24T10:00:00+09:00',
+              },
+            ],
+          }),
+        ),
+        queryParameters: {'date': '2026-06-24'},
+      );
+      final result = await repo.timeline(DateTime.utc(2026, 6, 24));
+      expect(result.length, 1);
+      expect(result[0], isA<TimelineSymptom>());
+      final symptom = result[0] as TimelineSymptom;
+      expect(symptom.symptomState, SymptomState.uncomfortable);
+      expect(symptom.afterMealMinutes, 90);
+      expect(symptom.occurredAt, '2026-06-24T10:00:00+09:00');
+    });
+
+    // 계약: 미지 timeLineType 스킵 (single 1개 + unknownX 1개 → 결과 1개)
+    test('미지 timeLineType "unknownX"는 스킵된다', () async {
+      adapter.onGet(
+        ApiEndpoints.timeline,
+        (server) => server.reply(
+          200,
+          _envelope({
+            'items': [
+              _timelineSingle(),
+              {'timeLineType': 'unknownX', 'mealRecordId': 'x'},
+            ],
+          }),
+        ),
+        queryParameters: {'date': '2026-06-17'},
+      );
+      final result = await repo.timeline(DateTime.utc(2026, 6, 17));
+      expect(result.length, 1);
+      expect(result[0], isA<TimelineSingle>());
+    });
   });
 
   // -------------------------------------------------------------------------
-  group('detail — GET /meals/{mealId}', () {
-    test('MealDetail이 올바르게 반환된다', () async {
+  group('weekly — GET /timeline/weekly?date= (result[] 직접 배열, F-9)', () {
+    test('result[] 를 WeeklyDay 목록으로 unwrap한다', () async {
       adapter.onGet(
-        ApiEndpoints.mealItem('m1'),
+        ApiEndpoints.timelineWeekly,
         (server) => server.reply(
           200,
-          _envelope(
-            _mealRecordDetailJson(
-              judgedGrade: 'RISK',
-              memo: '점심 후',
-              stateRecords: [
-                {'label': '속쓰림', 'date': '2026-06-17', 'timing': '식후 90분'},
-              ],
-            ),
-          ),
+          _envelope([
+            {
+              'date': '2026-06-17',
+              'dayOfWeek': 'WED',
+              'judgementList': ['RECOMMEND', 'RISK'],
+            },
+          ]),
+        ),
+        queryParameters: {'date': '2026-06-17'},
+      );
+      final result = await repo.weekly(DateTime.utc(2026, 6, 17));
+      expect(result.length, 1);
+      expect(result[0].judgements, [VerdictLevel.recommend, VerdictLevel.risk]);
+    });
+
+    // 계약: judgementList 대문자 grade → VerdictLevel, UNKNOWN 폴백
+    test('judgementList UNKNOWN grade → VerdictLevel.unknown 폴백', () async {
+      adapter.onGet(
+        ApiEndpoints.timelineWeekly,
+        (server) => server.reply(
+          200,
+          _envelope([
+            {
+              'date': '2026-06-24',
+              'dayOfWeek': 'WED',
+              'judgementList': ['UNKNOWN'],
+            },
+          ]),
+        ),
+        queryParameters: {'date': '2026-06-24'},
+      );
+      final result = await repo.weekly(DateTime.utc(2026, 6, 24));
+      expect(result[0].judgements[0], VerdictLevel.unknown);
+    });
+
+    // 계약: judgementList ≤3 (서버가 최대 3개 보냄, 클라이언트 통과 검증)
+    test('judgementList 3개 모두 매핑된다 (≤3 경계)', () async {
+      adapter.onGet(
+        ApiEndpoints.timelineWeekly,
+        (server) => server.reply(
+          200,
+          _envelope([
+            {
+              'date': '2026-06-24',
+              'dayOfWeek': 'WED',
+              'judgementList': ['RECOMMEND', 'CAUTION', 'RISK'],
+            },
+          ]),
+        ),
+        queryParameters: {'date': '2026-06-24'},
+      );
+      final result = await repo.weekly(DateTime.utc(2026, 6, 24));
+      expect(result[0].judgements.length, 3);
+      expect(result[0].judgements, [
+        VerdictLevel.recommend,
+        VerdictLevel.caution,
+        VerdictLevel.risk,
+      ]);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  group('appendFood — POST /meal-records', () {
+    test('성공 시 MealFood(analysis 포함)를 반환한다', () async {
+      adapter.onPost(
+        ApiEndpoints.mealRecords,
+        (server) => server.reply(200, _envelope(_foodDetailJson())),
+      );
+      final result = await repo.appendFood(foodExternalId: 'f1');
+      expect(result, isA<MealFood>());
+      expect(result.mealFoodId, 'mf1');
+      expect(result.mealRecordExternalId, 'mr1');
+      expect(result.analysis!.judgmentGrade, VerdictLevel.risk);
+    });
+
+    // 계약: POST 바디에 judgedGrade 필드가 있으면 안 된다 (F-10)
+    // CreateMealRecordRequestDto.toJson() + removeWhere(null) 후 judgedGrade 부재를
+    // DTO 레벨에서 직접 검증한다 (impl 경유 없이 확실하게).
+    test('POST 바디에 judgedGrade 키가 없다 — DTO toJson 직접 검증', () {
+      // eatenAt·mealRecordId 제공 시에도 judgedGrade가 절대 없어야 한다.
+      final body = const CreateMealRecordRequestDto(
+        foodExternalId: 'f1',
+      ).toJson()..removeWhere((_, v) => v == null);
+      expect(body.containsKey('judgedGrade'), isFalse,
+          reason: '서버가 analysis를 계산하므로 클라이언트는 judgedGrade를 보내면 안 된다');
+      expect(body['foodExternalId'], 'f1');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  group('appendFoodByText — 미지원 seam', () {
+    test('UnimplementedError를 던진다', () async {
+      await expectLater(
+        repo.appendFoodByText(foodTextInput: '아메리카노'),
+        throwsA(isA<UnimplementedError>()),
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  group('mealDetail — GET /meal-records/{id}', () {
+    test('MealRecord가 올바르게 반환된다', () async {
+      adapter.onGet(
+        ApiEndpoints.mealRecordItem('mr1'),
+        (server) => server.reply(
+          200,
+          _envelope({
+            'mealRecordId': 'mr1',
+            'eatenAt': '2026-06-17T09:02:00+09:00',
+            'meals': [
+              {
+                'mealFoodId': 'mf1',
+                'name': '커피',
+                'eatenAt': '2026-06-17T09:02:00+09:00',
+              },
+            ],
+            'stateRecords': [
+              {
+                'stateRecordId': 'sr1',
+                'label': '속쓰림',
+                'date': '2026-06-17',
+                'timingMinutes': 90,
+              },
+            ],
+          }),
         ),
       );
-
-      final result = await repo.detail('m1');
-      expect(result, isA<MealDetail>());
-      expect(result.mealId, 'm1');
-      expect(result.judgedGrade, VerdictLevel.risk);
-      expect(result.memo, '점심 후');
+      final result = await repo.mealDetail('mr1');
+      expect(result, isA<MealRecord>());
+      expect(result.mealRecordId, 'mr1');
+      expect(result.foods.length, 1);
       expect(result.stateRecords.length, 1);
-      expect(result.stateRecords[0].label, '속쓰림');
-      expect(result.stateRecords[0].timing, '식후 90분');
+      expect(result.stateRecords[0].timingMinutes, 90);
     });
 
-    test('judgedGrade null이면 entity.judgedGrade가 null이다', () async {
+    // 계약: stateRecords 키 누락 → 빈 리스트
+    test('stateRecords 키 누락 시 빈 목록을 반환한다', () async {
       adapter.onGet(
-        ApiEndpoints.mealItem('m2'),
+        ApiEndpoints.mealRecordItem('mr2'),
         (server) => server.reply(
           200,
-          _envelope(_mealRecordDetailJson(mealId: 'm2', judgedGrade: null)),
+          _envelope({
+            'mealRecordId': 'mr2',
+            'eatenAt': '2026-06-24T09:00:00+09:00',
+            'meals': [
+              {
+                'mealFoodId': 'mf2',
+                'name': '두부',
+                'eatenAt': '2026-06-24T09:00:00+09:00',
+              },
+            ],
+            // stateRecords 키 없음
+          }),
         ),
       );
+      final result = await repo.mealDetail('mr2');
+      expect(result.stateRecords, isEmpty);
+    });
 
-      final result = await repo.detail('m2');
-      expect(result.judgedGrade, isNull);
+    // 계약: stateRecords 명시 null → 빈 리스트
+    test('stateRecords 명시 null이어도 빈 목록을 반환한다', () async {
+      adapter.onGet(
+        ApiEndpoints.mealRecordItem('mr3'),
+        (server) => server.reply(
+          200,
+          _envelope({
+            'mealRecordId': 'mr3',
+            'eatenAt': '2026-06-24T09:00:00+09:00',
+            'meals': [
+              {
+                'mealFoodId': 'mf3',
+                'name': '된장찌개',
+                'eatenAt': '2026-06-24T09:00:00+09:00',
+              },
+            ],
+            'stateRecords': null,
+          }),
+        ),
+      );
+      final result = await repo.mealDetail('mr3');
+      expect(result.stateRecords, isEmpty);
+    });
+
+    // 계약: meals[].category null 방어
+    test('meals[].category null이어도 MealFood.category가 null로 매핑된다', () async {
+      adapter.onGet(
+        ApiEndpoints.mealRecordItem('mr4'),
+        (server) => server.reply(
+          200,
+          _envelope({
+            'mealRecordId': 'mr4',
+            'eatenAt': '2026-06-24T09:00:00+09:00',
+            'meals': [
+              {
+                'mealFoodId': 'mf4',
+                'name': '두부',
+                'category': null,
+                'eatenAt': '2026-06-24T09:00:00+09:00',
+              },
+            ],
+            'stateRecords': [],
+          }),
+        ),
+      );
+      final result = await repo.mealDetail('mr4');
+      expect(result.foods[0].category, isNull);
     });
   });
 
   // -------------------------------------------------------------------------
-  group('updateMemo — PATCH /meals/{mealId}', () {
-    test('PATCH 성공 시 MealDetail이 반환된다', () async {
-      adapter.onPatch(
-        ApiEndpoints.mealItem('m1'),
-        (server) => server.reply(
-          200,
-          _envelope(_mealRecordDetailJson(memo: '새 메모')),
-        ),
-        data: {'memo': '새 메모'},
+  group('foodDetail — GET /meal-records/foods/{id}', () {
+    test('MealFood(analysis 포함)를 반환한다', () async {
+      adapter.onGet(
+        ApiEndpoints.mealRecordFood('mf1'),
+        (server) => server.reply(200, _envelope(_foodDetailJson())),
       );
-
-      final result = await repo.updateMemo('m1', '새 메모');
-      expect(result, isA<MealDetail>());
-      expect(result.memo, '새 메모');
+      final result = await repo.foodDetail('mf1');
+      expect(result.mealFoodId, 'mf1');
+      expect(result.analysis, isNotNull);
     });
   });
 
   // -------------------------------------------------------------------------
-  group('delete — DELETE /meals/{mealId}', () {
-    test('DELETE 성공 시 Future<void>가 완료된다', () async {
+  group('deleteMeal — DELETE /meal-records/{id}', () {
+    test('성공 시 Future<void>가 완료된다', () async {
       adapter.onDelete(
-        ApiEndpoints.mealItem('m1'),
+        ApiEndpoints.mealRecordItem('mr1'),
         (server) => server.reply(200, _envelope(null)),
       );
+      await expectLater(repo.deleteMeal('mr1'), completes);
+    });
+  });
 
-      await expectLater(repo.delete('m1'), completes);
+  // -------------------------------------------------------------------------
+  group('deleteFood — DELETE /meal-records/foods/{id}', () {
+    test('성공 시 Future<void>가 완료된다', () async {
+      adapter.onDelete(
+        ApiEndpoints.mealRecordFood('mf1'),
+        (server) => server.reply(200, _envelope(null)),
+      );
+      await expectLater(repo.deleteFood('mf1'), completes);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  group('candidates — GET /meal-records/candidates (result[] 직접 배열)', () {
+    test('result[] 를 MealCandidatesDay 목록으로 unwrap한다', () async {
+      adapter.onGet(
+        ApiEndpoints.mealRecordCandidates,
+        (server) => server.reply(
+          200,
+          _envelope([
+            {
+              'date': '2026-06-17',
+              'meals': [
+                {
+                  'mealRecordId': 'mr1',
+                  'representativeFood': {'name': '된장찌개'},
+                  'otherFoodCount': 2,
+                  'eatenAt': '2026-06-17T12:30:00+09:00',
+                },
+              ],
+            },
+          ]),
+        ),
+      );
+      final result = await repo.candidates();
+      expect(result.length, 1);
+      expect(result[0].meals[0].representativeFoodName, '된장찌개');
+    });
+
+    // 계약 verbatim: representativeFood.category null 방어
+    test('representativeFood.category null → representativeFoodCategory가 null이다', () async {
+      adapter.onGet(
+        ApiEndpoints.mealRecordCandidates,
+        (server) => server.reply(
+          200,
+          _envelope([
+            {
+              'date': '2026-06-24',
+              'meals': [
+                {
+                  'mealRecordId': 'mr1',
+                  'representativeFood': {'name': '두부', 'category': null},
+                  'otherFoodCount': 2,
+                  'eatenAt': '2026-06-24T12:30:00+09:00',
+                },
+              ],
+            },
+          ]),
+        ),
+      );
+      final result = await repo.candidates();
+      expect(result[0].meals[0].representativeFoodCategory, isNull);
+      expect(result[0].meals[0].representativeFoodName, '두부');
+    });
+
+    // 계약: eatenAt ISO-8601 +09:00 오프셋 보존
+    test('eatenAt ISO-8601 +09:00 오프셋이 보존된다', () async {
+      adapter.onGet(
+        ApiEndpoints.mealRecordCandidates,
+        (server) => server.reply(
+          200,
+          _envelope([
+            {
+              'date': '2026-06-24',
+              'meals': [
+                {
+                  'mealRecordId': 'mr2',
+                  'representativeFood': {'name': '된장찌개', 'category': null},
+                  'otherFoodCount': 0,
+                  'eatenAt': '2026-06-24T12:30:00+09:00',
+                },
+              ],
+            },
+          ]),
+        ),
+      );
+      final result = await repo.candidates();
+      expect(result[0].meals[0].eatenAt, '2026-06-24T12:30:00+09:00');
     });
   });
 }

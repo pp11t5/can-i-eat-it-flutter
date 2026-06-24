@@ -8,23 +8,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/repositories/mock_meal_repository.dart';
-import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
-import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
-import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
-import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_detail_screen.dart';
-import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_group_detail_screen.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_food_detail_screen.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_record_detail_screen.dart';
 
-/// 골든 테스트 — 식사 상세 화면 (F3-3).
+/// 골든 테스트 — 신 상세 화면 (식사 상세 / 음식 상세).
 ///
 /// 생성된 PNG 경로:
-/// - test/features/meal_log/presentation/goldens/meal_detail_with_state_records.png
-/// - test/features/meal_log/presentation/goldens/meal_group_detail.png
+/// - test/features/meal_log/presentation/goldens/meal_record_detail.png
+/// - test/features/meal_log/presentation/goldens/meal_food_detail_with_analysis.png
 ///
 /// 재생성:
 ///   flutter test --update-goldens --tags golden \
 ///     test/features/meal_log/presentation/meal_detail_golden_test.dart
 
-Widget _wrapDetail(String mealId) {
+Widget _wrap(Widget child) {
   return ProviderScope(
     overrides: [
       // ignore: scoped_providers_should_specify_dependencies
@@ -33,71 +30,44 @@ Widget _wrapDetail(String mealId) {
     child: MaterialApp(
       theme: AppTheme.light,
       debugShowCheckedModeBanner: false,
-      home: MealDetailScreen(mealId: mealId),
-    ),
-  );
-}
-
-const _testGroup = MealGroup(
-  mealGroupId: 'group-001',
-  eatenAt: '2026-06-17T08:00:00+09:00',
-  records: [
-    MealRecord(
-      mealId: 'meal-001',
-      mealGroupId: 'group-001',
-      eatenAt: '2026-06-17T08:00:00+09:00',
-      food: FoodSummary(externalId: 'food-001', name: '두부'),
-      judgedGrade: VerdictLevel.recommend,
-    ),
-    MealRecord(
-      mealId: 'meal-002',
-      mealGroupId: 'group-001',
-      eatenAt: '2026-06-17T08:05:00+09:00',
-      food: FoodSummary(externalId: 'food-002', name: '커피'),
-      judgedGrade: VerdictLevel.risk,
-    ),
-  ],
-);
-
-Widget _wrapGroup() {
-  return ProviderScope(
-    child: MaterialApp(
-      theme: AppTheme.light,
-      debugShowCheckedModeBanner: false,
-      home: const MealGroupDetailScreen(group: _testGroup),
+      home: child,
     ),
   );
 }
 
 void main() {
-  group('식사 상세 골든 테스트', () {
-    testWidgets('단일 상세 — 상태기록 있는 meal-002(커피)', (tester) async {
+  group('식사·음식 상세 골든 테스트', () {
+    testWidgets('식사 상세 — record-002(음식 3건 + 상태기록)', (tester) async {
       tester.view.physicalSize = const Size(375, 812);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(_wrapDetail('meal-002'));
+      await tester.pumpWidget(
+        _wrap(const MealRecordDetailScreen(mealRecordId: 'record-002')),
+      );
       await tester.pumpAndSettle();
 
       await expectLater(
-        find.byType(MealDetailScreen),
-        matchesGoldenFile('goldens/meal_detail_with_state_records.png'),
+        find.byType(MealRecordDetailScreen),
+        matchesGoldenFile('goldens/meal_record_detail.png'),
       );
     });
 
-    testWidgets('그룹 상세 — 2개 음식 행', (tester) async {
+    testWidgets('음식 상세 — food-001(analysis 2섹션)', (tester) async {
       tester.view.physicalSize = const Size(375, 812);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(_wrapGroup());
+      await tester.pumpWidget(
+        _wrap(const MealFoodDetailScreen(mealFoodId: 'food-001')),
+      );
       await tester.pumpAndSettle();
 
       await expectLater(
-        find.byType(MealGroupDetailScreen),
-        matchesGoldenFile('goldens/meal_group_detail.png'),
+        find.byType(MealFoodDetailScreen),
+        matchesGoldenFile('goldens/meal_food_detail_with_analysis.png'),
       );
     });
   });

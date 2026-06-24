@@ -12,9 +12,8 @@ import 'package:can_i_eat_it/features/auth/presentation/screens/terms_screen.dar
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/food_check_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_screen.dart';
-import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
-import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_detail_screen.dart';
-import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_group_detail_screen.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_food_detail_screen.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_record_detail_screen.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_record_screen.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/timeline_screen.dart';
@@ -98,38 +97,39 @@ GoRouter appRouter(Ref ref) {
           );
         },
       ),
+      // 정적/2-세그먼트 라우트를 동적 :mealRecordId 보다 위에 배치(go_router 매칭 순서).
       GoRoute(
         path: '/meal/record',
         name: 'meal-record',
         pageBuilder: (context, state) {
-          final mealGroupId = state.extra as String?;
+          final mealRecordId = state.extra as String?;
           return MaterialPage(
             fullscreenDialog: true,
-            child: MealRecordScreen(mealGroupId: mealGroupId),
+            child: MealRecordScreen(mealRecordId: mealRecordId),
           );
         },
       ),
-      // 끼니 그룹 상세 — extra: MealGroup
+      // 음식 상세 — GET /meal-records/foods/:mealFoodId
       GoRoute(
-        path: '/meal/group',
-        name: 'meal-group-detail',
+        path: '/meal/food/:mealFoodId',
+        name: 'meal-food-detail',
         pageBuilder: (context, state) {
-          final group = state.extra! as MealGroup;
+          final mealFoodId = state.pathParameters['mealFoodId']!;
           return MaterialPage(
             fullscreenDialog: true,
-            child: MealGroupDetailScreen(group: group),
+            child: MealFoodDetailScreen(mealFoodId: mealFoodId),
           );
         },
       ),
-      // 단일 식사 기록 상세 — :mealId 경로 파라미터
+      // 식사 상세 — GET /meal-records/:mealRecordId (ID-only, 화면이 GET 조회)
       GoRoute(
-        path: '/meal/:mealId',
-        name: 'meal-detail',
+        path: '/meal/:mealRecordId',
+        name: 'meal-record-detail',
         pageBuilder: (context, state) {
-          final mealId = state.pathParameters['mealId']!;
+          final mealRecordId = state.pathParameters['mealRecordId']!;
           return MaterialPage(
             fullscreenDialog: true,
-            child: MealDetailScreen(mealId: mealId),
+            child: MealRecordDetailScreen(mealRecordId: mealRecordId),
           );
         },
       ),

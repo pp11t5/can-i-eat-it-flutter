@@ -103,6 +103,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
   Widget build(BuildContext context) {
     final timelineAsync =
         ref.watch(timelineControllerProvider(_selectedDate));
+    final weeklyAsync = ref.watch(weeklyControllerProvider(_weekStart));
 
     return Scaffold(
       backgroundColor: AppColors.surfaceBackground,
@@ -140,13 +141,12 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
                       onNextWeek: _onNextWeek,
                     ),
                     const SizedBox(height: AppSpacing.itemGap),
-                    // 주간 스트립
+                    // 주간 스트립 — weekly() 연동 도트
                     WeekStrip(
                       weekStart: _weekStart,
                       selectedDate: _selectedDate,
                       today: _today(),
-                      // TODO(server): 주간 집계EP 확인 후 7일 도트 연동 [figma:1351-14768]
-                      dotsByDate: _buildDotsByDate(timelineAsync.valueOrNull),
+                      dotsByDate: _buildDotsByDate(weeklyAsync.valueOrNull),
                       onDaySelected: _onDaySelected,
                     ),
                   ],
@@ -161,9 +161,9 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
                 error: (err, _) => _TimelineErrorView(
                   onRetry: () => _reloadTimeline(_selectedDate),
                 ),
-                data: (groups) => groups.isEmpty
+                data: (items) => items.isEmpty
                     ? const _TimelineEmptyView()
-                    : _TimelineGroupList(groups: groups),
+                    : _TimelineItemList(items: items),
               ),
             ),
           ],
@@ -178,22 +178,25 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
     );
   }
 
-  /// 선택일 데이터에서 도트 맵 생성.
+  /// 주간 데이터에서 도트 맵 생성 (GET /timeline/weekly 연동).
   ///
-  /// 현재는 선택일 단건만 점등 (주간 집계EP 미제공).
-  Map<DateTime, List<VerdictLevel>> _buildDotsByDate(List<MealGroup>? groups) {
-    if (groups == null || groups.isEmpty) return {};
-    final key = DateTime(
-      _selectedDate.year,
-      _selectedDate.month,
-      _selectedDate.day,
-    );
-    final levels = groups
-        .expand((g) => g.records)
-        .where((r) => r.judgedGrade != null)
-        .map((r) => r.judgedGrade!)
-        .toList();
-    return {key: levels};
+  /// 각 [WeeklyDay] 의 judgements(≤3, fromGrade 완료)를 날짜별로 매핑한다.
+  Map<DateTime, List<VerdictLevel>> _buildDotsByDate(List<WeeklyDay>? days) {
+    if (days == null || days.isEmpty) return {};
+    return {
+      for (final d in days)
+        if (_parseDate(d.date) case final key?) key: d.judgements,
+    };
+  }
+
+  /// 'YYYY-MM-DD' → DateTime(year, month, day). 파싱 실패 시 null.
+  static DateTime? _parseDate(String date) {
+    try {
+      final dt = DateTime.parse(date);
+      return DateTime(dt.year, dt.month, dt.day);
+    } catch (_) {
+      return null;
+    }
   }
 }
 
@@ -287,23 +290,20 @@ class _TimelineEmptyView extends StatelessWidget {
 // 데이터 상태 — 타임라인 리스트 (F3-2b: MealTimelineList로 교체 완료)
 // ---------------------------------------------------------------------------
 
-class _TimelineGroupList extends StatelessWidget {
-  const _TimelineGroupList({required this.groups});
+class _TimelineItemList extends StatelessWidget {
+  const _TimelineItemList({required this.items});
 
-  final List<MealGroup> groups;
+  final List<TimelineItem> items;
 
   @override
   Widget build(BuildContext context) {
     return MealTimelineList(
-      groups: groups,
-      onTapRecord: (record) {
-        context.push('/meal/${record.mealId}');
+      items: items,
+      onTapMeal: (mealRecordId) {
+        context.push('/meal/$mealRecordId');
       },
-      onTapGroup: (group) {
-        context.push('/meal/group', extra: group);
-      },
-      onAddFood: (group) {
-        context.push('/meal/record', extra: group.mealGroupId);
+      onAddFood: (mealRecordId) {
+        context.push('/meal/record', extra: mealRecordId);
       },
     );
   }

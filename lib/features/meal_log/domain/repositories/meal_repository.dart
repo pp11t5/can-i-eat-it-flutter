@@ -1,75 +1,66 @@
-import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 
-/// 식사 기록 저장소 인터페이스.
+/// 식사 기록 저장소 인터페이스 (신 서버 계약: /meal-records + /timeline).
 ///
 /// - 도메인 레이어 — 프레임워크 비종속.
-/// - 서버 grade 문자열 대신 도메인 [VerdictLevel] 을 받는다.
 /// - 실 구현: [MealRepositoryImpl], 테스트·오프라인: [MockMealRepository].
 abstract interface class MealRepository {
-  // ---------------------------------------------------------------------------
-  // 타임라인 조회
-  // ---------------------------------------------------------------------------
-
-  /// [date] 날짜의 끼니 그룹 목록을 최신순으로 반환한다.
+  /// [date] 날짜의 타임라인 항목 목록을 반환한다.
   ///
-  /// 대응 API: GET /meals?date=YYYY-MM-DD
-  Future<List<MealGroup>> timeline(DateTime date);
+  /// 대응 API: GET /timeline?date=YYYY-MM-DD (result.items[]).
+  Future<List<TimelineItem>> timeline(DateTime date);
 
-  // ---------------------------------------------------------------------------
-  // 식사 기록 생성
-  // ---------------------------------------------------------------------------
-
-  /// 음식 ID로 식사 기록을 생성한다 (1식사=1음식).
+  /// [date] 가 속한 주의 주간 도트 목록을 반환한다.
   ///
-  /// 대응 API: POST /meals
+  /// 대응 API: GET /timeline/weekly?date=YYYY-MM-DD (result[]).
+  Future<List<WeeklyDay>> weekly(DateTime date);
+
+  /// 음식 ID로 음식을 추가한다 (by-id).
+  ///
+  /// 대응 API: POST /meal-records.
   /// [foodExternalId]: 필수. 서버측 음식 식별자.
   /// [eatenAt]: 섭취 시각. null 이면 서버가 현재 시각 사용.
-  /// [mealGroupId]: 기존 끼니 그룹에 추가할 때 지정. null 이면 신규 그룹.
-  /// [grade]: 판정 등급. null 이면 미판정.
-  Future<MealRecord> create({
+  /// [mealRecordId]: null → 신규 식사 / != null → 기존 식사에 append.
+  /// 반환: 추가된 음식 단건(analysis 포함).
+  Future<MealFood> appendFood({
     required String foodExternalId,
     DateTime? eatenAt,
-    String? mealGroupId,
-    VerdictLevel? grade,
+    String? mealRecordId,
   });
 
-  /// 자유 텍스트 음식명으로 식사 기록을 생성한다.
+  /// 자유 텍스트 음식명으로 음식을 추가한다 — 서버 미지원 seam.
   ///
-  /// 대응 API: POST /meals/text
-  /// [foodTextInput]: 필수. 사용자 입력 음식명.
-  Future<MealRecord> createByText({
+  /// 현재 백엔드 미지원이라 구현체가 [UnimplementedError] 를 던진다. 호출부는
+  /// by-text 분기에서 이 메서드를 호출하지 않고 "준비중" UX로 단락해야 한다.
+  /// 백엔드 text-append API 도착 시 구현체만 채우면 된다(시그니처 불변).
+  Future<MealFood> appendFoodByText({
     required String foodTextInput,
     DateTime? eatenAt,
-    String? mealGroupId,
-    VerdictLevel? grade,
+    String? mealRecordId,
   });
 
-  // ---------------------------------------------------------------------------
-  // 식사 기록 상세
-  // ---------------------------------------------------------------------------
-
-  /// 식사 기록 상세를 조회한다.
+  /// 식사 상세를 조회한다.
   ///
-  /// 대응 API: GET /meals/{mealId}
-  Future<MealDetail> detail(String mealId);
+  /// 대응 API: GET /meal-records/{mealRecordId}.
+  Future<MealRecord> mealDetail(String mealRecordId);
 
-  // ---------------------------------------------------------------------------
-  // 메모 수정
-  // ---------------------------------------------------------------------------
-
-  /// 식사 기록 메모를 수정한다.
+  /// 음식 상세를 조회한다 (analysis 포함).
   ///
-  /// [memo]: null 또는 빈 문자열이면 메모를 삭제한다 (서버 계약: 0~200자).
-  /// 대응 API: PATCH /meals/{mealId}
-  Future<MealDetail> updateMemo(String mealId, String? memo);
+  /// 대응 API: GET /meal-records/foods/{mealFoodId}.
+  Future<MealFood> foodDetail(String mealFoodId);
 
-  // ---------------------------------------------------------------------------
-  // 삭제
-  // ---------------------------------------------------------------------------
-
-  /// 식사 기록을 삭제한다.
+  /// 식사를 삭제한다.
   ///
-  /// 대응 API: DELETE /meals/{mealId}
-  Future<void> delete(String mealId);
+  /// 대응 API: DELETE /meal-records/{mealRecordId}.
+  Future<void> deleteMeal(String mealRecordId);
+
+  /// 음식을 삭제한다 (마지막 음식이면 서버가 식사도 함께 삭제).
+  ///
+  /// 대응 API: DELETE /meal-records/foods/{mealFoodId}.
+  Future<void> deleteFood(String mealFoodId);
+
+  /// 증상 연결 후보 목록을 조회한다 (증상레이어 공유, W5-1은 인터페이스만).
+  ///
+  /// 대응 API: GET /meal-records/candidates (result[]).
+  Future<List<MealCandidatesDay>> candidates();
 }
