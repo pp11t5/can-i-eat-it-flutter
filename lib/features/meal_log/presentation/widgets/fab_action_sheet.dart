@@ -10,7 +10,7 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 /// Figma node 1351-14767.
 /// Dim 오버레이(검정 ~35%) + 우하단 X(녹색 원 FAB) + 흰 알약 메뉴 2개(우측정렬).
 /// - "🥗 식단 기록" → 닫고 '/meal/record' push
-/// - "✏️ 증상 일기" → disabled (회색), TODO(symptom)
+/// - "✏️ 증상 일기" → 닫고 '/symptom/record' push (W5-3 활성화)
 Future<void> showFabActionSheet(BuildContext context) {
   return showGeneralDialog<void>(
     context: context,
