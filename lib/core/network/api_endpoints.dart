@@ -108,6 +108,19 @@ class ApiEndpoints {
   static const String timelineWeekly = '/timeline/weekly';
 
   // ---------------------------------------------------------------------------
+  // Symptoms
+  // ---------------------------------------------------------------------------
+
+  /// `POST /symptoms`
+  static const String symptoms = '/symptoms';
+
+  /// `GET /symptoms/{id}` · `PUT /symptoms/{id}` · `DELETE /symptoms/{id}`
+  static String symptomItem(String id) => '/symptoms/$id';
+
+  /// `PATCH /symptoms/{id}/memo`
+  static String symptomMemo(String id) => '/symptoms/$id/memo';
+
+  // ---------------------------------------------------------------------------
   // Health
   // ---------------------------------------------------------------------------
 
