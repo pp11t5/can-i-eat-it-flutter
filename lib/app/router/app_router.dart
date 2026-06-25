@@ -24,6 +24,8 @@ import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_frequency_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_medications_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_triggers_screen.dart';
+import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
+import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_write_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -97,6 +99,20 @@ GoRouter appRouter(Ref ref) {
           );
         },
       ),
+      // 증상 작성/수정 화면 (fullscreenDialog 모달).
+      // extra: Symptom? (null=신규, 비-null=수정).
+      GoRoute(
+        path: '/symptom/record',
+        name: 'symptom-record',
+        pageBuilder: (context, state) {
+          final existing = state.extra as Symptom?;
+          return MaterialPage(
+            fullscreenDialog: true,
+            child: SymptomWriteScreen(existingSymptom: existing),
+          );
+        },
+      ),
+
       // 정적/2-세그먼트 라우트를 동적 :mealRecordId 보다 위에 배치(go_router 매칭 순서).
       GoRoute(
         path: '/meal/record',
