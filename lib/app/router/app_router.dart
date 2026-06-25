@@ -25,6 +25,7 @@ import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_medications_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_triggers_screen.dart';
 import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
+import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_detail_screen.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_write_screen.dart';
 
 part 'app_router.g.dart';
@@ -109,6 +110,24 @@ GoRouter appRouter(Ref ref) {
           return MaterialPage(
             fullscreenDialog: true,
             child: SymptomWriteScreen(existingSymptom: existing),
+          );
+        },
+      ),
+
+      // 증상 상세 화면 (fullscreenDialog 모달).
+      // extra: int? afterMealMinutes (타임라인 탭 진입 시 전달, 직접 진입 시 null).
+      GoRoute(
+        path: '/symptom/:symptomId',
+        name: 'symptom-detail',
+        pageBuilder: (context, state) {
+          final symptomId = state.pathParameters['symptomId']!;
+          final afterMealMinutes = state.extra as int?;
+          return MaterialPage(
+            fullscreenDialog: true,
+            child: SymptomDetailScreen(
+              symptomId: symptomId,
+              afterMealMinutes: afterMealMinutes,
+            ),
           );
         },
       ),

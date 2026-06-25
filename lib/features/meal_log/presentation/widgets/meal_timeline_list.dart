@@ -14,7 +14,7 @@ import 'package:can_i_eat_it/features/meal_log/presentation/widgets/food_thumbna
 /// [TimelineItem] sealed union(single/group/symptom)을 변형별로 렌더한다.
 /// - single: 음식 1개짜리 식사 (음식명 + grade 배지).
 /// - group: 음식 2개 이상짜리 식사 (대표음식 + "외 N개").
-/// - symptom: 증상 기록 (W5-1 최소 렌더, 탭 동작 없음).
+/// - symptom: 증상 기록 (탭 보류 — TimelineSymptom 에 symptomId 없음, W5-4 NOTE 참조).
 ///
 /// 시간대 아이콘은 mealRecordDateTime/occurredAt 의 hour 로 결정.
 ///
@@ -431,8 +431,11 @@ class _GroupMealCard extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// symptom 타일 (W5-1 최소 렌더 — 크래시 금지가 목적)
+// symptom 타일
 // ---------------------------------------------------------------------------
+// NOTE(W5-4 탭 보류): TimelineSymptom 에 symptomId 가 없어 상세 진입 불가.
+// 서버 GET /timeline?date= 의 symptom 변형이 symptomId 를 포함하지 않는다.
+// 서버 계약이 symptomId 를 추가하면 _SymptomCard 에 onTap→context.push('/symptom/:id') 연결.
 
 class _SymptomCard extends StatelessWidget {
   const _SymptomCard({required this.item});
