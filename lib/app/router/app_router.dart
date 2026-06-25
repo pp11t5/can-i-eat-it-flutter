@@ -20,6 +20,8 @@ import 'package:can_i_eat_it/features/meal_log/presentation/screens/timeline_scr
 import 'package:can_i_eat_it/features/mypage/presentation/screens/allergy_med_edit_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/profile_info_screen.dart';
+import 'package:can_i_eat_it/features/mypage/presentation/screens/withdraw_screen.dart';
+import 'package:can_i_eat_it/features/notification/presentation/screens/notification_settings_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_condition_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_frequency_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_medications_screen.dart';
@@ -223,6 +225,17 @@ GoRouter appRouter(Ref ref) {
                             const AllergyMedEditScreen(),
                       ),
                     ],
+                  ),
+                  GoRoute(
+                    path: 'notification-settings',
+                    name: 'mypage-notification-settings',
+                    builder: (context, state) =>
+                        const NotificationSettingsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'withdraw',
+                    name: 'mypage-withdraw',
+                    builder: (context, state) => const WithdrawScreen(),
                   ),
                 ],
               ),

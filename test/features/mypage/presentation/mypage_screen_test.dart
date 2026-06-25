@@ -137,8 +137,55 @@ void main() {
       await tester.pumpWidget(_buildMypageScreen());
       await tester.pumpAndSettle();
 
+      // 설정·약관 섹션은 스크롤 아래에 있으므로 끝까지 스크롤한다.
+      await tester.scrollUntilVisible(
+        find.text('개인정보 보호 약관'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
       expect(find.text('개인정보 보호 약관'), findsOneWidget);
       expect(find.text('서비스 이용 약관'), findsOneWidget);
+    });
+
+    testWidgets('로그아웃 항목이 표시된다', (tester) async {
+      await tester.pumpWidget(_buildMypageScreen());
+      await tester.pumpAndSettle();
+
+      expect(find.text('로그아웃'), findsOneWidget);
+    });
+
+    testWidgets('탈퇴 항목이 표시된다', (tester) async {
+      await tester.pumpWidget(_buildMypageScreen());
+      await tester.pumpAndSettle();
+
+      expect(find.text('탈퇴'), findsOneWidget);
+    });
+
+    testWidgets('로그아웃 탭 시 확인 다이얼로그가 표시된다', (tester) async {
+      await tester.pumpWidget(_buildMypageScreen());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('로그아웃'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.text('확인'), findsOneWidget);
+      expect(find.text('취소'), findsOneWidget);
+    });
+
+    testWidgets('로그아웃 다이얼로그 취소 시 다이얼로그가 닫힌다', (tester) async {
+      await tester.pumpWidget(_buildMypageScreen());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('로그아웃'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('취소'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsNothing);
     });
   });
 }

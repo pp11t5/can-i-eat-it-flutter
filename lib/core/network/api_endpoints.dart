@@ -126,4 +126,19 @@ class ApiEndpoints {
 
   /// `GET/POST /health`
   static const String health = '/health';
+
+  // ---------------------------------------------------------------------------
+  // Notifications (W5-6)
+  // ---------------------------------------------------------------------------
+
+  /// `GET /notifications/settings`
+  static const String notificationSettings = '/notifications/settings';
+
+  /// `PATCH /notifications/settings/toggle`
+  static const String notificationSettingsToggle =
+      '/notifications/settings/toggle';
+
+  /// `PATCH /notifications/settings/daily-time`
+  static const String notificationSettingsDailyTime =
+      '/notifications/settings/daily-time';
 }
