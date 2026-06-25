@@ -4,6 +4,45 @@ import 'package:can_i_eat_it/core/utils/kst_time.dart';
 
 void main() {
   // -------------------------------------------------------------------------
+  // parseKst — 서버 ISO → KST wall-clock 복원 (머신 TZ 무관)
+  // -------------------------------------------------------------------------
+
+  group('parseKst — KST wall-clock 복원', () {
+    test('+09:00 offset ISO → KST 컴포넌트 복원', () {
+      // 2026-06-24T08:30:00+09:00 → UTC 2026-06-23T23:30:00Z → KST 2026-06-24T08:30:00
+      final result = parseKst('2026-06-24T08:30:00+09:00');
+      expect(result.year, 2026);
+      expect(result.month, 6);
+      expect(result.day, 24);
+      expect(result.hour, 8);
+      expect(result.minute, 30);
+    });
+
+    test('Z offset(UTC) → 동일 instant의 KST 컴포넌트 복원 (익일 오전)', () {
+      // 2026-06-23T23:30:00Z → KST 2026-06-24T08:30:00 (UTC+9 = +9h)
+      final result = parseKst('2026-06-23T23:30:00Z');
+      expect(result.day, 24);
+      expect(result.hour, 8);
+      expect(result.minute, 30);
+    });
+
+    test('+09:00 와 Z offset이 같은 instant이면 동일한 KST 컴포넌트', () {
+      final fromOffset = parseKst('2026-06-24T08:30:00+09:00');
+      final fromUtc = parseKst('2026-06-23T23:30:00Z');
+      expect(fromOffset.year, fromUtc.year);
+      expect(fromOffset.month, fromUtc.month);
+      expect(fromOffset.day, fromUtc.day);
+      expect(fromOffset.hour, fromUtc.hour);
+      expect(fromOffset.minute, fromUtc.minute);
+    });
+
+    test('반환값은 isUtc=false (local-flag)', () {
+      final result = parseKst('2026-06-24T08:30:00+09:00');
+      expect(result.isUtc, isFalse);
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // toServerDate — 컴포넌트 verbatim, 시간 연산 없음
   // 새 계약: dt의 year/month/day 컴포넌트를 그대로 YYYY-MM-DD로 포맷.
   // -------------------------------------------------------------------------

@@ -6,6 +6,7 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
+import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/food_thumbnail.dart';
 
 /// 타임라인 리스트 위젯 — 왼쪽 수직 스파인 + 시간대 아이콘 + 변형별 타일.
@@ -39,7 +40,7 @@ class MealTimelineList extends StatelessWidget {
   /// ISO-8601 문자열 → 시(hour).
   static int _hourOf(String isoString) {
     try {
-      return DateTime.parse(isoString).toLocal().hour;
+      return parseKst(isoString).hour;
     } catch (_) {
       return 12;
     }
@@ -199,7 +200,7 @@ class _CardShell extends StatelessWidget {
 /// 시각 라벨 'HH:mm'.
 String _formatTime(String isoString) {
   try {
-    final dt = DateTime.parse(isoString).toLocal();
+    final dt = parseKst(isoString);
     final h = dt.hour.toString().padLeft(2, '0');
     final m = dt.minute.toString().padLeft(2, '0');
     return '$h:$m';
