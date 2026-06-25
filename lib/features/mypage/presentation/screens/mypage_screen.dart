@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
@@ -428,9 +429,9 @@ class _MealStatChip extends StatelessWidget {
 // 설정 섹션
 // ---------------------------------------------------------------------------
 
-class _SettingsSection extends StatelessWidget {
+class _SettingsSection extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -442,13 +443,78 @@ class _SettingsSection extends StatelessWidget {
           _ListTileRow(
             icon: Icons.notifications_outlined,
             label: '알림 설정',
-            onTap: () {
-              // TODO: 알림 설정 화면 미구현
-            },
+            onTap: () => context.push('/mypage/notification-settings'),
+          ),
+          const Divider(height: 1, color: AppColors.divider),
+          _ListTileRow(
+            icon: Icons.logout,
+            label: '로그아웃',
+            onTap: () => _showLogoutDialog(context, ref),
+          ),
+          const Divider(height: 1, color: AppColors.divider),
+          _ListTileRow(
+            icon: Icons.person_remove_outlined,
+            label: '탈퇴',
+            onTap: () => context.push('/mypage/withdraw'),
+            labelColor: AppColors.danger,
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _showLogoutDialog(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
+        ),
+        title: Text(
+          '로그아웃',
+          style: AppTextStyles.body1Bold.copyWith(
+            color: AppColors.textPrimary,
+          ),
+        ),
+        content: Text(
+          '로그아웃 하시겠어요?',
+          style: AppTextStyles.body2Regular.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              '취소',
+              style: AppTextStyles.body2Medium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              '확인',
+              style: AppTextStyles.body2Medium.copyWith(
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      try {
+        await ref.read(authControllerProvider.notifier).logout();
+        // auth redirect 가드가 /login 으로 이동시킴 — 별도 navigation 불필요.
+      } catch (_) {
+        if (context.mounted) {
+          await showAppToast(context, '로그아웃 중 오류가 발생했어요.');
+        }
+      }
+    }
   }
 }
 
@@ -471,7 +537,10 @@ class _TermsSection extends StatelessWidget {
             icon: Icons.privacy_tip_outlined,
             label: '개인정보 보호 약관',
             onTap: () {
-              // TODO: 약관 링크/화면
+              // TODO(content): 약관 실URL 확정 필요 — 현재 준비중 토스트.
+              // url_launcher 의존성 미추가(pubspec 변경 최소화).
+              // 확정 후 url_launcher로 https://can-i-eat-it.com/terms/privacy 열기.
+              showAppToast(context, '약관 페이지 준비 중이에요.');
             },
           ),
           const Divider(height: 1, color: AppColors.divider),
@@ -479,7 +548,9 @@ class _TermsSection extends StatelessWidget {
             icon: Icons.description_outlined,
             label: '서비스 이용 약관',
             onTap: () {
-              // TODO: 약관 링크/화면
+              // TODO(content): 약관 실URL 확정 필요 — 현재 준비중 토스트.
+              // 확정 후 url_launcher로 https://can-i-eat-it.com/terms/service 열기.
+              showAppToast(context, '약관 페이지 준비 중이에요.');
             },
           ),
         ],
@@ -497,11 +568,13 @@ class _ListTileRow extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.labelColor,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final Color? labelColor;
 
   @override
   Widget build(BuildContext context) {
@@ -515,13 +588,13 @@ class _ListTileRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: AppColors.textSecondary),
+            Icon(icon, size: 20, color: labelColor ?? AppColors.textSecondary),
             const SizedBox(width: AppSpacing.itemGap),
             Expanded(
               child: Text(
                 label,
                 style: AppTextStyles.body2Medium.copyWith(
-                  color: AppColors.textPrimary,
+                  color: labelColor ?? AppColors.textPrimary,
                 ),
               ),
             ),
