@@ -78,7 +78,7 @@ class _FabActionSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.itemGap),
 
-                // 증상 일기 (disabled)
+                // 증상 일기 (활성)
                 SlideTransition(
                   position: Tween<Offset>(
                     begin: const Offset(0, 0.4),
@@ -87,11 +87,13 @@ class _FabActionSheet extends StatelessWidget {
                     parent: animation,
                     curve: Curves.easeOut,
                   )),
-                  child: const _ActionItem(
+                  child: _ActionItem(
                     label: '✏️ 증상 일기',
-                    enabled: false,
-                    onTap: null,
-                    // TODO(symptom): /symptoms 계약 도착 시 활성화 [figma:1324-13866]
+                    enabled: true,
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.push('/symptom/record');
+                    },
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sectionGap),

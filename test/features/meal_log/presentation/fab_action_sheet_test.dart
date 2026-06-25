@@ -10,7 +10,10 @@ import 'package:can_i_eat_it/features/meal_log/presentation/widgets/fab_action_s
 // ---------------------------------------------------------------------------
 
 /// GoRouter 기반 앱 — showGeneralDialog가 go_router context에서 실행된다.
-Widget _makeApp({VoidCallback? onMealRecordPush}) {
+Widget _makeApp({
+  VoidCallback? onMealRecordPush,
+  VoidCallback? onSymptomRecordPush,
+}) {
   final router = GoRouter(
     initialLocation: '/timeline',
     routes: [
@@ -35,6 +38,15 @@ Widget _makeApp({VoidCallback? onMealRecordPush}) {
           onMealRecordPush?.call();
           return const MaterialPage(
             child: Scaffold(body: Text('meal/record')),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/symptom/record',
+        pageBuilder: (context, state) {
+          onSymptomRecordPush?.call();
+          return const MaterialPage(
+            child: Scaffold(body: Text('symptom/record')),
           );
         },
       ),
@@ -97,22 +109,22 @@ void main() {
     });
   });
 
-  group('FabActionSheet — 증상 일기 비활성', () {
-    testWidgets('"증상 일기" 탭 시 네비게이션이 발생하지 않는다(disabled)', (tester) async {
+  group('FabActionSheet — 증상 일기 활성', () {
+    testWidgets('"증상 일기" 탭 → /symptom/record로 이동한다', (tester) async {
       var navigated = false;
-      await tester.pumpWidget(_makeApp(onMealRecordPush: () => navigated = true));
+      await tester.pumpWidget(
+        _makeApp(onSymptomRecordPush: () => navigated = true),
+      );
       await tester.pumpAndSettle();
 
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      // 증상 일기는 disabled — 탭해도 네비 없음
-      await tester.tap(find.text('✏️ 증상 일기'), warnIfMissed: false);
+      await tester.tap(find.text('✏️ 증상 일기'));
       await tester.pumpAndSettle();
 
-      expect(navigated, isFalse);
-      // 시트는 여전히 열려 있음
-      expect(find.text('✏️ 증상 일기'), findsOneWidget);
+      expect(navigated, isTrue);
+      expect(find.text('symptom/record'), findsOneWidget);
     });
   });
 }
