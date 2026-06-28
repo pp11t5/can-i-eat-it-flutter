@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -5,6 +7,7 @@ import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/core/network/auth_interceptor.dart';
 import 'package:can_i_eat_it/core/network/dio_client.dart';
+import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/core/security/token_store.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:can_i_eat_it/features/auth/data/services/kakao_auth_service.dart';
@@ -82,6 +85,11 @@ class AuthController extends _$AuthController {
   Future<SignInOutcome> signInWithKakao() async {
     final outcome = await ref.read(authRepositoryProvider).signInWithKakao();
     _applyOutcomeToState(outcome, AuthProvider.kakao);
+    if (outcome is Authenticated) {
+      // FCM 토큰 등록 — fire-and-forget(로그인 UX 블로킹 제거).
+      // 실패해도 로그인 흐름을 막지 않는다(graceful).
+      unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
+    }
     if (outcome is! Recoverable) {
       await ref
           .read(analyticsServiceProvider)
@@ -97,6 +105,11 @@ class AuthController extends _$AuthController {
   Future<SignInOutcome> signInWithApple() async {
     final outcome = await ref.read(authRepositoryProvider).signInWithApple();
     _applyOutcomeToState(outcome, AuthProvider.apple);
+    if (outcome is Authenticated) {
+      // FCM 토큰 등록 — fire-and-forget(로그인 UX 블로킹 제거).
+      // 실패해도 로그인 흐름을 막지 않는다(graceful).
+      unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
+    }
     if (outcome is! Recoverable) {
       await ref
           .read(analyticsServiceProvider)
@@ -121,6 +134,9 @@ class AuthController extends _$AuthController {
     final repo = ref.read(authRepositoryProvider);
     final session = await repo.recoverAccount(provider, idToken: idToken);
     state = AsyncValue.data(session);
+    // 복구 성공 후 세션이 생겼으므로 FCM 토큰 등록 — fire-and-forget.
+    // 실패해도 복구 흐름을 막지 않는다(graceful).
+    unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
   }
 
   /// GET /auth/me 를 호출해 계정 식별정보(displayName·email·profileImageUrl)를 갱신한다.
@@ -135,6 +151,9 @@ class AuthController extends _$AuthController {
 
   /// 계정 탈퇴: 서버 withdraw + 로컬 세션·프로필 캐시 초기화.
   Future<void> withdraw() async {
+    // FCM 토큰 삭제 — authRepository.withdraw() 전(Bearer 유효 시점).
+    // 실패해도 탈퇴 흐름을 막지 않는다(graceful).
+    await ref.read(fcmLifecycleProvider).deleteToken();
     await ref.read(authRepositoryProvider).withdraw();
     await ref.read(profileCacheProvider).clear();
     state = const AsyncValue.data(null);
@@ -142,13 +161,20 @@ class AuthController extends _$AuthController {
 
   /// 서버 로그아웃 + 로컬 세션·프로필 캐시 초기화.
   Future<void> logout() async {
+    // FCM 토큰 삭제 — authRepository.logout() 전(Bearer 유효 시점).
+    // 실패해도 로그아웃 흐름을 막지 않는다(graceful).
+    await ref.read(fcmLifecycleProvider).deleteToken();
     await ref.read(authRepositoryProvider).logout();
     await ref.read(profileCacheProvider).clear();
     state = const AsyncValue.data(null);
   }
 
   /// 로컬 세션만 초기화 (오프라인 signOut) + 프로필 캐시 초기화.
+  ///
+  /// 오프라인이므로 서버 호출(deleteToken) 없이 구독만 정리한다.
   Future<void> signOut() async {
+    // 오프라인: 서버 DELETE 불가, 구독만 정리.
+    ref.read(fcmLifecycleProvider).cancelRefreshSubscription();
     await ref.read(authRepositoryProvider).signOut();
     await ref.read(profileCacheProvider).clear();
     state = const AsyncValue.data(null);

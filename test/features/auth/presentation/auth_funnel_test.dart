@@ -4,8 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
+import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
+
+import '../../../core/push/fcm_test_helpers.dart';
 
 // ---------------------------------------------------------------------------
 // 스파이 AnalyticsService
@@ -40,6 +43,8 @@ ProviderContainer makeContainer({
     overrides: [
       authRepositoryProvider.overrideWithValue(repo),
       analyticsServiceProvider.overrideWithValue(spy),
+      // FCM: 네이티브 플러그인 접근 차단 — noop으로 override.
+      fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
     ],
   );
   addTearDown(container.dispose);
