@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
+import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
+import '../../../core/push/fcm_test_helpers.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
@@ -34,6 +36,8 @@ ProviderContainer _makeContainer({
     overrides: [
       authRepositoryProvider.overrideWithValue(repo),
       analyticsServiceProvider.overrideWithValue(_NoopAnalyticsService()),
+      // FCM: 네이티브 플러그인 접근 차단 — noop으로 override.
+      fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
       if (cache != null) profileCacheProvider.overrideWithValue(cache),
     ],
   );

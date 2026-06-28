@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
+import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
@@ -10,6 +11,8 @@ import 'package:can_i_eat_it/features/auth/domain/repositories/auth_repository.d
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/withdraw_screen.dart';
+
+import '../../../core/push/fcm_test_helpers.dart';
 
 // ---------------------------------------------------------------------------
 // 목 AuthRepository
@@ -74,6 +77,8 @@ Widget _wrap({_MockAuthRepository? authRepo}) {
       authRepositoryProvider.overrideWithValue(repo),
       // ignore: scoped_providers_should_specify_dependencies
       profileCacheProvider.overrideWithValue(InMemoryProfileCache()),
+      // ignore: scoped_providers_should_specify_dependencies
+      fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
     ],
     child: MaterialApp(
       theme: AppTheme.light,

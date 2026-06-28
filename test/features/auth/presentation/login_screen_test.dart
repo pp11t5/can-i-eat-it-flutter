@@ -4,9 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/core/error/failure.dart';
+import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/login_screen.dart';
+
+import '../../../core/push/fcm_test_helpers.dart';
 
 /// LoginScreen 이 sign-in 후 SignInOutcome switch 로 분기하는 것을 검증한다.
 /// GoRouter 컨텍스트가 필요해 최소 라우트만 등록한다.
@@ -23,6 +26,8 @@ Widget _wrapWithOfflineFlag(MockAuthRepository repo, {required bool offline}) =>
         authRepositoryProvider.overrideWithValue(repo),
         // ignore: scoped_providers_should_specify_dependencies
         coldStartOfflineProvider.overrideWithValue(offline),
+        // ignore: scoped_providers_should_specify_dependencies
+        fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
       ],
       child: MaterialApp.router(routerConfig: _testRouter()),
     );
@@ -48,8 +53,12 @@ GoRouter _testRouter() => GoRouter(
 
 Widget _wrap(MockAuthRepository repo) => ProviderScope(
       // 테스트 루트 ProviderScope override — dependencies 불필요.
-      // ignore: scoped_providers_should_specify_dependencies
-      overrides: [authRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        // ignore: scoped_providers_should_specify_dependencies
+        authRepositoryProvider.overrideWithValue(repo),
+        // ignore: scoped_providers_should_specify_dependencies
+        fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
+      ],
       child: MaterialApp.router(routerConfig: _testRouter()),
     );
 

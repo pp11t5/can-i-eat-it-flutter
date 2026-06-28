@@ -83,5 +83,11 @@
 		<string>kakaotalk</string>
 		<string>kakaolink</string>
 	</array>
+	<!-- FCM: 백그라운드 원격 알림 수신 (APNs 추후, 빌드/코드 준비만) -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+		<string>fetch</string>
+	</array>
 </dict>
 </plist>
