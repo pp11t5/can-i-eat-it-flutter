@@ -29,6 +29,7 @@ import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding
 import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_detail_screen.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_write_screen.dart';
+import 'package:can_i_eat_it/features/symptom/presentation/screens/unrecorded_meals_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -103,17 +104,31 @@ GoRouter appRouter(Ref ref) {
         },
       ),
       // 증상 작성/수정 화면 (fullscreenDialog 모달).
-      // extra: Symptom? (null=신규, 비-null=수정).
+      // extra: Symptom? (null=신규, 비-null=수정) 또는 SymptomWriteArgs
+      // (신규 작성 시 원인 식사 프리필, 예: 미기록 식단 목록 진입).
       GoRoute(
         path: '/symptom/record',
         name: 'symptom-record',
         pageBuilder: (context, state) {
-          final existing = state.extra as Symptom?;
+          final extra = state.extra;
+          final existing = extra is Symptom ? extra : null;
+          final args = extra is SymptomWriteArgs ? extra : null;
           return MaterialPage(
             fullscreenDialog: true,
-            child: SymptomWriteScreen(existingSymptom: existing),
+            child: SymptomWriteScreen(
+              existingSymptom: existing,
+              initialMealRecordId: args?.initialMealRecordId,
+              initialMealName: args?.initialMealName,
+            ),
           );
         },
+      ),
+
+      // 증상 미기록 식단 화면 (push, 뒤로가기 진입).
+      GoRoute(
+        path: '/unrecorded-meals',
+        name: 'unrecorded-meals',
+        builder: (context, state) => const UnrecordedMealsScreen(),
       ),
 
       // 증상 상세 화면 (fullscreenDialog 모달).
