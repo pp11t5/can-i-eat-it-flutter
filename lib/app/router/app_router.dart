@@ -31,6 +31,7 @@ import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_detail_screen.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_write_screen.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/screens/unrecorded_meals_screen.dart';
+import 'package:can_i_eat_it/features/weekly_report/presentation/screens/weekly_report_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -206,6 +207,15 @@ GoRouter appRouter(Ref ref) {
             child: VerdictScreen(args: args),
           );
         },
+      ),
+      // 주간 리포트 화면 — 마이페이지 "전체보기"에서 present(X) 진입.
+      GoRoute(
+        path: '/weekly-report',
+        name: 'weekly-report',
+        pageBuilder: (context, state) => const MaterialPage(
+          fullscreenDialog: true,
+          child: WeeklyReportScreen(),
+        ),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
