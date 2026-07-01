@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/food_check/data/food_check_providers.dart';
@@ -38,6 +41,10 @@ class VerdictScreen extends ConsumerStatefulWidget {
 }
 
 class _VerdictScreenState extends ConsumerState<VerdictScreen> {
+  /// 도감(최근검색) 자동추가 one-shot 가드. by-id 진입 + 분류된 판정에서
+  /// 한 번만 [FoodRepository.addRecent] 를 호출하도록 막는다.
+  bool _savedToDictionary = false;
+
   @override
   void initState() {
     super.initState();
@@ -64,8 +71,42 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
     }
   }
 
+  /// 도감 자동추가 one-shot 훅.
+  ///
+  /// by-id 진입 + 판정 성공 + 분류된 결과(unknown 제외)일 때만
+  /// [FoodRepository.addRecent] 를 fire-and-forget 호출하고 토스트를 띄운다.
+  /// by-text 진입·unknown 판정·판정 실패(AsyncError)에는 아무 것도 하지 않는다.
+  void _maybeAutoAddToDictionary(
+    AsyncValue<EatVerdict>? previous,
+    AsyncValue<EatVerdict> next,
+  ) {
+    if (_savedToDictionary || !widget.args.isById) return;
+
+    final verdict = next.valueOrNull;
+    if (verdict == null ||
+        verdict.level == VerdictLevel.unknown ||
+        verdict.foodName.isEmpty) {
+      return;
+    }
+
+    _savedToDictionary = true;
+    unawaited(
+      ref
+          .read(foodRepositoryProvider)
+          .addRecent(widget.args.externalId!)
+          .catchError((_) {}),
+    );
+    if (mounted) {
+      showAppToast(context, '내 도감에 담았어요');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen<AsyncValue<EatVerdict>>(
+      verdictControllerProvider,
+      _maybeAutoAddToDictionary,
+    );
     final verdictAsync = ref.watch(verdictControllerProvider);
 
     return verdictAsync.when(
