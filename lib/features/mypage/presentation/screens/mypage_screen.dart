@@ -67,7 +67,7 @@ class MypageScreen extends ConsumerWidget {
 
           // 주간 기록 카드
           _WeeklyLogCard(
-            onViewAll: () => context.go('/timeline'),
+            onViewAll: () => context.push('/weekly-report'),
           ),
           const SizedBox(height: AppSpacing.sectionGap),
 
