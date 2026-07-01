@@ -117,18 +117,37 @@ void main() {
   });
 
   group('WeeklyReportScreen — 다운로드 버튼', () {
-    testWidgets('다운로드 아이콘 탭 → "준비 중이에요" 토스트가 표시된다', (tester) async {
+    testWidgets('로딩 상태에서는 다운로드 버튼이 비활성화된다', (tester) async {
+      final repo = _DelayedWeeklyReportRepository(
+        MockWeeklyReportRepository.seeded(),
+        delay: const Duration(milliseconds: 500),
+      );
+
+      await tester.pumpWidget(_wrap(repo));
+      await tester.pump();
+
+      final button = tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byIcon(Icons.file_download_outlined),
+          matching: find.byType(IconButton),
+        ),
+      );
+      expect(button.onPressed, isNull);
+
+      await tester.pumpAndSettle(); // 남은 타이머 정리.
+    });
+
+    testWidgets('데이터 로드 상태에서는 다운로드 버튼이 활성화된다', (tester) async {
       await tester.pumpWidget(_wrap(MockWeeklyReportRepository.seeded()));
       await tester.pumpAndSettle();
 
-      expect(find.text('준비 중이에요'), findsNothing);
-
-      await tester.tap(find.byIcon(Icons.file_download_outlined));
-      // showAppToast 가 2.5s 타이머를 생성하므로 pumpAndSettle 대신 pump 사용.
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      expect(find.text('준비 중이에요'), findsOneWidget);
+      final button = tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byIcon(Icons.file_download_outlined),
+          matching: find.byType(IconButton),
+        ),
+      );
+      expect(button.onPressed, isNotNull);
     });
   });
 }
