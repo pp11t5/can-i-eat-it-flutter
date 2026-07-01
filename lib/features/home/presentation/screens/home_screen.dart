@@ -6,10 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_search_bar.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
 
-/// W2 홈 화면 — Figma 1207:6590 empty-state 충실 구현.
+/// W6-0 홈 화면 — Figma 2122:14045("첫화면") / 2122:14040("데이터有") 구조 반영.
 ///
 /// AppShell(하단 탭) 내부에 포함되므로 자체 bottomNavigationBar를 갖지 않는다.
 /// 최근 검색은 /check 검색 화면으로 이동했으므로 홈에서 제거됨.
@@ -65,8 +66,35 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.contentGap),
 
-              // ── 4. 내 도감 카드 ───────────────────────────────────────
-              const _MyDictionaryCard(),
+              // ── 4. 2-up 진입 카드 행 — Figma 2122:14040 ───────────────
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: _HomeEntryCard(
+                        iconAsset: 'assets/illustrations/icon_pencil.png',
+                        title: '증상 기록하기',
+                        // TODO(W6-0b): 미기록 식단 카운트 = /meal-records/candidates
+                        subtitle: '미기록 식단 0',
+                        onTap: () => context.push('/unrecorded-meals'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _HomeEntryCard(
+                        iconAsset: 'assets/illustrations/food_salad.png',
+                        title: '음식 히스토리',
+                        subtitle: '식단과 증상 요약',
+                        onTap: () {
+                          // TODO(W6-2): /food-history 라우트로 배선
+                          showAppToast(context, '준비 중이에요');
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: AppSpacing.contentGap),
 
               // ── 5. 최근 식사 섹션 ─────────────────────────────────────
@@ -122,11 +150,6 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              // 최근 식사 ↔ 토스트 카드 gap 70 (Figma).
-              const SizedBox(height: 70),
-
-              // ── 6. 토스트 카드 ────────────────────────────────────────
-              const _ToastCard(),
               const SizedBox(height: AppSpacing.contentGap),
             ],
           ),
@@ -145,6 +168,8 @@ class _GreetingBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     // Figma 1207:6593: row justify center — 텍스트+캐릭터를 한 그룹으로 가운데 정렬
     // (Expanded/space-between 금지 — 좌우로 벌리면 Figma와 패딩 불일치).
+    // TODO(data): /my-page/summary weeklySummary streak 연동(후속)
+    const streakDays = 0;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -161,31 +186,20 @@ class _GreetingBlock extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              // TODO(data): 식사·증상 카운트 연동 시 실제 값.
               Text.rich(
                 TextSpan(
                   style: AppTextStyles.body2Regular.copyWith(
                     color: AppColors.textSecondary,
                   ),
                   children: [
-                    const TextSpan(text: '식단 기록 '),
+                    const TextSpan(text: '연속 편안한 날 '),
                     TextSpan(
-                      text: '0',
-                      style: AppTextStyles.body2Regular.copyWith(
-                        color: AppColors.textStrong,
-                        fontWeight: FontWeight.w700,
+                      text: '$streakDays일',
+                      style: AppTextStyles.body1Bold.copyWith(
+                        color: AppColors.primary,
                       ),
                     ),
-                    const TextSpan(text: ' 회\n'),
-                    const TextSpan(text: '증상 기록 '),
-                    TextSpan(
-                      text: '0',
-                      style: AppTextStyles.body2Regular.copyWith(
-                        color: AppColors.textStrong,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const TextSpan(text: ' 회'),
+                    const TextSpan(text: ' 째'),
                   ],
                 ),
               ),
@@ -204,157 +218,57 @@ class _GreetingBlock extends StatelessWidget {
   }
 }
 
-// ── 내 도감 카드 ──────────────────────────────────────────────────────────────
+// ── 2-up 진입 카드 (증상 기록하기 / 음식 히스토리) ──────────────────────────
 
-class _MyDictionaryCard extends StatelessWidget {
-  const _MyDictionaryCard();
+class _HomeEntryCard extends StatelessWidget {
+  const _HomeEntryCard({
+    required this.iconAsset,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final String iconAsset;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      // TODO(도감): 도감 화면 미구현 — 추후 연결.
-      onTap: () {},
+      onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(AppSpacing.cardPadding),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: const BorderRadius.all(Radius.circular(999)),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
           border: Border.all(
             color: AppColors.borderCard, // Figma stroke #EDEDF5
             width: 1,
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // LEFT: 불꽃 아이콘 + 연속 편안한 날 streak
-            Row(
-              children: [
-                Image.asset(
-                  'assets/illustrations/icon_fire.png',
-                  width: 32,
-                  height: 32,
-                  fit: BoxFit.contain,
-                ),
-                const SizedBox(width: 8),
-                // TODO(data): 실제 연속일수.
-                Text.rich(
-                  TextSpan(
-                    style: AppTextStyles.body1Bold.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                    children: [
-                      const TextSpan(text: '연속 편안한 날 '),
-                      TextSpan(
-                        text: '1일',
-                        style: AppTextStyles.body1Bold.copyWith(
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const TextSpan(text: ' 째'),
-                    ],
-                  ),
-                ),
-              ],
+            Image.asset(
+              iconAsset,
+              width: 40,
+              height: 40,
+              fit: BoxFit.contain,
             ),
-            // RIGHT: '내 도감' 라벨 + chevron
-            Row(
-              children: [
-                Text(
-                  '내 도감',
-                  style: AppTextStyles.body2Medium.copyWith(
-                    color: AppColors.textStrong,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                SvgPicture.asset(
-                  'assets/figma_extracted/chevron_right.svg',
-                  width: 24,
-                  height: 24,
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.textPrimary, // #1A1A1F
-                    BlendMode.srcIn,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── 토스트 카드 ───────────────────────────────────────────────────────────────
-
-class _ToastCard extends StatelessWidget {
-  const _ToastCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.push('/check'),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.cardPadding),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFEFEFE), // Figma #FEFEFE
-          borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
-          border: Border.all(
-            color: AppColors.border, // Figma stroke #EAEAEA → AppColors.border
-            width: 1.5,
-          ),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0A000000),
-              blurRadius: 8,
-              offset: Offset(0, 4), // Figma 1207:6704
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/illustrations/emoji_meal_prompt.png',
-                    width: 32,
-                    height: 32,
-                    fit: BoxFit.contain,
-                  ),
-                  const SizedBox(width: 16), // Figma 1207:6704 emoji↔text gap
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '검색하신 음식은 드셨어요?',
-                          style: AppTextStyles.body1Medium.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        Text(
-                          '식단에 추가하고 상태 기록하기',
-                          style: AppTextStyles.body2Regular.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: AppTextStyles.body1Bold.copyWith(
+                color: AppColors.textPrimary,
               ),
             ),
-            SvgPicture.asset(
-              'assets/figma_extracted/chevron_right.svg',
-              width: 24,
-              height: 24,
-              colorFilter: const ColorFilter.mode(
-                AppColors.textPrimary,
-                BlendMode.srcIn,
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: AppTextStyles.body2Regular.copyWith(
+                color: AppColors.textSecondary,
               ),
             ),
           ],

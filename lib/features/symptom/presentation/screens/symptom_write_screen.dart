@@ -43,6 +43,23 @@ const _symptomChipDefs = [
 ];
 
 // ---------------------------------------------------------------------------
+// SymptomWriteArgs — 원인 식사 프리필 진입 인자
+// ---------------------------------------------------------------------------
+
+/// [SymptomWriteScreen] 신규 작성 진입 시 원인 식사를 프리필하기 위한 인자.
+///
+/// 미기록 식단 목록 등에서 특정 식사를 원인으로 지정해 증상 작성으로 진입할 때 사용.
+class SymptomWriteArgs {
+  const SymptomWriteArgs({this.initialMealRecordId, this.initialMealName});
+
+  /// 프리필할 원인 식사 ID.
+  final String? initialMealRecordId;
+
+  /// 프리필할 원인 식사 표시명.
+  final String? initialMealName;
+}
+
+// ---------------------------------------------------------------------------
 // SymptomWriteScreen
 // ---------------------------------------------------------------------------
 
@@ -50,10 +67,24 @@ const _symptomChipDefs = [
 ///
 /// [existingSymptom] null → 신규 작성 모드.
 /// [existingSymptom] 비-null → 수정 모드 (폼 프리필 + update 호출).
+///
+/// [initialMealRecordId]/[initialMealName] 은 신규 작성 모드에서만 적용되는
+/// 원인 식사 프리필 인자([existingSymptom] 이 우선한다).
 class SymptomWriteScreen extends ConsumerStatefulWidget {
-  const SymptomWriteScreen({super.key, this.existingSymptom});
+  const SymptomWriteScreen({
+    super.key,
+    this.existingSymptom,
+    this.initialMealRecordId,
+    this.initialMealName,
+  });
 
   final Symptom? existingSymptom;
+
+  /// 신규 작성 모드 전용 원인 식사 프리필 ID.
+  final String? initialMealRecordId;
+
+  /// 신규 작성 모드 전용 원인 식사 프리필 표시명.
+  final String? initialMealName;
 
   @override
   ConsumerState<SymptomWriteScreen> createState() =>
@@ -84,8 +115,14 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
         memo: '',
       );
     } else {
-      // 신규 모드: 빈 폼
-      _formState = SymptomWriteFormState(occurredAt: nowKst());
+      // 신규 모드: 빈 폼 (원인 식사 프리필 인자가 있으면 시딩)
+      _formState = SymptomWriteFormState(
+        occurredAt: nowKst(),
+        linkedMealId: widget.initialMealRecordId,
+        linkedMealDisplayName: widget.initialMealRecordId != null
+            ? widget.initialMealName
+            : null,
+      );
     }
     _memoController.text = _formState.memo;
     _memoController.addListener(() {
