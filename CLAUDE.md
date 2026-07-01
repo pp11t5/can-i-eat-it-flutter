@@ -58,13 +58,14 @@
 - **서브에이전트끼리 협업을 기대하지 않는다**. 서브에이전트는 자식 서브에이전트를 만들 수 없다. 협업 흐름은 항상 마스터가 지휘.
 - **단순 스택트레이스 버그를 deep-debugger로 보내지 않는다**. 그건 implementer의 일이다.
 
-## 모델·effort 기준 (2026-05, Opus 4.8)
+## 모델·effort 기준 (2026-07, Opus 4.8 + Sonnet 5)
 
 - 기본 effort는 **high**. 비가역·보안 영역만 한 단계 올린다(pr-reviewer=xhigh). Opus 4.8 high ≈ Opus 4.7 xhigh 수준이라 대부분 high로 충분하고, max는 xhigh 대비 이득이 거의 없다(토큰 낭비).
 - 신규 레버(필요 시에만, 기본 흐름은 8-에이전트 라우팅 유지):
   - **fast mode**($10/$50, 출력 2.5×): 비용이 아닌 *지연* 레버. 인터랙티브 멀티에이전트 루프용.
   - **dynamic workflows / ultracode**(리서치 프리뷰): 100s~1000s 서브에이전트 병렬. *대량 구조 변환* 보조용이며 architect/pr-reviewer의 비가역 설계·핵심 리뷰를 **대체하지 않는다**.
   - Opus 4.8 캐시 최소치 1,024토큰 — 짧은 프롬프트도 캐시된다.
+- **Sonnet 5 반영(2026-06-30 출시)**: `model: sonnet` alias가 자동으로 Sonnet 5를 가리켜 에이전트 파일 무수정 승격. 가격 표준 $3/$15(2026-08-31까지 인트로 $2/$10). 새 토크나이저로 Sonnet 4.6 대비 ~30% 토큰↑ → 표시가 동일해도 Sonnet 작업 실비용이 오르니 토큰 예산·`max_tokens` 절단 위험 재점검. xhigh effort·적응형 추론 기본 ON을 새로 지원하지만, 정책상 Sonnet 에이전트엔 effort 필드 미부여(기본값 유지) — 어려운 작업만 호출 시점에 `effort: xhigh` 지정.
 - 토큰 절감 운영 습관 (v0.3.0 §11.7·§11.8):
   - **도구 출력 컴팩션**: `flutter test`·`dart run build_runner`·`dart analyze`·`flutter build`·git 출력은 원시로 마스터에 붓지 않는다. 명령 단계에서 좁히고(`| tail -n 30`, `grep -E '(FAIL|Error|✗|warning)'`, `--reporter=compact` 등), 긴 로그는 explorer(Haiku)에 "실패 원인+위치만" 추출 위임. 같은 파일 통째 재독 회피.
   - **컨텍스트 위생**: 이 CLAUDE.md는 얇게 유지(매 세션 자동 로드). 무거운 산출물(대용량 로그·생성물)은 파일로 남기고 경로만 참조. 완료 작업 메모는 작업 컨텍스트에서 비운다.
@@ -96,7 +97,7 @@
 
 ---
 
-> 템플릿 v0.3.0 기반 (Opus 4.8, 2026-06 토큰 절감 레버 §11.7·§11.8 편입).
+> 템플릿 v0.4.0 기반 (Opus 4.8 + Sonnet 5, 2026-07 Sonnet 5 반영: family alias 자동 승격 · 토크나이저 ~30% 주의).
 
 ---
 
