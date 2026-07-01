@@ -25,6 +25,10 @@ GoRouter _testRouter() => GoRouter(
           builder: (_, __) =>
               const Scaffold(body: Text('unrecorded-meals-stub')),
         ),
+        GoRoute(
+          path: '/food-history',
+          builder: (_, __) => const Scaffold(body: Text('food-history-stub')),
+        ),
       ],
     );
 
@@ -126,20 +130,14 @@ void main() {
       expect(find.text('unrecorded-meals-stub'), findsOneWidget);
     });
 
-    testWidgets('"음식 히스토리" 카드 탭 → "준비 중이에요" 토스트만 표시, 이동 없음',
-        (tester) async {
+    testWidgets('"음식 히스토리" 카드 탭 → /food-history로 push', (tester) async {
       await tester.pumpWidget(_wrapWithRouter());
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('음식 히스토리'));
-      // showAppToast 가 딜레이 타이머를 생성하므로 pumpAndSettle 대신 pump 사용.
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pumpAndSettle();
 
-      expect(find.text('준비 중이에요'), findsOneWidget);
-      // 스텁 화면으로 이동하지 않았어야 한다 — 여전히 홈 화면.
-      expect(find.text('unrecorded-meals-stub'), findsNothing);
-      expect(find.text('음식 히스토리'), findsOneWidget);
+      expect(find.text('food-history-stub'), findsOneWidget);
     });
   });
 

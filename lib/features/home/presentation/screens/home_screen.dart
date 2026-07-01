@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
-import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_search_bar.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
 
@@ -86,10 +85,7 @@ class HomeScreen extends ConsumerWidget {
                         iconAsset: 'assets/illustrations/food_salad.png',
                         title: '음식 히스토리',
                         subtitle: '식단과 증상 요약',
-                        onTap: () {
-                          // TODO(W6-2): /food-history 라우트로 배선
-                          showAppToast(context, '준비 중이에요');
-                        },
+                        onTap: () => context.push('/food-history'),
                       ),
                     ),
                   ],

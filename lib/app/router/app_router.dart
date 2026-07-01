@@ -12,6 +12,7 @@ import 'package:can_i_eat_it/features/auth/presentation/screens/terms_screen.dar
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/food_check_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_screen.dart';
+import 'package:can_i_eat_it/features/food_dictionary/presentation/screens/food_history_screen.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_food_detail_screen.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_record_detail_screen.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_record_screen.dart';
@@ -129,6 +130,13 @@ GoRouter appRouter(Ref ref) {
         path: '/unrecorded-meals',
         name: 'unrecorded-meals',
         builder: (context, state) => const UnrecordedMealsScreen(),
+      ),
+
+      // 음식 히스토리(내 도감) 화면 (push, 뒤로가기 진입).
+      GoRoute(
+        path: '/food-history',
+        name: 'food-history',
+        builder: (context, state) => const FoodHistoryScreen(),
       ),
 
       // 증상 상세 화면 (fullscreenDialog 모달).
