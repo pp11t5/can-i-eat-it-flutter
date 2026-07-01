@@ -108,6 +108,19 @@ class ApiEndpoints {
   static const String timelineWeekly = '/timeline/weekly';
 
   // ---------------------------------------------------------------------------
+  // Food Dictionary (W6-1, 내 도감)
+  // ---------------------------------------------------------------------------
+
+  /// `GET /dictionary/safe?cursor&size`
+  static const String dictionarySafe = '/dictionary/safe';
+
+  /// `GET /dictionary/caution-risk?cursor&size`
+  static const String dictionaryCautionRisk = '/dictionary/caution-risk';
+
+  /// `GET /dictionary/count`
+  static const String dictionaryCount = '/dictionary/count';
+
+  // ---------------------------------------------------------------------------
   // Symptoms
   // ---------------------------------------------------------------------------
 
