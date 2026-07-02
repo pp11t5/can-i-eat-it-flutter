@@ -12,6 +12,8 @@ import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
+import 'package:can_i_eat_it/features/food_dictionary/data/food_dictionary_providers.dart';
+import 'package:can_i_eat_it/features/food_dictionary/data/repositories/mock_dictionary_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
@@ -57,6 +59,10 @@ Widget _buildMypage({
       analyticsServiceProvider.overrideWithValue(_NoopAnalytics()),
       // ignore: scoped_providers_should_specify_dependencies
       profileCacheProvider.overrideWithValue(InMemoryProfileCache()),
+      // ignore: scoped_providers_should_specify_dependencies
+      dictionaryRepositoryProvider.overrideWithValue(
+        MockDictionaryRepository.seeded(),
+      ),
     ],
     child: MaterialApp(
       theme: AppTheme.light,
