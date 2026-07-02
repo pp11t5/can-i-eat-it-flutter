@@ -71,6 +71,14 @@ dev_dependencies:
   custom_lint: ^0.7.6
   riverpod_lint: ^2.6.5
   http_mock_adapter: ^0.6.1
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  image_path: "assets/appicon/app_icon.png"
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  background_color_ios: "#FFFFFF"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
