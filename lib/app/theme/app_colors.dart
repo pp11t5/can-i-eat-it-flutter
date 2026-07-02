@@ -99,4 +99,7 @@ abstract final class AppColors {
 
   /// 일요일 요일 라벨 색 — semanticRed(#FF383C)
   static const Color calendarSunday = ColorPrimitives.semanticRed;
+
+  /// AI 분석 배지 배경 (Figma 증상 상세 1324:13865 실측 #F8F2FF)
+  static const Color aiAccentSurface = ColorPrimitives.purple10;
 }
