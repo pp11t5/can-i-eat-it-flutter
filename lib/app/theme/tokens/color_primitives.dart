@@ -89,6 +89,9 @@ abstract final class ColorPrimitives {
   /// 보라 강조 (Figma 디자인시스템 신규 — 용도 미정, 디자이너 확정 시 semantic 추가)
   static const Color purple400 = Color(0xFF9321EC);
 
+  /// 보라 연한 배경 (Figma AI 분석 배지 실측 #F8F2FF)
+  static const Color purple10 = Color(0xFFF8F2FF);
+
   // --- OptionCard / SelectableChip 전용 (Figma onboarding 실측) ---
 
   /// 비선택 카드 배경 (Figma #F7F7FA)

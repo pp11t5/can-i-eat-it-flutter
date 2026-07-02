@@ -7,6 +7,7 @@ import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
+import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
 import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
@@ -118,6 +119,8 @@ class SymptomDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync =
         ref.watch(symptomDetailControllerProvider(symptomId));
+    final sessionAsync = ref.watch(authControllerProvider);
+    final displayName = sessionAsync.valueOrNull?.displayName ?? '회원';
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -144,6 +147,7 @@ class SymptomDetailScreen extends ConsumerWidget {
                   stateEmoji: _stateEmoji(symptom.symptomState),
                   stateColor: _stateColor(symptom.symptomState),
                   occurredAtLabel: _formatOccurredAt(symptom.occurredAt),
+                  displayName: displayName,
                 ),
               ),
             ),
@@ -209,6 +213,7 @@ class _Body extends StatelessWidget {
     required this.stateEmoji,
     required this.stateColor,
     required this.occurredAtLabel,
+    required this.displayName,
   });
 
   final Symptom symptom;
@@ -216,6 +221,7 @@ class _Body extends StatelessWidget {
   final String stateEmoji;
   final Color stateColor;
   final String occurredAtLabel;
+  final String displayName;
 
   /// 증상 유형 → 한국어 join. 비어있으면 기본 문구.
   String get _symptomTypesLabel {
@@ -282,7 +288,7 @@ class _Body extends StatelessWidget {
               Text(
                 stateEmoji,
                 style: TextStyle(
-                  fontSize: 36,
+                  fontSize: 32,
                   color: stateColor,
                   height: 1.1,
                 ),
@@ -294,7 +300,7 @@ class _Body extends StatelessWidget {
                   children: [
                     Text(
                       _symptomTypesLabel,
-                      style: AppTextStyles.header1Medium.copyWith(
+                      style: AppTextStyles.header2Bold.copyWith(
                         color: AppColors.textPrimary,
                       ),
                     ),
@@ -341,7 +347,10 @@ class _Body extends StatelessWidget {
           // ---------------------------------------------------------------
           if (symptom.analysisItems.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sectionGap),
-            _AnalysisSection(items: symptom.analysisItems),
+            _AnalysisSection(
+              items: symptom.analysisItems,
+              displayName: displayName,
+            ),
           ],
 
           const SizedBox(height: AppSpacing.sectionGap),
@@ -450,26 +459,31 @@ class _NoMealRow extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _AnalysisSection extends StatelessWidget {
-  const _AnalysisSection({required this.items});
+  const _AnalysisSection({required this.items, required this.displayName});
 
   final List<SymptomAnalysisItem> items;
+  final String displayName;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            const Text('✨', style: TextStyle(fontSize: 14)),
-            const SizedBox(width: AppSpacing.xs),
-            Text(
-              'AI 맞춤 분석이에요',
-              style: AppTextStyles.body2Bold.copyWith(
-                color: AppColors.textPrimary,
-              ),
+        Container(
+          padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.xs,
+            horizontal: AppSpacing.itemGap,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.aiAccentSurface,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          ),
+          child: Text(
+            '$displayName 님을 위한 맞춤 분석이에요',
+            style: AppTextStyles.body1Bold.copyWith(
+              color: AppColors.textPrimary,
             ),
-          ],
+          ),
         ),
         const SizedBox(height: AppSpacing.itemGap),
         ...items.map((item) => _AnalysisCard(item: item)),
