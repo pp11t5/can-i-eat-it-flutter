@@ -81,7 +81,7 @@ abstract class MealFood with _$MealFood {
     /// 음식 표시 이름.
     required String name,
 
-    /// 음식 카테고리. 서버가 없으면 null → FoodThumbnail 기본.
+    /// 음식 카테고리. 서버가 없으면 null → CategoryIcon regular 폴백.
     String? category,
 
     /// 섭취 시각 (ISO-8601 문자열 그대로, 표시 전용).
@@ -136,6 +136,9 @@ sealed class TimelineItem with _$TimelineItem {
     required String mealFoodName,
     required VerdictLevel grade,
     @Default(0) int etcCount,
+
+    /// 음식 카테고리 코드 (CategoryIcon 표시용). 서버 미제공 시 null → regular 폴백.
+    String? categoryCode,
   }) = TimelineSingle;
 
   /// group: 음식 2개 이상짜리 식사.
@@ -144,6 +147,9 @@ sealed class TimelineItem with _$TimelineItem {
     required String mealRecordDateTime,
     @Default(<String>[]) List<String> representativeFoods,
     @Default(0) int etcCount,
+
+    /// 음식 카테고리 코드 (CategoryIcon 표시용). 서버 미제공 시 null → regular 폴백.
+    String? categoryCode,
   }) = TimelineGroup;
 
   /// symptom: 증상 기록.

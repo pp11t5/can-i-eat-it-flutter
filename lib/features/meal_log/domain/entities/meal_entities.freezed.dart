@@ -1097,7 +1097,7 @@ mixin _$MealFood {
   /// 음식 표시 이름.
   String get name;
 
-  /// 음식 카테고리. 서버가 없으면 null → FoodThumbnail 기본.
+  /// 음식 카테고리. 서버가 없으면 null → CategoryIcon regular 폴백.
   String? get category;
 
   /// 섭취 시각 (ISO-8601 문자열 그대로, 표시 전용).
@@ -1421,7 +1421,7 @@ class _MealFood implements MealFood {
   @override
   final String name;
 
-  /// 음식 카테고리. 서버가 없으면 null → FoodThumbnail 기본.
+  /// 음식 카테고리. 서버가 없으면 null → CategoryIcon regular 폴백.
   @override
   final String? category;
 
@@ -2080,11 +2080,20 @@ extension TimelineItemPatterns on TimelineItem {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(String mealRecordId, String mealRecordDateTime,
-            String mealFoodName, VerdictLevel grade, int etcCount)?
+    TResult Function(
+            String mealRecordId,
+            String mealRecordDateTime,
+            String mealFoodName,
+            VerdictLevel grade,
+            int etcCount,
+            String? categoryCode)?
         single,
-    TResult Function(String mealRecordId, String mealRecordDateTime,
-            List<String> representativeFoods, int etcCount)?
+    TResult Function(
+            String mealRecordId,
+            String mealRecordDateTime,
+            List<String> representativeFoods,
+            int etcCount,
+            String? categoryCode)?
         group,
     TResult Function(
             SymptomState symptomState, int afterMealMinutes, String occurredAt)?
@@ -2094,11 +2103,16 @@ extension TimelineItemPatterns on TimelineItem {
     final _that = this;
     switch (_that) {
       case TimelineSingle() when single != null:
-        return single(_that.mealRecordId, _that.mealRecordDateTime,
-            _that.mealFoodName, _that.grade, _that.etcCount);
+        return single(
+            _that.mealRecordId,
+            _that.mealRecordDateTime,
+            _that.mealFoodName,
+            _that.grade,
+            _that.etcCount,
+            _that.categoryCode);
       case TimelineGroup() when group != null:
         return group(_that.mealRecordId, _that.mealRecordDateTime,
-            _that.representativeFoods, _that.etcCount);
+            _that.representativeFoods, _that.etcCount, _that.categoryCode);
       case TimelineSymptom() when symptom != null:
         return symptom(
             _that.symptomState, _that.afterMealMinutes, _that.occurredAt);
@@ -2122,11 +2136,20 @@ extension TimelineItemPatterns on TimelineItem {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(String mealRecordId, String mealRecordDateTime,
-            String mealFoodName, VerdictLevel grade, int etcCount)
+    required TResult Function(
+            String mealRecordId,
+            String mealRecordDateTime,
+            String mealFoodName,
+            VerdictLevel grade,
+            int etcCount,
+            String? categoryCode)
         single,
-    required TResult Function(String mealRecordId, String mealRecordDateTime,
-            List<String> representativeFoods, int etcCount)
+    required TResult Function(
+            String mealRecordId,
+            String mealRecordDateTime,
+            List<String> representativeFoods,
+            int etcCount,
+            String? categoryCode)
         group,
     required TResult Function(
             SymptomState symptomState, int afterMealMinutes, String occurredAt)
@@ -2135,11 +2158,16 @@ extension TimelineItemPatterns on TimelineItem {
     final _that = this;
     switch (_that) {
       case TimelineSingle():
-        return single(_that.mealRecordId, _that.mealRecordDateTime,
-            _that.mealFoodName, _that.grade, _that.etcCount);
+        return single(
+            _that.mealRecordId,
+            _that.mealRecordDateTime,
+            _that.mealFoodName,
+            _that.grade,
+            _that.etcCount,
+            _that.categoryCode);
       case TimelineGroup():
         return group(_that.mealRecordId, _that.mealRecordDateTime,
-            _that.representativeFoods, _that.etcCount);
+            _that.representativeFoods, _that.etcCount, _that.categoryCode);
       case TimelineSymptom():
         return symptom(
             _that.symptomState, _that.afterMealMinutes, _that.occurredAt);
@@ -2160,11 +2188,20 @@ extension TimelineItemPatterns on TimelineItem {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(String mealRecordId, String mealRecordDateTime,
-            String mealFoodName, VerdictLevel grade, int etcCount)?
+    TResult? Function(
+            String mealRecordId,
+            String mealRecordDateTime,
+            String mealFoodName,
+            VerdictLevel grade,
+            int etcCount,
+            String? categoryCode)?
         single,
-    TResult? Function(String mealRecordId, String mealRecordDateTime,
-            List<String> representativeFoods, int etcCount)?
+    TResult? Function(
+            String mealRecordId,
+            String mealRecordDateTime,
+            List<String> representativeFoods,
+            int etcCount,
+            String? categoryCode)?
         group,
     TResult? Function(
             SymptomState symptomState, int afterMealMinutes, String occurredAt)?
@@ -2173,11 +2210,16 @@ extension TimelineItemPatterns on TimelineItem {
     final _that = this;
     switch (_that) {
       case TimelineSingle() when single != null:
-        return single(_that.mealRecordId, _that.mealRecordDateTime,
-            _that.mealFoodName, _that.grade, _that.etcCount);
+        return single(
+            _that.mealRecordId,
+            _that.mealRecordDateTime,
+            _that.mealFoodName,
+            _that.grade,
+            _that.etcCount,
+            _that.categoryCode);
       case TimelineGroup() when group != null:
         return group(_that.mealRecordId, _that.mealRecordDateTime,
-            _that.representativeFoods, _that.etcCount);
+            _that.representativeFoods, _that.etcCount, _that.categoryCode);
       case TimelineSymptom() when symptom != null:
         return symptom(
             _that.symptomState, _that.afterMealMinutes, _that.occurredAt);
@@ -2195,7 +2237,8 @@ class TimelineSingle extends TimelineItem {
       required this.mealRecordDateTime,
       required this.mealFoodName,
       required this.grade,
-      this.etcCount = 0})
+      this.etcCount = 0,
+      this.categoryCode})
       : super._();
 
   final String mealRecordId;
@@ -2204,6 +2247,9 @@ class TimelineSingle extends TimelineItem {
   final VerdictLevel grade;
   @JsonKey()
   final int etcCount;
+
+  /// 음식 카테고리 코드 (CategoryIcon 표시용). 서버 미제공 시 null → regular 폴백.
+  final String? categoryCode;
 
   /// Create a copy of TimelineItem
   /// with the given fields replaced by the non-null parameter values.
@@ -2225,16 +2271,18 @@ class TimelineSingle extends TimelineItem {
                 other.mealFoodName == mealFoodName) &&
             (identical(other.grade, grade) || other.grade == grade) &&
             (identical(other.etcCount, etcCount) ||
-                other.etcCount == etcCount));
+                other.etcCount == etcCount) &&
+            (identical(other.categoryCode, categoryCode) ||
+                other.categoryCode == categoryCode));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, mealRecordId, mealRecordDateTime,
-      mealFoodName, grade, etcCount);
+      mealFoodName, grade, etcCount, categoryCode);
 
   @override
   String toString() {
-    return 'TimelineItem.single(mealRecordId: $mealRecordId, mealRecordDateTime: $mealRecordDateTime, mealFoodName: $mealFoodName, grade: $grade, etcCount: $etcCount)';
+    return 'TimelineItem.single(mealRecordId: $mealRecordId, mealRecordDateTime: $mealRecordDateTime, mealFoodName: $mealFoodName, grade: $grade, etcCount: $etcCount, categoryCode: $categoryCode)';
   }
 }
 
@@ -2250,7 +2298,8 @@ abstract mixin class $TimelineSingleCopyWith<$Res>
       String mealRecordDateTime,
       String mealFoodName,
       VerdictLevel grade,
-      int etcCount});
+      int etcCount,
+      String? categoryCode});
 }
 
 /// @nodoc
@@ -2270,6 +2319,7 @@ class _$TimelineSingleCopyWithImpl<$Res>
     Object? mealFoodName = null,
     Object? grade = null,
     Object? etcCount = null,
+    Object? categoryCode = freezed,
   }) {
     return _then(TimelineSingle(
       mealRecordId: null == mealRecordId
@@ -2292,6 +2342,10 @@ class _$TimelineSingleCopyWithImpl<$Res>
           ? _self.etcCount
           : etcCount // ignore: cast_nullable_to_non_nullable
               as int,
+      categoryCode: freezed == categoryCode
+          ? _self.categoryCode
+          : categoryCode // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -2303,7 +2357,8 @@ class TimelineGroup extends TimelineItem {
       {required this.mealRecordId,
       required this.mealRecordDateTime,
       final List<String> representativeFoods = const <String>[],
-      this.etcCount = 0})
+      this.etcCount = 0,
+      this.categoryCode})
       : _representativeFoods = representativeFoods,
         super._();
 
@@ -2320,6 +2375,9 @@ class TimelineGroup extends TimelineItem {
 
   @JsonKey()
   final int etcCount;
+
+  /// 음식 카테고리 코드 (CategoryIcon 표시용). 서버 미제공 시 null → regular 폴백.
+  final String? categoryCode;
 
   /// Create a copy of TimelineItem
   /// with the given fields replaced by the non-null parameter values.
@@ -2340,16 +2398,23 @@ class TimelineGroup extends TimelineItem {
             const DeepCollectionEquality()
                 .equals(other._representativeFoods, _representativeFoods) &&
             (identical(other.etcCount, etcCount) ||
-                other.etcCount == etcCount));
+                other.etcCount == etcCount) &&
+            (identical(other.categoryCode, categoryCode) ||
+                other.categoryCode == categoryCode));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, mealRecordId, mealRecordDateTime,
-      const DeepCollectionEquality().hash(_representativeFoods), etcCount);
+  int get hashCode => Object.hash(
+      runtimeType,
+      mealRecordId,
+      mealRecordDateTime,
+      const DeepCollectionEquality().hash(_representativeFoods),
+      etcCount,
+      categoryCode);
 
   @override
   String toString() {
-    return 'TimelineItem.group(mealRecordId: $mealRecordId, mealRecordDateTime: $mealRecordDateTime, representativeFoods: $representativeFoods, etcCount: $etcCount)';
+    return 'TimelineItem.group(mealRecordId: $mealRecordId, mealRecordDateTime: $mealRecordDateTime, representativeFoods: $representativeFoods, etcCount: $etcCount, categoryCode: $categoryCode)';
   }
 }
 
@@ -2364,7 +2429,8 @@ abstract mixin class $TimelineGroupCopyWith<$Res>
       {String mealRecordId,
       String mealRecordDateTime,
       List<String> representativeFoods,
-      int etcCount});
+      int etcCount,
+      String? categoryCode});
 }
 
 /// @nodoc
@@ -2383,6 +2449,7 @@ class _$TimelineGroupCopyWithImpl<$Res>
     Object? mealRecordDateTime = null,
     Object? representativeFoods = null,
     Object? etcCount = null,
+    Object? categoryCode = freezed,
   }) {
     return _then(TimelineGroup(
       mealRecordId: null == mealRecordId
@@ -2401,6 +2468,10 @@ class _$TimelineGroupCopyWithImpl<$Res>
           ? _self.etcCount
           : etcCount // ignore: cast_nullable_to_non_nullable
               as int,
+      categoryCode: freezed == categoryCode
+          ? _self.categoryCode
+          : categoryCode // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }

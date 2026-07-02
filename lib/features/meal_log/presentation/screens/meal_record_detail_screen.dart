@@ -6,10 +6,10 @@ import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
-import 'package:can_i_eat_it/features/meal_log/presentation/widgets/food_thumbnail.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/state_record_card.dart';
 
 /// 식사 상세 화면 (GET /meal-records/{mealRecordId}).
@@ -212,7 +212,7 @@ class _FoodRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.itemGap),
         child: Row(
           children: [
-            FoodThumbnail(category: food.category, size: 40),
+            CategoryIcon(code: food.category, size: 40),
             const SizedBox(width: AppSpacing.itemGap),
             Expanded(
               child: Column(

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/widgets/verdict_detail_card.dart';
@@ -184,7 +185,8 @@ class _HeroSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // 원형 컨테이너 — 음식 이미지 없음 → 등급색 배경 + 등급 아이콘 placeholder
+        // 원형 컨테이너 — 등급색 배경 + 음식 카테고리 일러스트
+        // (by-id 판정: food-type 코드 아이콘 / by-text 판정: category=null → regular 폴백)
         Container(
           width: 110,
           height: 110,
@@ -194,11 +196,7 @@ class _HeroSection extends StatelessWidget {
             border: Border.all(color: color.withValues(alpha: 0.25), width: 2),
           ),
           child: Center(
-            child: Icon(
-              _foodIconData(),
-              size: 52,
-              color: color,
-            ),
+            child: CategoryIcon(code: verdict.category, size: 80),
           ),
         ),
         const SizedBox(height: AppSpacing.itemGap),
@@ -232,16 +230,6 @@ class _HeroSection extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  /// 음식 일러스트 없음 → 등급별 아이콘으로 placeholder (보고서에 명시)
-  IconData _foodIconData() {
-    return switch (verdict.level) {
-      VerdictLevel.recommend => Icons.restaurant,
-      VerdictLevel.caution => Icons.restaurant,
-      VerdictLevel.risk => Icons.restaurant,
-      VerdictLevel.unknown => Icons.help_outline,
-    };
   }
 }
 
