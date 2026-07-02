@@ -6,6 +6,8 @@ import 'package:can_i_eat_it/app/theme/app_theme.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
+import 'package:can_i_eat_it/features/food_dictionary/data/food_dictionary_providers.dart';
+import 'package:can_i_eat_it/features/food_dictionary/data/repositories/mock_dictionary_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
@@ -50,6 +52,10 @@ Widget _buildMypageScreen({
       analyticsServiceProvider.overrideWithValue(_NoopAnalytics()),
       // ignore: scoped_providers_should_specify_dependencies
       profileCacheProvider.overrideWithValue(InMemoryProfileCache()),
+      // ignore: scoped_providers_should_specify_dependencies
+      dictionaryRepositoryProvider.overrideWithValue(
+        MockDictionaryRepository.seeded(),
+      ),
     ],
     child: MaterialApp(
       theme: AppTheme.light,
@@ -111,12 +117,12 @@ void main() {
       expect(find.text('건강 정보 미설정'), findsOneWidget);
     });
 
-    testWidgets('음식 히스토리 placeholder "—"가 표시된다', (tester) async {
+    testWidgets('음식 히스토리 카드에 실카운트 부제가 표시된다', (tester) async {
       await tester.pumpWidget(_buildMypageScreen());
       await tester.pumpAndSettle();
 
-      // 안전 음식, 주의 음식 "—" 2개 표시
-      expect(find.text('—'), findsWidgets);
+      // MockDictionaryRepository.seeded() — 안전 3개, 주의/위험 2개.
+      expect(find.text('안전 음식 3개, 주의 음식 2개'), findsOneWidget);
     });
 
     testWidgets('주간 기록 "전체보기" 버튼이 표시된다', (tester) async {

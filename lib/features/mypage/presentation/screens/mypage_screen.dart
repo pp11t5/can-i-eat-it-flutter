@@ -10,6 +10,7 @@ import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
+import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/dictionary_list_controller.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
@@ -19,7 +20,7 @@ import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart'
 /// 상단→하단:
 /// - 타이틀 "마이페이지"(중앙)
 /// - 프로필 카드 → /mypage/profile push
-/// - 내 음식 히스토리 카드 (placeholder — 집계 EP 부재)
+/// - 내 음식 히스토리 카드 → /food-history push (dictionaryCountProvider 실카운트)
 /// - 주간 기록 카드 (placeholder — 주간 집계·증상 EP 부재)
 /// - 설정 섹션
 /// - 약관 섹션
@@ -63,7 +64,7 @@ class MypageScreen extends ConsumerWidget {
           const SizedBox(height: AppSpacing.itemGap),
 
           // 내 음식 히스토리 카드
-          _FoodHistoryCard(),
+          const _FoodHistoryCard(),
           const SizedBox(height: AppSpacing.itemGap),
 
           // 주간 기록 카드
@@ -206,16 +207,23 @@ class _Avatar extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 내 음식 히스토리 카드 (placeholder)
+// 내 음식 히스토리 카드
 // ---------------------------------------------------------------------------
 
-class _FoodHistoryCard extends StatelessWidget {
+class _FoodHistoryCard extends ConsumerWidget {
+  const _FoodHistoryCard();
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final countAsync = ref.watch(dictionaryCountProvider);
+    final safeCount = countAsync.valueOrNull?.safeCount;
+    final cautionRiskCount = countAsync.valueOrNull?.cautionRiskCount;
+    // loading/error 시 count '—' 폴백 (food_history_screen.dart valueOrNull 패턴과 동일).
+    final subtitle =
+        '안전 음식 ${safeCount ?? '—'}개, 주의 음식 ${cautionRiskCount ?? '—'}개';
+
     return GestureDetector(
-      onTap: () {
-        // TODO(backend): 음식 히스토리 집계 EP 부재 — 탭 no-op
-      },
+      onTap: () => context.push('/food-history'),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.cardPadding),
         decoration: BoxDecoration(
@@ -223,68 +231,46 @@ class _FoodHistoryCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
           border: Border.all(color: AppColors.borderCard),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '내 음식 히스토리',
-                  style: AppTextStyles.body1Bold.copyWith(
-                    color: AppColors.textPrimary,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '내 음식 히스토리',
+                    style: AppTextStyles.body1Bold.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                SvgPicture.asset(
-                  'assets/figma_extracted/chevron_right.svg',
-                  width: 20,
-                  height: 20,
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.textTertiary,
-                    BlendMode.srcIn,
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: AppTextStyles.body2Regular.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: AppSpacing.itemGap),
-            // TODO(backend): 음식 히스토리 집계 EP 부재 — 수치 placeholder
-            const Row(
-              children: [
-                _HistoryStatItem(label: '안전 음식', value: '—'),
-                SizedBox(width: AppSpacing.sectionGap),
-                _HistoryStatItem(label: '주의 음식', value: '—'),
-              ],
+            const SizedBox(width: AppSpacing.itemGap),
+            // 연초록 스마일 배지 (Figma 민트 웃는 얼굴 근사 — 기존 초록 토큰만 재사용)
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                color: AppColors.surfaceSelected,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.sentiment_satisfied_alt,
+                size: 24,
+                color: AppColors.primary,
+              ),
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _HistoryStatItem extends StatelessWidget {
-  const _HistoryStatItem({required this.label, required this.value});
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          value,
-          style: AppTextStyles.header1Bold.copyWith(
-            color: AppColors.textStrong,
-          ),
-        ),
-        Text(
-          label,
-          style: AppTextStyles.caption1Medium.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
-      ],
     );
   }
 }
