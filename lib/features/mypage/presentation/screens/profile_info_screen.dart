@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
@@ -396,150 +397,36 @@ class _AccountCard extends ConsumerWidget {
   }
 
   Future<void> _onLogout(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
-        ),
-        title: Text(
-          '로그아웃',
-          style: AppTextStyles.header3Bold.copyWith(
-            color: AppColors.textPrimary,
-          ),
-        ),
-        content: Text(
-          '로그아웃 하시겠어요?',
-          style: AppTextStyles.body2Regular.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(
-              '취소',
-              style: AppTextStyles.body1Regular.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(
-              '로그아웃',
-              style: AppTextStyles.body1Bold.copyWith(
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-        ],
-      ),
+    final action = await showConfirmModal(
+      context,
+      title: '로그아웃 하시겠어요?',
+      primaryLabel: '취소',
+      primaryColor: AppColors.primary,
+      secondaryLabel: '로그아웃하기',
     );
 
-    if (confirmed != true) return;
+    // primary(취소) 또는 바깥 닫힘(null)이면 아무 것도 하지 않는다.
+    if (action != ConfirmModalAction.secondary) return;
     await ref.read(authControllerProvider.notifier).logout();
     if (!context.mounted) return;
     context.go('/login');
   }
 
   Future<void> _onWithdraw(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => _WithdrawDialog(),
+    final action = await showConfirmModal(
+      context,
+      title: '정말 탈퇴하시겠어요?',
+      titleStyle: AppTextStyles.header2Bold,
+      body: '탈퇴 후 2주 동안 로그인으로\n간편하게 복구할 수 있어요',
+      primaryLabel: '탈퇴하기',
+      primaryColor: AppColors.danger,
+      secondaryLabel: '취소하기',
     );
 
-    if (confirmed != true) return;
-    await ref.read(authControllerProvider.notifier).withdraw();
+    // primary(탈퇴하기) 선택 시 즉시 삭제하지 않고 계정삭제확인 화면으로 이동한다.
+    // 실제 withdraw() 는 그 화면의 최종 버튼(WithdrawScreen)이 수행한다.
+    if (action != ConfirmModalAction.primary) return;
     if (!context.mounted) return;
-    context.go('/login');
-  }
-}
-
-// ---------------------------------------------------------------------------
-// 탈퇴 Danger 다이얼로그 (deletion_grace_dialog 스타일 참조)
-// ---------------------------------------------------------------------------
-
-class _WithdrawDialog extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
-      ),
-      insetPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.screenPadding,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.sectionGap,
-          AppSpacing.sectionGap,
-          AppSpacing.sectionGap,
-          AppSpacing.cardPadding,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              '정말 탈퇴하시겠어요?',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.header3Bold.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.cardPadding),
-            Text(
-              '탈퇴하면 모든 데이터가 영구 삭제되며\n복구할 수 없어요.',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.body2Regular.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.contentGap),
-            // 탈퇴 확인 버튼 (danger)
-            Material(
-              color: AppColors.danger,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-              child: InkWell(
-                onTap: () => Navigator.of(context).pop(true),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.cardPadding),
-                  child: Center(
-                    child: Text(
-                      '탈퇴하기',
-                      style: AppTextStyles.body1Bold.copyWith(
-                        color: AppColors.surface,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.itemGap),
-            // 취소
-            InkWell(
-              onTap: () => Navigator.of(context).pop(false),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: AppSpacing.cardPadding,
-                ),
-                child: Center(
-                  child: Text(
-                    '취소',
-                    style: AppTextStyles.body1Regular.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    context.push('/mypage/withdraw');
   }
 }

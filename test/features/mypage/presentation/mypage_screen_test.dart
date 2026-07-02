@@ -170,9 +170,9 @@ void main() {
       await tester.tap(find.text('로그아웃'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(AlertDialog), findsOneWidget);
-      expect(find.text('확인'), findsOneWidget);
+      expect(find.text('로그아웃 하시겠어요?'), findsOneWidget);
       expect(find.text('취소'), findsOneWidget);
+      expect(find.text('로그아웃하기'), findsOneWidget);
     });
 
     testWidgets('로그아웃 다이얼로그 취소 시 다이얼로그가 닫힌다', (tester) async {
@@ -185,7 +185,7 @@ void main() {
       await tester.tap(find.text('취소'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.text('로그아웃 하시겠어요?'), findsNothing);
     });
   });
 }
