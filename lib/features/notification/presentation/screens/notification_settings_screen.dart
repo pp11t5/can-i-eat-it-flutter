@@ -1,5 +1,5 @@
-import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
@@ -10,11 +10,24 @@ import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/features/notification/data/notification_providers.dart';
 import 'package:can_i_eat_it/features/notification/domain/entities/notification_settings.dart';
 
+/// 1st-party 플랫폼 채널 — 취약한 app_settings 패키지(Swift 6 SPM 매니페스트로
+/// `flutter build ios`가 깨짐) 대체용. iOS: [AppDelegate], Android: [MainActivity]에서 구현.
+const _appSettingsChannel = MethodChannel('canieatit/app_settings');
+
+/// 기기 OS 알림 설정 화면을 연다. 채널 미구현/실패 시 best-effort로 무시한다.
+Future<void> _openOsNotificationSettings() async {
+  try {
+    await _appSettingsChannel.invokeMethod<void>('openNotificationSettings');
+  } catch (_) {
+    // best-effort — 채널 미구현/실패 시 무시
+  }
+}
+
 /// 기기 OS 설정 앱을 여는 콜백 provider — 테스트에서 override 가능한 seam.
 ///
-/// 기본값: [AppSettings.openAppSettings] (설정 > 앱 > 알림 화면으로 이동).
+/// 기본값: [_openOsNotificationSettings] (설정 > 앱 > 알림 화면으로 이동).
 final openAppSettingsProvider = Provider<Future<void> Function()>(
-  (ref) => AppSettings.openAppSettings,
+  (ref) => _openOsNotificationSettings,
 );
 
 /// 알림 설정 화면 (Figma 577-10290, 577-10286).
