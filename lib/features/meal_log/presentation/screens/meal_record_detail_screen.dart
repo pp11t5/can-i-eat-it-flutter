@@ -21,7 +21,7 @@ import 'package:can_i_eat_it/features/meal_log/presentation/widgets/state_record
 /// - 헤더: "HH:mm 시간에 먹은 음식이에요"
 /// - 음식 행 리스트 (각 음식 → /meal/food/:mealFoodId 음식 상세 진입)
 /// - 상태기록 섹션 (있을 때만)
-/// - 하단 CTA: "식사 삭제하기"
+/// - 하단 CTA: "기록 삭제하기"
 class MealRecordDetailScreen extends ConsumerWidget {
   const MealRecordDetailScreen({super.key, required this.mealRecordId});
 
@@ -325,7 +325,7 @@ class _BottomCta extends StatelessWidget {
             ),
           ),
           child: Text(
-            '식사 삭제하기',
+            '기록 삭제하기',
             style: AppTextStyles.body2Medium.copyWith(
               color: AppColors.textSecondary,
             ),

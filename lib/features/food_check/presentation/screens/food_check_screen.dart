@@ -632,15 +632,22 @@ class _RecentSection extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.itemGap),
-            for (var i = 0; i < items.length; i++) ...[
-              if (i > 0) const SizedBox(height: AppSpacing.itemGap),
-              _HistoryRow(
-                item: items[i],
-                onRemove: () => ref
-                    .read(recentFoodControllerProvider.notifier)
-                    .removeRecent(items[i].foodExternalId),
+            // 최근 검색 목록 — 항목이 화면을 넘겨도 오버플로 없이 스크롤한다.
+            // (검색결과 패널의 ListView.builder 와 동일하게 스크롤 처리.)
+            Expanded(
+              child: ListView.separated(
+                padding: EdgeInsets.zero,
+                itemCount: items.length,
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: AppSpacing.itemGap),
+                itemBuilder: (context, i) => _HistoryRow(
+                  item: items[i],
+                  onRemove: () => ref
+                      .read(recentFoodControllerProvider.notifier)
+                      .removeRecent(items[i].foodExternalId),
+                ),
               ),
-            ],
+            ),
           ],
         ),
       ),
