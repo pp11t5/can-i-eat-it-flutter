@@ -71,6 +71,7 @@ dev_dependencies:
   riverpod_lint: ^2.6.5
   http_mock_adapter: ^0.6.1
   flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.6
 
 flutter_launcher_icons:
   image_path: "assets/appicon/app_icon.png"
@@ -78,6 +79,13 @@ flutter_launcher_icons:
   ios: true
   remove_alpha_ios: true
   background_color_ios: "#FFFFFF"
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/splash/splash_logo.png
+  android_12:
+    color: "#FFFFFF"
+    image: assets/splash/splash_logo.png
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -93,6 +101,7 @@ flutter:
   assets:
     - assets/figma_extracted/
     - assets/illustrations/
+    - assets/splash/
 
   fonts:
     - family: Pretendard
