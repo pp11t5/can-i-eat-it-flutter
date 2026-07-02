@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
-import 'package:can_i_eat_it/features/meal_log/presentation/widgets/food_thumbnail.dart';
 
 /// 타임라인 리스트 위젯 — 왼쪽 수직 스파인 + 시간대 아이콘 + 변형별 타일.
 ///
@@ -295,7 +295,7 @@ class _SingleMealCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
               child: Row(
                 children: [
-                  const FoodThumbnail(),
+                  CategoryIcon(code: item.categoryCode, size: 32),
                   const SizedBox(width: AppSpacing.itemGap),
                   Expanded(
                     child: Text(
@@ -396,7 +396,7 @@ class _GroupMealCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
               child: Row(
                 children: [
-                  const FoodThumbnail(),
+                  CategoryIcon(code: item.categoryCode, size: 32),
                   const SizedBox(width: AppSpacing.itemGap),
                   Expanded(
                     child: Text(

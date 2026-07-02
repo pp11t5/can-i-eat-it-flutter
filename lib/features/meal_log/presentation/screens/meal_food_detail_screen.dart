@@ -6,10 +6,10 @@ import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
-import 'package:can_i_eat_it/features/meal_log/presentation/widgets/food_thumbnail.dart';
 
 /// 음식 상세 화면 (GET /meal-records/foods/{mealFoodId}).
 ///
@@ -17,7 +17,7 @@ import 'package:can_i_eat_it/features/meal_log/presentation/widgets/food_thumbna
 ///
 /// 구성:
 /// - TopBar: X(닫기) + "음식 상세 정보"
-/// - Hero: FoodThumbnail(큰 사이즈) + 음식명 + analysis.judgmentGrade 상태표시
+/// - Hero: CategoryIcon(큰 사이즈) + 음식명 + analysis.judgmentGrade 상태표시
 /// - 분석 섹션: trigger / allergy (있는 섹션만)
 /// - 하단 CTA: "음식 삭제하기"
 class MealFoodDetailScreen extends ConsumerWidget {
@@ -122,7 +122,7 @@ class _Body extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Hero
-          Center(child: FoodThumbnail(category: food.category, size: 72)),
+          Center(child: CategoryIcon(code: food.category, size: 80)),
           const SizedBox(height: AppSpacing.itemGap),
           Center(
             child: Text(

@@ -199,6 +199,8 @@ abstract final class TimelineItemDto {
           mealFoodName: mealFoodName,
           grade: VerdictLevelGrade.fromGrade(gradeRaw),
           etcCount: (j['etcCount'] as num?)?.toInt() ?? 0,
+          // TODO(backend): timeline Single/Group에 category 추가 시 실 카테고리 표시. 현재 미제공 → regular
+          categoryCode: j['category'] as String?,
         );
       case 'group':
         // 필수 필드 중 하나라도 null/누락이면 항목 스킵.
@@ -215,6 +217,8 @@ abstract final class TimelineItemDto {
                   .toList() ??
               const [],
           etcCount: (j['etcCount'] as num?)?.toInt() ?? 0,
+          // TODO(backend): timeline Single/Group에 category 추가 시 실 카테고리 표시. 현재 미제공 → regular
+          categoryCode: j['category'] as String?,
         );
       case 'symptom':
         // 필수 필드 중 하나라도 null/누락이면 항목 스킵.
