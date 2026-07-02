@@ -7,6 +7,7 @@ import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
@@ -464,48 +465,16 @@ class _SettingsSection extends ConsumerWidget {
   }
 
   Future<void> _showLogoutDialog(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
-        ),
-        title: Text(
-          '로그아웃',
-          style: AppTextStyles.body1Bold.copyWith(
-            color: AppColors.textPrimary,
-          ),
-        ),
-        content: Text(
-          '로그아웃 하시겠어요?',
-          style: AppTextStyles.body2Regular.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(
-              '취소',
-              style: AppTextStyles.body2Medium.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(
-              '확인',
-              style: AppTextStyles.body2Medium.copyWith(
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-        ],
-      ),
+    final action = await showConfirmModal(
+      context,
+      title: '로그아웃 하시겠어요?',
+      primaryLabel: '취소',
+      primaryColor: AppColors.primary,
+      secondaryLabel: '로그아웃하기',
     );
 
-    if (confirmed == true && context.mounted) {
+    // primary(취소) 또는 바깥 닫힘(null)이면 아무 것도 하지 않는다.
+    if (action == ConfirmModalAction.secondary && context.mounted) {
       try {
         await ref.read(authControllerProvider.notifier).logout();
         // auth redirect 가드가 /login 으로 이동시킴 — 별도 navigation 불필요.

@@ -187,7 +187,7 @@ void main() {
       await tester.tap(find.text('탈퇴하기'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('취소'));
+      await tester.tap(find.text('취소하기'));
       await tester.pumpAndSettle();
 
       expect(find.text('정말 탈퇴하시겠어요?'), findsNothing);
