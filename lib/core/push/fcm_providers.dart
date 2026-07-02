@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -21,6 +22,17 @@ FcmRepository fcmRepository(Ref ref) =>
 
 @riverpod
 FcmTokenService fcmTokenService(Ref ref) => FcmTokenService();
+
+/// 기기 OS 알림 권한이 명시적으로 차단(denied)됐는지 여부.
+///
+/// notDetermined/provisional/authorized는 false(차단 아님).
+/// Firebase 미초기화/예외 시에도 false(안전 폴백) — [FcmTokenService.permissionStatus]가
+/// null을 반환하므로 자동으로 안전하다.
+@riverpod
+Future<bool> osNotificationBlocked(Ref ref) async {
+  final status = await ref.watch(fcmTokenServiceProvider).permissionStatus();
+  return status == AuthorizationStatus.denied;
+}
 
 @riverpod
 FcmLifecycle fcmLifecycle(Ref ref) {

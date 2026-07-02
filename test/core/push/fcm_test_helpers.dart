@@ -1,3 +1,5 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/core/push/fcm_repository.dart';
 import 'package:can_i_eat_it/core/push/fcm_token_service.dart';
@@ -32,6 +34,9 @@ class NoopFcmTokenService extends FcmTokenService {
 
   @override
   Future<String?> currentToken() async => null;
+
+  @override
+  Future<AuthorizationStatus?> permissionStatus() async => null;
 
   @override
   Stream<String> get onTokenRefresh => const Stream.empty();

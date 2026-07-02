@@ -40,6 +40,30 @@ final fcmTokenServiceProvider = AutoDisposeProvider<FcmTokenService>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FcmTokenServiceRef = AutoDisposeProviderRef<FcmTokenService>;
+String _$osNotificationBlockedHash() =>
+    r'033aebc50c57f1c7a85586ec3ce2afd0e5d0953f';
+
+/// 기기 OS 알림 권한이 명시적으로 차단(denied)됐는지 여부.
+///
+/// notDetermined/provisional/authorized는 false(차단 아님).
+/// Firebase 미초기화/예외 시에도 false(안전 폴백) — [FcmTokenService.permissionStatus]가
+/// null을 반환하므로 자동으로 안전하다.
+///
+/// Copied from [osNotificationBlocked].
+@ProviderFor(osNotificationBlocked)
+final osNotificationBlockedProvider = AutoDisposeFutureProvider<bool>.internal(
+  osNotificationBlocked,
+  name: r'osNotificationBlockedProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$osNotificationBlockedHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef OsNotificationBlockedRef = AutoDisposeFutureProviderRef<bool>;
 String _$fcmLifecycleHash() => r'37eab8e002b0e7d125754d9ab806aec8088beb86';
 
 /// See also [fcmLifecycle].

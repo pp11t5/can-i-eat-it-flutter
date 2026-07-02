@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/core/push/fcm_repository.dart';
@@ -55,6 +57,9 @@ class _FakeFcmTokenService implements FcmTokenService {
     if (throwOnGetToken) throw Exception('apns-token-not-set');
     return tokenToReturn;
   }
+
+  @override
+  Future<AuthorizationStatus?> permissionStatus() async => null;
 
   @override
   Stream<String> get onTokenRefresh => _refreshCtrl.stream;
