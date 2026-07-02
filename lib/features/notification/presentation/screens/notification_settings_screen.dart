@@ -1,3 +1,4 @@
+import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,21 +6,60 @@ import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/features/notification/data/notification_providers.dart';
 import 'package:can_i_eat_it/features/notification/domain/entities/notification_settings.dart';
 
-/// 알림 설정 화면 (Figma 577-10290).
+/// 기기 OS 설정 앱을 여는 콜백 provider — 테스트에서 override 가능한 seam.
+///
+/// 기본값: [AppSettings.openAppSettings] (설정 > 앱 > 알림 화면으로 이동).
+final openAppSettingsProvider = Provider<Future<void> Function()>(
+  (ref) => AppSettings.openAppSettings,
+);
+
+/// 알림 설정 화면 (Figma 577-10290, 577-10286).
 ///
 /// - 토글 3개: 식후 2시간 알림(postMeal), 식단 기록 알림(dailyRecord), 주간 리포트(weeklyReport).
 /// - 알림 수신 시간 라디오 4개(morning8/evening8/night9/night10).
 /// - 토글·라디오 변경 시 낙관적 갱신 + PATCH 호출.
-class NotificationSettingsScreen extends ConsumerWidget {
+/// - 기기 OS 알림 권한이 차단(denied)돼 있으면 상단 안내 배너를 띄우고 나머지 설정을 비활성화한다.
+///   포그라운드 복귀 시 권한 상태를 재조회해 배너 표시를 갱신한다.
+class NotificationSettingsScreen extends ConsumerStatefulWidget {
   const NotificationSettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settingsAsync =
-        ref.watch(notificationSettingsControllerProvider);
+  ConsumerState<NotificationSettingsScreen> createState() =>
+      _NotificationSettingsScreenState();
+}
+
+class _NotificationSettingsScreenState
+    extends ConsumerState<NotificationSettingsScreen>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // 설정 앱에서 알림을 켜고 돌아오면(resumed) 배너 표시를 갱신한다.
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(osNotificationBlockedProvider);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final settingsAsync = ref.watch(notificationSettingsControllerProvider);
+    final osBlocked =
+        ref.watch(osNotificationBlockedProvider).valueOrNull ?? false;
 
     return Scaffold(
       backgroundColor: AppColors.surfaceBackground,
@@ -45,7 +85,10 @@ class NotificationSettingsScreen extends ConsumerWidget {
           message: e.toString(),
           onRetry: () => ref.invalidate(notificationSettingsControllerProvider),
         ),
-        data: (settings) => _SettingsBody(settings: settings),
+        data: (settings) => _SettingsBody(
+          settings: settings,
+          osBlocked: osBlocked,
+        ),
       ),
     );
   }
@@ -88,16 +131,15 @@ class _ErrorBody extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _SettingsBody extends ConsumerWidget {
-  const _SettingsBody({required this.settings});
+  const _SettingsBody({required this.settings, required this.osBlocked});
   final NotificationSettings settings;
+
+  /// 기기 OS 알림 권한이 denied(차단)됐는지 여부.
+  final bool osBlocked;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.screenPadding,
-        vertical: AppSpacing.cardPadding,
-      ),
+    final sections = Column(
       children: [
         // 알림 토글 카드
         _SectionCard(
@@ -159,6 +201,26 @@ class _SettingsBody extends ConsumerWidget {
         ),
       ],
     );
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.screenPadding,
+        vertical: AppSpacing.cardPadding,
+      ),
+      children: [
+        if (osBlocked) ...[
+          const _OsBlockedBanner(),
+          const SizedBox(height: AppSpacing.sectionGap),
+        ],
+        if (osBlocked)
+          Opacity(
+            opacity: 0.5,
+            child: IgnorePointer(child: sections),
+          )
+        else
+          sections,
+      ],
+    );
   }
 
   Future<void> _handleToggle(
@@ -191,6 +253,81 @@ class _SettingsBody extends ConsumerWidget {
         await showAppToast(context, '알림 시간 변경에 실패했어요.');
       }
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// OS 알림 차단 안내 배너 (Figma 577-10286)
+// ---------------------------------------------------------------------------
+
+class _OsBlockedBanner extends ConsumerWidget {
+  const _OsBlockedBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(color: AppColors.borderCard),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.warning_amber_rounded,
+                color: AppColors.verdictCaution,
+                size: 20,
+              ),
+              const SizedBox(width: AppSpacing.iconTextGap),
+              Expanded(
+                child: Text(
+                  '기기 알림이 꺼져있어요',
+                  style: AppTextStyles.body1Bold.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            '설정 → 먹어도돼? → 알림 허용에서\n알림을 켜주세요',
+            style: AppTextStyles.body2Regular.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.itemGap),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => ref.read(openAppSettingsProvider)(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.onPrimary,
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.itemGap + 4,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                '설정 바로 가기',
+                style: AppTextStyles.body2Bold.copyWith(
+                  color: AppColors.onPrimary,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

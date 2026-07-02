@@ -25,6 +25,18 @@ class FcmTokenService {
     }
   }
 
+  /// 현재 OS 알림 권한 상태. Firebase 미초기화/예외 시 null(안전 폴백) —
+  /// 호출측은 null을 "차단 아님"으로 취급한다.
+  Future<AuthorizationStatus?> permissionStatus() async {
+    try {
+      final settings = await _fm.getNotificationSettings();
+      return settings.authorizationStatus;
+    } catch (e) {
+      debugPrint('[FCM] getNotificationSettings failed (ignored): $e');
+      return null;
+    }
+  }
+
   /// 현재 FCM 토큰. APNs 부재(iOS) 등으로 실패하면 null 반환(graceful).
   Future<String?> currentToken() async {
     try {
