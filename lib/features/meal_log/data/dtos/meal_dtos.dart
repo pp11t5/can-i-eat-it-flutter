@@ -209,9 +209,26 @@ extension ConnectedSymptomsDtoMapper on ConnectedSymptomsDto {
 /// `.whereType<TimelineItem>()` 로 걸러 신규 타입 추가에도 무크래시.
 abstract final class TimelineItemDto {
   /// j['connectedSymptoms']가 있으면 [ConnectedSymptoms]로 매핑, 없으면 null.
+  ///
+  /// 서버가 필드 일부(symptomId/symptomState/afterMealMinutes 등)를 누락한
+  /// 채로 보내면 [ConnectedSymptomsDto.fromJson]이 TypeError를 던질 수 있다.
+  /// 칩은 부차 UI이므로 파싱 실패 시 null로 흡수하고 항목 자체는 살린다.
   static ConnectedSymptoms? _connectedSymptomsOf(Map<String, dynamic> j) {
-    final raw = j['connectedSymptoms'] as Map<String, dynamic>?;
-    return raw == null ? null : ConnectedSymptomsDto.fromJson(raw).toEntity();
+    try {
+      final raw = j['connectedSymptoms'] as Map<String, dynamic>?;
+      return raw == null
+          ? null
+          : ConnectedSymptomsDto.fromJson(raw).toEntity();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// j['timeIcon']을 [TimeIcon]으로 매핑. 비문자열·이상값이면 null(hour 휴리스틱
+  /// 폴백에 위임)로 흡수해 항목 파싱 자체는 실패시키지 않는다.
+  static TimeIcon? _timeIconOf(Map<String, dynamic> j) {
+    final raw = j['timeIcon'];
+    return raw is String ? TimeIconMapper.fromServer(raw) : null;
   }
 
   static TimelineItem? fromJson(Map<String, dynamic> j) {
@@ -237,7 +254,7 @@ abstract final class TimelineItemDto {
           etcCount: (j['etcCount'] as num?)?.toInt() ?? 0,
           // TODO(backend): timeline Single/Group에 category 추가 시 실 카테고리 표시. 현재 미제공 → regular
           categoryCode: j['category'] as String?,
-          timeIcon: TimeIconMapper.fromServer(j['timeIcon'] as String?),
+          timeIcon: _timeIconOf(j),
           connectedSymptoms: _connectedSymptomsOf(j),
         );
       case 'group':
@@ -257,7 +274,7 @@ abstract final class TimelineItemDto {
           etcCount: (j['etcCount'] as num?)?.toInt() ?? 0,
           // TODO(backend): timeline Single/Group에 category 추가 시 실 카테고리 표시. 현재 미제공 → regular
           categoryCode: j['category'] as String?,
-          timeIcon: TimeIconMapper.fromServer(j['timeIcon'] as String?),
+          timeIcon: _timeIconOf(j),
           connectedSymptoms: _connectedSymptomsOf(j),
         );
       case 'symptom':
@@ -274,7 +291,7 @@ abstract final class TimelineItemDto {
           symptomState: SymptomStateMapper.fromServer(symptomStateRaw),
           afterMealMinutes: afterMealMinutes,
           occurredAt: occurredAt,
-          timeIcon: TimeIconMapper.fromServer(j['timeIcon'] as String?),
+          timeIcon: _timeIconOf(j),
           symptomId: j['symptomId'] as String?,
         );
       default:

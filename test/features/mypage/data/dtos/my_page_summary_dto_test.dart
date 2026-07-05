@@ -187,5 +187,56 @@ void main() {
       expect(entity.weeklySummary.streakCount, 4);
       expect(entity.weeklySummary.mealCount.recommendCount, 9);
     });
+
+    // pr-review 수정3: 서브객체 하나 누락 시 나머지는 살아있어야 한다
+    // (top-level required였던 구 계약은 하나만 빠져도 fromJson TypeError로
+    // 요약 전체가 소실됐다).
+    test('profile 키 누락 시 foodHistory·weeklySummary는 살아있고 profile은 안전 기본값이다',
+        () {
+      final dto = MyPageSummaryDto.fromJson(const {
+        'foodHistory': {'safeCount': 12, 'cautionCount': 4},
+        'weeklySummary': {'mealRecordCount': 9, 'streakCount': 4},
+      });
+      final entity = dto.toEntity();
+      expect(entity.profile.nickName, '');
+      expect(entity.profile.disease, MyPageDisease.unknown);
+      expect(entity.foodHistory.safeCount, 12);
+      expect(entity.weeklySummary.mealRecordCount, 9);
+    });
+
+    test('foodHistory 키 누락 시 profile·weeklySummary는 살아있고 foodHistory는 0으로 폴백된다',
+        () {
+      final dto = MyPageSummaryDto.fromJson(const {
+        'profile': {'nickName': '홍길동', 'disease': 'gerd'},
+        'weeklySummary': {'mealRecordCount': 9},
+      });
+      final entity = dto.toEntity();
+      expect(entity.profile.nickName, '홍길동');
+      expect(entity.foodHistory.safeCount, 0);
+      expect(entity.foodHistory.cautionCount, 0);
+      expect(entity.weeklySummary.mealRecordCount, 9);
+    });
+
+    test('weeklySummary 키 누락 시 profile·foodHistory는 살아있고 weeklySummary는 0 폴백이다',
+        () {
+      final dto = MyPageSummaryDto.fromJson(const {
+        'profile': {'nickName': '홍길동', 'disease': 'gerd'},
+        'foodHistory': {'safeCount': 12, 'cautionCount': 4},
+      });
+      final entity = dto.toEntity();
+      expect(entity.profile.nickName, '홍길동');
+      expect(entity.foodHistory.safeCount, 12);
+      expect(entity.weeklySummary.mealRecordCount, 0);
+      expect(entity.weeklySummary.mealCount.recommendCount, 0);
+    });
+
+    test('세 서브객체 모두 누락 시 예외 없이 전부 안전 기본값으로 채워진다', () {
+      final entity = MyPageSummaryDto.fromJson(const {}).toEntity();
+      expect(entity.profile.nickName, '');
+      expect(entity.profile.disease, MyPageDisease.unknown);
+      expect(entity.foodHistory.safeCount, 0);
+      expect(entity.weeklySummary.mealRecordCount, 0);
+      expect(entity.weeklySummary.mealCount.recommendCount, 0);
+    });
   });
 }

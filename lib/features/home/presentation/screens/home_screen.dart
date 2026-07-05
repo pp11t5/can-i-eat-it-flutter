@@ -317,9 +317,9 @@ class _RecentMealTile extends StatelessWidget {
   Widget build(BuildContext context) {
     // eatenAt은 서버 ISO(+09:00) 원문 — parseKst로 KST 컴포넌트 복원 후 수동 포맷
     // (KST 이중변환 방지, meal_timeline_list.dart _formatTime과 동일 원칙).
-    final dt = parseKst(meal.eatenAt);
-    final time =
-        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    // malformed eatenAt이어도 타일 자체(음식명 등)는 렌더되도록 방어
+    // (meal_timeline_list.dart _hourOf와 동일 패턴).
+    final time = _formatEatenAtTime(meal.eatenAt);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -365,5 +365,17 @@ class _RecentMealTile extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// eatenAt(서버 ISO +09:00)을 'HH:mm'으로 포맷한다. malformed 값이면
+  /// FormatException으로 타일 전체가 레드스크린 되지 않도록 '—'로 폴백한다
+  /// (meal_timeline_list.dart `_hourOf`와 동일한 방어 패턴).
+  static String _formatEatenAtTime(String eatenAt) {
+    try {
+      final dt = parseKst(eatenAt);
+      return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    } catch (_) {
+      return '—';
+    }
   }
 }

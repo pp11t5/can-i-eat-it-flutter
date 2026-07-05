@@ -69,15 +69,19 @@ class MockAuthRepository implements AuthRepository {
   /// [appleOutcome]: Apple 로그인 결과. 미지정 시 [kakaoOutcome] 폴백.
   /// [delay]: 테스트에서 loading 상태 관찰용 — [currentSession] 반환 전 대기 시간.
   ///   기본값 [Duration.zero]이므로 기존 동작/테스트에 영향 없음.
+  /// [failRecoverTimes]: [recoverAccount] 호출이 실패해야 하는 횟수(재시도
+  ///   어포던스 테스트용). 기본 0 — 즉시 성공(기존 동작 불변).
   MockAuthRepository({
     AuthSession? initialSession,
     SignInOutcome? kakaoOutcome,
     SignInOutcome? appleOutcome,
     Duration delay = Duration.zero,
+    int failRecoverTimes = 0,
   })  : _session = initialSession,
         _kakaoOutcome = kakaoOutcome,
         _appleOutcome = appleOutcome,
-        _delay = delay;
+        _delay = delay,
+        _failRecoverTimes = failRecoverTimes;
 
   // ---------------------------------------------------------------------------
   // 시나리오 named factory
@@ -118,13 +122,18 @@ class MockAuthRepository implements AuthRepository {
       );
 
   /// 로그인 시 계정 삭제 유예 상태 → [Recoverable].
-  factory MockAuthRepository.deletionGrace() => MockAuthRepository(
+  ///
+  /// [failRecoverTimes]: recoverAccount 재시도 테스트용 — 지정 횟수만큼 실패
+  /// 후 성공한다. 기본 0(즉시 성공).
+  factory MockAuthRepository.deletionGrace({int failRecoverTimes = 0}) =>
+      MockAuthRepository(
         initialSession: null,
         kakaoOutcome: const Recoverable(
           reason: RecoverReason.deletionInProgress,
           provider: AuthProvider.kakao,
           idToken: 'mock-id-token',
         ),
+        failRecoverTimes: failRecoverTimes,
       );
 
   /// W1 데모용 시나리오.
@@ -149,6 +158,7 @@ class MockAuthRepository implements AuthRepository {
   final SignInOutcome? _kakaoOutcome;
   final SignInOutcome? _appleOutcome;
   final Duration _delay;
+  int _failRecoverTimes;
   TermsAgreement? _lastTermsAgreement;
 
   /// 마지막으로 기록된 약관 동의 이력. 테스트 검증용.
@@ -203,6 +213,11 @@ class MockAuthRepository implements AuthRepository {
     AuthProvider provider, {
     required String idToken,
   }) async {
+    // 재시도 어포던스 테스트용: 지정 횟수만큼 실패 후 성공.
+    if (_failRecoverTimes > 0) {
+      _failRecoverTimes--;
+      throw const UnexpectedFailure();
+    }
     // 403 경로는 _session=null 상태. Mock 은 새 active 세션을 합성해 반환한다.
     // idToken 은 실 구현에서 서버로 전달되지만 Mock 에서는 무시한다.
     _session = AuthSession(

@@ -140,6 +140,46 @@ void main() {
       // 다이얼로그 분기라 /terms 로 push 되지 않음.
       expect(find.text('terms stub'), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    // pr-review 수정2 회귀: 복구 실패로 모달이 닫혀 사용자가 로그인 플로우를
+    // 처음부터 다시 타야 하는 계정소실 위험 경로를 막는다. 실패 시 모달이
+    // 재노출돼 재시도할 수 있어야 한다.
+    testWidgets(
+        'Recoverable(deletionGrace) — 복구 실패 시 스낵바 노출 + 모달 재노출, 재시도 성공 시 모달이 닫힌다',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(MockAuthRepository.deletionGrace(failRecoverTimes: 1)),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('카카오로 로그인'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('탈퇴를 진행 중인 계정이에요'), findsOneWidget);
+
+      // 1차 시도 — recoverAccount 실패.
+      await tester.tap(find.text('계정 복구하고 계속하기'));
+      await tester.pumpAndSettle();
+
+      // 실패 스낵바 노출.
+      expect(
+        find.text('계정 복구에 실패했어요. 잠시 후 다시 시도해 주세요.'),
+        findsOneWidget,
+      );
+      // 모달이 닫히지 않고 재노출된다 — 재시도 어포던스.
+      expect(find.text('탈퇴를 진행 중인 계정이에요'), findsOneWidget);
+
+      // 2차 시도 — 성공.
+      await tester.tap(find.text('계정 복구하고 계속하기'));
+      await tester.pumpAndSettle();
+
+      // 복구 성공 → 모달이 닫힌다.
+      expect(find.text('탈퇴를 진행 중인 계정이에요'), findsNothing);
+
+      // 스낵바 타이머 소진 (pending Timer 잔존 방지).
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
   });
 
   group('LoginScreen 로그인 실패 T2 토스트 (Bug A 회귀)', () {

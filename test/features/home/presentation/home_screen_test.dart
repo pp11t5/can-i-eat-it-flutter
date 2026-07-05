@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/home/data/repositories/mock_home_repository.dart';
+import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
 import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
 import 'package:can_i_eat_it/features/mypage/data/repositories/mock_my_page_repository.dart';
@@ -209,6 +210,39 @@ void main() {
       expect(find.text('카페라떼'), findsOneWidget);
       expect(find.text('편안함'), findsOneWidget);
       expect(find.text('먹은 음식이 있으신가요?'), findsNothing);
+    });
+
+    // pr-review 수정4: parseKst가 무가드로 호출돼 malformed eatenAt 시
+    // FormatException 레드스크린이 나던 회귀를 막는다. 시간 표시만 실패하고
+    // 타일(음식명 등) 자체는 렌더돼야 한다.
+    testWidgets('eatenAt이 malformed여도 타일은 렌더되고 시간은 "—"로 폴백된다',
+        (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            // ignore: scoped_providers_should_specify_dependencies
+            myPageRepositoryProvider
+                .overrideWithValue(MockMyPageRepository.empty()),
+            // ignore: scoped_providers_should_specify_dependencies
+            homeRepositoryProvider.overrideWithValue(
+              MockHomeRepository(
+                recentFoods: const [
+                  RecentMeal(
+                    foodName: '두부',
+                    category: 'regular',
+                    eatenAt: 'not-a-date',
+                  ),
+                ],
+              ),
+            ),
+          ],
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('두부'), findsOneWidget);
+      expect(find.text('—'), findsOneWidget);
     });
   });
 

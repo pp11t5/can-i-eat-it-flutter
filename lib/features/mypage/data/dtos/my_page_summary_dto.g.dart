@@ -56,12 +56,18 @@ Map<String, dynamic> _$WeeklySummaryDtoToJson(_WeeklySummaryDto instance) =>
 
 _MyPageSummaryDto _$MyPageSummaryDtoFromJson(Map<String, dynamic> json) =>
     _MyPageSummaryDto(
-      profile: MyPageProfileSummaryDto.fromJson(
-          json['profile'] as Map<String, dynamic>),
-      foodHistory: FoodHistorySummaryDto.fromJson(
-          json['foodHistory'] as Map<String, dynamic>),
-      weeklySummary: WeeklySummaryDto.fromJson(
-          json['weeklySummary'] as Map<String, dynamic>),
+      profile: json['profile'] == null
+          ? null
+          : MyPageProfileSummaryDto.fromJson(
+              json['profile'] as Map<String, dynamic>),
+      foodHistory: json['foodHistory'] == null
+          ? null
+          : FoodHistorySummaryDto.fromJson(
+              json['foodHistory'] as Map<String, dynamic>),
+      weeklySummary: json['weeklySummary'] == null
+          ? null
+          : WeeklySummaryDto.fromJson(
+              json['weeklySummary'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$MyPageSummaryDtoToJson(_MyPageSummaryDto instance) =>

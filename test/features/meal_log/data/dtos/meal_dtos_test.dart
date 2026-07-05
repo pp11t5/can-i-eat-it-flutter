@@ -407,6 +407,44 @@ void main() {
         expect((item! as TimelineSingle).timeIcon, isNull);
       });
 
+      // pr-review 수정1: connectedSymptoms 필수 필드 누락 시 TypeError로
+      // 항목 전체가 무너지지 않고 칩만 null로 흡수돼야 한다.
+      test('single — connectedSymptoms 필수 필드(symptomId) 누락 시 칩은 null이지만 항목은 유지된다', () {
+        final item = TimelineItemDto.fromJson(const {
+          'timeLineType': 'single',
+          'mealRecordId': 'mr1',
+          'mealRecordDateTime': '2026-06-17T08:00:00+09:00',
+          'mealFoodName': '두부',
+          'grade': 'RECOMMEND',
+          'connectedSymptoms': {
+            // 'symptomId' 누락 → ConnectedSymptomsDto.fromJson TypeError 유발
+            'symptomState': 'uncomfortable',
+            'afterMealMinutes': 90,
+          },
+        });
+        expect(item, isNotNull);
+        final single = item! as TimelineSingle;
+        expect(single.mealFoodName, '두부');
+        expect(single.connectedSymptoms, isNull);
+      });
+
+      // pr-review 수정1: timeIcon이 문자열이 아닌 이상값(예: 숫자)이어도
+      // 캐스팅 TypeError로 항목이 무너지지 않고 null로 흡수돼야 한다.
+      test('single — timeIcon이 문자열이 아니면(숫자) null로 흡수되고 항목은 유지된다', () {
+        final item = TimelineItemDto.fromJson(const {
+          'timeLineType': 'single',
+          'mealRecordId': 'mr1',
+          'mealRecordDateTime': '2026-06-17T08:00:00+09:00',
+          'mealFoodName': '두부',
+          'grade': 'RECOMMEND',
+          'timeIcon': 1,
+        });
+        expect(item, isNotNull);
+        final single = item! as TimelineSingle;
+        expect(single.mealFoodName, '두부');
+        expect(single.timeIcon, isNull);
+      });
+
       test('group — timeIcon·connectedSymptoms를 매핑한다', () {
         final item = TimelineItemDto.fromJson(const {
           'timeLineType': 'group',

@@ -1085,9 +1085,9 @@ class __$WeeklySummaryDtoCopyWithImpl<$Res>
 
 /// @nodoc
 mixin _$MyPageSummaryDto {
-  MyPageProfileSummaryDto get profile;
-  FoodHistorySummaryDto get foodHistory;
-  WeeklySummaryDto get weeklySummary;
+  MyPageProfileSummaryDto? get profile;
+  FoodHistorySummaryDto? get foodHistory;
+  WeeklySummaryDto? get weeklySummary;
 
   /// Create a copy of MyPageSummaryDto
   /// with the given fields replaced by the non-null parameter values.
@@ -1130,13 +1130,13 @@ abstract mixin class $MyPageSummaryDtoCopyWith<$Res> {
       _$MyPageSummaryDtoCopyWithImpl;
   @useResult
   $Res call(
-      {MyPageProfileSummaryDto profile,
-      FoodHistorySummaryDto foodHistory,
-      WeeklySummaryDto weeklySummary});
+      {MyPageProfileSummaryDto? profile,
+      FoodHistorySummaryDto? foodHistory,
+      WeeklySummaryDto? weeklySummary});
 
-  $MyPageProfileSummaryDtoCopyWith<$Res> get profile;
-  $FoodHistorySummaryDtoCopyWith<$Res> get foodHistory;
-  $WeeklySummaryDtoCopyWith<$Res> get weeklySummary;
+  $MyPageProfileSummaryDtoCopyWith<$Res>? get profile;
+  $FoodHistorySummaryDtoCopyWith<$Res>? get foodHistory;
+  $WeeklySummaryDtoCopyWith<$Res>? get weeklySummary;
 }
 
 /// @nodoc
@@ -1152,23 +1152,23 @@ class _$MyPageSummaryDtoCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? profile = null,
-    Object? foodHistory = null,
-    Object? weeklySummary = null,
+    Object? profile = freezed,
+    Object? foodHistory = freezed,
+    Object? weeklySummary = freezed,
   }) {
     return _then(_self.copyWith(
-      profile: null == profile
+      profile: freezed == profile
           ? _self.profile
           : profile // ignore: cast_nullable_to_non_nullable
-              as MyPageProfileSummaryDto,
-      foodHistory: null == foodHistory
+              as MyPageProfileSummaryDto?,
+      foodHistory: freezed == foodHistory
           ? _self.foodHistory
           : foodHistory // ignore: cast_nullable_to_non_nullable
-              as FoodHistorySummaryDto,
-      weeklySummary: null == weeklySummary
+              as FoodHistorySummaryDto?,
+      weeklySummary: freezed == weeklySummary
           ? _self.weeklySummary
           : weeklySummary // ignore: cast_nullable_to_non_nullable
-              as WeeklySummaryDto,
+              as WeeklySummaryDto?,
     ));
   }
 
@@ -1176,8 +1176,12 @@ class _$MyPageSummaryDtoCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $MyPageProfileSummaryDtoCopyWith<$Res> get profile {
-    return $MyPageProfileSummaryDtoCopyWith<$Res>(_self.profile, (value) {
+  $MyPageProfileSummaryDtoCopyWith<$Res>? get profile {
+    if (_self.profile == null) {
+      return null;
+    }
+
+    return $MyPageProfileSummaryDtoCopyWith<$Res>(_self.profile!, (value) {
       return _then(_self.copyWith(profile: value));
     });
   }
@@ -1186,8 +1190,12 @@ class _$MyPageSummaryDtoCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $FoodHistorySummaryDtoCopyWith<$Res> get foodHistory {
-    return $FoodHistorySummaryDtoCopyWith<$Res>(_self.foodHistory, (value) {
+  $FoodHistorySummaryDtoCopyWith<$Res>? get foodHistory {
+    if (_self.foodHistory == null) {
+      return null;
+    }
+
+    return $FoodHistorySummaryDtoCopyWith<$Res>(_self.foodHistory!, (value) {
       return _then(_self.copyWith(foodHistory: value));
     });
   }
@@ -1196,8 +1204,12 @@ class _$MyPageSummaryDtoCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $WeeklySummaryDtoCopyWith<$Res> get weeklySummary {
-    return $WeeklySummaryDtoCopyWith<$Res>(_self.weeklySummary, (value) {
+  $WeeklySummaryDtoCopyWith<$Res>? get weeklySummary {
+    if (_self.weeklySummary == null) {
+      return null;
+    }
+
+    return $WeeklySummaryDtoCopyWith<$Res>(_self.weeklySummary!, (value) {
       return _then(_self.copyWith(weeklySummary: value));
     });
   }
@@ -1296,8 +1308,10 @@ extension MyPageSummaryDtoPatterns on MyPageSummaryDto {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(MyPageProfileSummaryDto profile,
-            FoodHistorySummaryDto foodHistory, WeeklySummaryDto weeklySummary)?
+    TResult Function(
+            MyPageProfileSummaryDto? profile,
+            FoodHistorySummaryDto? foodHistory,
+            WeeklySummaryDto? weeklySummary)?
         $default, {
     required TResult orElse(),
   }) {
@@ -1325,8 +1339,8 @@ extension MyPageSummaryDtoPatterns on MyPageSummaryDto {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(MyPageProfileSummaryDto profile,
-            FoodHistorySummaryDto foodHistory, WeeklySummaryDto weeklySummary)
+    TResult Function(MyPageProfileSummaryDto? profile,
+            FoodHistorySummaryDto? foodHistory, WeeklySummaryDto? weeklySummary)
         $default,
   ) {
     final _that = this;
@@ -1352,8 +1366,10 @@ extension MyPageSummaryDtoPatterns on MyPageSummaryDto {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(MyPageProfileSummaryDto profile,
-            FoodHistorySummaryDto foodHistory, WeeklySummaryDto weeklySummary)?
+    TResult? Function(
+            MyPageProfileSummaryDto? profile,
+            FoodHistorySummaryDto? foodHistory,
+            WeeklySummaryDto? weeklySummary)?
         $default,
   ) {
     final _that = this;
@@ -1369,19 +1385,16 @@ extension MyPageSummaryDtoPatterns on MyPageSummaryDto {
 /// @nodoc
 @JsonSerializable()
 class _MyPageSummaryDto implements MyPageSummaryDto {
-  const _MyPageSummaryDto(
-      {required this.profile,
-      required this.foodHistory,
-      required this.weeklySummary});
+  const _MyPageSummaryDto({this.profile, this.foodHistory, this.weeklySummary});
   factory _MyPageSummaryDto.fromJson(Map<String, dynamic> json) =>
       _$MyPageSummaryDtoFromJson(json);
 
   @override
-  final MyPageProfileSummaryDto profile;
+  final MyPageProfileSummaryDto? profile;
   @override
-  final FoodHistorySummaryDto foodHistory;
+  final FoodHistorySummaryDto? foodHistory;
   @override
-  final WeeklySummaryDto weeklySummary;
+  final WeeklySummaryDto? weeklySummary;
 
   /// Create a copy of MyPageSummaryDto
   /// with the given fields replaced by the non-null parameter values.
@@ -1430,16 +1443,16 @@ abstract mixin class _$MyPageSummaryDtoCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {MyPageProfileSummaryDto profile,
-      FoodHistorySummaryDto foodHistory,
-      WeeklySummaryDto weeklySummary});
+      {MyPageProfileSummaryDto? profile,
+      FoodHistorySummaryDto? foodHistory,
+      WeeklySummaryDto? weeklySummary});
 
   @override
-  $MyPageProfileSummaryDtoCopyWith<$Res> get profile;
+  $MyPageProfileSummaryDtoCopyWith<$Res>? get profile;
   @override
-  $FoodHistorySummaryDtoCopyWith<$Res> get foodHistory;
+  $FoodHistorySummaryDtoCopyWith<$Res>? get foodHistory;
   @override
-  $WeeklySummaryDtoCopyWith<$Res> get weeklySummary;
+  $WeeklySummaryDtoCopyWith<$Res>? get weeklySummary;
 }
 
 /// @nodoc
@@ -1455,23 +1468,23 @@ class __$MyPageSummaryDtoCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? profile = null,
-    Object? foodHistory = null,
-    Object? weeklySummary = null,
+    Object? profile = freezed,
+    Object? foodHistory = freezed,
+    Object? weeklySummary = freezed,
   }) {
     return _then(_MyPageSummaryDto(
-      profile: null == profile
+      profile: freezed == profile
           ? _self.profile
           : profile // ignore: cast_nullable_to_non_nullable
-              as MyPageProfileSummaryDto,
-      foodHistory: null == foodHistory
+              as MyPageProfileSummaryDto?,
+      foodHistory: freezed == foodHistory
           ? _self.foodHistory
           : foodHistory // ignore: cast_nullable_to_non_nullable
-              as FoodHistorySummaryDto,
-      weeklySummary: null == weeklySummary
+              as FoodHistorySummaryDto?,
+      weeklySummary: freezed == weeklySummary
           ? _self.weeklySummary
           : weeklySummary // ignore: cast_nullable_to_non_nullable
-              as WeeklySummaryDto,
+              as WeeklySummaryDto?,
     ));
   }
 
@@ -1479,8 +1492,12 @@ class __$MyPageSummaryDtoCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $MyPageProfileSummaryDtoCopyWith<$Res> get profile {
-    return $MyPageProfileSummaryDtoCopyWith<$Res>(_self.profile, (value) {
+  $MyPageProfileSummaryDtoCopyWith<$Res>? get profile {
+    if (_self.profile == null) {
+      return null;
+    }
+
+    return $MyPageProfileSummaryDtoCopyWith<$Res>(_self.profile!, (value) {
       return _then(_self.copyWith(profile: value));
     });
   }
@@ -1489,8 +1506,12 @@ class __$MyPageSummaryDtoCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $FoodHistorySummaryDtoCopyWith<$Res> get foodHistory {
-    return $FoodHistorySummaryDtoCopyWith<$Res>(_self.foodHistory, (value) {
+  $FoodHistorySummaryDtoCopyWith<$Res>? get foodHistory {
+    if (_self.foodHistory == null) {
+      return null;
+    }
+
+    return $FoodHistorySummaryDtoCopyWith<$Res>(_self.foodHistory!, (value) {
       return _then(_self.copyWith(foodHistory: value));
     });
   }
@@ -1499,8 +1520,12 @@ class __$MyPageSummaryDtoCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $WeeklySummaryDtoCopyWith<$Res> get weeklySummary {
-    return $WeeklySummaryDtoCopyWith<$Res>(_self.weeklySummary, (value) {
+  $WeeklySummaryDtoCopyWith<$Res>? get weeklySummary {
+    if (_self.weeklySummary == null) {
+      return null;
+    }
+
+    return $WeeklySummaryDtoCopyWith<$Res>(_self.weeklySummary!, (value) {
       return _then(_self.copyWith(weeklySummary: value));
     });
   }
