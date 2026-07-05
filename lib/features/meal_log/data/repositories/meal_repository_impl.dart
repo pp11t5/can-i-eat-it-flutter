@@ -75,16 +75,15 @@ class MealRepositoryImpl implements MealRepository {
     String? mealRecordId,
   }) async {
     try {
-      final body = CreateMealRecordRequestDto(
-        foodExternalId: foodExternalId,
+      final body = MealRecordByIdRequestDto(
         eatenAt: eatenAt != null ? toServerOffset(eatenAt) : null,
-        mealRecordId: mealRecordId,
       ).toJson()
         ..removeWhere((_, v) => v == null);
-      final response = await _dio.post<dynamic>(
-        ApiEndpoints.mealRecords,
-        data: body,
-      );
+      // mealRecordId 없음 → 신규 식사(by-id) / 있음 → 기존 식사에 append(by-id).
+      final path = mealRecordId == null
+          ? ApiEndpoints.mealRecordsByFoodId(foodExternalId)
+          : ApiEndpoints.mealRecordFoodById(mealRecordId, foodExternalId);
+      final response = await _dio.post<dynamic>(path, data: body);
       final dto = unwrap<MealFoodRecordDetailDto>(
         response,
         (j) => MealFoodRecordDetailDto.fromJson(j as Map<String, dynamic>),
@@ -101,10 +100,25 @@ class MealRepositoryImpl implements MealRepository {
     DateTime? eatenAt,
     String? mealRecordId,
   }) async {
-    // 서버 미지원 seam. 호출부(meal_recording.dart)는 by-text 분기에서 이 메서드를
-    // 호출하지 않고 "준비중" 토스트로 단락한다. 이 throw는 다른 호출자가 생기면
-    // 즉시 터지게 하는 안전망이다.
-    throw UnimplementedError('텍스트 음식 추가는 서버 준비중입니다');
+    try {
+      final body = MealRecordTextRequestDto(
+        name: clampMealName(foodTextInput),
+        eatenAt: eatenAt != null ? toServerOffset(eatenAt) : null,
+      ).toJson()
+        ..removeWhere((_, v) => v == null);
+      // mealRecordId 없음 → 신규 식사(by-text) / 있음 → 기존 식사에 append(by-text).
+      final path = mealRecordId == null
+          ? ApiEndpoints.mealRecords
+          : ApiEndpoints.mealRecordFoods(mealRecordId);
+      final response = await _dio.post<dynamic>(path, data: body);
+      final dto = unwrap<MealFoodRecordDetailDto>(
+        response,
+        (j) => MealFoodRecordDetailDto.fromJson(j as Map<String, dynamic>),
+      );
+      return dto.toEntity();
+    } on DioException catch (e) {
+      throw FailureMapper.fromDioException(e);
+    }
   }
 
   // ---------------------------------------------------------------------------

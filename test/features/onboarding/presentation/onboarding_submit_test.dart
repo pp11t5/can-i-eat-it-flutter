@@ -43,6 +43,15 @@ class ThrowingHealthProfileRepository implements HealthProfileRepository {
   Future<void> submitProfile(HealthProfile profile) async {
     throw Exception('서버 오류');
   }
+
+  @override
+  Future<void> updateHealthInfo({
+    required List<String> allergies,
+    required List<String> medications,
+  }) async {}
+
+  @override
+  Future<HealthProfile> fetchMedicalInfoStrict() async => const HealthProfile();
 }
 
 // ---------------------------------------------------------------------------

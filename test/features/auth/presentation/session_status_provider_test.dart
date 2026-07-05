@@ -26,6 +26,15 @@ class _ThrowingHealthProfileRepository implements HealthProfileRepository {
 
   @override
   Future<void> submitProfile(HealthProfile profile) async {}
+
+  @override
+  Future<void> updateHealthInfo({
+    required List<String> allergies,
+    required List<String> medications,
+  }) async {}
+
+  @override
+  Future<HealthProfile> fetchMedicalInfoStrict() async => const HealthProfile();
 }
 
 void main() {

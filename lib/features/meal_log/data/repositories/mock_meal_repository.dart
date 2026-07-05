@@ -1,4 +1,5 @@
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
+import 'package:can_i_eat_it/features/meal_log/data/dtos/meal_dtos.dart' show clampMealName;
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/repositories/meal_repository.dart';
@@ -53,12 +54,12 @@ class MockMealRepository implements MealRepository {
     return List<WeeklyDay>.unmodifiable(_weekly);
   }
 
-  @override
-  Future<MealFood> appendFood({
-    required String foodExternalId,
+  /// [appendFood]/[appendFoodByText] 공통 로직 — 음식 생성 + 식사 상세 캐시 반영.
+  MealFood _appendFood({
+    required String name,
     DateTime? eatenAt,
     String? mealRecordId,
-  }) async {
+  }) {
     final now = eatenAt ?? DateTime.now();
     final iso = now.toIso8601String();
     _seq++;
@@ -67,7 +68,7 @@ class MockMealRepository implements MealRepository {
 
     final food = MealFood(
       mealFoodId: foodId,
-      name: foodExternalId,
+      name: name,
       eatenAt: iso,
       mealRecordExternalId: recordId,
       analysis: const MealAnalysis(judgmentGrade: VerdictLevel.unknown),
@@ -91,14 +92,30 @@ class MockMealRepository implements MealRepository {
   }
 
   @override
+  Future<MealFood> appendFood({
+    required String foodExternalId,
+    DateTime? eatenAt,
+    String? mealRecordId,
+  }) async =>
+      _appendFood(
+        name: foodExternalId,
+        eatenAt: eatenAt,
+        mealRecordId: mealRecordId,
+      );
+
+  @override
   Future<MealFood> appendFoodByText({
     required String foodTextInput,
     DateTime? eatenAt,
     String? mealRecordId,
-  }) async {
-    // 미지원 seam — 실 구현과 동일하게 throw 하여 테스트가 미지원을 검증한다.
-    throw UnimplementedError('텍스트 음식 추가는 서버 준비중입니다');
-  }
+  }) async =>
+      _appendFood(
+        // 실구현(meal_repository_impl.dart)과 동일하게 서버 name 제약(≤100자,
+        // grapheme 기준)을 적용한다 — 계약 정합(pr-review 소소 수정 ③).
+        name: clampMealName(foodTextInput),
+        eatenAt: eatenAt,
+        mealRecordId: mealRecordId,
+      );
 
   @override
   Future<MealRecord> mealDetail(String mealRecordId) async {

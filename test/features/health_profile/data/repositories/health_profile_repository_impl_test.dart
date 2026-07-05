@@ -222,6 +222,336 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
+  // currentProfile — GET /my-page/health-info + GET /my-page/profile 병합 (W7 마이그레이션)
+  // -------------------------------------------------------------------------
+
+  group('currentProfile — 서버 GET 병합 (W7)', () {
+    test('두 GET이 모두 성공하면 allergies/medications/conditions가 병합된다', () async {
+      dioAdapter.onGet(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.reply(
+          200,
+          _envelope({
+            'allergies': ['milk', 'egg'],
+            'medications': ['omeprazole'],
+          }),
+        ),
+      );
+      dioAdapter.onGet(
+        ApiEndpoints.myPageProfile,
+        (server) => server.reply(
+          200,
+          _envelope({
+            'nickName': '테스트유저',
+            'profileImage': null,
+            'email': 'test@example.com',
+            'provider': 'KAKAO',
+            'diseaseType': 'gerd',
+            'representativeInfo': null,
+            'etcCount': 0,
+          }),
+        ),
+      );
+
+      final profile = await repo.currentProfile();
+
+      expect(profile, isNotNull);
+      expect(profile!.allergies, equals(['milk', 'egg']));
+      expect(profile.medications, equals(['omeprazole']));
+      expect(profile.conditions, equals(['GERD']));
+    });
+
+    test('diseaseType이 gastritis_ulcer면 conditions가 카탈로그 코드(gastritis)로 매핑된다',
+        () async {
+      dioAdapter.onGet(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.reply(200, _envelope({'allergies': [], 'medications': []})),
+      );
+      dioAdapter.onGet(
+        ApiEndpoints.myPageProfile,
+        (server) => server.reply(
+          200,
+          _envelope({'diseaseType': 'gastritis_ulcer', 'provider': 'LOCAL'}),
+        ),
+      );
+
+      final profile = await repo.currentProfile();
+      expect(profile!.conditions, equals(['gastritis']));
+    });
+
+    test('두 GET 모두 result:null이면 온보딩 미완료로 간주해 null을 반환한다', () async {
+      dioAdapter.onGet(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.reply(200, _envelope(null)),
+      );
+      dioAdapter.onGet(
+        ApiEndpoints.myPageProfile,
+        (server) => server.reply(200, _envelope(null)),
+      );
+
+      expect(await repo.currentProfile(), isNull);
+    });
+
+    test('GET 성공 후 캐시가 최신 값으로 갱신된다 (오프라인 폴백 대비)', () async {
+      dioAdapter.onGet(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.reply(
+          200,
+          _envelope({'allergies': ['peanut'], 'medications': <String>[]}),
+        ),
+      );
+      dioAdapter.onGet(
+        ApiEndpoints.myPageProfile,
+        (server) => server.reply(200, _envelope({'diseaseType': 'gerd'})),
+      );
+
+      await repo.currentProfile();
+
+      final cached = await cache.read();
+      expect(cached!.allergies, equals(['peanut']));
+    });
+
+    test(
+        'health-info만 실패하면 allergies/medications는 캐시로 폴백하되 conditions는 '
+        '라이브 profile 값으로 병합된다 (독립 처리, pr-review 의료안전 플래그#2)', () async {
+      // 사전에 캐시를 채워 둔다 (직전 성공 시 저장된 것으로 가정) — conditions는 이전 값(ibs).
+      await cache.write(
+        const HealthProfile(allergies: ['fish_shellfish'], conditions: ['ibs']),
+      );
+
+      dioAdapter.onGet(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.throws(
+          500,
+          DioException(
+            requestOptions: RequestOptions(path: ApiEndpoints.myPageHealthInfo),
+            type: DioExceptionType.connectionError,
+          ),
+        ),
+      );
+      // profile은 성공 — health-info 실패가 profile의 성공분까지 폐기해서는 안 된다.
+      dioAdapter.onGet(
+        ApiEndpoints.myPageProfile,
+        (server) => server.reply(200, _envelope({'diseaseType': 'gerd'})),
+      );
+
+      final profile = await repo.currentProfile();
+      expect(profile, isNotNull);
+      // health-info 실패 → 캐시값 유지
+      expect(profile!.allergies, equals(['fish_shellfish']));
+      // profile 성공 → 라이브 값으로 갱신
+      expect(profile.conditions, equals(['GERD']));
+    });
+
+    test(
+        'profile만 실패하면 conditions는 캐시로 폴백하되 allergies/medications는 '
+        '라이브 health-info 값으로 병합된다 (독립 처리)', () async {
+      await cache.write(
+        const HealthProfile(allergies: ['fish_shellfish'], conditions: ['ibs']),
+      );
+
+      dioAdapter.onGet(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.reply(
+          200,
+          _envelope({'allergies': ['peanut'], 'medications': <String>[]}),
+        ),
+      );
+      dioAdapter.onGet(
+        ApiEndpoints.myPageProfile,
+        (server) => server.throws(
+          500,
+          DioException(
+            requestOptions: RequestOptions(path: ApiEndpoints.myPageProfile),
+            type: DioExceptionType.connectionError,
+          ),
+        ),
+      );
+
+      final profile = await repo.currentProfile();
+      expect(profile, isNotNull);
+      // health-info 성공 → 라이브 값으로 갱신
+      expect(profile!.allergies, equals(['peanut']));
+      // profile 실패 → 캐시값 유지
+      expect(profile.conditions, equals(['ibs']));
+    });
+
+    test('둘 다 실패하면 캐시 전체로 폴백한다 (크래시 금지)', () async {
+      await cache.write(HealthProfile.sampleGerd());
+
+      dioAdapter.onGet(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.throws(
+          500,
+          DioException(
+            requestOptions: RequestOptions(path: ApiEndpoints.myPageHealthInfo),
+            type: DioExceptionType.connectionError,
+          ),
+        ),
+      );
+      dioAdapter.onGet(
+        ApiEndpoints.myPageProfile,
+        (server) => server.throws(
+          500,
+          DioException(
+            requestOptions: RequestOptions(path: ApiEndpoints.myPageProfile),
+            type: DioExceptionType.connectionError,
+          ),
+        ),
+      );
+
+      final profile = await repo.currentProfile();
+      expect(profile, equals(HealthProfile.sampleGerd()));
+    });
+
+    test('둘 다 실패 + 캐시도 비어있으면 null을 반환한다 (throw 하지 않음)', () async {
+      dioAdapter.onGet(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.throws(
+          500,
+          DioException(
+            requestOptions: RequestOptions(path: ApiEndpoints.myPageHealthInfo),
+            type: DioExceptionType.connectionError,
+          ),
+        ),
+      );
+      dioAdapter.onGet(
+        ApiEndpoints.myPageProfile,
+        (server) => server.throws(
+          500,
+          DioException(
+            requestOptions: RequestOptions(path: ApiEndpoints.myPageProfile),
+            type: DioExceptionType.connectionError,
+          ),
+        ),
+      );
+
+      await expectLater(repo.currentProfile(), completion(isNull));
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // fetchMedicalInfoStrict — GET /my-page/health-info (편집 화면 전용, 캐시 폴백 없음)
+  // -------------------------------------------------------------------------
+
+  group('fetchMedicalInfoStrict — 편집 화면 전용 strict 조회 (pr-review 의료안전 ②-1)', () {
+    test('성공 시 allergies/medications를 반환한다', () async {
+      dioAdapter.onGet(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.reply(
+          200,
+          _envelope({
+            'allergies': ['milk', 'egg'],
+            'medications': ['omeprazole'],
+          }),
+        ),
+      );
+
+      final result = await repo.fetchMedicalInfoStrict();
+      expect(result.allergies, equals(['milk', 'egg']));
+      expect(result.medications, equals(['omeprazole']));
+    });
+
+    test('네트워크 오류 시 캐시 폴백 없이 NetworkFailure를 throw한다', () async {
+      // 캐시에 이전 값이 있어도 절대 사용하지 않는다 — stale 데이터로 편집 진입 금지.
+      await cache.write(
+        const HealthProfile(allergies: ['fish_shellfish'], medications: ['stale-med']),
+      );
+
+      dioAdapter.onGet(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.throws(
+          500,
+          DioException(
+            requestOptions: RequestOptions(path: ApiEndpoints.myPageHealthInfo),
+            type: DioExceptionType.connectionError,
+          ),
+        ),
+      );
+
+      await expectLater(
+        repo.fetchMedicalInfoStrict(),
+        throwsA(isA<NetworkFailure>()),
+      );
+    });
+
+    test('result:null(온보딩 미완료 등)이면 UnexpectedFailure를 throw한다', () async {
+      dioAdapter.onGet(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.reply(200, _envelope(null)),
+      );
+
+      await expectLater(
+        repo.fetchMedicalInfoStrict(),
+        throwsA(isA<UnexpectedFailure>()),
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // updateHealthInfo — PATCH /my-page/health-info (W7 마이그레이션)
+  // -------------------------------------------------------------------------
+
+  group('updateHealthInfo — PATCH /my-page/health-info', () {
+    test('allergens/medications 바디로 PATCH 되고 성공 시 캐시가 갱신된다', () async {
+      dioAdapter.onPatch(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.reply(200, _envelope(null)),
+        data: {
+          'allergens': ['milk', 'egg'],
+          'medications': ['omeprazole'],
+        },
+      );
+
+      await repo.updateHealthInfo(
+        allergies: ['milk', 'egg'],
+        medications: ['omeprazole'],
+      );
+
+      final cached = await cache.read();
+      expect(cached!.allergies, equals(['milk', 'egg']));
+      expect(cached.medications, equals(['omeprazole']));
+    });
+
+    test('기존 캐시가 있으면 allergies/medications만 교체하고 나머지는 보존한다', () async {
+      await cache.write(HealthProfile.sampleGerd());
+
+      dioAdapter.onPatch(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.reply(200, _envelope(null)),
+        data: Matchers.any,
+      );
+
+      await repo.updateHealthInfo(allergies: ['soy'], medications: []);
+
+      final cached = await cache.read();
+      expect(cached!.allergies, equals(['soy']));
+      expect(cached.conditions, equals(HealthProfile.sampleGerd().conditions));
+      expect(cached.diagnosed, equals(HealthProfile.sampleGerd().diagnosed));
+    });
+
+    test('서버 오류 시 NetworkFailure를 throw하고 캐시는 변경되지 않는다', () async {
+      dioAdapter.onPatch(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.throws(
+          500,
+          DioException(
+            requestOptions: RequestOptions(path: ApiEndpoints.myPageHealthInfo),
+            type: DioExceptionType.connectionError,
+          ),
+        ),
+        data: Matchers.any,
+      );
+
+      await expectLater(
+        repo.updateHealthInfo(allergies: ['milk'], medications: []),
+        throwsA(isA<NetworkFailure>()),
+      );
+      expect(await cache.read(), isNull);
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // 캐시 계약 — repository_contract.dart healthProfileRepositoryCacheContract
   // -------------------------------------------------------------------------
   //

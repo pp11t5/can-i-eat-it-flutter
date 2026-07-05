@@ -27,6 +27,7 @@ _MealCountDto _$MealCountDtoFromJson(Map<String, dynamic> json) =>
       recommendCount: (json['recommendCount'] as num?)?.toInt() ?? 0,
       cautionCount: (json['cautionCount'] as num?)?.toInt() ?? 0,
       riskCount: (json['riskCount'] as num?)?.toInt() ?? 0,
+      unknownCount: (json['unknownCount'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$MealCountDtoToJson(_MealCountDto instance) =>
@@ -34,6 +35,7 @@ Map<String, dynamic> _$MealCountDtoToJson(_MealCountDto instance) =>
       'recommendCount': instance.recommendCount,
       'cautionCount': instance.cautionCount,
       'riskCount': instance.riskCount,
+      'unknownCount': instance.unknownCount,
     };
 
 _WeeklyReportDto _$WeeklyReportDtoFromJson(Map<String, dynamic> json) =>

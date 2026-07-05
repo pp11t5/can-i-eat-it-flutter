@@ -258,10 +258,13 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  group('appendFood — POST /meal-records', () {
-    test('성공 시 MealFood(analysis 포함)를 반환한다', () async {
+  group(
+      'appendFood — 신규(POST /meal-records/foods/{id}) · '
+      '기존(POST /meal-records/{id}/foods/{id})', () {
+    test('mealRecordId 없으면 POST /meal-records/foods/{id}로 신규 식사를 생성한다',
+        () async {
       adapter.onPost(
-        ApiEndpoints.mealRecords,
+        ApiEndpoints.mealRecordsByFoodId('f1'),
         (server) => server.reply(200, _envelope(_foodDetailJson())),
       );
       final result = await repo.appendFood(foodExternalId: 'f1');
@@ -271,27 +274,78 @@ void main() {
       expect(result.analysis!.judgmentGrade, VerdictLevel.risk);
     });
 
-    // 계약: POST 바디에 judgedGrade 필드가 있으면 안 된다 (F-10)
-    // CreateMealRecordRequestDto.toJson() + removeWhere(null) 후 judgedGrade 부재를
-    // DTO 레벨에서 직접 검증한다 (impl 경유 없이 확실하게).
-    test('POST 바디에 judgedGrade 키가 없다 — DTO toJson 직접 검증', () {
-      // eatenAt·mealRecordId 제공 시에도 judgedGrade가 절대 없어야 한다.
-      final body = const CreateMealRecordRequestDto(
-        foodExternalId: 'f1',
+    test('mealRecordId 있으면 POST /meal-records/{id}/foods/{id}로 기존 식사에 추가한다',
+        () async {
+      adapter.onPost(
+        ApiEndpoints.mealRecordFoodById('mr1', 'f1'),
+        (server) => server.reply(200, _envelope(_foodDetailJson())),
+      );
+      final result =
+          await repo.appendFood(foodExternalId: 'f1', mealRecordId: 'mr1');
+      expect(result, isA<MealFood>());
+      expect(result.mealRecordExternalId, 'mr1');
+    });
+
+    // 계약: POST 바디에 foodExternalId·judgedGrade 필드가 있으면 안 된다 (경로 파라미터로
+    // 전달되므로 바디에 불필요, F-10). DTO 레벨에서 직접 검증(impl 경유 없이 확실하게).
+    test('POST 바디에 foodExternalId·judgedGrade 키가 없다 — DTO toJson 직접 검증', () {
+      final body = const MealRecordByIdRequestDto(
+        eatenAt: '2026-06-24T08:30:00+09:00',
       ).toJson()..removeWhere((_, v) => v == null);
       expect(body.containsKey('judgedGrade'), isFalse,
           reason: '서버가 analysis를 계산하므로 클라이언트는 judgedGrade를 보내면 안 된다');
-      expect(body['foodExternalId'], 'f1');
+      expect(body.containsKey('foodExternalId'), isFalse,
+          reason: 'foodExternalId는 경로 파라미터로 전달되므로 바디에 없어야 한다');
+      expect(body['eatenAt'], '2026-06-24T08:30:00+09:00');
     });
   });
 
   // -------------------------------------------------------------------------
-  group('appendFoodByText — 미지원 seam', () {
-    test('UnimplementedError를 던진다', () async {
-      await expectLater(
-        repo.appendFoodByText(foodTextInput: '아메리카노'),
-        throwsA(isA<UnimplementedError>()),
+  group(
+      'appendFoodByText — 신규(POST /meal-records) · '
+      '기존(POST /meal-records/{id}/foods)', () {
+    test('mealRecordId 없으면 POST /meal-records로 신규 식사를 생성한다', () async {
+      adapter.onPost(
+        ApiEndpoints.mealRecords,
+        (server) => server.reply(200, _envelope(_foodDetailJson())),
       );
+      final result = await repo.appendFoodByText(foodTextInput: '아메리카노');
+      expect(result, isA<MealFood>());
+      expect(result.mealFoodId, 'mf1');
+    });
+
+    test('mealRecordId 있으면 POST /meal-records/{id}/foods로 기존 식사에 추가한다',
+        () async {
+      adapter.onPost(
+        ApiEndpoints.mealRecordFoods('mr1'),
+        (server) => server.reply(200, _envelope(_foodDetailJson())),
+      );
+      final result = await repo.appendFoodByText(
+        foodTextInput: '아메리카노',
+        mealRecordId: 'mr1',
+      );
+      expect(result, isA<MealFood>());
+      expect(result.mealRecordExternalId, 'mr1');
+    });
+
+    test('name은 trim되고 100자를 초과하면 100자로 잘려 전송된다', () async {
+      Map<String, dynamic>? capturedBody;
+      dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            capturedBody = options.data as Map<String, dynamic>?;
+            handler.next(options);
+          },
+        ),
+      );
+      adapter.onPost(
+        ApiEndpoints.mealRecords,
+        (server) => server.reply(200, _envelope(_foodDetailJson())),
+      );
+      final longName = '  ${'가' * 150}  ';
+      await repo.appendFoodByText(foodTextInput: longName);
+      expect(capturedBody!['name'], hasLength(100));
+      expect(capturedBody!['name'], '가' * 100);
     });
   });
 

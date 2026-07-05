@@ -41,6 +41,7 @@ abstract class MealCountDto with _$MealCountDto {
     @Default(0) int recommendCount,
     @Default(0) int cautionCount,
     @Default(0) int riskCount,
+    @Default(0) int unknownCount,
   }) = _MealCountDto;
 
   factory MealCountDto.fromJson(Map<String, dynamic> json) =>
@@ -52,6 +53,7 @@ extension MealCountDtoMapper on MealCountDto {
         recommendCount: recommendCount,
         cautionCount: cautionCount,
         riskCount: riskCount,
+        unknownCount: unknownCount,
       );
 }
 

@@ -32,6 +32,31 @@ final healthProfileRepositoryProvider =
 // ignore: unused_element
 typedef HealthProfileRepositoryRef
     = AutoDisposeProviderRef<HealthProfileRepository>;
+String _$medicalInfoStrictHash() => r'94e7c3ba02ec4f7dc2985547cdf4e786b9846027';
+
+/// 알레르기·복용약 편집 화면 전용 — 캐시 폴백 없이 서버 최신 상태를 조회한다.
+///
+/// [HealthProfileController]([currentProfile] 기반)와 달리 실패 시 에러를 그대로
+/// 전파한다 — stale 데이터 위에서 편집·PATCH하는 것을 막기 위함(의료안전, pr-review ②-1).
+/// allergy_med_edit_screen이 이 provider를 watch하고, 에러 상태에서는 재시도
+/// UI를 보이며 저장 자체를 막는다.
+///
+/// Copied from [medicalInfoStrict].
+@ProviderFor(medicalInfoStrict)
+final medicalInfoStrictProvider =
+    AutoDisposeFutureProvider<HealthProfile>.internal(
+  medicalInfoStrict,
+  name: r'medicalInfoStrictProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$medicalInfoStrictHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef MedicalInfoStrictRef = AutoDisposeFutureProviderRef<HealthProfile>;
 String _$onboardedStatusHash() => r'261b515f4f604aed6b2062c6ad180acde41d874d';
 
 /// 온보딩 완료 여부 AsyncNotifier (ADR-0007 §3-1 (6-D)).
@@ -56,7 +81,7 @@ final onboardedStatusProvider = AutoDisposeFutureProvider<bool>.internal(
 // ignore: unused_element
 typedef OnboardedStatusRef = AutoDisposeFutureProviderRef<bool>;
 String _$healthProfileControllerHash() =>
-    r'709031e73cbdd7c1d137a09bdf41050b6fa04925';
+    r'4670d479caf882461b6f46203700e27db2d9a22e';
 
 /// 건강 프로필 상태 컨트롤러 (AsyncNotifier).
 ///

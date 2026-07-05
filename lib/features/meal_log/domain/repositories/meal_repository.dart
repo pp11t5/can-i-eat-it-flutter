@@ -17,7 +17,8 @@ abstract interface class MealRepository {
 
   /// 음식 ID로 음식을 추가한다 (by-id).
   ///
-  /// 대응 API: POST /meal-records.
+  /// 대응 API: [mealRecordId] null → POST /meal-records/foods/{foodExternalId}(신규) /
+  /// != null → POST /meal-records/{mealRecordId}/foods/{foodExternalId}(기존 식사 append).
   /// [foodExternalId]: 필수. 서버측 음식 식별자.
   /// [eatenAt]: 섭취 시각. null 이면 서버가 현재 시각 사용.
   /// [mealRecordId]: null → 신규 식사 / != null → 기존 식사에 append.
@@ -28,11 +29,14 @@ abstract interface class MealRepository {
     String? mealRecordId,
   });
 
-  /// 자유 텍스트 음식명으로 음식을 추가한다 — 서버 미지원 seam.
+  /// 자유 텍스트 음식명으로 음식을 추가한다 (by-text).
   ///
-  /// 현재 백엔드 미지원이라 구현체가 [UnimplementedError] 를 던진다. 호출부는
-  /// by-text 분기에서 이 메서드를 호출하지 않고 "준비중" UX로 단락해야 한다.
-  /// 백엔드 text-append API 도착 시 구현체만 채우면 된다(시그니처 불변).
+  /// 대응 API: [mealRecordId] null → POST /meal-records(신규) /
+  /// != null → POST /meal-records/{mealRecordId}/foods(기존 식사 append).
+  /// [foodTextInput]: 필수. 자유 입력 음식명 — 구현체가 trim 후 ≤100자로 클램프한다.
+  /// [eatenAt]: 섭취 시각. null 이면 서버가 현재 시각 사용.
+  /// [mealRecordId]: null → 신규 식사 / != null → 기존 식사에 append.
+  /// 반환: 추가된 음식 단건(analysis 포함).
   Future<MealFood> appendFoodByText({
     required String foodTextInput,
     DateTime? eatenAt,

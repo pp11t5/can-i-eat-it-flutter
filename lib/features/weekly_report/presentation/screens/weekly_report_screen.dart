@@ -394,8 +394,10 @@ class _MealDistributionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final total =
-        mealCount.recommendCount + mealCount.cautionCount + mealCount.riskCount;
+    final total = mealCount.recommendCount +
+        mealCount.cautionCount +
+        mealCount.riskCount +
+        mealCount.unknownCount;
 
     return _ReportCard(
       title: '내 식단 분포',
@@ -438,6 +440,12 @@ class _MealDistributionCard extends StatelessWidget {
                         color: AppColors.verdictDanger,
                         label: '위험 음식 ${mealCount.riskCount}끼',
                       ),
+                      const SizedBox(height: AppSpacing.itemGap),
+                      _LegendRow(
+                        icon: Icons.help,
+                        color: AppColors.verdictUnknown,
+                        label: '확인 어려움 ${mealCount.unknownCount}끼',
+                      ),
                     ],
                   ),
                 ),
@@ -479,6 +487,12 @@ class _Donut extends StatelessWidget {
                 PieChartSectionData(
                   value: mealCount.riskCount.toDouble(),
                   color: AppColors.verdictDanger,
+                  showTitle: false,
+                  radius: 20,
+                ),
+                PieChartSectionData(
+                  value: mealCount.unknownCount.toDouble(),
+                  color: AppColors.verdictUnknown,
                   showTitle: false,
                   radius: 20,
                 ),

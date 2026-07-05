@@ -3,12 +3,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:can_i_eat_it/features/home/data/home_providers.dart';
+import 'package:can_i_eat_it/features/home/data/repositories/mock_home_repository.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
+import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
+import 'package:can_i_eat_it/features/mypage/data/repositories/mock_my_page_repository.dart';
 
-/// 테스트용 래퍼. HomeScreen은 더 이상 searchHistoryProvider에 의존하지 않으므로
-/// 단순 ProviderScope + MaterialApp으로 충분하다.
-Widget _wrap() => const ProviderScope(
-      child: MaterialApp(home: HomeScreen()),
+/// 테스트용 래퍼. mySummaryProvider(streak)·homeRepositoryProvider(미기록·최근식사)를
+/// 결정적 Mock으로 override한다(W7 — 실제 Dio 호출 방지).
+Widget _wrap({bool withData = false}) => ProviderScope(
+      overrides: [
+        // ignore: scoped_providers_should_specify_dependencies
+        myPageRepositoryProvider.overrideWithValue(
+          withData
+              ? MockMyPageRepository.seeded()
+              : MockMyPageRepository.empty(),
+        ),
+        // ignore: scoped_providers_should_specify_dependencies
+        homeRepositoryProvider.overrideWithValue(
+          withData ? MockHomeRepository.seeded() : MockHomeRepository.empty(),
+        ),
+      ],
+      child: const MaterialApp(home: HomeScreen()),
     );
 
 /// 네비게이션 검증용 최소 GoRouter — symptom_detail_screen_test.dart의
@@ -33,6 +49,14 @@ GoRouter _testRouter() => GoRouter(
     );
 
 Widget _wrapWithRouter() => ProviderScope(
+      overrides: [
+        // ignore: scoped_providers_should_specify_dependencies
+        myPageRepositoryProvider.overrideWithValue(
+          MockMyPageRepository.empty(),
+        ),
+        // ignore: scoped_providers_should_specify_dependencies
+        homeRepositoryProvider.overrideWithValue(MockHomeRepository.empty()),
+      ],
       child: MaterialApp.router(routerConfig: _testRouter()),
     );
 
@@ -117,6 +141,25 @@ void main() {
       expect(find.text('음식 히스토리'), findsOneWidget);
       expect(find.text('식단과 증상 요약'), findsOneWidget);
     });
+
+    testWidgets('unrecordedMealCountProvider 실카운트로 "미기록 식단 N" 배지가 표시된다',
+        (tester) async {
+      await tester.pumpWidget(_wrap(withData: true));
+      await tester.pumpAndSettle();
+
+      // MockHomeRepository.seeded() — unrecordedCount:2.
+      expect(find.text('미기록 식단 2'), findsOneWidget);
+    });
+  });
+
+  group('HomeScreen — 인사말 블록 streak 실데이터', () {
+    testWidgets('mySummaryProvider seeded 값이면 "4일"이 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap(withData: true));
+      await tester.pumpAndSettle();
+
+      // MockMyPageRepository.seeded() — weeklySummary.streakCount:4.
+      expect(find.textContaining('4일'), findsOneWidget);
+    });
   });
 
   group('HomeScreen — 2-up 진입 카드 네비게이션', () {
@@ -154,6 +197,18 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('먹은 음식이 있으신가요?'), findsOneWidget);
+    });
+
+    testWidgets('recentMealsProvider 데이터가 있으면 실제 목록으로 교체되고 placeholder는 사라진다',
+        (tester) async {
+      await tester.pumpWidget(_wrap(withData: true));
+      await tester.pumpAndSettle();
+
+      // MockHomeRepository.seeded() — 계란찜(comfortable)·카페라떼.
+      expect(find.text('계란찜'), findsOneWidget);
+      expect(find.text('카페라떼'), findsOneWidget);
+      expect(find.text('편안함'), findsOneWidget);
+      expect(find.text('먹은 음식이 있으신가요?'), findsNothing);
     });
   });
 

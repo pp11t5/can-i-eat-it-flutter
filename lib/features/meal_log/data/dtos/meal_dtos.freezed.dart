@@ -2708,6 +2708,448 @@ class __$MealRecordDetailDtoCopyWithImpl<$Res>
 }
 
 /// @nodoc
+mixin _$ConnectedSymptomsDto {
+  String get symptomId;
+  String get symptomState;
+  int get afterMealMinutes;
+  List<String> get representativeSymptoms;
+  int get etcCount;
+
+  /// Create a copy of ConnectedSymptomsDto
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $ConnectedSymptomsDtoCopyWith<ConnectedSymptomsDto> get copyWith =>
+      _$ConnectedSymptomsDtoCopyWithImpl<ConnectedSymptomsDto>(
+          this as ConnectedSymptomsDto, _$identity);
+
+  /// Serializes this ConnectedSymptomsDto to a JSON map.
+  Map<String, dynamic> toJson();
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is ConnectedSymptomsDto &&
+            (identical(other.symptomId, symptomId) ||
+                other.symptomId == symptomId) &&
+            (identical(other.symptomState, symptomState) ||
+                other.symptomState == symptomState) &&
+            (identical(other.afterMealMinutes, afterMealMinutes) ||
+                other.afterMealMinutes == afterMealMinutes) &&
+            const DeepCollectionEquality()
+                .equals(other.representativeSymptoms, representativeSymptoms) &&
+            (identical(other.etcCount, etcCount) ||
+                other.etcCount == etcCount));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      symptomId,
+      symptomState,
+      afterMealMinutes,
+      const DeepCollectionEquality().hash(representativeSymptoms),
+      etcCount);
+
+  @override
+  String toString() {
+    return 'ConnectedSymptomsDto(symptomId: $symptomId, symptomState: $symptomState, afterMealMinutes: $afterMealMinutes, representativeSymptoms: $representativeSymptoms, etcCount: $etcCount)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $ConnectedSymptomsDtoCopyWith<$Res> {
+  factory $ConnectedSymptomsDtoCopyWith(ConnectedSymptomsDto value,
+          $Res Function(ConnectedSymptomsDto) _then) =
+      _$ConnectedSymptomsDtoCopyWithImpl;
+  @useResult
+  $Res call(
+      {String symptomId,
+      String symptomState,
+      int afterMealMinutes,
+      List<String> representativeSymptoms,
+      int etcCount});
+}
+
+/// @nodoc
+class _$ConnectedSymptomsDtoCopyWithImpl<$Res>
+    implements $ConnectedSymptomsDtoCopyWith<$Res> {
+  _$ConnectedSymptomsDtoCopyWithImpl(this._self, this._then);
+
+  final ConnectedSymptomsDto _self;
+  final $Res Function(ConnectedSymptomsDto) _then;
+
+  /// Create a copy of ConnectedSymptomsDto
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? symptomId = null,
+    Object? symptomState = null,
+    Object? afterMealMinutes = null,
+    Object? representativeSymptoms = null,
+    Object? etcCount = null,
+  }) {
+    return _then(_self.copyWith(
+      symptomId: null == symptomId
+          ? _self.symptomId
+          : symptomId // ignore: cast_nullable_to_non_nullable
+              as String,
+      symptomState: null == symptomState
+          ? _self.symptomState
+          : symptomState // ignore: cast_nullable_to_non_nullable
+              as String,
+      afterMealMinutes: null == afterMealMinutes
+          ? _self.afterMealMinutes
+          : afterMealMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
+      representativeSymptoms: null == representativeSymptoms
+          ? _self.representativeSymptoms
+          : representativeSymptoms // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      etcCount: null == etcCount
+          ? _self.etcCount
+          : etcCount // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [ConnectedSymptomsDto].
+extension ConnectedSymptomsDtoPatterns on ConnectedSymptomsDto {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_ConnectedSymptomsDto value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _ConnectedSymptomsDto() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_ConnectedSymptomsDto value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _ConnectedSymptomsDto():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_ConnectedSymptomsDto value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _ConnectedSymptomsDto() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(
+            String symptomId,
+            String symptomState,
+            int afterMealMinutes,
+            List<String> representativeSymptoms,
+            int etcCount)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _ConnectedSymptomsDto() when $default != null:
+        return $default(
+            _that.symptomId,
+            _that.symptomState,
+            _that.afterMealMinutes,
+            _that.representativeSymptoms,
+            _that.etcCount);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(
+            String symptomId,
+            String symptomState,
+            int afterMealMinutes,
+            List<String> representativeSymptoms,
+            int etcCount)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _ConnectedSymptomsDto():
+        return $default(
+            _that.symptomId,
+            _that.symptomState,
+            _that.afterMealMinutes,
+            _that.representativeSymptoms,
+            _that.etcCount);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(
+            String symptomId,
+            String symptomState,
+            int afterMealMinutes,
+            List<String> representativeSymptoms,
+            int etcCount)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _ConnectedSymptomsDto() when $default != null:
+        return $default(
+            _that.symptomId,
+            _that.symptomState,
+            _that.afterMealMinutes,
+            _that.representativeSymptoms,
+            _that.etcCount);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _ConnectedSymptomsDto implements ConnectedSymptomsDto {
+  const _ConnectedSymptomsDto(
+      {required this.symptomId,
+      required this.symptomState,
+      required this.afterMealMinutes,
+      final List<String> representativeSymptoms = const <String>[],
+      this.etcCount = 0})
+      : _representativeSymptoms = representativeSymptoms;
+  factory _ConnectedSymptomsDto.fromJson(Map<String, dynamic> json) =>
+      _$ConnectedSymptomsDtoFromJson(json);
+
+  @override
+  final String symptomId;
+  @override
+  final String symptomState;
+  @override
+  final int afterMealMinutes;
+  final List<String> _representativeSymptoms;
+  @override
+  @JsonKey()
+  List<String> get representativeSymptoms {
+    if (_representativeSymptoms is EqualUnmodifiableListView)
+      return _representativeSymptoms;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_representativeSymptoms);
+  }
+
+  @override
+  @JsonKey()
+  final int etcCount;
+
+  /// Create a copy of ConnectedSymptomsDto
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$ConnectedSymptomsDtoCopyWith<_ConnectedSymptomsDto> get copyWith =>
+      __$ConnectedSymptomsDtoCopyWithImpl<_ConnectedSymptomsDto>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$ConnectedSymptomsDtoToJson(
+      this,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _ConnectedSymptomsDto &&
+            (identical(other.symptomId, symptomId) ||
+                other.symptomId == symptomId) &&
+            (identical(other.symptomState, symptomState) ||
+                other.symptomState == symptomState) &&
+            (identical(other.afterMealMinutes, afterMealMinutes) ||
+                other.afterMealMinutes == afterMealMinutes) &&
+            const DeepCollectionEquality().equals(
+                other._representativeSymptoms, _representativeSymptoms) &&
+            (identical(other.etcCount, etcCount) ||
+                other.etcCount == etcCount));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      symptomId,
+      symptomState,
+      afterMealMinutes,
+      const DeepCollectionEquality().hash(_representativeSymptoms),
+      etcCount);
+
+  @override
+  String toString() {
+    return 'ConnectedSymptomsDto(symptomId: $symptomId, symptomState: $symptomState, afterMealMinutes: $afterMealMinutes, representativeSymptoms: $representativeSymptoms, etcCount: $etcCount)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$ConnectedSymptomsDtoCopyWith<$Res>
+    implements $ConnectedSymptomsDtoCopyWith<$Res> {
+  factory _$ConnectedSymptomsDtoCopyWith(_ConnectedSymptomsDto value,
+          $Res Function(_ConnectedSymptomsDto) _then) =
+      __$ConnectedSymptomsDtoCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {String symptomId,
+      String symptomState,
+      int afterMealMinutes,
+      List<String> representativeSymptoms,
+      int etcCount});
+}
+
+/// @nodoc
+class __$ConnectedSymptomsDtoCopyWithImpl<$Res>
+    implements _$ConnectedSymptomsDtoCopyWith<$Res> {
+  __$ConnectedSymptomsDtoCopyWithImpl(this._self, this._then);
+
+  final _ConnectedSymptomsDto _self;
+  final $Res Function(_ConnectedSymptomsDto) _then;
+
+  /// Create a copy of ConnectedSymptomsDto
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? symptomId = null,
+    Object? symptomState = null,
+    Object? afterMealMinutes = null,
+    Object? representativeSymptoms = null,
+    Object? etcCount = null,
+  }) {
+    return _then(_ConnectedSymptomsDto(
+      symptomId: null == symptomId
+          ? _self.symptomId
+          : symptomId // ignore: cast_nullable_to_non_nullable
+              as String,
+      symptomState: null == symptomState
+          ? _self.symptomState
+          : symptomState // ignore: cast_nullable_to_non_nullable
+              as String,
+      afterMealMinutes: null == afterMealMinutes
+          ? _self.afterMealMinutes
+          : afterMealMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
+      representativeSymptoms: null == representativeSymptoms
+          ? _self._representativeSymptoms
+          : representativeSymptoms // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      etcCount: null == etcCount
+          ? _self.etcCount
+          : etcCount // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
 mixin _$WeeklyDayDto {
   String get date;
   String get dayOfWeek; // 서버 키 'judgementList'와 필드명 동일 → JsonKey 불필요.
@@ -3789,91 +4231,80 @@ class __$MealCandidatesDayDtoCopyWithImpl<$Res>
 }
 
 /// @nodoc
-mixin _$CreateMealRecordRequestDto {
-  String get foodExternalId;
+mixin _$MealRecordTextRequestDto {
+  String get name;
   String? get eatenAt;
-  String? get mealRecordId;
 
-  /// Create a copy of CreateMealRecordRequestDto
+  /// Create a copy of MealRecordTextRequestDto
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $CreateMealRecordRequestDtoCopyWith<CreateMealRecordRequestDto>
-      get copyWith =>
-          _$CreateMealRecordRequestDtoCopyWithImpl<CreateMealRecordRequestDto>(
-              this as CreateMealRecordRequestDto, _$identity);
+  $MealRecordTextRequestDtoCopyWith<MealRecordTextRequestDto> get copyWith =>
+      _$MealRecordTextRequestDtoCopyWithImpl<MealRecordTextRequestDto>(
+          this as MealRecordTextRequestDto, _$identity);
 
-  /// Serializes this CreateMealRecordRequestDto to a JSON map.
+  /// Serializes this MealRecordTextRequestDto to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is CreateMealRecordRequestDto &&
-            (identical(other.foodExternalId, foodExternalId) ||
-                other.foodExternalId == foodExternalId) &&
-            (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt) &&
-            (identical(other.mealRecordId, mealRecordId) ||
-                other.mealRecordId == mealRecordId));
+            other is MealRecordTextRequestDto &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, foodExternalId, eatenAt, mealRecordId);
+  int get hashCode => Object.hash(runtimeType, name, eatenAt);
 
   @override
   String toString() {
-    return 'CreateMealRecordRequestDto(foodExternalId: $foodExternalId, eatenAt: $eatenAt, mealRecordId: $mealRecordId)';
+    return 'MealRecordTextRequestDto(name: $name, eatenAt: $eatenAt)';
   }
 }
 
 /// @nodoc
-abstract mixin class $CreateMealRecordRequestDtoCopyWith<$Res> {
-  factory $CreateMealRecordRequestDtoCopyWith(CreateMealRecordRequestDto value,
-          $Res Function(CreateMealRecordRequestDto) _then) =
-      _$CreateMealRecordRequestDtoCopyWithImpl;
+abstract mixin class $MealRecordTextRequestDtoCopyWith<$Res> {
+  factory $MealRecordTextRequestDtoCopyWith(MealRecordTextRequestDto value,
+          $Res Function(MealRecordTextRequestDto) _then) =
+      _$MealRecordTextRequestDtoCopyWithImpl;
   @useResult
-  $Res call({String foodExternalId, String? eatenAt, String? mealRecordId});
+  $Res call({String name, String? eatenAt});
 }
 
 /// @nodoc
-class _$CreateMealRecordRequestDtoCopyWithImpl<$Res>
-    implements $CreateMealRecordRequestDtoCopyWith<$Res> {
-  _$CreateMealRecordRequestDtoCopyWithImpl(this._self, this._then);
+class _$MealRecordTextRequestDtoCopyWithImpl<$Res>
+    implements $MealRecordTextRequestDtoCopyWith<$Res> {
+  _$MealRecordTextRequestDtoCopyWithImpl(this._self, this._then);
 
-  final CreateMealRecordRequestDto _self;
-  final $Res Function(CreateMealRecordRequestDto) _then;
+  final MealRecordTextRequestDto _self;
+  final $Res Function(MealRecordTextRequestDto) _then;
 
-  /// Create a copy of CreateMealRecordRequestDto
+  /// Create a copy of MealRecordTextRequestDto
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? foodExternalId = null,
+    Object? name = null,
     Object? eatenAt = freezed,
-    Object? mealRecordId = freezed,
   }) {
     return _then(_self.copyWith(
-      foodExternalId: null == foodExternalId
-          ? _self.foodExternalId
-          : foodExternalId // ignore: cast_nullable_to_non_nullable
+      name: null == name
+          ? _self.name
+          : name // ignore: cast_nullable_to_non_nullable
               as String,
       eatenAt: freezed == eatenAt
           ? _self.eatenAt
           : eatenAt // ignore: cast_nullable_to_non_nullable
               as String?,
-      mealRecordId: freezed == mealRecordId
-          ? _self.mealRecordId
-          : mealRecordId // ignore: cast_nullable_to_non_nullable
-              as String?,
     ));
   }
 }
 
-/// Adds pattern-matching-related methods to [CreateMealRecordRequestDto].
-extension CreateMealRecordRequestDtoPatterns on CreateMealRecordRequestDto {
+/// Adds pattern-matching-related methods to [MealRecordTextRequestDto].
+extension MealRecordTextRequestDtoPatterns on MealRecordTextRequestDto {
   /// A variant of `map` that fallback to returning `orElse`.
   ///
   /// It is equivalent to doing:
@@ -3888,12 +4319,12 @@ extension CreateMealRecordRequestDtoPatterns on CreateMealRecordRequestDto {
 
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>(
-    TResult Function(_CreateMealRecordRequestDto value)? $default, {
+    TResult Function(_MealRecordTextRequestDto value)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _CreateMealRecordRequestDto() when $default != null:
+      case _MealRecordTextRequestDto() when $default != null:
         return $default(_that);
       case _:
         return orElse();
@@ -3915,11 +4346,11 @@ extension CreateMealRecordRequestDtoPatterns on CreateMealRecordRequestDto {
 
   @optionalTypeArgs
   TResult map<TResult extends Object?>(
-    TResult Function(_CreateMealRecordRequestDto value) $default,
+    TResult Function(_MealRecordTextRequestDto value) $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _CreateMealRecordRequestDto():
+      case _MealRecordTextRequestDto():
         return $default(_that);
       case _:
         throw StateError('Unexpected subclass');
@@ -3940,11 +4371,11 @@ extension CreateMealRecordRequestDtoPatterns on CreateMealRecordRequestDto {
 
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_CreateMealRecordRequestDto value)? $default,
+    TResult? Function(_MealRecordTextRequestDto value)? $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _CreateMealRecordRequestDto() when $default != null:
+      case _MealRecordTextRequestDto() when $default != null:
         return $default(_that);
       case _:
         return null;
@@ -3965,16 +4396,13 @@ extension CreateMealRecordRequestDtoPatterns on CreateMealRecordRequestDto {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(
-            String foodExternalId, String? eatenAt, String? mealRecordId)?
-        $default, {
+    TResult Function(String name, String? eatenAt)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _CreateMealRecordRequestDto() when $default != null:
-        return $default(
-            _that.foodExternalId, _that.eatenAt, _that.mealRecordId);
+      case _MealRecordTextRequestDto() when $default != null:
+        return $default(_that.name, _that.eatenAt);
       case _:
         return orElse();
     }
@@ -3995,15 +4423,12 @@ extension CreateMealRecordRequestDtoPatterns on CreateMealRecordRequestDto {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(
-            String foodExternalId, String? eatenAt, String? mealRecordId)
-        $default,
+    TResult Function(String name, String? eatenAt) $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _CreateMealRecordRequestDto():
-        return $default(
-            _that.foodExternalId, _that.eatenAt, _that.mealRecordId);
+      case _MealRecordTextRequestDto():
+        return $default(_that.name, _that.eatenAt);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -4023,15 +4448,12 @@ extension CreateMealRecordRequestDtoPatterns on CreateMealRecordRequestDto {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(
-            String foodExternalId, String? eatenAt, String? mealRecordId)?
-        $default,
+    TResult? Function(String name, String? eatenAt)? $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _CreateMealRecordRequestDto() when $default != null:
-        return $default(
-            _that.foodExternalId, _that.eatenAt, _that.mealRecordId);
+      case _MealRecordTextRequestDto() when $default != null:
+        return $default(_that.name, _that.eatenAt);
       case _:
         return null;
     }
@@ -4040,31 +4462,28 @@ extension CreateMealRecordRequestDtoPatterns on CreateMealRecordRequestDto {
 
 /// @nodoc
 @JsonSerializable()
-class _CreateMealRecordRequestDto implements CreateMealRecordRequestDto {
-  const _CreateMealRecordRequestDto(
-      {required this.foodExternalId, this.eatenAt, this.mealRecordId});
-  factory _CreateMealRecordRequestDto.fromJson(Map<String, dynamic> json) =>
-      _$CreateMealRecordRequestDtoFromJson(json);
+class _MealRecordTextRequestDto implements MealRecordTextRequestDto {
+  const _MealRecordTextRequestDto({required this.name, this.eatenAt});
+  factory _MealRecordTextRequestDto.fromJson(Map<String, dynamic> json) =>
+      _$MealRecordTextRequestDtoFromJson(json);
 
   @override
-  final String foodExternalId;
+  final String name;
   @override
   final String? eatenAt;
-  @override
-  final String? mealRecordId;
 
-  /// Create a copy of CreateMealRecordRequestDto
+  /// Create a copy of MealRecordTextRequestDto
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  _$CreateMealRecordRequestDtoCopyWith<_CreateMealRecordRequestDto>
-      get copyWith => __$CreateMealRecordRequestDtoCopyWithImpl<
-          _CreateMealRecordRequestDto>(this, _$identity);
+  _$MealRecordTextRequestDtoCopyWith<_MealRecordTextRequestDto> get copyWith =>
+      __$MealRecordTextRequestDtoCopyWithImpl<_MealRecordTextRequestDto>(
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$CreateMealRecordRequestDtoToJson(
+    return _$MealRecordTextRequestDtoToJson(
       this,
     );
   }
@@ -4073,66 +4492,358 @@ class _CreateMealRecordRequestDto implements CreateMealRecordRequestDto {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _CreateMealRecordRequestDto &&
-            (identical(other.foodExternalId, foodExternalId) ||
-                other.foodExternalId == foodExternalId) &&
-            (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt) &&
-            (identical(other.mealRecordId, mealRecordId) ||
-                other.mealRecordId == mealRecordId));
+            other is _MealRecordTextRequestDto &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, foodExternalId, eatenAt, mealRecordId);
+  int get hashCode => Object.hash(runtimeType, name, eatenAt);
 
   @override
   String toString() {
-    return 'CreateMealRecordRequestDto(foodExternalId: $foodExternalId, eatenAt: $eatenAt, mealRecordId: $mealRecordId)';
+    return 'MealRecordTextRequestDto(name: $name, eatenAt: $eatenAt)';
   }
 }
 
 /// @nodoc
-abstract mixin class _$CreateMealRecordRequestDtoCopyWith<$Res>
-    implements $CreateMealRecordRequestDtoCopyWith<$Res> {
-  factory _$CreateMealRecordRequestDtoCopyWith(
-          _CreateMealRecordRequestDto value,
-          $Res Function(_CreateMealRecordRequestDto) _then) =
-      __$CreateMealRecordRequestDtoCopyWithImpl;
+abstract mixin class _$MealRecordTextRequestDtoCopyWith<$Res>
+    implements $MealRecordTextRequestDtoCopyWith<$Res> {
+  factory _$MealRecordTextRequestDtoCopyWith(_MealRecordTextRequestDto value,
+          $Res Function(_MealRecordTextRequestDto) _then) =
+      __$MealRecordTextRequestDtoCopyWithImpl;
   @override
   @useResult
-  $Res call({String foodExternalId, String? eatenAt, String? mealRecordId});
+  $Res call({String name, String? eatenAt});
 }
 
 /// @nodoc
-class __$CreateMealRecordRequestDtoCopyWithImpl<$Res>
-    implements _$CreateMealRecordRequestDtoCopyWith<$Res> {
-  __$CreateMealRecordRequestDtoCopyWithImpl(this._self, this._then);
+class __$MealRecordTextRequestDtoCopyWithImpl<$Res>
+    implements _$MealRecordTextRequestDtoCopyWith<$Res> {
+  __$MealRecordTextRequestDtoCopyWithImpl(this._self, this._then);
 
-  final _CreateMealRecordRequestDto _self;
-  final $Res Function(_CreateMealRecordRequestDto) _then;
+  final _MealRecordTextRequestDto _self;
+  final $Res Function(_MealRecordTextRequestDto) _then;
 
-  /// Create a copy of CreateMealRecordRequestDto
+  /// Create a copy of MealRecordTextRequestDto
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? foodExternalId = null,
+    Object? name = null,
     Object? eatenAt = freezed,
-    Object? mealRecordId = freezed,
   }) {
-    return _then(_CreateMealRecordRequestDto(
-      foodExternalId: null == foodExternalId
-          ? _self.foodExternalId
-          : foodExternalId // ignore: cast_nullable_to_non_nullable
+    return _then(_MealRecordTextRequestDto(
+      name: null == name
+          ? _self.name
+          : name // ignore: cast_nullable_to_non_nullable
               as String,
       eatenAt: freezed == eatenAt
           ? _self.eatenAt
           : eatenAt // ignore: cast_nullable_to_non_nullable
               as String?,
-      mealRecordId: freezed == mealRecordId
-          ? _self.mealRecordId
-          : mealRecordId // ignore: cast_nullable_to_non_nullable
+    ));
+  }
+}
+
+/// @nodoc
+mixin _$MealRecordByIdRequestDto {
+  String? get eatenAt;
+
+  /// Create a copy of MealRecordByIdRequestDto
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $MealRecordByIdRequestDtoCopyWith<MealRecordByIdRequestDto> get copyWith =>
+      _$MealRecordByIdRequestDtoCopyWithImpl<MealRecordByIdRequestDto>(
+          this as MealRecordByIdRequestDto, _$identity);
+
+  /// Serializes this MealRecordByIdRequestDto to a JSON map.
+  Map<String, dynamic> toJson();
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is MealRecordByIdRequestDto &&
+            (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, eatenAt);
+
+  @override
+  String toString() {
+    return 'MealRecordByIdRequestDto(eatenAt: $eatenAt)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $MealRecordByIdRequestDtoCopyWith<$Res> {
+  factory $MealRecordByIdRequestDtoCopyWith(MealRecordByIdRequestDto value,
+          $Res Function(MealRecordByIdRequestDto) _then) =
+      _$MealRecordByIdRequestDtoCopyWithImpl;
+  @useResult
+  $Res call({String? eatenAt});
+}
+
+/// @nodoc
+class _$MealRecordByIdRequestDtoCopyWithImpl<$Res>
+    implements $MealRecordByIdRequestDtoCopyWith<$Res> {
+  _$MealRecordByIdRequestDtoCopyWithImpl(this._self, this._then);
+
+  final MealRecordByIdRequestDto _self;
+  final $Res Function(MealRecordByIdRequestDto) _then;
+
+  /// Create a copy of MealRecordByIdRequestDto
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? eatenAt = freezed,
+  }) {
+    return _then(_self.copyWith(
+      eatenAt: freezed == eatenAt
+          ? _self.eatenAt
+          : eatenAt // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [MealRecordByIdRequestDto].
+extension MealRecordByIdRequestDtoPatterns on MealRecordByIdRequestDto {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_MealRecordByIdRequestDto value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _MealRecordByIdRequestDto() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_MealRecordByIdRequestDto value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealRecordByIdRequestDto():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_MealRecordByIdRequestDto value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealRecordByIdRequestDto() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(String? eatenAt)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _MealRecordByIdRequestDto() when $default != null:
+        return $default(_that.eatenAt);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(String? eatenAt) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealRecordByIdRequestDto():
+        return $default(_that.eatenAt);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(String? eatenAt)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MealRecordByIdRequestDto() when $default != null:
+        return $default(_that.eatenAt);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _MealRecordByIdRequestDto implements MealRecordByIdRequestDto {
+  const _MealRecordByIdRequestDto({this.eatenAt});
+  factory _MealRecordByIdRequestDto.fromJson(Map<String, dynamic> json) =>
+      _$MealRecordByIdRequestDtoFromJson(json);
+
+  @override
+  final String? eatenAt;
+
+  /// Create a copy of MealRecordByIdRequestDto
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$MealRecordByIdRequestDtoCopyWith<_MealRecordByIdRequestDto> get copyWith =>
+      __$MealRecordByIdRequestDtoCopyWithImpl<_MealRecordByIdRequestDto>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$MealRecordByIdRequestDtoToJson(
+      this,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _MealRecordByIdRequestDto &&
+            (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, eatenAt);
+
+  @override
+  String toString() {
+    return 'MealRecordByIdRequestDto(eatenAt: $eatenAt)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$MealRecordByIdRequestDtoCopyWith<$Res>
+    implements $MealRecordByIdRequestDtoCopyWith<$Res> {
+  factory _$MealRecordByIdRequestDtoCopyWith(_MealRecordByIdRequestDto value,
+          $Res Function(_MealRecordByIdRequestDto) _then) =
+      __$MealRecordByIdRequestDtoCopyWithImpl;
+  @override
+  @useResult
+  $Res call({String? eatenAt});
+}
+
+/// @nodoc
+class __$MealRecordByIdRequestDtoCopyWithImpl<$Res>
+    implements _$MealRecordByIdRequestDtoCopyWith<$Res> {
+  __$MealRecordByIdRequestDtoCopyWithImpl(this._self, this._then);
+
+  final _MealRecordByIdRequestDto _self;
+  final $Res Function(_MealRecordByIdRequestDto) _then;
+
+  /// Create a copy of MealRecordByIdRequestDto
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? eatenAt = freezed,
+  }) {
+    return _then(_MealRecordByIdRequestDto(
+      eatenAt: freezed == eatenAt
+          ? _self.eatenAt
+          : eatenAt // ignore: cast_nullable_to_non_nullable
               as String?,
     ));
   }

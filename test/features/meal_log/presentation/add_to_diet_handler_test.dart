@@ -16,6 +16,7 @@ import 'package:can_i_eat_it/features/meal_log/presentation/meal_recording.dart'
 
 class _SpyMealRepository implements MealRepository {
   String? lastFoodExternalId;
+  String? lastFoodTextInput;
   DateTime? lastEatenAt;
   String? lastMealRecordId;
   int appendFoodCallCount = 0;
@@ -46,7 +47,15 @@ class _SpyMealRepository implements MealRepository {
     String? mealRecordId,
   }) async {
     appendFoodByTextCallCount++;
-    throw UnimplementedError('텍스트 음식 추가는 서버 준비중입니다');
+    lastFoodTextInput = foodTextInput;
+    lastEatenAt = eatenAt;
+    lastMealRecordId = mealRecordId;
+    return MealFood(
+      mealFoodId: 'mock-2',
+      name: foodTextInput,
+      eatenAt: (eatenAt ?? DateTime.now()).toIso8601String(),
+      mealRecordExternalId: mealRecordId ?? 'mr-2',
+    );
   }
 
   @override
@@ -252,7 +261,8 @@ void main() {
   });
 
   group('makeHandlerFromRef — by-text 케이스 (foodExternalId == null)', () {
-    testWidgets('appendFood·appendFoodByText 모두 호출되지 않는다 (준비중 단락)',
+    testWidgets(
+        'appendFoodByText가 1회 호출되고 foodTextInput·eatenAt·mealRecordId가 전달된다',
         (tester) async {
       final spy = _SpyMealRepository();
       await _runHandler(
@@ -262,8 +272,67 @@ void main() {
         ctx: MealRecordContext(eatenAt: _kEatAt, mealRecordId: 'mr-1'),
       );
 
+      expect(spy.appendFoodByTextCallCount, 1);
       expect(spy.appendFoodCallCount, 0);
+      expect(spy.lastFoodTextInput, '된장찌개');
+      expect(spy.lastEatenAt, _kEatAt);
+      expect(spy.lastMealRecordId, 'mr-1');
+    });
+
+    testWidgets('mealRecordId 없으면 appendFoodByText에 mealRecordId가 전달되지 않는다',
+        (tester) async {
+      final spy = _SpyMealRepository();
+      await _runHandler(
+        tester: tester,
+        spy: spy,
+        verdict: _kVerdictByText,
+        ctx: MealRecordContext(eatenAt: _kEatAt),
+      );
+
+      expect(spy.appendFoodByTextCallCount, 1);
+      expect(spy.lastMealRecordId, isNull);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // 빈 이름 방어 (의료성 — 이름 없는 식사 기록 금지, pr-review 소소 수정 ③)
+  // ---------------------------------------------------------------------------
+  group('makeHandlerFromRef — foodName 빈 문자열 방어', () {
+    testWidgets('foodName이 공백뿐이면 appendFoodByText를 호출하지 않는다', (tester) async {
+      final spy = _SpyMealRepository();
+      const blankVerdict = EatVerdict(
+        level: VerdictLevel.caution,
+        foodName: '   ',
+        // foodExternalId null → by-text
+      );
+
+      await _runHandler(
+        tester: tester,
+        spy: spy,
+        verdict: blankVerdict,
+        ctx: MealRecordContext(eatenAt: _kEatAt),
+      );
+
       expect(spy.appendFoodByTextCallCount, 0);
+      expect(spy.appendFoodCallCount, 0);
+    });
+
+    testWidgets('foodName이 빈 문자열이면 appendFoodByText를 호출하지 않는다', (tester) async {
+      final spy = _SpyMealRepository();
+      const emptyVerdict = EatVerdict(
+        level: VerdictLevel.caution,
+        foodName: '',
+      );
+
+      await _runHandler(
+        tester: tester,
+        spy: spy,
+        verdict: emptyVerdict,
+        ctx: MealRecordContext(eatenAt: _kEatAt),
+      );
+
+      expect(spy.appendFoodByTextCallCount, 0);
+      expect(spy.appendFoodCallCount, 0);
     });
   });
 }

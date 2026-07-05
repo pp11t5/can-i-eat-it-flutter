@@ -11,6 +11,8 @@ import 'package:can_i_eat_it/features/food_dictionary/data/repositories/mock_dic
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
+import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
+import 'package:can_i_eat_it/features/mypage/data/repositories/mock_my_page_repository.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
@@ -36,11 +38,15 @@ class _NoopAnalytics implements AnalyticsService {
 Widget _buildMypageScreen({
   AuthSession? session,
   bool withProfile = true,
+  bool withSummary = true,
 }) {
   final repo = MockAuthRepository(initialSession: session);
   final profileRepo = withProfile
       ? MockHealthProfileRepository.completed()
       : MockHealthProfileRepository.noProfile();
+  final summaryRepo = withSummary
+      ? MockMyPageRepository.seeded()
+      : MockMyPageRepository.empty();
 
   return ProviderScope(
     overrides: [
@@ -56,6 +62,8 @@ Widget _buildMypageScreen({
       dictionaryRepositoryProvider.overrideWithValue(
         MockDictionaryRepository.seeded(),
       ),
+      // ignore: scoped_providers_should_specify_dependencies
+      myPageRepositoryProvider.overrideWithValue(summaryRepo),
     ],
     child: MaterialApp(
       theme: AppTheme.light,
@@ -130,6 +138,29 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('전체보기'), findsOneWidget);
+    });
+
+    testWidgets('주간 기록 카드에 mySummaryProvider 실카운트가 표시된다', (tester) async {
+      await tester.pumpWidget(_buildMypageScreen());
+      await tester.pumpAndSettle();
+
+      // MockMyPageRepository.seeded() — mealRecordCount:9, recentSymptomCount:2,
+      // streakCount:4, mealCount(recommend:9, caution:3, risk:1).
+      expect(find.text('9'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('4'), findsOneWidget);
+      expect(find.text('권장 9'), findsOneWidget);
+      expect(find.text('주의 3'), findsOneWidget);
+      expect(find.text('위험 1'), findsOneWidget);
+    });
+
+    testWidgets('요약 데이터가 빈 상태면 주간 기록 카드 수치가 0으로 표시된다', (tester) async {
+      await tester.pumpWidget(_buildMypageScreen(withSummary: false));
+      await tester.pumpAndSettle();
+
+      expect(find.text('권장 0'), findsOneWidget);
+      expect(find.text('주의 0'), findsOneWidget);
+      expect(find.text('위험 0'), findsOneWidget);
     });
 
     testWidgets('알림 설정 항목이 표시된다', (tester) async {

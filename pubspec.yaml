@@ -35,6 +35,8 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  # grapheme cluster 기준 문자열 절단(clampMealName) — flutter SDK 전이 의존성을 명시 선언.
+  characters: ^1.4.1
   flutter_riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
   go_router: ^15.1.2

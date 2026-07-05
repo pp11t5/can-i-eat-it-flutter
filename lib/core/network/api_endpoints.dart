@@ -89,7 +89,7 @@ class ApiEndpoints {
   // Meal (신 계약: /meal-records + /timeline)
   // ---------------------------------------------------------------------------
 
-  /// `POST /meal-records` (음식 추가)
+  /// `POST /meal-records` (신규 식사, by-text)
   static const String mealRecords = '/meal-records';
 
   /// `GET /meal-records/{id}` · `DELETE /meal-records/{id}`
@@ -97,6 +97,25 @@ class ApiEndpoints {
 
   /// `GET /meal-records/foods/{foodId}` · `DELETE /meal-records/foods/{foodId}`
   static String mealRecordFood(String foodId) => '/meal-records/foods/$foodId';
+
+  /// POST 신규 식사(by-id) 경로. `/meal-records/foods/{foodExternalId}` —
+  /// [mealRecordFood]와 문자열이 같지만(그쪽은 GET 상세·DELETE) POST는 신규 식사
+  /// 생성 semantics이므로 드리프트 방지를 위해 별도 이름의 빌더로 분리한다.
+  ///
+  /// `POST /meal-records/foods/{foodExternalId}`
+  static String mealRecordsByFoodId(String foodExternalId) =>
+      '/meal-records/foods/$foodExternalId';
+
+  /// `POST /meal-records/{mealRecordId}/foods` (기존 식사에 텍스트 음식 추가)
+  static String mealRecordFoods(String mealRecordId) =>
+      '/meal-records/$mealRecordId/foods';
+
+  /// `POST /meal-records/{mealRecordId}/foods/{foodExternalId}` (기존 식사에 ID 음식 추가)
+  static String mealRecordFoodById(
+    String mealRecordId,
+    String foodExternalId,
+  ) =>
+      '/meal-records/$mealRecordId/foods/$foodExternalId';
 
   /// `GET /meal-records/candidates`
   static const String mealRecordCandidates = '/meal-records/candidates';
@@ -170,4 +189,42 @@ class ApiEndpoints {
 
   /// `GET /my-page/reports`
   static const String myPageReports = '/my-page/reports';
+
+  // ---------------------------------------------------------------------------
+  // My Page Summary (W7, 홈·마이 실데이터)
+  // ---------------------------------------------------------------------------
+
+  /// `GET /my-page/summary`
+  static const String myPageSummary = '/my-page/summary';
+
+  /// `GET /my-page/profile`
+  static const String myPageProfile = '/my-page/profile';
+
+  /// `GET /my-page/health-info` · `PATCH /my-page/health-info`
+  static const String myPageHealthInfo = '/my-page/health-info';
+
+  // ---------------------------------------------------------------------------
+  // Meal — minor EP (W7, 홈 화면 배지·최근 식사)
+  // ---------------------------------------------------------------------------
+
+  /// `GET /meal-records/unrecorded-count`
+  static const String mealRecordsUnrecordedCount =
+      '/meal-records/unrecorded-count';
+
+  /// `GET /meal-records/recent-foods`
+  static const String mealRecordsRecentFoods = '/meal-records/recent-foods';
+
+  // ---------------------------------------------------------------------------
+  // Food — minor EP (W7, 이전 증상 이력·카테고리, UI 배선 defer)
+  // ---------------------------------------------------------------------------
+
+  /// 음식별 증상 이력 경로 템플릿. [foodSymptoms] 로 치환.
+  static const String _foodSymptomsTemplate = '/foods/{foodExternalId}/symptoms';
+
+  /// `GET /foods/{foodExternalId}/symptoms`
+  static String foodSymptoms(String foodExternalId) =>
+      _foodSymptomsTemplate.replaceFirst('{foodExternalId}', foodExternalId);
+
+  /// `GET /foods/categories`
+  static const String foodCategories = '/foods/categories';
 }

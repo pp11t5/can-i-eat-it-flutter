@@ -17,13 +17,36 @@ class WeeklyReportRepositoryImpl implements WeeklyReportRepository {
   Future<WeeklyReport> getWeeklyReport() async {
     try {
       final response = await _dio.get<dynamic>(ApiEndpoints.myPageReports);
-      final dto = unwrap<WeeklyReportDto>(
+      // result:null 관용 처리 — 백엔드가 항상 zero-fill 하지 않으므로 빈 리포트로
+      // 폴백해 에러 화면 대신 빈 상태를 보여준다(W7).
+      final dto = unwrapOrNull<WeeklyReportDto>(
         response,
         (j) => WeeklyReportDto.fromJson(j as Map<String, dynamic>),
       );
-      return dto.toEntity();
+      return dto?.toEntity() ?? _emptyWeeklyReport;
     } on DioException catch (e) {
       throw FailureMapper.fromDioException(e);
     }
   }
 }
+
+/// result:null(이번 주 리포트가 아직 없음) 폴백 빈 리포트.
+///
+/// startDate/endDate/weekLabel은 서버 원문이 없어 빈 문자열이다 — 화면의
+/// 날짜·주차 라벨은 빈 값을 그대로 통과시켜 크래시 없이 렌더한다.
+const _emptyWeeklyReport = WeeklyReport(
+  startDate: '',
+  endDate: '',
+  weekLabel: '',
+  comfortableState: ComfortableState(
+    streakCount: 0,
+    recommendedMealCount: 0,
+    percentage: 0,
+  ),
+  mealCount: MealCount(
+    recommendCount: 0,
+    cautionCount: 0,
+    riskCount: 0,
+    unknownCount: 0,
+  ),
+);

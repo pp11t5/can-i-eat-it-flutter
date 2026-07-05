@@ -139,6 +139,32 @@ T unwrap<T>(Response<dynamic> response, T Function(Object?) fromJson) {
   }
 }
 
+/// 서버 응답 [response] 에서 봉투를 벗기고 [T] 를 반환한다. [unwrap] 과 달리
+/// `result` 가 `null` 이면 예외 없이 `null` 을 반환한다.
+///
+/// 백엔드가 항상 zero-fill 된 객체를 보낸다고 가정할 수 없는 엔드포인트
+/// (예: 이번 주 리포트가 아직 없는 경우)에서 호출부가 빈 상태 엔티티로
+/// 폴백할 때 사용한다 (W7). 실패 응답(`isSuccess==false`)은 [unwrap] 과
+/// 동일하게 [Failure] 를 throw 한다 — null 관용은 "성공 + result:null" 케이스에만
+/// 적용된다.
+T? unwrapOrNull<T>(Response<dynamic> response, T Function(Object?) fromJson) {
+  final Map<String, dynamic> body;
+  if (response.data is Map<String, dynamic>) {
+    body = response.data as Map<String, dynamic>;
+  } else {
+    throw const UnexpectedFailure('응답 형식이 올바르지 않아요.');
+  }
+
+  final envelope = ApiResponse.fromJson(body, (json) => json);
+
+  if (envelope.isSuccess) {
+    if (envelope.result == null) return null;
+    return fromJson(envelope.result);
+  } else {
+    throw FailureMapper.fromCode(envelope.code, message: envelope.message);
+  }
+}
+
 /// 응답 데이터 없이 성공 여부만 확인하는 언랩.
 ///
 /// 서버가 `result: null` 인 성공 응답을 보내는 엔드포인트에 사용.

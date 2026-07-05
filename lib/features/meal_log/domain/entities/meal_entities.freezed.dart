@@ -1950,25 +1950,493 @@ class __$MealRecordCopyWithImpl<$Res> implements _$MealRecordCopyWith<$Res> {
 }
 
 /// @nodoc
-mixin _$TimelineItem {
+mixin _$ConnectedSymptoms {
+  String get symptomId;
+  SymptomState get symptomState;
+  int get afterMealMinutes;
+  List<String> get representativeSymptoms;
+  int get etcCount;
+
+  /// Create a copy of ConnectedSymptoms
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $ConnectedSymptomsCopyWith<ConnectedSymptoms> get copyWith =>
+      _$ConnectedSymptomsCopyWithImpl<ConnectedSymptoms>(
+          this as ConnectedSymptoms, _$identity);
+
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is TimelineItem);
+        (other.runtimeType == runtimeType &&
+            other is ConnectedSymptoms &&
+            (identical(other.symptomId, symptomId) ||
+                other.symptomId == symptomId) &&
+            (identical(other.symptomState, symptomState) ||
+                other.symptomState == symptomState) &&
+            (identical(other.afterMealMinutes, afterMealMinutes) ||
+                other.afterMealMinutes == afterMealMinutes) &&
+            const DeepCollectionEquality()
+                .equals(other.representativeSymptoms, representativeSymptoms) &&
+            (identical(other.etcCount, etcCount) ||
+                other.etcCount == etcCount));
   }
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => Object.hash(
+      runtimeType,
+      symptomId,
+      symptomState,
+      afterMealMinutes,
+      const DeepCollectionEquality().hash(representativeSymptoms),
+      etcCount);
 
   @override
   String toString() {
-    return 'TimelineItem()';
+    return 'ConnectedSymptoms(symptomId: $symptomId, symptomState: $symptomState, afterMealMinutes: $afterMealMinutes, representativeSymptoms: $representativeSymptoms, etcCount: $etcCount)';
   }
 }
 
 /// @nodoc
-class $TimelineItemCopyWith<$Res> {
-  $TimelineItemCopyWith(TimelineItem _, $Res Function(TimelineItem) __);
+abstract mixin class $ConnectedSymptomsCopyWith<$Res> {
+  factory $ConnectedSymptomsCopyWith(
+          ConnectedSymptoms value, $Res Function(ConnectedSymptoms) _then) =
+      _$ConnectedSymptomsCopyWithImpl;
+  @useResult
+  $Res call(
+      {String symptomId,
+      SymptomState symptomState,
+      int afterMealMinutes,
+      List<String> representativeSymptoms,
+      int etcCount});
+}
+
+/// @nodoc
+class _$ConnectedSymptomsCopyWithImpl<$Res>
+    implements $ConnectedSymptomsCopyWith<$Res> {
+  _$ConnectedSymptomsCopyWithImpl(this._self, this._then);
+
+  final ConnectedSymptoms _self;
+  final $Res Function(ConnectedSymptoms) _then;
+
+  /// Create a copy of ConnectedSymptoms
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? symptomId = null,
+    Object? symptomState = null,
+    Object? afterMealMinutes = null,
+    Object? representativeSymptoms = null,
+    Object? etcCount = null,
+  }) {
+    return _then(_self.copyWith(
+      symptomId: null == symptomId
+          ? _self.symptomId
+          : symptomId // ignore: cast_nullable_to_non_nullable
+              as String,
+      symptomState: null == symptomState
+          ? _self.symptomState
+          : symptomState // ignore: cast_nullable_to_non_nullable
+              as SymptomState,
+      afterMealMinutes: null == afterMealMinutes
+          ? _self.afterMealMinutes
+          : afterMealMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
+      representativeSymptoms: null == representativeSymptoms
+          ? _self.representativeSymptoms
+          : representativeSymptoms // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      etcCount: null == etcCount
+          ? _self.etcCount
+          : etcCount // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [ConnectedSymptoms].
+extension ConnectedSymptomsPatterns on ConnectedSymptoms {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_ConnectedSymptoms value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _ConnectedSymptoms() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_ConnectedSymptoms value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _ConnectedSymptoms():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_ConnectedSymptoms value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _ConnectedSymptoms() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(
+            String symptomId,
+            SymptomState symptomState,
+            int afterMealMinutes,
+            List<String> representativeSymptoms,
+            int etcCount)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _ConnectedSymptoms() when $default != null:
+        return $default(
+            _that.symptomId,
+            _that.symptomState,
+            _that.afterMealMinutes,
+            _that.representativeSymptoms,
+            _that.etcCount);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(
+            String symptomId,
+            SymptomState symptomState,
+            int afterMealMinutes,
+            List<String> representativeSymptoms,
+            int etcCount)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _ConnectedSymptoms():
+        return $default(
+            _that.symptomId,
+            _that.symptomState,
+            _that.afterMealMinutes,
+            _that.representativeSymptoms,
+            _that.etcCount);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(
+            String symptomId,
+            SymptomState symptomState,
+            int afterMealMinutes,
+            List<String> representativeSymptoms,
+            int etcCount)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _ConnectedSymptoms() when $default != null:
+        return $default(
+            _that.symptomId,
+            _that.symptomState,
+            _that.afterMealMinutes,
+            _that.representativeSymptoms,
+            _that.etcCount);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _ConnectedSymptoms implements ConnectedSymptoms {
+  const _ConnectedSymptoms(
+      {required this.symptomId,
+      required this.symptomState,
+      required this.afterMealMinutes,
+      final List<String> representativeSymptoms = const <String>[],
+      this.etcCount = 0})
+      : _representativeSymptoms = representativeSymptoms;
+
+  @override
+  final String symptomId;
+  @override
+  final SymptomState symptomState;
+  @override
+  final int afterMealMinutes;
+  final List<String> _representativeSymptoms;
+  @override
+  @JsonKey()
+  List<String> get representativeSymptoms {
+    if (_representativeSymptoms is EqualUnmodifiableListView)
+      return _representativeSymptoms;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_representativeSymptoms);
+  }
+
+  @override
+  @JsonKey()
+  final int etcCount;
+
+  /// Create a copy of ConnectedSymptoms
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$ConnectedSymptomsCopyWith<_ConnectedSymptoms> get copyWith =>
+      __$ConnectedSymptomsCopyWithImpl<_ConnectedSymptoms>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _ConnectedSymptoms &&
+            (identical(other.symptomId, symptomId) ||
+                other.symptomId == symptomId) &&
+            (identical(other.symptomState, symptomState) ||
+                other.symptomState == symptomState) &&
+            (identical(other.afterMealMinutes, afterMealMinutes) ||
+                other.afterMealMinutes == afterMealMinutes) &&
+            const DeepCollectionEquality().equals(
+                other._representativeSymptoms, _representativeSymptoms) &&
+            (identical(other.etcCount, etcCount) ||
+                other.etcCount == etcCount));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      symptomId,
+      symptomState,
+      afterMealMinutes,
+      const DeepCollectionEquality().hash(_representativeSymptoms),
+      etcCount);
+
+  @override
+  String toString() {
+    return 'ConnectedSymptoms(symptomId: $symptomId, symptomState: $symptomState, afterMealMinutes: $afterMealMinutes, representativeSymptoms: $representativeSymptoms, etcCount: $etcCount)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$ConnectedSymptomsCopyWith<$Res>
+    implements $ConnectedSymptomsCopyWith<$Res> {
+  factory _$ConnectedSymptomsCopyWith(
+          _ConnectedSymptoms value, $Res Function(_ConnectedSymptoms) _then) =
+      __$ConnectedSymptomsCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {String symptomId,
+      SymptomState symptomState,
+      int afterMealMinutes,
+      List<String> representativeSymptoms,
+      int etcCount});
+}
+
+/// @nodoc
+class __$ConnectedSymptomsCopyWithImpl<$Res>
+    implements _$ConnectedSymptomsCopyWith<$Res> {
+  __$ConnectedSymptomsCopyWithImpl(this._self, this._then);
+
+  final _ConnectedSymptoms _self;
+  final $Res Function(_ConnectedSymptoms) _then;
+
+  /// Create a copy of ConnectedSymptoms
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? symptomId = null,
+    Object? symptomState = null,
+    Object? afterMealMinutes = null,
+    Object? representativeSymptoms = null,
+    Object? etcCount = null,
+  }) {
+    return _then(_ConnectedSymptoms(
+      symptomId: null == symptomId
+          ? _self.symptomId
+          : symptomId // ignore: cast_nullable_to_non_nullable
+              as String,
+      symptomState: null == symptomState
+          ? _self.symptomState
+          : symptomState // ignore: cast_nullable_to_non_nullable
+              as SymptomState,
+      afterMealMinutes: null == afterMealMinutes
+          ? _self.afterMealMinutes
+          : afterMealMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
+      representativeSymptoms: null == representativeSymptoms
+          ? _self._representativeSymptoms
+          : representativeSymptoms // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      etcCount: null == etcCount
+          ? _self.etcCount
+          : etcCount // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+mixin _$TimelineItem {
+  /// 서버 지정 시간대 아이콘. null 이면 hour 휴리스틱 폴백.
+  TimeIcon? get timeIcon;
+
+  /// Create a copy of TimelineItem
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $TimelineItemCopyWith<TimelineItem> get copyWith =>
+      _$TimelineItemCopyWithImpl<TimelineItem>(
+          this as TimelineItem, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is TimelineItem &&
+            (identical(other.timeIcon, timeIcon) ||
+                other.timeIcon == timeIcon));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, timeIcon);
+
+  @override
+  String toString() {
+    return 'TimelineItem(timeIcon: $timeIcon)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $TimelineItemCopyWith<$Res> {
+  factory $TimelineItemCopyWith(
+          TimelineItem value, $Res Function(TimelineItem) _then) =
+      _$TimelineItemCopyWithImpl;
+  @useResult
+  $Res call({TimeIcon? timeIcon});
+}
+
+/// @nodoc
+class _$TimelineItemCopyWithImpl<$Res> implements $TimelineItemCopyWith<$Res> {
+  _$TimelineItemCopyWithImpl(this._self, this._then);
+
+  final TimelineItem _self;
+  final $Res Function(TimelineItem) _then;
+
+  /// Create a copy of TimelineItem
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? timeIcon = freezed,
+  }) {
+    return _then(_self.copyWith(
+      timeIcon: freezed == timeIcon
+          ? _self.timeIcon
+          : timeIcon // ignore: cast_nullable_to_non_nullable
+              as TimeIcon?,
+    ));
+  }
 }
 
 /// Adds pattern-matching-related methods to [TimelineItem].
@@ -2086,17 +2554,21 @@ extension TimelineItemPatterns on TimelineItem {
             String mealFoodName,
             VerdictLevel grade,
             int etcCount,
-            String? categoryCode)?
+            String? categoryCode,
+            TimeIcon? timeIcon,
+            ConnectedSymptoms? connectedSymptoms)?
         single,
     TResult Function(
             String mealRecordId,
             String mealRecordDateTime,
             List<String> representativeFoods,
             int etcCount,
-            String? categoryCode)?
+            String? categoryCode,
+            TimeIcon? timeIcon,
+            ConnectedSymptoms? connectedSymptoms)?
         group,
-    TResult Function(
-            SymptomState symptomState, int afterMealMinutes, String occurredAt)?
+    TResult Function(SymptomState symptomState, int afterMealMinutes,
+            String occurredAt, TimeIcon? timeIcon, String? symptomId)?
         symptom,
     required TResult orElse(),
   }) {
@@ -2109,13 +2581,21 @@ extension TimelineItemPatterns on TimelineItem {
             _that.mealFoodName,
             _that.grade,
             _that.etcCount,
-            _that.categoryCode);
+            _that.categoryCode,
+            _that.timeIcon,
+            _that.connectedSymptoms);
       case TimelineGroup() when group != null:
-        return group(_that.mealRecordId, _that.mealRecordDateTime,
-            _that.representativeFoods, _that.etcCount, _that.categoryCode);
+        return group(
+            _that.mealRecordId,
+            _that.mealRecordDateTime,
+            _that.representativeFoods,
+            _that.etcCount,
+            _that.categoryCode,
+            _that.timeIcon,
+            _that.connectedSymptoms);
       case TimelineSymptom() when symptom != null:
-        return symptom(
-            _that.symptomState, _that.afterMealMinutes, _that.occurredAt);
+        return symptom(_that.symptomState, _that.afterMealMinutes,
+            _that.occurredAt, _that.timeIcon, _that.symptomId);
       case _:
         return orElse();
     }
@@ -2142,17 +2622,21 @@ extension TimelineItemPatterns on TimelineItem {
             String mealFoodName,
             VerdictLevel grade,
             int etcCount,
-            String? categoryCode)
+            String? categoryCode,
+            TimeIcon? timeIcon,
+            ConnectedSymptoms? connectedSymptoms)
         single,
     required TResult Function(
             String mealRecordId,
             String mealRecordDateTime,
             List<String> representativeFoods,
             int etcCount,
-            String? categoryCode)
+            String? categoryCode,
+            TimeIcon? timeIcon,
+            ConnectedSymptoms? connectedSymptoms)
         group,
-    required TResult Function(
-            SymptomState symptomState, int afterMealMinutes, String occurredAt)
+    required TResult Function(SymptomState symptomState, int afterMealMinutes,
+            String occurredAt, TimeIcon? timeIcon, String? symptomId)
         symptom,
   }) {
     final _that = this;
@@ -2164,13 +2648,21 @@ extension TimelineItemPatterns on TimelineItem {
             _that.mealFoodName,
             _that.grade,
             _that.etcCount,
-            _that.categoryCode);
+            _that.categoryCode,
+            _that.timeIcon,
+            _that.connectedSymptoms);
       case TimelineGroup():
-        return group(_that.mealRecordId, _that.mealRecordDateTime,
-            _that.representativeFoods, _that.etcCount, _that.categoryCode);
+        return group(
+            _that.mealRecordId,
+            _that.mealRecordDateTime,
+            _that.representativeFoods,
+            _that.etcCount,
+            _that.categoryCode,
+            _that.timeIcon,
+            _that.connectedSymptoms);
       case TimelineSymptom():
-        return symptom(
-            _that.symptomState, _that.afterMealMinutes, _that.occurredAt);
+        return symptom(_that.symptomState, _that.afterMealMinutes,
+            _that.occurredAt, _that.timeIcon, _that.symptomId);
     }
   }
 
@@ -2194,17 +2686,21 @@ extension TimelineItemPatterns on TimelineItem {
             String mealFoodName,
             VerdictLevel grade,
             int etcCount,
-            String? categoryCode)?
+            String? categoryCode,
+            TimeIcon? timeIcon,
+            ConnectedSymptoms? connectedSymptoms)?
         single,
     TResult? Function(
             String mealRecordId,
             String mealRecordDateTime,
             List<String> representativeFoods,
             int etcCount,
-            String? categoryCode)?
+            String? categoryCode,
+            TimeIcon? timeIcon,
+            ConnectedSymptoms? connectedSymptoms)?
         group,
-    TResult? Function(
-            SymptomState symptomState, int afterMealMinutes, String occurredAt)?
+    TResult? Function(SymptomState symptomState, int afterMealMinutes,
+            String occurredAt, TimeIcon? timeIcon, String? symptomId)?
         symptom,
   }) {
     final _that = this;
@@ -2216,13 +2712,21 @@ extension TimelineItemPatterns on TimelineItem {
             _that.mealFoodName,
             _that.grade,
             _that.etcCount,
-            _that.categoryCode);
+            _that.categoryCode,
+            _that.timeIcon,
+            _that.connectedSymptoms);
       case TimelineGroup() when group != null:
-        return group(_that.mealRecordId, _that.mealRecordDateTime,
-            _that.representativeFoods, _that.etcCount, _that.categoryCode);
+        return group(
+            _that.mealRecordId,
+            _that.mealRecordDateTime,
+            _that.representativeFoods,
+            _that.etcCount,
+            _that.categoryCode,
+            _that.timeIcon,
+            _that.connectedSymptoms);
       case TimelineSymptom() when symptom != null:
-        return symptom(
-            _that.symptomState, _that.afterMealMinutes, _that.occurredAt);
+        return symptom(_that.symptomState, _that.afterMealMinutes,
+            _that.occurredAt, _that.timeIcon, _that.symptomId);
       case _:
         return null;
     }
@@ -2238,7 +2742,9 @@ class TimelineSingle extends TimelineItem {
       required this.mealFoodName,
       required this.grade,
       this.etcCount = 0,
-      this.categoryCode})
+      this.categoryCode,
+      this.timeIcon,
+      this.connectedSymptoms})
       : super._();
 
   final String mealRecordId;
@@ -2251,8 +2757,16 @@ class TimelineSingle extends TimelineItem {
   /// 음식 카테고리 코드 (CategoryIcon 표시용). 서버 미제공 시 null → regular 폴백.
   final String? categoryCode;
 
+  /// 서버 지정 시간대 아이콘. null 이면 hour 휴리스틱 폴백.
+  @override
+  final TimeIcon? timeIcon;
+
+  /// 연결증상. 없으면 칩 미표시.
+  final ConnectedSymptoms? connectedSymptoms;
+
   /// Create a copy of TimelineItem
   /// with the given fields replaced by the non-null parameter values.
+  @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $TimelineSingleCopyWith<TimelineSingle> get copyWith =>
@@ -2273,16 +2787,20 @@ class TimelineSingle extends TimelineItem {
             (identical(other.etcCount, etcCount) ||
                 other.etcCount == etcCount) &&
             (identical(other.categoryCode, categoryCode) ||
-                other.categoryCode == categoryCode));
+                other.categoryCode == categoryCode) &&
+            (identical(other.timeIcon, timeIcon) ||
+                other.timeIcon == timeIcon) &&
+            (identical(other.connectedSymptoms, connectedSymptoms) ||
+                other.connectedSymptoms == connectedSymptoms));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, mealRecordId, mealRecordDateTime,
-      mealFoodName, grade, etcCount, categoryCode);
+      mealFoodName, grade, etcCount, categoryCode, timeIcon, connectedSymptoms);
 
   @override
   String toString() {
-    return 'TimelineItem.single(mealRecordId: $mealRecordId, mealRecordDateTime: $mealRecordDateTime, mealFoodName: $mealFoodName, grade: $grade, etcCount: $etcCount, categoryCode: $categoryCode)';
+    return 'TimelineItem.single(mealRecordId: $mealRecordId, mealRecordDateTime: $mealRecordDateTime, mealFoodName: $mealFoodName, grade: $grade, etcCount: $etcCount, categoryCode: $categoryCode, timeIcon: $timeIcon, connectedSymptoms: $connectedSymptoms)';
   }
 }
 
@@ -2292,6 +2810,7 @@ abstract mixin class $TimelineSingleCopyWith<$Res>
   factory $TimelineSingleCopyWith(
           TimelineSingle value, $Res Function(TimelineSingle) _then) =
       _$TimelineSingleCopyWithImpl;
+  @override
   @useResult
   $Res call(
       {String mealRecordId,
@@ -2299,7 +2818,11 @@ abstract mixin class $TimelineSingleCopyWith<$Res>
       String mealFoodName,
       VerdictLevel grade,
       int etcCount,
-      String? categoryCode});
+      String? categoryCode,
+      TimeIcon? timeIcon,
+      ConnectedSymptoms? connectedSymptoms});
+
+  $ConnectedSymptomsCopyWith<$Res>? get connectedSymptoms;
 }
 
 /// @nodoc
@@ -2312,6 +2835,7 @@ class _$TimelineSingleCopyWithImpl<$Res>
 
   /// Create a copy of TimelineItem
   /// with the given fields replaced by the non-null parameter values.
+  @override
   @pragma('vm:prefer-inline')
   $Res call({
     Object? mealRecordId = null,
@@ -2320,6 +2844,8 @@ class _$TimelineSingleCopyWithImpl<$Res>
     Object? grade = null,
     Object? etcCount = null,
     Object? categoryCode = freezed,
+    Object? timeIcon = freezed,
+    Object? connectedSymptoms = freezed,
   }) {
     return _then(TimelineSingle(
       mealRecordId: null == mealRecordId
@@ -2346,7 +2872,29 @@ class _$TimelineSingleCopyWithImpl<$Res>
           ? _self.categoryCode
           : categoryCode // ignore: cast_nullable_to_non_nullable
               as String?,
+      timeIcon: freezed == timeIcon
+          ? _self.timeIcon
+          : timeIcon // ignore: cast_nullable_to_non_nullable
+              as TimeIcon?,
+      connectedSymptoms: freezed == connectedSymptoms
+          ? _self.connectedSymptoms
+          : connectedSymptoms // ignore: cast_nullable_to_non_nullable
+              as ConnectedSymptoms?,
     ));
+  }
+
+  /// Create a copy of TimelineItem
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $ConnectedSymptomsCopyWith<$Res>? get connectedSymptoms {
+    if (_self.connectedSymptoms == null) {
+      return null;
+    }
+
+    return $ConnectedSymptomsCopyWith<$Res>(_self.connectedSymptoms!, (value) {
+      return _then(_self.copyWith(connectedSymptoms: value));
+    });
   }
 }
 
@@ -2358,7 +2906,9 @@ class TimelineGroup extends TimelineItem {
       required this.mealRecordDateTime,
       final List<String> representativeFoods = const <String>[],
       this.etcCount = 0,
-      this.categoryCode})
+      this.categoryCode,
+      this.timeIcon,
+      this.connectedSymptoms})
       : _representativeFoods = representativeFoods,
         super._();
 
@@ -2379,8 +2929,16 @@ class TimelineGroup extends TimelineItem {
   /// 음식 카테고리 코드 (CategoryIcon 표시용). 서버 미제공 시 null → regular 폴백.
   final String? categoryCode;
 
+  /// 서버 지정 시간대 아이콘. null 이면 hour 휴리스틱 폴백.
+  @override
+  final TimeIcon? timeIcon;
+
+  /// 연결증상. 없으면 칩 미표시.
+  final ConnectedSymptoms? connectedSymptoms;
+
   /// Create a copy of TimelineItem
   /// with the given fields replaced by the non-null parameter values.
+  @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $TimelineGroupCopyWith<TimelineGroup> get copyWith =>
@@ -2400,7 +2958,11 @@ class TimelineGroup extends TimelineItem {
             (identical(other.etcCount, etcCount) ||
                 other.etcCount == etcCount) &&
             (identical(other.categoryCode, categoryCode) ||
-                other.categoryCode == categoryCode));
+                other.categoryCode == categoryCode) &&
+            (identical(other.timeIcon, timeIcon) ||
+                other.timeIcon == timeIcon) &&
+            (identical(other.connectedSymptoms, connectedSymptoms) ||
+                other.connectedSymptoms == connectedSymptoms));
   }
 
   @override
@@ -2410,11 +2972,13 @@ class TimelineGroup extends TimelineItem {
       mealRecordDateTime,
       const DeepCollectionEquality().hash(_representativeFoods),
       etcCount,
-      categoryCode);
+      categoryCode,
+      timeIcon,
+      connectedSymptoms);
 
   @override
   String toString() {
-    return 'TimelineItem.group(mealRecordId: $mealRecordId, mealRecordDateTime: $mealRecordDateTime, representativeFoods: $representativeFoods, etcCount: $etcCount, categoryCode: $categoryCode)';
+    return 'TimelineItem.group(mealRecordId: $mealRecordId, mealRecordDateTime: $mealRecordDateTime, representativeFoods: $representativeFoods, etcCount: $etcCount, categoryCode: $categoryCode, timeIcon: $timeIcon, connectedSymptoms: $connectedSymptoms)';
   }
 }
 
@@ -2424,13 +2988,18 @@ abstract mixin class $TimelineGroupCopyWith<$Res>
   factory $TimelineGroupCopyWith(
           TimelineGroup value, $Res Function(TimelineGroup) _then) =
       _$TimelineGroupCopyWithImpl;
+  @override
   @useResult
   $Res call(
       {String mealRecordId,
       String mealRecordDateTime,
       List<String> representativeFoods,
       int etcCount,
-      String? categoryCode});
+      String? categoryCode,
+      TimeIcon? timeIcon,
+      ConnectedSymptoms? connectedSymptoms});
+
+  $ConnectedSymptomsCopyWith<$Res>? get connectedSymptoms;
 }
 
 /// @nodoc
@@ -2443,6 +3012,7 @@ class _$TimelineGroupCopyWithImpl<$Res>
 
   /// Create a copy of TimelineItem
   /// with the given fields replaced by the non-null parameter values.
+  @override
   @pragma('vm:prefer-inline')
   $Res call({
     Object? mealRecordId = null,
@@ -2450,6 +3020,8 @@ class _$TimelineGroupCopyWithImpl<$Res>
     Object? representativeFoods = null,
     Object? etcCount = null,
     Object? categoryCode = freezed,
+    Object? timeIcon = freezed,
+    Object? connectedSymptoms = freezed,
   }) {
     return _then(TimelineGroup(
       mealRecordId: null == mealRecordId
@@ -2472,7 +3044,29 @@ class _$TimelineGroupCopyWithImpl<$Res>
           ? _self.categoryCode
           : categoryCode // ignore: cast_nullable_to_non_nullable
               as String?,
+      timeIcon: freezed == timeIcon
+          ? _self.timeIcon
+          : timeIcon // ignore: cast_nullable_to_non_nullable
+              as TimeIcon?,
+      connectedSymptoms: freezed == connectedSymptoms
+          ? _self.connectedSymptoms
+          : connectedSymptoms // ignore: cast_nullable_to_non_nullable
+              as ConnectedSymptoms?,
     ));
+  }
+
+  /// Create a copy of TimelineItem
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $ConnectedSymptomsCopyWith<$Res>? get connectedSymptoms {
+    if (_self.connectedSymptoms == null) {
+      return null;
+    }
+
+    return $ConnectedSymptomsCopyWith<$Res>(_self.connectedSymptoms!, (value) {
+      return _then(_self.copyWith(connectedSymptoms: value));
+    });
   }
 }
 
@@ -2482,15 +3076,26 @@ class TimelineSymptom extends TimelineItem {
   const TimelineSymptom(
       {required this.symptomState,
       required this.afterMealMinutes,
-      required this.occurredAt})
+      required this.occurredAt,
+      this.timeIcon,
+      this.symptomId})
       : super._();
 
   final SymptomState symptomState;
   final int afterMealMinutes;
   final String occurredAt;
 
+  /// 서버 지정 시간대 아이콘. symptom 행은 항상 의료 아이콘을 쓰므로 표시엔
+  /// 미사용 — 계약 완전성을 위해 보관만.
+  @override
+  final TimeIcon? timeIcon;
+
+  /// 증상 상세 식별자. 있으면 탭 가능(구 페이로드 방어 위해 nullable).
+  final String? symptomId;
+
   /// Create a copy of TimelineItem
   /// with the given fields replaced by the non-null parameter values.
+  @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
   $TimelineSymptomCopyWith<TimelineSymptom> get copyWith =>
@@ -2506,16 +3111,20 @@ class TimelineSymptom extends TimelineItem {
             (identical(other.afterMealMinutes, afterMealMinutes) ||
                 other.afterMealMinutes == afterMealMinutes) &&
             (identical(other.occurredAt, occurredAt) ||
-                other.occurredAt == occurredAt));
+                other.occurredAt == occurredAt) &&
+            (identical(other.timeIcon, timeIcon) ||
+                other.timeIcon == timeIcon) &&
+            (identical(other.symptomId, symptomId) ||
+                other.symptomId == symptomId));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, symptomState, afterMealMinutes, occurredAt);
+  int get hashCode => Object.hash(runtimeType, symptomState, afterMealMinutes,
+      occurredAt, timeIcon, symptomId);
 
   @override
   String toString() {
-    return 'TimelineItem.symptom(symptomState: $symptomState, afterMealMinutes: $afterMealMinutes, occurredAt: $occurredAt)';
+    return 'TimelineItem.symptom(symptomState: $symptomState, afterMealMinutes: $afterMealMinutes, occurredAt: $occurredAt, timeIcon: $timeIcon, symptomId: $symptomId)';
   }
 }
 
@@ -2525,9 +3134,14 @@ abstract mixin class $TimelineSymptomCopyWith<$Res>
   factory $TimelineSymptomCopyWith(
           TimelineSymptom value, $Res Function(TimelineSymptom) _then) =
       _$TimelineSymptomCopyWithImpl;
+  @override
   @useResult
   $Res call(
-      {SymptomState symptomState, int afterMealMinutes, String occurredAt});
+      {SymptomState symptomState,
+      int afterMealMinutes,
+      String occurredAt,
+      TimeIcon? timeIcon,
+      String? symptomId});
 }
 
 /// @nodoc
@@ -2540,11 +3154,14 @@ class _$TimelineSymptomCopyWithImpl<$Res>
 
   /// Create a copy of TimelineItem
   /// with the given fields replaced by the non-null parameter values.
+  @override
   @pragma('vm:prefer-inline')
   $Res call({
     Object? symptomState = null,
     Object? afterMealMinutes = null,
     Object? occurredAt = null,
+    Object? timeIcon = freezed,
+    Object? symptomId = freezed,
   }) {
     return _then(TimelineSymptom(
       symptomState: null == symptomState
@@ -2559,6 +3176,14 @@ class _$TimelineSymptomCopyWithImpl<$Res>
           ? _self.occurredAt
           : occurredAt // ignore: cast_nullable_to_non_nullable
               as String,
+      timeIcon: freezed == timeIcon
+          ? _self.timeIcon
+          : timeIcon // ignore: cast_nullable_to_non_nullable
+              as TimeIcon?,
+      symptomId: freezed == symptomId
+          ? _self.symptomId
+          : symptomId // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }

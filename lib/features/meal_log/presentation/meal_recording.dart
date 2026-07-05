@@ -16,22 +16,31 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
   return (BuildContext context, EatVerdict verdict, MealRecordContext ctx) async {
     final repo = ref.read(mealRepositoryProvider);
 
-    // by-text seam: 서버 준비중 → repo 호출하지 않고 "준비중" 토스트로 단락.
-    // (appendFoodByText의 UnimplementedError가 실제 사용자 경로에 도달하지 않게 한다.)
-    if (verdict.foodExternalId == null) {
-      if (context.mounted) {
-        await showAppToast(context, '직접 입력한 음식 기록은 준비 중이에요.');
-      }
-      return;
-    }
-
     try {
       // grade 미전송 — 서버가 analysis 를 계산한다(F-10).
-      await repo.appendFood(
-        foodExternalId: verdict.foodExternalId!,
-        eatenAt: ctx.eatenAt,
-        mealRecordId: ctx.mealRecordId,
-      );
+      // foodExternalId 有 → by-id / null → by-text(자유 입력 음식명).
+      if (verdict.foodExternalId != null) {
+        await repo.appendFood(
+          foodExternalId: verdict.foodExternalId!,
+          eatenAt: ctx.eatenAt,
+          mealRecordId: ctx.mealRecordId,
+        );
+      } else {
+        final trimmedName = verdict.foodName.trim();
+        if (trimmedName.isEmpty) {
+          // 빈 이름 음식 기록 금지(의료성 — 이름 없는 식사 기록은 판정 근거를
+          // 남기지 못한다, pr-review 소소 수정 ③). 방어적으로 스킵하고 실패 토스트.
+          if (context.mounted) {
+            await showAppToast(context, '식사 기록에 실패했어요. 다시 시도해주세요.');
+          }
+          return;
+        }
+        await repo.appendFoodByText(
+          foodTextInput: trimmedName,
+          eatenAt: ctx.eatenAt,
+          mealRecordId: ctx.mealRecordId,
+        );
+      }
 
       // 타임라인 + weekly invalidate
       final dateKey = DateTime(
