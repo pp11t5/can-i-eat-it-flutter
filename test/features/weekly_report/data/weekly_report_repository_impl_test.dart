@@ -76,4 +76,21 @@ void main() {
       expect(result.mealCount.riskCount, 2);
     });
   });
+
+  // -------------------------------------------------------------------------
+  group('getWeeklyReport — result:null 관용 처리 (W7)', () {
+    test('result가 null이어도 예외 없이 빈 WeeklyReport를 반환한다', () async {
+      adapter.onGet(
+        ApiEndpoints.myPageReports,
+        (server) => server.reply(200, _envelope(null)),
+      );
+      final result = await repo.getWeeklyReport();
+      expect(result, isA<WeeklyReport>());
+      expect(result.comfortableState.streakCount, 0);
+      expect(result.mealCount.recommendCount, 0);
+      expect(result.mealCount.cautionCount, 0);
+      expect(result.mealCount.riskCount, 0);
+      expect(result.mealCount.unknownCount, 0);
+    });
+  });
 }

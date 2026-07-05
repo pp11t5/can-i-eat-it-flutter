@@ -55,21 +55,25 @@ void main() {
   // MealCountDto — GET /my-page/reports result.mealCount
   // -------------------------------------------------------------------------
   group('MealCountDto', () {
-    test('recommendCount·cautionCount·riskCount를 파싱하고 toEntity에 반영한다', () {
+    test('recommendCount·cautionCount·riskCount·unknownCount를 파싱하고 toEntity에 반영한다',
+        () {
       final dto = MealCountDto.fromJson(const {
         'recommendCount': 6,
         'cautionCount': 3,
         'riskCount': 2,
+        'unknownCount': 1,
       });
       expect(dto.recommendCount, 6);
       expect(dto.cautionCount, 3);
       expect(dto.riskCount, 2);
+      expect(dto.unknownCount, 1);
 
       final entity = dto.toEntity();
       expect(entity, isA<MealCount>());
       expect(entity.recommendCount, 6);
       expect(entity.cautionCount, 3);
       expect(entity.riskCount, 2);
+      expect(entity.unknownCount, 1);
     });
 
     test('키 전체 누락 시 각 카운트는 0으로 폴백된다', () {
@@ -77,6 +81,7 @@ void main() {
       expect(entity.recommendCount, 0);
       expect(entity.cautionCount, 0);
       expect(entity.riskCount, 0);
+      expect(entity.unknownCount, 0);
     });
 
     test('일부 키만 누락돼도 해당 카운트만 0으로 폴백된다', () {
@@ -84,6 +89,17 @@ void main() {
       expect(dto.recommendCount, 6);
       expect(dto.cautionCount, 0);
       expect(dto.riskCount, 0);
+      expect(dto.unknownCount, 0);
+    });
+
+    // 계약: unknownCount 키만 누락돼도 0으로 폴백된다 (구 응답 방어 — W7)
+    test('unknownCount 키 누락 시 0으로 폴백된다', () {
+      final dto = MealCountDto.fromJson(const {
+        'recommendCount': 6,
+        'cautionCount': 3,
+        'riskCount': 2,
+      });
+      expect(dto.unknownCount, 0);
     });
   });
 

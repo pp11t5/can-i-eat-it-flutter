@@ -372,6 +372,7 @@ mixin _$MealCountDto {
   int get recommendCount;
   int get cautionCount;
   int get riskCount;
+  int get unknownCount;
 
   /// Create a copy of MealCountDto
   /// with the given fields replaced by the non-null parameter values.
@@ -394,17 +395,19 @@ mixin _$MealCountDto {
             (identical(other.cautionCount, cautionCount) ||
                 other.cautionCount == cautionCount) &&
             (identical(other.riskCount, riskCount) ||
-                other.riskCount == riskCount));
+                other.riskCount == riskCount) &&
+            (identical(other.unknownCount, unknownCount) ||
+                other.unknownCount == unknownCount));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, recommendCount, cautionCount, riskCount);
+  int get hashCode => Object.hash(
+      runtimeType, recommendCount, cautionCount, riskCount, unknownCount);
 
   @override
   String toString() {
-    return 'MealCountDto(recommendCount: $recommendCount, cautionCount: $cautionCount, riskCount: $riskCount)';
+    return 'MealCountDto(recommendCount: $recommendCount, cautionCount: $cautionCount, riskCount: $riskCount, unknownCount: $unknownCount)';
   }
 }
 
@@ -414,7 +417,8 @@ abstract mixin class $MealCountDtoCopyWith<$Res> {
           MealCountDto value, $Res Function(MealCountDto) _then) =
       _$MealCountDtoCopyWithImpl;
   @useResult
-  $Res call({int recommendCount, int cautionCount, int riskCount});
+  $Res call(
+      {int recommendCount, int cautionCount, int riskCount, int unknownCount});
 }
 
 /// @nodoc
@@ -432,6 +436,7 @@ class _$MealCountDtoCopyWithImpl<$Res> implements $MealCountDtoCopyWith<$Res> {
     Object? recommendCount = null,
     Object? cautionCount = null,
     Object? riskCount = null,
+    Object? unknownCount = null,
   }) {
     return _then(_self.copyWith(
       recommendCount: null == recommendCount
@@ -445,6 +450,10 @@ class _$MealCountDtoCopyWithImpl<$Res> implements $MealCountDtoCopyWith<$Res> {
       riskCount: null == riskCount
           ? _self.riskCount
           : riskCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      unknownCount: null == unknownCount
+          ? _self.unknownCount
+          : unknownCount // ignore: cast_nullable_to_non_nullable
               as int,
     ));
   }
@@ -543,15 +552,16 @@ extension MealCountDtoPatterns on MealCountDto {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(int recommendCount, int cautionCount, int riskCount)?
+    TResult Function(int recommendCount, int cautionCount, int riskCount,
+            int unknownCount)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _MealCountDto() when $default != null:
-        return $default(
-            _that.recommendCount, _that.cautionCount, _that.riskCount);
+        return $default(_that.recommendCount, _that.cautionCount,
+            _that.riskCount, _that.unknownCount);
       case _:
         return orElse();
     }
@@ -572,14 +582,15 @@ extension MealCountDtoPatterns on MealCountDto {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(int recommendCount, int cautionCount, int riskCount)
+    TResult Function(int recommendCount, int cautionCount, int riskCount,
+            int unknownCount)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _MealCountDto():
-        return $default(
-            _that.recommendCount, _that.cautionCount, _that.riskCount);
+        return $default(_that.recommendCount, _that.cautionCount,
+            _that.riskCount, _that.unknownCount);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -599,14 +610,15 @@ extension MealCountDtoPatterns on MealCountDto {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(int recommendCount, int cautionCount, int riskCount)?
+    TResult? Function(int recommendCount, int cautionCount, int riskCount,
+            int unknownCount)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _MealCountDto() when $default != null:
-        return $default(
-            _that.recommendCount, _that.cautionCount, _that.riskCount);
+        return $default(_that.recommendCount, _that.cautionCount,
+            _that.riskCount, _that.unknownCount);
       case _:
         return null;
     }
@@ -617,7 +629,10 @@ extension MealCountDtoPatterns on MealCountDto {
 @JsonSerializable()
 class _MealCountDto implements MealCountDto {
   const _MealCountDto(
-      {this.recommendCount = 0, this.cautionCount = 0, this.riskCount = 0});
+      {this.recommendCount = 0,
+      this.cautionCount = 0,
+      this.riskCount = 0,
+      this.unknownCount = 0});
   factory _MealCountDto.fromJson(Map<String, dynamic> json) =>
       _$MealCountDtoFromJson(json);
 
@@ -630,6 +645,9 @@ class _MealCountDto implements MealCountDto {
   @override
   @JsonKey()
   final int riskCount;
+  @override
+  @JsonKey()
+  final int unknownCount;
 
   /// Create a copy of MealCountDto
   /// with the given fields replaced by the non-null parameter values.
@@ -656,17 +674,19 @@ class _MealCountDto implements MealCountDto {
             (identical(other.cautionCount, cautionCount) ||
                 other.cautionCount == cautionCount) &&
             (identical(other.riskCount, riskCount) ||
-                other.riskCount == riskCount));
+                other.riskCount == riskCount) &&
+            (identical(other.unknownCount, unknownCount) ||
+                other.unknownCount == unknownCount));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, recommendCount, cautionCount, riskCount);
+  int get hashCode => Object.hash(
+      runtimeType, recommendCount, cautionCount, riskCount, unknownCount);
 
   @override
   String toString() {
-    return 'MealCountDto(recommendCount: $recommendCount, cautionCount: $cautionCount, riskCount: $riskCount)';
+    return 'MealCountDto(recommendCount: $recommendCount, cautionCount: $cautionCount, riskCount: $riskCount, unknownCount: $unknownCount)';
   }
 }
 
@@ -678,7 +698,8 @@ abstract mixin class _$MealCountDtoCopyWith<$Res>
       __$MealCountDtoCopyWithImpl;
   @override
   @useResult
-  $Res call({int recommendCount, int cautionCount, int riskCount});
+  $Res call(
+      {int recommendCount, int cautionCount, int riskCount, int unknownCount});
 }
 
 /// @nodoc
@@ -697,6 +718,7 @@ class __$MealCountDtoCopyWithImpl<$Res>
     Object? recommendCount = null,
     Object? cautionCount = null,
     Object? riskCount = null,
+    Object? unknownCount = null,
   }) {
     return _then(_MealCountDto(
       recommendCount: null == recommendCount
@@ -710,6 +732,10 @@ class __$MealCountDtoCopyWithImpl<$Res>
       riskCount: null == riskCount
           ? _self.riskCount
           : riskCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      unknownCount: null == unknownCount
+          ? _self.unknownCount
+          : unknownCount // ignore: cast_nullable_to_non_nullable
               as int,
     ));
   }

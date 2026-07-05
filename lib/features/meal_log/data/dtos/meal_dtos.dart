@@ -1,3 +1,4 @@
+import 'package:characters/characters.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
@@ -170,6 +171,35 @@ extension MealRecordDetailDtoMapper on MealRecordDetailDto {
 }
 
 // ---------------------------------------------------------------------------
+// ConnectedSymptomsDto — 타임라인 single/group의 연결증상
+// ---------------------------------------------------------------------------
+
+/// 연결증상 DTO (타임라인 single/group 항목의 connectedSymptoms 대응).
+@freezed
+abstract class ConnectedSymptomsDto with _$ConnectedSymptomsDto {
+  const factory ConnectedSymptomsDto({
+    required String symptomId,
+    required String symptomState,
+    required int afterMealMinutes,
+    @Default(<String>[]) List<String> representativeSymptoms,
+    @Default(0) int etcCount,
+  }) = _ConnectedSymptomsDto;
+
+  factory ConnectedSymptomsDto.fromJson(Map<String, dynamic> json) =>
+      _$ConnectedSymptomsDtoFromJson(json);
+}
+
+extension ConnectedSymptomsDtoMapper on ConnectedSymptomsDto {
+  ConnectedSymptoms toEntity() => ConnectedSymptoms(
+        symptomId: symptomId,
+        symptomState: SymptomStateMapper.fromServer(symptomState),
+        afterMealMinutes: afterMealMinutes,
+        representativeSymptoms: representativeSymptoms,
+        etcCount: etcCount,
+      );
+}
+
+// ---------------------------------------------------------------------------
 // Timeline polymorphic DTO — 수동 디스패치 팩토리
 // ---------------------------------------------------------------------------
 
@@ -178,6 +208,29 @@ extension MealRecordDetailDtoMapper on MealRecordDetailDto {
 /// 알 수 없는 timeLineType 은 null 을 반환한다. 호출부는 리스트 매핑 시
 /// `.whereType<TimelineItem>()` 로 걸러 신규 타입 추가에도 무크래시.
 abstract final class TimelineItemDto {
+  /// j['connectedSymptoms']가 있으면 [ConnectedSymptoms]로 매핑, 없으면 null.
+  ///
+  /// 서버가 필드 일부(symptomId/symptomState/afterMealMinutes 등)를 누락한
+  /// 채로 보내면 [ConnectedSymptomsDto.fromJson]이 TypeError를 던질 수 있다.
+  /// 칩은 부차 UI이므로 파싱 실패 시 null로 흡수하고 항목 자체는 살린다.
+  static ConnectedSymptoms? _connectedSymptomsOf(Map<String, dynamic> j) {
+    try {
+      final raw = j['connectedSymptoms'] as Map<String, dynamic>?;
+      return raw == null
+          ? null
+          : ConnectedSymptomsDto.fromJson(raw).toEntity();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// j['timeIcon']을 [TimeIcon]으로 매핑. 비문자열·이상값이면 null(hour 휴리스틱
+  /// 폴백에 위임)로 흡수해 항목 파싱 자체는 실패시키지 않는다.
+  static TimeIcon? _timeIconOf(Map<String, dynamic> j) {
+    final raw = j['timeIcon'];
+    return raw is String ? TimeIconMapper.fromServer(raw) : null;
+  }
+
   static TimelineItem? fromJson(Map<String, dynamic> j) {
     final type = j['timeLineType'] as String?;
     switch (type) {
@@ -201,6 +254,8 @@ abstract final class TimelineItemDto {
           etcCount: (j['etcCount'] as num?)?.toInt() ?? 0,
           // TODO(backend): timeline Single/Group에 category 추가 시 실 카테고리 표시. 현재 미제공 → regular
           categoryCode: j['category'] as String?,
+          timeIcon: _timeIconOf(j),
+          connectedSymptoms: _connectedSymptomsOf(j),
         );
       case 'group':
         // 필수 필드 중 하나라도 null/누락이면 항목 스킵.
@@ -219,6 +274,8 @@ abstract final class TimelineItemDto {
           etcCount: (j['etcCount'] as num?)?.toInt() ?? 0,
           // TODO(backend): timeline Single/Group에 category 추가 시 실 카테고리 표시. 현재 미제공 → regular
           categoryCode: j['category'] as String?,
+          timeIcon: _timeIconOf(j),
+          connectedSymptoms: _connectedSymptomsOf(j),
         );
       case 'symptom':
         // 필수 필드 중 하나라도 null/누락이면 항목 스킵.
@@ -234,6 +291,8 @@ abstract final class TimelineItemDto {
           symptomState: SymptomStateMapper.fromServer(symptomStateRaw),
           afterMealMinutes: afterMealMinutes,
           occurredAt: occurredAt,
+          timeIcon: _timeIconOf(j),
+          symptomId: j['symptomId'] as String?,
         );
       default:
         return null;
@@ -315,21 +374,47 @@ extension MealCandidatesDayDtoMapper on MealCandidatesDayDto {
 }
 
 // ---------------------------------------------------------------------------
-// 요청 DTO
+// 요청 DTO — POST /meal-records 4분화 (신규/기존 × by-text/by-id)
 // ---------------------------------------------------------------------------
 
-/// POST /meal-records 요청 바디.
+/// POST /meal-records(신규) · POST /meal-records/{id}/foods(기존) 요청 바디 (by-text).
 ///
 /// ⚠️ judgedGrade 필드 없음 — 서버가 analysis 를 계산한다(F-10).
 /// null 필드는 직렬화 시 누락한다(impl에서 removeWhere).
 @freezed
-abstract class CreateMealRecordRequestDto with _$CreateMealRecordRequestDto {
-  const factory CreateMealRecordRequestDto({
-    required String foodExternalId,
+abstract class MealRecordTextRequestDto with _$MealRecordTextRequestDto {
+  const factory MealRecordTextRequestDto({
+    required String name,
     String? eatenAt,
-    String? mealRecordId,
-  }) = _CreateMealRecordRequestDto;
+  }) = _MealRecordTextRequestDto;
 
-  factory CreateMealRecordRequestDto.fromJson(Map<String, dynamic> json) =>
-      _$CreateMealRecordRequestDtoFromJson(json);
+  factory MealRecordTextRequestDto.fromJson(Map<String, dynamic> json) =>
+      _$MealRecordTextRequestDtoFromJson(json);
+}
+
+/// POST /meal-records/foods/{id}(신규) · POST /meal-records/{id}/foods/{id}(기존)
+/// 요청 바디 (by-id). foodExternalId 는 경로 파라미터로 전달되므로 바디에는 없다.
+///
+/// null 필드는 직렬화 시 누락한다(impl에서 removeWhere).
+@freezed
+abstract class MealRecordByIdRequestDto with _$MealRecordByIdRequestDto {
+  const factory MealRecordByIdRequestDto({
+    String? eatenAt,
+  }) = _MealRecordByIdRequestDto;
+
+  factory MealRecordByIdRequestDto.fromJson(Map<String, dynamic> json) =>
+      _$MealRecordByIdRequestDtoFromJson(json);
+}
+
+/// 서버 name 제약(≤100자) 준수 — trim 후 초과분을 자른다.
+///
+/// [MealRecordTextRequestDto.name] 조립 전 impl이 호출한다. DTO 레벨에서 직접
+/// 단위 테스트 가능하도록 top-level 함수로 둔다.
+///
+/// `String.substring`은 UTF-16 코드유닛 기준이라 서로게이트 쌍(이모지 등)이나
+/// 결합 문자소(자소)를 반토막 낼 수 있다(pr-review 소소 수정 ③). 대신
+/// `characters` 패키지의 grapheme cluster 기준으로 잘라 완전한 문자만 남긴다.
+String clampMealName(String input) {
+  final trimmed = input.trim().characters;
+  return trimmed.length > 100 ? trimmed.take(100).toString() : trimmed.toString();
 }

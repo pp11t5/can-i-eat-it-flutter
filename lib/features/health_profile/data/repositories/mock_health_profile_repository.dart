@@ -44,7 +44,10 @@ class MockHealthProfileRepository implements HealthProfileRepository {
   final Duration _delay;
   HealthProfile? _lastSubmittedProfile;
 
-  /// 마지막으로 제출된 프로필. 테스트 검증용.
+  /// 마지막으로 저장된 프로필. 테스트 검증용.
+  ///
+  /// [submitProfile](전체 제출) · [updateHealthInfo](allergies/medications 부분 갱신)
+  /// 양쪽 모두 이 필드를 갱신한다.
   HealthProfile? get lastSubmittedProfile => _lastSubmittedProfile;
 
   // ---------------------------------------------------------------------------
@@ -67,5 +70,37 @@ class MockHealthProfileRepository implements HealthProfileRepository {
   Future<void> submitProfile(HealthProfile profile) async {
     _lastSubmittedProfile = profile;
     _profile = profile;
+  }
+
+  @override
+  Future<void> updateHealthInfo({
+    required List<String> allergies,
+    required List<String> medications,
+  }) async {
+    final next = (_profile ?? const HealthProfile()).copyWith(
+      allergies: allergies,
+      medications: medications,
+    );
+    _lastSubmittedProfile = next;
+    _profile = next;
+  }
+
+  /// 편집 화면 전용 strict 조회 — 캐시 폴백 없이 실패를 그대로 throw하는
+  /// [HealthProfileRepositoryImpl.fetchMedicalInfoStrict]를 Mock에서 재현한다.
+  ///
+  /// 프로필이 없으면(noProfile 시나리오) 서버가 조회 실패로 응답하는 상황을
+  /// 흉내 내 [StateError]를 throw한다. 특정 오류를 주입하고 싶은 테스트는
+  /// [HealthProfileRepository]를 직접 구현한 별도 fake를 사용한다
+  /// (session_status_provider_test.dart 등과 동일 관례).
+  @override
+  Future<HealthProfile> fetchMedicalInfoStrict() async {
+    if (_delay > Duration.zero) await Future.delayed(_delay);
+    final p = _profile;
+    if (p == null) {
+      throw StateError(
+        'MockHealthProfileRepository.fetchMedicalInfoStrict: 프로필 없음(noProfile)',
+      );
+    }
+    return HealthProfile(allergies: p.allergies, medications: p.medications);
   }
 }

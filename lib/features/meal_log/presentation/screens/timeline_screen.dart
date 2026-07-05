@@ -305,6 +305,9 @@ class _TimelineItemList extends StatelessWidget {
       onAddFood: (mealRecordId) {
         context.push('/meal/record', extra: mealRecordId);
       },
+      onTapSymptom: (symptomId) {
+        context.push('/symptom/$symptomId');
+      },
     );
   }
 }

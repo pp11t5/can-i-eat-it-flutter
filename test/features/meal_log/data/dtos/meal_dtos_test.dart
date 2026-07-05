@@ -1,3 +1,4 @@
+import 'package:characters/characters.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
@@ -341,6 +342,155 @@ void main() {
     });
 
     // -------------------------------------------------------------------------
+    // W7: timeIcon·connectedSymptoms·symptomId (P1 additive)
+    // -------------------------------------------------------------------------
+    group('timeIcon·connectedSymptoms·symptomId — P1 신규 필드', () {
+      test('single — timeIcon "sun"·connectedSymptoms를 매핑한다', () {
+        final item = TimelineItemDto.fromJson(const {
+          'timeLineType': 'single',
+          'mealRecordId': 'mr1',
+          'mealRecordDateTime': '2026-06-17T08:00:00+09:00',
+          'mealFoodName': '두부',
+          'grade': 'RECOMMEND',
+          'timeIcon': 'sun',
+          'connectedSymptoms': {
+            'symptomId': 'sym-1',
+            'symptomState': 'uncomfortable',
+            'afterMealMinutes': 90,
+            'representativeSymptoms': ['속쓰림'],
+            'etcCount': 1,
+          },
+        });
+        final single = item! as TimelineSingle;
+        expect(single.timeIcon, TimeIcon.sun);
+        expect(single.connectedSymptoms, isNotNull);
+        expect(single.connectedSymptoms!.symptomId, 'sym-1');
+        expect(single.connectedSymptoms!.symptomState, SymptomState.uncomfortable);
+        expect(single.connectedSymptoms!.representativeSymptoms, ['속쓰림']);
+        expect(single.connectedSymptoms!.etcCount, 1);
+      });
+
+      test('single — timeIcon "moon" → TimeIcon.moon', () {
+        final item = TimelineItemDto.fromJson(const {
+          'timeLineType': 'single',
+          'mealRecordId': 'mr1',
+          'mealRecordDateTime': '2026-06-17T20:00:00+09:00',
+          'mealFoodName': '두부',
+          'grade': 'RECOMMEND',
+          'timeIcon': 'moon',
+        });
+        expect((item! as TimelineSingle).timeIcon, TimeIcon.moon);
+      });
+
+      test('single — timeIcon·connectedSymptoms 누락 시 둘 다 null이다', () {
+        final item = TimelineItemDto.fromJson(const {
+          'timeLineType': 'single',
+          'mealRecordId': 'mr1',
+          'mealRecordDateTime': '2026-06-17T08:00:00+09:00',
+          'mealFoodName': '두부',
+          'grade': 'RECOMMEND',
+        });
+        final single = item! as TimelineSingle;
+        expect(single.timeIcon, isNull);
+        expect(single.connectedSymptoms, isNull);
+      });
+
+      test('single — 알 수 없는 timeIcon 문자열은 null로 폴백된다', () {
+        final item = TimelineItemDto.fromJson(const {
+          'timeLineType': 'single',
+          'mealRecordId': 'mr1',
+          'mealRecordDateTime': '2026-06-17T08:00:00+09:00',
+          'mealFoodName': '두부',
+          'grade': 'RECOMMEND',
+          'timeIcon': 'dawn',
+        });
+        expect((item! as TimelineSingle).timeIcon, isNull);
+      });
+
+      // pr-review 수정1: connectedSymptoms 필수 필드 누락 시 TypeError로
+      // 항목 전체가 무너지지 않고 칩만 null로 흡수돼야 한다.
+      test('single — connectedSymptoms 필수 필드(symptomId) 누락 시 칩은 null이지만 항목은 유지된다', () {
+        final item = TimelineItemDto.fromJson(const {
+          'timeLineType': 'single',
+          'mealRecordId': 'mr1',
+          'mealRecordDateTime': '2026-06-17T08:00:00+09:00',
+          'mealFoodName': '두부',
+          'grade': 'RECOMMEND',
+          'connectedSymptoms': {
+            // 'symptomId' 누락 → ConnectedSymptomsDto.fromJson TypeError 유발
+            'symptomState': 'uncomfortable',
+            'afterMealMinutes': 90,
+          },
+        });
+        expect(item, isNotNull);
+        final single = item! as TimelineSingle;
+        expect(single.mealFoodName, '두부');
+        expect(single.connectedSymptoms, isNull);
+      });
+
+      // pr-review 수정1: timeIcon이 문자열이 아닌 이상값(예: 숫자)이어도
+      // 캐스팅 TypeError로 항목이 무너지지 않고 null로 흡수돼야 한다.
+      test('single — timeIcon이 문자열이 아니면(숫자) null로 흡수되고 항목은 유지된다', () {
+        final item = TimelineItemDto.fromJson(const {
+          'timeLineType': 'single',
+          'mealRecordId': 'mr1',
+          'mealRecordDateTime': '2026-06-17T08:00:00+09:00',
+          'mealFoodName': '두부',
+          'grade': 'RECOMMEND',
+          'timeIcon': 1,
+        });
+        expect(item, isNotNull);
+        final single = item! as TimelineSingle;
+        expect(single.mealFoodName, '두부');
+        expect(single.timeIcon, isNull);
+      });
+
+      test('group — timeIcon·connectedSymptoms를 매핑한다', () {
+        final item = TimelineItemDto.fromJson(const {
+          'timeLineType': 'group',
+          'mealRecordId': 'mr2',
+          'mealRecordDateTime': '2026-06-17T12:30:00+09:00',
+          'representativeFoods': ['된장찌개', '커피'],
+          'etcCount': 1,
+          'timeIcon': 'sun',
+          'connectedSymptoms': {
+            'symptomId': 'sym-2',
+            'symptomState': 'severe',
+            'afterMealMinutes': 60,
+          },
+        });
+        final group = item! as TimelineGroup;
+        expect(group.timeIcon, TimeIcon.sun);
+        expect(group.connectedSymptoms!.symptomId, 'sym-2');
+        expect(group.connectedSymptoms!.symptomState, SymptomState.severe);
+        // representativeSymptoms·etcCount 누락 → DTO 폴백(빈 목록·0)
+        expect(group.connectedSymptoms!.representativeSymptoms, isEmpty);
+        expect(group.connectedSymptoms!.etcCount, 0);
+      });
+
+      test('symptom — symptomId를 매핑한다', () {
+        final item = TimelineItemDto.fromJson(const {
+          'timeLineType': 'symptom',
+          'symptomState': 'uncomfortable',
+          'afterMealMinutes': 120,
+          'occurredAt': '2026-06-17T14:30:00+09:00',
+          'symptomId': 'sym-3',
+        });
+        expect((item! as TimelineSymptom).symptomId, 'sym-3');
+      });
+
+      test('symptom — symptomId 누락 시 null이다 (구 페이로드 방어)', () {
+        final item = TimelineItemDto.fromJson(const {
+          'timeLineType': 'symptom',
+          'symptomState': 'uncomfortable',
+          'afterMealMinutes': 120,
+          'occurredAt': '2026-06-17T14:30:00+09:00',
+        });
+        expect((item! as TimelineSymptom).symptomId, isNull);
+      });
+    });
+
+    // -------------------------------------------------------------------------
     // S-2 회귀: 알려진 타입이라도 필수 필드 누락 시 항목만 스킵 (TypeError 방지)
     // -------------------------------------------------------------------------
     group('필수 필드 누락 — 해당 항목만 null 반환 (whereType 스킵)', () {
@@ -555,44 +705,142 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  // CreateMealRecordRequestDto
+  // MealRecordTextRequestDto — by-text (POST /meal-records · .../foods)
   // -------------------------------------------------------------------------
-  group('CreateMealRecordRequestDto', () {
+  group('MealRecordTextRequestDto', () {
+    test('name 필드를 직렬화한다', () {
+      const dto = MealRecordTextRequestDto(name: '아메리카노');
+      expect(dto.toJson()['name'], '아메리카노');
+    });
+
     test('judgedGrade 필드가 없다 (F-10)', () {
-      const dto = CreateMealRecordRequestDto(foodExternalId: 'f1');
-      final json = dto.toJson();
-      expect(json.containsKey('judgedGrade'), isFalse);
-      expect(json['foodExternalId'], 'f1');
+      const dto = MealRecordTextRequestDto(name: '아메리카노');
+      expect(dto.toJson().containsKey('judgedGrade'), isFalse);
     });
 
     // 계약: null 필드는 직렬화 시 키 자체가 없어야 함 (impl이 removeWhere null 처리)
-    // toJson() 자체에서는 null 키가 포함될 수 있으므로 impl의 removeWhere 패턴 검증
     test('eatenAt null이면 toJson에 eatenAt 값이 null이다 (impl removeWhere 대상)', () {
-      const dto = CreateMealRecordRequestDto(foodExternalId: 'f1');
-      final json = dto.toJson();
-      // toJson은 null을 포함할 수 있음 — impl이 removeWhere(null)로 제거한다.
-      // 여기서는 null이거나 키가 없어야 한다.
-      expect(json['eatenAt'], isNull);
+      const dto = MealRecordTextRequestDto(name: '아메리카노');
+      expect(dto.toJson()['eatenAt'], isNull);
     });
 
-    test('mealRecordId null이면 toJson에 mealRecordId 값이 null이다 (impl removeWhere 대상)', () {
-      const dto = CreateMealRecordRequestDto(foodExternalId: 'f2');
-      final json = dto.toJson();
-      expect(json['mealRecordId'], isNull);
-    });
-
-    // impl이 removeWhere 후 전송할 때 judgedGrade가 절대 없는지 이중 확인
-    test('eatenAt·mealRecordId 제공 시에도 judgedGrade 필드는 없다', () {
-      const dto = CreateMealRecordRequestDto(
-        foodExternalId: 'f3',
+    test('eatenAt 제공 시 값이 보존된다', () {
+      const dto = MealRecordTextRequestDto(
+        name: '아메리카노',
         eatenAt: '2026-06-24T08:30:00+09:00',
-        mealRecordId: 'mr1',
       );
+      expect(dto.toJson()['eatenAt'], '2026-06-24T08:30:00+09:00');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // MealRecordByIdRequestDto — by-id (POST /meal-records/foods/{id} · .../foods/{id})
+  // -------------------------------------------------------------------------
+  group('MealRecordByIdRequestDto', () {
+    test('foodExternalId·judgedGrade 필드가 없다 (경로 파라미터로 전달, F-10)', () {
+      const dto = MealRecordByIdRequestDto();
       final json = dto.toJson();
+      expect(json.containsKey('foodExternalId'), isFalse);
       expect(json.containsKey('judgedGrade'), isFalse);
-      expect(json['foodExternalId'], 'f3');
-      expect(json['eatenAt'], '2026-06-24T08:30:00+09:00');
-      expect(json['mealRecordId'], 'mr1');
+    });
+
+    test('eatenAt null이면 toJson에 eatenAt 값이 null이다 (impl removeWhere 대상)', () {
+      const dto = MealRecordByIdRequestDto();
+      expect(dto.toJson()['eatenAt'], isNull);
+    });
+
+    test('eatenAt 제공 시 값이 보존된다', () {
+      const dto = MealRecordByIdRequestDto(eatenAt: '2026-06-24T08:30:00+09:00');
+      expect(dto.toJson()['eatenAt'], '2026-06-24T08:30:00+09:00');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // clampMealName — 서버 name 제약(≤100자) 준수
+  // -------------------------------------------------------------------------
+  group('clampMealName', () {
+    test('앞뒤 공백을 제거한다', () {
+      expect(clampMealName('  아메리카노  '), '아메리카노');
+    });
+
+    test('100자 이하 문자열은 그대로 유지한다', () {
+      final input = 'a' * 100;
+      expect(clampMealName(input), input);
+    });
+
+    test('100자 초과 문자열은 100자로 잘린다', () {
+      final input = 'a' * 150;
+      final result = clampMealName(input);
+      expect(result.length, 100);
+      expect(result, 'a' * 100);
+    });
+
+    test('trim 후 100자를 초과하면 잘린다', () {
+      final input = '  ${'가' * 150}  ';
+      expect(clampMealName(input).length, 100);
+    });
+
+    // -----------------------------------------------------------------------
+    // grapheme cluster 기준 절단 (pr-review 소소 수정 ③)
+    //
+    // String.substring은 UTF-16 코드유닛 기준이라 서로게이트 쌍(이모지 등)을
+    // 반토막 낼 수 있다. 'a'*99 뒤에 이모지(2코드유닛)를 붙이면 substring(0,100)은
+    // 99번째 인덱스(이모지의 상위 서로게이트)에서 잘려 깨진 문자열이 된다.
+    // clampMealName은 grapheme 기준이므로 이모지를 통째로 포함하거나 제외해야 한다.
+    // -----------------------------------------------------------------------
+    test('서로게이트 쌍(이모지)을 반토막 내지 않는다 — 완전한 grapheme만 남는다', () {
+      final input = ('a' * 99) + ('🍜' * 10);
+      final result = clampMealName(input);
+
+      // grapheme 기준으로 정확히 100개(문자소)만 남는다.
+      expect(result.characters.length, 100);
+      // 100번째 grapheme(마지막 이모지)이 통째로 보존된다 — 반토막 서로게이트 없음.
+      expect(result.characters.last, '🍜');
+      // UTF-16 code unit 기준으로는 101(99 + 이모지 2유닛)이어야 정상 — substring(0,100)이면
+      // 100이 되며 이는 깨진 서로게이트를 의미했을 것.
+      expect(result.length, 101);
+    });
+
+    test('이모지만으로 구성된 문자열도 grapheme 단위로 잘린다', () {
+      final input = '🍜' * 150;
+      final result = clampMealName(input);
+
+      expect(result.characters.length, 100);
+      expect(result, equals('🍜' * 100));
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // ConnectedSymptomsDto — 타임라인 single/group 연결증상
+  // -------------------------------------------------------------------------
+  group('ConnectedSymptomsDto', () {
+    test('필드를 파싱하고 toEntity에 반영한다', () {
+      final dto = ConnectedSymptomsDto.fromJson(const {
+        'symptomId': 'sym-1',
+        'symptomState': 'uncomfortable',
+        'afterMealMinutes': 90,
+        'representativeSymptoms': ['속쓰림', '더부룩함'],
+        'etcCount': 2,
+      });
+      expect(dto.symptomId, 'sym-1');
+      expect(dto.afterMealMinutes, 90);
+
+      final entity = dto.toEntity();
+      expect(entity, isA<ConnectedSymptoms>());
+      expect(entity.symptomId, 'sym-1');
+      expect(entity.symptomState, SymptomState.uncomfortable);
+      expect(entity.representativeSymptoms, ['속쓰림', '더부룩함']);
+      expect(entity.etcCount, 2);
+    });
+
+    test('representativeSymptoms·etcCount 누락 시 빈 목록·0으로 폴백된다', () {
+      final entity = ConnectedSymptomsDto.fromJson(const {
+        'symptomId': 'sym-2',
+        'symptomState': 'severe',
+        'afterMealMinutes': 30,
+      }).toEntity();
+      expect(entity.representativeSymptoms, isEmpty);
+      expect(entity.etcCount, 0);
     });
   });
 }

@@ -17,6 +17,8 @@ import 'package:can_i_eat_it/features/food_dictionary/data/repositories/mock_dic
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
+import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
+import 'package:can_i_eat_it/features/mypage/data/repositories/mock_my_page_repository.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/profile_info_screen.dart';
 
@@ -62,6 +64,10 @@ Widget _buildMypage({
       // ignore: scoped_providers_should_specify_dependencies
       dictionaryRepositoryProvider.overrideWithValue(
         MockDictionaryRepository.seeded(),
+      ),
+      // ignore: scoped_providers_should_specify_dependencies
+      myPageRepositoryProvider.overrideWithValue(
+        MockMyPageRepository.seeded(),
       ),
     ],
     child: MaterialApp(

@@ -57,6 +57,44 @@ void healthProfileRepositoryContract(
       expect(await repo.currentProfile(), equals(empty));
     });
   });
+
+  // ---------------------------------------------------------------------------
+  group('updateHealthInfo — allergies/medications 부분 갱신 (W7 마이그레이션)', () {
+    test('updateHealthInfo 후 currentProfile의 allergies/medications가 갱신된다', () async {
+      final repo = create();
+      await repo.submitProfile(HealthProfile.sampleGerd());
+      await repo.updateHealthInfo(
+        allergies: ['milk', 'egg'],
+        medications: ['란소프라졸'],
+      );
+
+      final profile = await repo.currentProfile();
+      expect(profile!.allergies, equals(['milk', 'egg']));
+      expect(profile.medications, equals(['란소프라졸']));
+    });
+
+    test('updateHealthInfo는 conditions 등 다른 필드를 보존한다', () async {
+      final repo = create();
+      await repo.submitProfile(HealthProfile.sampleGerd());
+      await repo.updateHealthInfo(allergies: ['wheat'], medications: []);
+
+      final profile = await repo.currentProfile();
+      expect(profile!.conditions, equals(HealthProfile.sampleGerd().conditions));
+      expect(
+        profile.symptomFrequency,
+        equals(HealthProfile.sampleGerd().symptomFrequency),
+      );
+    });
+
+    test('base 프로필이 없는 상태에서도 updateHealthInfo가 정상 동작한다', () async {
+      final repo = create();
+      await repo.updateHealthInfo(allergies: ['soy'], medications: ['med1']);
+
+      final profile = await repo.currentProfile();
+      expect(profile!.allergies, equals(['soy']));
+      expect(profile.medications, equals(['med1']));
+    });
+  });
 }
 
 // ---------------------------------------------------------------------------

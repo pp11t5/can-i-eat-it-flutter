@@ -13,6 +13,7 @@ import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers
 import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/dictionary_list_controller.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
+import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 
 /// 마이페이지 요약 화면 (Figma 1718-7884).
@@ -21,7 +22,7 @@ import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart'
 /// - 타이틀 "마이페이지"(중앙)
 /// - 프로필 카드 → /mypage/profile push
 /// - 내 음식 히스토리 카드 → /food-history push (dictionaryCountProvider 실카운트)
-/// - 주간 기록 카드 (placeholder — 주간 집계·증상 EP 부재)
+/// - 주간 기록 카드 (mySummaryProvider 실데이터, W7)
 /// - 설정 섹션
 /// - 약관 섹션
 class MypageScreen extends ConsumerWidget {
@@ -279,16 +280,20 @@ class _FoodHistoryCard extends ConsumerWidget {
 // 주간 기록 카드 (placeholder)
 // ---------------------------------------------------------------------------
 
-class _WeeklyLogCard extends StatelessWidget {
+class _WeeklyLogCard extends ConsumerWidget {
   const _WeeklyLogCard({required this.onViewAll});
   final VoidCallback onViewAll;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // 현재 날짜 기반 주 표시
     final now = DateTime.now();
     final weekOfMonth = ((now.day - 1) ~/ 7) + 1;
     final title = '${now.month}월 $weekOfMonth째 주 기록';
+
+    // loading/error 시 각 수치 '—' 폴백 (_FoodHistoryCard valueOrNull 패턴과 동일).
+    final weekly = ref.watch(mySummaryProvider).valueOrNull?.weeklySummary;
+    final mealCount = weekly?.mealCount;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
@@ -321,32 +326,43 @@ class _WeeklyLogCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.itemGap),
-          // TODO(backend): 주간 집계·증상 EP 부재 — 수치 placeholder
-          const Row(
+          Row(
             children: [
-              _WeeklyStatItem(label: '식사 기록', value: '—'),
-              SizedBox(width: AppSpacing.cardPadding),
-              _WeeklyStatItem(label: '최근 증상', value: '—'),
-              SizedBox(width: AppSpacing.cardPadding),
-              _WeeklyStatItem(label: '연속 편안', value: '—'),
+              _WeeklyStatItem(
+                label: '식사 기록',
+                value: '${weekly?.mealRecordCount ?? '—'}',
+              ),
+              const SizedBox(width: AppSpacing.cardPadding),
+              _WeeklyStatItem(
+                label: '최근 증상',
+                value: '${weekly?.recentSymptomCount ?? '—'}',
+              ),
+              const SizedBox(width: AppSpacing.cardPadding),
+              _WeeklyStatItem(
+                label: '연속 편안',
+                value: '${weekly?.streakCount ?? '—'}',
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.itemGap),
-          const Row(
+          Row(
             children: [
               _MealStatChip(
                 label: '권장',
                 color: AppColors.verdictRecommend,
+                value: mealCount?.recommendCount,
               ),
-              SizedBox(width: AppSpacing.itemGap),
+              const SizedBox(width: AppSpacing.itemGap),
               _MealStatChip(
                 label: '주의',
                 color: AppColors.verdictCaution,
+                value: mealCount?.cautionCount,
               ),
-              SizedBox(width: AppSpacing.itemGap),
+              const SizedBox(width: AppSpacing.itemGap),
               _MealStatChip(
                 label: '위험',
                 color: AppColors.verdictDanger,
+                value: mealCount?.riskCount,
               ),
             ],
           ),
@@ -384,9 +400,10 @@ class _WeeklyStatItem extends StatelessWidget {
 }
 
 class _MealStatChip extends StatelessWidget {
-  const _MealStatChip({required this.label, required this.color});
+  const _MealStatChip({required this.label, required this.color, this.value});
   final String label;
   final Color color;
+  final int? value;
 
   @override
   Widget build(BuildContext context) {
@@ -402,7 +419,7 @@ class _MealStatChip extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          '$label —',
+          '$label ${value ?? '—'}',
           style: AppTextStyles.caption1Medium.copyWith(
             color: AppColors.textSecondary,
           ),

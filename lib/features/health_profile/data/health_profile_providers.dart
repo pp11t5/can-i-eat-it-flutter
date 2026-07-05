@@ -16,6 +16,16 @@ part 'health_profile_providers.g.dart';
 HealthProfileRepository healthProfileRepository(Ref ref) =>
     MockHealthProfileRepository.noProfile();
 
+/// 알레르기·복용약 편집 화면 전용 — 캐시 폴백 없이 서버 최신 상태를 조회한다.
+///
+/// [HealthProfileController]([currentProfile] 기반)와 달리 실패 시 에러를 그대로
+/// 전파한다 — stale 데이터 위에서 편집·PATCH하는 것을 막기 위함(의료안전, pr-review ②-1).
+/// allergy_med_edit_screen이 이 provider를 watch하고, 에러 상태에서는 재시도
+/// UI를 보이며 저장 자체를 막는다.
+@riverpod
+Future<HealthProfile> medicalInfoStrict(Ref ref) =>
+    ref.watch(healthProfileRepositoryProvider).fetchMedicalInfoStrict();
+
 /// 온보딩 완료 여부 AsyncNotifier (ADR-0007 §3-1 (6-D)).
 ///
 /// [sessionStatus] provider가 이 값을 `hasProfile` 소스로 사용한다.
@@ -46,5 +56,21 @@ class HealthProfileController extends _$HealthProfileController {
     state = AsyncData(profile);
     // onboardedStatus 캐시 무효화 → sessionStatus 재평가 트리거
     ref.invalidate(onboardedStatusProvider);
+  }
+
+  /// 알레르기·복용약만 갱신한다 (`PATCH /my-page/health-info`, W7 마이그레이션).
+  ///
+  /// [submit]과 달리 온보딩 게이트에 영향을 주지 않으므로 [onboardedStatusProvider]를
+  /// invalidate 하지 않는다(이 화면은 온보딩 완료 사용자만 진입).
+  Future<void> updateHealthInfo({
+    required List<String> allergies,
+    required List<String> medications,
+  }) async {
+    await ref.read(healthProfileRepositoryProvider).updateHealthInfo(
+          allergies: allergies,
+          medications: medications,
+        );
+    final base = state.valueOrNull ?? const HealthProfile();
+    state = AsyncData(base.copyWith(allergies: allergies, medications: medications));
   }
 }

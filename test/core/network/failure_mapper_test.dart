@@ -1,7 +1,28 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/core/network/failure_mapper.dart';
+
+Response<dynamic> _response(Map<String, dynamic> body) => Response<dynamic>(
+      requestOptions: RequestOptions(path: '/test'),
+      data: body,
+      statusCode: 200,
+    );
+
+Map<String, dynamic> _envelope({
+  required bool isSuccess,
+  dynamic result,
+  String code = 'SUCCESS',
+  String message = 'ok',
+}) =>
+    {
+      'isSuccess': isSuccess,
+      'code': code,
+      'message': message,
+      'traceId': null,
+      'result': result,
+    };
 
 void main() {
   // -------------------------------------------------------------------------
@@ -111,6 +132,44 @@ void main() {
         message: '커스텀 메시지',
       );
       expect(failure.message, '커스텀 메시지');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // unwrapOrNull — result:null 관용 언랩 (W7)
+  // -------------------------------------------------------------------------
+  group('unwrapOrNull', () {
+    test('성공 + result 있음 → fromJson으로 파싱한 값을 반환한다', () {
+      final response = _response(
+        _envelope(isSuccess: true, result: {'value': 'ok'}),
+      );
+      final result = unwrapOrNull<String>(
+        response,
+        (j) => (j as Map<String, dynamic>)['value'] as String,
+      );
+      expect(result, 'ok');
+    });
+
+    test('성공 + result:null → 예외 없이 null을 반환한다', () {
+      final response = _response(_envelope(isSuccess: true, result: null));
+      final result = unwrapOrNull<String>(
+        response,
+        (j) => (j as Map<String, dynamic>)['value'] as String,
+      );
+      expect(result, isNull);
+    });
+
+    test('실패 응답이면 unwrap과 동일하게 Failure를 throw한다', () {
+      final response = _response(
+        _envelope(isSuccess: false, code: 'COMMON500_1'),
+      );
+      expect(
+        () => unwrapOrNull<String>(
+          response,
+          (j) => (j as Map<String, dynamic>)['value'] as String,
+        ),
+        throwsA(isA<UnexpectedFailure>()),
+      );
     });
   });
 }

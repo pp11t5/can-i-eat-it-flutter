@@ -7,13 +7,14 @@ import 'package:can_i_eat_it/features/health_profile/data/health_profile_provide
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
+import 'package:can_i_eat_it/features/health_profile/domain/repositories/health_profile_repository.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/allergy_med_edit_screen.dart';
 
 // ---------------------------------------------------------------------------
 // 헬퍼
 // ---------------------------------------------------------------------------
 
-Widget _buildScreen({MockHealthProfileRepository? repo}) {
+Widget _buildScreen({HealthProfileRepository? repo}) {
   final profileRepo = repo ?? MockHealthProfileRepository.completed();
 
   return ProviderScope(
@@ -38,6 +39,41 @@ Widget _buildScreen({MockHealthProfileRepository? repo}) {
 class _CaptureMockRepo extends MockHealthProfileRepository {
   _CaptureMockRepo({required HealthProfile initialProfile})
       : super(initialProfile: initialProfile);
+}
+
+/// [fetchMedicalInfoStrict] 최초 1회만 실패하고 이후 성공하는 fake — 재시도 UX 검증용.
+///
+/// (pr-review 의료안전 ②-1) 편집 화면이 strict 조회 실패 시 에러+재시도를 보이고,
+/// 재시도 성공 시 폼으로 정상 전환되는지 확인한다.
+class _FlakyHealthProfileRepository implements HealthProfileRepository {
+  _FlakyHealthProfileRepository(this._profile);
+
+  final HealthProfile _profile;
+  int fetchAttempts = 0;
+
+  @override
+  Future<HealthProfile> fetchMedicalInfoStrict() async {
+    fetchAttempts++;
+    if (fetchAttempts == 1) {
+      throw Exception('일시적 네트워크 오류');
+    }
+    return _profile;
+  }
+
+  @override
+  Future<HealthProfile?> currentProfile() async => _profile;
+
+  @override
+  Future<bool> onboardedStatus() async => true;
+
+  @override
+  Future<void> submitProfile(HealthProfile profile) async {}
+
+  @override
+  Future<void> updateHealthInfo({
+    required List<String> allergies,
+    required List<String> medications,
+  }) async {}
 }
 
 void main() {
@@ -179,7 +215,7 @@ void main() {
       expect(find.text('저장하기'), findsOneWidget);
     });
 
-    testWidgets('저장하기 탭 → HealthProfileController.submit 호출됨', (tester) async {
+    testWidgets('저장하기 탭 → HealthProfileController.updateHealthInfo 호출됨', (tester) async {
       final repo = _CaptureMockRepo(
         initialProfile: const HealthProfile(
           conditions: ['GERD'],
@@ -200,7 +236,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      // submit이 호출되어 lastSubmittedProfile이 세팅됨
+      // updateHealthInfo가 호출되어 lastSubmittedProfile이 세팅됨
       expect(repo.lastSubmittedProfile, isNotNull);
 
       // toast 생명주기 전체 소진 (등장 250ms + 표시 2500ms + 퇴장 250ms + 여유)
@@ -261,58 +297,57 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
-  // 3. 빈 캐시(null) 처리 테스트
+  // 3. medicalInfoStrictProvider 조회 실패 — 에러+재시도 UI, 저장 자체 불가
+  //    (의료안전, pr-review ②-1: stale 데이터 위에서 편집·PATCH 금지)
   // ---------------------------------------------------------------------------
-  group('빈 캐시(null) 처리', () {
-    testWidgets('캐시 null 상태에서 저장하기 탭 → confirm 다이얼로그 표시', (tester) async {
+  group('medicalInfoStrictProvider 조회 실패 — 에러+재시도', () {
+    testWidgets('조회 실패 시 폼 대신 에러+재시도 UI가 표시되고 저장 버튼이 없다',
+        (tester) async {
+      // noProfile: fetchMedicalInfoStrict가 StateError를 throw(캐시 폴백 없음).
       final repo = MockHealthProfileRepository.noProfile();
 
       await tester.pumpWidget(_buildScreen(repo: repo));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('저장하기'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('기존 건강 정보를 불러올 수 없어요'), findsOneWidget);
+      expect(find.text('건강 정보를 불러오지 못했어요.\n다시 시도해 주세요.'), findsOneWidget);
+      expect(find.text('다시 시도'), findsOneWidget);
+      // 폼 자체가 렌더되지 않으므로 저장 버튼·입력 필드가 아예 없다(비활성이 아니라 부재).
+      expect(find.text('저장하기'), findsNothing);
+      expect(find.byType(TextField), findsNothing);
     });
 
-    testWidgets('confirm 다이얼로그 취소 → submit 미호출', (tester) async {
-      final repo = MockHealthProfileRepository.noProfile();
+    testWidgets('조회 지연 중에는 로딩 인디케이터가 표시되고 폼은 아직 없다', (tester) async {
+      final repo = MockHealthProfileRepository.completed(
+        delay: const Duration(milliseconds: 500),
+      );
 
       await tester.pumpWidget(_buildScreen(repo: repo));
-      await tester.pumpAndSettle();
+      await tester.pump(); // 1프레임 — 아직 로딩 중
 
-      await tester.tap(find.text('저장하기'));
-      await tester.pumpAndSettle();
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text('저장하기'), findsNothing);
 
-      await tester.tap(find.text('취소'));
-      await tester.pumpAndSettle();
-
-      // submit 미호출 → lastSubmittedProfile이 null
-      expect(repo.lastSubmittedProfile, isNull);
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.text('저장하기'), findsOneWidget);
     });
 
-    testWidgets('confirm 다이얼로그 계속 → 빈 base로 submit 호출됨', (tester) async {
-      final repo = MockHealthProfileRepository.noProfile();
+    testWidgets('재시도 탭 → 조회 성공 시 폼이 정상 표시된다', (tester) async {
+      final repo = _FlakyHealthProfileRepository(HealthProfile.sampleGerd());
 
       await tester.pumpWidget(_buildScreen(repo: repo));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('저장하기'));
+      // 최초 조회 실패 → 에러 UI
+      expect(find.text('다시 시도'), findsOneWidget);
+      expect(find.text('저장하기'), findsNothing);
+
+      await tester.tap(find.text('다시 시도'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('계속'));
-      // pump만 사용 — showAppToast의 2.5s 타이머가 pumpAndSettle을 블록함
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // 빈 base로 submit 호출 → lastSubmittedProfile이 non-null
-      expect(repo.lastSubmittedProfile, isNotNull);
-
-      // toast 생명주기 전체 소진
-      await tester.pump(const Duration(milliseconds: 300));
-      await tester.pump(const Duration(milliseconds: 2600));
-      await tester.pump(const Duration(milliseconds: 300));
+      // 재시도 성공 → 폼 표시(sampleGerd의 medications 초기값도 확인)
+      expect(find.text('저장하기'), findsOneWidget);
+      expect(find.text('omeprazole'), findsOneWidget);
+      expect(repo.fetchAttempts, 2);
     });
   });
 }

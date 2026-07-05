@@ -10,9 +10,9 @@ enum ConfirmModalAction { primary, secondary }
 /// 공용 확인 모달 (Figma ModalCard #365:2465 정합).
 ///
 /// - 모달카드: 배경 white, radius 16, 패딩 24/24/16, bg white.
-/// - 텍스트 그룹(gap 16) → 텍스트↔버튼 그룹 gap 32 → 버튼 그룹(gap 8).
-/// - Primary: 채움 버튼([primaryColor]), padding 16, radius 8, body1Bold + onPrimary(흰색).
-/// - Secondary: 텍스트 버튼, body1Regular + textSecondary.
+/// - 텍스트 그룹(gap 8) → 텍스트↔버튼 그룹 gap 24 → 버튼 그룹(gap 8).
+/// - 타이틀 기본 body1Bold(16px). Primary: 채움 버튼([primaryColor]), padding 16,
+///   radius 8, body1Bold + onPrimary(흰색). Secondary: 텍스트 버튼, body1Regular + textSecondary.
 ///
 /// ★주의: Primary(채움)이 항상 "실행" 액션은 아니다 — 화면별로 강조 버튼이
 /// 확인/취소 어느 쪽인지 다르므로(예: 로그아웃 팝업은 Primary가 "취소"),
@@ -87,16 +87,16 @@ class _ConfirmModal extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 텍스트 그룹 (gap 16).
+            // 텍스트 그룹 (gap 8).
             Text(
               title,
               textAlign: TextAlign.center,
-              style: (titleStyle ?? AppTextStyles.header3Bold).copyWith(
+              style: (titleStyle ?? AppTextStyles.body1Bold).copyWith(
                 color: AppColors.textPrimary,
               ),
             ),
             if (body != null) ...[
-              const SizedBox(height: AppSpacing.cardPadding),
+              const SizedBox(height: AppSpacing.itemGap),
               Text(
                 body!,
                 textAlign: TextAlign.center,
@@ -105,7 +105,7 @@ class _ConfirmModal extends StatelessWidget {
                 ),
               ),
             ],
-            const SizedBox(height: AppSpacing.contentGap),
+            const SizedBox(height: AppSpacing.sectionGap),
             // 버튼 그룹 (gap 8).
             _PrimaryCta(
               label: primaryLabel,

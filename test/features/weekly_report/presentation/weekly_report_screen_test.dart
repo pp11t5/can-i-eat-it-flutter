@@ -27,6 +27,36 @@ class _DelayedWeeklyReportRepository implements WeeklyReportRepository {
   }
 }
 
+// ---------------------------------------------------------------------------
+// 고정 응답 fake — unknownCount(도넛 4분할) 렌더 검증용.
+// ---------------------------------------------------------------------------
+
+class _FixedWeeklyReportRepository implements WeeklyReportRepository {
+  _FixedWeeklyReportRepository(this._report);
+
+  final WeeklyReport _report;
+
+  @override
+  Future<WeeklyReport> getWeeklyReport() async => _report;
+}
+
+const _kReportWithUnknown = WeeklyReport(
+  startDate: '2026-06-29',
+  endDate: '2026-07-05',
+  weekLabel: '이번 주',
+  comfortableState: ComfortableState(
+    streakCount: 4,
+    recommendedMealCount: 12,
+    percentage: 68.5,
+  ),
+  mealCount: MealCount(
+    recommendCount: 12,
+    cautionCount: 5,
+    riskCount: 1,
+    unknownCount: 2,
+  ),
+);
+
 Widget _wrap(WeeklyReportRepository repo) {
   return ProviderScope(
     overrides: [
@@ -85,6 +115,27 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('시간별 평균 증상기록'), findsNothing);
+    });
+  });
+
+  group('WeeklyReportScreen — 카드2 unknownCount 4분할 (W7)', () {
+    testWidgets('unknownCount>0이면 "확인 어려움 N끼" 범례 + 총끼수에 포함된다',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(_FixedWeeklyReportRepository(_kReportWithUnknown)),
+      );
+      await tester.pumpAndSettle();
+
+      // unknownCount 2 + recommend 12 + caution 5 + risk 1 → total 20.
+      expect(find.text('확인 어려움 2끼'), findsOneWidget);
+      expect(find.text('20끼'), findsOneWidget);
+    });
+
+    testWidgets('unknownCount가 0이면 "확인 어려움 0끼" 범례를 표시한다', (tester) async {
+      await tester.pumpWidget(_wrap(MockWeeklyReportRepository.seeded()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('확인 어려움 0끼'), findsOneWidget);
     });
   });
 

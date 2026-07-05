@@ -6,8 +6,14 @@ import 'package:go_router/go_router.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/category_icon.dart';
+import 'package:can_i_eat_it/core/utils/kst_time.dart';
+import 'package:can_i_eat_it/features/home/data/home_providers.dart';
+import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_search_bar.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
+import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
+import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
 
 /// W6-0 홈 화면 — Figma 2122:14045("첫화면") / 2122:14040("데이터有") 구조 반영.
 ///
@@ -18,6 +24,11 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // loading/error 시 '—' 폴백 (_FoodHistoryCard valueOrNull 패턴과 동일).
+    final streakDays =
+        ref.watch(mySummaryProvider).valueOrNull?.weeklySummary.streakCount;
+    final unrecordedCount = ref.watch(unrecordedMealCountProvider).valueOrNull;
+
     return Scaffold(
       backgroundColor: const Color(0xFFFBFBFB), // Figma bg #FBFBFB
       body: SafeArea(
@@ -32,7 +43,7 @@ class HomeScreen extends ConsumerWidget {
 
               // ── 1. 인사말 블록 ─────────────────────────────────────────
               // 캐릭터 하단이 검색바 상단과 맞붙도록 gap 0 (Figma 절대배치 overlap).
-              const _GreetingBlock(),
+              _GreetingBlock(streakDays: streakDays),
 
               // ── 2. 검색 바 ────────────────────────────────────────────
               HomeSearchBar(onTap: () => context.push('/check')),
@@ -74,8 +85,7 @@ class HomeScreen extends ConsumerWidget {
                       child: _HomeEntryCard(
                         iconAsset: 'assets/illustrations/icon_pencil.png',
                         title: '증상 기록하기',
-                        // TODO(W6-0b): 미기록 식단 카운트 = /meal-records/candidates
-                        subtitle: '미기록 식단 0',
+                        subtitle: '미기록 식단 ${unrecordedCount ?? '—'}',
                         onTap: () => context.push('/unrecorded-meals'),
                       ),
                     ),
@@ -101,51 +111,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.itemGap),
-              // TODO(W4): 식사 기록 데이터 연결 시 실제 목록으로 교체.
-              // Figma 1207:6614
-              GestureDetector(
-                onTap: () {}, // TODO(W4): 식사 기록 진입
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                    border: Border.all(
-                      color: AppColors.borderCard, // Figma stroke #EDEDF5
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Row(
-                        children: [
-                          Image.asset(
-                            'assets/illustrations/food_regular.png',
-                            width: 32,
-                            height: 32,
-                            fit: BoxFit.contain,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '먹은 음식이 있으신가요?',
-                            style: AppTextStyles.body1Medium.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      // Figma heck-fill_small/plus — 초록 disc + 흰 플러스 일체형 SVG.
-                      SvgPicture.asset(
-                        'assets/figma_extracted/icon_plus_circle.svg',
-                        width: 24,
-                        height: 24,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              const _RecentMealsSection(),
               const SizedBox(height: AppSpacing.contentGap),
             ],
           ),
@@ -158,14 +124,15 @@ class HomeScreen extends ConsumerWidget {
 // ── 인사말 블록 (캐릭터 이미지 + 텍스트) ────────────────────────────────────
 
 class _GreetingBlock extends StatelessWidget {
-  const _GreetingBlock();
+  const _GreetingBlock({required this.streakDays});
+
+  /// 연속 편안 일수. mySummaryProvider loading/error 시 null → '—' 폴백.
+  final int? streakDays;
 
   @override
   Widget build(BuildContext context) {
     // Figma 1207:6593: row justify center — 텍스트+캐릭터를 한 그룹으로 가운데 정렬
     // (Expanded/space-between 금지 — 좌우로 벌리면 Figma와 패딩 불일치).
-    // TODO(data): /my-page/summary weeklySummary streak 연동(후속)
-    const streakDays = 0;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -190,7 +157,7 @@ class _GreetingBlock extends StatelessWidget {
                   children: [
                     const TextSpan(text: '연속 편안한 날 '),
                     TextSpan(
-                      text: '$streakDays일',
+                      text: '${streakDays ?? '—'}일',
                       style: AppTextStyles.body1Bold.copyWith(
                         color: AppColors.primary,
                       ),
@@ -271,5 +238,144 @@ class _HomeEntryCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// ── 최근 식사 섹션 (recentMealsProvider 실데이터, W7) ────────────────────────
+
+class _RecentMealsSection extends ConsumerWidget {
+  const _RecentMealsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final meals =
+        ref.watch(recentMealsProvider).valueOrNull ?? const <RecentMeal>[];
+
+    // 로딩·에러·빈 상태 — 기존 빈 상태 placeholder 카드 유지 (Figma 1207:6614).
+    if (meals.isEmpty) {
+      return GestureDetector(
+        onTap: () {}, // TODO(W4): 식사 기록 진입
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+            border: Border.all(
+              color: AppColors.borderCard, // Figma stroke #EDEDF5
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  Image.asset(
+                    'assets/illustrations/food_regular.png',
+                    width: 32,
+                    height: 32,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '먹은 음식이 있으신가요?',
+                    style: AppTextStyles.body1Medium.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              // Figma heck-fill_small/plus — 초록 disc + 흰 플러스 일체형 SVG.
+              SvgPicture.asset(
+                'assets/figma_extracted/icon_plus_circle.svg',
+                width: 24,
+                height: 24,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        for (var i = 0; i < meals.length; i++) ...[
+          if (i > 0) const SizedBox(height: AppSpacing.itemGap),
+          _RecentMealTile(meal: meals[i]),
+        ],
+      ],
+    );
+  }
+}
+
+class _RecentMealTile extends StatelessWidget {
+  const _RecentMealTile({required this.meal});
+  final RecentMeal meal;
+
+  @override
+  Widget build(BuildContext context) {
+    // eatenAt은 서버 ISO(+09:00) 원문 — parseKst로 KST 컴포넌트 복원 후 수동 포맷
+    // (KST 이중변환 방지, meal_timeline_list.dart _formatTime과 동일 원칙).
+    // malformed eatenAt이어도 타일 자체(음식명 등)는 렌더되도록 방어
+    // (meal_timeline_list.dart _hourOf와 동일 패턴).
+    final time = _formatEatenAtTime(meal.eatenAt);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(
+          color: AppColors.borderCard, // Figma stroke #EDEDF5
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          CategoryIcon(code: meal.category, size: 32),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  meal.foodName,
+                  style: AppTextStyles.body1Medium.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                if (meal.symptomState != null)
+                  Text(
+                    meal.symptomState!.label,
+                    style: AppTextStyles.caption1Medium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Text(
+            time,
+            style: AppTextStyles.body2Regular.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// eatenAt(서버 ISO +09:00)을 'HH:mm'으로 포맷한다. malformed 값이면
+  /// FormatException으로 타일 전체가 레드스크린 되지 않도록 '—'로 폴백한다
+  /// (meal_timeline_list.dart `_hourOf`와 동일한 방어 패턴).
+  static String _formatEatenAtTime(String eatenAt) {
+    try {
+      final dt = parseKst(eatenAt);
+      return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    } catch (_) {
+      return '—';
+    }
   }
 }

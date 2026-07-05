@@ -53,13 +53,17 @@ void mealRepositoryContract(
   });
 
   // -------------------------------------------------------------------------
-  group('appendFoodByText — 미지원 seam', () {
-    test('appendFoodByText는 UnimplementedError를 던진다', () async {
+  group('appendFoodByText — 기본 동작', () {
+    test('appendFoodByText는 MealFood를 반환한다', () async {
       final repo = create();
-      await expectLater(
-        repo.appendFoodByText(foodTextInput: '아메리카노'),
-        throwsA(isA<UnimplementedError>()),
-      );
+      final result = await repo.appendFoodByText(foodTextInput: '아메리카노');
+      expect(result, isA<MealFood>());
+    });
+
+    test('appendFoodByText 결과의 mealFoodId는 비어 있지 않다', () async {
+      final repo = create();
+      final result = await repo.appendFoodByText(foodTextInput: '아메리카노');
+      expect(result.mealFoodId, isNotEmpty);
     });
   });
 

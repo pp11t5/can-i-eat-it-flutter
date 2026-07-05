@@ -132,6 +132,29 @@ Map<String, dynamic> _$MealRecordDetailDtoToJson(
       'stateRecords': instance.stateRecords,
     };
 
+_ConnectedSymptomsDto _$ConnectedSymptomsDtoFromJson(
+        Map<String, dynamic> json) =>
+    _ConnectedSymptomsDto(
+      symptomId: json['symptomId'] as String,
+      symptomState: json['symptomState'] as String,
+      afterMealMinutes: (json['afterMealMinutes'] as num).toInt(),
+      representativeSymptoms: (json['representativeSymptoms'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
+      etcCount: (json['etcCount'] as num?)?.toInt() ?? 0,
+    );
+
+Map<String, dynamic> _$ConnectedSymptomsDtoToJson(
+        _ConnectedSymptomsDto instance) =>
+    <String, dynamic>{
+      'symptomId': instance.symptomId,
+      'symptomState': instance.symptomState,
+      'afterMealMinutes': instance.afterMealMinutes,
+      'representativeSymptoms': instance.representativeSymptoms,
+      'etcCount': instance.etcCount,
+    };
+
 _WeeklyDayDto _$WeeklyDayDtoFromJson(Map<String, dynamic> json) =>
     _WeeklyDayDto(
       date: json['date'] as String,
@@ -183,18 +206,28 @@ Map<String, dynamic> _$MealCandidatesDayDtoToJson(
       'meals': instance.meals,
     };
 
-_CreateMealRecordRequestDto _$CreateMealRecordRequestDtoFromJson(
+_MealRecordTextRequestDto _$MealRecordTextRequestDtoFromJson(
         Map<String, dynamic> json) =>
-    _CreateMealRecordRequestDto(
-      foodExternalId: json['foodExternalId'] as String,
+    _MealRecordTextRequestDto(
+      name: json['name'] as String,
       eatenAt: json['eatenAt'] as String?,
-      mealRecordId: json['mealRecordId'] as String?,
     );
 
-Map<String, dynamic> _$CreateMealRecordRequestDtoToJson(
-        _CreateMealRecordRequestDto instance) =>
+Map<String, dynamic> _$MealRecordTextRequestDtoToJson(
+        _MealRecordTextRequestDto instance) =>
     <String, dynamic>{
-      'foodExternalId': instance.foodExternalId,
+      'name': instance.name,
       'eatenAt': instance.eatenAt,
-      'mealRecordId': instance.mealRecordId,
+    };
+
+_MealRecordByIdRequestDto _$MealRecordByIdRequestDtoFromJson(
+        Map<String, dynamic> json) =>
+    _MealRecordByIdRequestDto(
+      eatenAt: json['eatenAt'] as String?,
+    );
+
+Map<String, dynamic> _$MealRecordByIdRequestDtoToJson(
+        _MealRecordByIdRequestDto instance) =>
+    <String, dynamic>{
+      'eatenAt': instance.eatenAt,
     };

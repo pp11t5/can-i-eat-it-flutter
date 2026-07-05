@@ -65,5 +65,8 @@ abstract class MealCount with _$MealCount {
 
     /// 위험 식사 수.
     required int riskCount,
+
+    /// 확인 어려움 식사 수. 기존 생성자·목·골든 보호 위해 @Default(0)(required 금지).
+    @Default(0) int unknownCount,
   }) = _MealCount;
 }

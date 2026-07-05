@@ -138,13 +138,40 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  group('appendFoodByText — 미지원', () {
-    test('appendFoodByText는 UnimplementedError를 던진다', () async {
+  group('appendFoodByText', () {
+    test('mealRecordId 없이 appendFoodByText 시 신규 식사가 생성된다', () async {
       final repo = MockMealRepository.empty();
-      await expectLater(
-        repo.appendFoodByText(foodTextInput: '아메리카노'),
-        throwsA(isA<UnimplementedError>()),
+      final food = await repo.appendFoodByText(foodTextInput: '아메리카노');
+      final record = await repo.mealDetail(food.mealRecordExternalId!);
+      expect(record.foods.length, 1);
+      expect(record.foods[0].name, '아메리카노');
+    });
+
+    test('mealRecordId 지정 시 같은 식사에 음식이 추가된다', () async {
+      final repo = MockMealRepository.empty();
+      final first = await repo.appendFood(foodExternalId: 'f-1');
+      final recordId = first.mealRecordExternalId!;
+      await repo.appendFoodByText(
+        foodTextInput: '아메리카노',
+        mealRecordId: recordId,
       );
+      final record = await repo.mealDetail(recordId);
+      expect(record.foods.length, 2);
+    });
+
+    test('앞뒤 공백은 trim되어 저장된다', () async {
+      final repo = MockMealRepository.empty();
+      final food = await repo.appendFoodByText(foodTextInput: '  아메리카노  ');
+      expect(food.name, '아메리카노');
+    });
+
+    test('100자 초과 이름은 실구현과 동일하게 100자(grapheme 기준)로 잘린다 '
+        '(pr-review 소소 수정 ③, meal_repository_impl.dart 정합)', () async {
+      final repo = MockMealRepository.empty();
+      final longName = '가' * 150;
+      final food = await repo.appendFoodByText(foodTextInput: longName);
+      expect(food.name.length, 100);
+      expect(food.name, '가' * 100);
     });
   });
 

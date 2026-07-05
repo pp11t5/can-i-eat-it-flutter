@@ -46,6 +46,36 @@ const _kSymptom = TimelineItem.symptom(
   occurredAt: '2026-06-17T14:30:00+09:00',
 );
 
+const _kSymptomWithId = TimelineItem.symptom(
+  symptomState: SymptomState.uncomfortable,
+  afterMealMinutes: 120,
+  occurredAt: '2026-06-17T14:30:00+09:00',
+  symptomId: 'sym-42',
+);
+
+// timeIcon=moon 이 아침 시각(hour=8, 휴리스틱상 sun)보다 우선해야 함을 검증.
+const _kSingleMorningWithMoonIcon = TimelineItem.single(
+  mealRecordId: 'mr-moon',
+  mealRecordDateTime: '2026-06-17T08:00:00+09:00',
+  mealFoodName: '두부',
+  grade: VerdictLevel.recommend,
+  timeIcon: TimeIcon.moon,
+);
+
+const _kSingleWithSymptom = TimelineItem.single(
+  mealRecordId: 'mr-symptom',
+  mealRecordDateTime: '2026-06-17T08:00:00+09:00',
+  mealFoodName: '두부',
+  grade: VerdictLevel.recommend,
+  connectedSymptoms: ConnectedSymptoms(
+    symptomId: 'sym-1',
+    symptomState: SymptomState.uncomfortable,
+    afterMealMinutes: 90,
+    representativeSymptoms: ['속쓰림'],
+    etcCount: 1,
+  ),
+);
+
 void main() {
   group('MealTimelineList — 변형별 렌더링', () {
     testWidgets('single 타일은 음식명과 grade 라벨을 표시한다', (tester) async {
@@ -139,6 +169,91 @@ void main() {
       await tester.tap(find.text('같이 먹은 음식이 있나요?'));
       await tester.pump();
       expect(addedId, 'mr-morning');
+    });
+  });
+
+  group('MealTimelineList — timeIcon 우선 (P1)', () {
+    testWidgets('timeIcon이 있으면 hour 휴리스틱보다 우선한다 (아침 시각이어도 moon 아이콘)',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(const MealTimelineList(items: [_kSingleMorningWithMoonIcon])),
+      );
+      expect(find.byIcon(Icons.nights_stay_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.wb_sunny_outlined), findsNothing);
+    });
+
+    testWidgets('symptom 행은 timeIcon 유무와 무관하게 항상 의료 아이콘을 표시한다',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(const MealTimelineList(items: [_kSymptom])),
+      );
+      expect(find.byIcon(Icons.medical_information_outlined), findsOneWidget);
+    });
+  });
+
+  group('MealTimelineList — 연결증상 칩 (P1)', () {
+    testWidgets('connectedSymptoms가 있으면 대표증상+외N개+식후N분 칩을 표시한다',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(const MealTimelineList(items: [_kSingleWithSymptom])),
+      );
+      expect(find.textContaining('속쓰림 외 1개'), findsOneWidget);
+      expect(find.textContaining('식후 1시간 30분'), findsOneWidget);
+    });
+
+    testWidgets('connectedSymptoms가 없으면 칩이 표시되지 않는다', (tester) async {
+      await tester.pumpWidget(
+        _wrap(const MealTimelineList(items: [_kSingleMorning])),
+      );
+      expect(find.textContaining('식후'), findsNothing);
+    });
+
+    testWidgets('연결증상 칩 탭 시 onTapSymptom이 symptomId와 함께 호출된다',
+        (tester) async {
+      String? tappedSymptomId;
+      await tester.pumpWidget(
+        _wrap(
+          MealTimelineList(
+            items: const [_kSingleWithSymptom],
+            onTapSymptom: (id) => tappedSymptomId = id,
+          ),
+        ),
+      );
+      await tester.tap(find.textContaining('속쓰림'));
+      await tester.pump();
+      expect(tappedSymptomId, 'sym-1');
+    });
+  });
+
+  group('MealTimelineList — 증상 행 탭 (P1)', () {
+    testWidgets('symptomId가 있으면 증상 행 탭 시 onTapSymptom이 호출된다', (tester) async {
+      String? tappedSymptomId;
+      await tester.pumpWidget(
+        _wrap(
+          MealTimelineList(
+            items: const [_kSymptomWithId],
+            onTapSymptom: (id) => tappedSymptomId = id,
+          ),
+        ),
+      );
+      await tester.tap(find.text('불편함'));
+      await tester.pump();
+      expect(tappedSymptomId, 'sym-42');
+    });
+
+    testWidgets('symptomId가 없으면 증상 행 탭이 무시된다 (크래시 없음)', (tester) async {
+      String? tappedSymptomId;
+      await tester.pumpWidget(
+        _wrap(
+          MealTimelineList(
+            items: const [_kSymptom],
+            onTapSymptom: (id) => tappedSymptomId = id,
+          ),
+        ),
+      );
+      await tester.tap(find.text('불편함'));
+      await tester.pump();
+      expect(tappedSymptomId, isNull);
     });
   });
 }

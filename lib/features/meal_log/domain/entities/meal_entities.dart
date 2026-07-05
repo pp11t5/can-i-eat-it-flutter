@@ -118,6 +118,44 @@ abstract class MealRecord with _$MealRecord {
 }
 
 // ---------------------------------------------------------------------------
+// TimeIcon — 타임라인 시간대 아이콘 판별자
+// ---------------------------------------------------------------------------
+
+/// 타임라인 항목의 서버 지정 시간대 아이콘.
+///
+/// 없으면(null) 호출부가 기존 hour 휴리스틱으로 폴백한다.
+enum TimeIcon { sun, moon }
+
+/// [TimeIcon] 서버 변환 확장.
+extension TimeIconMapper on TimeIcon {
+  /// 서버 [v] 문자열을 [TimeIcon] 으로 변환한다. 미지값·null 은 null 폴백
+  /// (hour 휴리스틱 사용을 호출부에 위임).
+  static TimeIcon? fromServer(String? v) => switch (v) {
+        'sun' => TimeIcon.sun,
+        'moon' => TimeIcon.moon,
+        _ => null,
+      };
+}
+
+// ---------------------------------------------------------------------------
+// ConnectedSymptoms — 타임라인 single/group 연결증상
+// ---------------------------------------------------------------------------
+
+/// 식사에 연결된 증상 요약 (타임라인 single/group 카드 하단 칩).
+///
+/// [symptomId] 로 증상 상세(`/symptom/:id`) 이동.
+@freezed
+abstract class ConnectedSymptoms with _$ConnectedSymptoms {
+  const factory ConnectedSymptoms({
+    required String symptomId,
+    required SymptomState symptomState,
+    required int afterMealMinutes,
+    @Default(<String>[]) List<String> representativeSymptoms,
+    @Default(0) int etcCount,
+  }) = _ConnectedSymptoms;
+}
+
+// ---------------------------------------------------------------------------
 // TimelineItem — sealed union 3변형
 // ---------------------------------------------------------------------------
 
@@ -139,6 +177,12 @@ sealed class TimelineItem with _$TimelineItem {
 
     /// 음식 카테고리 코드 (CategoryIcon 표시용). 서버 미제공 시 null → regular 폴백.
     String? categoryCode,
+
+    /// 서버 지정 시간대 아이콘. null 이면 hour 휴리스틱 폴백.
+    TimeIcon? timeIcon,
+
+    /// 연결증상. 없으면 칩 미표시.
+    ConnectedSymptoms? connectedSymptoms,
   }) = TimelineSingle;
 
   /// group: 음식 2개 이상짜리 식사.
@@ -150,6 +194,12 @@ sealed class TimelineItem with _$TimelineItem {
 
     /// 음식 카테고리 코드 (CategoryIcon 표시용). 서버 미제공 시 null → regular 폴백.
     String? categoryCode,
+
+    /// 서버 지정 시간대 아이콘. null 이면 hour 휴리스틱 폴백.
+    TimeIcon? timeIcon,
+
+    /// 연결증상. 없으면 칩 미표시.
+    ConnectedSymptoms? connectedSymptoms,
   }) = TimelineGroup;
 
   /// symptom: 증상 기록.
@@ -157,6 +207,13 @@ sealed class TimelineItem with _$TimelineItem {
     required SymptomState symptomState,
     required int afterMealMinutes,
     required String occurredAt,
+
+    /// 서버 지정 시간대 아이콘. symptom 행은 항상 의료 아이콘을 쓰므로 표시엔
+    /// 미사용 — 계약 완전성을 위해 보관만.
+    TimeIcon? timeIcon,
+
+    /// 증상 상세 식별자. 있으면 탭 가능(구 페이로드 방어 위해 nullable).
+    String? symptomId,
   }) = TimelineSymptom;
 }
 

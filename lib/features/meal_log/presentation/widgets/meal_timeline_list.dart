@@ -12,21 +12,24 @@ import 'package:can_i_eat_it/core/utils/kst_time.dart';
 /// 타임라인 리스트 위젯 — 왼쪽 수직 스파인 + 시간대 아이콘 + 변형별 타일.
 ///
 /// [TimelineItem] sealed union(single/group/symptom)을 변형별로 렌더한다.
-/// - single: 음식 1개짜리 식사 (음식명 + grade 배지).
-/// - group: 음식 2개 이상짜리 식사 (대표음식 + "외 N개").
-/// - symptom: 증상 기록 (탭 보류 — TimelineSymptom 에 symptomId 없음, W5-4 NOTE 참조).
+/// - single: 음식 1개짜리 식사 (음식명 + grade 배지 + 연결증상 칩).
+/// - group: 음식 2개 이상짜리 식사 (대표음식 + "외 N개" + 연결증상 칩).
+/// - symptom: 증상 기록 (symptomId 있으면 탭 가능 → 증상 상세).
 ///
-/// 시간대 아이콘은 mealRecordDateTime/occurredAt 의 hour 로 결정.
+/// 시간대 아이콘은 [TimelineItem.timeIcon] 우선, 없으면 mealRecordDateTime/
+/// occurredAt 의 hour 휴리스틱으로 폴백(증상 행은 항상 의료 아이콘).
 ///
 /// [items]: 표시할 타임라인 항목 목록 (비어있지 않아야 함).
 /// [onTapMeal]: single/group 타일 탭 콜백 (식사 상세 진입).
 /// [onAddFood]: single/group 타일 "+음식 추가" 콜백.
+/// [onTapSymptom]: 증상 행 또는 연결증상 칩 탭 콜백 (증상 상세 진입, symptomId).
 class MealTimelineList extends StatelessWidget {
   const MealTimelineList({
     super.key,
     required this.items,
     this.onTapMeal,
     this.onAddFood,
+    this.onTapSymptom,
   });
 
   final List<TimelineItem> items;
@@ -37,6 +40,9 @@ class MealTimelineList extends StatelessWidget {
   /// single/group 타일 "+음식 추가" → 기존 식사에 추가(mealRecordId).
   final void Function(String mealRecordId)? onAddFood;
 
+  /// 증상 행/연결증상 칩 탭 → 증상 상세(symptomId).
+  final void Function(String symptomId)? onTapSymptom;
+
   /// ISO-8601 문자열 → 시(hour).
   static int _hourOf(String isoString) {
     try {
@@ -46,7 +52,7 @@ class MealTimelineList extends StatelessWidget {
     }
   }
 
-  /// hour → 시간대 아이콘.
+  /// hour → 시간대 아이콘 (timeIcon 미제공 시 폴백).
   static IconData _mealTimeIcon(int hour) {
     if (hour < 12) return Icons.wb_sunny_outlined; // 아침
     if (hour < 18) return Icons.wb_twilight_outlined; // 점심
@@ -60,6 +66,22 @@ class MealTimelineList extends StatelessWidget {
         TimelineSymptom(:final occurredAt) => _hourOf(occurredAt),
       };
 
+  /// 스파인 아이콘 — timeIcon 우선, 없으면 hour 휴리스틱. 증상 행은 의미상
+  /// 항상 의료 아이콘(semantic)을 유지한다.
+  static IconData _resolveIcon(TimelineItem item) {
+    if (item is TimelineSymptom) return Icons.medical_information_outlined;
+    final timeIcon = switch (item) {
+      TimelineSingle(:final timeIcon) => timeIcon,
+      TimelineGroup(:final timeIcon) => timeIcon,
+      TimelineSymptom() => null,
+    };
+    return switch (timeIcon) {
+      TimeIcon.sun => Icons.wb_sunny_outlined,
+      TimeIcon.moon => Icons.nights_stay_outlined,
+      null => _mealTimeIcon(_itemHour(item)),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -71,9 +93,7 @@ class MealTimelineList extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = items[index];
         final isLast = index == items.length - 1;
-        final icon = item is TimelineSymptom
-            ? Icons.medical_information_outlined
-            : _mealTimeIcon(_itemHour(item));
+        final icon = _resolveIcon(item);
 
         final Widget card = switch (item) {
           TimelineSingle() => _SingleMealCard(
@@ -84,6 +104,7 @@ class MealTimelineList extends StatelessWidget {
               onAddFood: onAddFood != null
                   ? () => onAddFood!(item.mealRecordId)
                   : null,
+              onTapSymptom: onTapSymptom,
             ),
           TimelineGroup() => _GroupMealCard(
               item: item,
@@ -93,8 +114,14 @@ class MealTimelineList extends StatelessWidget {
               onAddFood: onAddFood != null
                   ? () => onAddFood!(item.mealRecordId)
                   : null,
+              onTapSymptom: onTapSymptom,
             ),
-          TimelineSymptom() => _SymptomCard(item: item),
+          TimelineSymptom() => _SymptomCard(
+              item: item,
+              onTap: (onTapSymptom != null && item.symptomId != null)
+                  ? () => onTapSymptom!(item.symptomId!)
+                  : null,
+            ),
         };
 
         return _TimelineRow(icon: icon, isLast: isLast, child: card);
@@ -217,6 +244,14 @@ Color _verdictColor(VerdictLevel level) => switch (level) {
       VerdictLevel.unknown => AppColors.verdictUnknown,
     };
 
+/// 식후 경과 분 → "식후 N분"(_SymptomCard·_ConnectedSymptomsChip 공유).
+String _afterMealLabel(int minutes) {
+  if (minutes < 60) return '식후 $minutes분';
+  final h = minutes ~/ 60;
+  final m = minutes % 60;
+  return m == 0 ? '식후 $h시간' : '식후 $h시간 $m분';
+}
+
 /// "＋ 같이 먹은 음식이 있나요?" 행.
 class _AddFoodRow extends StatelessWidget {
   const _AddFoodRow({required this.onAddFood});
@@ -244,6 +279,61 @@ class _AddFoodRow extends StatelessWidget {
   }
 }
 
+/// 연결증상 칩 — 대표증상 + "외 N개" + "식후 N분" 요약, 탭 시 증상 상세 이동.
+class _ConnectedSymptomsChip extends StatelessWidget {
+  const _ConnectedSymptomsChip({required this.connectedSymptoms, this.onTap});
+
+  final ConnectedSymptoms connectedSymptoms;
+  final VoidCallback? onTap;
+
+  /// 대표증상 + "외 N개" 요약.
+  String _summary() {
+    final names = connectedSymptoms.representativeSymptoms.join(', ');
+    if (connectedSymptoms.etcCount > 0) {
+      return names.isEmpty
+          ? '외 ${connectedSymptoms.etcCount}개'
+          : '$names 외 ${connectedSymptoms.etcCount}개';
+    }
+    return names;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        margin: const EdgeInsets.only(top: AppSpacing.itemGap),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.chipPaddingH,
+          vertical: AppSpacing.chipPaddingV,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('🩺', style: TextStyle(fontSize: 14, height: 1.0)),
+            const SizedBox(width: AppSpacing.xs),
+            Flexible(
+              child: Text(
+                '${_summary()} · ${_afterMealLabel(connectedSymptoms.afterMealMinutes)}',
+                style: AppTextStyles.caption1Medium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
 // single 타일
 // ---------------------------------------------------------------------------
@@ -253,11 +343,15 @@ class _SingleMealCard extends StatelessWidget {
     required this.item,
     this.onTap,
     this.onAddFood,
+    this.onTapSymptom,
   });
 
   final TimelineSingle item;
   final VoidCallback? onTap;
   final VoidCallback? onAddFood;
+
+  /// 연결증상 칩 탭 → 증상 상세(symptomId).
+  final void Function(String symptomId)? onTapSymptom;
 
   @override
   Widget build(BuildContext context) {
@@ -324,6 +418,13 @@ class _SingleMealCard extends StatelessWidget {
               ),
             ),
           ),
+          if (item.connectedSymptoms != null)
+            _ConnectedSymptomsChip(
+              connectedSymptoms: item.connectedSymptoms!,
+              onTap: onTapSymptom != null
+                  ? () => onTapSymptom!(item.connectedSymptoms!.symptomId)
+                  : null,
+            ),
           const Divider(
             height: AppSpacing.sectionGap,
             color: AppColors.divider,
@@ -345,11 +446,15 @@ class _GroupMealCard extends StatelessWidget {
     required this.item,
     this.onTap,
     this.onAddFood,
+    this.onTapSymptom,
   });
 
   final TimelineGroup item;
   final VoidCallback? onTap;
   final VoidCallback? onAddFood;
+
+  /// 연결증상 칩 탭 → 증상 상세(symptomId).
+  final void Function(String symptomId)? onTapSymptom;
 
   /// 대표음식 + "외 N개" 요약.
   String _summary() {
@@ -418,6 +523,13 @@ class _GroupMealCard extends StatelessWidget {
               ),
             ),
           ),
+          if (item.connectedSymptoms != null)
+            _ConnectedSymptomsChip(
+              connectedSymptoms: item.connectedSymptoms!,
+              onTap: onTapSymptom != null
+                  ? () => onTapSymptom!(item.connectedSymptoms!.symptomId)
+                  : null,
+            ),
           const Divider(
             height: AppSpacing.sectionGap,
             color: AppColors.divider,
@@ -433,51 +545,47 @@ class _GroupMealCard extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // symptom 타일
 // ---------------------------------------------------------------------------
-// NOTE(W5-4 탭 보류): TimelineSymptom 에 symptomId 가 없어 상세 진입 불가.
-// 서버 GET /timeline?date= 의 symptom 변형이 symptomId 를 포함하지 않는다.
-// 서버 계약이 symptomId 를 추가하면 _SymptomCard 에 onTap→context.push('/symptom/:id') 연결.
+// symptomId 가 있으면 탭 가능 → 증상 상세(구 페이로드 방어를 위해 nullable,
+// symptomId 없는 항목은 onTap 이 null 로 전달되어 탭 불가).
 
 class _SymptomCard extends StatelessWidget {
-  const _SymptomCard({required this.item});
+  const _SymptomCard({required this.item, this.onTap});
 
   final TimelineSymptom item;
-
-  /// 식후 경과 분 → "식후 N분".
-  String _afterMealLabel(int minutes) {
-    if (minutes < 60) return '식후 $minutes분';
-    final h = minutes ~/ 60;
-    final m = minutes % 60;
-    return m == 0 ? '식후 $h시간' : '식후 $h시간 $m분';
-  }
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return _CardShell(
-      child: Row(
-        children: [
-          const Text('🩺', style: TextStyle(fontSize: 18, height: 1.0)),
-          const SizedBox(width: AppSpacing.itemGap),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.symptomState.label,
-                  style: AppTextStyles.body2Medium.copyWith(
-                    color: AppColors.textPrimary,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Row(
+          children: [
+            const Text('🩺', style: TextStyle(fontSize: 18, height: 1.0)),
+            const SizedBox(width: AppSpacing.itemGap),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.symptomState.label,
+                    style: AppTextStyles.body2Medium.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  '${_afterMealLabel(item.afterMealMinutes)} · ${_formatTime(item.occurredAt)}',
-                  style: AppTextStyles.caption1Medium.copyWith(
-                    color: AppColors.textSecondary,
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '${_afterMealLabel(item.afterMealMinutes)} · ${_formatTime(item.occurredAt)}',
+                    style: AppTextStyles.caption1Medium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
