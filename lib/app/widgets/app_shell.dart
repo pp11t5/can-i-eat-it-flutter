@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_icon_sizes.dart';
+import '../theme/app_icons.dart';
 import '../theme/app_text_styles.dart';
+import 'app_icon.dart';
 
 /// 바텀 내비를 포함한 앱 셸.
 /// StatefulShellRoute의 builder가 반환한다.
@@ -13,18 +15,9 @@ class AppShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
   static const _tabs = [
-    _TabItem(
-      label: '홈',
-      iconAsset: 'assets/figma_extracted/nav_home.svg',
-    ),
-    _TabItem(
-      label: '타임라인',
-      iconAsset: 'assets/figma_extracted/nav_timeline.svg',
-    ),
-    _TabItem(
-      label: '마이',
-      iconAsset: 'assets/figma_extracted/nav_my.svg',
-    ),
+    _TabItem(label: '홈', iconAsset: AppIcons.navHome),
+    _TabItem(label: '타임라인', iconAsset: AppIcons.navTimeline),
+    _TabItem(label: '마이', iconAsset: AppIcons.navMy),
   ];
 
   @override
@@ -94,14 +87,11 @@ class _BottomNavBar extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SvgPicture.asset(
+                      AppIcon(
                         tabs[index].iconAsset,
-                        width: 24,
-                        height: 24,
-                        colorFilter: ColorFilter.mode(
-                          color,
-                          BlendMode.srcIn,
-                        ),
+                        size: AppIconSizes.s24,
+                        color: color,
+                        semanticsLabel: tabs[index].label,
                       ),
                       const SizedBox(height: 4),
                       Text(
