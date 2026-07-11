@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_icons.dart';
 import '../theme/app_text_styles.dart';
 
 /// 바텀 내비를 포함한 앱 셸.
@@ -13,18 +14,9 @@ class AppShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
   static const _tabs = [
-    _TabItem(
-      label: '홈',
-      iconAsset: 'assets/figma_extracted/nav_home.svg',
-    ),
-    _TabItem(
-      label: '타임라인',
-      iconAsset: 'assets/figma_extracted/nav_timeline.svg',
-    ),
-    _TabItem(
-      label: '마이',
-      iconAsset: 'assets/figma_extracted/nav_my.svg',
-    ),
+    _TabItem(label: '홈', iconAsset: AppIcons.navHome),
+    _TabItem(label: '타임라인', iconAsset: AppIcons.navTimeline),
+    _TabItem(label: '마이', iconAsset: AppIcons.navMy),
   ];
 
   @override
