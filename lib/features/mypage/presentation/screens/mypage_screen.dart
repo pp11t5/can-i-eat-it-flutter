@@ -8,6 +8,8 @@ import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
+import 'package:can_i_eat_it/core/config/terms_catalog.dart';
+import 'package:can_i_eat_it/core/util/external_link.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/dictionary_list_controller.dart';
@@ -508,22 +510,19 @@ class _TermsSection extends StatelessWidget {
           _ListTileRow(
             icon: Icons.privacy_tip_outlined,
             label: '개인정보 보호 약관',
-            onTap: () {
-              // TODO(content): 약관 실URL 확정 필요 — 현재 준비중 토스트.
-              // url_launcher 의존성 미추가(pubspec 변경 최소화).
-              // 확정 후 url_launcher로 https://can-i-eat-it.com/terms/privacy 열기.
-              showAppToast(context, '약관 페이지 준비 중이에요.');
-            },
+            onTap: () => openExternalUrl(context, TermsCatalog.privacyUrl),
           ),
           const Divider(height: 1, color: AppColors.divider),
           _ListTileRow(
             icon: Icons.description_outlined,
             label: '서비스 이용 약관',
-            onTap: () {
-              // TODO(content): 약관 실URL 확정 필요 — 현재 준비중 토스트.
-              // 확정 후 url_launcher로 https://can-i-eat-it.com/terms/service 열기.
-              showAppToast(context, '약관 페이지 준비 중이에요.');
-            },
+            onTap: () => openExternalUrl(context, TermsCatalog.tosUrl),
+          ),
+          const Divider(height: 1, color: AppColors.divider),
+          _ListTileRow(
+            icon: Icons.campaign_outlined,
+            label: '마케팅 정보 수신',
+            onTap: () => openExternalUrl(context, TermsCatalog.marketingUrl),
           ),
         ],
       ),

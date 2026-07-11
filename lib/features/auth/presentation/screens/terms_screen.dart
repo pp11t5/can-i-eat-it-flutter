@@ -7,7 +7,9 @@ import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_button.dart';
+import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/core/config/terms_catalog.dart';
+import 'package:can_i_eat_it/core/util/external_link.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/widgets/figma_checkbox.dart';
@@ -157,23 +159,32 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
                       checked: _termsOfService,
                       onTap: () =>
                           setState(() => _termsOfService = !_termsOfService),
+                      onChevronTap: () =>
+                          openExternalUrl(context, TermsCatalog.tosUrl),
                     ),
                     _TermRow(
                       label: '[필수] 개인정보 수집·이용 동의',
                       checked: _privacy,
                       onTap: () => setState(() => _privacy = !_privacy),
+                      onChevronTap: () =>
+                          openExternalUrl(context, TermsCatalog.privacyUrl),
                     ),
                     _TermRow(
                       label: '[필수] 민감정보(건강) 수집 동의',
                       checked: _sensitiveInfo,
                       onTap: () =>
                           setState(() => _sensitiveInfo = !_sensitiveInfo),
+                      // TODO(PO): 민감정보 수집 약관 URL 확정 대기.
+                      onChevronTap: () =>
+                          showAppToast(context, '약관 페이지 준비 중이에요.'),
                     ),
                     _TermRow(
                       label: '[선택] 마케팅·푸시 알림 수신',
                       checked: _marketing,
                       optional: true,
                       onTap: () => setState(() => _marketing = !_marketing),
+                      onChevronTap: () =>
+                          openExternalUrl(context, TermsCatalog.marketingUrl),
                     ),
                   ],
                 ),
@@ -250,12 +261,16 @@ class _TermRow extends StatelessWidget {
     required this.label,
     required this.checked,
     required this.onTap,
+    required this.onChevronTap,
     this.optional = false,
   });
 
   final String label;
   final bool checked;
   final VoidCallback onTap;
+
+  /// 우측 chevron 탭 — 약관 전문(외부 URL 또는 준비중 안내) 열기.
+  final VoidCallback onChevronTap;
 
   /// [선택] 항목 — checkbox 20px + 라벨 색 textSecondary.
   final bool optional;
@@ -289,11 +304,9 @@ class _TermRow extends StatelessWidget {
               ),
             ),
           ),
-          // 우측 chevron — 약관 상세 웹뷰 push 영역(W1 placeholder).
+          // 우측 chevron — 약관 전문 열기.
           InkWell(
-            onTap: () {
-              // TODO: 약관 전문 WebView(34_개인정보약관) push — 화면 구현 후 연결.
-            },
+            onTap: onChevronTap,
             child: Padding(
               padding: const EdgeInsets.all(4),
               child: SvgPicture.asset(
