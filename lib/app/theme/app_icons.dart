@@ -1,14 +1,14 @@
-/// 앱 전역 에셋 경로 레지스트리.
+/// 앱 전역 **SVG 아이콘** 경로 레지스트리.
 ///
-/// 모든 아이콘·이미지 경로는 이 클래스를 경유한다(문자열 중복·오타 방지).
+/// 이 클래스는 `.svg` 경로만 담는다 — `AppIcon`이 `SvgPicture`로만 렌더하므로,
+/// PNG 를 여기 섞으면 `AppIcon(png)` 이 컴파일은 되고 런타임에 깨진다.
+/// PNG 래스터 이미지는 [AppImages] 로 분리한다.
 /// 음식 카테고리 일러스트는 `CategoryIcon` 이 소유하므로 여기 포함하지 않는다.
 ///
 /// 규칙: 모노크롬 아이콘은 `AppIcon` + 색 지정으로 렌더(BlendMode.srcIn 틴팅),
-/// 브랜드·다색 에셋은 색 미지정(원본색 유지). 이모지·`Icons.*` 사용 금지.
+/// 브랜드·다색 SVG 는 색 미지정(원본색 유지). 이모지·`Icons.*` 사용 금지.
 abstract final class AppIcons {
   static const String _figma = 'assets/figma_extracted';
-  static const String _illust = 'assets/illustrations';
-  static const String _splash = 'assets/splash';
 
   // --- 내비게이션 (app_shell) ---
   static const String navHome = '$_figma/nav_home.svg';
@@ -31,15 +31,25 @@ abstract final class AppIcons {
   // --- 빈 상태 ---
   static const String foodEmpty = '$_figma/icon_food_empty.svg';
 
-  // --- 브랜드 (다색, 원본색 유지) ---
+  // --- 브랜드 (다색 SVG, 원본색 유지) ---
   static const String kakaoSymbol = '$_figma/kakao_logo_symbol.svg';
+}
 
-  // --- 로그인/스플래시 일러스트 (PNG) ---
+/// 앱 전역 **PNG 래스터 이미지** 경로 레지스트리.
+///
+/// `Image.asset` 으로 렌더한다. 벡터 아이콘은 [AppIcons] + `AppIcon` 사용.
+/// (SVG 전용 `AppIcon` 에 이 경로를 넘기면 assert 로 조기 실패한다.)
+abstract final class AppImages {
+  static const String _figma = 'assets/figma_extracted';
+  static const String _illust = 'assets/illustrations';
+  static const String _splash = 'assets/splash';
+
+  // --- 로그인/스플래시 일러스트 ---
   static const String loginBg = '$_figma/login_bg_image.png';
   static const String loginLogo = '$_figma/login_logo_illust.png';
   static const String splashLogo = '$_splash/splash_logo.png';
 
-  // --- 일러스트 (PNG, 직접 참조) ---
+  // --- 일러스트 (직접 참조) ---
   static const String pencil = '$_illust/icon_pencil.png';
   static const String fire = '$_illust/icon_fire.png';
   static const String characterGreeting = '$_illust/character_greeting.png';

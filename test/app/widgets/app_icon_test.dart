@@ -41,4 +41,14 @@ void main() {
     final svg = await pumpIcon(tester, const AppIcon(AppIcons.kakaoSymbol));
     expect(svg.colorFilter, isNull);
   });
+
+  testWidgets('PNG 경로는 build 시 assert 로 실패(SVG 전용 가드)', (tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: AppIcon('assets/illustrations/icon_fire.png'),
+      ),
+    );
+    expect(tester.takeException(), isA<AssertionError>());
+  });
 }
