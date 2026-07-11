@@ -7,7 +7,7 @@ part of 'symptom_write_controller.dart';
 // **************************************************************************
 
 String _$symptomWriteControllerHash() =>
-    r'd12f9e1e30190ab75dc3ce22f7acf4d6d85309df';
+    r'3c38bee5690c4799a4cf54ebdb5463ffe3cbaecf';
 
 /// Copied from Dart SDK
 class _SystemHash {

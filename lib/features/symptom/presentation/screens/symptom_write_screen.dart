@@ -150,13 +150,9 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
   // 저장 가능 여부
   // --------------------------------------------------------------------------
 
-  /// mood 선택 필수. linkedMealId는 "선택 안 할래요" 시 null이므로
-  /// mealRecordId 필수 계약과 충돌 — TODO(contract) 참고.
-  /// 현재: "선택 안 할래요"(linkedMealId=null) 는 저장 버튼 비활성화.
-  // TODO(contract): mealRecordId 필수 vs "선택 안 할래요" 미연결 — 서버 계약 확인 필요.
-  // 서버가 mealRecordId를 nullable로 바꾸면 이 조건 제거.
-  bool get _canSave =>
-      _formState.mood != null && _formState.linkedMealId != null;
+  /// mood 선택만 필수. mealRecordId는 서버 계약상 nullable이므로 "선택 안
+  /// 할래요"(linkedMealId=null, 식사 미연결)여도 저장 가능하다.
+  bool get _canSave => _formState.mood != null;
 
   // --------------------------------------------------------------------------
   // 이벤트 핸들러
@@ -209,19 +205,23 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
         ),
       ),
     );
-    if (result != null) {
-      setState(() {
-        _formState = _formState.copyWith(
-          linkedMealId: result.mealRecordId,
-          linkedMealDisplayName: result.displayName,
-        );
-      });
-    } else if (result == null) {
-      // "선택 안 할래요" 결과
+    if (result == null) {
+      // 단순 dismiss(AppBar/시스템 뒤로가기) — 변경 없음, 기존 linkedMeal 보존
+      return;
+    }
+    if (result.cleared) {
+      // "선택 안 할래요" 명시적 해제
       setState(() {
         _formState = _formState.copyWith(clearLinkedMeal: true);
       });
+      return;
     }
+    setState(() {
+      _formState = _formState.copyWith(
+        linkedMealId: result.mealRecordId,
+        linkedMealDisplayName: result.displayName,
+      );
+    });
   }
 
   Future<void> _onSave() async {

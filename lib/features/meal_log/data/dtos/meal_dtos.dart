@@ -252,8 +252,8 @@ abstract final class TimelineItemDto {
           mealFoodName: mealFoodName,
           grade: VerdictLevelGrade.fromGrade(gradeRaw),
           etcCount: (j['etcCount'] as num?)?.toInt() ?? 0,
-          // TODO(backend): timeline Single/Group에 category 추가 시 실 카테고리 표시. 현재 미제공 → regular
-          categoryCode: j['category'] as String?,
+          // 서버 제공됨(mealFoodCategory).
+          categoryCode: j['mealFoodCategory'] as String?,
           timeIcon: _timeIconOf(j),
           connectedSymptoms: _connectedSymptomsOf(j),
         );
@@ -272,8 +272,8 @@ abstract final class TimelineItemDto {
                   .toList() ??
               const [],
           etcCount: (j['etcCount'] as num?)?.toInt() ?? 0,
-          // TODO(backend): timeline Single/Group에 category 추가 시 실 카테고리 표시. 현재 미제공 → regular
-          categoryCode: j['category'] as String?,
+          // 서버 제공됨(mealFoodCategory).
+          categoryCode: j['mealFoodCategory'] as String?,
           timeIcon: _timeIconOf(j),
           connectedSymptoms: _connectedSymptomsOf(j),
         );

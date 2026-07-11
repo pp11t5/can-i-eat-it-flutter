@@ -29,6 +29,9 @@ mixin _$WeeklyReport {
   /// 도넛 분포용 식사 판정 카운트.
   MealCount get mealCount;
 
+  /// 기록된 증상 집계. 서버 응답에 필드가 없으면 null(빈상태로 렌더).
+  SymptomReport? get symptomReport;
+
   /// Create a copy of WeeklyReport
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -50,16 +53,18 @@ mixin _$WeeklyReport {
             (identical(other.comfortableState, comfortableState) ||
                 other.comfortableState == comfortableState) &&
             (identical(other.mealCount, mealCount) ||
-                other.mealCount == mealCount));
+                other.mealCount == mealCount) &&
+            (identical(other.symptomReport, symptomReport) ||
+                other.symptomReport == symptomReport));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, startDate, endDate, weekLabel, comfortableState, mealCount);
+  int get hashCode => Object.hash(runtimeType, startDate, endDate, weekLabel,
+      comfortableState, mealCount, symptomReport);
 
   @override
   String toString() {
-    return 'WeeklyReport(startDate: $startDate, endDate: $endDate, weekLabel: $weekLabel, comfortableState: $comfortableState, mealCount: $mealCount)';
+    return 'WeeklyReport(startDate: $startDate, endDate: $endDate, weekLabel: $weekLabel, comfortableState: $comfortableState, mealCount: $mealCount, symptomReport: $symptomReport)';
   }
 }
 
@@ -74,10 +79,12 @@ abstract mixin class $WeeklyReportCopyWith<$Res> {
       String endDate,
       String weekLabel,
       ComfortableState comfortableState,
-      MealCount mealCount});
+      MealCount mealCount,
+      SymptomReport? symptomReport});
 
   $ComfortableStateCopyWith<$Res> get comfortableState;
   $MealCountCopyWith<$Res> get mealCount;
+  $SymptomReportCopyWith<$Res>? get symptomReport;
 }
 
 /// @nodoc
@@ -97,6 +104,7 @@ class _$WeeklyReportCopyWithImpl<$Res> implements $WeeklyReportCopyWith<$Res> {
     Object? weekLabel = null,
     Object? comfortableState = null,
     Object? mealCount = null,
+    Object? symptomReport = freezed,
   }) {
     return _then(_self.copyWith(
       startDate: null == startDate
@@ -119,6 +127,10 @@ class _$WeeklyReportCopyWithImpl<$Res> implements $WeeklyReportCopyWith<$Res> {
           ? _self.mealCount
           : mealCount // ignore: cast_nullable_to_non_nullable
               as MealCount,
+      symptomReport: freezed == symptomReport
+          ? _self.symptomReport
+          : symptomReport // ignore: cast_nullable_to_non_nullable
+              as SymptomReport?,
     ));
   }
 
@@ -139,6 +151,20 @@ class _$WeeklyReportCopyWithImpl<$Res> implements $WeeklyReportCopyWith<$Res> {
   $MealCountCopyWith<$Res> get mealCount {
     return $MealCountCopyWith<$Res>(_self.mealCount, (value) {
       return _then(_self.copyWith(mealCount: value));
+    });
+  }
+
+  /// Create a copy of WeeklyReport
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $SymptomReportCopyWith<$Res>? get symptomReport {
+    if (_self.symptomReport == null) {
+      return null;
+    }
+
+    return $SymptomReportCopyWith<$Res>(_self.symptomReport!, (value) {
+      return _then(_self.copyWith(symptomReport: value));
     });
   }
 }
@@ -236,8 +262,13 @@ extension WeeklyReportPatterns on WeeklyReport {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String startDate, String endDate, String weekLabel,
-            ComfortableState comfortableState, MealCount mealCount)?
+    TResult Function(
+            String startDate,
+            String endDate,
+            String weekLabel,
+            ComfortableState comfortableState,
+            MealCount mealCount,
+            SymptomReport? symptomReport)?
         $default, {
     required TResult orElse(),
   }) {
@@ -245,7 +276,7 @@ extension WeeklyReportPatterns on WeeklyReport {
     switch (_that) {
       case _WeeklyReport() when $default != null:
         return $default(_that.startDate, _that.endDate, _that.weekLabel,
-            _that.comfortableState, _that.mealCount);
+            _that.comfortableState, _that.mealCount, _that.symptomReport);
       case _:
         return orElse();
     }
@@ -266,15 +297,20 @@ extension WeeklyReportPatterns on WeeklyReport {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String startDate, String endDate, String weekLabel,
-            ComfortableState comfortableState, MealCount mealCount)
+    TResult Function(
+            String startDate,
+            String endDate,
+            String weekLabel,
+            ComfortableState comfortableState,
+            MealCount mealCount,
+            SymptomReport? symptomReport)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _WeeklyReport():
         return $default(_that.startDate, _that.endDate, _that.weekLabel,
-            _that.comfortableState, _that.mealCount);
+            _that.comfortableState, _that.mealCount, _that.symptomReport);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -294,15 +330,20 @@ extension WeeklyReportPatterns on WeeklyReport {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String startDate, String endDate, String weekLabel,
-            ComfortableState comfortableState, MealCount mealCount)?
+    TResult? Function(
+            String startDate,
+            String endDate,
+            String weekLabel,
+            ComfortableState comfortableState,
+            MealCount mealCount,
+            SymptomReport? symptomReport)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _WeeklyReport() when $default != null:
         return $default(_that.startDate, _that.endDate, _that.weekLabel,
-            _that.comfortableState, _that.mealCount);
+            _that.comfortableState, _that.mealCount, _that.symptomReport);
       case _:
         return null;
     }
@@ -317,7 +358,8 @@ class _WeeklyReport implements WeeklyReport {
       required this.endDate,
       required this.weekLabel,
       required this.comfortableState,
-      required this.mealCount});
+      required this.mealCount,
+      this.symptomReport});
 
   /// 리포트 시작일 (서버 원문 문자열, 'YYYY-MM-DD').
   @override
@@ -338,6 +380,10 @@ class _WeeklyReport implements WeeklyReport {
   /// 도넛 분포용 식사 판정 카운트.
   @override
   final MealCount mealCount;
+
+  /// 기록된 증상 집계. 서버 응답에 필드가 없으면 null(빈상태로 렌더).
+  @override
+  final SymptomReport? symptomReport;
 
   /// Create a copy of WeeklyReport
   /// with the given fields replaced by the non-null parameter values.
@@ -360,16 +406,18 @@ class _WeeklyReport implements WeeklyReport {
             (identical(other.comfortableState, comfortableState) ||
                 other.comfortableState == comfortableState) &&
             (identical(other.mealCount, mealCount) ||
-                other.mealCount == mealCount));
+                other.mealCount == mealCount) &&
+            (identical(other.symptomReport, symptomReport) ||
+                other.symptomReport == symptomReport));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, startDate, endDate, weekLabel, comfortableState, mealCount);
+  int get hashCode => Object.hash(runtimeType, startDate, endDate, weekLabel,
+      comfortableState, mealCount, symptomReport);
 
   @override
   String toString() {
-    return 'WeeklyReport(startDate: $startDate, endDate: $endDate, weekLabel: $weekLabel, comfortableState: $comfortableState, mealCount: $mealCount)';
+    return 'WeeklyReport(startDate: $startDate, endDate: $endDate, weekLabel: $weekLabel, comfortableState: $comfortableState, mealCount: $mealCount, symptomReport: $symptomReport)';
   }
 }
 
@@ -386,12 +434,15 @@ abstract mixin class _$WeeklyReportCopyWith<$Res>
       String endDate,
       String weekLabel,
       ComfortableState comfortableState,
-      MealCount mealCount});
+      MealCount mealCount,
+      SymptomReport? symptomReport});
 
   @override
   $ComfortableStateCopyWith<$Res> get comfortableState;
   @override
   $MealCountCopyWith<$Res> get mealCount;
+  @override
+  $SymptomReportCopyWith<$Res>? get symptomReport;
 }
 
 /// @nodoc
@@ -412,6 +463,7 @@ class __$WeeklyReportCopyWithImpl<$Res>
     Object? weekLabel = null,
     Object? comfortableState = null,
     Object? mealCount = null,
+    Object? symptomReport = freezed,
   }) {
     return _then(_WeeklyReport(
       startDate: null == startDate
@@ -434,6 +486,10 @@ class __$WeeklyReportCopyWithImpl<$Res>
           ? _self.mealCount
           : mealCount // ignore: cast_nullable_to_non_nullable
               as MealCount,
+      symptomReport: freezed == symptomReport
+          ? _self.symptomReport
+          : symptomReport // ignore: cast_nullable_to_non_nullable
+              as SymptomReport?,
     ));
   }
 
@@ -454,6 +510,20 @@ class __$WeeklyReportCopyWithImpl<$Res>
   $MealCountCopyWith<$Res> get mealCount {
     return $MealCountCopyWith<$Res>(_self.mealCount, (value) {
       return _then(_self.copyWith(mealCount: value));
+    });
+  }
+
+  /// Create a copy of WeeklyReport
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $SymptomReportCopyWith<$Res>? get symptomReport {
+    if (_self.symptomReport == null) {
+      return null;
+    }
+
+    return $SymptomReportCopyWith<$Res>(_self.symptomReport!, (value) {
+      return _then(_self.copyWith(symptomReport: value));
     });
   }
 }
@@ -1168,6 +1238,720 @@ class __$MealCountCopyWithImpl<$Res> implements _$MealCountCopyWith<$Res> {
       unknownCount: null == unknownCount
           ? _self.unknownCount
           : unknownCount // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+mixin _$SymptomReport {
+  /// 이번 주 증상 기록 총 횟수.
+  int get recordedCount;
+
+  /// 평균 기록 시간 라벨 (서버 원문, 예: '16:30'). 값 없으면 pill 미노출.
+  String? get averageTimeLabel;
+
+  /// 평균 강도. 값 없으면 pill 미노출.
+  int? get averageIntensity;
+
+  /// 증상 종류별 카운트 (막대 그래프용).
+  List<SymptomTypeCount> get typeCounts;
+
+  /// Create a copy of SymptomReport
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $SymptomReportCopyWith<SymptomReport> get copyWith =>
+      _$SymptomReportCopyWithImpl<SymptomReport>(
+          this as SymptomReport, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is SymptomReport &&
+            (identical(other.recordedCount, recordedCount) ||
+                other.recordedCount == recordedCount) &&
+            (identical(other.averageTimeLabel, averageTimeLabel) ||
+                other.averageTimeLabel == averageTimeLabel) &&
+            (identical(other.averageIntensity, averageIntensity) ||
+                other.averageIntensity == averageIntensity) &&
+            const DeepCollectionEquality()
+                .equals(other.typeCounts, typeCounts));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, recordedCount, averageTimeLabel,
+      averageIntensity, const DeepCollectionEquality().hash(typeCounts));
+
+  @override
+  String toString() {
+    return 'SymptomReport(recordedCount: $recordedCount, averageTimeLabel: $averageTimeLabel, averageIntensity: $averageIntensity, typeCounts: $typeCounts)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $SymptomReportCopyWith<$Res> {
+  factory $SymptomReportCopyWith(
+          SymptomReport value, $Res Function(SymptomReport) _then) =
+      _$SymptomReportCopyWithImpl;
+  @useResult
+  $Res call(
+      {int recordedCount,
+      String? averageTimeLabel,
+      int? averageIntensity,
+      List<SymptomTypeCount> typeCounts});
+}
+
+/// @nodoc
+class _$SymptomReportCopyWithImpl<$Res>
+    implements $SymptomReportCopyWith<$Res> {
+  _$SymptomReportCopyWithImpl(this._self, this._then);
+
+  final SymptomReport _self;
+  final $Res Function(SymptomReport) _then;
+
+  /// Create a copy of SymptomReport
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? recordedCount = null,
+    Object? averageTimeLabel = freezed,
+    Object? averageIntensity = freezed,
+    Object? typeCounts = null,
+  }) {
+    return _then(_self.copyWith(
+      recordedCount: null == recordedCount
+          ? _self.recordedCount
+          : recordedCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      averageTimeLabel: freezed == averageTimeLabel
+          ? _self.averageTimeLabel
+          : averageTimeLabel // ignore: cast_nullable_to_non_nullable
+              as String?,
+      averageIntensity: freezed == averageIntensity
+          ? _self.averageIntensity
+          : averageIntensity // ignore: cast_nullable_to_non_nullable
+              as int?,
+      typeCounts: null == typeCounts
+          ? _self.typeCounts
+          : typeCounts // ignore: cast_nullable_to_non_nullable
+              as List<SymptomTypeCount>,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [SymptomReport].
+extension SymptomReportPatterns on SymptomReport {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_SymptomReport value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _SymptomReport() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_SymptomReport value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _SymptomReport():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_SymptomReport value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _SymptomReport() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(int recordedCount, String? averageTimeLabel,
+            int? averageIntensity, List<SymptomTypeCount> typeCounts)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _SymptomReport() when $default != null:
+        return $default(_that.recordedCount, _that.averageTimeLabel,
+            _that.averageIntensity, _that.typeCounts);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(int recordedCount, String? averageTimeLabel,
+            int? averageIntensity, List<SymptomTypeCount> typeCounts)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _SymptomReport():
+        return $default(_that.recordedCount, _that.averageTimeLabel,
+            _that.averageIntensity, _that.typeCounts);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(int recordedCount, String? averageTimeLabel,
+            int? averageIntensity, List<SymptomTypeCount> typeCounts)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _SymptomReport() when $default != null:
+        return $default(_that.recordedCount, _that.averageTimeLabel,
+            _that.averageIntensity, _that.typeCounts);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _SymptomReport implements SymptomReport {
+  const _SymptomReport(
+      {required this.recordedCount,
+      this.averageTimeLabel,
+      this.averageIntensity,
+      final List<SymptomTypeCount> typeCounts = const []})
+      : _typeCounts = typeCounts;
+
+  /// 이번 주 증상 기록 총 횟수.
+  @override
+  final int recordedCount;
+
+  /// 평균 기록 시간 라벨 (서버 원문, 예: '16:30'). 값 없으면 pill 미노출.
+  @override
+  final String? averageTimeLabel;
+
+  /// 평균 강도. 값 없으면 pill 미노출.
+  @override
+  final int? averageIntensity;
+
+  /// 증상 종류별 카운트 (막대 그래프용).
+  final List<SymptomTypeCount> _typeCounts;
+
+  /// 증상 종류별 카운트 (막대 그래프용).
+  @override
+  @JsonKey()
+  List<SymptomTypeCount> get typeCounts {
+    if (_typeCounts is EqualUnmodifiableListView) return _typeCounts;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_typeCounts);
+  }
+
+  /// Create a copy of SymptomReport
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$SymptomReportCopyWith<_SymptomReport> get copyWith =>
+      __$SymptomReportCopyWithImpl<_SymptomReport>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _SymptomReport &&
+            (identical(other.recordedCount, recordedCount) ||
+                other.recordedCount == recordedCount) &&
+            (identical(other.averageTimeLabel, averageTimeLabel) ||
+                other.averageTimeLabel == averageTimeLabel) &&
+            (identical(other.averageIntensity, averageIntensity) ||
+                other.averageIntensity == averageIntensity) &&
+            const DeepCollectionEquality()
+                .equals(other._typeCounts, _typeCounts));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, recordedCount, averageTimeLabel,
+      averageIntensity, const DeepCollectionEquality().hash(_typeCounts));
+
+  @override
+  String toString() {
+    return 'SymptomReport(recordedCount: $recordedCount, averageTimeLabel: $averageTimeLabel, averageIntensity: $averageIntensity, typeCounts: $typeCounts)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$SymptomReportCopyWith<$Res>
+    implements $SymptomReportCopyWith<$Res> {
+  factory _$SymptomReportCopyWith(
+          _SymptomReport value, $Res Function(_SymptomReport) _then) =
+      __$SymptomReportCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {int recordedCount,
+      String? averageTimeLabel,
+      int? averageIntensity,
+      List<SymptomTypeCount> typeCounts});
+}
+
+/// @nodoc
+class __$SymptomReportCopyWithImpl<$Res>
+    implements _$SymptomReportCopyWith<$Res> {
+  __$SymptomReportCopyWithImpl(this._self, this._then);
+
+  final _SymptomReport _self;
+  final $Res Function(_SymptomReport) _then;
+
+  /// Create a copy of SymptomReport
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? recordedCount = null,
+    Object? averageTimeLabel = freezed,
+    Object? averageIntensity = freezed,
+    Object? typeCounts = null,
+  }) {
+    return _then(_SymptomReport(
+      recordedCount: null == recordedCount
+          ? _self.recordedCount
+          : recordedCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      averageTimeLabel: freezed == averageTimeLabel
+          ? _self.averageTimeLabel
+          : averageTimeLabel // ignore: cast_nullable_to_non_nullable
+              as String?,
+      averageIntensity: freezed == averageIntensity
+          ? _self.averageIntensity
+          : averageIntensity // ignore: cast_nullable_to_non_nullable
+              as int?,
+      typeCounts: null == typeCounts
+          ? _self._typeCounts
+          : typeCounts // ignore: cast_nullable_to_non_nullable
+              as List<SymptomTypeCount>,
+    ));
+  }
+}
+
+/// @nodoc
+mixin _$SymptomTypeCount {
+  /// 서버 원문 증상 종류 코드 (예: 'throat_foreign_body').
+  String get type;
+
+  /// 화면 표시 라벨 (예: '이물감').
+  String get label;
+
+  /// 해당 종류 기록 횟수.
+  int get count;
+
+  /// Create a copy of SymptomTypeCount
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $SymptomTypeCountCopyWith<SymptomTypeCount> get copyWith =>
+      _$SymptomTypeCountCopyWithImpl<SymptomTypeCount>(
+          this as SymptomTypeCount, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is SymptomTypeCount &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.label, label) || other.label == label) &&
+            (identical(other.count, count) || other.count == count));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, type, label, count);
+
+  @override
+  String toString() {
+    return 'SymptomTypeCount(type: $type, label: $label, count: $count)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $SymptomTypeCountCopyWith<$Res> {
+  factory $SymptomTypeCountCopyWith(
+          SymptomTypeCount value, $Res Function(SymptomTypeCount) _then) =
+      _$SymptomTypeCountCopyWithImpl;
+  @useResult
+  $Res call({String type, String label, int count});
+}
+
+/// @nodoc
+class _$SymptomTypeCountCopyWithImpl<$Res>
+    implements $SymptomTypeCountCopyWith<$Res> {
+  _$SymptomTypeCountCopyWithImpl(this._self, this._then);
+
+  final SymptomTypeCount _self;
+  final $Res Function(SymptomTypeCount) _then;
+
+  /// Create a copy of SymptomTypeCount
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? type = null,
+    Object? label = null,
+    Object? count = null,
+  }) {
+    return _then(_self.copyWith(
+      type: null == type
+          ? _self.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String,
+      label: null == label
+          ? _self.label
+          : label // ignore: cast_nullable_to_non_nullable
+              as String,
+      count: null == count
+          ? _self.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [SymptomTypeCount].
+extension SymptomTypeCountPatterns on SymptomTypeCount {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_SymptomTypeCount value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _SymptomTypeCount() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_SymptomTypeCount value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _SymptomTypeCount():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_SymptomTypeCount value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _SymptomTypeCount() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(String type, String label, int count)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _SymptomTypeCount() when $default != null:
+        return $default(_that.type, _that.label, _that.count);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(String type, String label, int count) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _SymptomTypeCount():
+        return $default(_that.type, _that.label, _that.count);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(String type, String label, int count)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _SymptomTypeCount() when $default != null:
+        return $default(_that.type, _that.label, _that.count);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _SymptomTypeCount implements SymptomTypeCount {
+  const _SymptomTypeCount(
+      {required this.type, required this.label, required this.count});
+
+  /// 서버 원문 증상 종류 코드 (예: 'throat_foreign_body').
+  @override
+  final String type;
+
+  /// 화면 표시 라벨 (예: '이물감').
+  @override
+  final String label;
+
+  /// 해당 종류 기록 횟수.
+  @override
+  final int count;
+
+  /// Create a copy of SymptomTypeCount
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$SymptomTypeCountCopyWith<_SymptomTypeCount> get copyWith =>
+      __$SymptomTypeCountCopyWithImpl<_SymptomTypeCount>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _SymptomTypeCount &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.label, label) || other.label == label) &&
+            (identical(other.count, count) || other.count == count));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, type, label, count);
+
+  @override
+  String toString() {
+    return 'SymptomTypeCount(type: $type, label: $label, count: $count)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$SymptomTypeCountCopyWith<$Res>
+    implements $SymptomTypeCountCopyWith<$Res> {
+  factory _$SymptomTypeCountCopyWith(
+          _SymptomTypeCount value, $Res Function(_SymptomTypeCount) _then) =
+      __$SymptomTypeCountCopyWithImpl;
+  @override
+  @useResult
+  $Res call({String type, String label, int count});
+}
+
+/// @nodoc
+class __$SymptomTypeCountCopyWithImpl<$Res>
+    implements _$SymptomTypeCountCopyWith<$Res> {
+  __$SymptomTypeCountCopyWithImpl(this._self, this._then);
+
+  final _SymptomTypeCount _self;
+  final $Res Function(_SymptomTypeCount) _then;
+
+  /// Create a copy of SymptomTypeCount
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? type = null,
+    Object? label = null,
+    Object? count = null,
+  }) {
+    return _then(_SymptomTypeCount(
+      type: null == type
+          ? _self.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String,
+      label: null == label
+          ? _self.label
+          : label // ignore: cast_nullable_to_non_nullable
+              as String,
+      count: null == count
+          ? _self.count
+          : count // ignore: cast_nullable_to_non_nullable
               as int,
     ));
   }

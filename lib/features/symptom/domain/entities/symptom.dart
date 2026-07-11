@@ -135,11 +135,12 @@ abstract class Symptom with _$Symptom {
 ///
 /// - create: occurredAt null 허용 (서버가 현재 시각 사용).
 /// - update: 호출자가 occurredAt 비-null 을 보장해야 한다 (서버 계약 필수).
+/// - mealRecordId: null 이면 누락(미전송, 식사 미연결).
 /// - memo: null 이면 누락(미전송).
 class SymptomDraft {
   const SymptomDraft({
     required this.symptomState,
-    required this.mealRecordId,
+    this.mealRecordId,
     this.symptomTypes = const [],
     this.occurredAt,
     this.memo,
@@ -148,8 +149,9 @@ class SymptomDraft {
   /// 증상 5단계 상태 (필수).
   final SymptomState symptomState;
 
-  /// 연결 식사 기록 ID (필수, minLen 1).
-  final String mealRecordId;
+  /// 연결 식사 기록 ID. null 이면 식사 미연결(서버 계약상 nullable) —
+  /// repository 에서 body 키 자체를 누락시켜 전달한다.
+  final String? mealRecordId;
 
   /// 증상 유형 목록 (≤4 unique, 기본 빈 목록).
   final List<SymptomType> symptomTypes;

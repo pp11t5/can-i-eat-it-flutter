@@ -57,4 +57,15 @@ const _seededReport = WeeklyReport(
     cautionCount: 5,
     riskCount: 1,
   ),
+  symptomReport: SymptomReport(
+    recordedCount: 11,
+    averageTimeLabel: '16:30',
+    averageIntensity: 3,
+    typeCounts: [
+      SymptomTypeCount(type: 'throat_foreign_body', label: '이물감', count: 1),
+      SymptomTypeCount(type: 'acid_reflux', label: '신물', count: 4),
+      SymptomTypeCount(type: 'cough', label: '기침', count: 4),
+      SymptomTypeCount(type: 'chest_tightness', label: '답답함', count: 2),
+    ],
+  ),
 );
