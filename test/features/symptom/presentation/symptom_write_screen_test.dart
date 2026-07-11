@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
@@ -270,12 +272,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // 프리필된 원인 식사가 표시된다.
-      expect(find.text('🍽️ 된장찌개'), findsOneWidget);
+      expect(find.text('된장찌개'), findsOneWidget);
 
       // 원인 식사 카드 탭 → meal pick 화면 진입 (스크롤 아래 있어 우선
       // ensureVisible로 뷰포트 안으로 스크롤한 뒤 탭)
       final mealCardFinder = find.ancestor(
-        of: find.text('🍽️ 된장찌개'),
+        of: find.text('된장찌개'),
         matching: find.byType(GestureDetector),
       ).first;
       await tester.ensureVisible(mealCardFinder);
@@ -285,11 +287,12 @@ void main() {
       expect(find.text('원인 식사'), findsOneWidget);
 
       // AppBar 뒤로가기(단순 dismiss) — 아무 것도 선택하지 않고 나감
-      await tester.tap(find.byIcon(Icons.arrow_back_ios_new));
+      await tester.tap(find.byWidgetPredicate(
+          (w) => w is AppIcon && w.asset == AppIcons.chevronLeft));
       await tester.pumpAndSettle();
 
       // 기존 linkedMeal 표시가 그대로 보존되어야 한다.
-      expect(find.text('🍽️ 된장찌개'), findsOneWidget);
+      expect(find.text('된장찌개'), findsOneWidget);
       expect(find.text('최근 음식을 선택해 주세요'), findsNothing);
     });
 
@@ -297,12 +300,12 @@ void main() {
       await tester.pumpWidget(_wrap(existingSymptom: existingWithMeal));
       await tester.pumpAndSettle();
 
-      expect(find.text('🍽️ 된장찌개'), findsOneWidget);
+      expect(find.text('된장찌개'), findsOneWidget);
 
       // 원인 식사 카드 탭 → meal pick 화면 진입 (스크롤 아래 있어 우선
       // ensureVisible로 뷰포트 안으로 스크롤한 뒤 탭)
       final mealCardFinder = find.ancestor(
-        of: find.text('🍽️ 된장찌개'),
+        of: find.text('된장찌개'),
         matching: find.byType(GestureDetector),
       ).first;
       await tester.ensureVisible(mealCardFinder);
@@ -318,7 +321,7 @@ void main() {
 
       // linkedMeal이 해제되어 힌트 텍스트로 돌아간다.
       expect(find.text('최근 음식을 선택해 주세요'), findsOneWidget);
-      expect(find.text('🍽️ 된장찌개'), findsNothing);
+      expect(find.text('된장찌개'), findsNothing);
     });
   });
 }

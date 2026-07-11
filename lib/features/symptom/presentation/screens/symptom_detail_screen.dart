@@ -3,15 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
-import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
 import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/providers/symptom_detail_controller.dart';
+import 'package:can_i_eat_it/features/symptom/presentation/widgets/mood_face.dart';
 
 // ---------------------------------------------------------------------------
 // 요일 라벨
@@ -60,25 +64,6 @@ class SymptomDetailScreen extends ConsumerWidget {
       return isoString;
     }
   }
-
-  // -------------------------------------------------------------------------
-  // SymptomState 이모지 / 색상
-  // -------------------------------------------------------------------------
-
-  static String _stateEmoji(SymptomState state) => switch (state) {
-        SymptomState.comfortable => '😊',
-        SymptomState.good => '🙂',
-        SymptomState.normal => '😐',
-        SymptomState.uncomfortable => '😕',
-        SymptomState.severe => '😣',
-      };
-
-  static Color _stateColor(SymptomState state) => switch (state) {
-        SymptomState.comfortable || SymptomState.good => AppColors.primary,
-        SymptomState.normal => AppColors.textSecondary,
-        SymptomState.uncomfortable => const Color(0xFFFF8C00),
-        SymptomState.severe => AppColors.danger,
-      };
 
   // -------------------------------------------------------------------------
   // 삭제
@@ -144,8 +129,6 @@ class SymptomDetailScreen extends ConsumerWidget {
                 data: (symptom) => _Body(
                   symptom: symptom,
                   afterMealMinutes: afterMealMinutes,
-                  stateEmoji: _stateEmoji(symptom.symptomState),
-                  stateColor: _stateColor(symptom.symptomState),
                   occurredAtLabel: _formatOccurredAt(symptom.occurredAt),
                   displayName: displayName,
                 ),
@@ -178,6 +161,7 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
+      width: double.infinity,
       height: 56,
       child: Stack(
         alignment: Alignment.center,
@@ -185,8 +169,12 @@ class _TopBar extends StatelessWidget {
           Positioned(
             left: AppSpacing.xs,
             child: IconButton(
-              icon: const Icon(Icons.close),
-              color: AppColors.textPrimary,
+              icon: const AppIcon(
+                AppIcons.close,
+                size: AppIconSizes.s24,
+                color: AppColors.textPrimary,
+                semanticsLabel: '닫기',
+              ),
               onPressed: onClose,
             ),
           ),
@@ -210,16 +198,12 @@ class _Body extends StatelessWidget {
   const _Body({
     required this.symptom,
     required this.afterMealMinutes,
-    required this.stateEmoji,
-    required this.stateColor,
     required this.occurredAtLabel,
     required this.displayName,
   });
 
   final Symptom symptom;
   final int? afterMealMinutes;
-  final String stateEmoji;
-  final Color stateColor;
   final String occurredAtLabel;
   final String displayName;
 
@@ -245,23 +229,6 @@ class _Body extends StatelessWidget {
     return '$first 외 ${meal.foods.length - 1}개';
   }
 
-  /// category → 이모지 (기본 🍽️).
-  String _categoryEmoji(String? category) {
-    if (category == null) return '🍽️';
-    return switch (category) {
-      '한식' => '🍲',
-      '중식' => '🥢',
-      '일식' => '🍣',
-      '양식' => '🍝',
-      '패스트푸드' => '🍔',
-      '음료' => '☕',
-      '간식' => '🍪',
-      '과일' => '🍎',
-      '채소' => '🥦',
-      _ => '🍽️',
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final afterMeal = afterMealMinutes;
@@ -285,14 +252,7 @@ class _Body extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                stateEmoji,
-                style: TextStyle(
-                  fontSize: 32,
-                  color: stateColor,
-                  height: 1.1,
-                ),
-              ),
+              MoodFace(state: symptom.symptomState, size: 40),
               const SizedBox(width: AppSpacing.itemGap),
               Expanded(
                 child: Column(
@@ -331,13 +291,10 @@ class _Body extends StatelessWidget {
           const SizedBox(height: AppSpacing.itemGap),
           if (symptom.linkedMeal != null)
             _MealCard(
-              meal: symptom.linkedMeal!,
               foodsLabel: _foodsLabel(symptom.linkedMeal!),
-              categoryEmoji: _categoryEmoji(
-                symptom.linkedMeal!.foods.isNotEmpty
-                    ? symptom.linkedMeal!.foods.first.category
-                    : null,
-              ),
+              categoryCode: symptom.linkedMeal!.foods.isNotEmpty
+                  ? symptom.linkedMeal!.foods.first.category
+                  : null,
             )
           else
             const _NoMealRow(),
@@ -376,14 +333,14 @@ class _Body extends StatelessWidget {
 
 class _MealCard extends StatelessWidget {
   const _MealCard({
-    required this.meal,
     required this.foodsLabel,
-    required this.categoryEmoji,
+    required this.categoryCode,
   });
 
-  final SymptomLinkedMeal meal;
   final String foodsLabel;
-  final String categoryEmoji;
+
+  /// 서버 음식 카테고리 코드. null/미매핑 → CategoryIcon regular 폴백.
+  final String? categoryCode;
 
   @override
   Widget build(BuildContext context) {
@@ -396,7 +353,7 @@ class _MealCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(categoryEmoji, style: const TextStyle(fontSize: 20)),
+          CategoryIcon(code: categoryCode, size: 32),
           const SizedBox(width: AppSpacing.itemGap),
           Expanded(
             child: Text(

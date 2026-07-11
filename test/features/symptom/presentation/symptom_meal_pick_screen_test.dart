@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/repositories/meal_repository.dart';
@@ -136,7 +138,11 @@ void main() {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
       // radio_button_checked 아이콘이 1개 존재 ("선택 안 할래요")
-      expect(find.byIcon(Icons.radio_button_checked), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+            (w) => w is AppIcon && w.asset == AppIcons.plusCircle),
+        findsOneWidget,
+      );
     });
 
     testWidgets('식사 카드 탭 시 해당 카드 선택됨', (tester) async {
@@ -145,7 +151,11 @@ void main() {
       await tester.tap(find.text('된장찌개'));
       await tester.pumpAndSettle();
       // 된장찌개 선택 후 radio_button_checked가 된장찌개 카드에 있음
-      expect(find.byIcon(Icons.radio_button_checked), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+            (w) => w is AppIcon && w.asset == AppIcons.plusCircle),
+        findsOneWidget,
+      );
     });
 
     testWidgets('"선택 안 할래요" 탭 시 다른 선택 해제', (tester) async {
@@ -158,15 +168,22 @@ void main() {
       await tester.tap(find.text('선택 안 할래요'));
       await tester.pumpAndSettle();
       // "선택 안 할래요"만 선택됨
-      expect(find.byIcon(Icons.radio_button_checked), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+            (w) => w is AppIcon && w.asset == AppIcons.plusCircle),
+        findsOneWidget,
+      );
     });
 
     testWidgets('initialMealRecordId 주입 시 해당 식사 프리선택', (tester) async {
       await tester.pumpWidget(_wrap(initialMealRecordId: 'mr-1'));
       await tester.pumpAndSettle();
-      // mr-1(된장찌개)이 선택됨 — radio_button_checked 1개
-      expect(find.byIcon(Icons.radio_button_checked), findsOneWidget);
-      expect(find.byIcon(Icons.radio_button_unchecked), findsWidgets);
+      // mr-1(된장찌개)이 선택됨 — plus_circle 인디케이터 1개
+      expect(
+        find.byWidgetPredicate(
+            (w) => w is AppIcon && w.asset == AppIcons.plusCircle),
+        findsOneWidget,
+      );
     });
   });
 
@@ -258,7 +275,8 @@ void main() {
       expect(find.text('원인 식사'), findsOneWidget);
 
       // AppBar 뒤로가기 아이콘 탭 (선택 상태 변경 없이 dismiss)
-      await tester.tap(find.byIcon(Icons.arrow_back_ios_new));
+      await tester.tap(find.byWidgetPredicate(
+          (w) => w is AppIcon && w.asset == AppIcons.chevronLeft));
       await tester.pumpAndSettle();
 
       expect(result, isNull);
