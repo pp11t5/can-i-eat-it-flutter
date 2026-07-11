@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
@@ -167,8 +170,12 @@ class _SymptomTimePickScreenState extends State<SymptomTimePickScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary, size: 20),
+          icon: const AppIcon(
+            AppIcons.chevronLeft,
+            size: AppIconSizes.s24,
+            color: AppColors.textPrimary,
+            semanticsLabel: '뒤로',
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(

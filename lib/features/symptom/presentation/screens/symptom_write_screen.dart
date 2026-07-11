@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
@@ -12,6 +16,7 @@ import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/providers/symptom_write_controller.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_meal_pick_screen.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_time_pick_screen.dart';
+import 'package:can_i_eat_it/features/symptom/presentation/widgets/mood_face.dart';
 
 // ---------------------------------------------------------------------------
 // 화면 전용 mood 라벨 (symptom_state.dart의 label은 변경 금지)
@@ -25,7 +30,6 @@ const _moodOrder = [
   SymptomState.uncomfortable,
   SymptomState.severe,
 ];
-const _moodEmojis = ['😊', '🙂', '😐', '😕', '😣'];
 
 // ---------------------------------------------------------------------------
 // 증상 칩 정의
@@ -283,7 +287,12 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: AppColors.textPrimary),
+          icon: const AppIcon(
+            AppIcons.close,
+            size: AppIconSizes.s24,
+            color: AppColors.textPrimary,
+            semanticsLabel: '닫기',
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -350,7 +359,9 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
                                 .copyWith(color: AppColors.textPrimary),
                           ),
                         ),
-                        const Text('🕐', style: TextStyle(fontSize: 20)),
+                        // Figma: 시간 카드 우측 정적 장식(무드 얼굴 에셋). 시계 아님.
+                        Image.asset(AppImages.moodComfortable,
+                            width: 24, height: 24),
                       ],
                     ),
                   ),
@@ -363,11 +374,16 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
                     onTap: _onMealTap,
                     child: Row(
                       children: [
+                        if (_formState.linkedMealId != null) ...[
+                          // 카테고리 코드 미보유 → regular 폴백. 데이터 확장 시 코드 전달.
+                          const CategoryIcon(code: null, size: 32),
+                          const SizedBox(width: AppSpacing.itemGap),
+                        ],
                         Expanded(
                           child: Text(
                             _formState.linkedMealId == null
                                 ? '최근 음식을 선택해 주세요'
-                                : '🍽️ ${_formState.linkedMealDisplayName ?? '식사 선택됨'}',
+                                : (_formState.linkedMealDisplayName ?? '식사 선택됨'),
                             style: AppTextStyles.body2Medium.copyWith(
                               color: _formState.linkedMealId == null
                                   ? AppColors.textTertiary
@@ -375,7 +391,9 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
                             ),
                           ),
                         ),
-                        const Text('🔗', style: TextStyle(fontSize: 20)),
+                        // Figma: 식사 카드 우측 정적 장식(무드 얼굴 에셋). 링크 아님.
+                        Image.asset(AppImages.moodComfortable,
+                            width: 24, height: 24),
                       ],
                     ),
                   ),
@@ -522,75 +540,67 @@ class _MoodSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(_moodOrder.length, (i) {
-        final mood = _moodOrder[i];
-        final isSelected = selected == mood;
-        final isLast = i == _moodOrder.length - 1;
-
-        return Expanded(
-          child: Row(
+    const circle = 40.0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // 원 행 + 뒤 연결선
+        SizedBox(
+          height: circle,
+          child: Stack(
+            alignment: Alignment.center,
             children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    // 원 (선택: 초록 채움 + 이모지, 미선택: 회색 테두리)
-                    GestureDetector(
-                      onTap: () => onTap(mood),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isSelected
-                              ? AppColors.primary
-                              : AppColors.surfaceMuted,
-                          border: isSelected
-                              ? null
-                              : Border.all(
-                                  color: AppColors.border, width: 1.5),
-                        ),
-                        child: Center(
-                          child: isSelected
-                              ? Text(
-                                  _moodEmojis[i],
-                                  style: const TextStyle(fontSize: 22),
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    // 라벨
-                    Text(
-                      _moodLabels[i],
-                      style: AppTextStyles.caption1Medium.copyWith(
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+              // 첫~마지막 원 중심을 잇는 연결선 (원 뒤)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: circle / 2),
+                child: Container(height: 1, color: AppColors.border),
               ),
-              // 연결선 (마지막 원 다음에는 선 없음)
-              if (!isLast)
-                Expanded(
-                  child: Container(
-                    height: 1.5,
-                    margin: const EdgeInsets.only(
-                      bottom: AppSpacing.sectionGap,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: List.generate(_moodOrder.length, (i) {
+                  final mood = _moodOrder[i];
+                  final isSelected = selected == mood;
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => onTap(mood),
+                    child: SizedBox(
+                      width: circle,
+                      height: circle,
+                      // 선택: Figma 무드 얼굴 에셋 / 미선택: 빈 테두리 원
+                      child: isSelected
+                          ? MoodFace(state: mood, size: circle)
+                          : Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.surface,
+                                border: Border.all(
+                                    color: AppColors.border, width: 1),
+                              ),
+                            ),
                     ),
-                    color: AppColors.border,
-                  ),
-                ),
+                  );
+                }),
+              ),
             ],
           ),
-        );
-      }),
+        ),
+        const SizedBox(height: AppSpacing.itemGap),
+        // 라벨 행 (Figma: 전부 gray/50)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(_moodOrder.length, (i) {
+            return SizedBox(
+              width: circle,
+              child: Text(
+                _moodLabels[i],
+                textAlign: TextAlign.center,
+                style: AppTextStyles.body2Medium
+                    .copyWith(color: AppColors.textSecondary),
+              ),
+            );
+          }),
+        ),
+      ],
     );
   }
 }

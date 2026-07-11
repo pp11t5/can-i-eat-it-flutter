@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
+import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
@@ -110,34 +114,6 @@ class _SymptomMealPickScreenState
     return meal.representativeFoodName;
   }
 
-  String _categoryEmoji(String? category) {
-    if (category == null) return '🍽️';
-    switch (category.toLowerCase()) {
-      case 'korean':
-        return '🍚';
-      case 'japanese':
-        return '🍣';
-      case 'chinese':
-        return '🥢';
-      case 'western':
-        return '🍝';
-      case 'fastfood':
-        return '🍔';
-      case 'snack':
-        return '🍿';
-      case 'drink':
-        return '🥤';
-      case 'dessert':
-        return '🍰';
-      case 'fruit':
-        return '🍎';
-      case 'vegetable':
-        return '🥦';
-      default:
-        return '🍽️';
-    }
-  }
-
   void _onConfirm(List<MealCandidatesDay> allDays) {
     if (_selectedMealRecordId == null) {
       // "선택 안 할래요" 명시적 해제 — bare null(dismiss)과 구분되는 전용 신호.
@@ -176,8 +152,12 @@ class _SymptomMealPickScreenState
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary, size: 20),
+          icon: const AppIcon(
+            AppIcons.chevronLeft,
+            size: AppIconSizes.s24,
+            color: AppColors.textPrimary,
+            semanticsLabel: '뒤로',
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -224,9 +204,9 @@ class _SymptomMealPickScreenState
                     ),
                     const SizedBox(height: AppSpacing.sectionGap),
 
-                    // "선택 안 할래요" 카드
+                    // "선택 안 할래요" 카드 (Figma: leading 아이콘 없음)
                     _MealOptionCard(
-                      leading: const Text('🤷', style: TextStyle(fontSize: 24)),
+                      leading: null,
                       title: '선택 안 할래요',
                       subtitle: '모르겠어요, 식사와 상관없어요',
                       selected: _selectedMealRecordId == null,
@@ -255,9 +235,9 @@ class _SymptomMealPickScreenState
                               padding: const EdgeInsets.only(
                                   bottom: AppSpacing.itemGap),
                               child: _MealOptionCard(
-                                leading: Text(
-                                  _categoryEmoji(meal.representativeFoodCategory),
-                                  style: const TextStyle(fontSize: 24),
+                                leading: CategoryIcon(
+                                  code: meal.representativeFoodCategory,
+                                  size: 32,
                                 ),
                                 title: _mealDisplayName(meal),
                                 subtitle: _formatEatenAt(meal.eatenAt),
@@ -335,7 +315,8 @@ class _MealOptionCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final Widget leading;
+  /// 좌측 아이콘. null 이면 생략(예: "선택 안 할래요" 카드).
+  final Widget? leading;
   final String title;
   final String subtitle;
   final bool selected;
@@ -358,8 +339,10 @@ class _MealOptionCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            leading,
-            const SizedBox(width: AppSpacing.itemGap),
+            if (leading != null) ...[
+              leading!,
+              const SizedBox(width: AppSpacing.itemGap),
+            ],
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -382,13 +365,22 @@ class _MealOptionCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.itemGap),
-            Icon(
-              selected
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-              color: selected ? AppColors.primary : AppColors.border,
-              size: 20,
-            ),
+            // 선택: Figma 녹색 plus_circle / 미선택: 빈 테두리 원
+            if (selected)
+              const AppIcon(
+                AppIcons.plusCircle,
+                size: AppIconSizes.s24,
+                semanticsLabel: '선택됨',
+              )
+            else
+              Container(
+                width: AppIconSizes.s24,
+                height: AppIconSizes.s24,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.border, width: 1.5),
+                ),
+              ),
           ],
         ),
       ),

@@ -54,4 +54,13 @@ abstract final class AppImages {
   static const String fire = '$_illust/icon_fire.png';
   static const String characterGreeting = '$_illust/character_greeting.png';
   static const String mealPrompt = '$_illust/emoji_meal_prompt.png';
+
+  // --- 무드 얼굴 (증상 상태 5단계, Figma "emoji" 세트 래스터) ---
+  // SymptomState comfortable/good/normal/uncomfortable/severe = 레벨 1~5.
+  // 렌더는 `MoodFace` 위젯 경유.
+  static const String moodComfortable = '$_illust/mood_comfortable.png';
+  static const String moodGood = '$_illust/mood_good.png';
+  static const String moodNormal = '$_illust/mood_normal.png';
+  static const String moodUncomfortable = '$_illust/mood_uncomfortable.png';
+  static const String moodSevere = '$_illust/mood_severe.png';
 }
