@@ -13,14 +13,28 @@ import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dar
 // ---------------------------------------------------------------------------
 
 /// 원인 식사 선택 결과.
+///
+/// - 식사 선택: [mealRecordId]/[displayName] non-null, [cleared]=false.
+/// - "선택 안 할래요"(명시적 해제): [MealPickResult.cleared] 사용, [cleared]=true.
+/// - 단순 dismiss(AppBar/시스템 뒤로가기): pop 값 자체가 bare null이며 이
+///   클래스의 인스턴스가 아니다. 호출부에서 null과 [cleared]를 구분해야 한다.
 class MealPickResult {
   const MealPickResult({
     required this.mealRecordId,
     required this.displayName,
-  });
+  }) : cleared = false;
 
-  final String mealRecordId;
-  final String displayName;
+  /// "선택 안 할래요" 탭 → 명시적 해제 신호.
+  const MealPickResult.cleared()
+      : mealRecordId = null,
+        displayName = null,
+        cleared = true;
+
+  final String? mealRecordId;
+  final String? displayName;
+
+  /// true면 사용자가 "선택 안 할래요"를 명시적으로 선택함(linkedMeal 해제 의도).
+  final bool cleared;
 }
 
 // ---------------------------------------------------------------------------
@@ -126,7 +140,8 @@ class _SymptomMealPickScreenState
 
   void _onConfirm(List<MealCandidatesDay> allDays) {
     if (_selectedMealRecordId == null) {
-      Navigator.of(context).pop(null);
+      // "선택 안 할래요" 명시적 해제 — bare null(dismiss)과 구분되는 전용 신호.
+      Navigator.of(context).pop(const MealPickResult.cleared());
       return;
     }
     // 선택된 식사를 찾아 displayName 계산
@@ -143,7 +158,8 @@ class _SymptomMealPickScreenState
         }
       }
     }
-    Navigator.of(context).pop(null);
+    // 데이터 불일치로 선택된 식사를 찾지 못한 방어적 fallback — 해제로 처리.
+    Navigator.of(context).pop(const MealPickResult.cleared());
   }
 
   @override

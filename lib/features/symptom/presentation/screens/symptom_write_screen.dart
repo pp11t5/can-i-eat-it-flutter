@@ -205,19 +205,23 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
         ),
       ),
     );
-    if (result != null) {
-      setState(() {
-        _formState = _formState.copyWith(
-          linkedMealId: result.mealRecordId,
-          linkedMealDisplayName: result.displayName,
-        );
-      });
-    } else if (result == null) {
-      // "선택 안 할래요" 결과
+    if (result == null) {
+      // 단순 dismiss(AppBar/시스템 뒤로가기) — 변경 없음, 기존 linkedMeal 보존
+      return;
+    }
+    if (result.cleared) {
+      // "선택 안 할래요" 명시적 해제
       setState(() {
         _formState = _formState.copyWith(clearLinkedMeal: true);
       });
+      return;
     }
+    setState(() {
+      _formState = _formState.copyWith(
+        linkedMealId: result.mealRecordId,
+        linkedMealDisplayName: result.displayName,
+      );
+    });
   }
 
   Future<void> _onSave() async {

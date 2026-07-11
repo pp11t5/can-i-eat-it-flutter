@@ -171,8 +171,9 @@ void main() {
   });
 
   group('SymptomMealPickScreen — 확인 결과 반환', () {
-    testWidgets('"선택 안 할래요" 선택 후 "확인" → null 반환', (tester) async {
-      Object? result = 'sentinel';
+    testWidgets('"선택 안 할래요" 선택 후 "확인" → cleared 신호 반환(bare null 아님)',
+        (tester) async {
+      MealPickResult? result;
 
       await tester.pumpWidget(
         ProviderScope(
@@ -209,6 +210,55 @@ void main() {
 
       // "선택 안 할래요"는 기본 선택 상태
       await tester.tap(find.text('확인'));
+      await tester.pumpAndSettle();
+
+      // bare null(단순 dismiss)이 아니라 명시적 cleared 신호여야 한다.
+      expect(result, isNotNull);
+      expect(result!.cleared, isTrue);
+      expect(result!.mealRecordId, isNull);
+    });
+
+    testWidgets('AppBar 뒤로가기(단순 dismiss) → bare null 반환', (tester) async {
+      MealPickResult? result = const MealPickResult(
+        mealRecordId: 'sentinel',
+        displayName: 'sentinel',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            // ignore: scoped_providers_should_specify_dependencies
+            mealRepositoryProvider
+                .overrideWithValue(_MockMealRepository()),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: ElevatedButton(
+                  onPressed: () async {
+                    result = await Navigator.of(context)
+                        .push<MealPickResult?>(
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const SymptomMealPickScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text('열기'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('열기'));
+      await tester.pumpAndSettle();
+      expect(find.text('원인 식사'), findsOneWidget);
+
+      // AppBar 뒤로가기 아이콘 탭 (선택 상태 변경 없이 dismiss)
+      await tester.tap(find.byIcon(Icons.arrow_back_ios_new));
       await tester.pumpAndSettle();
 
       expect(result, isNull);

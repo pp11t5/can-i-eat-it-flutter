@@ -13,12 +13,14 @@ import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 /// onTap: () => openExternalUrl(context, TermsCatalog.tosUrl),
 /// ```
 Future<void> openExternalUrl(BuildContext context, String url) async {
-  final uri = Uri.parse(url);
+  final uri = Uri.tryParse(url);
   var success = false;
-  try {
-    success = await launchUrl(uri, mode: LaunchMode.externalApplication);
-  } catch (_) {
-    success = false;
+  if (uri != null) {
+    try {
+      success = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      success = false;
+    }
   }
 
   if (!success && context.mounted) {

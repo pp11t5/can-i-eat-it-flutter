@@ -43,5 +43,12 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Android 11+ 패키지 가시성: 외부 브라우저로 https 링크를 열기 위해
+             필요 (url_launcher의 launchUrl 호출이 이 쿼리 없이는 활동을
+             찾지 못할 수 있음). -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
     </queries>
 </manifest>

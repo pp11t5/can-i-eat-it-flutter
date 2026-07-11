@@ -396,4 +396,109 @@ void main() {
       expect(capturedBody!['occurredAt'], '2026-06-17T14:30:00+09:00');
     });
   });
+
+  // -------------------------------------------------------------------------
+  // create/update — 요청 바디 mealRecordId null/비null 검증
+  // (mealRecordId=null → 서버가 "식사 미연결"로 해석하려면 body 에서 키 자체가
+  //  누락돼야 한다. DTO.toJson() 만으로는 검증되지 않고 impl의
+  //  removeWhere((_,v)=>v==null) 가 실제로 적용된 최종 전송 body 를 봐야 하므로
+  //  update의 occurredAt 캡처 테스트와 동일하게 replyCallback으로 확인한다.)
+  // -------------------------------------------------------------------------
+  group('create — 요청 바디 mealRecordId null/비null', () {
+    test('mealRecordId null 이면 POST 바디에 키가 없다', () async {
+      Map<String, dynamic>? capturedBody;
+      adapter.onPost(
+        ApiEndpoints.symptoms,
+        (server) => server.replyCallback(
+          200,
+          (requestOptions) {
+            capturedBody = requestOptions.data as Map<String, dynamic>?;
+            return _envelope(_symptomResponseJson());
+          },
+        ),
+      );
+      await repo.create(const SymptomDraft(
+        symptomState: SymptomState.uncomfortable,
+      ));
+      expect(capturedBody, isNotNull);
+      expect(capturedBody!.containsKey('mealRecordId'), isFalse,
+          reason: 'mealRecordId null 이면 서버가 식사 미연결로 해석하도록 키가 없어야 한다');
+    });
+
+    test('mealRecordId 있으면 POST 바디에 키가 존재하고 값이 보존된다', () async {
+      Map<String, dynamic>? capturedBody;
+      adapter.onPost(
+        ApiEndpoints.symptoms,
+        (server) => server.replyCallback(
+          200,
+          (requestOptions) {
+            capturedBody = requestOptions.data as Map<String, dynamic>?;
+            return _envelope(_symptomResponseJson());
+          },
+        ),
+      );
+      await repo.create(const SymptomDraft(
+        symptomState: SymptomState.uncomfortable,
+        mealRecordId: 'record-001',
+      ));
+      expect(capturedBody, isNotNull);
+      expect(capturedBody!.containsKey('mealRecordId'), isTrue);
+      expect(capturedBody!['mealRecordId'], 'record-001');
+    });
+  });
+
+  group('update — 요청 바디 mealRecordId null/비null', () {
+    test('mealRecordId null 이면 PUT 바디에 키가 없다 (occurredAt은 유지된다)', () async {
+      Map<String, dynamic>? capturedBody;
+      adapter.onPut(
+        ApiEndpoints.symptomItem('sym-meal-null'),
+        (server) => server.replyCallback(
+          200,
+          (requestOptions) {
+            capturedBody = requestOptions.data as Map<String, dynamic>?;
+            return _envelope(null);
+          },
+        ),
+      );
+      await repo.update(
+        'sym-meal-null',
+        SymptomDraft(
+          symptomState: SymptomState.uncomfortable,
+          occurredAt: DateTime(2026, 6, 17, 14, 30, 0),
+        ),
+      );
+      expect(capturedBody, isNotNull);
+      expect(capturedBody!.containsKey('mealRecordId'), isFalse,
+          reason: 'mealRecordId null 이면 서버가 식사 미연결로 해석하도록 키가 없어야 한다');
+      // 회귀 방지: mealRecordId 누락 처리가 occurredAt까지 함께 지우면 안 된다.
+      expect(capturedBody!.containsKey('occurredAt'), isTrue,
+          reason: 'update 바디에서 occurredAt은 mealRecordId 유무와 무관하게 항상 필수');
+      expect(capturedBody!['occurredAt'], '2026-06-17T14:30:00+09:00');
+    });
+
+    test('mealRecordId 있으면 PUT 바디에 키가 존재하고 값이 보존된다', () async {
+      Map<String, dynamic>? capturedBody;
+      adapter.onPut(
+        ApiEndpoints.symptomItem('sym-meal-present'),
+        (server) => server.replyCallback(
+          200,
+          (requestOptions) {
+            capturedBody = requestOptions.data as Map<String, dynamic>?;
+            return _envelope(null);
+          },
+        ),
+      );
+      await repo.update(
+        'sym-meal-present',
+        SymptomDraft(
+          symptomState: SymptomState.uncomfortable,
+          mealRecordId: 'record-777',
+          occurredAt: DateTime(2026, 6, 17, 14, 30, 0),
+        ),
+      );
+      expect(capturedBody, isNotNull);
+      expect(capturedBody!.containsKey('mealRecordId'), isTrue);
+      expect(capturedBody!['mealRecordId'], 'record-777');
+    });
+  });
 }

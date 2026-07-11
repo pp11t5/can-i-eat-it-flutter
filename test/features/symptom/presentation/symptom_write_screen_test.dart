@@ -251,4 +251,74 @@ void main() {
       expect(find.text('증상 기록 작성'), findsOneWidget);
     });
   });
+
+  group('SymptomWriteScreen — 원인 식사 수정(edit 모드 회귀)', () {
+    const existingWithMeal = Symptom(
+      symptomId: 'sym-2',
+      symptomState: SymptomState.normal,
+      stateTitle: '보통',
+      occurredAt: '2026-06-25T10:00:00+09:00',
+      linkedMeal: SymptomLinkedMeal(
+        mealRecordId: 'mr-1',
+        foods: [SymptomLinkedFood(mealFoodId: 'mf-1', name: '된장찌개')],
+      ),
+    );
+
+    testWidgets('meal pick 열고 AppBar 뒤로가기(dismiss) → 기존 linkedMeal 보존',
+        (tester) async {
+      await tester.pumpWidget(_wrap(existingSymptom: existingWithMeal));
+      await tester.pumpAndSettle();
+
+      // 프리필된 원인 식사가 표시된다.
+      expect(find.text('🍽️ 된장찌개'), findsOneWidget);
+
+      // 원인 식사 카드 탭 → meal pick 화면 진입 (스크롤 아래 있어 우선
+      // ensureVisible로 뷰포트 안으로 스크롤한 뒤 탭)
+      final mealCardFinder = find.ancestor(
+        of: find.text('🍽️ 된장찌개'),
+        matching: find.byType(GestureDetector),
+      ).first;
+      await tester.ensureVisible(mealCardFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(mealCardFinder);
+      await tester.pumpAndSettle();
+      expect(find.text('원인 식사'), findsOneWidget);
+
+      // AppBar 뒤로가기(단순 dismiss) — 아무 것도 선택하지 않고 나감
+      await tester.tap(find.byIcon(Icons.arrow_back_ios_new));
+      await tester.pumpAndSettle();
+
+      // 기존 linkedMeal 표시가 그대로 보존되어야 한다.
+      expect(find.text('🍽️ 된장찌개'), findsOneWidget);
+      expect(find.text('최근 음식을 선택해 주세요'), findsNothing);
+    });
+
+    testWidgets('meal pick 열고 "선택 안 할래요" 확정 → linkedMeal 해제', (tester) async {
+      await tester.pumpWidget(_wrap(existingSymptom: existingWithMeal));
+      await tester.pumpAndSettle();
+
+      expect(find.text('🍽️ 된장찌개'), findsOneWidget);
+
+      // 원인 식사 카드 탭 → meal pick 화면 진입 (스크롤 아래 있어 우선
+      // ensureVisible로 뷰포트 안으로 스크롤한 뒤 탭)
+      final mealCardFinder = find.ancestor(
+        of: find.text('🍽️ 된장찌개'),
+        matching: find.byType(GestureDetector),
+      ).first;
+      await tester.ensureVisible(mealCardFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(mealCardFinder);
+      await tester.pumpAndSettle();
+
+      // "선택 안 할래요" 선택 후 확인
+      await tester.tap(find.text('선택 안 할래요'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('확인'));
+      await tester.pumpAndSettle();
+
+      // linkedMeal이 해제되어 힌트 텍스트로 돌아간다.
+      expect(find.text('최근 음식을 선택해 주세요'), findsOneWidget);
+      expect(find.text('🍽️ 된장찌개'), findsNothing);
+    });
+  });
 }
