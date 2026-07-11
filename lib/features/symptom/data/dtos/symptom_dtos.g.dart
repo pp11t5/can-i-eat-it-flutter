@@ -108,7 +108,7 @@ _SymptomCreateRequestDto _$SymptomCreateRequestDtoFromJson(
               .toList() ??
           const <String>[],
       occurredAt: json['occurredAt'] as String?,
-      mealRecordId: json['mealRecordId'] as String,
+      mealRecordId: json['mealRecordId'] as String?,
       memo: json['memo'] as String?,
     );
 
@@ -131,7 +131,7 @@ _SymptomUpdateRequestDto _$SymptomUpdateRequestDtoFromJson(
               .toList() ??
           const <String>[],
       occurredAt: json['occurredAt'] as String,
-      mealRecordId: json['mealRecordId'] as String,
+      mealRecordId: json['mealRecordId'] as String?,
       memo: json['memo'] as String?,
     );
 

@@ -90,9 +90,10 @@ class SymptomWriteController extends _$SymptomWriteController {
 
     final draft = SymptomDraft(
       symptomState: formState.mood!,
-      // TODO(contract): mealRecordId 필수(minLen1) vs "선택 안 할래요" 미연결 — 서버 계약 확인 필요.
-      // 현재 linkedMealId null 시 빈 문자열로 대체 (저장 버튼 비활성화로 사전 차단).
-      mealRecordId: formState.linkedMealId ?? '',
+      // mealRecordId nullable (서버 계약 확정): linkedMealId 미선택("선택 안
+      // 할래요")이면 그대로 null 전달 → repository 가 body 키를 누락시켜 서버가
+      // 식사 미연결로 해석한다.
+      mealRecordId: formState.linkedMealId,
       symptomTypes: formState.symptomTypes,
       occurredAt: formState.occurredAt,
       memo: formState.memo.trim().isEmpty ? null : formState.memo.trim(),

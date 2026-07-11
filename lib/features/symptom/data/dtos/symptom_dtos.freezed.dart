@@ -1879,7 +1879,7 @@ mixin _$SymptomCreateRequestDto {
   String get symptomState;
   List<String> get symptomTypes;
   String? get occurredAt;
-  String get mealRecordId;
+  String? get mealRecordId;
   String? get memo;
 
   /// Create a copy of SymptomCreateRequestDto
@@ -1935,7 +1935,7 @@ abstract mixin class $SymptomCreateRequestDtoCopyWith<$Res> {
       {String symptomState,
       List<String> symptomTypes,
       String? occurredAt,
-      String mealRecordId,
+      String? mealRecordId,
       String? memo});
 }
 
@@ -1955,7 +1955,7 @@ class _$SymptomCreateRequestDtoCopyWithImpl<$Res>
     Object? symptomState = null,
     Object? symptomTypes = null,
     Object? occurredAt = freezed,
-    Object? mealRecordId = null,
+    Object? mealRecordId = freezed,
     Object? memo = freezed,
   }) {
     return _then(_self.copyWith(
@@ -1971,10 +1971,10 @@ class _$SymptomCreateRequestDtoCopyWithImpl<$Res>
           ? _self.occurredAt
           : occurredAt // ignore: cast_nullable_to_non_nullable
               as String?,
-      mealRecordId: null == mealRecordId
+      mealRecordId: freezed == mealRecordId
           ? _self.mealRecordId
           : mealRecordId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       memo: freezed == memo
           ? _self.memo
           : memo // ignore: cast_nullable_to_non_nullable
@@ -2077,7 +2077,7 @@ extension SymptomCreateRequestDtoPatterns on SymptomCreateRequestDto {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(String symptomState, List<String> symptomTypes,
-            String? occurredAt, String mealRecordId, String? memo)?
+            String? occurredAt, String? mealRecordId, String? memo)?
         $default, {
     required TResult orElse(),
   }) {
@@ -2107,7 +2107,7 @@ extension SymptomCreateRequestDtoPatterns on SymptomCreateRequestDto {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(String symptomState, List<String> symptomTypes,
-            String? occurredAt, String mealRecordId, String? memo)
+            String? occurredAt, String? mealRecordId, String? memo)
         $default,
   ) {
     final _that = this;
@@ -2135,7 +2135,7 @@ extension SymptomCreateRequestDtoPatterns on SymptomCreateRequestDto {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(String symptomState, List<String> symptomTypes,
-            String? occurredAt, String mealRecordId, String? memo)?
+            String? occurredAt, String? mealRecordId, String? memo)?
         $default,
   ) {
     final _that = this;
@@ -2156,7 +2156,7 @@ class _SymptomCreateRequestDto implements SymptomCreateRequestDto {
       {required this.symptomState,
       final List<String> symptomTypes = const <String>[],
       this.occurredAt,
-      required this.mealRecordId,
+      this.mealRecordId,
       this.memo})
       : _symptomTypes = symptomTypes;
   factory _SymptomCreateRequestDto.fromJson(Map<String, dynamic> json) =>
@@ -2176,7 +2176,7 @@ class _SymptomCreateRequestDto implements SymptomCreateRequestDto {
   @override
   final String? occurredAt;
   @override
-  final String mealRecordId;
+  final String? mealRecordId;
   @override
   final String? memo;
 
@@ -2240,7 +2240,7 @@ abstract mixin class _$SymptomCreateRequestDtoCopyWith<$Res>
       {String symptomState,
       List<String> symptomTypes,
       String? occurredAt,
-      String mealRecordId,
+      String? mealRecordId,
       String? memo});
 }
 
@@ -2260,7 +2260,7 @@ class __$SymptomCreateRequestDtoCopyWithImpl<$Res>
     Object? symptomState = null,
     Object? symptomTypes = null,
     Object? occurredAt = freezed,
-    Object? mealRecordId = null,
+    Object? mealRecordId = freezed,
     Object? memo = freezed,
   }) {
     return _then(_SymptomCreateRequestDto(
@@ -2276,10 +2276,10 @@ class __$SymptomCreateRequestDtoCopyWithImpl<$Res>
           ? _self.occurredAt
           : occurredAt // ignore: cast_nullable_to_non_nullable
               as String?,
-      mealRecordId: null == mealRecordId
+      mealRecordId: freezed == mealRecordId
           ? _self.mealRecordId
           : mealRecordId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       memo: freezed == memo
           ? _self.memo
           : memo // ignore: cast_nullable_to_non_nullable
@@ -2293,7 +2293,7 @@ mixin _$SymptomUpdateRequestDto {
   String get symptomState;
   List<String> get symptomTypes;
   String get occurredAt;
-  String get mealRecordId;
+  String? get mealRecordId;
   String? get memo;
 
   /// Create a copy of SymptomUpdateRequestDto
@@ -2349,7 +2349,7 @@ abstract mixin class $SymptomUpdateRequestDtoCopyWith<$Res> {
       {String symptomState,
       List<String> symptomTypes,
       String occurredAt,
-      String mealRecordId,
+      String? mealRecordId,
       String? memo});
 }
 
@@ -2369,7 +2369,7 @@ class _$SymptomUpdateRequestDtoCopyWithImpl<$Res>
     Object? symptomState = null,
     Object? symptomTypes = null,
     Object? occurredAt = null,
-    Object? mealRecordId = null,
+    Object? mealRecordId = freezed,
     Object? memo = freezed,
   }) {
     return _then(_self.copyWith(
@@ -2385,10 +2385,10 @@ class _$SymptomUpdateRequestDtoCopyWithImpl<$Res>
           ? _self.occurredAt
           : occurredAt // ignore: cast_nullable_to_non_nullable
               as String,
-      mealRecordId: null == mealRecordId
+      mealRecordId: freezed == mealRecordId
           ? _self.mealRecordId
           : mealRecordId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       memo: freezed == memo
           ? _self.memo
           : memo // ignore: cast_nullable_to_non_nullable
@@ -2491,7 +2491,7 @@ extension SymptomUpdateRequestDtoPatterns on SymptomUpdateRequestDto {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(String symptomState, List<String> symptomTypes,
-            String occurredAt, String mealRecordId, String? memo)?
+            String occurredAt, String? mealRecordId, String? memo)?
         $default, {
     required TResult orElse(),
   }) {
@@ -2521,7 +2521,7 @@ extension SymptomUpdateRequestDtoPatterns on SymptomUpdateRequestDto {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(String symptomState, List<String> symptomTypes,
-            String occurredAt, String mealRecordId, String? memo)
+            String occurredAt, String? mealRecordId, String? memo)
         $default,
   ) {
     final _that = this;
@@ -2549,7 +2549,7 @@ extension SymptomUpdateRequestDtoPatterns on SymptomUpdateRequestDto {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(String symptomState, List<String> symptomTypes,
-            String occurredAt, String mealRecordId, String? memo)?
+            String occurredAt, String? mealRecordId, String? memo)?
         $default,
   ) {
     final _that = this;
@@ -2570,7 +2570,7 @@ class _SymptomUpdateRequestDto implements SymptomUpdateRequestDto {
       {required this.symptomState,
       final List<String> symptomTypes = const <String>[],
       required this.occurredAt,
-      required this.mealRecordId,
+      this.mealRecordId,
       this.memo})
       : _symptomTypes = symptomTypes;
   factory _SymptomUpdateRequestDto.fromJson(Map<String, dynamic> json) =>
@@ -2590,7 +2590,7 @@ class _SymptomUpdateRequestDto implements SymptomUpdateRequestDto {
   @override
   final String occurredAt;
   @override
-  final String mealRecordId;
+  final String? mealRecordId;
   @override
   final String? memo;
 
@@ -2654,7 +2654,7 @@ abstract mixin class _$SymptomUpdateRequestDtoCopyWith<$Res>
       {String symptomState,
       List<String> symptomTypes,
       String occurredAt,
-      String mealRecordId,
+      String? mealRecordId,
       String? memo});
 }
 
@@ -2674,7 +2674,7 @@ class __$SymptomUpdateRequestDtoCopyWithImpl<$Res>
     Object? symptomState = null,
     Object? symptomTypes = null,
     Object? occurredAt = null,
-    Object? mealRecordId = null,
+    Object? mealRecordId = freezed,
     Object? memo = freezed,
   }) {
     return _then(_SymptomUpdateRequestDto(
@@ -2690,10 +2690,10 @@ class __$SymptomUpdateRequestDtoCopyWithImpl<$Res>
           ? _self.occurredAt
           : occurredAt // ignore: cast_nullable_to_non_nullable
               as String,
-      mealRecordId: null == mealRecordId
+      mealRecordId: freezed == mealRecordId
           ? _self.mealRecordId
           : mealRecordId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       memo: freezed == memo
           ? _self.memo
           : memo // ignore: cast_nullable_to_non_nullable

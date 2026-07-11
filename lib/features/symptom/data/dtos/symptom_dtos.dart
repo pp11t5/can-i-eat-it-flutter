@@ -126,6 +126,7 @@ extension SymptomResponseDtoMapper on SymptomResponseDto {
 /// POST /symptoms 요청 바디.
 ///
 /// occurredAt null 이면 body 에서 누락(서버가 현재 시각 사용) — impl 에서 removeWhere.
+/// mealRecordId null 이면 body 에서 누락(서버가 식사 미연결로 해석) — impl 에서 removeWhere.
 /// symptomTypes 빈 목록이면 [] 로 전송.
 @freezed
 abstract class SymptomCreateRequestDto with _$SymptomCreateRequestDto {
@@ -133,7 +134,7 @@ abstract class SymptomCreateRequestDto with _$SymptomCreateRequestDto {
     required String symptomState,
     @Default(<String>[]) List<String> symptomTypes,
     String? occurredAt,
-    required String mealRecordId,
+    String? mealRecordId,
     String? memo,
   }) = _SymptomCreateRequestDto;
 
@@ -144,13 +145,14 @@ abstract class SymptomCreateRequestDto with _$SymptomCreateRequestDto {
 /// PUT /symptoms/{symptomId} 요청 바디.
 ///
 /// occurredAt 은 update 시 필수 (서버 계약).
+/// mealRecordId null 이면 body 에서 누락(서버가 식사 미연결로 해석) — impl 에서 removeWhere.
 @freezed
 abstract class SymptomUpdateRequestDto with _$SymptomUpdateRequestDto {
   const factory SymptomUpdateRequestDto({
     required String symptomState,
     @Default(<String>[]) List<String> symptomTypes,
     required String occurredAt,
-    required String mealRecordId,
+    String? mealRecordId,
     String? memo,
   }) = _SymptomUpdateRequestDto;
 
