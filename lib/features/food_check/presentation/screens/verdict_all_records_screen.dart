@@ -32,7 +32,7 @@ class VerdictAllRecordsScreen extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.screenPadding,
-                  vertical: AppSpacing.sectionGap,
+                  vertical: AppSpacing.cardPadding,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,11 +70,11 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 56,
+      height: 64,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
       decoration: const BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: AppColors.divider, width: 0.5),
+          bottom: BorderSide(color: Color(0xFFF5F5F5), width: 1),
         ),
       ),
       child: Row(
@@ -82,7 +82,7 @@ class _TopBar extends StatelessWidget {
           IconButton(
             icon: const AppIcon(
               AppIcons.chevronLeft,
-              size: AppIconSizes.s24,
+              size: AppIconSizes.s32,
               color: AppColors.textPrimary,
               semanticsLabel: '뒤로',
             ),
@@ -92,7 +92,7 @@ class _TopBar extends StatelessWidget {
             child: Text(
               '증상 기록',
               textAlign: TextAlign.center,
-              style: AppTextStyles.body1Bold.copyWith(
+              style: AppTextStyles.body1Medium.copyWith(
                 color: AppColors.textPrimary,
               ),
             ),
@@ -112,19 +112,16 @@ class _RecordCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.cardPadding,
-        vertical: AppSpacing.itemGap + AppSpacing.xs, // 12
-      ),
+      padding: const EdgeInsets.all(AppSpacing.cardPadding), // 16
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.borderCard),
       ),
       child: Row(
         children: [
           MoodFace(state: SymptomStateMapper.fromLabel(record.label), size: 32),
-          const SizedBox(width: AppSpacing.cardPadding),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               record.label,
@@ -135,7 +132,7 @@ class _RecordCard extends StatelessWidget {
           ),
           Text(
             '${record.date} · ${record.timing}',
-            style: AppTextStyles.caption1Medium.copyWith(
+            style: AppTextStyles.body2Medium.copyWith(
               color: AppColors.textSecondary,
             ),
           ),
