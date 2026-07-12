@@ -55,6 +55,8 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
                 ),
               ),
             ),
+            // ── TopBar 하단 구분선 (Figma gray/30 #F5F5F5) ────────────────────
+            Container(height: 1, color: const Color(0xFFF5F5F5)),
             // ── StepProgress (0px gap after TopBar per Figma) ────────────────
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -74,7 +76,7 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     '해당되는 항목을 모두 선택해 주세요',
-                    style: AppTextStyles.body1Regular.copyWith(
+                    style: AppTextStyles.body1Medium.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -98,16 +100,18 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
                   return OptionCard(
                     label: entry.label,
                     selected: isSelected,
+                    size: OptionCardSize.compact,
                     onTap: () => notifier.toggleSymptom(entry.code),
                   );
                 },
               ),
             ),
-            // ── CTA ───────────────────────────────────────────────────────────
+            // ── CTA (Figma p2: top0/bottom32) ────────────────────────────────
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-                vertical: AppSpacing.sectionGap,
+              padding: const EdgeInsets.only(
+                left: AppSpacing.screenPadding,
+                right: AppSpacing.screenPadding,
+                bottom: 32,
               ),
               child: AppButton.primary(
                 label: '다음',

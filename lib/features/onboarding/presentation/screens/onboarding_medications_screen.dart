@@ -91,16 +91,22 @@ class _OnboardingMedicationsScreenState
                 ),
               ),
             ),
-            // ── StepProgress (0px gap after TopBar per Figma) ────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(
+            // ── TopBar 하단 구분선 (Figma gray/30 #F5F5F5) ────────────────────
+            Container(height: 1, color: const Color(0xFFF5F5F5)),
+            // ── StepProgress (0px gap after TopBar per Figma, 16px 유지) ──────
+            const Padding(
+              padding: EdgeInsets.symmetric(
                 horizontal: AppSpacing.screenPadding,
               ),
+              child: StepProgress(currentStep: 4, totalSteps: 4),
+            ),
+            const SizedBox(height: AppSpacing.sectionGap),
+            // ── Title (Figma p4 한정: 가로 padding 24px) ──────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const StepProgress(currentStep: 4, totalSteps: 4),
-                  const SizedBox(height: AppSpacing.sectionGap),
                   Text(
                     '알레르기와 복용 중인 약을\n알려주세요',
                     style: AppTextStyles.header1Bold.copyWith(
@@ -110,7 +116,7 @@ class _OnboardingMedicationsScreenState
                   const SizedBox(height: 16),
                   Text(
                     '없으면 완료를 눌러주세요',
-                    style: AppTextStyles.body1Regular.copyWith(
+                    style: AppTextStyles.body1Medium.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -118,12 +124,10 @@ class _OnboardingMedicationsScreenState
                 ],
               ),
             ),
-            // ── 스크롤 영역 ───────────────────────────────────────────────────
+            // ── 스크롤 영역 (Figma p4 한정: 가로 padding 24px) ────────────────
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.screenPadding,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -134,7 +138,7 @@ class _OnboardingMedicationsScreenState
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.itemGap),
+                    const SizedBox(height: 16),
                     Wrap(
                       spacing: AppSpacing.itemGap,
                       runSpacing: AppSpacing.itemGap,
@@ -157,7 +161,7 @@ class _OnboardingMedicationsScreenState
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.itemGap),
+                    const SizedBox(height: 16),
                     TextField(
                       controller: _medController,
                       style: AppTextStyles.body1Regular.copyWith(
@@ -222,11 +226,13 @@ class _OnboardingMedicationsScreenState
                 ),
               ),
             ),
-            // ── 에러 + 면책 고지 + CTA ────────────────────────────────────────
+            // ── 에러 + 면책 고지 + CTA (Figma p4: top16/bottom32) ─────────────
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-                vertical: AppSpacing.sectionGap,
+              padding: const EdgeInsets.only(
+                left: AppSpacing.screenPadding,
+                right: AppSpacing.screenPadding,
+                top: 16,
+                bottom: 32,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
