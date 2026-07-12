@@ -26,32 +26,30 @@ class StateRecordCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.cardPadding,
-        vertical: AppSpacing.itemGap,
-      ),
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
-        color: AppColors.surfaceBackground,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(color: AppColors.borderCard, width: 1),
       ),
       child: Row(
         children: [
-          MoodFace(state: SymptomStateMapper.fromLabel(record.label), size: 40),
-          const SizedBox(width: AppSpacing.itemGap),
+          MoodFace(state: SymptomStateMapper.fromLabel(record.label), size: 32),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   record.label,
-                  style: AppTextStyles.body2Medium.copyWith(
+                  style: AppTextStyles.body2Bold.copyWith(
                     color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   '${record.date} · ${_timingLabel(record.timingMinutes)}',
-                  style: AppTextStyles.caption1Medium.copyWith(
+                  style: AppTextStyles.body2Medium.copyWith(
                     color: AppColors.textSecondary,
                   ),
                 ),
