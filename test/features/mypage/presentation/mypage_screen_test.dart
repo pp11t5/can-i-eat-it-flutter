@@ -208,7 +208,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('로그아웃 하시겠어요?'), findsOneWidget);
-      expect(find.text('취소'), findsOneWidget);
+      // Figma 577:10285: Primary(green) 라벨은 "취소하기".
+      expect(find.text('취소하기'), findsOneWidget);
       expect(find.text('로그아웃하기'), findsOneWidget);
     });
 
@@ -219,7 +220,7 @@ void main() {
       await tester.tap(find.text('로그아웃'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('취소'));
+      await tester.tap(find.text('취소하기'));
       await tester.pumpAndSettle();
 
       expect(find.text('로그아웃 하시겠어요?'), findsNothing);

@@ -473,7 +473,8 @@ class _SettingsSection extends ConsumerWidget {
     final action = await showConfirmModal(
       context,
       title: '로그아웃 하시겠어요?',
-      primaryLabel: '취소',
+      // Figma 577:10285: Primary(green)=취소하기(안전), Secondary=로그아웃하기.
+      primaryLabel: '취소하기',
       primaryColor: AppColors.primary,
       secondaryLabel: '로그아웃하기',
     );
