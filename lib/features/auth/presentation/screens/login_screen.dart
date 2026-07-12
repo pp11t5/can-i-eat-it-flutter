@@ -5,8 +5,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
@@ -349,7 +351,11 @@ class _AppleButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.apple, size: 22, color: AppColors.surface),
+                const AppIcon(
+                  AppIcons.appleLogo,
+                  size: 22,
+                  color: AppColors.surface,
+                ),
                 const SizedBox(width: 15),
                 Text(
                   'Apple로 로그인',

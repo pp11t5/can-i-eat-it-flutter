@@ -4,9 +4,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_button.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/app/widgets/step_progress.dart';
@@ -170,6 +172,20 @@ class _OnboardingMedicationsScreenState
                           horizontal: AppSpacing.cardPadding,
                           vertical: AppSpacing.cardPadding,
                         ),
+                        // Figma 1064:12268 — 필드 우측 인라인 추가 버튼(초록 원+흰 plus).
+                        suffixIcon: Padding(
+                          padding: const EdgeInsets.only(
+                            right: AppSpacing.itemGap,
+                          ),
+                          child: GestureDetector(
+                            onTap: _addMedication,
+                            child: const AppIcon(AppIcons.plusCircle, size: 24),
+                          ),
+                        ),
+                        suffixIconConstraints: const BoxConstraints(
+                          minWidth: 40,
+                          minHeight: 40,
+                        ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(
                             AppSpacing.radiusCard,
@@ -186,12 +202,6 @@ class _OnboardingMedicationsScreenState
                         ),
                       ),
                       onSubmitted: (_) => _addMedication(),
-                    ),
-                    const SizedBox(height: AppSpacing.itemGap),
-                    AppButton.secondary(
-                      label: '＋ 복용약 추가',
-                      onPressed: _addMedication,
-                      isExpanded: true,
                     ),
                     // 추가된 약 목록
                     if (draft.medications.isNotEmpty) ...[
@@ -231,11 +241,7 @@ class _OnboardingMedicationsScreenState
                       ),
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.error_outline,
-                            color: AppColors.verdictDanger,
-                            size: 20,
-                          ),
+                          const AppIcon(AppIcons.error, size: 20),
                           const SizedBox(width: AppSpacing.itemGap),
                           Expanded(
                             child: Text(
@@ -312,8 +318,8 @@ class _MedicationChip extends StatelessWidget {
           const SizedBox(width: AppSpacing.xs),
           GestureDetector(
             onTap: onRemove,
-            child: const Icon(
-              Icons.close,
+            child: const AppIcon(
+              AppIcons.closeSmall,
               size: 16,
               color: AppColors.primary,
             ),
