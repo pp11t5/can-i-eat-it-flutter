@@ -1,3 +1,4 @@
+import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/meal_log/data/dtos/meal_dtos.dart' show clampMealName;
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
@@ -7,7 +8,9 @@ import 'package:can_i_eat_it/features/meal_log/domain/repositories/meal_reposito
 /// [MealRepository] 인메모리 Mock 구현. UI 선개발·테스트용 (신 계약).
 ///
 /// - [MockMealRepository.seeded()]: single 1 + group 1 + symptom 1 타임라인,
-///   mealDetail/foodDetail 캐시, weekly·candidates 시드.
+///   mealDetail/foodDetail 캐시, weekly·candidates 시드. 실 API처럼
+///   **날짜 인식**(date-aware) — `timeline`/`weekly` 는 조회 날짜에 맞춰
+///   필터링된다. [seeded]의 `anchor` 로 시드 기준일을 이동할 수 있다.
 /// - [MockMealRepository.empty()]: 빈 타임라인.
 class MockMealRepository implements MealRepository {
   MockMealRepository({
@@ -27,14 +30,18 @@ class MockMealRepository implements MealRepository {
   /// 빈 상태.
   factory MockMealRepository.empty() => MockMealRepository();
 
-  /// 샘플 데이터.
-  factory MockMealRepository.seeded() => MockMealRepository(
-        initialTimeline: _seedTimeline,
-        initialMealDetails: _seedMealDetails,
-        initialFoodDetails: _seedFoodDetails,
-        initialWeekly: _seedWeekly,
-        initialCandidates: _seedCandidates,
-      );
+  /// 샘플 데이터. [anchor] 를 넘기면 시드 기준일(Y/M/D)을 이동한다(미지정 시
+  /// [_kSeedAnchor]).
+  factory MockMealRepository.seeded({DateTime? anchor}) {
+    final base = anchor ?? _kSeedAnchor;
+    return MockMealRepository(
+      initialTimeline: _buildSeedTimeline(base),
+      initialMealDetails: _buildSeedMealDetails(base),
+      initialFoodDetails: _buildSeedFoodDetails(base),
+      initialWeekly: _buildSeedWeekly(base),
+      initialCandidates: _buildSeedCandidates(base),
+    );
+  }
 
   final List<TimelineItem> _timeline;
   final Map<String, MealRecord> _mealDetails;
@@ -46,12 +53,31 @@ class MockMealRepository implements MealRepository {
 
   @override
   Future<List<TimelineItem>> timeline(DateTime date) async {
-    return List<TimelineItem>.unmodifiable(_timeline);
+    final items = _timeline.where((item) {
+      final iso = switch (item) {
+        TimelineSingle(mealRecordDateTime: final dt) => dt,
+        TimelineGroup(mealRecordDateTime: final dt) => dt,
+        TimelineSymptom(occurredAt: final dt) => dt,
+      };
+      final parsed = _tryParseKst(iso);
+      if (parsed == null) return false;
+      return parsed.year == date.year &&
+          parsed.month == date.month &&
+          parsed.day == date.day;
+    }).toList();
+    return List<TimelineItem>.unmodifiable(items);
   }
 
   @override
   Future<List<WeeklyDay>> weekly(DateTime date) async {
-    return List<WeeklyDay>.unmodifiable(_weekly);
+    final start = DateTime(date.year, date.month, date.day);
+    final end = start.add(const Duration(days: 7));
+    final items = _weekly.where((day) {
+      final parsed = _tryParseDate(day.date);
+      if (parsed == null) return false;
+      return !parsed.isBefore(start) && parsed.isBefore(end);
+    }).toList();
+    return List<WeeklyDay>.unmodifiable(items);
   }
 
   /// [appendFood]/[appendFoodByText] 공통 로직 — 음식 생성 + 식사 상세 캐시 반영.
@@ -167,146 +193,205 @@ class MockMealRepository implements MealRepository {
   }
 }
 
+/// [iso] 를 [parseKst] 로 파싱한다. 실패 시 null(호출부가 필터링 대상에서 제외).
+DateTime? _tryParseKst(String iso) {
+  try {
+    return parseKst(iso);
+  } catch (_) {
+    return null;
+  }
+}
+
+/// 'YYYY-MM-DD' 문자열을 [DateTime] 으로 파싱한다. 실패 시 null.
+DateTime? _tryParseDate(String ymd) {
+  try {
+    return DateTime.parse(ymd);
+  } catch (_) {
+    return null;
+  }
+}
+
 // ---------------------------------------------------------------------------
-// 시드 데이터
+// 시드 데이터 — anchor(base) 기준 날짜로 생성되는 빌더 함수들
 // ---------------------------------------------------------------------------
 
-const _kEatenMorning = '2026-06-17T08:00:00+09:00';
-const _kEatenLunch = '2026-06-17T12:30:00+09:00';
-const _kEatenSymptom = '2026-06-17T14:30:00+09:00';
+/// 시드 기본 기준일. [MockMealRepository.seeded] 호출 시 `anchor` 를 넘기지
+/// 않으면 이 날짜(Y/M/D)로 모든 시드 datetime 이 생성된다.
+final DateTime _kSeedAnchor = DateTime(2026, 6, 17);
 
-final _seedTimeline = <TimelineItem>[
-  // single: 음식 1개짜리 식사
-  const TimelineItem.single(
-    mealRecordId: 'record-001',
-    mealRecordDateTime: _kEatenMorning,
-    mealFoodName: '두부',
-    grade: VerdictLevel.recommend,
-  ),
-  // group: 음식 2개 이상짜리 식사
-  const TimelineItem.group(
-    mealRecordId: 'record-002',
-    mealRecordDateTime: _kEatenLunch,
-    representativeFoods: ['된장찌개', '커피'],
-    etcCount: 1,
-  ),
-  // symptom: 증상 기록
-  const TimelineItem.symptom(
-    symptomState: SymptomState.uncomfortable,
-    afterMealMinutes: 120,
-    occurredAt: _kEatenSymptom,
-  ),
-];
+/// [base] 의 Y/M/D + ([hour]:[minute]) 를 서버 offset 포맷
+/// ('YYYY-MM-DDTHH:mm:00+09:00')으로 직렬화한다.
+String _isoAt(DateTime base, int hour, int minute) =>
+    toServerOffset(DateTime(base.year, base.month, base.day, hour, minute));
 
-final _seedMealDetails = <String, MealRecord>{
-  'record-001': const MealRecord(
-    mealRecordId: 'record-001',
-    eatenAt: _kEatenMorning,
-    foods: [
-      MealFood(
-        mealFoodId: 'food-001',
-        name: '두부',
-        category: '두류',
-        eatenAt: _kEatenMorning,
-      ),
-    ],
-  ),
-  'record-002': const MealRecord(
-    mealRecordId: 'record-002',
-    eatenAt: _kEatenLunch,
-    foods: [
-      MealFood(
-        mealFoodId: 'food-002',
-        name: '된장찌개',
-        category: '한식',
-        eatenAt: _kEatenLunch,
-      ),
-      MealFood(
-        mealFoodId: 'food-003',
-        name: '커피',
-        category: '음료',
-        eatenAt: _kEatenLunch,
-      ),
-      MealFood(
-        mealFoodId: 'food-004',
-        name: '공기밥',
-        category: '한식',
-        eatenAt: _kEatenLunch,
-      ),
-    ],
-    stateRecords: [
-      StateRecord(
-        stateRecordId: 'state-001',
-        label: '속쓰림',
-        date: '2026-06-17',
-        timingMinutes: 30,
-      ),
-    ],
-  ),
-};
+/// [base] 의 Y/M/D 를 'YYYY-MM-DD' 로 직렬화한다.
+String _ymd(DateTime base) => toServerDate(base);
 
-final _seedFoodDetails = <String, MealFood>{
-  'food-001': const MealFood(
-    mealFoodId: 'food-001',
-    name: '두부',
-    category: '두류',
-    eatenAt: _kEatenMorning,
-    mealRecordExternalId: 'record-001',
-    analysis: MealAnalysis(
-      judgmentGrade: VerdictLevel.recommend,
-      trigger: AnalysisSection(
-        ment: '트리거/증상 분석',
-        content: '역류 트리거에 해당하지 않아요.',
-      ),
-      allergy: AnalysisSection(
-        ment: '알레르기/복용약 분석',
-        content: '알레르기·복용약 충돌이 없어요.',
+List<TimelineItem> _buildSeedTimeline(DateTime base) {
+  final eatenMorning = _isoAt(base, 8, 0);
+  final eatenLunch = _isoAt(base, 12, 30);
+  final eatenSymptom = _isoAt(base, 14, 30);
+
+  return <TimelineItem>[
+    // single: 음식 1개짜리 식사
+    TimelineItem.single(
+      mealRecordId: 'record-001',
+      mealRecordDateTime: eatenMorning,
+      mealFoodName: '두부',
+      grade: VerdictLevel.recommend,
+    ),
+    // group: 음식 2개 이상짜리 식사 (연결증상 보유)
+    TimelineItem.group(
+      mealRecordId: 'record-002',
+      mealRecordDateTime: eatenLunch,
+      representativeFoods: const ['된장찌개', '커피'],
+      etcCount: 1,
+      connectedSymptoms: const ConnectedSymptoms(
+        symptomId: 'symptom-001',
+        symptomState: SymptomState.uncomfortable,
+        afterMealMinutes: 120,
+        representativeSymptoms: ['속쓰림'],
+        etcCount: 0,
       ),
     ),
-  ),
-  'food-002': const MealFood(
-    mealFoodId: 'food-002',
-    name: '된장찌개',
-    category: '한식',
-    eatenAt: _kEatenLunch,
-    mealRecordExternalId: 'record-002',
-    analysis: MealAnalysis(
-      judgmentGrade: VerdictLevel.caution,
-      trigger: AnalysisSection(
-        ment: '트리거/증상 분석',
-        content: '나트륨 함량이 높아 위산 역류를 악화할 수 있어요.',
-      ),
-      allergy: AnalysisSection(
-        ment: '알레르기/복용약 분석',
-        content: '알레르기·복용약 충돌은 없어요.',
+    // symptom: 증상 기록 (탭 가능하도록 symptomId 보유)
+    TimelineItem.symptom(
+      symptomState: SymptomState.uncomfortable,
+      afterMealMinutes: 120,
+      occurredAt: eatenSymptom,
+      symptomId: 'symptom-001',
+    ),
+  ];
+}
+
+Map<String, MealRecord> _buildSeedMealDetails(DateTime base) {
+  final eatenMorning = _isoAt(base, 8, 0);
+  final eatenLunch = _isoAt(base, 12, 30);
+
+  return <String, MealRecord>{
+    'record-001': MealRecord(
+      mealRecordId: 'record-001',
+      eatenAt: eatenMorning,
+      foods: [
+        MealFood(
+          mealFoodId: 'food-001',
+          name: '두부',
+          category: '두류',
+          eatenAt: eatenMorning,
+        ),
+      ],
+    ),
+    'record-002': MealRecord(
+      mealRecordId: 'record-002',
+      eatenAt: eatenLunch,
+      foods: [
+        MealFood(
+          mealFoodId: 'food-002',
+          name: '된장찌개',
+          category: '한식',
+          eatenAt: eatenLunch,
+        ),
+        MealFood(
+          mealFoodId: 'food-003',
+          name: '커피',
+          category: '음료',
+          eatenAt: eatenLunch,
+        ),
+        MealFood(
+          mealFoodId: 'food-004',
+          name: '공기밥',
+          category: '한식',
+          eatenAt: eatenLunch,
+        ),
+      ],
+      stateRecords: [
+        StateRecord(
+          stateRecordId: 'state-001',
+          label: '속쓰림',
+          date: _ymd(base),
+          timingMinutes: 30,
+        ),
+      ],
+    ),
+  };
+}
+
+Map<String, MealFood> _buildSeedFoodDetails(DateTime base) {
+  final eatenMorning = _isoAt(base, 8, 0);
+  final eatenLunch = _isoAt(base, 12, 30);
+
+  return <String, MealFood>{
+    'food-001': MealFood(
+      mealFoodId: 'food-001',
+      name: '두부',
+      category: '두류',
+      eatenAt: eatenMorning,
+      mealRecordExternalId: 'record-001',
+      analysis: const MealAnalysis(
+        judgmentGrade: VerdictLevel.recommend,
+        trigger: AnalysisSection(
+          ment: '트리거/증상 분석',
+          content: '역류 트리거에 해당하지 않아요.',
+        ),
+        allergy: AnalysisSection(
+          ment: '알레르기/복용약 분석',
+          content: '알레르기·복용약 충돌이 없어요.',
+        ),
       ),
     ),
-  ),
-};
-
-final _seedWeekly = <WeeklyDay>[
-  const WeeklyDay(
-    date: '2026-06-17',
-    dayOfWeek: 'WED',
-    judgements: [
-      VerdictLevel.recommend,
-      VerdictLevel.caution,
-      VerdictLevel.risk,
-    ],
-  ),
-];
-
-final _seedCandidates = <MealCandidatesDay>[
-  const MealCandidatesDay(
-    date: '2026-06-17',
-    meals: [
-      MealCandidate(
-        mealRecordId: 'record-002',
-        representativeFoodName: '된장찌개',
-        representativeFoodCategory: '한식',
-        otherFoodCount: 2,
-        eatenAt: _kEatenLunch,
+    'food-002': MealFood(
+      mealFoodId: 'food-002',
+      name: '된장찌개',
+      category: '한식',
+      eatenAt: eatenLunch,
+      mealRecordExternalId: 'record-002',
+      analysis: const MealAnalysis(
+        judgmentGrade: VerdictLevel.caution,
+        trigger: AnalysisSection(
+          ment: '트리거/증상 분석',
+          content: '나트륨 함량이 높아 위산 역류를 악화할 수 있어요.',
+        ),
+        allergy: AnalysisSection(
+          ment: '알레르기/복용약 분석',
+          content: '알레르기·복용약 충돌은 없어요.',
+        ),
       ),
-    ],
-  ),
-];
+    ),
+  };
+}
+
+List<WeeklyDay> _buildSeedWeekly(DateTime base) {
+  // 신호등 dots 는 타임라인 데이터가 존재하는 날(base)에만 부여한다 — dots 가
+  // 있는데 탭하면 빈 타임라인이 나오는 불일치를 막기 위함(실 API 는 dots·타임라인이
+  // 같은 날짜 데이터에서 나온다). base 하루에 최대 3개 판정색 dots.
+  return <WeeklyDay>[
+    WeeklyDay(
+      date: _ymd(base),
+      dayOfWeek: 'WED',
+      judgements: const [
+        VerdictLevel.recommend,
+        VerdictLevel.caution,
+        VerdictLevel.risk,
+      ],
+    ),
+  ];
+}
+
+List<MealCandidatesDay> _buildSeedCandidates(DateTime base) {
+  final eatenLunch = _isoAt(base, 12, 30);
+
+  return <MealCandidatesDay>[
+    MealCandidatesDay(
+      date: _ymd(base),
+      meals: [
+        MealCandidate(
+          mealRecordId: 'record-002',
+          representativeFoodName: '된장찌개',
+          representativeFoodCategory: '한식',
+          otherFoodCount: 2,
+          eatenAt: eatenLunch,
+        ),
+      ],
+    ),
+  ];
+}

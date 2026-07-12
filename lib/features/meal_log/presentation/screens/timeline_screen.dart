@@ -10,6 +10,7 @@ import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
+import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/fab_action_sheet.dart';
@@ -157,7 +158,6 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
                 ),
               ),
             ),
-            const Divider(height: 1, color: AppColors.divider),
             // --- 타임라인 리스트 ---
             Expanded(
               child: timelineAsync.when(
@@ -311,8 +311,14 @@ class _TimelineItemList extends StatelessWidget {
       onTapMeal: (mealRecordId) {
         context.push('/meal/$mealRecordId');
       },
-      onAddFood: (mealRecordId) {
-        context.push('/meal/record', extra: mealRecordId);
+      onAddFood: (mealRecordId, mealRecordDateTime) {
+        context.push(
+          '/check',
+          extra: MealRecordContext(
+            eatenAt: parseKst(mealRecordDateTime),
+            mealRecordId: mealRecordId,
+          ),
+        );
       },
       onTapSymptom: (symptomId) {
         context.push('/symptom/$symptomId');

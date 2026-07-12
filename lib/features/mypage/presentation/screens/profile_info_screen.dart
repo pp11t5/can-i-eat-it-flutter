@@ -89,13 +89,36 @@ class _ProfileInfoScreenState extends ConsumerState<ProfileInfoScreen> {
           _ProfileHeader(session: session),
           const SizedBox(height: AppSpacing.contentGap),
 
-          // 내 건강 정보 카드
+          // 내 건강 정보 섹션
+          const _SectionLabel(label: '내 건강 정보'),
+          const SizedBox(height: AppSpacing.itemGap),
           _HealthInfoCard(profile: profile),
           const SizedBox(height: AppSpacing.contentGap),
 
-          // 내 계정 카드
+          // 내 계정 섹션
+          const _SectionLabel(label: '내 계정'),
+          const SizedBox(height: AppSpacing.itemGap),
           _AccountCard(),
         ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 섹션 라벨 (카드 밖, mypage_screen.dart _SectionLabel과 동일 패턴)
+// ---------------------------------------------------------------------------
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: AppTextStyles.body2Bold.copyWith(
+        color: AppColors.textSecondary,
       ),
     );
   }
@@ -211,22 +234,6 @@ class _HealthInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.cardPadding,
-              AppSpacing.cardPadding,
-              AppSpacing.cardPadding,
-              AppSpacing.itemGap,
-            ),
-            child: Text(
-              '내 건강 정보',
-              style: AppTextStyles.body2Bold.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          const Divider(height: 1, color: AppColors.divider),
-
           // 건강 고민 행 — 가로 ListTile: [선행아이콘] [라벨] …Spacer… [값] [자물쇠] (읽기전용, 탭 불가)
           Padding(
             padding: const EdgeInsets.symmetric(
@@ -334,22 +341,6 @@ class _AccountCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.cardPadding,
-              AppSpacing.cardPadding,
-              AppSpacing.cardPadding,
-              AppSpacing.itemGap,
-            ),
-            child: Text(
-              '내 계정',
-              style: AppTextStyles.body2Bold.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          const Divider(height: 1, color: AppColors.divider),
-
           // 로그아웃
           InkWell(
             onTap: () => _onLogout(context, ref),

@@ -168,7 +168,7 @@ void main() {
         _wrap(
           MealTimelineList(
             items: const [_kSingleMorning],
-            onAddFood: (id) => addedId = id,
+            onAddFood: (id, _) => addedId = id,
           ),
         ),
       );

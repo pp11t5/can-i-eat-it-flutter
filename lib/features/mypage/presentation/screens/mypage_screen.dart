@@ -7,8 +7,6 @@ import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
-import 'package:can_i_eat_it/app/widgets/app_toast.dart';
-import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
 import 'package:can_i_eat_it/core/config/terms_catalog.dart';
 import 'package:can_i_eat_it/core/util/external_link.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
@@ -472,45 +470,9 @@ class _SettingsSection extends ConsumerWidget {
             label: '알림 설정',
             onTap: () => context.push('/mypage/notification-settings'),
           ),
-          const Divider(height: 1, color: AppColors.divider),
-          _ListTileRow(
-            icon: Icons.logout,
-            label: '로그아웃',
-            onTap: () => _showLogoutDialog(context, ref),
-          ),
-          const Divider(height: 1, color: AppColors.divider),
-          _ListTileRow(
-            icon: Icons.person_remove_outlined,
-            label: '탈퇴',
-            onTap: () => context.push('/mypage/withdraw'),
-            labelColor: AppColors.danger,
-          ),
         ],
       ),
     );
-  }
-
-  Future<void> _showLogoutDialog(BuildContext context, WidgetRef ref) async {
-    final action = await showConfirmModal(
-      context,
-      title: '로그아웃 하시겠어요?',
-      // Figma 577:10285: Primary(green)=취소하기(안전), Secondary=로그아웃하기.
-      primaryLabel: '취소하기',
-      primaryColor: AppColors.primary,
-      secondaryLabel: '로그아웃하기',
-    );
-
-    // primary(취소) 또는 바깥 닫힘(null)이면 아무 것도 하지 않는다.
-    if (action == ConfirmModalAction.secondary && context.mounted) {
-      try {
-        await ref.read(authControllerProvider.notifier).logout();
-        // auth redirect 가드가 /login 으로 이동시킴 — 별도 navigation 불필요.
-      } catch (_) {
-        if (context.mounted) {
-          await showAppToast(context, '로그아웃 중 오류가 발생했어요.');
-        }
-      }
-    }
   }
 }
 
@@ -554,17 +516,11 @@ class _TermsSection extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _ListTileRow extends StatelessWidget {
-  const _ListTileRow({
-    required this.label,
-    required this.onTap,
-    this.icon,
-    this.labelColor,
-  });
+  const _ListTileRow({required this.label, required this.onTap, this.icon});
 
   final IconData? icon;
   final String label;
   final VoidCallback onTap;
-  final Color? labelColor;
 
   @override
   Widget build(BuildContext context) {
@@ -579,18 +535,14 @@ class _ListTileRow extends StatelessWidget {
         child: Row(
           children: [
             if (icon != null) ...[
-              Icon(
-                icon,
-                size: 24,
-                color: labelColor ?? AppColors.textSecondary,
-              ),
+              Icon(icon, size: 24, color: AppColors.textSecondary),
               const SizedBox(width: AppSpacing.cardPadding),
             ],
             Expanded(
               child: Text(
                 label,
                 style: AppTextStyles.body1Regular.copyWith(
-                  color: labelColor ?? AppColors.textPrimary,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),
