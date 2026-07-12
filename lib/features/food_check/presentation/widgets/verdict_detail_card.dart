@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
+import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
+import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
+import 'package:can_i_eat_it/features/symptom/presentation/widgets/mood_face.dart';
 
 /// 판정 상세 카드 — Figma HeroSection 재정합 (W3-3).
 ///
 /// 구조:
-/// 1. AI 분석 카드: "✨ AI 분석" 보라 칩 + 캡션 + items 불릿
+/// 1. AI 분석 카드: sparkle + "AI 분석" 보라 칩 + 캡션 + items 불릿
 /// 2. 증상 기록 섹션: "N개의 증상 기록" 헤더 + "모두 보기 >" + 카드형 기록 (≤3개)
 /// 3. 대체 음식 섹션: "대체 음식 추천" 헤더 + 카드형 substitute 목록
 ///
@@ -75,7 +81,7 @@ class _AiAnalysisCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 헤더 행: "✨ AI 분석" 보라 칩 + 캡션
+          // 헤더 행: sparkle + "AI 분석" 보라 칩 + 캡션
           Row(
             children: [
               // AI 분석 칩
@@ -85,18 +91,18 @@ class _AiAnalysisCard extends StatelessWidget {
                   vertical: AppSpacing.xs,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEDE9FE), // 연보라 배경
+                  color: const Color(0xFFF8F2FF), // 연보라 배경(Figma)
                   borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('✨', style: TextStyle(fontSize: 12)),
+                    const AppIcon(AppIcons.sparkle, size: AppIconSizes.s16),
                     const SizedBox(width: AppSpacing.xs),
                     Text(
                       'AI 분석',
                       style: AppTextStyles.caption1Bold.copyWith(
-                        color: const Color(0xFF6D28D9), // 보라
+                        color: const Color(0xFF9747FF), // 보라(Figma)
                       ),
                     ),
                   ],
@@ -188,16 +194,6 @@ class _StateRecordsSection extends StatelessWidget {
   /// null이면 "모두 보기" 탭 무동작 (F3 placeholder)
   final VoidCallback? onSeeAll;
 
-  /// label → 심각도 이모지 매핑 (best-effort, Figma 기준)
-  String _severityEmoji(String label) {
-    final lower = label.toLowerCase();
-    if (lower.contains('편안')) return '😊';
-    if (lower.contains('심각')) return '😖';
-    if (lower.contains('불편')) return '😣';
-    // 기타 label은 중립 이모지로 fallback
-    return '😐';
-  }
-
   @override
   Widget build(BuildContext context) {
     // ≤3개만 표시
@@ -218,11 +214,23 @@ class _StateRecordsSection extends StatelessWidget {
             ),
             GestureDetector(
               onTap: onSeeAll,
-              child: Text(
-                '모두 보기 >',
-                style: AppTextStyles.body2Medium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+              behavior: HitTestBehavior.opaque,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '모두 보기',
+                    style: AppTextStyles.body2Medium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  const AppIcon(
+                    AppIcons.chevronRight,
+                    size: AppIconSizes.s16,
+                    color: AppColors.textSecondary,
+                  ),
+                ],
               ),
             ),
           ],
@@ -232,10 +240,7 @@ class _StateRecordsSection extends StatelessWidget {
         // 기록 카드 (테두리 카드)
         for (var i = 0; i < displayRecords.length; i++) ...[
           if (i > 0) const SizedBox(height: AppSpacing.itemGap),
-          _StateRecordCard(
-            record: displayRecords[i],
-            emoji: _severityEmoji(displayRecords[i].label),
-          ),
+          _StateRecordCard(record: displayRecords[i]),
         ],
       ],
     );
@@ -243,13 +248,9 @@ class _StateRecordsSection extends StatelessWidget {
 }
 
 class _StateRecordCard extends StatelessWidget {
-  const _StateRecordCard({
-    required this.record,
-    required this.emoji,
-  });
+  const _StateRecordCard({required this.record});
 
   final VerdictStateRecord record;
-  final String emoji;
 
   @override
   Widget build(BuildContext context) {
@@ -265,8 +266,8 @@ class _StateRecordCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // 좌측 심각도 이모지
-          Text(emoji, style: const TextStyle(fontSize: 24)),
+          // 좌측 심각도 무드 얼굴 (서버 라벨 → SymptomState 근사 매핑)
+          MoodFace(state: SymptomStateMapper.fromLabel(record.label), size: 32),
           const SizedBox(width: AppSpacing.cardPadding),
           // label (볼드)
           Expanded(
@@ -340,12 +341,8 @@ class _SubstituteCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // 음식 이모지 없음 — 일반 아이콘 placeholder (데이터 없음, 보고서에 명시)
-          const Icon(
-            Icons.restaurant_menu,
-            size: 28,
-            color: AppColors.textSecondary,
-          ),
+          // 음식 카테고리 미제공(엔티티에 code 없음) → regular 폴백 일러스트.
+          const CategoryIcon(code: null, size: 28),
           const SizedBox(width: AppSpacing.cardPadding),
           Expanded(
             child: Text(
@@ -355,12 +352,8 @@ class _SubstituteCard extends StatelessWidget {
               ),
             ),
           ),
-          // 우측 녹색 체크 아이콘
-          const Icon(
-            Icons.check_circle,
-            color: AppColors.verdictRecommend,
-            size: 24,
-          ),
+          // 우측 녹색 체크 배지(권장 배지 재사용)
+          const AppIcon(AppIcons.verdictRecommend, size: AppIconSizes.s24),
         ],
       ),
     );

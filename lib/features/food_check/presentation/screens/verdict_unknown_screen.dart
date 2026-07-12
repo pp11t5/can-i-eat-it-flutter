@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
 
 /// 확인어려움 화면 (Figma node 554-5327).
@@ -140,14 +143,14 @@ class _TipRow extends StatelessWidget {
             _SearchChip(
               text: badChipText,
               backgroundColor: const Color(0xFFFFE0E0),
-              icon: Icons.close,
+              iconAsset: AppIcons.close,
               iconColor: AppColors.textSecondary,
             ),
             const SizedBox(width: AppSpacing.itemGap),
             // 변환 화살표 (나쁜 검색 → 좋은 검색). Figma 렌더는 우측 방향(→).
-            const Icon(
-              Icons.arrow_forward,
-              size: 24,
+            const AppIcon(
+              AppIcons.arrowRight,
+              size: AppIconSizes.s24,
               color: AppColors.textSecondary,
             ),
             const SizedBox(width: AppSpacing.itemGap),
@@ -155,7 +158,7 @@ class _TipRow extends StatelessWidget {
             _SearchChip(
               text: goodChipText,
               backgroundColor: const Color(0xFFD9F5EA),
-              icon: Icons.check,
+              iconAsset: AppIcons.check,
               iconColor: AppColors.primary,
             ),
           ],
@@ -193,13 +196,13 @@ class _SearchChip extends StatelessWidget {
   const _SearchChip({
     required this.text,
     required this.backgroundColor,
-    required this.icon,
+    required this.iconAsset,
     required this.iconColor,
   });
 
   final String text;
   final Color backgroundColor;
-  final IconData icon;
+  final String iconAsset;
   final Color iconColor;
 
   @override
@@ -216,7 +219,7 @@ class _SearchChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: iconColor),
+          AppIcon(iconAsset, size: AppIconSizes.s16, color: iconColor),
           const SizedBox(width: 4),
           Text(
             text,

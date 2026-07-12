@@ -6,8 +6,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
+import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/features/food_check/data/food_check_providers.dart';
 import 'package:can_i_eat_it/features/food_check/data/recent_food_providers.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
@@ -420,7 +424,7 @@ class _ResultCard extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.cardPadding),
         child: Row(
           children: [
-            // DESIGN-GAP: per-food 이모지는 API 미제공 → placeholder. 디자이너 확인 대기.
+            // per-food 카테고리는 API 미제공 → regular 폴백 일러스트(Figma food).
             Container(
               width: 40,
               height: 40,
@@ -428,11 +432,8 @@ class _ResultCard extends StatelessWidget {
                 color: AppColors.surfaceMuted,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
               ),
-              child: const Icon(
-                Icons.restaurant_menu,
-                size: 20,
-                color: AppColors.textSecondary,
-              ),
+              alignment: Alignment.center,
+              child: const CategoryIcon(code: null, size: 24),
             ),
             const SizedBox(width: AppSpacing.cardPadding),
             Expanded(
@@ -488,10 +489,12 @@ class _DirectAnalyzeCta extends StatelessWidget {
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
               ),
-              child: const Icon(
-                Icons.sentiment_dissatisfied_outlined,
-                size: 22,
-                color: AppColors.textSecondary,
+              child: const Center(
+                child: AppIcon(
+                  AppIcons.sad,
+                  size: AppIconSizes.s24,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
             const SizedBox(width: AppSpacing.cardPadding),
@@ -515,9 +518,9 @@ class _DirectAnalyzeCta extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
-              Icons.chevron_right,
-              size: 20,
+            const AppIcon(
+              AppIcons.chevronRight,
+              size: AppIconSizes.s20,
               color: AppColors.textSecondary,
             ),
           ],

@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/widgets/verdict_detail_card.dart';
+import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_all_records_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_unknown_screen.dart';
 
 /// 판정 결과 화면 (W3-3 Figma HeroSection 정합).
@@ -53,7 +57,12 @@ class VerdictResultScreen extends ConsumerWidget {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const AppIcon(
+            AppIcons.chevronLeft,
+            size: AppIconSizes.s24,
+            color: AppColors.textPrimary,
+            semanticsLabel: '뒤로',
+          ),
           onPressed: onRetry,
         ),
         title: Text(
@@ -80,7 +89,18 @@ class VerdictResultScreen extends ConsumerWidget {
             const SizedBox(height: AppSpacing.sectionGap),
 
             // 상세 판정 카드 (AI분석 칩 카드 + 불릿 items + 대체음식 + 기록)
-            VerdictDetailCard(verdict: verdict),
+            VerdictDetailCard(
+              verdict: verdict,
+              onSeeAllRecords: verdict.stateRecords.total > 0
+                  ? () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => VerdictAllRecordsScreen(
+                            stateRecords: verdict.stateRecords,
+                          ),
+                        ),
+                      )
+                  : null,
+            ),
             const SizedBox(height: AppSpacing.sectionGap),
 
             // 면책 고지 (모든 verdict 화면 필수 — 제품 요건)
@@ -117,55 +137,16 @@ class _HeroSection extends StatelessWidget {
 
   final EatVerdict verdict;
 
-  Color _verdictColor() {
-    return switch (verdict.level) {
-      VerdictLevel.recommend => AppColors.verdictRecommend,
-      VerdictLevel.caution => AppColors.verdictCaution,
-      VerdictLevel.risk => AppColors.verdictDanger,
-      VerdictLevel.unknown => AppColors.verdictUnknown,
+  /// 등급별 헤드라인 배지 (자체완결 색배지 — 초록체크/주황!/빨강X).
+  /// unknown 은 build() 상단에서 [VerdictUnknownScreen] 으로 위임돼 여기 도달하지 않음.
+  Widget _headlineIcon() {
+    final asset = switch (verdict.level) {
+      VerdictLevel.recommend => AppIcons.verdictRecommend,
+      VerdictLevel.caution => AppIcons.verdictCaution,
+      VerdictLevel.risk => AppIcons.verdictRisk,
+      VerdictLevel.unknown => AppIcons.verdictRisk, // 미도달 폴백
     };
-  }
-
-  /// 등급별 헤드라인 아이콘
-  Widget _headlineIcon(Color color) {
-    return switch (verdict.level) {
-      VerdictLevel.recommend => Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(Icons.check, color: Colors.white, size: 20),
-        ),
-      VerdictLevel.caution => Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(Icons.priority_high, color: Colors.white, size: 20),
-        ),
-      VerdictLevel.risk => Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(Icons.close, color: Colors.white, size: 20),
-        ),
-      VerdictLevel.unknown => Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(Icons.help_outline, color: Colors.white, size: 20),
-        ),
-    };
+    return AppIcon(asset, size: 28);
   }
 
   /// 등급별 헤드라인 문구
@@ -180,20 +161,19 @@ class _HeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _verdictColor();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // 원형 컨테이너 — 등급색 배경 + 음식 카테고리 일러스트
+        // 원형 컨테이너 — Figma: 중립 회색(#FAFAFA) + 연회색 테두리(#DBDBE5),
+        // 등급색과 무관하게 항상 동일. 안에 음식 카테고리 일러스트.
         // (by-id 판정: food-type 코드 아이콘 / by-text 판정: category=null → regular 폴백)
         Container(
           width: 110,
           height: 110,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.12),
+            color: const Color(0xFFFAFAFA),
             shape: BoxShape.circle,
-            border: Border.all(color: color.withValues(alpha: 0.25), width: 2),
+            border: Border.all(color: const Color(0xFFDBDBE5)),
           ),
           child: Center(
             child: CategoryIcon(code: verdict.category, size: 80),
@@ -209,13 +189,14 @@ class _HeroSection extends StatelessWidget {
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.itemGap),
+        const SizedBox(height: AppSpacing.sectionGap),
 
-        // 등급 헤드라인: 아이콘 + 문구
+        // 등급 헤드라인: 아이콘 + 문구 — Figma 좌측 정렬(스크린 마진 기준).
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _headlineIcon(color),
+            _headlineIcon(),
             const SizedBox(width: AppSpacing.itemGap),
             Flexible(
               child: Text(
@@ -223,7 +204,6 @@ class _HeroSection extends StatelessWidget {
                 style: AppTextStyles.header3Bold.copyWith(
                   color: AppColors.textPrimary,
                 ),
-                textAlign: TextAlign.center,
               ),
             ),
           ],
