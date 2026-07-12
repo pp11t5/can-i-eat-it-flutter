@@ -181,7 +181,8 @@ void main() {
       await tester.tap(find.text('전체 삭제'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('취소'));
+      // Figma 554:5324: 보조(취소) 버튼 라벨은 "취소하기".
+      await tester.tap(find.text('취소하기'));
       await tester.pumpAndSettle();
 
       expect(find.text('검색 기록을 삭제하시겠어요?'), findsNothing);
@@ -224,7 +225,7 @@ void main() {
 
       // _DirectAnalyzeCta 카드: 제목 + 부제에 쿼리 포함
       expect(find.text('찾는 음식이 없어요'), findsOneWidget);
-      expect(find.textContaining("'없는음식xyz'로 검색하기"), findsOneWidget);
+      expect(find.textContaining("'없는음식xyz'로 분석하기"), findsOneWidget);
     });
 
     testWidgets('결과 셀 탭 → addRecent 호출 후 /verdict 라우트 진입', (tester) async {
