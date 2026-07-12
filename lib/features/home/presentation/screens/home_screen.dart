@@ -47,7 +47,7 @@ class HomeScreen extends ConsumerWidget {
 
               // ── 2. 검색 바 ────────────────────────────────────────────
               HomeSearchBar(onTap: () => context.push('/check')),
-              const SizedBox(height: AppSpacing.itemGap),
+              const SizedBox(height: 14),
 
               // ── 3. 제안 칩 행 — Figma 1207:6604 단일 행 수평 스크롤 ────────
               SingleChildScrollView(
@@ -89,7 +89,7 @@ class HomeScreen extends ConsumerWidget {
                         onTap: () => context.push('/unrecorded-meals'),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: _HomeEntryCard(
                         iconAsset: 'assets/illustrations/food_salad.png',
@@ -110,7 +110,7 @@ class HomeScreen extends ConsumerWidget {
                   color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: AppSpacing.itemGap),
+              const SizedBox(height: 16),
               const _RecentMealsSection(),
               const SizedBox(height: AppSpacing.contentGap),
             ],
@@ -148,10 +148,10 @@ class _GreetingBlock extends StatelessWidget {
                   color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               Text.rich(
                 TextSpan(
-                  style: AppTextStyles.body2Regular.copyWith(
+                  style: AppTextStyles.body1Medium.copyWith(
                     color: AppColors.textSecondary,
                   ),
                   children: [
@@ -204,11 +204,15 @@ class _HomeEntryCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-          border: Border.all(
-            color: AppColors.borderCard, // Figma stroke #EDEDF5
-            width: 1,
-          ),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              offset: const Offset(0, 4),
+              blurRadius: 8,
+              spreadRadius: 1,
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,21 +220,20 @@ class _HomeEntryCard extends StatelessWidget {
           children: [
             Image.asset(
               iconAsset,
-              width: 40,
-              height: 40,
+              width: 24,
+              height: 24,
               fit: BoxFit.contain,
             ),
             const SizedBox(height: 12),
             Text(
               title,
-              style: AppTextStyles.body1Bold.copyWith(
-                color: AppColors.textPrimary,
+              style: AppTextStyles.body2Medium.copyWith(
+                color: AppColors.textStrong,
               ),
             ),
-            const SizedBox(height: 4),
             Text(
               subtitle,
-              style: AppTextStyles.body2Regular.copyWith(
+              style: AppTextStyles.caption1Medium.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),

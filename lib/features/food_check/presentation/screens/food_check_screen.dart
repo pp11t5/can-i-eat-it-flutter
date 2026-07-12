@@ -255,7 +255,7 @@ class _TopBar extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: AppSpacing.screenPadding),
+            const SizedBox(width: AppSpacing.itemGap),
             // 검색 필드 — 가로 나머지 공간 전부.
             Expanded(
               child: TextField(
@@ -392,7 +392,7 @@ class _ResultList extends StatelessWidget {
         if (index <= items.length) {
           final food = items[index - 1];
           return Padding(
-            padding: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.only(bottom: 8),
             child: _ResultCard(food: food, onTap: () => onTap(food)),
           );
         }
@@ -408,7 +408,7 @@ class _ResultList extends StatelessWidget {
 
 /// 검색 결과 단일 카드 (Figma 554-5322 결과 항목).
 ///
-/// - 흰 배경, #EAEAEA 1px 테두리, radius 16, 내부 패딩 16
+/// - 흰 배경, borderCard(#EDEDF5) 1px 테두리, radius 8, 내부 패딩 16
 /// - 좌측 placeholder leading 아이콘 (API에 이모지/아이콘 필드 없음)
 /// - 이름 body1Bold/textPrimary
 /// - chevron 없음, category 서브텍스트 없음
@@ -426,25 +426,16 @@ class _ResultCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           border: Border.all(
-            color: const Color(0xFFEAEAEA),
+            color: AppColors.borderCard,
           ),
-          borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         ),
         padding: const EdgeInsets.all(AppSpacing.cardPadding),
         child: Row(
           children: [
             // per-food 카테고리는 API 미제공 → regular 폴백 일러스트(Figma food).
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceMuted,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-              ),
-              alignment: Alignment.center,
-              child: const CategoryIcon(code: null, size: 24),
-            ),
-            const SizedBox(width: AppSpacing.cardPadding),
+            const CategoryIcon(code: null, size: 32),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 food.name,
@@ -465,7 +456,7 @@ class _ResultCard extends StatelessWidget {
 /// 결과 리스트 맨 아래 항상 표시 — 결과가 있을 때도, 없을 때도.
 /// 탭 → raw query 직접 분석 (/verdict, externalId 없으니 addRecent 생략).
 ///
-/// - surfaceMuted(#F4F4F5) 배경, radius 16, 내부 패딩 16~20
+/// - surfaceMuted(#F4F4F5) 배경, border(#EAEAEA), radius 8, 내부 패딩 16
 /// - 좌측 placeholder icon (슬픈 표정 아이콘)
 /// - 제목 "찾는 음식이 없어요" body1Bold/textPrimary
 /// - 부제 "'<query>'로 검색하기" + chevron(>) body2Medium/textSecondary
@@ -482,29 +473,17 @@ class _DirectAnalyzeCta extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.surfaceMuted,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.cardPadding,
-          vertical: 20,
-        ),
+        padding: const EdgeInsets.all(AppSpacing.cardPadding),
         child: Row(
           children: [
-            // DESIGN-GAP: per-food 이모지는 API 미제공 → placeholder. 디자이너 확인 대기.
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-              ),
-              child: const Center(
-                child: AppIcon(
-                  AppIcons.sad,
-                  size: AppIconSizes.s24,
-                  color: AppColors.textSecondary,
-                ),
-              ),
+            // Figma 554:5322 "찾는 음식이 없어요" — 고정 주황 distress 이모지(mood_uncomfortable, 32).
+            Image.asset(
+              AppImages.moodUncomfortable,
+              width: AppIconSizes.s32,
+              height: AppIconSizes.s32,
             ),
             const SizedBox(width: AppSpacing.cardPadding),
             Expanded(
@@ -513,16 +492,16 @@ class _DirectAnalyzeCta extends StatelessWidget {
                 children: [
                   Text(
                     '찾는 음식이 없어요',
-                    style: AppTextStyles.body1Bold.copyWith(
-                      color: AppColors.textPrimary,
+                    style: AppTextStyles.body1Medium.copyWith(
+                      color: AppColors.textStrong,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 0),
                   Text(
                     // Figma 554:5322/365-1849: 탭 시 raw text 판정(분석)이므로 "분석하기".
                     "'$query'로 분석하기",
                     style: AppTextStyles.body2Medium.copyWith(
-                      color: AppColors.textSecondary,
+                      color: AppColors.textStrong,
                     ),
                   ),
                 ],
@@ -530,7 +509,7 @@ class _DirectAnalyzeCta extends StatelessWidget {
             ),
             const AppIcon(
               AppIcons.chevronRight,
-              size: AppIconSizes.s20,
+              size: AppIconSizes.s16,
               color: AppColors.textSecondary,
             ),
           ],
@@ -735,7 +714,8 @@ class _EmptyState extends StatelessWidget {
             '아직 검색 기록이 없어요',
             textAlign: TextAlign.center,
             style: AppTextStyles.body1Regular.copyWith(
-              fontSize: 18,
+              fontSize: 20,
+              height: 1.2,
               color: AppColors.navInactive,
             ),
           ),
