@@ -30,6 +30,7 @@ Future<ConfirmModalAction?> showConfirmModal(
   required String primaryLabel,
   required Color primaryColor,
   required String secondaryLabel,
+  Color? secondaryColor,
   bool barrierDismissible = false,
 }) {
   return showDialog<ConfirmModalAction>(
@@ -43,6 +44,7 @@ Future<ConfirmModalAction?> showConfirmModal(
       primaryLabel: primaryLabel,
       primaryColor: primaryColor,
       secondaryLabel: secondaryLabel,
+      secondaryColor: secondaryColor,
     ),
   );
 }
@@ -56,6 +58,7 @@ class _ConfirmModal extends StatelessWidget {
     required this.primaryLabel,
     required this.primaryColor,
     required this.secondaryLabel,
+    this.secondaryColor,
   });
 
   final String title;
@@ -65,6 +68,7 @@ class _ConfirmModal extends StatelessWidget {
   final String primaryLabel;
   final Color primaryColor;
   final String secondaryLabel;
+  final Color? secondaryColor;
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +120,7 @@ class _ConfirmModal extends StatelessWidget {
             const SizedBox(height: AppSpacing.itemGap),
             _SecondaryCta(
               label: secondaryLabel,
+              color: secondaryColor,
               onTap: () =>
                   Navigator.of(context).pop(ConfirmModalAction.secondary),
             ),
@@ -162,11 +167,12 @@ class _PrimaryCta extends StatelessWidget {
   }
 }
 
-/// 텍스트 버튼(secondary) — 전체 너비 탭.
+/// 텍스트 버튼(secondary) — 전체 너비 탭. [color] 미지정 시 textSecondary(회색).
 class _SecondaryCta extends StatelessWidget {
-  const _SecondaryCta({required this.label, required this.onTap});
+  const _SecondaryCta({required this.label, this.color, required this.onTap});
 
   final String label;
+  final Color? color;
   final VoidCallback onTap;
 
   @override
@@ -179,7 +185,7 @@ class _SecondaryCta extends StatelessWidget {
           child: Text(
             label,
             style: AppTextStyles.body1Regular.copyWith(
-              color: AppColors.textSecondary,
+              color: color ?? AppColors.textSecondary,
             ),
           ),
         ),

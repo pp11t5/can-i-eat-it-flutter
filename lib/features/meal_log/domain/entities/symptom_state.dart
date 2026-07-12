@@ -45,4 +45,18 @@ extension SymptomStateMapper on SymptomState {
         SymptomState.uncomfortable => '불편함',
         SymptomState.severe => '심함',
       };
+
+  /// 서버 표시 문자열([StateRecord.label] 등)을 [SymptomState] 로 근사 매핑한다.
+  ///
+  /// 서버가 상태 enum 대신 표시용 라벨('편안해요'·'불편해요' 등)만 주는 경우
+  /// 무드 얼굴 렌더를 위해 사용한다. 미상 값은 [SymptomState.normal] 로 폴백.
+  /// ('불편'은 '편'을 포함하므로 '편안'을 먼저 검사.)
+  static SymptomState fromLabel(String label) {
+    if (label.contains('편안')) return SymptomState.comfortable;
+    if (label.contains('불편')) return SymptomState.uncomfortable;
+    if (label.contains('심')) return SymptomState.severe;
+    if (label.contains('좋')) return SymptomState.good;
+    if (label.contains('보통')) return SymptomState.normal;
+    return SymptomState.normal;
+  }
 }

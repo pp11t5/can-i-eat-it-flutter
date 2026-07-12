@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 
 /// 주차 네비게이션 바.
 ///
@@ -34,9 +37,12 @@ class WeekNav extends StatelessWidget {
         children: [
           IconButton(
             onPressed: onPrevWeek,
-            icon: const Icon(Icons.chevron_left),
-            color: AppColors.textPrimary,
-            iconSize: 24,
+            icon: const AppIcon(
+              AppIcons.chevronLeft,
+              size: AppIconSizes.s24,
+              color: AppColors.textPrimary,
+              semanticsLabel: '이전 주',
+            ),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
             visualDensity: VisualDensity.compact,
@@ -51,9 +57,12 @@ class WeekNav extends StatelessWidget {
           const SizedBox(width: 4),
           IconButton(
             onPressed: onNextWeek,
-            icon: const Icon(Icons.chevron_right),
-            color: AppColors.textPrimary,
-            iconSize: 24,
+            icon: const AppIcon(
+              AppIcons.chevronRight,
+              size: AppIconSizes.s24,
+              color: AppColors.textPrimary,
+              semanticsLabel: '다음 주',
+            ),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
             visualDensity: VisualDensity.compact,

@@ -31,6 +31,30 @@ abstract final class AppIcons {
   // --- 빈 상태 ---
   static const String foodEmpty = '$_figma/icon_food_empty.svg';
 
+  // --- 액션 아이콘 (모노크롬, 틴팅) ---
+  static const String plus = '$_figma/ic_plus.svg';
+  static const String bell = '$_figma/ic_bell.svg';
+  static const String lock = '$_figma/ic_lock.svg';
+  static const String pill = '$_figma/ic_pill.svg';
+  static const String sad = '$_figma/ic_sad.svg';
+  static const String trash = '$_figma/ic_trash.svg';
+  static const String pencil = '$_figma/ic_pencil.svg';
+  static const String download = '$_figma/ic_download.svg';
+
+  // --- 시맨틱 상태 (고정색 SVG, 원본색 유지) ---
+  static const String error = '$_figma/ic_error.svg'; // #FF383C
+  static const String warning = '$_figma/ic_warning.svg'; // #FF8D28
+
+  // --- 타임라인 레일 배지 (다색 자체완결, 원본색 유지) ---
+  // 32×32 둥근 배경 + 글리프. 색 미지정으로 원본 그대로 렌더.
+  static const String mealSun = '$_figma/ic_meal_sun.svg'; // 식사(주간)
+  static const String mealMoon = '$_figma/ic_meal_moon.svg'; // 식사(야간)
+  static const String recordChecklist =
+      '$_figma/ic_record_checklist.svg'; // 증상 기록
+
+  // --- 프로필 아바타 (다색 배지, 원본색 유지) ---
+  static const String userAvatar = '$_figma/ic_user.svg';
+
   // --- 브랜드 (다색 SVG, 원본색 유지) ---
   static const String kakaoSymbol = '$_figma/kakao_logo_symbol.svg';
 }

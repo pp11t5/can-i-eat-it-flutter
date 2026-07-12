@@ -3,10 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
+import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
@@ -40,6 +44,20 @@ class MealRecordDetailScreen extends ConsumerWidget {
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
+    // Figma 2469:9839 — 무확인 즉시삭제 방지. Primary(초록)="취소하기",
+    // Secondary(빨강)="삭제하기"(파괴 액션). secondary 선택 시에만 진행.
+    final action = await showConfirmModal(
+      context,
+      title: '음식 기록을 모두 삭제하시겠어요?',
+      body: '음식 삭제 시 음식 기록에 연결된\n증상 기록도 함께 삭제돼요.',
+      primaryLabel: '취소하기',
+      primaryColor: AppColors.primary,
+      secondaryLabel: '삭제하기',
+      secondaryColor: AppColors.danger,
+    );
+    if (action != ConfirmModalAction.secondary) return;
+    if (!context.mounted) return;
+
     try {
       await ref
           .read(mealRecordDetailControllerProvider(mealRecordId).notifier)
@@ -172,7 +190,12 @@ class _TopBar extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.close, color: AppColors.textPrimary),
+            icon: const AppIcon(
+              AppIcons.chevronLeft,
+              size: AppIconSizes.s24,
+              color: AppColors.textPrimary,
+              semanticsLabel: '뒤로',
+            ),
             onPressed: onClose,
           ),
           Expanded(
@@ -236,9 +259,9 @@ class _FoodRow extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
-              Icons.chevron_right,
-              size: 20,
+            const AppIcon(
+              AppIcons.chevronRight,
+              size: AppIconSizes.s20,
               color: AppColors.textTertiary,
             ),
           ],
@@ -325,7 +348,7 @@ class _BottomCta extends StatelessWidget {
             ),
           ),
           child: Text(
-            '기록 삭제하기',
+            '기록 모두 삭제하기',
             style: AppTextStyles.body2Medium.copyWith(
               color: AppColors.textSecondary,
             ),

@@ -3,8 +3,11 @@ import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 
 /// 식사 기록 화면 — 섭취 시각 선택 후 음식 검색으로 이어지는 흐름.
@@ -158,7 +161,12 @@ class _MealRecordScreenState extends State<MealRecordScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: AppColors.textPrimary),
+          icon: const AppIcon(
+            AppIcons.close,
+            size: AppIconSizes.s24,
+            color: AppColors.textPrimary,
+            semanticsLabel: '닫기',
+          ),
           onPressed: () {
             if (context.canPop()) context.pop();
           },

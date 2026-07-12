@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
@@ -14,6 +16,10 @@ Widget _wrap(Widget child) => ProviderScope(
         home: Scaffold(body: child),
       ),
     );
+
+/// 스파인 배지(AppIcon) 에셋 경로로 찾는 finder.
+Finder _badge(String asset) =>
+    find.byWidgetPredicate((w) => w is AppIcon && w.asset == asset);
 
 // ---------------------------------------------------------------------------
 // 픽스처: single(아침 08:00) / group(점심 12:30) / symptom / single(저녁 19:00)
@@ -116,26 +122,26 @@ void main() {
     });
   });
 
-  group('MealTimelineList — 시간대 아이콘 매핑', () {
-    testWidgets('아침(hour<12) → wb_sunny_outlined', (tester) async {
+  group('MealTimelineList — 시간대 배지 매핑', () {
+    testWidgets('아침(hour<18) → mealSun 배지', (tester) async {
       await tester.pumpWidget(
         _wrap(const MealTimelineList(items: [_kSingleMorning])),
       );
-      expect(find.byIcon(Icons.wb_sunny_outlined), findsOneWidget);
+      expect(_badge(AppIcons.mealSun), findsOneWidget);
     });
 
-    testWidgets('점심(12≤hour<18) → wb_twilight_outlined', (tester) async {
+    testWidgets('점심(12≤hour<18) → mealSun 배지(주간)', (tester) async {
       await tester.pumpWidget(
         _wrap(const MealTimelineList(items: [_kGroupLunch])),
       );
-      expect(find.byIcon(Icons.wb_twilight_outlined), findsOneWidget);
+      expect(_badge(AppIcons.mealSun), findsOneWidget);
     });
 
-    testWidgets('저녁(hour≥18) → nights_stay_outlined', (tester) async {
+    testWidgets('저녁(hour≥18) → mealMoon 배지', (tester) async {
       await tester.pumpWidget(
         _wrap(const MealTimelineList(items: [_kSingleEvening])),
       );
-      expect(find.byIcon(Icons.nights_stay_outlined), findsOneWidget);
+      expect(_badge(AppIcons.mealMoon), findsOneWidget);
     });
   });
 
@@ -173,21 +179,21 @@ void main() {
   });
 
   group('MealTimelineList — timeIcon 우선 (P1)', () {
-    testWidgets('timeIcon이 있으면 hour 휴리스틱보다 우선한다 (아침 시각이어도 moon 아이콘)',
+    testWidgets('timeIcon이 있으면 hour 휴리스틱보다 우선한다 (아침 시각이어도 moon 배지)',
         (tester) async {
       await tester.pumpWidget(
         _wrap(const MealTimelineList(items: [_kSingleMorningWithMoonIcon])),
       );
-      expect(find.byIcon(Icons.nights_stay_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.wb_sunny_outlined), findsNothing);
+      expect(_badge(AppIcons.mealMoon), findsOneWidget);
+      expect(_badge(AppIcons.mealSun), findsNothing);
     });
 
-    testWidgets('symptom 행은 timeIcon 유무와 무관하게 항상 의료 아이콘을 표시한다',
+    testWidgets('symptom 행은 timeIcon 유무와 무관하게 항상 checklist 배지를 표시한다',
         (tester) async {
       await tester.pumpWidget(
         _wrap(const MealTimelineList(items: [_kSymptom])),
       );
-      expect(find.byIcon(Icons.medical_information_outlined), findsOneWidget);
+      expect(_badge(AppIcons.recordChecklist), findsOneWidget);
     });
   });
 

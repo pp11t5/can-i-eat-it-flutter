@@ -4,8 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
@@ -173,7 +176,13 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
         onPressed: () => showFabActionSheet(context),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
-        child: const Icon(Icons.add),
+        shape: const CircleBorder(),
+        child: const AppIcon(
+          AppIcons.plus,
+          size: AppIconSizes.s24,
+          color: AppColors.onPrimary,
+          semanticsLabel: '기록 추가',
+        ),
       ),
     );
   }
@@ -268,10 +277,9 @@ class _TimelineEmptyView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.restaurant_menu_outlined,
+          const AppIcon(
+            AppIcons.foodEmpty,
             size: 48,
-            color: AppColors.textTertiary,
           ),
           const SizedBox(height: AppSpacing.itemGap),
           Text(
