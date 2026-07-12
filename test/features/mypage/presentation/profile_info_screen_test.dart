@@ -153,7 +153,7 @@ void main() {
       await tester.tap(find.text('로그아웃'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('취소'));
+      await tester.tap(find.text('취소하기'));
       await tester.pumpAndSettle();
 
       // 다이얼로그가 닫힘 → "로그아웃 하시겠어요?" 없음
