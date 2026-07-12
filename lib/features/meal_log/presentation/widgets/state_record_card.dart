@@ -4,6 +4,8 @@ import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
+import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
+import 'package:can_i_eat_it/features/symptom/presentation/widgets/mood_face.dart';
 
 /// 증상 기록 단건 카드.
 ///
@@ -34,7 +36,7 @@ class StateRecordCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Text('🩺', style: TextStyle(fontSize: 16, height: 1.0)),
+          MoodFace(state: SymptomStateMapper.fromLabel(record.label), size: 40),
           const SizedBox(width: AppSpacing.itemGap),
           Expanded(
             child: Column(

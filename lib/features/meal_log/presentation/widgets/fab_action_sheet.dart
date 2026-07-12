@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
+import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 
 /// FAB 액션시트 표시.
 ///
 /// Figma node 1351-14767.
-/// Dim 오버레이(검정 ~35%) + 우하단 X(녹색 원 FAB) + 흰 알약 메뉴 2개(우측정렬).
-/// - "🥗 식단 기록" → 닫고 '/meal/record' push
-/// - "✏️ 증상 일기" → 닫고 '/symptom/record' push (W5-3 활성화)
+/// Dim 오버레이(검정 ~35%) + 우하단 X(녹색 원 FAB, `+` 를 45° 회전) + 흰 알약
+/// 메뉴 2개(우측정렬).
+/// - "식단 기록"(밥그릇 아이콘) → 닫고 '/meal/record' push
+/// - "증상 일기"(연필 아이콘) → 닫고 '/symptom/record' push
 Future<void> showFabActionSheet(BuildContext context) {
   return showGeneralDialog<void>(
     context: context,
@@ -68,8 +73,9 @@ class _FabActionSheet extends StatelessWidget {
                     curve: Curves.easeOut,
                   )),
                   child: _ActionItem(
-                    label: '🥗 식단 기록',
-                    enabled: true,
+                    // regular 폴백 = 밥그릇(Figma food/regular_24).
+                    icon: const CategoryIcon(code: null, size: 24),
+                    label: '식단 기록',
                     onTap: () {
                       Navigator.of(context).pop();
                       context.push('/meal/record');
@@ -88,8 +94,8 @@ class _FabActionSheet extends StatelessWidget {
                     curve: Curves.easeOut,
                   )),
                   child: _ActionItem(
-                    label: '✏️ 증상 일기',
-                    enabled: true,
+                    icon: Image.asset(AppImages.pencil, width: 24, height: 24),
+                    label: '증상 일기',
                     onTap: () {
                       Navigator.of(context).pop();
                       context.push('/symptom/record');
@@ -98,13 +104,24 @@ class _FabActionSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.sectionGap),
 
-                // X 버튼 (녹색 원 FAB)
+                // X 버튼 (녹색 원 FAB) — `+` 를 45° 회전해 X 로.
                 FloatingActionButton(
                   onPressed: () => Navigator.of(context).pop(),
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.onPrimary,
                   elevation: 4,
-                  child: const Icon(Icons.close),
+                  shape: const CircleBorder(),
+                  child: RotationTransition(
+                    turns: Tween<double>(begin: 0, end: 0.125).animate(
+                      CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                    ),
+                    child: const AppIcon(
+                      AppIcons.plus,
+                      size: AppIconSizes.s24,
+                      color: AppColors.onPrimary,
+                      semanticsLabel: '닫기',
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -115,45 +132,50 @@ class _FabActionSheet extends StatelessWidget {
   }
 }
 
-/// 알약형 메뉴 항목 위젯.
+/// 알약형 메뉴 항목 위젯 — 아이콘 + 라벨.
 class _ActionItem extends StatelessWidget {
   const _ActionItem({
+    required this.icon,
     required this.label,
-    required this.enabled,
     required this.onTap,
   });
 
+  final Widget icon;
   final String label;
-  final bool enabled;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: enabled ? onTap : null,
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.cardPadding,
           vertical: AppSpacing.chipPaddingV + 4,
         ),
         decoration: BoxDecoration(
-          color: enabled ? AppColors.surface : AppColors.surfaceMuted,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-          boxShadow: enabled
-              ? const [
-                  BoxShadow(
-                    color: Color(0x1A000000),
-                    blurRadius: 8,
-                    offset: Offset(0, 2),
-                  ),
-                ]
-              : null,
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x1A000000),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
-        child: Text(
-          label,
-          style: AppTextStyles.body1Medium.copyWith(
-            color: enabled ? AppColors.textPrimary : AppColors.textTertiary,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            icon,
+            const SizedBox(width: AppSpacing.itemGap),
+            Text(
+              label,
+              style: AppTextStyles.body1Medium.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
         ),
       ),
     );

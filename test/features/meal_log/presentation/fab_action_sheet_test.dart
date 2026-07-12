@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/fab_action_sheet.dart';
 
 // ---------------------------------------------------------------------------
@@ -72,8 +74,8 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      expect(find.text('🥗 식단 기록'), findsOneWidget);
-      expect(find.text('✏️ 증상 일기'), findsOneWidget);
+      expect(find.text('식단 기록'), findsOneWidget);
+      expect(find.text('증상 일기'), findsOneWidget);
     });
 
     testWidgets('X 버튼 탭 시 시트가 닫힌다', (tester) async {
@@ -82,13 +84,17 @@ void main() {
 
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
-      expect(find.text('🥗 식단 기록'), findsOneWidget);
+      expect(find.text('식단 기록'), findsOneWidget);
 
-      // X(close) 아이콘 FAB 탭으로 닫기
-      await tester.tap(find.byIcon(Icons.close));
+      // X(= `+`를 45° 회전한 plus 에셋) FAB 탭으로 닫기
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is AppIcon && w.asset == AppIcons.plus,
+        ),
+      );
       await tester.pumpAndSettle();
 
-      expect(find.text('🥗 식단 기록'), findsNothing);
+      expect(find.text('식단 기록'), findsNothing);
     });
   });
 
@@ -101,7 +107,7 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('🥗 식단 기록'));
+      await tester.tap(find.text('식단 기록'));
       await tester.pumpAndSettle();
 
       expect(navigated, isTrue);
@@ -120,7 +126,7 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('✏️ 증상 일기'));
+      await tester.tap(find.text('증상 일기'));
       await tester.pumpAndSettle();
 
       expect(navigated, isTrue);

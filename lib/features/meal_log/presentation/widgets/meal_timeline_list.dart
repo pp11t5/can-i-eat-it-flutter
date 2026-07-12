@@ -1,28 +1,31 @@
 import 'package:flutter/material.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 
-/// 타임라인 리스트 위젯 — 왼쪽 수직 스파인 + 시간대 아이콘 + 변형별 타일.
+/// 타임라인 리스트 위젯 — 왼쪽 수직 스파인 + 시간대 배지 + 변형별 타일.
 ///
 /// [TimelineItem] sealed union(single/group/symptom)을 변형별로 렌더한다.
-/// - single: 음식 1개짜리 식사 (음식명 + grade 배지 + 연결증상 칩).
-/// - group: 음식 2개 이상짜리 식사 (대표음식 + "외 N개" + 연결증상 칩).
+/// - single: 음식 1개짜리 식사 (음식명 + grade 배지 + 연결증상 카드).
+/// - group: 음식 2개 이상짜리 식사 (대표음식 + "외 N개" + 연결증상 카드).
 /// - symptom: 증상 기록 (symptomId 있으면 탭 가능 → 증상 상세).
 ///
-/// 시간대 아이콘은 [TimelineItem.timeIcon] 우선, 없으면 mealRecordDateTime/
-/// occurredAt 의 hour 휴리스틱으로 폴백(증상 행은 항상 의료 아이콘).
+/// 스파인 배지는 Figma 에셋(자체완결 원형): 증상은 `checklist`, 식사는
+/// [TimelineItem.timeIcon] 우선(sun/moon), 없으면 hour 휴리스틱(주간=sun/야간=moon).
 ///
 /// [items]: 표시할 타임라인 항목 목록 (비어있지 않아야 함).
 /// [onTapMeal]: single/group 타일 탭 콜백 (식사 상세 진입).
 /// [onAddFood]: single/group 타일 "+음식 추가" 콜백.
-/// [onTapSymptom]: 증상 행 또는 연결증상 칩 탭 콜백 (증상 상세 진입, symptomId).
+/// [onTapSymptom]: 증상 행 또는 연결증상 카드 탭 콜백 (증상 상세 진입, symptomId).
 class MealTimelineList extends StatelessWidget {
   const MealTimelineList({
     super.key,
@@ -40,7 +43,7 @@ class MealTimelineList extends StatelessWidget {
   /// single/group 타일 "+음식 추가" → 기존 식사에 추가(mealRecordId).
   final void Function(String mealRecordId)? onAddFood;
 
-  /// 증상 행/연결증상 칩 탭 → 증상 상세(symptomId).
+  /// 증상 행/연결증상 카드 탭 → 증상 상세(symptomId).
   final void Function(String symptomId)? onTapSymptom;
 
   /// ISO-8601 문자열 → 시(hour).
@@ -52,13 +55,6 @@ class MealTimelineList extends StatelessWidget {
     }
   }
 
-  /// hour → 시간대 아이콘 (timeIcon 미제공 시 폴백).
-  static IconData _mealTimeIcon(int hour) {
-    if (hour < 12) return Icons.wb_sunny_outlined; // 아침
-    if (hour < 18) return Icons.wb_twilight_outlined; // 점심
-    return Icons.nights_stay_outlined; // 저녁
-  }
-
   /// 항목별 시간대 hour 추출.
   static int _itemHour(TimelineItem item) => switch (item) {
         TimelineSingle(:final mealRecordDateTime) => _hourOf(mealRecordDateTime),
@@ -66,19 +62,19 @@ class MealTimelineList extends StatelessWidget {
         TimelineSymptom(:final occurredAt) => _hourOf(occurredAt),
       };
 
-  /// 스파인 아이콘 — timeIcon 우선, 없으면 hour 휴리스틱. 증상 행은 의미상
-  /// 항상 의료 아이콘(semantic)을 유지한다.
-  static IconData _resolveIcon(TimelineItem item) {
-    if (item is TimelineSymptom) return Icons.medical_information_outlined;
+  /// 스파인 배지 에셋 — 증상은 checklist, 식사는 timeIcon 우선(sun/moon),
+  /// 없으면 hour 휴리스틱(주간=sun / 야간=moon). Figma Component 1 세트 정합.
+  static String _resolveBadge(TimelineItem item) {
+    if (item is TimelineSymptom) return AppIcons.recordChecklist;
     final timeIcon = switch (item) {
       TimelineSingle(:final timeIcon) => timeIcon,
       TimelineGroup(:final timeIcon) => timeIcon,
       TimelineSymptom() => null,
     };
     return switch (timeIcon) {
-      TimeIcon.sun => Icons.wb_sunny_outlined,
-      TimeIcon.moon => Icons.nights_stay_outlined,
-      null => _mealTimeIcon(_itemHour(item)),
+      TimeIcon.sun => AppIcons.mealSun,
+      TimeIcon.moon => AppIcons.mealMoon,
+      null => _itemHour(item) < 18 ? AppIcons.mealSun : AppIcons.mealMoon,
     };
   }
 
@@ -93,7 +89,7 @@ class MealTimelineList extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = items[index];
         final isLast = index == items.length - 1;
-        final icon = _resolveIcon(item);
+        final badge = _resolveBadge(item);
 
         final Widget card = switch (item) {
           TimelineSingle() => _SingleMealCard(
@@ -124,21 +120,22 @@ class MealTimelineList extends StatelessWidget {
             ),
         };
 
-        return _TimelineRow(icon: icon, isLast: isLast, child: card);
+        return _TimelineRow(badgeAsset: badge, isLast: isLast, child: card);
       },
     );
   }
 }
 
-/// 타임라인 행 — 스파인(라인+아이콘) + 오른쪽 카드.
+/// 타임라인 행 — 스파인(배지 + 라인) + 오른쪽 카드.
 class _TimelineRow extends StatelessWidget {
   const _TimelineRow({
-    required this.icon,
+    required this.badgeAsset,
     required this.isLast,
     required this.child,
   });
 
-  final IconData icon;
+  /// 스파인 배지 SVG 경로(자체완결 원형, 원본색 유지).
+  final String badgeAsset;
   final bool isLast;
   final Widget child;
 
@@ -158,20 +155,8 @@ class _TimelineRow extends StatelessWidget {
               width: _iconContainerSize,
               child: Column(
                 children: [
-                  Container(
-                    width: _iconContainerSize,
-                    height: _iconContainerSize,
-                    decoration: const BoxDecoration(
-                      color: AppColors.surfaceMuted,
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      icon,
-                      size: 16,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
+                  // 자체완결 원형 배지(32×32) — 별도 회색 래퍼 없이 직접 렌더.
+                  AppIcon(badgeAsset, size: AppIconSizes.s32),
                   if (!isLast)
                     Expanded(
                       child: Container(
@@ -244,7 +229,7 @@ Color _verdictColor(VerdictLevel level) => switch (level) {
       VerdictLevel.unknown => AppColors.verdictUnknown,
     };
 
-/// 식후 경과 분 → "식후 N분"(_SymptomCard·_ConnectedSymptomsChip 공유).
+/// 식후 경과 분 → "식후 N분"(_SymptomCard·_ConnectedSymptomsCard 공유).
 String _afterMealLabel(int minutes) {
   if (minutes < 60) return '식후 $minutes분';
   final h = minutes ~/ 60;
@@ -265,7 +250,12 @@ class _AddFoodRow extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: Row(
         children: [
-          const Icon(Icons.add, size: 16, color: AppColors.textTertiary),
+          const AppIcon(
+            AppIcons.plus,
+            size: AppIconSizes.s16,
+            color: AppColors.textTertiary,
+            semanticsLabel: '음식 추가',
+          ),
           const SizedBox(width: AppSpacing.xs),
           Text(
             '같이 먹은 음식이 있나요?',
@@ -279,9 +269,11 @@ class _AddFoodRow extends StatelessWidget {
   }
 }
 
-/// 연결증상 칩 — 대표증상 + "외 N개" + "식후 N분" 요약, 탭 시 증상 상세 이동.
-class _ConnectedSymptomsChip extends StatelessWidget {
-  const _ConnectedSymptomsChip({required this.connectedSymptoms, this.onTap});
+/// 연결증상 카드 — 대표증상 요약 + "식후 N분", 탭 시 증상 상세 이동.
+///
+/// Figma: "+같이 먹은 음식" 아래 중첩 회색 카드(요약 볼드 + chevron).
+class _ConnectedSymptomsCard extends StatelessWidget {
+  const _ConnectedSymptomsCard({required this.connectedSymptoms, this.onTap});
 
   final ConnectedSymptoms connectedSymptoms;
   final VoidCallback? onTap;
@@ -304,29 +296,43 @@ class _ConnectedSymptomsChip extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: Container(
         margin: const EdgeInsets.only(top: AppSpacing.itemGap),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.chipPaddingH,
-          vertical: AppSpacing.chipPaddingV,
-        ),
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSpacing.cardPadding),
         decoration: BoxDecoration(
-          color: AppColors.surfaceMuted,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+          color: AppColors.surfaceBackground,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('🩺', style: TextStyle(fontSize: 14, height: 1.0)),
-            const SizedBox(width: AppSpacing.xs),
-            Flexible(
-              child: Text(
-                '${_summary()} · ${_afterMealLabel(connectedSymptoms.afterMealMinutes)}',
-                style: AppTextStyles.caption1Medium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _summary(),
+                    style: AppTextStyles.body2Bold.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    _afterMealLabel(connectedSymptoms.afterMealMinutes),
+                    style: AppTextStyles.caption1Medium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
+            if (onTap != null)
+              const AppIcon(
+                AppIcons.chevronRight,
+                size: AppIconSizes.s20,
+                color: AppColors.textTertiary,
+                semanticsLabel: '증상 상세',
+              ),
           ],
         ),
       ),
@@ -350,7 +356,7 @@ class _SingleMealCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onAddFood;
 
-  /// 연결증상 칩 탭 → 증상 상세(symptomId).
+  /// 연결증상 카드 탭 → 증상 상세(symptomId).
   final void Function(String symptomId)? onTapSymptom;
 
   @override
@@ -362,23 +368,11 @@ class _SingleMealCard extends StatelessWidget {
           GestureDetector(
             onTap: onTap,
             behavior: HitTestBehavior.opaque,
-            child: Row(
-              children: [
-                Text(
-                  '먹은 음식 · ${_formatTime(item.mealRecordDateTime)}',
-                  style: AppTextStyles.caption1Medium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                if (onTap != null) ...[
-                  const SizedBox(width: 2),
-                  const Icon(
-                    Icons.chevron_right,
-                    size: 14,
-                    color: AppColors.textTertiary,
-                  ),
-                ],
-              ],
+            child: Text(
+              '먹은 음식 · ${_formatTime(item.mealRecordDateTime)}',
+              style: AppTextStyles.caption1Medium.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.itemGap),
@@ -409,28 +403,24 @@ class _SingleMealCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
-                  const Icon(
-                    Icons.chevron_right,
-                    size: 16,
+                  const AppIcon(
+                    AppIcons.chevronRight,
+                    size: AppIconSizes.s16,
                     color: AppColors.textTertiary,
                   ),
                 ],
               ),
             ),
           ),
+          const SizedBox(height: AppSpacing.itemGap),
+          _AddFoodRow(onAddFood: onAddFood),
           if (item.connectedSymptoms != null)
-            _ConnectedSymptomsChip(
+            _ConnectedSymptomsCard(
               connectedSymptoms: item.connectedSymptoms!,
               onTap: onTapSymptom != null
                   ? () => onTapSymptom!(item.connectedSymptoms!.symptomId)
                   : null,
             ),
-          const Divider(
-            height: AppSpacing.sectionGap,
-            color: AppColors.divider,
-            thickness: 0.5,
-          ),
-          _AddFoodRow(onAddFood: onAddFood),
         ],
       ),
     );
@@ -453,7 +443,7 @@ class _GroupMealCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onAddFood;
 
-  /// 연결증상 칩 탭 → 증상 상세(symptomId).
+  /// 연결증상 카드 탭 → 증상 상세(symptomId).
   final void Function(String symptomId)? onTapSymptom;
 
   /// 대표음식 + "외 N개" 요약.
@@ -474,23 +464,11 @@ class _GroupMealCard extends StatelessWidget {
           GestureDetector(
             onTap: onTap,
             behavior: HitTestBehavior.opaque,
-            child: Row(
-              children: [
-                Text(
-                  '먹은 음식 · ${_formatTime(item.mealRecordDateTime)}',
-                  style: AppTextStyles.caption1Medium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                if (onTap != null) ...[
-                  const SizedBox(width: 2),
-                  const Icon(
-                    Icons.chevron_right,
-                    size: 14,
-                    color: AppColors.textTertiary,
-                  ),
-                ],
-              ],
+            child: Text(
+              '먹은 음식 · ${_formatTime(item.mealRecordDateTime)}',
+              style: AppTextStyles.caption1Medium.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.itemGap),
@@ -514,28 +492,24 @@ class _GroupMealCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
-                  const Icon(
-                    Icons.chevron_right,
-                    size: 16,
+                  const AppIcon(
+                    AppIcons.chevronRight,
+                    size: AppIconSizes.s16,
                     color: AppColors.textTertiary,
                   ),
                 ],
               ),
             ),
           ),
+          const SizedBox(height: AppSpacing.itemGap),
+          _AddFoodRow(onAddFood: onAddFood),
           if (item.connectedSymptoms != null)
-            _ConnectedSymptomsChip(
+            _ConnectedSymptomsCard(
               connectedSymptoms: item.connectedSymptoms!,
               onTap: onTapSymptom != null
                   ? () => onTapSymptom!(item.connectedSymptoms!.symptomId)
                   : null,
             ),
-          const Divider(
-            height: AppSpacing.sectionGap,
-            color: AppColors.divider,
-            thickness: 0.5,
-          ),
-          _AddFoodRow(onAddFood: onAddFood),
         ],
       ),
     );
@@ -562,12 +536,17 @@ class _SymptomCard extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         child: Row(
           children: [
-            const Text('🩺', style: TextStyle(fontSize: 18, height: 1.0)),
-            const SizedBox(width: AppSpacing.itemGap),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(
+                    '증상 기록 · ${_formatTime(item.occurredAt)}',
+                    style: AppTextStyles.caption1Medium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     item.symptomState.label,
                     style: AppTextStyles.body2Medium.copyWith(
@@ -576,7 +555,7 @@ class _SymptomCard extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    '${_afterMealLabel(item.afterMealMinutes)} · ${_formatTime(item.occurredAt)}',
+                    _afterMealLabel(item.afterMealMinutes),
                     style: AppTextStyles.caption1Medium.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -584,6 +563,13 @@ class _SymptomCard extends StatelessWidget {
                 ],
               ),
             ),
+            if (onTap != null)
+              const AppIcon(
+                AppIcons.chevronRight,
+                size: AppIconSizes.s20,
+                color: AppColors.textTertiary,
+                semanticsLabel: '증상 상세',
+              ),
           ],
         ),
       ),
