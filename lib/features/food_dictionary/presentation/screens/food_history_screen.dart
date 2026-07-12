@@ -83,6 +83,7 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
         backgroundColor: AppColors.surface,
         elevation: 0,
         centerTitle: true,
+        toolbarHeight: 64,
         leading: IconButton(
           iconSize: 32,
           padding: EdgeInsets.zero,
@@ -95,7 +96,11 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
         ),
         title: Text(
           '음식 히스토리',
-          style: AppTextStyles.body1Bold.copyWith(color: AppColors.textPrimary),
+          style:
+              AppTextStyles.body1Medium.copyWith(color: AppColors.textPrimary),
+        ),
+        shape: const Border(
+          bottom: BorderSide(color: Color(0xFFF5F5F5), width: 1),
         ),
       ),
       body: SafeArea(
@@ -105,7 +110,7 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
             const Padding(
               padding: EdgeInsets.fromLTRB(
                 AppSpacing.screenPadding,
-                AppSpacing.itemGap,
+                16,
                 AppSpacing.screenPadding,
                 0,
               ),
@@ -202,7 +207,7 @@ class _SegmentToggle extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xs),
       decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
+        color: const Color(0xFFEAEAEA),
         borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
       ),
       child: Row(
@@ -262,9 +267,10 @@ class _SegmentItem extends StatelessWidget {
         child: Text(
           label,
           style: selected
-              ? AppTextStyles.body1Bold.copyWith(color: AppColors.textPrimary)
+              ? AppTextStyles.body1Medium
+                  .copyWith(color: const Color(0xFF000000))
               : AppTextStyles.body1Medium
-                  .copyWith(color: AppColors.textSecondary),
+                  .copyWith(color: AppColors.textTertiary),
         ),
       ),
     );
@@ -304,9 +310,11 @@ class _DictionaryList extends StatelessWidget {
         }
         return ListView.separated(
           controller: scrollController,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.screenPadding,
-            vertical: AppSpacing.itemGap,
+          padding: const EdgeInsets.only(
+            left: AppSpacing.screenPadding,
+            right: AppSpacing.screenPadding,
+            top: AppSpacing.itemGap,
+            bottom: 16,
           ),
           itemCount: dictState.items.length + (dictState.hasNext ? 1 : 0),
           separatorBuilder: (_, __) =>
@@ -351,7 +359,7 @@ class _DictionaryCard extends StatelessWidget {
             child: Row(
               children: [
                 CategoryIcon(code: item.categoryCode, size: 32),
-                const SizedBox(width: AppSpacing.itemGap * 1.5),
+                const SizedBox(width: AppSpacing.itemGap),
                 Expanded(
                   child: Text(
                     item.name,

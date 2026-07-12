@@ -26,9 +26,8 @@ class VerdictOutlineBadge extends StatelessWidget {
       };
 
   Color _backgroundColor() => switch (level) {
-        // recommend: verdictRecommend 옅은 알파 (기존 VerdictBadge dot 배지와 동일 비율).
-        VerdictLevel.recommend =>
-          AppColors.verdictRecommend.withValues(alpha: 0.12),
+        // recommend: Figma 실측 flat 배경 (AppColors.surfaceSelected = green10 #F0FFF4).
+        VerdictLevel.recommend => AppColors.surfaceSelected,
         // caution/risk: Figma 실측 연한 배경 — semantic 토큰 미정, const Color 유지.
         VerdictLevel.caution => const Color(0xFFFFF5EA),
         VerdictLevel.risk => const Color(0xFFFFE0E0),
@@ -41,7 +40,7 @@ class VerdictOutlineBadge extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.chipPaddingH,
+        horizontal: 16,
         vertical: AppSpacing.chipPaddingV,
       ),
       decoration: BoxDecoration(
@@ -51,7 +50,7 @@ class VerdictOutlineBadge extends StatelessWidget {
       ),
       child: Text(
         level.label,
-        style: AppTextStyles.body2Bold.copyWith(color: borderColor),
+        style: AppTextStyles.body2Medium.copyWith(color: borderColor),
       ),
     );
   }
