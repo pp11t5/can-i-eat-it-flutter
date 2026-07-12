@@ -22,6 +22,7 @@ abstract final class AppIcons {
   static const String closeSmall = '$_figma/icon_close_small.svg';
   static const String search = '$_figma/icon_search.svg';
   static const String plusCircle = '$_figma/icon_plus_circle.svg';
+  static const String clock = '$_figma/ic_clock.svg';
 
   // --- 체크박스 ---
   static const String checkboxChecked = '$_figma/checkbox_checked_on.svg';
@@ -59,9 +60,12 @@ abstract final class AppIcons {
 
   // --- 판정 배지 (자체완결 색배지, 원본색 유지) ---
   // recommend=초록원+흰체크, caution=주황+! , risk=빨강+X (verdict 헤드라인·대체음식).
+  // unknown=회색원+흰물음표 — Figma 소스 노드 부재(W6-17 주간리포트 범례 유일 사용처),
+  // 나머지 3종과 동일한 원+글리프 구성으로 저작(디자이너 검수 권장).
   static const String verdictRecommend = '$_figma/ic_verdict_recommend.svg';
   static const String verdictCaution = '$_figma/ic_verdict_caution.svg';
   static const String verdictRisk = '$_figma/ic_verdict_risk.svg';
+  static const String verdictUnknown = '$_figma/ic_verdict_unknown.svg';
 
   // --- AI 스파클 (보라 #9747FF, 원본색 유지) ---
   static const String sparkle = '$_figma/ic_sparkle.svg';

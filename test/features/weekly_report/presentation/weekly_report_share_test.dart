@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/features/weekly_report/data/repositories/mock_weekly_report_repository.dart';
 import 'package:can_i_eat_it/features/weekly_report/data/weekly_report_providers.dart';
 import 'package:can_i_eat_it/features/weekly_report/presentation/controllers/report_sharer.dart';
@@ -60,7 +62,9 @@ void main() {
 
         expect(sharer.callCount, 0);
 
-        await tester.tap(find.byIcon(Icons.file_download_outlined));
+        await tester.tap(find.byWidgetPredicate(
+          (w) => w is AppIcon && w.asset == AppIcons.download,
+        ));
         await tester.pump();
         // RepaintBoundary.toImage()는 실제 async 파이프라인(진짜 이벤트루프 tick)에서만
         // 완료된다 — runAsync 존 안에서 실제 시간을 흘려보내 캡처를 완결시킨다.
