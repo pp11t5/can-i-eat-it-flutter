@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/app/widgets/step_progress.dart';
@@ -191,7 +193,13 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       await tester.enterText(find.byType(TextField).first, '오메프라졸');
-      await tester.tap(find.text('＋ 복용약 추가'));
+      // Figma 정합: 별도 버튼 → TextField 우측 인라인 + 버튼(plusCircle).
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is AppIcon && w.asset == AppIcons.plusCircle,
+        ),
+        warnIfMissed: false,
+      );
       await tester.pumpAndSettle();
 
       expect(
@@ -218,7 +226,13 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       await tester.enterText(find.byType(TextField).first, '란소프라졸');
-      await tester.tap(find.text('＋ 복용약 추가'));
+      // Figma 정합: 별도 버튼 → TextField 우측 인라인 + 버튼(plusCircle).
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is AppIcon && w.asset == AppIcons.plusCircle,
+        ),
+        warnIfMissed: false,
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('란소프라졸'), findsOneWidget);
@@ -243,7 +257,13 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       await tester.enterText(find.byType(TextField).first, '오메프라졸');
-      await tester.tap(find.text('＋ 복용약 추가'));
+      // Figma 정합: 별도 버튼 → TextField 우측 인라인 + 버튼(plusCircle).
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is AppIcon && w.asset == AppIcons.plusCircle,
+        ),
+        warnIfMissed: false,
+      );
       await tester.pumpAndSettle();
 
       expect(
@@ -252,12 +272,15 @@ void main() {
       );
 
       // 약 칩이 스크롤 영역 아래에 생성되므로 보이도록 스크롤한다.
+      final removeIcon = find.byWidgetPredicate(
+        (w) => w is AppIcon && w.asset == AppIcons.closeSmall,
+      );
       await tester.scrollUntilVisible(
-        find.byIcon(Icons.close),
+        removeIcon,
         100,
         scrollable: find.byType(Scrollable).first,
       );
-      await tester.tap(find.byIcon(Icons.close));
+      await tester.tap(removeIcon, warnIfMissed: false);
       await tester.pumpAndSettle();
 
       expect(

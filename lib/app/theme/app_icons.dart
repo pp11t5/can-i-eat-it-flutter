@@ -68,6 +68,9 @@ abstract final class AppIcons {
 
   // --- 브랜드 (다색 SVG, 원본색 유지) ---
   static const String kakaoSymbol = '$_figma/kakao_logo_symbol.svg';
+
+  // --- 브랜드 (모노크롬, 틴팅) ---
+  static const String appleLogo = '$_figma/apple_logo.svg';
 }
 
 /// 앱 전역 **PNG 래스터 이미지** 경로 레지스트리.

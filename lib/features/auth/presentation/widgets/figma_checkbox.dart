@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 
 /// Figma node 365:1557 의 커스텀 체크박스를 그대로 구현한 위젯.
 ///
@@ -31,8 +33,8 @@ class FigmaCheckbox extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
-                child: const Icon(
-                  Icons.check_rounded,
+                child: const AppIcon(
+                  AppIcons.check,
                   size: 15,
                   color: AppColors.surface,
                 ),
