@@ -218,9 +218,10 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      // Figma 2523:14131 — Content L/R 16, T/B 16.
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.screenPadding,
-        vertical: AppSpacing.sectionGap,
+        vertical: AppSpacing.cardPadding,
       ),
       // W6-7: PNG 공유 캡처 대상 (AppBar 제외, 기간/주차 라벨 + 카드1 + 카드2).
       // 배경색을 명시해 투명 배경으로 캡처되는 것을 방지한다.
@@ -247,7 +248,8 @@ class _Body extends StatelessWidget {
                   color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: AppSpacing.sectionGap),
+              // Figma — 헤더 → 카드 간격 32.
+              const SizedBox(height: AppSpacing.contentGap),
 
               // -------------------------------------------------------------
               // 카드1 — 속 편한 음식 현황
@@ -304,7 +306,8 @@ class _ReportCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      // Figma 2523:14131 — 카드 padding 24(전 카드 공통).
+      padding: const EdgeInsets.all(AppSpacing.sectionGap),
       decoration: BoxDecoration(
         color: _kCardBg,
         border: Border.all(color: _kCardBorder, width: 1),
@@ -358,8 +361,8 @@ class _ComfortableStateCard extends StatelessWidget {
               label: '권장 음식',
               icon: SvgPicture.asset(
                 AppIcons.verdictRecommend,
-                width: 28,
-                height: 28,
+                width: 32,
+                height: 32,
               ),
               value: '${comfortableState.recommendedMealCount}끼',
             ),
@@ -369,8 +372,8 @@ class _ComfortableStateCard extends StatelessWidget {
               label: '전체 비율',
               icon: Image.asset(
                 AppImages.moodGood,
-                width: 28,
-                height: 28,
+                width: 32,
+                height: 32,
               ),
               value: '${comfortableState.percentage.toStringAsFixed(1)}%',
             ),
@@ -394,21 +397,22 @@ class _StatColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Figma 2523:14131 — 라벨 14/#737380, 숫자 16(M)/#1A1A1F, 컬럼 내부 gap 16.
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           label,
-          style: AppTextStyles.caption1Medium.copyWith(
+          style: AppTextStyles.body2Medium.copyWith(
             color: AppColors.textSecondary,
           ),
         ),
-        const SizedBox(height: AppSpacing.itemGap),
+        const SizedBox(height: AppSpacing.cardPadding),
         icon,
-        const SizedBox(height: AppSpacing.itemGap),
+        const SizedBox(height: AppSpacing.cardPadding),
         Text(
           value,
-          style: AppTextStyles.body1Bold.copyWith(
+          style: AppTextStyles.body1Medium.copyWith(
             color: AppColors.textPrimary,
           ),
         ),
@@ -758,36 +762,31 @@ class _SymptomPill extends StatelessWidget {
   }
 }
 
-/// 증상 종류별 막대 Row(4열, 하단 정렬, gap 8). 막대 높이는 열 중 최댓값 대비 비례.
+/// 증상 종류별 막대 Row — 각 컬럼 폭이 횟수 비례(flex=count), 막대 사이 gap 8.
+/// (Figma 2523:14131 실측: 이물감 fixed33/답답함50/신물·기침 fill 구조 → flex(count)로 근사.
+/// 세로 높이가 아니라 가로 폭이 비율, 컬럼이 폭을 나눠 가지므로 막대 사이 여백 없음.)
 class _SymptomTypeBars extends StatelessWidget {
   const _SymptomTypeBars({required this.typeCounts});
 
   final List<SymptomTypeCount> typeCounts;
 
-  /// 막대 최대 높이 (Figma 실측).
-  static const double _kMaxBarHeight = 80.0;
-
   @override
   Widget build(BuildContext context) {
     if (typeCounts.isEmpty) return const SizedBox.shrink();
 
-    final maxCount = typeCounts
-        .map((e) => e.count)
-        .fold<int>(0, (max, count) => count > max ? count : max);
-
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (var i = 0; i < typeCounts.length; i++) ...[
           if (i > 0) const SizedBox(width: AppSpacing.itemGap),
+          // Figma 실측 폭(이물감 33/답답함 50/count4 fill≈94) 근사: width≈16+17×count.
+          // base 16으로 작은 count도 라벨("이물감") 한 줄이 들어가는 폭 확보.
           Expanded(
+            flex: 16 + 17 * (typeCounts[i].count < 0 ? 0 : typeCounts[i].count),
             child: _SymptomBarColumn(
               typeCount: typeCounts[i],
               color: _kSymptomBarColors[typeCounts[i].type] ??
                   AppColors.verdictUnknown,
-              heightRatio:
-                  maxCount == 0 ? 0 : typeCounts[i].count / maxCount,
-              maxHeight: _kMaxBarHeight,
             ),
           ),
         ],
@@ -796,46 +795,31 @@ class _SymptomTypeBars extends StatelessWidget {
   }
 }
 
-/// 막대 1열 — 세로 막대(radius 10, 폭 33) + 라벨(caption) + "N 번"(caption).
+/// 막대 1열 — 가로 막대(높이 46, 폭=컬럼 채움, radius 10) + 라벨.
+/// Figma 2523:14131 실측: 막대 46×radius10, 라벨 왼쪽 정렬, 증상명 #737380 / "N 번" #1A1A1F.
 class _SymptomBarColumn extends StatelessWidget {
   const _SymptomBarColumn({
     required this.typeCount,
     required this.color,
-    required this.heightRatio,
-    required this.maxHeight,
   });
 
   final SymptomTypeCount typeCount;
   final Color color;
-  final double heightRatio;
-  final double maxHeight;
 
-  /// 막대 폭 (Figma 실측 ~33).
-  static const double _kBarWidth = 33.0;
-
-  /// count=0이어도 완전히 사라지지 않도록 하는 최소 높이.
-  static const double _kMinBarHeight = 4.0;
+  /// 막대 고정 높이 (Figma 실측 46pt).
+  static const double _kBarHeight = 46.0;
 
   @override
   Widget build(BuildContext context) {
-    final barHeight =
-        (maxHeight * heightRatio).clamp(_kMinBarHeight, maxHeight);
-
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          height: maxHeight,
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              width: _kBarWidth,
-              height: barHeight,
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
+        Container(
+          height: _kBarHeight,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(10),
           ),
         ),
         const SizedBox(height: AppSpacing.itemGap),
@@ -848,7 +832,7 @@ class _SymptomBarColumn extends StatelessWidget {
         Text(
           '${typeCount.count} 번',
           style: AppTextStyles.caption1Medium.copyWith(
-            color: AppColors.textSecondary,
+            color: AppColors.textPrimary,
           ),
         ),
       ],
