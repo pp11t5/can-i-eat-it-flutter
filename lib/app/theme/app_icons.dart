@@ -40,6 +40,8 @@ abstract final class AppIcons {
   static const String trash = '$_figma/ic_trash.svg';
   static const String pencil = '$_figma/ic_pencil.svg';
   static const String download = '$_figma/ic_download.svg';
+  static const String check = '$_figma/ic_check.svg';
+  static const String arrowRight = '$_figma/ic_arrow_right.svg';
 
   // --- 시맨틱 상태 (고정색 SVG, 원본색 유지) ---
   static const String error = '$_figma/ic_error.svg'; // #FF383C
@@ -54,6 +56,15 @@ abstract final class AppIcons {
 
   // --- 프로필 아바타 (다색 배지, 원본색 유지) ---
   static const String userAvatar = '$_figma/ic_user.svg';
+
+  // --- 판정 배지 (자체완결 색배지, 원본색 유지) ---
+  // recommend=초록원+흰체크, caution=주황+! , risk=빨강+X (verdict 헤드라인·대체음식).
+  static const String verdictRecommend = '$_figma/ic_verdict_recommend.svg';
+  static const String verdictCaution = '$_figma/ic_verdict_caution.svg';
+  static const String verdictRisk = '$_figma/ic_verdict_risk.svg';
+
+  // --- AI 스파클 (보라 #9747FF, 원본색 유지) ---
+  static const String sparkle = '$_figma/ic_sparkle.svg';
 
   // --- 브랜드 (다색 SVG, 원본색 유지) ---
   static const String kakaoSymbol = '$_figma/kakao_logo_symbol.svg';

@@ -184,7 +184,7 @@ void main() {
       expect(find.text('두부국'), findsOneWidget);
     });
 
-    testWidgets('주의 상태에서 stateRecords 기록이 있으면 "모두 보기 >" 버튼 노출', (tester) async {
+    testWidgets('주의 상태에서 stateRecords 기록이 있으면 "모두 보기" 버튼 노출', (tester) async {
       final verdict = EatVerdict.caution(foodName: '된장찌개');
       // caution 샘플은 total=2
       await tester.pumpWidget(
@@ -192,8 +192,8 @@ void main() {
       );
       await tester.pump();
 
-      // Figma 재정합: "모두 보기 >" 텍스트로 변경
-      expect(find.text('모두 보기 >'), findsOneWidget);
+      // Figma 정합: "모두 보기" 텍스트 + chevron 에셋 아이콘.
+      expect(find.text('모두 보기'), findsOneWidget);
     });
   });
 
