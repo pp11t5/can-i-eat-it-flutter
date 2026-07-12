@@ -141,12 +141,12 @@ class _TimelineRow extends StatelessWidget {
 
   static const double _iconContainerSize = 32.0;
   static const double _spineWidth = 1.5;
-  static const double _rowGap = AppSpacing.itemGap;
+  static const double _rowGap = 16.0; // Figma 실측: 스파인 배지 ↔ 카드 가로 gap
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.sectionGap),
+      padding: EdgeInsets.only(bottom: isLast ? 0 : 16), // Figma 실측: 아이템 세로 gap
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,11 +193,13 @@ class _CardShell extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(color: AppColors.border, width: 1),
         boxShadow: const [
           BoxShadow(
             color: AppColors.weekStripShadow,
             blurRadius: 8,
-            offset: Offset(0, 2),
+            offset: Offset(0, 4),
+            spreadRadius: 1,
           ),
         ],
       ),
@@ -253,14 +255,14 @@ class _AddFoodRow extends StatelessWidget {
           const AppIcon(
             AppIcons.plus,
             size: AppIconSizes.s16,
-            color: AppColors.textTertiary,
+            color: AppColors.textSecondary,
             semanticsLabel: '음식 추가',
           ),
-          const SizedBox(width: AppSpacing.xs),
+          const SizedBox(width: AppSpacing.itemGap),
           Text(
             '같이 먹은 음식이 있나요?',
             style: AppTextStyles.caption1Medium.copyWith(
-              color: AppColors.textTertiary,
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -301,6 +303,7 @@ class _ConnectedSymptomsCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surfaceBackground,
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          border: Border.all(color: AppColors.border, width: 1),
         ),
         child: Row(
           children: [
@@ -319,7 +322,7 @@ class _ConnectedSymptomsCard extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     _afterMealLabel(connectedSymptoms.afterMealMinutes),
-                    style: AppTextStyles.caption1Medium.copyWith(
+                    style: AppTextStyles.body2Medium.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -329,7 +332,7 @@ class _ConnectedSymptomsCard extends StatelessWidget {
             if (onTap != null)
               const AppIcon(
                 AppIcons.chevronRight,
-                size: AppIconSizes.s20,
+                size: AppIconSizes.s16,
                 color: AppColors.textTertiary,
                 semanticsLabel: '증상 상세',
               ),
@@ -371,7 +374,7 @@ class _SingleMealCard extends StatelessWidget {
             child: Text(
               '먹은 음식 · ${_formatTime(item.mealRecordDateTime)}',
               style: AppTextStyles.caption1Medium.copyWith(
-                color: AppColors.textSecondary,
+                color: AppColors.textTertiary,
               ),
             ),
           ),
@@ -380,7 +383,7 @@ class _SingleMealCard extends StatelessWidget {
             onTap: onTap,
             borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               child: Row(
                 children: [
                   CategoryIcon(code: item.categoryCode, size: 32),
@@ -388,7 +391,7 @@ class _SingleMealCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       item.mealFoodName,
-                      style: AppTextStyles.body2Medium.copyWith(
+                      style: AppTextStyles.body2Bold.copyWith(
                         color: AppColors.textPrimary,
                       ),
                       maxLines: 1,
@@ -398,7 +401,7 @@ class _SingleMealCard extends StatelessWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     item.grade.label,
-                    style: AppTextStyles.caption1Medium.copyWith(
+                    style: AppTextStyles.body2Medium.copyWith(
                       color: _verdictColor(item.grade),
                     ),
                   ),
@@ -467,7 +470,7 @@ class _GroupMealCard extends StatelessWidget {
             child: Text(
               '먹은 음식 · ${_formatTime(item.mealRecordDateTime)}',
               style: AppTextStyles.caption1Medium.copyWith(
-                color: AppColors.textSecondary,
+                color: AppColors.textTertiary,
               ),
             ),
           ),
@@ -476,7 +479,7 @@ class _GroupMealCard extends StatelessWidget {
             onTap: onTap,
             borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               child: Row(
                 children: [
                   CategoryIcon(code: item.categoryCode, size: 32),
@@ -484,7 +487,7 @@ class _GroupMealCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       _summary(),
-                      style: AppTextStyles.body2Medium.copyWith(
+                      style: AppTextStyles.body2Bold.copyWith(
                         color: AppColors.textPrimary,
                       ),
                       maxLines: 1,
@@ -543,13 +546,13 @@ class _SymptomCard extends StatelessWidget {
                   Text(
                     '증상 기록 · ${_formatTime(item.occurredAt)}',
                     style: AppTextStyles.caption1Medium.copyWith(
-                      color: AppColors.textSecondary,
+                      color: AppColors.textTertiary,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     item.symptomState.label,
-                    style: AppTextStyles.body2Medium.copyWith(
+                    style: AppTextStyles.body2Bold.copyWith(
                       color: AppColors.textPrimary,
                     ),
                   ),
@@ -566,7 +569,7 @@ class _SymptomCard extends StatelessWidget {
             if (onTap != null)
               const AppIcon(
                 AppIcons.chevronRight,
-                size: AppIconSizes.s20,
+                size: AppIconSizes.s16,
                 color: AppColors.textTertiary,
                 semanticsLabel: '증상 상세',
               ),

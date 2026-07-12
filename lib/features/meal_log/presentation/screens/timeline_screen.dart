@@ -109,7 +109,8 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
     final weeklyAsync = ref.watch(weeklyControllerProvider(_weekStart));
 
     return Scaffold(
-      backgroundColor: AppColors.surfaceBackground,
+      // Figma 실측: #FCFCFC (surfaceBackground #F5F5F5 과 구분되는 타임라인 전용 배경)
+      backgroundColor: const Color(0xFFFCFCFC),
       body: SafeArea(
         child: Column(
           children: [

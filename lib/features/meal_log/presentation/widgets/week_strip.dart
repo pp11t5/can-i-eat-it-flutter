@@ -11,7 +11,7 @@ import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dar
 /// - 각 칸: 요일(일~토) + 날짜 숫자. 오늘 칸은 요일 라벨을 "오늘"로 치환.
 /// - 선택일: 검정 원형 배지 + 흰 텍스트 강조.
 /// - 일요일 요일 라벨: [AppColors.calendarSunday] (빨강).
-/// - 미래 날짜(today 이후): 요일라벨·숫자 모두 [AppColors.textTertiary] (회색).
+/// - 미래 날짜(today 이후): 요일라벨은 [AppColors.textSecondary], 숫자는 옅은 회색(#BBBBBB).
 /// - 각 칸 하단 도트(Ellipse) 최대 3개 — 당일 기록의 VerdictLevel 색상.
 ///
 /// [weekStart]: 해당 주 일요일 날짜.
@@ -54,7 +54,6 @@ class WeekStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: List.generate(7, (i) {
         final day = weekStart.add(Duration(days: i));
         final isSelected = _isSameDay(day, selectedDate);
@@ -66,14 +65,16 @@ class WeekStrip extends StatelessWidget {
         // 요일 라벨: 오늘이면 "오늘", 아니면 요일명
         final label = isToday ? '오늘' : _dayLabels[i];
 
-        return _DayCell(
-          dayLabel: label,
-          dayNumber: day.day,
-          isSelected: isSelected,
-          isSunday: isSunday,
-          isFuture: isFuture,
-          dots: dots.take(3).toList(),
-          onTap: () => onDaySelected(day),
+        return Expanded(
+          child: _DayCell(
+            dayLabel: label,
+            dayNumber: day.day,
+            isSelected: isSelected,
+            isSunday: isSunday,
+            isFuture: isFuture,
+            dots: dots.take(3).toList(),
+            onTap: () => onDaySelected(day),
+          ),
         );
       }),
     );
@@ -116,7 +117,7 @@ class _DayCell extends StatelessWidget {
   /// 그 외 우선순위: 미래(회색) < 일요일(빨강) < 기본(secondary).
   Color _labelColor() {
     if (isSelected) return AppColors.surface; // 선택 캡슐 안 흰색
-    if (isFuture) return AppColors.textTertiary;
+    if (isFuture) return AppColors.textSecondary; // 미래에도 요일 라벨은 회색 유지
     if (isSunday) return AppColors.calendarSunday;
     return AppColors.textSecondary;
   }
@@ -124,24 +125,26 @@ class _DayCell extends StatelessWidget {
   /// 날짜 숫자 색상 결정.
   Color _numberColor() {
     if (isSelected) return AppColors.surface; // 캡슐 안 흰색
-    if (isFuture) return AppColors.textTertiary;
-    return AppColors.textPrimary;
+    if (isFuture) return const Color(0xFFBBBBBB); // Figma 실측: 미래 날짜 숫자
+    return AppColors.textSecondary;
   }
 
   @override
   Widget build(BuildContext context) {
     // Figma 1351:14768: 선택일은 요일+숫자+도트를 감싸는 검정 세로 캡슐(흰 텍스트).
-    // 숫자만 감싸는 원형이 아니다. 비선택 셀도 동일 폭(40)을 차지해 정렬을 유지한다.
+    // 숫자만 감싸는 원형이 아니다. 비선택 셀도 부모 Expanded로 균등 폭을 차지해 정렬을 유지한다.
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        width: 40,
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.itemGap),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.itemGap,
+          horizontal: 8,
+        ),
         decoration: isSelected
             ? BoxDecoration(
-                color: AppColors.textPrimary,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                color: const Color(0xFF222222),
+                borderRadius: BorderRadius.circular(16),
               )
             : null,
         child: Column(
@@ -158,7 +161,7 @@ class _DayCell extends StatelessWidget {
             // 날짜 숫자
             Text(
               '$dayNumber',
-              style: AppTextStyles.body2Medium.copyWith(color: _numberColor()),
+              style: AppTextStyles.body1Bold.copyWith(color: _numberColor()),
             ),
             const SizedBox(height: AppSpacing.xs),
             // 도트 (최대 3개)
@@ -176,8 +179,8 @@ class _DotRow extends StatelessWidget {
 
   final List<VerdictLevel> dots;
 
-  static const double _dotSize = 5.0;
-  static const double _dotGap = 2.0;
+  static const double _dotSize = 8.0;
+  static const double _dotGap = 3.0;
 
   static Color _colorOf(VerdictLevel level) => switch (level) {
         VerdictLevel.recommend => AppColors.verdictRecommend,
