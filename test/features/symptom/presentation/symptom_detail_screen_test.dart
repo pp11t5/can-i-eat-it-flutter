@@ -319,8 +319,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('기록을 삭제하시겠어요?'), findsOneWidget);
+      // showConfirmModal: Primary(채움 green)='취소하기', Secondary(빨강 텍스트)='삭제하기'.
+      expect(find.text('취소하기'), findsOneWidget);
       expect(find.text('삭제하기'), findsOneWidget);
-      expect(find.text('취소'), findsOneWidget);
     });
 
     testWidgets('다이얼로그 취소 → 다이얼로그 닫힘', (tester) async {
@@ -335,7 +336,7 @@ void main() {
       await tester.tap(find.text('기록 삭제하기'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('취소'));
+      await tester.tap(find.text('취소하기'));
       await tester.pumpAndSettle();
 
       expect(find.text('기록을 삭제하시겠어요?'), findsNothing);
