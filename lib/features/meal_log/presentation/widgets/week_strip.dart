@@ -112,8 +112,8 @@ class _DayCell extends StatelessWidget {
 
   /// 요일 라벨 색상 결정.
   ///
-  /// 우선순위: 선택(배지 안 흰색) < 미래(회색) < 일요일(빨강) < 기본(secondary)
-  /// 선택일 라벨은 배지 바깥에 있으므로 isSelected 시 textPrimary 유지.
+  /// 선택일 라벨은 검정 캡슐 안에 놓이므로 흰색(surface)이 최우선.
+  /// 그 외 우선순위: 미래(회색) < 일요일(빨강) < 기본(secondary).
   Color _labelColor() {
     if (isSelected) return AppColors.surface; // 선택 캡슐 안 흰색
     if (isFuture) return AppColors.textTertiary;
@@ -123,7 +123,7 @@ class _DayCell extends StatelessWidget {
 
   /// 날짜 숫자 색상 결정.
   Color _numberColor() {
-    if (isSelected) return AppColors.surface; // 배지 안 흰색
+    if (isSelected) return AppColors.surface; // 캡슐 안 흰색
     if (isFuture) return AppColors.textTertiary;
     return AppColors.textPrimary;
   }
