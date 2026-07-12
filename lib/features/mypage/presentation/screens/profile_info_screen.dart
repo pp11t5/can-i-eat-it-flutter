@@ -54,6 +54,7 @@ class _ProfileInfoScreenState extends ConsumerState<ProfileInfoScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
+        toolbarHeight: 64,
         leading: IconButton(
           iconSize: 32,
           padding: EdgeInsets.zero,
@@ -68,31 +69,32 @@ class _ProfileInfoScreenState extends ConsumerState<ProfileInfoScreen> {
         ),
         title: Text(
           '프로필 정보',
-          style: AppTextStyles.body1Bold.copyWith(
+          style: AppTextStyles.body1Medium.copyWith(
             color: AppColors.textPrimary,
           ),
         ),
         shape: const Border(
-          bottom: BorderSide(color: AppColors.divider, width: 1),
+          bottom: BorderSide(color: AppColors.surfaceMuted, width: 1),
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.screenPadding,
-          vertical: AppSpacing.cardPadding,
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screenPadding,
+          AppSpacing.itemGap,
+          AppSpacing.screenPadding,
+          AppSpacing.cardPadding,
         ),
         children: [
           // 헤더: 아바타 + 닉네임 + 이메일·연동
           _ProfileHeader(session: session),
-          const SizedBox(height: AppSpacing.sectionGap),
+          const SizedBox(height: AppSpacing.contentGap),
 
           // 내 건강 정보 카드
           _HealthInfoCard(profile: profile),
-          const SizedBox(height: AppSpacing.itemGap),
+          const SizedBox(height: AppSpacing.contentGap),
 
           // 내 계정 카드
           _AccountCard(),
-          const SizedBox(height: AppSpacing.sectionGap),
         ],
       ),
     );
@@ -146,15 +148,15 @@ class _ProfileHeader extends StatelessWidget {
         const SizedBox(height: AppSpacing.itemGap),
         Text(
           displayName,
-          style: AppTextStyles.header1Bold.copyWith(
+          style: AppTextStyles.header2Bold.copyWith(
             color: AppColors.textPrimary,
           ),
         ),
         if (_subtext.isNotEmpty) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.itemGap),
           Text(
             _subtext,
-            style: AppTextStyles.body2Regular.copyWith(
+            style: AppTextStyles.caption1Medium.copyWith(
               color: AppColors.textSecondary,
             ),
           ),
@@ -203,8 +205,8 @@ class _HealthInfoCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.borderCard),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,27 +237,27 @@ class _HealthInfoCard extends StatelessWidget {
               children: [
                 const Icon(
                   Icons.sentiment_dissatisfied_outlined,
-                  size: 20,
+                  size: 24,
                   color: AppColors.textSecondary,
                 ),
-                const SizedBox(width: AppSpacing.itemGap),
+                const SizedBox(width: AppSpacing.cardPadding),
                 Text(
                   '건강 고민',
-                  style: AppTextStyles.body2Medium.copyWith(
+                  style: AppTextStyles.body1Medium.copyWith(
                     color: AppColors.textPrimary,
                   ),
                 ),
                 const Spacer(),
                 Text(
                   _conditionLabel,
-                  style: AppTextStyles.body2Regular.copyWith(
+                  style: AppTextStyles.body2Medium.copyWith(
                     color: AppColors.textSecondary,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.itemGap),
                 const Icon(
                   Icons.lock_outline,
-                  size: 18,
+                  size: 24,
                   color: AppColors.textTertiary,
                 ),
               ],
@@ -267,8 +269,8 @@ class _HealthInfoCard extends StatelessWidget {
           InkWell(
             onTap: () => context.push('/mypage/profile/allergy-med'),
             borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(AppSpacing.radiusCard),
-              bottomRight: Radius.circular(AppSpacing.radiusCard),
+              bottomLeft: Radius.circular(AppSpacing.radiusModal),
+              bottomRight: Radius.circular(AppSpacing.radiusModal),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(
@@ -279,28 +281,28 @@ class _HealthInfoCard extends StatelessWidget {
                 children: [
                   const Icon(
                     Icons.medication_outlined,
-                    size: 20,
+                    size: 24,
                     color: AppColors.textSecondary,
                   ),
-                  const SizedBox(width: AppSpacing.itemGap),
+                  const SizedBox(width: AppSpacing.cardPadding),
                   Text(
-                    '알레르기 · 복용약',
-                    style: AppTextStyles.body2Medium.copyWith(
+                    '알레르기・복용약',
+                    style: AppTextStyles.body1Medium.copyWith(
                       color: AppColors.textPrimary,
                     ),
                   ),
                   const Spacer(),
                   Text(
                     _allergyMedLabel,
-                    style: AppTextStyles.body2Regular.copyWith(
+                    style: AppTextStyles.body2Medium.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.itemGap),
                   SvgPicture.asset(
                     'assets/figma_extracted/chevron_right.svg',
-                    width: 20,
-                    height: 20,
+                    width: 24,
+                    height: 24,
                     colorFilter: const ColorFilter.mode(
                       AppColors.textTertiary,
                       BlendMode.srcIn,
@@ -326,32 +328,39 @@ class _AccountCard extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.borderCard),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.cardPadding,
+              AppSpacing.cardPadding,
+              AppSpacing.cardPadding,
+              AppSpacing.itemGap,
+            ),
+            child: Text(
+              '내 계정',
+              style: AppTextStyles.body2Bold.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          const Divider(height: 1, color: AppColors.divider),
+
           // 로그아웃
           InkWell(
             onTap: () => _onLogout(context, ref),
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(AppSpacing.radiusCard),
-              topRight: Radius.circular(AppSpacing.radiusCard),
-            ),
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.cardPadding),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.logout,
-                    size: 20,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: AppSpacing.itemGap),
                   Expanded(
                     child: Text(
                       '로그아웃',
-                      style: AppTextStyles.body2Medium.copyWith(
+                      style: AppTextStyles.body1Regular.copyWith(
                         color: AppColors.textPrimary,
                       ),
                     ),
@@ -366,23 +375,17 @@ class _AccountCard extends ConsumerWidget {
           InkWell(
             onTap: () => _onWithdraw(context, ref),
             borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(AppSpacing.radiusCard),
-              bottomRight: Radius.circular(AppSpacing.radiusCard),
+              bottomLeft: Radius.circular(AppSpacing.radiusModal),
+              bottomRight: Radius.circular(AppSpacing.radiusModal),
             ),
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.cardPadding),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.delete_outline,
-                    size: 20,
-                    color: AppColors.danger,
-                  ),
-                  const SizedBox(width: AppSpacing.itemGap),
                   Expanded(
                     child: Text(
                       '탈퇴하기',
-                      style: AppTextStyles.body2Medium.copyWith(
+                      style: AppTextStyles.body1Regular.copyWith(
                         color: AppColors.danger,
                       ),
                     ),

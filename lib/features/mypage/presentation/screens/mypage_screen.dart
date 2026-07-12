@@ -47,9 +47,10 @@ class MypageScreen extends ConsumerWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
+        toolbarHeight: 64,
         title: Text(
           '마이페이지',
-          style: AppTextStyles.body1Bold.copyWith(
+          style: AppTextStyles.body1Medium.copyWith(
             color: AppColors.textPrimary,
           ),
         ),
@@ -65,11 +66,11 @@ class MypageScreen extends ConsumerWidget {
         children: [
           // 프로필 카드
           _ProfileCard(session: session, profile: profile),
-          const SizedBox(height: AppSpacing.itemGap),
+          const SizedBox(height: AppSpacing.sectionGap),
 
           // 내 음식 히스토리 카드
           const _FoodHistoryCard(),
-          const SizedBox(height: AppSpacing.itemGap),
+          const SizedBox(height: AppSpacing.sectionGap),
 
           // 주간 기록 카드
           _WeeklyLogCard(
@@ -79,13 +80,13 @@ class MypageScreen extends ConsumerWidget {
 
           // 설정 섹션
           const _SectionLabel(label: '설정'),
-          const SizedBox(height: AppSpacing.itemGap),
+          const SizedBox(height: AppSpacing.cardPadding),
           _SettingsSection(),
           const SizedBox(height: AppSpacing.sectionGap),
 
           // 약관 섹션
           const _SectionLabel(label: '약관'),
-          const SizedBox(height: AppSpacing.itemGap),
+          const SizedBox(height: AppSpacing.cardPadding),
           _TermsSection(),
           const SizedBox(height: AppSpacing.sectionGap),
         ],
@@ -104,13 +105,10 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Text(
-        label,
-        style: AppTextStyles.caption1Bold.copyWith(
-          color: AppColors.textSecondary,
-        ),
+    return Text(
+      label,
+      style: AppTextStyles.body2Bold.copyWith(
+        color: AppColors.textSecondary,
       ),
     );
   }
@@ -144,10 +142,10 @@ class _ProfileCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => context.push('/mypage/profile'),
       child: Container(
-        padding: const EdgeInsets.all(AppSpacing.cardPadding),
+        padding: const EdgeInsets.all(AppSpacing.sectionGap),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
           border: Border.all(color: AppColors.borderCard),
         ),
         child: Row(
@@ -166,10 +164,10 @@ class _ProfileCard extends StatelessWidget {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     _conditionSubtext,
-                    style: AppTextStyles.body2Regular.copyWith(
+                    style: AppTextStyles.body2Medium.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -200,7 +198,7 @@ class _Avatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
-      radius: 28,
+      radius: 20,
       backgroundColor: AppColors.surfaceMuted,
       backgroundImage: imageUrl != null ? NetworkImage(imageUrl!) : null,
       child: imageUrl == null
@@ -232,7 +230,7 @@ class _FoodHistoryCard extends ConsumerWidget {
         padding: const EdgeInsets.all(AppSpacing.cardPadding),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
           border: Border.all(color: AppColors.borderCard),
         ),
         child: Row(
@@ -247,10 +245,9 @@ class _FoodHistoryCard extends ConsumerWidget {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: AppTextStyles.body2Regular.copyWith(
+                    style: AppTextStyles.body2Medium.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -259,7 +256,7 @@ class _FoodHistoryCard extends ConsumerWidget {
             ),
             const SizedBox(width: AppSpacing.itemGap),
             // 좋음 무드 배지 (Figma 1718:7884 초록 스마일 — MoodFace 에셋 재사용)
-            Image.asset(AppImages.moodComfortable, width: 40, height: 40),
+            Image.asset(AppImages.moodComfortable, width: 24, height: 24),
           ],
         ),
       ),
@@ -465,8 +462,8 @@ class _SettingsSection extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.borderCard),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         children: [
@@ -527,8 +524,8 @@ class _TermsSection extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.borderCard),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         children: [
@@ -584,23 +581,23 @@ class _ListTileRow extends StatelessWidget {
             if (icon != null) ...[
               Icon(
                 icon,
-                size: 20,
+                size: 24,
                 color: labelColor ?? AppColors.textSecondary,
               ),
-              const SizedBox(width: AppSpacing.itemGap),
+              const SizedBox(width: AppSpacing.cardPadding),
             ],
             Expanded(
               child: Text(
                 label,
-                style: AppTextStyles.body2Medium.copyWith(
+                style: AppTextStyles.body1Regular.copyWith(
                   color: labelColor ?? AppColors.textPrimary,
                 ),
               ),
             ),
             SvgPicture.asset(
               'assets/figma_extracted/chevron_right.svg',
-              width: 20,
-              height: 20,
+              width: 24,
+              height: 24,
               colorFilter: const ColorFilter.mode(
                 AppColors.textTertiary,
                 BlendMode.srcIn,

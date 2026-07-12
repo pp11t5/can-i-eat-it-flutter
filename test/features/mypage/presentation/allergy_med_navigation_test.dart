@@ -76,8 +76,8 @@ void main() {
       expect(find.byType(ProfileInfoScreen), findsOneWidget);
       expect(find.byType(AllergyMedEditScreen), findsNothing);
 
-      // '알레르기 · 복용약' 행 탭
-      await tester.tap(find.text('알레르기 · 복용약'));
+      // '알레르기・복용약' 행 탭
+      await tester.tap(find.text('알레르기・복용약'));
       await tester.pumpAndSettle();
 
       // AllergyMedEditScreen으로 이동
