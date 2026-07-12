@@ -177,7 +177,7 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
     final bool showResults = _query.isNotEmpty;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

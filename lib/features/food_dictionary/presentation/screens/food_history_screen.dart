@@ -78,7 +78,7 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
     final cautionRiskAsync = ref.watch(cautionRiskDictionaryControllerProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.scaffoldBackground,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,

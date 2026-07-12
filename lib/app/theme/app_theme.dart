@@ -13,6 +13,7 @@ class AppTheme {
         useMaterial3: true,
         colorScheme: _lightColorScheme,
         textTheme: _textTheme,
+        scaffoldBackgroundColor: AppColors.scaffoldBackground,
       );
 
   /// W1에서는 light와 동일하게 유지. 다크 토큰 분리는 추후 진행.
@@ -20,6 +21,7 @@ class AppTheme {
         useMaterial3: true,
         colorScheme: _lightColorScheme,
         textTheme: _textTheme,
+        scaffoldBackgroundColor: AppColors.scaffoldBackground,
       );
 
   static const ColorScheme _lightColorScheme = ColorScheme(

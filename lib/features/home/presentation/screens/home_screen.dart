@@ -30,7 +30,7 @@ class HomeScreen extends ConsumerWidget {
     final unrecordedCount = ref.watch(unrecordedMealCountProvider).valueOrNull;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFB), // Figma bg #FBFBFB
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(

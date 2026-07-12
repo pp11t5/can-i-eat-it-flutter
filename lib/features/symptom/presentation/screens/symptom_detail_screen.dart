@@ -111,7 +111,7 @@ class SymptomDetailScreen extends ConsumerWidget {
     final displayName = sessionAsync.valueOrNull?.displayName ?? '회원';
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: Column(
           children: [

@@ -40,7 +40,7 @@ class MypageScreen extends ConsumerWidget {
     final profile = profileAsync.valueOrNull;
 
     return Scaffold(
-      backgroundColor: AppColors.surfaceBackground,
+      backgroundColor: AppColors.scaffoldBackground,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         surfaceTintColor: AppColors.surface,

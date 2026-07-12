@@ -281,7 +281,7 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
     final isLoading = submitState is AsyncLoading;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.scaffoldBackground,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,

@@ -70,7 +70,7 @@ class MealFoodDetailScreen extends ConsumerWidget {
     final foodAsync = ref.watch(mealFoodDetailControllerProvider(mealFoodId));
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: Column(
           children: [

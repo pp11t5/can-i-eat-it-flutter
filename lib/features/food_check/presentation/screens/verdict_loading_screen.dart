@@ -27,7 +27,7 @@ class VerdictLoadingScreen extends ConsumerWidget {
         : (sessionName != null && sessionName.isNotEmpty ? sessionName : '회원');
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.scaffoldBackground,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
