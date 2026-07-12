@@ -33,7 +33,7 @@ class VerdictUnknownScreen extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(
                   AppSpacing.screenPadding, // left 16
-                  24,                       // top ~y204에서 상단 safe area 감안
+                  AppSpacing.itemGap,       // top 8
                   AppSpacing.screenPadding, // right 16
                   AppSpacing.itemGap,       // bottom 8
                 ),
@@ -136,7 +136,7 @@ class _TipRow extends StatelessWidget {
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: AppSpacing.itemGap),
+        const SizedBox(height: 16),
         Row(
           children: [
             // 나쁜 칩 (분홍: bg #FFE0E0, close 아이콘)
@@ -146,20 +146,20 @@ class _TipRow extends StatelessWidget {
               iconAsset: AppIcons.close,
               iconColor: AppColors.textSecondary,
             ),
-            const SizedBox(width: AppSpacing.itemGap),
+            const SizedBox(width: 12),
             // 변환 화살표 (나쁜 검색 → 좋은 검색). Figma 렌더는 우측 방향(→).
             const AppIcon(
               AppIcons.arrowRight,
               size: AppIconSizes.s24,
               color: AppColors.textSecondary,
             ),
-            const SizedBox(width: AppSpacing.itemGap),
+            const SizedBox(width: 12),
             // 좋은 칩 (녹색: bg #D9F5EA, check 아이콘)
             _SearchChip(
               text: goodChipText,
               backgroundColor: const Color(0xFFD9F5EA),
               iconAsset: AppIcons.check,
-              iconColor: AppColors.primary,
+              iconColor: const Color(0xFF525252),
             ),
           ],
         ),
@@ -214,6 +214,7 @@ class _SearchChip extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: backgroundColor,
+        border: Border.all(color: const Color(0xFFE9E9E9)),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -223,7 +224,7 @@ class _SearchChip extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             text,
-            style: AppTextStyles.body2Medium.copyWith(
+            style: AppTextStyles.body1Medium.copyWith(
               color: AppColors.textPrimary,
             ),
           ),
