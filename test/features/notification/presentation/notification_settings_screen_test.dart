@@ -100,6 +100,10 @@ void main() {
       await tester.pumpWidget(_wrap(repo: mock));
       await tester.pumpAndSettle();
 
+      // Figma 정합으로 카드가 커져 라디오가 뷰포트 아래로 밀리므로 스크롤한다.
+      await tester.ensureVisible(find.text('저녁 18:00'));
+      await tester.pumpAndSettle();
+
       await tester.tap(find.text('저녁 18:00'));
       await tester.pumpAndSettle();
 

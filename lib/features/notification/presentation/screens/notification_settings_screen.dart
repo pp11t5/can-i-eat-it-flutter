@@ -83,15 +83,19 @@ class _NotificationSettingsScreenState
         surfaceTintColor: AppColors.surface,
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: const BackButton(color: AppColors.textPrimary),
+        toolbarHeight: 64,
+        leading: const IconTheme(
+          data: IconThemeData(size: 32),
+          child: BackButton(color: AppColors.textPrimary),
+        ),
         title: Text(
           '알림 설정',
-          style: AppTextStyles.body1Bold.copyWith(
+          style: AppTextStyles.body1Medium.copyWith(
             color: AppColors.textPrimary,
           ),
         ),
         shape: const Border(
-          bottom: BorderSide(color: AppColors.divider, width: 1),
+          bottom: BorderSide(color: Color(0xFFF5F5F5), width: 1),
         ),
       ),
       body: settingsAsync.when(
@@ -155,6 +159,8 @@ class _SettingsBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sections = Column(
+      // Figma: "알림 받을 시간" 섹션 라벨은 좌측정렬(기본 center면 라벨만 가운데로 쏠림).
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 알림 토글 카드
         _SectionCard(
@@ -171,8 +177,8 @@ class _SettingsBody extends ConsumerWidget {
             ),
             const Divider(
               height: 1,
-              indent: AppSpacing.cardPadding,
-              endIndent: AppSpacing.cardPadding,
+              indent: 24,
+              endIndent: 24,
               color: AppColors.divider,
             ),
             _ToggleRow(
@@ -187,8 +193,8 @@ class _SettingsBody extends ConsumerWidget {
             ),
             const Divider(
               height: 1,
-              indent: AppSpacing.cardPadding,
-              endIndent: AppSpacing.cardPadding,
+              indent: 24,
+              endIndent: 24,
               color: AppColors.divider,
             ),
             _ToggleRow(
@@ -207,7 +213,7 @@ class _SettingsBody extends ConsumerWidget {
 
         // 알림 수신 시간 카드
         const _SectionLabel(label: '알림 받을 시간'),
-        const SizedBox(height: AppSpacing.itemGap),
+        const SizedBox(height: 16),
         // Figma 577:10290 — 시간 라디오 카드는 행 사이 구분선 없음(간격만).
         _SectionCard(
           children: DailyNotificationTime.values
@@ -223,7 +229,7 @@ class _SettingsBody extends ConsumerWidget {
 
     return ListView(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.screenPadding,
+        horizontal: 24,
         vertical: AppSpacing.cardPadding,
       ),
       children: [
@@ -300,7 +306,7 @@ class _OsBlockedBanner extends ConsumerWidget {
             children: [
               // Figma 배너 얼굴 일러스트(😰 주황) = MoodFace uncomfortable 재사용.
               Image.asset(AppImages.moodUncomfortable, width: 24, height: 24),
-              const SizedBox(width: AppSpacing.iconTextGap),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   '기기 알림이 꺼져있어요',
@@ -311,14 +317,14 @@ class _OsBlockedBanner extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.xs),
+          const SizedBox(height: 10),
           Text(
             '설정 → 먹어도돼? → 알림 허용에서\n알림을 켜주세요',
-            style: AppTextStyles.body2Regular.copyWith(
+            style: AppTextStyles.body1Medium.copyWith(
               color: AppColors.textSecondary,
             ),
           ),
-          const SizedBox(height: AppSpacing.itemGap),
+          const SizedBox(height: 10),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -327,7 +333,7 @@ class _OsBlockedBanner extends ConsumerWidget {
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.onPrimary,
                 padding: const EdgeInsets.symmetric(
-                  vertical: AppSpacing.itemGap + 4,
+                  vertical: 16,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
@@ -336,7 +342,7 @@ class _OsBlockedBanner extends ConsumerWidget {
               ),
               child: Text(
                 '설정 바로 가기',
-                style: AppTextStyles.body2Bold.copyWith(
+                style: AppTextStyles.body1Bold.copyWith(
                   color: AppColors.onPrimary,
                 ),
               ),
@@ -359,10 +365,10 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4),
+      padding: EdgeInsets.zero,
       child: Text(
         label,
-        style: AppTextStyles.caption1Bold.copyWith(
+        style: AppTextStyles.body2Bold.copyWith(
           color: AppColors.textSecondary,
         ),
       ),
@@ -416,8 +422,8 @@ class _ToggleRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.cardPadding,
-        vertical: AppSpacing.cardPadding,
+        horizontal: 24,
+        vertical: 24,
       ),
       child: Row(
         children: [
@@ -427,14 +433,14 @@ class _ToggleRow extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: AppTextStyles.body2Medium.copyWith(
+                  style: AppTextStyles.body1Medium.copyWith(
                     color: AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: AppTextStyles.caption1Medium.copyWith(
+                  style: AppTextStyles.body2Medium.copyWith(
                     color: AppColors.textSecondary,
                   ),
                 ),
@@ -473,15 +479,15 @@ class _RadioRow extends StatelessWidget {
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.cardPadding,
-          vertical: AppSpacing.cardPadding,
+          horizontal: 24,
+          vertical: 24,
         ),
         child: Row(
           children: [
             Expanded(
               child: Text(
                 label,
-                style: AppTextStyles.body2Medium.copyWith(
+                style: AppTextStyles.body1Medium.copyWith(
                   color: AppColors.textPrimary,
                 ),
               ),
@@ -489,11 +495,11 @@ class _RadioRow extends StatelessWidget {
             // Figma 577:10290 — 선택=초록 원+흰 체크(verdict grade 재사용),
             // 미선택=흰 원+#EAEAEA 1px 링.
             if (selected)
-              SvgPicture.asset(AppIcons.verdictRecommend, width: 24, height: 24)
+              SvgPicture.asset(AppIcons.verdictRecommend, width: 32, height: 32)
             else
               Container(
-                width: 24,
-                height: 24,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   shape: BoxShape.circle,
