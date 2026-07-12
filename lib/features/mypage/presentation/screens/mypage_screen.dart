@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
@@ -257,20 +258,8 @@ class _FoodHistoryCard extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.itemGap),
-            // 연초록 스마일 배지 (Figma 민트 웃는 얼굴 근사 — 기존 초록 토큰만 재사용)
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: AppColors.surfaceSelected,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.sentiment_satisfied_alt,
-                size: 24,
-                color: AppColors.primary,
-              ),
-            ),
+            // 좋음 무드 배지 (Figma 1718:7884 초록 스마일 — MoodFace 에셋 재사용)
+            Image.asset(AppImages.moodComfortable, width: 40, height: 40),
           ],
         ),
       ),
@@ -279,7 +268,7 @@ class _FoodHistoryCard extends ConsumerWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 주간 기록 카드 (placeholder)
+// 주간 기록 카드 (Figma 1718:6134 — 헤더 밖 + 내부 회색 StatCard)
 // ---------------------------------------------------------------------------
 
 class _WeeklyLogCard extends ConsumerWidget {
@@ -288,112 +277,108 @@ class _WeeklyLogCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 현재 날짜 기반 주 표시
+    // 현재 날짜 기반 주 표시 (Figma "5월 둘째 주 기록" — 네이티브 서수).
+    const ordinals = ['첫째', '둘째', '셋째', '넷째', '다섯째'];
     final now = DateTime.now();
     final weekOfMonth = ((now.day - 1) ~/ 7) + 1;
-    final title = '${now.month}월 $weekOfMonth째 주 기록';
+    final ordinal = ordinals[(weekOfMonth - 1).clamp(0, ordinals.length - 1)];
+    final title = '${now.month}월 $ordinal 주 기록';
 
     // loading/error 시 각 수치 '—' 폴백 (_FoodHistoryCard valueOrNull 패턴과 동일).
     final weekly = ref.watch(mySummaryProvider).valueOrNull?.weeklySummary;
     final mealCount = weekly?.mealCount;
 
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.cardPadding),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.borderCard),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: AppTextStyles.body1Bold.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              GestureDetector(
-                onTap: onViewAll,
-                child: Text(
-                  '전체보기',
-                  style: AppTextStyles.body2Regular.copyWith(
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.itemGap),
-          Row(
-            children: [
-              _WeeklyStatItem(
-                label: '식사 기록',
-                value: '${weekly?.mealRecordCount ?? '—'}',
-              ),
-              const SizedBox(width: AppSpacing.cardPadding),
-              _WeeklyStatItem(
-                label: '최근 증상',
-                value: '${weekly?.recentSymptomCount ?? '—'}',
-              ),
-              const SizedBox(width: AppSpacing.cardPadding),
-              _WeeklyStatItem(
-                label: '연속 편안',
-                value: '${weekly?.streakCount ?? '—'}',
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.itemGap),
-          Row(
-            children: [
-              _MealStatChip(
-                label: '권장',
-                color: AppColors.verdictRecommend,
-                value: mealCount?.recommendCount,
-              ),
-              const SizedBox(width: AppSpacing.itemGap),
-              _MealStatChip(
-                label: '주의',
-                color: AppColors.verdictCaution,
-                value: mealCount?.cautionCount,
-              ),
-              const SizedBox(width: AppSpacing.itemGap),
-              _MealStatChip(
-                label: '위험',
-                color: AppColors.verdictDanger,
-                value: mealCount?.riskCount,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _WeeklyStatItem extends StatelessWidget {
-  const _WeeklyStatItem({required this.label, required this.value});
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          value,
-          style: AppTextStyles.body1Bold.copyWith(
-            color: AppColors.textStrong,
-          ),
+        // 헤더 (카드 밖) — Figma 1718:6135
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: AppTextStyles.header2Bold.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+            GestureDetector(
+              onTap: onViewAll,
+              behavior: HitTestBehavior.opaque,
+              child: Row(
+                children: [
+                  Text(
+                    '전체 보기',
+                    style: AppTextStyles.body2Medium.copyWith(
+                      color: AppColors.textStrong,
+                    ),
+                  ),
+                  SvgPicture.asset(
+                    AppIcons.chevronRight,
+                    width: 24,
+                    height: 24,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.textStrong,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        Text(
-          label,
-          style: AppTextStyles.caption1Medium.copyWith(
-            color: AppColors.textSecondary,
+        const SizedBox(height: AppSpacing.cardPadding),
+        // 통계 내부 카드(StatCard) — Figma 1718:6140
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.sectionGap),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceInset,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusStatCard),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            children: [
+              _WeeklyStatRow(
+                label: '식사 기록',
+                value: weekly?.mealRecordCount,
+                unit: '회',
+              ),
+              const SizedBox(height: AppSpacing.cardPadding),
+              _WeeklyStatRow(
+                label: '최근 증상',
+                value: weekly?.recentSymptomCount,
+                unit: '회',
+              ),
+              const SizedBox(height: AppSpacing.cardPadding),
+              _WeeklyStatRow(
+                label: '연속 편안 일수',
+                value: weekly?.streakCount,
+                unit: '일',
+              ),
+              const SizedBox(height: AppSpacing.cardPadding),
+              // 품질 행 — Figma 1718:6156 (✅⚠️❌ 아이콘 + "…음식 N끼")
+              Wrap(
+                spacing: AppSpacing.iconTextGap,
+                runSpacing: AppSpacing.itemGap,
+                children: [
+                  _MealStatChip(
+                    icon: AppIcons.verdictRecommend,
+                    label: '권장음식',
+                    value: mealCount?.recommendCount,
+                  ),
+                  _MealStatChip(
+                    icon: AppIcons.verdictCaution,
+                    label: '주의 음식',
+                    value: mealCount?.cautionCount,
+                  ),
+                  _MealStatChip(
+                    icon: AppIcons.verdictRisk,
+                    label: '위험 음식',
+                    value: mealCount?.riskCount,
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ],
@@ -401,27 +386,66 @@ class _WeeklyStatItem extends StatelessWidget {
   }
 }
 
-class _MealStatChip extends StatelessWidget {
-  const _MealStatChip({required this.label, required this.color, this.value});
+/// 지표 1행 — 라벨(좌) / 큰 숫자+단위(우, baseline 정렬). Figma 1718:6141.
+class _WeeklyStatRow extends StatelessWidget {
+  const _WeeklyStatRow({
+    required this.label,
+    required this.value,
+    required this.unit,
+  });
   final String label;
-  final Color color;
+  final int? value;
+  final String unit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.body1Bold.copyWith(
+            color: AppColors.textPrimary,
+          ),
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              value == null ? '—' : '$value',
+              style: AppTextStyles.title2.copyWith(color: AppColors.primary),
+            ),
+            const SizedBox(width: AppSpacing.itemGap),
+            Text(
+              unit,
+              style: AppTextStyles.body2Regular.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// 품질 칩 — grade 아이콘 + "라벨 N끼". Figma 1718:6158/6161/6164.
+class _MealStatChip extends StatelessWidget {
+  const _MealStatChip({required this.icon, required this.label, this.value});
+  final String icon;
+  final String label;
   final int? value;
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 4),
+        SvgPicture.asset(icon, width: 18, height: 18),
+        const SizedBox(width: AppSpacing.iconTextGap),
         Text(
-          '$label ${value ?? '—'}',
+          '$label ${value ?? '—'}끼',
           style: AppTextStyles.caption1Medium.copyWith(
             color: AppColors.textSecondary,
           ),
@@ -509,19 +533,16 @@ class _TermsSection extends StatelessWidget {
       child: Column(
         children: [
           _ListTileRow(
-            icon: Icons.privacy_tip_outlined,
             label: '개인정보 보호 약관',
             onTap: () => openExternalUrl(context, TermsCatalog.privacyUrl),
           ),
           const Divider(height: 1, color: AppColors.divider),
           _ListTileRow(
-            icon: Icons.description_outlined,
             label: '서비스 이용 약관',
             onTap: () => openExternalUrl(context, TermsCatalog.tosUrl),
           ),
           const Divider(height: 1, color: AppColors.divider),
           _ListTileRow(
-            icon: Icons.campaign_outlined,
             label: '마케팅 정보 수신',
             onTap: () => openExternalUrl(context, TermsCatalog.marketingUrl),
           ),
@@ -537,13 +558,13 @@ class _TermsSection extends StatelessWidget {
 
 class _ListTileRow extends StatelessWidget {
   const _ListTileRow({
-    required this.icon,
     required this.label,
     required this.onTap,
+    this.icon,
     this.labelColor,
   });
 
-  final IconData icon;
+  final IconData? icon;
   final String label;
   final VoidCallback onTap;
   final Color? labelColor;
@@ -560,8 +581,14 @@ class _ListTileRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: labelColor ?? AppColors.textSecondary),
-            const SizedBox(width: AppSpacing.itemGap),
+            if (icon != null) ...[
+              Icon(
+                icon,
+                size: 20,
+                color: labelColor ?? AppColors.textSecondary,
+              ),
+              const SizedBox(width: AppSpacing.itemGap),
+            ],
             Expanded(
               child: Text(
                 label,
