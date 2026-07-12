@@ -329,13 +329,12 @@ class _MealOptionCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.all(AppSpacing.cardPadding),
+        // Figma 554:7347: 선택된 카드도 흰 배경·회색 테두리를 유지한다.
+        // 선택 표시는 우측 green plus_circle 아이콘이 전담(카드 green fill 아님).
         decoration: BoxDecoration(
-          color: selected ? AppColors.surfaceSelected : AppColors.surface,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-          border: Border.all(
-            color: selected ? AppColors.primary : AppColors.border,
-            width: selected ? 1.5 : 1.0,
-          ),
+          border: Border.all(color: AppColors.border, width: 1.0),
         ),
         child: Row(
           children: [
@@ -350,9 +349,7 @@ class _MealOptionCard extends StatelessWidget {
                   Text(
                     title,
                     style: AppTextStyles.body2Medium.copyWith(
-                      color: selected
-                          ? AppColors.primary
-                          : AppColors.textPrimary,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   Text(

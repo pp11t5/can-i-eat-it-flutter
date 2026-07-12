@@ -10,6 +10,7 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
+import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
@@ -70,15 +71,17 @@ class SymptomDetailScreen extends ConsumerWidget {
   // -------------------------------------------------------------------------
 
   Future<void> _showDeleteDialog(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogCtx) => _DeleteConfirmDialog(
-        onConfirm: () => Navigator.of(dialogCtx).pop(true),
-        onCancel: () => Navigator.of(dialogCtx).pop(false),
-      ),
+    // Figma 1718:8508: 파괴적 액션을 de-emphasize — Primary(채움 green)=취소하기,
+    // Secondary(빨강 텍스트)=삭제하기. 앱 전역 삭제 확인 패턴(showConfirmModal)과 일치.
+    final action = await showConfirmModal(
+      context,
+      title: '기록을 삭제하시겠어요?',
+      primaryLabel: '취소하기',
+      primaryColor: AppColors.primary,
+      secondaryLabel: '삭제하기',
+      secondaryColor: AppColors.danger,
     );
-    if (confirmed != true) return;
+    if (action != ConfirmModalAction.secondary) return;
     if (!context.mounted) return;
 
     try {
@@ -344,12 +347,13 @@ class _MealCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Figma 1324:13865: 흰 배경 + 연회색 테두리 카드(surfaceBackground 회색 fill 아님).
     return Container(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
-        color: AppColors.surfaceBackground,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.divider, width: 0.5),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
@@ -380,12 +384,13 @@ class _NoMealRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Figma 554:7337: 흰 배경 + 연회색 테두리 카드(surfaceBackground 회색 fill 아님).
     return Container(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
-        color: AppColors.surfaceBackground,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.divider, width: 0.5),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
@@ -400,10 +405,16 @@ class _NoMealRow extends StatelessWidget {
           // 음식 연결하기 — W5-3 연동 가능해지면 활성화 예정.
           // TODO(W5-3): linkedMeal 연결 플로우 연결.
           Text(
-            '음식 연결하기 >',
+            '음식 연결하기',
             style: AppTextStyles.body2Medium.copyWith(
-              color: AppColors.textTertiary,
+              color: AppColors.textSecondary,
             ),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          const AppIcon(
+            AppIcons.chevronRight,
+            size: AppIconSizes.s16,
+            color: AppColors.textSecondary,
           ),
         ],
       ),
@@ -599,99 +610,6 @@ class _BottomCta extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// _DeleteConfirmDialog
-// ---------------------------------------------------------------------------
-
-class _DeleteConfirmDialog extends StatelessWidget {
-  const _DeleteConfirmDialog({
-    required this.onConfirm,
-    required this.onCancel,
-  });
-
-  final VoidCallback onConfirm;
-  final VoidCallback onCancel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
-      ),
-      insetPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.screenPadding,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.sectionGap,
-          AppSpacing.sectionGap,
-          AppSpacing.sectionGap,
-          AppSpacing.cardPadding,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              '기록을 삭제하시겠어요?',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.header3Bold.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.cardPadding),
-            Text(
-              '삭제하면 되돌릴 수 없어요.',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.body2Regular.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.contentGap),
-            Material(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-              child: InkWell(
-                onTap: onConfirm,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.cardPadding),
-                  child: Center(
-                    child: Text(
-                      '삭제하기',
-                      style: AppTextStyles.body1Bold.copyWith(
-                        color: AppColors.onPrimary,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.itemGap),
-            InkWell(
-              onTap: onCancel,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: AppSpacing.cardPadding,
-                ),
-                child: Center(
-                  child: Text(
-                    '취소',
-                    style: AppTextStyles.body1Regular.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
