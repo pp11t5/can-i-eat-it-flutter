@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/features/weekly_report/data/repositories/mock_weekly_report_repository.dart';
 import 'package:can_i_eat_it/features/weekly_report/data/weekly_report_providers.dart';
 import 'package:can_i_eat_it/features/weekly_report/domain/entities/weekly_report.dart';
@@ -179,7 +181,9 @@ void main() {
 
       final button = tester.widget<IconButton>(
         find.ancestor(
-          of: find.byIcon(Icons.file_download_outlined),
+          of: find.byWidgetPredicate(
+            (w) => w is AppIcon && w.asset == AppIcons.download,
+          ),
           matching: find.byType(IconButton),
         ),
       );
@@ -194,7 +198,9 @@ void main() {
 
       final button = tester.widget<IconButton>(
         find.ancestor(
-          of: find.byIcon(Icons.file_download_outlined),
+          of: find.byWidgetPredicate(
+            (w) => w is AppIcon && w.asset == AppIcons.download,
+          ),
           matching: find.byType(IconButton),
         ),
       );

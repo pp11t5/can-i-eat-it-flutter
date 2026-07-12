@@ -9,8 +9,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/features/weekly_report/data/weekly_report_providers.dart';
 import 'package:can_i_eat_it/features/weekly_report/domain/entities/weekly_report.dart';
@@ -153,8 +156,11 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.file_download_outlined),
-            color: AppColors.textPrimary,
+            icon: const AppIcon(
+              AppIcons.download,
+              size: AppIconSizes.s24,
+              color: AppColors.textPrimary,
+            ),
             // 데이터 로드 상태에서만 활성 — 로딩/에러 시 캡처 대상이 없다.
             onPressed: report == null ? null : _handleDownload,
           ),
@@ -350,10 +356,10 @@ class _ComfortableStateCard extends StatelessWidget {
           Expanded(
             child: _StatColumn(
               label: '권장 음식',
-              icon: const Icon(
-                Icons.check_circle,
-                color: AppColors.verdictRecommend,
-                size: 28,
+              icon: SvgPicture.asset(
+                AppIcons.verdictRecommend,
+                width: 28,
+                height: 28,
               ),
               value: '${comfortableState.recommendedMealCount}끼',
             ),
@@ -361,10 +367,10 @@ class _ComfortableStateCard extends StatelessWidget {
           Expanded(
             child: _StatColumn(
               label: '전체 비율',
-              icon: const Icon(
-                Icons.sentiment_satisfied_rounded,
-                color: AppColors.verdictRecommend,
-                size: 28,
+              icon: Image.asset(
+                AppImages.moodGood,
+                width: 28,
+                height: 28,
               ),
               value: '${comfortableState.percentage.toStringAsFixed(1)}%',
             ),
@@ -452,26 +458,38 @@ class _MealDistributionCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _LegendRow(
-                        icon: Icons.check_circle,
-                        color: AppColors.verdictRecommend,
+                        icon: SvgPicture.asset(
+                          AppIcons.verdictRecommend,
+                          width: 16,
+                          height: 16,
+                        ),
                         label: '권장음식 ${mealCount.recommendCount}끼',
                       ),
                       const SizedBox(height: AppSpacing.itemGap),
                       _LegendRow(
-                        icon: Icons.error,
-                        color: AppColors.verdictCaution,
+                        icon: SvgPicture.asset(
+                          AppIcons.verdictCaution,
+                          width: 16,
+                          height: 16,
+                        ),
                         label: '주의 음식 ${mealCount.cautionCount}끼',
                       ),
                       const SizedBox(height: AppSpacing.itemGap),
                       _LegendRow(
-                        icon: Icons.cancel,
-                        color: AppColors.verdictDanger,
+                        icon: SvgPicture.asset(
+                          AppIcons.verdictRisk,
+                          width: 16,
+                          height: 16,
+                        ),
                         label: '위험 음식 ${mealCount.riskCount}끼',
                       ),
                       const SizedBox(height: AppSpacing.itemGap),
                       _LegendRow(
-                        icon: Icons.help,
-                        color: AppColors.verdictUnknown,
+                        icon: SvgPicture.asset(
+                          AppIcons.verdictUnknown,
+                          width: 16,
+                          height: 16,
+                        ),
                         label: '확인 어려움 ${mealCount.unknownCount}끼',
                       ),
                     ],
@@ -544,19 +562,17 @@ class _Donut extends StatelessWidget {
 class _LegendRow extends StatelessWidget {
   const _LegendRow({
     required this.icon,
-    required this.color,
     required this.label,
   });
 
-  final IconData icon;
-  final Color color;
+  final Widget icon;
   final String label;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, color: color, size: 16),
+        icon,
         const SizedBox(width: AppSpacing.iconTextGap),
         Expanded(
           child: Text(
@@ -677,7 +693,11 @@ class _SymptomRecordHeader extends StatelessWidget {
               _SymptomPill(
                 backgroundColor: _kSymptomPillGrayBg,
                 contentColor: AppColors.textPrimary,
-                icon: Icons.access_time,
+                icon: const AppIcon(
+                  AppIcons.clock,
+                  size: 14,
+                  color: AppColors.textPrimary,
+                ),
                 label: '평균 시간 $averageTimeLabel',
               ),
               if (averageIntensity != null)
@@ -708,7 +728,7 @@ class _SymptomPill extends StatelessWidget {
   final Color backgroundColor;
   final Color contentColor;
   final String label;
-  final IconData? icon;
+  final Widget? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -725,7 +745,7 @@ class _SymptomPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 14, color: contentColor),
+            icon!,
             const SizedBox(width: AppSpacing.iconTextGap),
           ],
           Text(
