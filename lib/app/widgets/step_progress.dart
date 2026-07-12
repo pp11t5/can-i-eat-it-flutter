@@ -55,7 +55,7 @@ class _Segment extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       height: height,
       decoration: BoxDecoration(
-        color: filled ? AppColors.primary : AppColors.surfaceMuted,
+        color: filled ? AppColors.primary : const Color(0xFFEDEDF5),
         borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
       ),
     );

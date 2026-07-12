@@ -76,6 +76,8 @@ class _OnboardingTriggersScreenState
                 ),
               ),
             ),
+            // ── TopBar 하단 구분선 (Figma gray/30 #F5F5F5) ────────────────────
+            Container(height: 1, color: const Color(0xFFF5F5F5)),
             // ── StepProgress (0px gap after TopBar per Figma) ────────────────
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -95,7 +97,7 @@ class _OnboardingTriggersScreenState
                   const SizedBox(height: 16),
                   Text(
                     '평소 먹고 나면 속이 불편했던 음식을 선택해 주세요',
-                    style: AppTextStyles.body1Regular.copyWith(
+                    style: AppTextStyles.body1Medium.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -126,7 +128,7 @@ class _OnboardingTriggersScreenState
                         );
                       }).toList(),
                     ),
-                    const SizedBox(height: AppSpacing.sectionGap),
+                    const SizedBox(height: AppSpacing.contentGap),
                     // 기타 섹션
                     Text(
                       '해당하는 음식이 없나요?',
@@ -134,7 +136,7 @@ class _OnboardingTriggersScreenState
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.itemGap),
+                    const SizedBox(height: 16),
                     TextField(
                       controller: _customController,
                       style: AppTextStyles.body1Regular.copyWith(
@@ -174,11 +176,12 @@ class _OnboardingTriggersScreenState
                 ),
               ),
             ),
-            // ── CTA ───────────────────────────────────────────────────────────
+            // ── CTA (Figma p3: top0/bottom32) ────────────────────────────────
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-                vertical: AppSpacing.sectionGap,
+              padding: const EdgeInsets.only(
+                left: AppSpacing.screenPadding,
+                right: AppSpacing.screenPadding,
+                bottom: 32,
               ),
               child: AppButton.primary(
                 label: '다음',

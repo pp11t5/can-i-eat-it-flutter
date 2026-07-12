@@ -79,6 +79,8 @@ class OnboardingConditionScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+              // ── TopBar 하단 구분선 (Figma gray/30 #F5F5F5) ────────────────────
+              Container(height: 1, color: const Color(0xFFF5F5F5)),
               // ── StepProgress (0px gap after TopBar per Figma) ────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -98,7 +100,7 @@ class OnboardingConditionScreen extends ConsumerWidget {
                     const SizedBox(height: 16),
                     Text(
                       '현재는 역류성 식도염만 지원해요\n향후 다른 질환도 추가될 예정이에요',
-                      style: AppTextStyles.body1Regular.copyWith(
+                      style: AppTextStyles.body1Medium.copyWith(
                         color: AppColors.textSecondary,
                       ),
                     ),
@@ -113,8 +115,7 @@ class OnboardingConditionScreen extends ConsumerWidget {
                     horizontal: AppSpacing.screenPadding,
                   ),
                   itemCount: conditionOptions.length,
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(height: AppSpacing.itemGap),
+                  separatorBuilder: (_, __) => const SizedBox(height: 16),
                   itemBuilder: (context, index) {
                     final entry = conditionOptions[index];
                     final isSelected = draft.conditions.contains(entry.code);
@@ -130,11 +131,13 @@ class OnboardingConditionScreen extends ConsumerWidget {
                   },
                 ),
               ),
-              // ── CTA ───────────────────────────────────────────────────────────
+              // ── CTA (Figma p1: top16/bottom32) ───────────────────────────────
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.screenPadding,
-                  vertical: AppSpacing.sectionGap,
+                padding: const EdgeInsets.only(
+                  left: AppSpacing.screenPadding,
+                  right: AppSpacing.screenPadding,
+                  top: 16,
+                  bottom: 32,
                 ),
                 child: AppButton.primary(
                   label: '다음',
