@@ -519,7 +519,8 @@ class _DirectAnalyzeCta extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    "'$query'로 검색하기",
+                    // Figma 554:5322/365-1849: 탭 시 raw text 판정(분석)이므로 "분석하기".
+                    "'$query'로 분석하기",
                     style: AppTextStyles.body2Medium.copyWith(
                       color: AppColors.textSecondary,
                     ),

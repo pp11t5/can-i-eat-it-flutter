@@ -83,7 +83,8 @@ class _ClearSearchHistoryDialog extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    '취소',
+                    // Figma 554:5324: 보조 버튼 라벨은 "취소하기".
+                    '취소하기',
                     style: AppTextStyles.body1Regular.copyWith(
                       color: AppColors.textSecondary,
                     ),
