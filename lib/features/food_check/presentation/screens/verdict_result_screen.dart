@@ -86,7 +86,7 @@ class VerdictResultScreen extends ConsumerWidget {
           children: [
             // HeroSection: 원형 placeholder + 음식명 + 등급 헤드라인
             _HeroSection(verdict: verdict),
-            const SizedBox(height: AppSpacing.sectionGap),
+            const SizedBox(height: AppSpacing.contentGap),
 
             // 상세 판정 카드 (AI분석 칩 카드 + 불릿 items + 대체음식 + 기록)
             VerdictDetailCard(
@@ -146,7 +146,7 @@ class _HeroSection extends StatelessWidget {
       VerdictLevel.risk => AppIcons.verdictRisk,
       VerdictLevel.unknown => AppIcons.verdictRisk, // 미도달 폴백
     };
-    return AppIcon(asset, size: 28);
+    return AppIcon(asset, size: AppIconSizes.s24);
   }
 
   /// 등급별 헤드라인 문구
@@ -168,8 +168,8 @@ class _HeroSection extends StatelessWidget {
         // 등급색과 무관하게 항상 동일. 안에 음식 카테고리 일러스트.
         // (by-id 판정: food-type 코드 아이콘 / by-text 판정: category=null → regular 폴백)
         Container(
-          width: 110,
-          height: 110,
+          width: 100,
+          height: 100,
           decoration: BoxDecoration(
             color: const Color(0xFFFAFAFA),
             shape: BoxShape.circle,
@@ -179,12 +179,17 @@ class _HeroSection extends StatelessWidget {
             child: CategoryIcon(code: verdict.category, size: 80),
           ),
         ),
-        const SizedBox(height: AppSpacing.itemGap),
+        const SizedBox(height: 16),
 
         // 음식명 — 가운데 정렬, 큰 볼드
         Text(
           verdict.foodName,
-          style: AppTextStyles.header2Bold.copyWith(
+          style: const TextStyle(
+            fontFamily: 'Pretendard',
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            height: 1.5,
+            letterSpacing: 0,
             color: AppColors.textPrimary,
           ),
           textAlign: TextAlign.center,
@@ -201,8 +206,12 @@ class _HeroSection extends StatelessWidget {
             Flexible(
               child: Text(
                 _headlineText(),
-                style: AppTextStyles.header3Bold.copyWith(
-                  color: AppColors.textPrimary,
+                style: const TextStyle(
+                  fontFamily: 'Pretendard',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  height: 1.5,
+                  color: Color(0xFF000000),
                 ),
               ),
             ),

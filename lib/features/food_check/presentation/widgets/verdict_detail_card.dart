@@ -39,7 +39,7 @@ class VerdictDetailCard extends StatelessWidget {
         // 1. AI 분석 카드
         if (verdict.items.isNotEmpty) ...[
           _AiAnalysisCard(items: verdict.items),
-          const SizedBox(height: AppSpacing.sectionGap),
+          const SizedBox(height: AppSpacing.contentGap),
         ],
 
         // 2. 증상 기록 섹션 (total>0 일 때만)
@@ -48,7 +48,7 @@ class VerdictDetailCard extends StatelessWidget {
             stateRecords: verdict.stateRecords,
             onSeeAll: onSeeAllRecords,
           ),
-          const SizedBox(height: AppSpacing.sectionGap),
+          const SizedBox(height: AppSpacing.contentGap),
         ],
 
         // 3. 대체 음식 섹션 (빈배열이면 숨김)
@@ -74,7 +74,7 @@ class _AiAnalysisCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusStatCard),
         border: Border.all(color: AppColors.border),
       ),
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
@@ -92,7 +92,7 @@ class _AiAnalysisCard extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF8F2FF), // 연보라 배경(Figma)
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -101,7 +101,7 @@ class _AiAnalysisCard extends StatelessWidget {
                     const SizedBox(width: AppSpacing.xs),
                     Text(
                       'AI 분석',
-                      style: AppTextStyles.caption1Bold.copyWith(
+                      style: AppTextStyles.caption1Medium.copyWith(
                         color: const Color(0xFF9747FF), // 보라(Figma)
                       ),
                     ),
@@ -114,7 +114,7 @@ class _AiAnalysisCard extends StatelessWidget {
                 child: Text(
                   '내 정보와 식사 기록을 바탕으로 분석',
                   style: AppTextStyles.caption1Medium.copyWith(
-                    color: AppColors.textSecondary,
+                    color: AppColors.textTertiary,
                   ),
                 ),
               ),
@@ -125,7 +125,7 @@ class _AiAnalysisCard extends StatelessWidget {
           // 불릿 항목들
           for (var i = 0; i < items.length; i++) ...[
             if (i > 0) const SizedBox(height: AppSpacing.cardPadding),
-            _BulletItem(item: items[i]),
+            _BulletItem(item: items[i], isFirst: i == 0),
           ],
         ],
       ),
@@ -134,12 +134,25 @@ class _AiAnalysisCard extends StatelessWidget {
 }
 
 class _BulletItem extends StatelessWidget {
-  const _BulletItem({required this.item});
+  const _BulletItem({required this.item, required this.isFirst});
 
   final VerdictItem item;
 
+  /// 첫 번째 항목(PItem①)만 emphasis 스타일이 Figma상 별도 강조(height 1.5 /
+  /// 순검정) + 본문과의 간격(8)이 다르다. 두 번째 이후(PItem②~)는 기존 스타일 유지.
+  final bool isFirst;
+
   @override
   Widget build(BuildContext context) {
+    final emphasisStyle = isFirst
+        ? AppTextStyles.body2Bold.copyWith(
+            height: 1.5,
+            color: const Color(0xFF000000),
+          )
+        : AppTextStyles.body2Bold.copyWith(
+            color: AppColors.textPrimary,
+          );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -147,29 +160,19 @@ class _BulletItem extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '• ',
-              style: AppTextStyles.body2Bold.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
+            Text('• ', style: emphasisStyle),
             Expanded(
-              child: Text(
-                item.emphasis,
-                style: AppTextStyles.body2Bold.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
+              child: Text(item.emphasis, style: emphasisStyle),
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.xs),
+        SizedBox(height: isFirst ? 8 : AppSpacing.xs),
         // 회색 body 텍스트
         Padding(
           padding: const EdgeInsets.only(left: AppSpacing.itemGap),
           child: Text(
             item.body,
-            style: AppTextStyles.body2Medium.copyWith(
+            style: AppTextStyles.body2Regular.copyWith(
               color: AppColors.textSecondary,
             ),
           ),
@@ -209,7 +212,9 @@ class _StateRecordsSection extends StatelessWidget {
             Text(
               '${stateRecords.total}개의 증상 기록',
               style: AppTextStyles.body1Bold.copyWith(
-                color: AppColors.textPrimary,
+                height: 1.5,
+                letterSpacing: 0,
+                color: const Color(0xFF4D4D59),
               ),
             ),
             GestureDetector(
@@ -268,12 +273,13 @@ class _StateRecordCard extends StatelessWidget {
         children: [
           // 좌측 심각도 무드 얼굴 (서버 라벨 → SymptomState 근사 매핑)
           MoodFace(state: SymptomStateMapper.fromLabel(record.label), size: 32),
-          const SizedBox(width: AppSpacing.cardPadding),
+          const SizedBox(width: 12),
           // label (볼드)
           Expanded(
             child: Text(
               record.label,
               style: AppTextStyles.body2Bold.copyWith(
+                height: 1.5,
                 color: AppColors.textPrimary,
               ),
             ),
@@ -281,7 +287,12 @@ class _StateRecordCard extends StatelessWidget {
           // 우측 날짜 · 타이밍 (회색)
           Text(
             '${record.date} · ${record.timing}',
-            style: AppTextStyles.caption1Medium.copyWith(
+            style: const TextStyle(
+              fontFamily: 'Pretendard',
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              height: 1.5,
+              letterSpacing: 0,
               color: AppColors.textSecondary,
             ),
           ),
@@ -342,8 +353,8 @@ class _SubstituteCard extends StatelessWidget {
       child: Row(
         children: [
           // 음식 카테고리 미제공(엔티티에 code 없음) → regular 폴백 일러스트.
-          const CategoryIcon(code: null, size: 28),
-          const SizedBox(width: AppSpacing.cardPadding),
+          const CategoryIcon(code: null, size: 32),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               substitute.name,

@@ -163,18 +163,26 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
       width: double.infinity,
-      height: 56,
+      height: 64,
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: AppColors.surfaceBackground, width: 1),
+        ),
+      ),
       child: Stack(
         alignment: Alignment.center,
         children: [
           Positioned(
-            left: AppSpacing.xs,
+            left: 16,
             child: IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              visualDensity: VisualDensity.compact,
               icon: const AppIcon(
                 AppIcons.close,
-                size: AppIconSizes.s24,
+                size: AppIconSizes.s32,
                 color: AppColors.textPrimary,
                 semanticsLabel: '닫기',
               ),
@@ -242,9 +250,9 @@ class _Body extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenPadding,
-        AppSpacing.sectionGap,
+        16,
         AppSpacing.screenPadding,
-        AppSpacing.contentGap,
+        16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,10 +261,10 @@ class _Body extends StatelessWidget {
           // 헤더 (이모지 + 제목 + 부제)
           // ---------------------------------------------------------------
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              MoodFace(state: symptom.symptomState, size: 40),
-              const SizedBox(width: AppSpacing.itemGap),
+              MoodFace(state: symptom.symptomState, size: 32),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,7 +278,7 @@ class _Body extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       subLabel,
-                      style: AppTextStyles.body2Regular.copyWith(
+                      style: AppTextStyles.body2Medium.copyWith(
                         color: AppColors.textSecondary,
                       ),
                     ),
@@ -280,14 +288,14 @@ class _Body extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: AppSpacing.sectionGap),
+          const SizedBox(height: AppSpacing.contentGap),
 
           // ---------------------------------------------------------------
           // "이 식사를 먹고 기록했어요" 섹션
           // ---------------------------------------------------------------
           Text(
             '이 식사를 먹고 기록했어요',
-            style: AppTextStyles.body2Bold.copyWith(
+            style: AppTextStyles.body1Bold.copyWith(
               color: AppColors.textPrimary,
             ),
           ),
@@ -306,14 +314,14 @@ class _Body extends StatelessWidget {
           // AI 분석 섹션 (analysis null 또는 빈 목록이면 숨김)
           // ---------------------------------------------------------------
           if (symptom.analysisItems.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.sectionGap),
+            const SizedBox(height: AppSpacing.contentGap),
             _AnalysisSection(
               items: symptom.analysisItems,
               displayName: displayName,
             ),
           ],
 
-          const SizedBox(height: AppSpacing.sectionGap),
+          const SizedBox(height: 16),
 
           // ---------------------------------------------------------------
           // 면책 고지
@@ -353,7 +361,7 @@ class _MealCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.borderCard),
       ),
       child: Row(
         children: [
@@ -362,7 +370,7 @@ class _MealCard extends StatelessWidget {
           Expanded(
             child: Text(
               foodsLabel,
-              style: AppTextStyles.body2Medium.copyWith(
+              style: AppTextStyles.body1Bold.copyWith(
                 color: AppColors.textPrimary,
               ),
               maxLines: 1,
@@ -390,14 +398,14 @@ class _NoMealRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.borderCard),
       ),
       child: Row(
         children: [
           Expanded(
             child: Text(
               '연결된 음식이 없어요',
-              style: AppTextStyles.body2Regular.copyWith(
+              style: AppTextStyles.body2Medium.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),
@@ -407,13 +415,13 @@ class _NoMealRow extends StatelessWidget {
           Text(
             '음식 연결하기',
             style: AppTextStyles.body2Medium.copyWith(
-              color: AppColors.textSecondary,
+              color: AppColors.textStrong,
             ),
           ),
-          const SizedBox(width: AppSpacing.xs),
+          const SizedBox(width: AppSpacing.itemGap),
           const AppIcon(
             AppIcons.chevronRight,
-            size: AppIconSizes.s16,
+            size: AppIconSizes.s24,
             color: AppColors.textSecondary,
           ),
         ],
@@ -442,20 +450,59 @@ class _AnalysisSection extends StatelessWidget {
             vertical: AppSpacing.xs,
             horizontal: AppSpacing.itemGap,
           ),
-          decoration: BoxDecoration(
-            color: AppColors.aiAccentSurface,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-          ),
-          child: Text(
-            '$displayName 님을 위한 맞춤 분석이에요',
-            style: AppTextStyles.body1Bold.copyWith(
-              color: AppColors.textPrimary,
-            ),
+          child: Row(
+            children: [
+              const _AiAnalysisBadge(),
+              const SizedBox(width: AppSpacing.itemGap),
+              Expanded(
+                child: Text(
+                  '$displayName 님을 위한 맞춤 분석이에요',
+                  style: AppTextStyles.body1Bold.copyWith(
+                    color: const Color(0xFF000000),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: AppSpacing.itemGap),
         ...items.map((item) => _AnalysisCard(item: item)),
       ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _AiAnalysisBadge — "AI 분석" 칩 (verdict_detail_card.dart AI칩 참고)
+// ---------------------------------------------------------------------------
+
+class _AiAnalysisBadge extends StatelessWidget {
+  const _AiAnalysisBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.itemGap,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.aiAccentSurface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const AppIcon(AppIcons.sparkle, size: AppIconSizes.s16),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            'AI 분석',
+            style: AppTextStyles.caption1Bold.copyWith(
+              color: const Color(0xFF9747FF),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -475,8 +522,9 @@ class _AnalysisCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.itemGap),
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
-        color: AppColors.surfaceBackground,
+        color: const Color(0xFFFEFEFE),
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -487,11 +535,11 @@ class _AnalysisCard extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: AppSpacing.xs),
+          const SizedBox(height: 16),
           Text(
             item.body,
-            style: AppTextStyles.body2Regular.copyWith(
-              color: AppColors.textSecondary,
+            style: AppTextStyles.body2Medium.copyWith(
+              color: AppColors.textPrimary,
             ),
           ),
         ],
@@ -552,9 +600,9 @@ class _BottomCta extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenPadding,
-        AppSpacing.itemGap,
+        0,
         AppSpacing.screenPadding,
-        AppSpacing.sectionGap,
+        AppSpacing.contentGap,
       ),
       decoration: const BoxDecoration(
         color: AppColors.surface,
@@ -570,7 +618,10 @@ class _BottomCta extends StatelessWidget {
               style: OutlinedButton.styleFrom(
                 backgroundColor: AppColors.surface,
                 foregroundColor: AppColors.textSecondary,
-                side: const BorderSide(color: AppColors.border),
+                side: const BorderSide(
+                  color: Color(0xFF8C8C8C),
+                  width: 1.5,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
                 ),
@@ -580,7 +631,7 @@ class _BottomCta extends StatelessWidget {
               ),
               child: Text(
                 '기록 삭제하기',
-                style: AppTextStyles.body2Medium.copyWith(
+                style: AppTextStyles.body1Bold.copyWith(
                   color: AppColors.textSecondary,
                 ),
               ),
@@ -603,7 +654,7 @@ class _BottomCta extends StatelessWidget {
               ),
               child: Text(
                 '수정하기',
-                style: AppTextStyles.body2Medium.copyWith(
+                style: AppTextStyles.body1Bold.copyWith(
                   color: AppColors.onPrimary,
                 ),
               ),

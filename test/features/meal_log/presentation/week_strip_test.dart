@@ -129,7 +129,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('WeekStrip — 미래 날짜 회색', () {
-    testWidgets('미래 날짜 요일 라벨이 textTertiary 색으로 렌더된다', (tester) async {
+    testWidgets('미래 날짜 요일 라벨이 textSecondary 색으로 렌더된다', (tester) async {
       // today = 2026-06-14 (일) → 15~20은 미래
       final earlyToday = DateTime(2026, 6, 14);
       await tester.pumpWidget(
@@ -139,15 +139,15 @@ void main() {
         )),
       );
 
-      // "월"(15일) 라벨은 미래 → textTertiary
+      // "월"(15일) 라벨은 미래 → Figma 실측: 미래에도 요일 라벨은 textSecondary(#737380) 유지
       final mondayText = tester.widget<Text>(find.text('월'));
       expect(
         mondayText.style?.color,
-        equals(AppColors.textTertiary),
+        equals(AppColors.textSecondary),
       );
     });
 
-    testWidgets('미래 날짜 숫자가 textTertiary 색으로 렌더된다', (tester) async {
+    testWidgets('미래 날짜 숫자가 #BBBBBB 색으로 렌더된다', (tester) async {
       final earlyToday = DateTime(2026, 6, 14);
       await tester.pumpWidget(
         _wrap(buildStrip(
@@ -156,15 +156,15 @@ void main() {
         )),
       );
 
-      // 15일(미래) 숫자 텍스트
+      // 15일(미래) 숫자 텍스트 → Figma 실측: 옅은 회색 #BBBBBB
       final futureNum = tester.widget<Text>(find.text('15'));
       expect(
         futureNum.style?.color,
-        equals(AppColors.textTertiary),
+        equals(const Color(0xFFBBBBBB)),
       );
     });
 
-    testWidgets('오늘 날짜 숫자는 미래가 아니라 textPrimary이다', (tester) async {
+    testWidgets('오늘 날짜 숫자는 미래가 아니라 textSecondary이다', (tester) async {
       await tester.pumpWidget(
         _wrap(buildStrip(
           selectedDate: DateTime(2026, 6, 14), // 다른 날 선택
@@ -172,11 +172,11 @@ void main() {
         )),
       );
 
-      // 오늘(17)은 미래가 아님 → 선택 아닐 때 textPrimary
+      // 오늘(17)은 미래가 아님 → 선택 아닐 때 Figma 실측: textSecondary(#737380)
       final todayNum = tester.widget<Text>(find.text('17'));
       expect(
         todayNum.style?.color,
-        equals(AppColors.textPrimary),
+        equals(AppColors.textSecondary),
       );
     });
   });
