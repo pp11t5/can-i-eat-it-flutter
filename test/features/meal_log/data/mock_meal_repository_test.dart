@@ -70,6 +70,20 @@ void main() {
       expect(candidates, isNotEmpty);
       expect(candidates[0].meals, isNotEmpty);
     });
+
+    test('seeded 타임라인의 symptom 항목은 symptomId를 보유한다', () async {
+      final repo = MockMealRepository.seeded();
+      final items = await repo.timeline(DateTime(2026, 6, 17));
+      final sym = items.whereType<TimelineSymptom>().first;
+      expect(sym.symptomId, isNotNull);
+    });
+
+    test('seeded 타임라인의 group 항목은 connectedSymptoms를 보유한다', () async {
+      final repo = MockMealRepository.seeded();
+      final items = await repo.timeline(DateTime(2026, 6, 17));
+      final grp = items.whereType<TimelineGroup>().first;
+      expect(grp.connectedSymptoms, isNotNull);
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -195,12 +209,16 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  group('timeline — 날짜 인수 무관 동작 (mock은 날짜 무시)', () {
-    test('다른 날짜를 넘겨도 동일한 항목 목록을 반환한다', () async {
+  group('timeline — 날짜 인식', () {
+    test('시드 anchor 날짜는 항목을 반환하고 다른 날짜는 빈 목록이다', () async {
       final repo = MockMealRepository.seeded();
-      final a = await repo.timeline(DateTime(2026, 6, 17));
-      final b = await repo.timeline(DateTime(2026, 1, 1));
-      expect(a.length, b.length);
+      expect(await repo.timeline(DateTime(2026, 6, 17)), isNotEmpty);
+      expect(await repo.timeline(DateTime(2026, 1, 1)), isEmpty);
+    });
+    test('anchor를 주입하면 해당 날짜로 시드가 이동한다', () async {
+      final repo = MockMealRepository.seeded(anchor: DateTime(2026, 7, 13));
+      expect(await repo.timeline(DateTime(2026, 7, 13)), isNotEmpty);
+      expect(await repo.timeline(DateTime(2026, 6, 17)), isEmpty);
     });
   });
 }

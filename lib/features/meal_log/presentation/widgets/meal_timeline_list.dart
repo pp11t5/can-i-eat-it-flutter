@@ -24,7 +24,7 @@ import 'package:can_i_eat_it/core/utils/kst_time.dart';
 ///
 /// [items]: 표시할 타임라인 항목 목록 (비어있지 않아야 함).
 /// [onTapMeal]: single/group 타일 탭 콜백 (식사 상세 진입).
-/// [onAddFood]: single/group 타일 "+음식 추가" 콜백.
+/// [onAddFood]: single/group 타일 "+음식 추가" 콜백 (mealRecordId, 기존 식사 섭취시각).
 /// [onTapSymptom]: 증상 행 또는 연결증상 카드 탭 콜백 (증상 상세 진입, symptomId).
 class MealTimelineList extends StatelessWidget {
   const MealTimelineList({
@@ -40,8 +40,8 @@ class MealTimelineList extends StatelessWidget {
   /// single/group 타일 탭 → 식사 상세(mealRecordId).
   final void Function(String mealRecordId)? onTapMeal;
 
-  /// single/group 타일 "+음식 추가" → 기존 식사에 추가(mealRecordId).
-  final void Function(String mealRecordId)? onAddFood;
+  /// single/group 타일 "+음식 추가" → 기존 식사에 추가(mealRecordId, mealRecordDateTime).
+  final void Function(String mealRecordId, String mealRecordDateTime)? onAddFood;
 
   /// 증상 행/연결증상 카드 탭 → 증상 상세(symptomId).
   final void Function(String symptomId)? onTapSymptom;
@@ -98,7 +98,7 @@ class MealTimelineList extends StatelessWidget {
                   ? () => onTapMeal!(item.mealRecordId)
                   : null,
               onAddFood: onAddFood != null
-                  ? () => onAddFood!(item.mealRecordId)
+                  ? () => onAddFood!(item.mealRecordId, item.mealRecordDateTime)
                   : null,
               onTapSymptom: onTapSymptom,
             ),
@@ -108,7 +108,7 @@ class MealTimelineList extends StatelessWidget {
                   ? () => onTapMeal!(item.mealRecordId)
                   : null,
               onAddFood: onAddFood != null
-                  ? () => onAddFood!(item.mealRecordId)
+                  ? () => onAddFood!(item.mealRecordId, item.mealRecordDateTime)
                   : null,
               onTapSymptom: onTapSymptom,
             ),
@@ -145,33 +145,37 @@ class _TimelineRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : 16), // Figma 실측: 아이템 세로 gap
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: _iconContainerSize,
-              child: Column(
-                children: [
-                  // 자체완결 원형 배지(32×32) — 별도 회색 래퍼 없이 직접 렌더.
-                  AppIcon(badgeAsset, size: AppIconSizes.s32),
-                  if (!isLast)
-                    Expanded(
-                      child: Container(
-                        width: _spineWidth,
-                        color: AppColors.divider,
-                        margin: const EdgeInsets.symmetric(vertical: 2),
-                      ),
+    // 스파인 라인 연속화: 세로 gap(16px)을 오른쪽 카드 쪽 Padding으로 흡수시켜
+    // IntrinsicHeight 행 높이 = 카드 + gap 이 되게 하고, 왼쪽 라인이 그 전체
+    // 높이를 채워 다음 배지 상단까지 끊김 없이 이어지도록 한다.
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: _iconContainerSize,
+            child: Column(
+              children: [
+                // 자체완결 원형 배지(32×32) — 별도 회색 래퍼 없이 직접 렌더.
+                AppIcon(badgeAsset, size: AppIconSizes.s32),
+                if (!isLast)
+                  Expanded(
+                    child: Container(
+                      width: _spineWidth,
+                      color: AppColors.divider,
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
-            const SizedBox(width: _rowGap),
-            Expanded(child: child),
-          ],
-        ),
+          ),
+          const SizedBox(width: _rowGap),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: isLast ? 0 : 16), // Figma 실측: 아이템 세로 gap
+              child: child,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -183,15 +187,18 @@ class _TimelineRow extends StatelessWidget {
 
 /// 흰 카드(radius, 은은한 그림자) 셸.
 class _CardShell extends StatelessWidget {
-  const _CardShell({required this.child});
+  const _CardShell({required this.child, this.color = AppColors.surface});
 
   final Widget child;
+
+  /// 카드 배경색 — 식사 카드는 흰색(기본값), 증상 단독 카드는 회색.
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: color,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         border: Border.all(color: AppColors.border, width: 1),
         boxShadow: const [
@@ -534,6 +541,7 @@ class _SymptomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _CardShell(
+      color: AppColors.surfaceBackground,
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,

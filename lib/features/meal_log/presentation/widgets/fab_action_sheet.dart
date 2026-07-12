@@ -58,7 +58,11 @@ class _FabActionSheet extends StatelessWidget {
           // 메뉴 항목 + X 버튼 — 우하단 정렬
           Positioned(
             right: AppSpacing.screenPadding,
-            bottom: MediaQuery.of(context).padding.bottom + AppSpacing.screenPadding,
+            // 64 = app_shell.dart _BottomNavBar 의 SizedBox(height: 64) —
+            // X 버튼(과 그 위 메뉴 열)을 하단 네비바 위 FAB 위치에 맞춘다.
+            bottom: MediaQuery.of(context).padding.bottom +
+                64 +
+                AppSpacing.screenPadding,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
