@@ -128,7 +128,7 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
     final report = weeklyReportAsync.valueOrNull;
 
     return Scaffold(
-      backgroundColor: AppColors.surfaceBackground,
+      backgroundColor: AppColors.scaffoldBackground,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         surfaceTintColor: AppColors.surface,

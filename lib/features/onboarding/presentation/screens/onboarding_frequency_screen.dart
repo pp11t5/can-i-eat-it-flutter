@@ -24,7 +24,7 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
     final notifier = ref.read(onboardingControllerProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

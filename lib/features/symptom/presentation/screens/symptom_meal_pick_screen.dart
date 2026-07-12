@@ -146,7 +146,7 @@ class _SymptomMealPickScreenState
     );
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.scaffoldBackground,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,

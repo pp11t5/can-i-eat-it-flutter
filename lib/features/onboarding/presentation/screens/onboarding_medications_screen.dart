@@ -60,7 +60,7 @@ class _OnboardingMedicationsScreenState
     final hasError = submitState is AsyncError;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

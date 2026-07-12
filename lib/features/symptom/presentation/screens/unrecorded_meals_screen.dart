@@ -98,7 +98,7 @@ class UnrecordedMealsScreen extends ConsumerWidget {
     final candidatesAsync = ref.watch(mealCandidatesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.scaffoldBackground,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,

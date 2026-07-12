@@ -165,7 +165,7 @@ class _SymptomTimePickScreenState extends State<SymptomTimePickScreen> {
     final dates = _dateOptions();
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.scaffoldBackground,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,

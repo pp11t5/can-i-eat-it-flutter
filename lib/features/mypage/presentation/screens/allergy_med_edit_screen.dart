@@ -139,7 +139,7 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
     final medicalInfoAsync = ref.watch(medicalInfoStrictProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.scaffoldBackground,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         surfaceTintColor: AppColors.surface,

@@ -50,7 +50,7 @@ class OnboardingConditionScreen extends ConsumerWidget {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.surface,
+        backgroundColor: AppColors.scaffoldBackground,
         body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

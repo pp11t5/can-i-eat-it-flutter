@@ -77,7 +77,7 @@ class _NotificationSettingsScreenState
         ref.watch(osNotificationBlockedProvider).valueOrNull ?? false;
 
     return Scaffold(
-      backgroundColor: AppColors.surfaceBackground,
+      backgroundColor: AppColors.scaffoldBackground,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         surfaceTintColor: AppColors.surface,

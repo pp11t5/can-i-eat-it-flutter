@@ -39,7 +39,7 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceBackground,
+      backgroundColor: AppColors.scaffoldBackground,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         surfaceTintColor: AppColors.surface,

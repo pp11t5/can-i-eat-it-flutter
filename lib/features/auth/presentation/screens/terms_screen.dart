@@ -91,7 +91,7 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.surface,
+        backgroundColor: AppColors.scaffoldBackground,
         appBar: AppBar(
           backgroundColor: AppColors.surface,
           surfaceTintColor: AppColors.surface,

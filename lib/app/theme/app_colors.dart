@@ -37,6 +37,10 @@ abstract final class AppColors {
   /// 카드 안에 삽입되는 통계/설정 카드 배경 (Figma gray/20 #FCFCFC)
   static const Color surfaceInset = ColorPrimitives.gray20;
 
+  /// 모든 화면(Scaffold)의 기본 배경 — #FEFEFE 흰색으로 통일.
+  /// 회색(surfaceBackground=#F5F5F5)을 스캐폴드 배경으로 쓰지 않는다.
+  static const Color scaffoldBackground = Color(0xFFFEFEFE);
+
   // --- 텍스트 ---
 
   static const Color textPrimary = ColorPrimitives.fontColor100;

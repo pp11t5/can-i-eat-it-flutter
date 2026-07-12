@@ -110,7 +110,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
 
     return Scaffold(
       // Figma 실측: #FCFCFC (surfaceBackground #F5F5F5 과 구분되는 타임라인 전용 배경)
-      backgroundColor: const Color(0xFFFCFCFC),
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: Column(
           children: [
