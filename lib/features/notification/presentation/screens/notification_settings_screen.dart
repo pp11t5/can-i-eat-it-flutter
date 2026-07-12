@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
@@ -167,7 +169,12 @@ class _SettingsBody extends ConsumerWidget {
                 NotificationToggleType.postMeal,
               ),
             ),
-            const Divider(height: 1, color: AppColors.divider),
+            const Divider(
+              height: 1,
+              indent: AppSpacing.cardPadding,
+              endIndent: AppSpacing.cardPadding,
+              color: AppColors.divider,
+            ),
             _ToggleRow(
               title: '식단 기록 알림',
               subtitle: '식사, 증상 기록을 위해 보내요',
@@ -178,7 +185,12 @@ class _SettingsBody extends ConsumerWidget {
                 NotificationToggleType.dailyRecord,
               ),
             ),
-            const Divider(height: 1, color: AppColors.divider),
+            const Divider(
+              height: 1,
+              indent: AppSpacing.cardPadding,
+              endIndent: AppSpacing.cardPadding,
+              color: AppColors.divider,
+            ),
             _ToggleRow(
               title: '주간 리포트',
               subtitle: '매주 일요일 19:00에 알림이 가요',
@@ -196,21 +208,15 @@ class _SettingsBody extends ConsumerWidget {
         // 알림 수신 시간 카드
         const _SectionLabel(label: '알림 받을 시간'),
         const SizedBox(height: AppSpacing.itemGap),
+        // Figma 577:10290 — 시간 라디오 카드는 행 사이 구분선 없음(간격만).
         _SectionCard(
-          children: DailyNotificationTime.values.map((slot) {
-            final isLast = slot == DailyNotificationTime.values.last;
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _RadioRow(
-                  label: slot.label,
-                  selected: settings.dailyTime == slot,
-                  onTap: () => _handleDailyTime(context, ref, slot),
-                ),
-                if (!isLast) const Divider(height: 1, color: AppColors.divider),
-              ],
-            );
-          }).toList(),
+          children: DailyNotificationTime.values
+              .map((slot) => _RadioRow(
+                    label: slot.label,
+                    selected: settings.dailyTime == slot,
+                    onTap: () => _handleDailyTime(context, ref, slot),
+                  ))
+              .toList(),
         ),
       ],
     );
@@ -280,22 +286,20 @@ class _OsBlockedBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      padding: const EdgeInsets.all(AppSpacing.sectionGap),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.borderCard),
+        // Figma 577:10286 배너 — bg #FCFCFC, stroke #EAEAEA 1.5, radius 14.
+        color: AppColors.surfaceInset,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusStatCard),
+        border: Border.all(color: AppColors.border, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.warning_amber_rounded,
-                color: AppColors.verdictCaution,
-                size: 20,
-              ),
+              // Figma 배너 얼굴 일러스트(😰 주황) = MoodFace uncomfortable 재사용.
+              Image.asset(AppImages.moodUncomfortable, width: 24, height: 24),
               const SizedBox(width: AppSpacing.iconTextGap),
               Expanded(
                 child: Text(
@@ -379,8 +383,9 @@ class _SectionCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.borderCard),
+        // Figma 577:10290 섹션 카드 — radius 16, stroke #EAEAEA.
+        borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -436,11 +441,10 @@ class _ToggleRow extends StatelessWidget {
               ],
             ),
           ),
-          Switch(
+          // Figma 577:10290 — iOS 스타일 스위치(흰 thumb, ON=#34C759 track).
+          Switch.adaptive(
             value: value,
             onChanged: onChanged,
-            activeThumbColor: AppColors.primary,
-            activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
           ),
         ],
       ),
@@ -482,15 +486,20 @@ class _RadioRow extends StatelessWidget {
                 ),
               ),
             ),
-            // Radio deprecated API(groupValue/onChanged/activeColor) 회피.
-            // 선택 상태를 아이콘으로 표현한다.
-            Icon(
-              selected
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-              color: selected ? AppColors.primary : AppColors.textTertiary,
-              size: 24,
-            ),
+            // Figma 577:10290 — 선택=초록 원+흰 체크(verdict grade 재사용),
+            // 미선택=흰 원+#EAEAEA 1px 링.
+            if (selected)
+              SvgPicture.asset(AppIcons.verdictRecommend, width: 24, height: 24)
+            else
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.border),
+                ),
+              ),
           ],
         ),
       ),
