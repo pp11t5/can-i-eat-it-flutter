@@ -185,6 +185,9 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
             _TopBar(
               controller: _textController,
               onClose: _handleClose,
+              // Figma 1398:16659: 식사기록 흐름(시간선택→검색) 진입이면 leading이
+              // 뒤로(chevron) — pop 시 시간선택 화면으로 복귀(선택시간 보존).
+              leadingIsBack: widget.recordContext != null,
               onChanged: _onTextChanged,
               onSubmit: _onSubmit,
             ),
@@ -217,10 +220,14 @@ class _TopBar extends StatelessWidget {
     required this.onClose,
     required this.onChanged,
     required this.onSubmit,
+    this.leadingIsBack = false,
   });
 
   final TextEditingController controller;
   final VoidCallback onClose;
+
+  /// true면 leading을 뒤로(chevron)로, false면 닫기(X)로 렌더.
+  final bool leadingIsBack;
   final ValueChanged<String> onChanged;
   final ValueChanged<String> onSubmit;
 
@@ -232,12 +239,14 @@ class _TopBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
         child: Row(
           children: [
-            // 닫기 X 아이콘.
+            // 뒤로(chevron) 또는 닫기(X) — 진입 흐름에 따라 결정.
             GestureDetector(
               onTap: onClose,
               behavior: HitTestBehavior.opaque,
               child: SvgPicture.asset(
-                'assets/figma_extracted/icon_close.svg',
+                leadingIsBack
+                    ? 'assets/figma_extracted/chevron_left.svg'
+                    : 'assets/figma_extracted/icon_close.svg',
                 width: 32,
                 height: 32,
                 colorFilter: const ColorFilter.mode(

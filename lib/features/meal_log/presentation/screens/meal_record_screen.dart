@@ -8,6 +8,7 @@ import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
+import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 
 /// 식사 기록 화면 — 섭취 시각 선택 후 음식 검색으로 이어지는 흐름.
@@ -289,30 +290,16 @@ class _QuickChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Figma 554:7335: 빠른선택 칩 = 흰 배경+테두리, 선택 시 green 아웃라인
+    // (SelectableChip 공유 — 증상 시간선택과 동일 스타일, 회색 fill 아님).
     return Wrap(
       spacing: AppSpacing.itemGap,
       runSpacing: AppSpacing.itemGap,
       children: List.generate(offsets.length, (i) {
-        final selected = selectedOffset == offsets[i];
-        return GestureDetector(
+        return SelectableChip(
+          label: labels[i],
+          selected: selectedOffset == offsets[i],
           onTap: () => onTap(offsets[i]),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.chipPaddingH,
-              vertical: AppSpacing.chipPaddingV,
-            ),
-            decoration: BoxDecoration(
-              color: selected ? AppColors.primary : AppColors.surfaceMuted,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-            ),
-            child: Text(
-              labels[i],
-              style: AppTextStyles.body2Medium.copyWith(
-                color: selected ? AppColors.onPrimary : AppColors.textPrimary,
-              ),
-            ),
-          ),
         );
       }),
     );
@@ -345,12 +332,10 @@ class _WheelPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    // Figma 554:7335: 휠은 흰 화면 위에 놓이며 회색 카드로 감싸지 않는다.
+    // 선택행만 회색(surfaceMuted) 하이라이트 pill.
+    return SizedBox(
       height: _pickerHeight,
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-      ),
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -362,8 +347,8 @@ class _WheelPicker extends StatelessWidget {
             height: _itemExtent,
             child: Container(
               decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppSpacing.xs),
+                color: AppColors.surfaceMuted,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
               ),
             ),
           ),

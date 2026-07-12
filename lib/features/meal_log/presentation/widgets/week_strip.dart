@@ -115,6 +115,7 @@ class _DayCell extends StatelessWidget {
   /// 우선순위: 선택(배지 안 흰색) < 미래(회색) < 일요일(빨강) < 기본(secondary)
   /// 선택일 라벨은 배지 바깥에 있으므로 isSelected 시 textPrimary 유지.
   Color _labelColor() {
+    if (isSelected) return AppColors.surface; // 선택 캡슐 안 흰색
     if (isFuture) return AppColors.textTertiary;
     if (isSunday) return AppColors.calendarSunday;
     return AppColors.textSecondary;
@@ -129,60 +130,41 @@ class _DayCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Figma 1351:14768: 선택일은 요일+숫자+도트를 감싸는 검정 세로 캡슐(흰 텍스트).
+    // 숫자만 감싸는 원형이 아니다. 비선택 셀도 동일 폭(40)을 차지해 정렬을 유지한다.
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 요일 라벨 (또는 "오늘")
-          Text(
-            dayLabel,
-            style: AppTextStyles.caption1Medium.copyWith(
-              color: _labelColor(),
+      child: Container(
+        width: 40,
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.itemGap),
+        decoration: isSelected
+            ? BoxDecoration(
+                color: AppColors.textPrimary,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+              )
+            : null,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 요일 라벨 (또는 "오늘")
+            Text(
+              dayLabel,
+              style: AppTextStyles.caption1Medium.copyWith(
+                color: _labelColor(),
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          // 날짜 숫자 (선택 시 검정 원형 배경)
-          _DayBadge(dayNumber: dayNumber, isSelected: isSelected, numberColor: _numberColor()),
-          const SizedBox(height: AppSpacing.xs),
-          // 도트 (최대 3개)
-          _DotRow(dots: dots),
-        ],
-      ),
-    );
-  }
-}
-
-/// 날짜 숫자 배지 — 선택 시 검정 원형 배경 + 흰 텍스트.
-class _DayBadge extends StatelessWidget {
-  const _DayBadge({
-    required this.dayNumber,
-    required this.isSelected,
-    required this.numberColor,
-  });
-
-  final int dayNumber;
-  final bool isSelected;
-  final Color numberColor;
-
-  static const double _size = 32.0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: _size,
-      height: _size,
-      decoration: isSelected
-          ? const BoxDecoration(
-              color: AppColors.textPrimary,
-              shape: BoxShape.circle,
-            )
-          : null,
-      alignment: Alignment.center,
-      child: Text(
-        '$dayNumber',
-        style: AppTextStyles.body2Medium.copyWith(color: numberColor),
+            const SizedBox(height: AppSpacing.xs),
+            // 날짜 숫자
+            Text(
+              '$dayNumber',
+              style: AppTextStyles.body2Medium.copyWith(color: _numberColor()),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            // 도트 (최대 3개)
+            _DotRow(dots: dots),
+          ],
+        ),
       ),
     );
   }

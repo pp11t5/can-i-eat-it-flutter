@@ -248,8 +248,9 @@ void main() {
         final deco = c.decoration;
         return deco is BoxDecoration && deco.shape == BoxShape.circle;
       });
-      // 날짜 배지 1개 + 도트 2개 = 최소 3개
-      expect(dotContainers.length, greaterThanOrEqualTo(3));
+      // 도트 2개 = 원형 컨테이너 2개.
+      // (선택 배지는 이제 요일+숫자+도트를 감싸는 캡슐(rounded-rect)이라 circle 아님.)
+      expect(dotContainers.length, greaterThanOrEqualTo(2));
     });
   });
 }
