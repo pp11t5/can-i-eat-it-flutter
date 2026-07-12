@@ -37,8 +37,11 @@ class VerdictAllRecordsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // 헤더 카운트는 실제 렌더되는 records 수 기준(Figma: 카운트==표시수).
+                    // total 은 서버 전체 집계(≥records.length)일 수 있어 목적지가
+                    // 캡된 records 뿐인 이 화면에선 표시 수와 불일치하므로 사용 안 함.
                     Text(
-                      '${stateRecords.total}개의 증상 기록',
+                      '${stateRecords.records.length}개의 증상 기록',
                       style: AppTextStyles.body1Bold.copyWith(
                         color: AppColors.textPrimary,
                       ),

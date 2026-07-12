@@ -137,15 +137,6 @@ class _HeroSection extends StatelessWidget {
 
   final EatVerdict verdict;
 
-  Color _verdictColor() {
-    return switch (verdict.level) {
-      VerdictLevel.recommend => AppColors.verdictRecommend,
-      VerdictLevel.caution => AppColors.verdictCaution,
-      VerdictLevel.risk => AppColors.verdictDanger,
-      VerdictLevel.unknown => AppColors.verdictUnknown,
-    };
-  }
-
   /// 등급별 헤드라인 배지 (자체완결 색배지 — 초록체크/주황!/빨강X).
   /// unknown 은 build() 상단에서 [VerdictUnknownScreen] 으로 위임돼 여기 도달하지 않음.
   Widget _headlineIcon() {
@@ -170,20 +161,19 @@ class _HeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _verdictColor();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // 원형 컨테이너 — 등급색 배경 + 음식 카테고리 일러스트
+        // 원형 컨테이너 — Figma: 중립 회색(#FAFAFA) + 연회색 테두리(#DBDBE5),
+        // 등급색과 무관하게 항상 동일. 안에 음식 카테고리 일러스트.
         // (by-id 판정: food-type 코드 아이콘 / by-text 판정: category=null → regular 폴백)
         Container(
           width: 110,
           height: 110,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.12),
+            color: const Color(0xFFFAFAFA),
             shape: BoxShape.circle,
-            border: Border.all(color: color.withValues(alpha: 0.25), width: 2),
+            border: Border.all(color: const Color(0xFFDBDBE5)),
           ),
           child: Center(
             child: CategoryIcon(code: verdict.category, size: 80),
@@ -199,11 +189,12 @@ class _HeroSection extends StatelessWidget {
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.itemGap),
+        const SizedBox(height: AppSpacing.sectionGap),
 
-        // 등급 헤드라인: 아이콘 + 문구
+        // 등급 헤드라인: 아이콘 + 문구 — Figma 좌측 정렬(스크린 마진 기준).
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             _headlineIcon(),
             const SizedBox(width: AppSpacing.itemGap),
@@ -213,7 +204,6 @@ class _HeroSection extends StatelessWidget {
                 style: AppTextStyles.header3Bold.copyWith(
                   color: AppColors.textPrimary,
                 ),
-                textAlign: TextAlign.center,
               ),
             ),
           ],
