@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
@@ -18,9 +19,13 @@ import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_un
 ///         test/features/food_check/presentation/verdict_screens_golden_test.dart
 
 Widget _wrapFullScreen(Widget child) {
-  return MaterialApp(
-    theme: AppTheme.light,
-    home: child,
+  // VerdictLoadingScreen이 ConsumerWidget(authControllerProvider 참조)이므로
+  // ProviderScope로 감싼다. nickname 명시 시에도 build에서 ref.watch가 호출됨.
+  return ProviderScope(
+    child: MaterialApp(
+      theme: AppTheme.light,
+      home: child,
+    ),
   );
 }
 
