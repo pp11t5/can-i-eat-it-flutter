@@ -123,7 +123,7 @@ void main() {
       await tester.pumpWidget(_buildProfileInfoScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('알레르기 · 복용약'), findsOneWidget);
+      expect(find.text('알레르기・복용약'), findsOneWidget);
     });
 
     testWidgets('로그아웃 버튼 탭 시 확인 다이얼로그가 표시된다', (tester) async {

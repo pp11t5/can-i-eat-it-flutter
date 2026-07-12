@@ -167,6 +167,14 @@ void main() {
       await tester.pumpWidget(_buildMypageScreen());
       await tester.pumpAndSettle();
 
+      // 설정 섹션은 스크롤 아래에 있으므로 스크롤한다.
+      await tester.scrollUntilVisible(
+        find.text('알림 설정'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
       expect(find.text('알림 설정'), findsOneWidget);
     });
 
@@ -190,11 +198,25 @@ void main() {
       await tester.pumpWidget(_buildMypageScreen());
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.text('로그아웃'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
       expect(find.text('로그아웃'), findsOneWidget);
     });
 
     testWidgets('탈퇴 항목이 표시된다', (tester) async {
       await tester.pumpWidget(_buildMypageScreen());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('탈퇴'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('탈퇴'), findsOneWidget);
