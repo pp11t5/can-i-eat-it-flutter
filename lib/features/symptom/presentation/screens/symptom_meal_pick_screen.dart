@@ -151,10 +151,11 @@ class _SymptomMealPickScreenState
         backgroundColor: AppColors.surface,
         elevation: 0,
         centerTitle: true,
+        toolbarHeight: 64,
         leading: IconButton(
           icon: const AppIcon(
             AppIcons.chevronLeft,
-            size: AppIconSizes.s24,
+            size: AppIconSizes.s32,
             color: AppColors.textPrimary,
             semanticsLabel: '뒤로',
           ),
@@ -162,11 +163,12 @@ class _SymptomMealPickScreenState
         ),
         title: Text(
           '원인 식사',
-          style: AppTextStyles.body1Bold.copyWith(color: AppColors.textPrimary),
+          style: AppTextStyles.body1Medium
+              .copyWith(color: AppColors.textPrimary),
         ),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1),
-          child: Divider(height: 1, thickness: 1, color: AppColors.divider),
+          child: Divider(height: 1, thickness: 1, color: Color(0xFFF5F5F5)),
         ),
       ),
       body: candidatesAsync.when(
@@ -188,18 +190,16 @@ class _SymptomMealPickScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: AppSpacing.sectionGap),
-
                     // 헤더
                     Text(
                       '어떤 식사와\n관련된 증상인가요?',
-                      style: AppTextStyles.header1Bold
+                      style: AppTextStyles.header2Bold
                           .copyWith(color: AppColors.textPrimary),
                     ),
-                    const SizedBox(height: AppSpacing.xs),
+                    const SizedBox(height: 8),
                     Text(
                       '하루 동안 먹은 식사 중 선택해주세요',
-                      style: AppTextStyles.body2Regular
+                      style: AppTextStyles.body2Medium
                           .copyWith(color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: AppSpacing.sectionGap),
@@ -224,7 +224,7 @@ class _SymptomMealPickScreenState
                         children: [
                           Text(
                             _sectionTitle(day.date),
-                            style: AppTextStyles.body2Bold
+                            style: AppTextStyles.body2Medium
                                 .copyWith(color: AppColors.textSecondary),
                           ),
                           const SizedBox(height: AppSpacing.itemGap),
@@ -249,7 +249,7 @@ class _SymptomMealPickScreenState
                               ),
                             );
                           }),
-                          const SizedBox(height: AppSpacing.itemGap),
+                          const SizedBox(height: 24),
                         ],
                       );
                     }),
@@ -334,7 +334,7 @@ class _MealOptionCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-          border: Border.all(color: AppColors.border, width: 1.0),
+          border: Border.all(color: AppColors.borderCard, width: 1.0),
         ),
         child: Row(
           children: [
@@ -348,13 +348,14 @@ class _MealOptionCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: AppTextStyles.body2Medium.copyWith(
+                    style: AppTextStyles.body1Bold.copyWith(
                       color: AppColors.textPrimary,
                     ),
                   ),
+                  const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: AppTextStyles.caption1Medium.copyWith(
+                    style: AppTextStyles.body2Medium.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -373,9 +374,14 @@ class _MealOptionCard extends StatelessWidget {
               Container(
                 width: AppIconSizes.s24,
                 height: AppIconSizes.s24,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.border, width: 1.5),
+                alignment: Alignment.center,
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.border, width: 1.0),
+                  ),
                 ),
               ),
           ],

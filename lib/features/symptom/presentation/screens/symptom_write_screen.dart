@@ -286,10 +286,11 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
         backgroundColor: AppColors.surface,
         elevation: 0,
         centerTitle: true,
+        toolbarHeight: 64,
         leading: IconButton(
           icon: const AppIcon(
             AppIcons.close,
-            size: AppIconSizes.s24,
+            size: AppIconSizes.s32,
             color: AppColors.textPrimary,
             semanticsLabel: '닫기',
           ),
@@ -297,12 +298,12 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
         ),
         title: Text(
           '증상 기록 작성',
-          style:
-              AppTextStyles.body1Bold.copyWith(color: AppColors.textPrimary),
+          style: AppTextStyles.body1Medium
+              .copyWith(color: AppColors.textPrimary),
         ),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1),
-          child: Divider(height: 1, thickness: 1, color: AppColors.divider),
+          child: Divider(height: 1, thickness: 1, color: Color(0xFFF5F5F5)),
         ),
       ),
       body: Column(
@@ -318,16 +319,16 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
 
                   // ── 섹션 1: mood ──────────────────────────────────────
                   const _SectionLabel(label: '지금 속은 어때요?'),
-                  const SizedBox(height: AppSpacing.itemGap),
+                  const SizedBox(height: 16),
                   _MoodSelector(
                     selected: _formState.mood,
                     onTap: _onMoodTap,
                   ),
-                  const SizedBox(height: AppSpacing.contentGap),
+                  const SizedBox(height: 48),
 
                   // ── 섹션 2: 증상 유형 ──────────────────────────────────
                   const _SectionLabel(label: '어떤 증상이 느껴지시나요?'),
-                  const SizedBox(height: AppSpacing.itemGap),
+                  const SizedBox(height: 16),
                   Wrap(
                     spacing: AppSpacing.itemGap,
                     runSpacing: AppSpacing.itemGap,
@@ -343,11 +344,11 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
                       );
                     }).toList(),
                   ),
-                  const SizedBox(height: AppSpacing.contentGap),
+                  const SizedBox(height: 48),
 
                   // ── 섹션 3: 시간 ───────────────────────────────────────
                   const _SectionLabel(label: '언제 그런 증상을 느끼셨어요?'),
-                  const SizedBox(height: AppSpacing.itemGap),
+                  const SizedBox(height: 16),
                   _TapCard(
                     onTap: _onTimeTap,
                     child: Row(
@@ -365,11 +366,11 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.contentGap),
+                  const SizedBox(height: 48),
 
                   // ── 섹션 4: 원인 식사 ──────────────────────────────────
                   const _SectionLabel(label: '어떤 식사를 먹고 증상이 느껴졌나요?'),
-                  const SizedBox(height: AppSpacing.itemGap),
+                  const SizedBox(height: 16),
                   _TapCard(
                     onTap: _onMealTap,
                     child: Row(
@@ -397,11 +398,11 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.contentGap),
+                  const SizedBox(height: 48),
 
                   // ── 섹션 5: 메모 ───────────────────────────────────────
                   const _SectionLabel(label: '추가 메모 기록'),
-                  const SizedBox(height: AppSpacing.itemGap),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: _memoController,
                     maxLength: 200,
@@ -411,21 +412,23 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
                         .copyWith(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       hintText: '구체적인 상태를 써주세요',
-                      hintStyle: AppTextStyles.body2Regular
-                          .copyWith(color: AppColors.textTertiary),
+                      hintStyle: AppTextStyles.body2Medium
+                          .copyWith(color: AppColors.textSecondary),
                       counterStyle: AppTextStyles.caption1Medium
-                          .copyWith(color: AppColors.textTertiary),
+                          .copyWith(color: AppColors.textSecondary),
                       filled: true,
-                      fillColor: AppColors.surfaceMuted,
+                      fillColor: AppColors.surface,
                       border: OutlineInputBorder(
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusCard),
-                        borderSide: BorderSide.none,
+                        borderSide: const BorderSide(
+                            color: AppColors.border, width: 1.5),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusCard),
-                        borderSide: BorderSide.none,
+                        borderSide: const BorderSide(
+                            color: AppColors.border, width: 1.5),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius:
@@ -496,7 +499,8 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: AppTextStyles.body1Bold.copyWith(color: AppColors.textPrimary),
+      style: AppTextStyles.body1Bold
+          .copyWith(color: const Color(0xFF222222)),
     );
   }
 }
@@ -520,7 +524,7 @@ class _TapCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: AppColors.borderCard),
         ),
         child: child,
       ),
@@ -572,7 +576,7 @@ class _MoodSelector extends StatelessWidget {
                           : Container(
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: AppColors.surface,
+                                color: const Color(0xFFFCFCFC),
                                 border: Border.all(
                                     color: AppColors.border, width: 1),
                               ),

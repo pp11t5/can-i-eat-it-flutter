@@ -170,10 +170,11 @@ class _SymptomTimePickScreenState extends State<SymptomTimePickScreen> {
         backgroundColor: AppColors.surface,
         elevation: 0,
         centerTitle: true,
+        toolbarHeight: 64,
         leading: IconButton(
           icon: const AppIcon(
             AppIcons.chevronLeft,
-            size: AppIconSizes.s24,
+            size: AppIconSizes.s32,
             color: AppColors.textPrimary,
             semanticsLabel: '뒤로',
           ),
@@ -181,11 +182,12 @@ class _SymptomTimePickScreenState extends State<SymptomTimePickScreen> {
         ),
         title: Text(
           '시간 설정',
-          style: AppTextStyles.body1Bold.copyWith(color: AppColors.textPrimary),
+          style: AppTextStyles.body1Medium
+              .copyWith(color: AppColors.textPrimary),
         ),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1),
-          child: Divider(height: 1, thickness: 1, color: AppColors.divider),
+          child: Divider(height: 1, thickness: 1, color: Color(0xFFF5F5F5)),
         ),
       ),
       body: Column(
@@ -197,22 +199,20 @@ class _SymptomTimePickScreenState extends State<SymptomTimePickScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: AppSpacing.sectionGap),
-
                   // 빠른 선택
                   Text(
                     '빠른 선택',
                     style: AppTextStyles.body1Bold
                         .copyWith(color: AppColors.textPrimary),
                   ),
-                  const SizedBox(height: AppSpacing.itemGap),
+                  const SizedBox(height: 16),
                   _QuickChips(
                     offsets: _quickOffsets,
                     labels: _quickLabels,
                     selectedOffset: _selectedOffsetMinutes,
                     onTap: _onChipTap,
                   ),
-                  const SizedBox(height: AppSpacing.sectionGap),
+                  const SizedBox(height: 48),
 
                   // 직접 선택
                   Text(
@@ -220,7 +220,7 @@ class _SymptomTimePickScreenState extends State<SymptomTimePickScreen> {
                     style: AppTextStyles.body1Bold
                         .copyWith(color: AppColors.textPrimary),
                   ),
-                  const SizedBox(height: AppSpacing.itemGap),
+                  const SizedBox(height: 16),
                   _WheelPicker(
                     dateOptions: dates,
                     dateLabel: _dateLabel,
