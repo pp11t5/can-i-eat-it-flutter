@@ -137,7 +137,7 @@ void main() {
       await tester.pumpWidget(_buildMypageScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('전체보기'), findsOneWidget);
+      expect(find.text('전체 보기'), findsOneWidget);
     });
 
     testWidgets('주간 기록 카드에 mySummaryProvider 실카운트가 표시된다', (tester) async {
@@ -149,18 +149,18 @@ void main() {
       expect(find.text('9'), findsOneWidget);
       expect(find.text('2'), findsOneWidget);
       expect(find.text('4'), findsOneWidget);
-      expect(find.text('권장 9'), findsOneWidget);
-      expect(find.text('주의 3'), findsOneWidget);
-      expect(find.text('위험 1'), findsOneWidget);
+      expect(find.text('권장음식 9끼'), findsOneWidget);
+      expect(find.text('주의 음식 3끼'), findsOneWidget);
+      expect(find.text('위험 음식 1끼'), findsOneWidget);
     });
 
     testWidgets('요약 데이터가 빈 상태면 주간 기록 카드 수치가 0으로 표시된다', (tester) async {
       await tester.pumpWidget(_buildMypageScreen(withSummary: false));
       await tester.pumpAndSettle();
 
-      expect(find.text('권장 0'), findsOneWidget);
-      expect(find.text('주의 0'), findsOneWidget);
-      expect(find.text('위험 0'), findsOneWidget);
+      expect(find.text('권장음식 0끼'), findsOneWidget);
+      expect(find.text('주의 음식 0끼'), findsOneWidget);
+      expect(find.text('위험 음식 0끼'), findsOneWidget);
     });
 
     testWidgets('알림 설정 항목이 표시된다', (tester) async {
@@ -204,6 +204,14 @@ void main() {
       await tester.pumpWidget(_buildMypageScreen());
       await tester.pumpAndSettle();
 
+      // 주간기록 카드가 커져 로그아웃 행이 뷰포트 아래로 밀리므로 스크롤한다.
+      await tester.scrollUntilVisible(
+        find.text('로그아웃'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
       await tester.tap(find.text('로그아웃'));
       await tester.pumpAndSettle();
 
@@ -215,6 +223,13 @@ void main() {
 
     testWidgets('로그아웃 다이얼로그 취소 시 다이얼로그가 닫힌다', (tester) async {
       await tester.pumpWidget(_buildMypageScreen());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('로그아웃'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('로그아웃'));

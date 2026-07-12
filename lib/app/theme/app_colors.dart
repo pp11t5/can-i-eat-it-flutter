@@ -34,6 +34,9 @@ abstract final class AppColors {
   static const Color surfaceSelected = ColorPrimitives.green10;
   static const Color surfaceMuted = ColorPrimitives.gray30;
 
+  /// 카드 안에 삽입되는 통계/설정 카드 배경 (Figma gray/20 #FCFCFC)
+  static const Color surfaceInset = ColorPrimitives.gray20;
+
   // --- 텍스트 ---
 
   static const Color textPrimary = ColorPrimitives.fontColor100;

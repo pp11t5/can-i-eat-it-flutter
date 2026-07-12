@@ -16,6 +16,7 @@ abstract final class SpacingPrimitives {
 /// 위젯은 이 클래스를 직접 참조하지 말고 AppSpacing을 경유할 것.
 abstract final class RadiusPrimitives {
   static const double r8 = 8;
+  static const double r14 = 14;
   static const double r16 = 16;
   static const double rPill = 999;
 }

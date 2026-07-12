@@ -39,6 +39,9 @@ abstract final class AppSpacing {
   /// 카드 모서리 반경
   static const double radiusCard = RadiusPrimitives.r8;
 
+  /// 내부 통계 카드(StatCard) 모서리 반경 (Figma 1718:6140 · 알림 카드 577:10290)
+  static const double radiusStatCard = RadiusPrimitives.r14;
+
   /// 모달 모서리 반경
   static const double radiusModal = RadiusPrimitives.r16;
 
