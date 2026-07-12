@@ -53,7 +53,7 @@ class MealRecordDetailScreen extends ConsumerWidget {
       primaryLabel: '취소하기',
       primaryColor: AppColors.primary,
       secondaryLabel: '삭제하기',
-      secondaryColor: AppColors.danger,
+      secondaryColor: AppColors.verdictDanger,
     );
     if (action != ConfirmModalAction.secondary) return;
     if (!context.mounted) return;
@@ -127,15 +127,15 @@ class _Body extends StatelessWidget {
         AppSpacing.screenPadding,
         AppSpacing.sectionGap,
         AppSpacing.screenPadding,
-        AppSpacing.sectionGap,
+        AppSpacing.cardPadding,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             '$timeLabel 시간에 먹은 음식이에요',
-            style: AppTextStyles.body2Regular.copyWith(
-              color: AppColors.textSecondary,
+            style: AppTextStyles.header2Bold.copyWith(
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.sectionGap),
@@ -150,7 +150,7 @@ class _Body extends StatelessWidget {
             const SizedBox(height: AppSpacing.sectionGap),
             Text(
               '${record.stateRecords.length}개의 증상 기록',
-              style: AppTextStyles.body2Bold.copyWith(
+              style: AppTextStyles.body1Bold.copyWith(
                 color: AppColors.textPrimary,
               ),
             ),
@@ -180,11 +180,11 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 56,
+      height: 64,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
       decoration: const BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: AppColors.divider, width: 0.5),
+          bottom: BorderSide(color: Color(0xFFF5F5F5), width: 1),
         ),
       ),
       child: Row(
@@ -192,7 +192,7 @@ class _TopBar extends StatelessWidget {
           IconButton(
             icon: const AppIcon(
               AppIcons.chevronLeft,
-              size: AppIconSizes.s24,
+              size: AppIconSizes.s32,
               color: AppColors.textPrimary,
               semanticsLabel: '뒤로',
             ),
@@ -202,7 +202,7 @@ class _TopBar extends StatelessWidget {
             child: Text(
               '식사 상세 정보',
               textAlign: TextAlign.center,
-              style: AppTextStyles.body1Bold.copyWith(
+              style: AppTextStyles.body1Medium.copyWith(
                 color: AppColors.textPrimary,
               ),
             ),
@@ -228,43 +228,52 @@ class _FoodRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final timeLabel = MealRecordDetailScreen._formatTime(food.eatenAt);
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.itemGap),
-        child: Row(
-          children: [
-            CategoryIcon(code: food.category, size: 40),
-            const SizedBox(width: AppSpacing.itemGap),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    food.name,
-                    style: AppTextStyles.body2Medium.copyWith(
-                      color: AppColors.textPrimary,
+    // Figma 554:7338: 각 음식은 흰 배경 카드(테두리 #EDEDF5, radius8, padding16)로 표시.
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.itemGap),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.borderCard),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.cardPadding),
+          child: Row(
+            children: [
+              CategoryIcon(code: food.category, size: 32),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      food.name,
+                      style: AppTextStyles.body1Bold.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    '$timeLabel에 식사',
-                    style: AppTextStyles.caption1Medium.copyWith(
-                      color: AppColors.textSecondary,
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      '$timeLabel에 식사',
+                      style: AppTextStyles.body2Medium.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const AppIcon(
-              AppIcons.chevronRight,
-              size: AppIconSizes.s20,
-              color: AppColors.textTertiary,
-            ),
-          ],
+              const AppIcon(
+                AppIcons.chevronRight,
+                size: AppIconSizes.s24,
+                color: AppColors.textTertiary,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -339,7 +348,7 @@ class _BottomCta extends StatelessWidget {
           style: OutlinedButton.styleFrom(
             backgroundColor: AppColors.surface,
             foregroundColor: AppColors.textSecondary,
-            side: const BorderSide(color: AppColors.border),
+            side: const BorderSide(color: Color(0xFF8C8C8C), width: 1.5),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
             ),
@@ -349,7 +358,7 @@ class _BottomCta extends StatelessWidget {
           ),
           child: Text(
             '기록 모두 삭제하기',
-            style: AppTextStyles.body2Medium.copyWith(
+            style: AppTextStyles.body1Bold.copyWith(
               color: AppColors.textSecondary,
             ),
           ),
