@@ -376,6 +376,42 @@ void main() {
 
       expect(capturedRepo.deletedIds, contains('symptom-001'));
     });
+
+    testWidgets('취소하기 탭 → repository.delete 미호출 (매핑 반전 회귀 가드)',
+        (tester) async {
+      late _MockSymptomRepository capturedRepo;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          // ignore: scoped_providers_should_specify_dependencies
+          overrides: [
+            symptomRepositoryProvider.overrideWith((ref) {
+              capturedRepo = _MockSymptomRepository(
+                symptom: _symptomWithMealAndAnalysis,
+              );
+              return capturedRepo;
+            }),
+            mealRepositoryProvider.overrideWithValue(_MockMealRepository()),
+          ],
+          child: MaterialApp.router(
+            theme: AppTheme.light,
+            routerConfig: _testRouter(symptomId: 'symptom-001'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('기록 삭제하기'));
+      await tester.pumpAndSettle();
+
+      // Primary(green) '취소하기' 탭 → ConfirmModalAction.primary → 삭제 안 함.
+      // 매핑이 반전돼 취소가 삭제를 트리거하면 이 단언이 실패한다(안전 가드).
+      await tester.tap(find.text('취소하기'));
+      await tester.pumpAndSettle();
+
+      expect(capturedRepo.deletedIds, isEmpty);
+      expect(find.text('기록을 삭제하시겠어요?'), findsNothing);
+    });
   });
 
   // -------------------------------------------------------------------------
