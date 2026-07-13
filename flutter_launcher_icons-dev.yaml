@@ -1,0 +1,9 @@
+# 개발(dev) 앱 아이콘 설정 — "Dev" 배지 아이콘.
+# 적용: dart run flutter_launcher_icons -f flutter_launcher_icons-dev.yaml
+# TODO(flavor): iOS dev 플레이버 스킴/AppIcon set 및 Android dev flavor res 준비 후 적용.
+flutter_launcher_icons:
+  image_path: "assets/app_icon/app_icon_dev.png"
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  background_color_ios: "#FFFFFF"
