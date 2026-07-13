@@ -10,6 +10,7 @@ import 'package:can_i_eat_it/core/network/dio_client.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/core/security/token_store.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:can_i_eat_it/features/auth/data/services/apple_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/data/services/kakao_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
@@ -31,18 +32,30 @@ part 'auth_providers.g.dart';
 KakaoAuthService kakaoAuthService(Ref ref) => KakaoAuthServiceImpl();
 
 // ---------------------------------------------------------------------------
+// AppleAuthService provider
+// ---------------------------------------------------------------------------
+
+/// [AppleAuthService] 공급자.
+///
+/// 테스트에서는 `ProviderScope(overrides: [appleAuthServiceProvider.overrideWithValue(...)])` 로
+/// stub 을 주입한다.
+@riverpod
+AppleAuthService appleAuthService(Ref ref) => AppleAuthServiceImpl();
+
+// ---------------------------------------------------------------------------
 // AuthRepository provider
 // ---------------------------------------------------------------------------
 
 /// [AuthRepository] 공급자.
 ///
-/// 기본값: 실 [AuthRepositoryImpl] (카카오 SDK + 서버 JWT).
+/// 기본값: 실 [AuthRepositoryImpl] (카카오/애플 SDK + 서버 JWT).
 /// 테스트 / 오프라인 환경에서는 [MockAuthRepository] 를 override 로 주입한다.
 @riverpod
 AuthRepository authRepository(Ref ref) => AuthRepositoryImpl(
       dio: ref.watch(dioProvider),
       tokenStore: ref.watch(tokenStoreProvider),
       kakaoAuthService: ref.watch(kakaoAuthServiceProvider),
+      appleAuthService: ref.watch(appleAuthServiceProvider),
     );
 
 // ---------------------------------------------------------------------------

@@ -8,6 +8,7 @@ import 'package:can_i_eat_it/features/auth/data/dtos/auth_login_response_dto.dar
 import 'package:can_i_eat_it/features/auth/data/dtos/auth_me_response_dto.dart';
 import 'package:can_i_eat_it/features/auth/data/dtos/consent_request_dto.dart';
 import 'package:can_i_eat_it/features/auth/data/dtos/onboarding_status_dto.dart';
+import 'package:can_i_eat_it/features/auth/data/services/apple_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/data/services/kakao_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
@@ -16,20 +17,23 @@ import 'package:can_i_eat_it/features/auth/domain/repositories/auth_repository.d
 
 /// [AuthRepository] 실 구현 (ADR-0007 §3-1 (6-A)).
 ///
-/// 카카오 OIDC idToken → `POST /auth/{provider}/login` → JWT 토큰 저장.
+/// 카카오/애플 OIDC idToken → `POST /auth/{provider}/login` → JWT 토큰 저장.
 /// 성공 시 `GET /onboarding/status` 를 이어 호출해 [Authenticated.onboarded] 를 채운다.
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required Dio dio,
     required TokenStore tokenStore,
     required KakaoAuthService kakaoAuthService,
+    required AppleAuthService appleAuthService,
   })  : _dio = dio,
         _tokenStore = tokenStore,
-        _kakaoAuthService = kakaoAuthService;
+        _kakaoAuthService = kakaoAuthService,
+        _appleAuthService = appleAuthService;
 
   final Dio _dio;
   final TokenStore _tokenStore;
   final KakaoAuthService _kakaoAuthService;
+  final AppleAuthService _appleAuthService;
 
   /// 현재 로컬 세션 (토큰 기반 in-memory 캐시).
   AuthSession? _session;
@@ -81,8 +85,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<SignInOutcome> signInWithApple() async {
-    // 베타는 카카오 단독 (ADR-0003 §7). Apple Mock 경로는 유지.
-    // TODO: Apple OIDC 실연동 시 apple provider 로 교체.
     return _signIn(AuthProvider.apple);
   }
 
@@ -216,7 +218,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   /// 소셜 로그인 공통 흐름.
   ///
-  /// 1. 카카오 SDK 로 idToken 획득 (Apple은 TODO)
+  /// 1. 카카오/애플 SDK 로 idToken 획득
   /// 2. `POST /auth/{provider}/login` 호출
   /// 3. 성공(200) → 토큰 저장 + `GET /onboarding/status` → [Authenticated]
   /// 4. [TermsRequiredFailure] catch → [NeedsTerms]
@@ -230,8 +232,8 @@ class AuthRepositoryImpl implements AuthRepository {
         final kakaoResult = await _kakaoAuthService.signIn();
         idToken = kakaoResult.idToken;
       } else {
-        // Apple OIDC — 티켓 4 이후 실연동. 현재는 에러 (테스트에서 override).
-        throw UnimplementedError('Apple 로그인은 아직 구현되지 않았습니다.');
+        final appleResult = await _appleAuthService.signIn();
+        idToken = appleResult.idToken;
       }
 
       // 2. 서버 로그인

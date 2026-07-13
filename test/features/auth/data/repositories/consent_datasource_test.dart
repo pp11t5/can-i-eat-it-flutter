@@ -6,6 +6,7 @@ import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/core/network/api_endpoints.dart';
 import 'package:can_i_eat_it/core/security/token_store.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:can_i_eat_it/features/auth/data/services/apple_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/data/services/kakao_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
@@ -22,6 +23,16 @@ class _NoOpKakaoAuthService implements KakaoAuthService {
 
   @override
   Future<void> signOut() async {}
+}
+
+class _NoOpAppleAuthService implements AppleAuthService {
+  @override
+  Future<AppleAuthResult> signIn() async => const AppleAuthResult(
+        idToken: 'id',
+        authorizationCode: 'code',
+        email: 'e@e.com',
+        fullName: 'Apple Tester',
+      );
 }
 
 // ---------------------------------------------------------------------------
@@ -70,6 +81,7 @@ void main() {
       dio: dio,
       tokenStore: tokenStore,
       kakaoAuthService: _NoOpKakaoAuthService(),
+      appleAuthService: _NoOpAppleAuthService(),
     );
 
     // 세션을 미리 설정 (recordTermsAgreement 는 활성 세션 필요)

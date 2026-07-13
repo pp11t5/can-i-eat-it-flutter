@@ -1,0 +1,5 @@
+// 플레이버 컨피그 Debug-prod 전용 base xcconfig.
+// CocoaPods 가 생성한 컨피그별 Pods xcconfig 를 정확히 포함해야 신규 pod(모듈)이
+// 누락되지 않는다(공유 Debug/Release.xcconfig 는 stale base 를 참조하므로 사용 불가).
+#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug-prod.xcconfig"
+#include "Generated.xcconfig"
