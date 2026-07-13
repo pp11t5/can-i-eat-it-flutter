@@ -55,6 +55,9 @@ class NotificationSettingsController
         NotificationToggleType.weeklyReport => settings.copyWith(
             weeklyReportEnabled: !settings.weeklyReportEnabled,
           ),
+        NotificationToggleType.marketing => settings.copyWith(
+            marketingPushEnabled: !settings.marketingPushEnabled,
+          ),
       };
     });
 

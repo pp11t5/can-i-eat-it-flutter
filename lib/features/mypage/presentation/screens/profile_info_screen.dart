@@ -4,8 +4,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
@@ -160,14 +163,13 @@ class _ProfileHeader extends StatelessWidget {
 
     return Column(
       children: [
-        CircleAvatar(
-          radius: 40,
-          backgroundColor: AppColors.surfaceMuted,
-          backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
-          child: imageUrl == null
-              ? const Icon(Icons.person, size: 36, color: AppColors.textTertiary)
-              : null,
-        ),
+        imageUrl != null
+            ? CircleAvatar(
+                radius: 40,
+                backgroundColor: AppColors.surfaceMuted,
+                backgroundImage: NetworkImage(imageUrl),
+              )
+            : const AppIcon(AppIcons.userAvatarPlaceholder, size: 80),
         const SizedBox(height: AppSpacing.itemGap),
         Text(
           displayName,
@@ -242,9 +244,9 @@ class _HealthInfoCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(
-                  Icons.sentiment_dissatisfied_outlined,
-                  size: 24,
+                const AppIcon(
+                  AppIcons.sad,
+                  size: AppIconSizes.s24,
                   color: AppColors.textSecondary,
                 ),
                 const SizedBox(width: AppSpacing.cardPadding),
@@ -262,9 +264,9 @@ class _HealthInfoCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.itemGap),
-                const Icon(
-                  Icons.lock_outline,
-                  size: 24,
+                const AppIcon(
+                  AppIcons.lock,
+                  size: AppIconSizes.s24,
                   color: AppColors.textTertiary,
                 ),
               ],
@@ -286,9 +288,9 @@ class _HealthInfoCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.medication_outlined,
-                    size: 24,
+                  const AppIcon(
+                    AppIcons.pill,
+                    size: AppIconSizes.s24,
                     color: AppColors.textSecondary,
                   ),
                   const SizedBox(width: AppSpacing.cardPadding),
@@ -364,7 +366,7 @@ class _AccountCard extends ConsumerWidget {
 
           // 탈퇴하기
           InkWell(
-            onTap: () => _onWithdraw(context, ref),
+            onTap: () => context.push('/mypage/withdraw'),
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(AppSpacing.radiusModal),
               bottomRight: Radius.circular(AppSpacing.radiusModal),
@@ -405,23 +407,5 @@ class _AccountCard extends ConsumerWidget {
     await ref.read(authControllerProvider.notifier).logout();
     if (!context.mounted) return;
     context.go('/login');
-  }
-
-  Future<void> _onWithdraw(BuildContext context, WidgetRef ref) async {
-    final action = await showConfirmModal(
-      context,
-      title: '정말 탈퇴하시겠어요?',
-      titleStyle: AppTextStyles.header2Bold,
-      body: '탈퇴 후 2주 동안 로그인으로\n간편하게 복구할 수 있어요',
-      primaryLabel: '탈퇴하기',
-      primaryColor: AppColors.danger,
-      secondaryLabel: '취소하기',
-    );
-
-    // primary(탈퇴하기) 선택 시 즉시 삭제하지 않고 계정삭제확인 화면으로 이동한다.
-    // 실제 withdraw() 는 그 화면의 최종 버튼(WithdrawScreen)이 수행한다.
-    if (action != ConfirmModalAction.primary) return;
-    if (!context.mounted) return;
-    context.push('/mypage/withdraw');
   }
 }

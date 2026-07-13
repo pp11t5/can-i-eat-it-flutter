@@ -105,13 +105,17 @@ void main() {
       expect(find.text('정말 계정을 삭제하시겠어요?'), findsOneWidget);
     });
 
-    testWidgets('삭제 항목 4개가 표시된다', (tester) async {
+    testWidgets('안내 문구가 표시된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
-      expect(find.text('식사 기록'), findsOneWidget);
-      expect(find.text('증상 기록'), findsOneWidget);
-      expect(find.text('건강 정보'), findsOneWidget);
-      expect(find.text('주간 리포트'), findsOneWidget);
+      expect(find.textContaining('되돌릴 수 없어요'), findsOneWidget);
+    });
+
+    testWidgets('삭제 항목 카드가 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      expect(find.textContaining('식사기록'), findsOneWidget);
+      expect(find.textContaining('주간 리포트'), findsOneWidget);
     });
 
     testWidgets('"데이터 영구 삭제" 버튼이 표시된다', (tester) async {
@@ -122,17 +126,40 @@ void main() {
   });
 
   group('WithdrawScreen — 탈퇴 동작', () {
-    testWidgets('"데이터 영구 삭제" 버튼 탭 시 withdraw() 호출된다', (tester) async {
+    testWidgets('"데이터 영구 삭제" 버튼 탭 시 확인 팝업이 표시되고, "탈퇴하기" 탭 시 withdraw() 호출된다',
+        (tester) async {
       final mock = _MockAuthRepository();
       await tester.pumpWidget(_wrap(authRepo: mock));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('데이터 영구 삭제'));
+      await tester.pumpAndSettle();
+
+      // 확인 팝업이 표시되고, withdraw()는 아직 호출되지 않는다.
+      expect(find.text('정말 탈퇴하시겠어요?'), findsOneWidget);
+      expect(mock.withdrawCalled, isFalse);
+
+      await tester.tap(find.text('탈퇴하기'));
       // withdraw() 비동기 완료 대기 (pumpAndSettle은 setState 루프로 timeout 우려).
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(mock.withdrawCalled, isTrue);
+    });
+
+    testWidgets('확인 팝업에서 "취소하기" 탭 시 withdraw() 호출되지 않는다', (tester) async {
+      final mock = _MockAuthRepository();
+      await tester.pumpWidget(_wrap(authRepo: mock));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('데이터 영구 삭제'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('취소하기'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('정말 탈퇴하시겠어요?'), findsNothing);
+      expect(mock.withdrawCalled, isFalse);
     });
   });
 }

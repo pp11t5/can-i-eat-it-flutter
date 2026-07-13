@@ -86,14 +86,17 @@ void main() {
     });
   });
 
-  group('WeeklyReportScreen — 인-이미지 면책 캡션 (W6-7 후속)', () {
-    testWidgets('공유 캡처 대상(RepaintBoundary) 안에 면책 캡션이 렌더된다', (tester) async {
+  group('WeeklyReportScreen — 인-이미지 면책 캡션 제거 (Figma 2523:14131 정합)', () {
+    testWidgets(
+        '화면(공유 캡처 대상 RepaintBoundary 포함)에는 인-이미지 면책 캡션이 더 이상 렌더되지 '
+        '않는다 — 의료 면책은 공유 시트 첨부 텍스트(_kShareText, 위 테스트로 커버)로만 전달된다',
+        (tester) async {
       await tester.pumpWidget(_wrap(_SpyReportSharer()));
       await tester.pumpAndSettle();
 
       expect(
         find.text('개인 식단 기록 요약이며 의학적 진단·처방이 아니에요 · 먹어도 돼?'),
-        findsOneWidget,
+        findsNothing,
       );
     });
   });

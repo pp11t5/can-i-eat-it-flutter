@@ -308,7 +308,9 @@ class _Body extends StatelessWidget {
                   : null,
             )
           else
-            const _NoMealRow(),
+            _NoMealRow(
+              onLink: () => context.push('/symptom/record', extra: symptom),
+            ),
 
           // ---------------------------------------------------------------
           // AI 분석 섹션 (analysis null 또는 빈 목록이면 숨김)
@@ -388,43 +390,47 @@ class _MealCard extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _NoMealRow extends StatelessWidget {
-  const _NoMealRow();
+  const _NoMealRow({this.onLink});
+
+  final VoidCallback? onLink;
 
   @override
   Widget build(BuildContext context) {
     // Figma 554:7337: 흰 배경 + 연회색 테두리 카드(surfaceBackground 회색 fill 아님).
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.cardPadding),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.borderCard),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              '연결된 음식이 없어요',
-              style: AppTextStyles.body2Medium.copyWith(
-                color: AppColors.textSecondary,
+    return GestureDetector(
+      onTap: onLink,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.cardPadding),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          border: Border.all(color: AppColors.borderCard),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                '연결된 음식이 없어요',
+                style: AppTextStyles.body2Medium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
-          ),
-          // 음식 연결하기 — W5-3 연동 가능해지면 활성화 예정.
-          // TODO(W5-3): linkedMeal 연결 플로우 연결.
-          Text(
-            '음식 연결하기',
-            style: AppTextStyles.body2Medium.copyWith(
-              color: AppColors.textStrong,
+            Text(
+              '음식 연결하기',
+              style: AppTextStyles.body2Medium.copyWith(
+                color: AppColors.textStrong,
+              ),
             ),
-          ),
-          const SizedBox(width: AppSpacing.itemGap),
-          const AppIcon(
-            AppIcons.chevronRight,
-            size: AppIconSizes.s24,
-            color: AppColors.textSecondary,
-          ),
-        ],
+            const SizedBox(width: AppSpacing.itemGap),
+            const AppIcon(
+              AppIcons.chevronRight,
+              size: AppIconSizes.s24,
+              color: AppColors.textSecondary,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -16,6 +16,7 @@ class MockNotificationRepository implements NotificationRepository {
           dailyRecordEnabled: false,
           weeklyReportEnabled: false,
           dailyTime: DailyNotificationTime.morning8,
+          marketingPushEnabled: true,
         );
 
   NotificationSettings _settings;
@@ -41,6 +42,9 @@ class MockNotificationRepository implements NotificationRepository {
         ),
       NotificationToggleType.weeklyReport => _settings.copyWith(
           weeklyReportEnabled: !_settings.weeklyReportEnabled,
+        ),
+      NotificationToggleType.marketing => _settings.copyWith(
+          marketingPushEnabled: !_settings.marketingPushEnabled,
         ),
     };
   }

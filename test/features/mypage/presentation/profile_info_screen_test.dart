@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
@@ -13,6 +14,7 @@ import 'package:can_i_eat_it/features/health_profile/data/health_profile_provide
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/profile_info_screen.dart';
+import 'package:can_i_eat_it/features/mypage/presentation/screens/withdraw_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Stubs
@@ -55,6 +57,46 @@ Widget _buildProfileInfoScreen({
       theme: AppTheme.light,
       debugShowCheckedModeBanner: false,
       home: const ProfileInfoScreen(),
+    ),
+  );
+}
+
+/// ProfileInfoScreen은 탈퇴하기 탭 시 context.push('/mypage/withdraw')를 호출한다.
+/// 테스트 라우터에서 이 경로를 그대로 선언해 네비게이션을 검증한다
+/// (allergy_med_navigation_test.dart와 동일 패턴).
+Widget _buildWithWithdrawRouter({AuthSession? session}) {
+  final repo = MockAuthRepository(initialSession: session);
+  final router = GoRouter(
+    initialLocation: '/mypage/profile',
+    routes: [
+      GoRoute(
+        path: '/mypage/profile',
+        builder: (context, state) => const ProfileInfoScreen(),
+      ),
+      GoRoute(
+        path: '/mypage/withdraw',
+        builder: (context, state) => const WithdrawScreen(),
+      ),
+    ],
+  );
+
+  return ProviderScope(
+    overrides: [
+      // ignore: scoped_providers_should_specify_dependencies
+      authRepositoryProvider.overrideWithValue(repo),
+      // ignore: scoped_providers_should_specify_dependencies
+      healthProfileRepositoryProvider.overrideWithValue(
+        MockHealthProfileRepository.completed(),
+      ),
+      // ignore: scoped_providers_should_specify_dependencies
+      analyticsServiceProvider.overrideWithValue(_NoopAnalytics()),
+      // ignore: scoped_providers_should_specify_dependencies
+      profileCacheProvider.overrideWithValue(InMemoryProfileCache()),
+    ],
+    child: MaterialApp.router(
+      theme: AppTheme.light,
+      debugShowCheckedModeBanner: false,
+      routerConfig: router,
     ),
   );
 }
@@ -160,37 +202,23 @@ void main() {
       expect(find.text('로그아웃 하시겠어요?'), findsNothing);
     });
 
-    testWidgets('탈퇴하기 버튼 탭 시 Danger 다이얼로그가 표시된다', (tester) async {
+    testWidgets('탈퇴하기 버튼 탭 시 팝업 없이 바로 탈퇴 안내 화면으로 이동한다', (tester) async {
       const session = AuthSession(
         userId: 'test-user',
         provider: AuthProvider.kakao,
         hasAgreedTerms: true,
       );
-      await tester.pumpWidget(_buildProfileInfoScreen(session: session));
+      await tester.pumpWidget(_buildWithWithdrawRouter(session: session));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('탈퇴하기'));
       await tester.pumpAndSettle();
 
-      expect(find.text('정말 탈퇴하시겠어요?'), findsOneWidget);
-    });
-
-    testWidgets('탈퇴 다이얼로그에서 취소하면 닫힌다', (tester) async {
-      const session = AuthSession(
-        userId: 'test-user',
-        provider: AuthProvider.kakao,
-        hasAgreedTerms: true,
-      );
-      await tester.pumpWidget(_buildProfileInfoScreen(session: session));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('탈퇴하기'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('취소하기'));
-      await tester.pumpAndSettle();
-
+      // 확인 팝업은 뜨지 않고(탈퇴 안내 화면 하단 버튼으로 확인 단계가 이동됨),
+      // WithdrawScreen으로 곧바로 push된다.
       expect(find.text('정말 탈퇴하시겠어요?'), findsNothing);
+      expect(find.byType(WithdrawScreen), findsOneWidget);
+      expect(find.text('데이터 영구 삭제'), findsOneWidget);
     });
 
     testWidgets('getMe 실패 시 크래시 없이 기존 세션값 표시', (tester) async {

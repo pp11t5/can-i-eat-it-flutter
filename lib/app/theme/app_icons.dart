@@ -58,6 +58,10 @@ abstract final class AppIcons {
   // --- 프로필 아바타 (다색 배지, 원본색 유지) ---
   static const String userAvatar = '$_figma/ic_user.svg';
 
+  /// 프로필/마이 아바타 placeholder — Figma "ri:user-5-line"(자체완결: 회색원 #F5F5F5
+  /// + 단색 유저글리프 #8C8C8C). 색 미지정으로 원본색 유지.
+  static const String userAvatarPlaceholder = '$_figma/ic_user_line.svg';
+
   // --- 판정 배지 (자체완결 색배지, 원본색 유지) ---
   // recommend=초록원+흰체크, caution=주황+! , risk=빨강+X (verdict 헤드라인·대체음식).
   // unknown=회색원+흰물음표 — Figma 소스 노드 부재(W6-17 주간리포트 범례 유일 사용처),
