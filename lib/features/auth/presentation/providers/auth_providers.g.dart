@@ -28,11 +28,33 @@ final kakaoAuthServiceProvider = AutoDisposeProvider<KakaoAuthService>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef KakaoAuthServiceRef = AutoDisposeProviderRef<KakaoAuthService>;
-String _$authRepositoryHash() => r'168be4e7cf75eb13be117e59d3fedaf5bba8dcbd';
+String _$appleAuthServiceHash() => r'd36bf205ecfab1387babde805e367c0f679566e3';
+
+/// [AppleAuthService] 공급자.
+///
+/// 테스트에서는 `ProviderScope(overrides: [appleAuthServiceProvider.overrideWithValue(...)])` 로
+/// stub 을 주입한다.
+///
+/// Copied from [appleAuthService].
+@ProviderFor(appleAuthService)
+final appleAuthServiceProvider = AutoDisposeProvider<AppleAuthService>.internal(
+  appleAuthService,
+  name: r'appleAuthServiceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$appleAuthServiceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AppleAuthServiceRef = AutoDisposeProviderRef<AppleAuthService>;
+String _$authRepositoryHash() => r'5e6ad1c9554f83dc25313ff51199f52423451a1e';
 
 /// [AuthRepository] 공급자.
 ///
-/// 기본값: 실 [AuthRepositoryImpl] (카카오 SDK + 서버 JWT).
+/// 기본값: 실 [AuthRepositoryImpl] (카카오/애플 SDK + 서버 JWT).
 /// 테스트 / 오프라인 환경에서는 [MockAuthRepository] 를 override 로 주입한다.
 ///
 /// Copied from [authRepository].

@@ -6,9 +6,28 @@ import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/core/network/api_endpoints.dart';
 import 'package:can_i_eat_it/core/security/token_store.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:can_i_eat_it/features/auth/data/services/apple_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/data/services/kakao_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
+
+// ---------------------------------------------------------------------------
+// 테스트용 AppleAuthService stub
+// ---------------------------------------------------------------------------
+
+class _StubAppleAuthService implements AppleAuthService {
+  _StubAppleAuthService({required this.idToken});
+
+  final String idToken;
+
+  @override
+  Future<AppleAuthResult> signIn() async => AppleAuthResult(
+        idToken: idToken,
+        authorizationCode: 'test-auth-code',
+        email: 'apple-test@example.com',
+        fullName: 'Apple Tester',
+      );
+}
 
 // ---------------------------------------------------------------------------
 // 테스트용 KakaoAuthService stub
@@ -93,6 +112,7 @@ void main() {
       dio: dio,
       tokenStore: tokenStore,
       kakaoAuthService: _StubKakaoAuthService(idToken: 'test-id-token'),
+      appleAuthService: _StubAppleAuthService(idToken: 'test-id-token'),
     );
   });
 
@@ -279,6 +299,7 @@ void main() {
         dio: dio,
         tokenStore: tokenStore,
         kakaoAuthService: countingKakao,
+        appleAuthService: _StubAppleAuthService(idToken: 'test-id-token'),
       );
 
       dioAdapter.onPost(
