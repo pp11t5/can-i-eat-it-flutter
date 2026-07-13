@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "608028073650",
-    "project_id": "can-i-eat-it-c0cb6",
-    "storage_bucket": "can-i-eat-it-c0cb6.firebasestorage.app"
+    "project_number": "717895572091",
+    "project_id": "canieatthis-38b4e",
+    "storage_bucket": "canieatthis-38b4e.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:608028073650:android:9b7684ffcaa42c70a8b3ab",
+        "mobilesdk_app_id": "1:717895572091:android:3b610f21785869c03360de",
         "android_client_info": {
-          "package_name": "com.canieatthis.can_i_eat_this"
+          "package_name": "com.canieatthis.can_i_eat_this.dev"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAzb2m0KHtMkSNrBUQDmrqjwuhvwRIjOAg"
+          "current_key": "AIzaSyCj_3PPP-6oVjxLve8eiSFNbdo9jj4FU3o"
         }
       ],
       "services": {

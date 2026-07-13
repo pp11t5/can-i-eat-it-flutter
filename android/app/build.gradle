@@ -36,13 +36,16 @@ android {
         prod {
             dimension = "env"
             resValue "string", "app_name", "먹어도돼?"
+            // Kakao 로그인 리다이렉트 스킴(네이티브 앱키 기반, 클라 식별자).
+            manifestPlaceholders["kakaoScheme"] = "kakao2d007771e0083b600999053b9b1d4e83"
         }
         dev {
             dimension = "env"
             // 운영과 별도 설치되도록 패키지 suffix 분리.
             applicationIdSuffix = ".dev"
             resValue "string", "app_name", "먹어도돼? Dev"
-            // TODO(flavor): dev 카카오 스킴/Firebase 준비 시 여기에 manifestPlaceholders 추가.
+            // dev 카카오 테스트앱 네이티브 앱키 기반 스킴.
+            manifestPlaceholders["kakaoScheme"] = "kakao92e00e2a84be177d37bc6819f3032a03"
         }
     }
 

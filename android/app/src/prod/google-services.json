@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "717895572091",
+    "project_id": "canieatthis-38b4e",
+    "storage_bucket": "canieatthis-38b4e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:717895572091:android:a367bcbe00c2048e3360de",
+        "android_client_info": {
+          "package_name": "com.canieatthis.can_i_eat_this"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCj_3PPP-6oVjxLve8eiSFNbdo9jj4FU3o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:717895572091:android:3b610f21785869c03360de",
+        "android_client_info": {
+          "package_name": "com.canieatthis.can_i_eat_this.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCj_3PPP-6oVjxLve8eiSFNbdo9jj4FU3o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

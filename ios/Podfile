@@ -4,10 +4,16 @@ platform :ios, '15.0'
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
+# 플레이버(prod/dev)별 빌드 컨피그 → CocoaPods 빌드타입 매핑.
+# (Xcode 컨피그를 Debug-<flavor>/Release-<flavor>/Profile-<flavor> 로 분리했으므로
+#  향후 `pod install` 이 각 컨피그를 올바른 타입으로 분류하도록 명시한다.)
 project 'Runner', {
-  'Debug' => :debug,
-  'Profile' => :release,
-  'Release' => :release,
+  'Debug-prod' => :debug,
+  'Profile-prod' => :release,
+  'Release-prod' => :release,
+  'Debug-dev' => :debug,
+  'Profile-dev' => :release,
+  'Release-dev' => :release,
 }
 
 def flutter_root
