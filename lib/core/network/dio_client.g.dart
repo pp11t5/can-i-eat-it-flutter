@@ -6,7 +6,7 @@ part of 'dio_client.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$dioHash() => r'b5e9d66f61a55c492a93719fdf9553882dfa6c64';
+String _$dioHash() => r'83322795097a97ae9ff663469bc3a0f5ddf678a6';
 
 /// 앱 전역에서 공유하는 Dio 인스턴스 (ADR-0007 §3-1 (1)).
 ///
