@@ -51,7 +51,8 @@ enum DailyNotificationTime {
 enum NotificationToggleType {
   postMeal,
   dailyRecord,
-  weeklyReport;
+  weeklyReport,
+  marketing;
 
   /// 서버 전송 문자열 (`toServer`).
   String toServer() {
@@ -59,6 +60,7 @@ enum NotificationToggleType {
       NotificationToggleType.postMeal => 'post_meal',
       NotificationToggleType.dailyRecord => 'daily_record',
       NotificationToggleType.weeklyReport => 'weekly_report',
+      NotificationToggleType.marketing => 'marketing',
     };
   }
 }
@@ -70,6 +72,7 @@ class NotificationSettings {
     required this.dailyRecordEnabled,
     required this.weeklyReportEnabled,
     required this.dailyTime,
+    required this.marketingPushEnabled,
   });
 
   final bool postMealEnabled;
@@ -77,17 +80,22 @@ class NotificationSettings {
   final bool weeklyReportEnabled;
   final DailyNotificationTime dailyTime;
 
+  /// 마케팅·푸시 알림 수신 마스터 토글 (Figma 577:10290).
+  final bool marketingPushEnabled;
+
   NotificationSettings copyWith({
     bool? postMealEnabled,
     bool? dailyRecordEnabled,
     bool? weeklyReportEnabled,
     DailyNotificationTime? dailyTime,
+    bool? marketingPushEnabled,
   }) {
     return NotificationSettings(
       postMealEnabled: postMealEnabled ?? this.postMealEnabled,
       dailyRecordEnabled: dailyRecordEnabled ?? this.dailyRecordEnabled,
       weeklyReportEnabled: weeklyReportEnabled ?? this.weeklyReportEnabled,
       dailyTime: dailyTime ?? this.dailyTime,
+      marketingPushEnabled: marketingPushEnabled ?? this.marketingPushEnabled,
     );
   }
 
@@ -99,12 +107,14 @@ class NotificationSettings {
           postMealEnabled == other.postMealEnabled &&
           dailyRecordEnabled == other.dailyRecordEnabled &&
           weeklyReportEnabled == other.weeklyReportEnabled &&
-          dailyTime == other.dailyTime;
+          dailyTime == other.dailyTime &&
+          marketingPushEnabled == other.marketingPushEnabled;
 
   @override
   int get hashCode =>
       postMealEnabled.hashCode ^
       dailyRecordEnabled.hashCode ^
       weeklyReportEnabled.hashCode ^
-      dailyTime.hashCode;
+      dailyTime.hashCode ^
+      marketingPushEnabled.hashCode;
 }

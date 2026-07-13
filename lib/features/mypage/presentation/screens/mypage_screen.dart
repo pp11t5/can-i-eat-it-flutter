@@ -4,13 +4,15 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
 import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/core/config/terms_catalog.dart';
-import 'package:can_i_eat_it/core/util/external_link.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
+import 'package:can_i_eat_it/features/auth/presentation/screens/terms_detail_screen.dart';
 import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/dictionary_list_controller.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
@@ -195,14 +197,13 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: 20,
-      backgroundColor: AppColors.surfaceMuted,
-      backgroundImage: imageUrl != null ? NetworkImage(imageUrl!) : null,
-      child: imageUrl == null
-          ? const Icon(Icons.person, size: 28, color: AppColors.textTertiary)
-          : null,
-    );
+    return imageUrl != null
+        ? CircleAvatar(
+            radius: 20,
+            backgroundColor: AppColors.surfaceMuted,
+            backgroundImage: NetworkImage(imageUrl!),
+          )
+        : const AppIcon(AppIcons.userAvatarPlaceholder, size: 40);
   }
 }
 
@@ -466,7 +467,7 @@ class _SettingsSection extends ConsumerWidget {
       child: Column(
         children: [
           _ListTileRow(
-            icon: Icons.notifications_outlined,
+            iconAsset: AppIcons.bell,
             label: '알림 설정',
             onTap: () => context.push('/mypage/notification-settings'),
           ),
@@ -493,17 +494,38 @@ class _TermsSection extends StatelessWidget {
         children: [
           _ListTileRow(
             label: '개인정보 보호 약관',
-            onTap: () => openExternalUrl(context, TermsCatalog.privacyUrl),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const TermsDetailScreen(
+                  title: '개인정보 처리방침',
+                  url: TermsCatalog.privacyUrl,
+                ),
+              ),
+            ),
           ),
           const Divider(height: 1, color: AppColors.divider),
           _ListTileRow(
             label: '서비스 이용 약관',
-            onTap: () => openExternalUrl(context, TermsCatalog.tosUrl),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const TermsDetailScreen(
+                  title: '서비스 이용약관',
+                  url: TermsCatalog.tosUrl,
+                ),
+              ),
+            ),
           ),
           const Divider(height: 1, color: AppColors.divider),
           _ListTileRow(
             label: '마케팅 정보 수신',
-            onTap: () => openExternalUrl(context, TermsCatalog.marketingUrl),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const TermsDetailScreen(
+                  title: '마케팅 정보 수신 동의',
+                  url: TermsCatalog.marketingUrl,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -516,9 +538,13 @@ class _TermsSection extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _ListTileRow extends StatelessWidget {
-  const _ListTileRow({required this.label, required this.onTap, this.icon});
+  const _ListTileRow({
+    required this.label,
+    required this.onTap,
+    this.iconAsset,
+  });
 
-  final IconData? icon;
+  final String? iconAsset;
   final String label;
   final VoidCallback onTap;
 
@@ -534,8 +560,12 @@ class _ListTileRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            if (icon != null) ...[
-              Icon(icon, size: 24, color: AppColors.textSecondary),
+            if (iconAsset != null) ...[
+              AppIcon(
+                iconAsset!,
+                size: AppIconSizes.s24,
+                color: AppColors.textSecondary,
+              ),
               const SizedBox(width: AppSpacing.cardPadding),
             ],
             Expanded(

@@ -42,6 +42,12 @@ const _kSymptomPillGrayBg = Color(0xFFD3D3D3);
 /// 평균 강도 pill 배경 (보라).
 const _kSymptomPillPurpleBg = Color(0xFF9747FF);
 
+/// 평균 강도 pill 텍스트 — "평균 강도 N" 부분 색(흰색, Figma 실측 #FEFEFE).
+const _kSymptomIntensityValueColor = Color(0xFFFEFEFE);
+
+/// 평균 강도 pill 텍스트 — "/ 5" 접미 색(연회색).
+const _kSymptomIntensityMaxColor = Color(0xFFBBBBBB);
+
 /// 증상 종류별 막대 채움색 (초록 계열 4단계, 서버 코드 → 색 매핑).
 const _kSymptomBarColors = <String, Color>{
   'throat_foreign_body': Color(0xFFD9F5EA), // 이물감
@@ -59,13 +65,6 @@ const _kSymptomBarColors = <String, Color>{
 /// 리뷰로 확정 예정 — 이후 문구 변경 시 이 상수만 수정한다.
 const _kShareText = '이번 주 식단 기록 리포트예요. 진료 시 의료진과 공유해 참고용으로 활용해 보세요. '
     '(의학적 진단·처방이 아닌 개인 기록 요약입니다.)';
-
-/// 공유 PNG(캡처 대상) 하단에 함께 노출되는 인-이미지 면책 캡션.
-///
-/// pr-reviewer should-fix(W6-7 후속): "위험 음식 N끼" 등 판정 라벨이 면책 없이
-/// 이미지 단독으로 유통될 수 있어, 캡처 대상 내부에 작은 캡션으로 동봉한다.
-/// RepaintBoundary 내부에 위치하므로 화면에도 자연히 함께 노출된다.
-const _kInImageDisclaimerText = '개인 식단 기록 요약이며 의학적 진단·처방이 아니에요 · 먹어도 돼?';
 
 // ---------------------------------------------------------------------------
 // WeeklyReportScreen
@@ -269,21 +268,6 @@ class _Body extends StatelessWidget {
               // 카드3 — 기록된 증상 (Figma node 2523:14131)
               // -------------------------------------------------------------
               _SymptomRecordCard(symptomReport: report.symptomReport),
-
-              // -------------------------------------------------------------
-              // 인-이미지 면책 캡션 (W6-7 후속) — 공유 PNG 안에 함께 캡처된다.
-              // -------------------------------------------------------------
-              const SizedBox(height: AppSpacing.sectionGap),
-              SizedBox(
-                width: double.infinity,
-                child: Text(
-                  _kInImageDisclaimerText,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.caption1Medium.copyWith(
-                    color: AppColors.textTertiary,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -696,13 +680,12 @@ class _SymptomRecordHeader extends StatelessWidget {
             if (averageTimeLabel != null) ...[
               _SymptomPill(
                 backgroundColor: _kSymptomPillGrayBg,
-                contentColor: AppColors.textPrimary,
-                icon: const AppIcon(
-                  AppIcons.clock,
-                  size: 14,
-                  color: AppColors.textPrimary,
+                child: Text(
+                  '평균 시간 $averageTimeLabel',
+                  style: AppTextStyles.caption1Medium.copyWith(
+                    color: AppColors.textStrong,
+                  ),
                 ),
-                label: '평균 시간 $averageTimeLabel',
               ),
               if (averageIntensity != null)
                 const SizedBox(width: AppSpacing.itemGap),
@@ -710,8 +693,20 @@ class _SymptomRecordHeader extends StatelessWidget {
             if (averageIntensity != null)
               _SymptomPill(
                 backgroundColor: _kSymptomPillPurpleBg,
-                contentColor: Colors.white,
-                label: '평균 강도 $averageIntensity',
+                child: Text.rich(
+                  TextSpan(
+                    style: AppTextStyles.caption1Medium.copyWith(
+                      color: _kSymptomIntensityValueColor,
+                    ),
+                    children: [
+                      TextSpan(text: '평균 강도 $averageIntensity'),
+                      const TextSpan(
+                        text: ' / 5',
+                        style: TextStyle(color: _kSymptomIntensityMaxColor),
+                      ),
+                    ],
+                  ),
+                ),
               ),
           ],
         ),
@@ -720,44 +715,26 @@ class _SymptomRecordHeader extends StatelessWidget {
   }
 }
 
-/// pill 1개 — 회색(평균 시간, 시계 아이콘 앞) / 보라(평균 강도, 흰 글씨).
+/// pill 1개 — 회색(평균 시간) / 보라(평균 강도). 텍스트만, 아이콘 없음(Figma 2523:14131).
 class _SymptomPill extends StatelessWidget {
   const _SymptomPill({
     required this.backgroundColor,
-    required this.contentColor,
-    required this.label,
-    this.icon,
+    required this.child,
   });
 
   final Color backgroundColor;
-  final Color contentColor;
-  final String label;
-  final Widget? icon;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
+    // Figma 2523:14131 실측 — padding V2/H10 (공통 chip 토큰(V8/H12)과 다름).
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.chipPaddingH,
-        vertical: AppSpacing.chipPaddingV,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            icon!,
-            const SizedBox(width: AppSpacing.iconTextGap),
-          ],
-          Text(
-            label,
-            style: AppTextStyles.caption1Medium.copyWith(color: contentColor),
-          ),
-        ],
-      ),
+      child: child,
     );
   }
 }

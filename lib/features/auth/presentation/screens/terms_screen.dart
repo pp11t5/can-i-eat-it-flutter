@@ -9,9 +9,9 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_button.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/core/config/terms_catalog.dart';
-import 'package:can_i_eat_it/core/util/external_link.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
+import 'package:can_i_eat_it/features/auth/presentation/screens/terms_detail_screen.dart';
 import 'package:can_i_eat_it/features/auth/presentation/widgets/figma_checkbox.dart';
 
 /// 약관 동의 화면 (03_약관동의) — Figma node 365:1557 기준 시각 충실.
@@ -159,15 +159,27 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
                       checked: _termsOfService,
                       onTap: () =>
                           setState(() => _termsOfService = !_termsOfService),
-                      onChevronTap: () =>
-                          openExternalUrl(context, TermsCatalog.tosUrl),
+                      onChevronTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const TermsDetailScreen(
+                            title: '서비스 이용약관',
+                            url: TermsCatalog.tosUrl,
+                          ),
+                        ),
+                      ),
                     ),
                     _TermRow(
                       label: '[필수] 개인정보 수집·이용 동의',
                       checked: _privacy,
                       onTap: () => setState(() => _privacy = !_privacy),
-                      onChevronTap: () =>
-                          openExternalUrl(context, TermsCatalog.privacyUrl),
+                      onChevronTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const TermsDetailScreen(
+                            title: '개인정보 처리방침',
+                            url: TermsCatalog.privacyUrl,
+                          ),
+                        ),
+                      ),
                     ),
                     _TermRow(
                       label: '[필수] 민감정보(건강) 수집 동의',
@@ -183,8 +195,14 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
                       checked: _marketing,
                       optional: true,
                       onTap: () => setState(() => _marketing = !_marketing),
-                      onChevronTap: () =>
-                          openExternalUrl(context, TermsCatalog.marketingUrl),
+                      onChevronTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const TermsDetailScreen(
+                            title: '마케팅 정보 수신 동의',
+                            url: TermsCatalog.marketingUrl,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),

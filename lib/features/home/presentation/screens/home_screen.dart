@@ -257,7 +257,7 @@ class _RecentMealsSection extends ConsumerWidget {
     // 로딩·에러·빈 상태 — 기존 빈 상태 placeholder 카드 유지 (Figma 1207:6614).
     if (meals.isEmpty) {
       return GestureDetector(
-        onTap: () {}, // TODO(W4): 식사 기록 진입
+        onTap: () => context.push('/meal/record'),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(

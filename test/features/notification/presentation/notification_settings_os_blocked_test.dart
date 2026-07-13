@@ -25,6 +25,7 @@ Widget _wrap({
           dailyRecordEnabled: true,
           weeklyReportEnabled: false,
           dailyTime: DailyNotificationTime.morning8,
+          marketingPushEnabled: true,
         ),
       );
   return ProviderScope(
@@ -50,7 +51,7 @@ Widget _wrap({
 
 void main() {
   group('NotificationSettingsScreen — OS 알림 차단(denied)', () {
-    testWidgets('배너 + "설정 바로 가기" 버튼이 렌더되고, 설정 섹션은 비활성화된다',
+    testWidgets('배너 + "설정 바로 가기" 버튼이 렌더되고, 3토글 카드는 비활성화된다',
         (tester) async {
       final mock = MockNotificationRepository(
         seed: const NotificationSettings(
@@ -58,6 +59,7 @@ void main() {
           dailyRecordEnabled: false,
           weeklyReportEnabled: false,
           dailyTime: DailyNotificationTime.morning8,
+          marketingPushEnabled: true,
         ),
       );
       await tester.pumpWidget(_wrap(osBlocked: true, repo: mock));
@@ -66,20 +68,59 @@ void main() {
       expect(find.text('기기 알림이 꺼져있어요'), findsOneWidget);
       expect(find.text('설정 바로 가기'), findsOneWidget);
 
-      // 설정 섹션은 IgnorePointer로 감싸져 있어 토글을 탭해도 반응하지 않는다.
-      final switches = find.byType(Switch);
-      expect(switches, findsWidgets);
-      await tester.tap(switches.first, warnIfMissed: false);
+      // "식후 2시간 알림" 토글은 IgnorePointer로 감싸져 있어 탭해도 반응하지 않는다.
+      final postMealRow = find.ancestor(
+        of: find.text('식후 2시간 알림'),
+        matching: find.byType(Row),
+      );
+      final postMealSwitch = find.descendant(
+        of: postMealRow.first,
+        matching: find.byType(Switch),
+      );
+      await tester.tap(postMealSwitch, warnIfMissed: false);
       await tester.pumpAndSettle();
 
       expect(mock.toggleCalls, isEmpty);
 
-      // 설정 섹션이 IgnorePointer로 감싸져 있는지 확인.
-      final ignorePointerFinder = find.ancestor(
-        of: switches.first,
-        matching: find.byType(IgnorePointer),
+      // 3토글 카드가 Opacity(0.5)로 dim 처리돼 있는지 확인.
+      final dimmedFinder = find.byWidgetPredicate(
+        (widget) => widget is Opacity && widget.opacity == 0.5,
       );
-      expect(ignorePointerFinder, findsWidgets);
+      expect(dimmedFinder, findsOneWidget);
+      expect(
+        find.ancestor(of: postMealSwitch, matching: dimmedFinder),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('마스터 토글은 OS 차단 중에도 항상 활성 상태를 유지한다', (tester) async {
+      final mock = MockNotificationRepository(
+        seed: const NotificationSettings(
+          postMealEnabled: false,
+          dailyRecordEnabled: false,
+          weeklyReportEnabled: false,
+          dailyTime: DailyNotificationTime.morning8,
+          marketingPushEnabled: true,
+        ),
+      );
+      await tester.pumpWidget(_wrap(osBlocked: true, repo: mock));
+      await tester.pumpAndSettle();
+
+      // 마스터 토글(첫 번째 Switch)은 dim(Opacity 0.5) 처리 대상이 아니다.
+      final switches = find.byType(Switch);
+      final masterSwitch = switches.first;
+      final dimmedFinder = find.byWidgetPredicate(
+        (widget) => widget is Opacity && widget.opacity == 0.5,
+      );
+      expect(
+        find.ancestor(of: masterSwitch, matching: dimmedFinder),
+        findsNothing,
+      );
+
+      await tester.tap(masterSwitch);
+      await tester.pumpAndSettle();
+
+      expect(mock.toggleCalls, contains(NotificationToggleType.marketing));
     });
 
     testWidgets('"설정 바로 가기" 탭 시 openAppSettingsProvider 콜백이 호출된다',
@@ -105,6 +146,7 @@ void main() {
           dailyRecordEnabled: false,
           weeklyReportEnabled: false,
           dailyTime: DailyNotificationTime.morning8,
+          marketingPushEnabled: true,
         ),
       );
       await tester.pumpWidget(_wrap(osBlocked: false, repo: mock));
@@ -113,9 +155,15 @@ void main() {
       expect(find.text('기기 알림이 꺼져있어요'), findsNothing);
       expect(find.text('설정 바로 가기'), findsNothing);
 
-      final switches = find.byType(Switch);
-      expect(switches, findsWidgets);
-      await tester.tap(switches.first);
+      final postMealRow = find.ancestor(
+        of: find.text('식후 2시간 알림'),
+        matching: find.byType(Row),
+      );
+      final postMealSwitch = find.descendant(
+        of: postMealRow.first,
+        matching: find.byType(Switch),
+      );
+      await tester.tap(postMealSwitch);
       await tester.pumpAndSettle();
 
       expect(mock.toggleCalls, contains(NotificationToggleType.postMeal));

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
@@ -202,7 +204,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // omeprazole 옆 × 아이콘 탭
-      await tester.tap(find.byIcon(Icons.close).first);
+      await tester.tap(
+        find
+            .byWidgetPredicate(
+              (w) => w is AppIcon && w.asset == AppIcons.closeSmall,
+            )
+            .first,
+      );
       await tester.pump();
 
       expect(find.text('omeprazole'), findsNothing);

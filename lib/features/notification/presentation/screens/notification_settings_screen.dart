@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_icons.dart';
@@ -34,10 +33,11 @@ final openAppSettingsProvider = Provider<Future<void> Function()>(
 
 /// 알림 설정 화면 (Figma 577-10290, 577-10286).
 ///
+/// - 마스터 토글 1개: 마케팅·푸시 알림 수신(marketing).
 /// - 토글 3개: 식후 2시간 알림(postMeal), 식단 기록 알림(dailyRecord), 주간 리포트(weeklyReport).
-/// - 알림 수신 시간 라디오 4개(morning8/evening8/night9/night10).
-/// - 토글·라디오 변경 시 낙관적 갱신 + PATCH 호출.
-/// - 기기 OS 알림 권한이 차단(denied)돼 있으면 상단 안내 배너를 띄우고 나머지 설정을 비활성화한다.
+/// - 토글 변경 시 낙관적 갱신 + PATCH 호출.
+/// - 기기 OS 알림 권한이 차단(denied)돼 있으면 상단 안내 배너를 띄운다. 이때도 마스터
+///   토글은 항상 활성 상태를 유지하고, 배너 아래 3개 토글 카드만 비활성화(dim)한다.
 ///   포그라운드 복귀 시 권한 상태를 재조회해 배너 표시를 갱신한다.
 class NotificationSettingsScreen extends ConsumerStatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -158,71 +158,50 @@ class _SettingsBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sections = Column(
-      // Figma: "알림 받을 시간" 섹션 라벨은 좌측정렬(기본 center면 라벨만 가운데로 쏠림).
-      crossAxisAlignment: CrossAxisAlignment.start,
+    // 3개 토글 카드 — OS 알림 차단 시 이 카드만 dim 처리한다(마스터 토글은 항상 활성).
+    final toggleCard = _SectionCard(
       children: [
-        // 알림 토글 카드
-        _SectionCard(
-          children: [
-            _ToggleRow(
-              title: '식후 2시간 알림',
-              subtitle: '증상 기록을 위해 보내요',
-              value: settings.postMealEnabled,
-              onChanged: (v) => _handleToggle(
-                context,
-                ref,
-                NotificationToggleType.postMeal,
-              ),
-            ),
-            const Divider(
-              height: 1,
-              indent: 24,
-              endIndent: 24,
-              color: AppColors.divider,
-            ),
-            _ToggleRow(
-              title: '식단 기록 알림',
-              subtitle: '식사, 증상 기록을 위해 보내요',
-              value: settings.dailyRecordEnabled,
-              onChanged: (v) => _handleToggle(
-                context,
-                ref,
-                NotificationToggleType.dailyRecord,
-              ),
-            ),
-            const Divider(
-              height: 1,
-              indent: 24,
-              endIndent: 24,
-              color: AppColors.divider,
-            ),
-            _ToggleRow(
-              title: '주간 리포트',
-              subtitle: '매주 일요일 19:00에 알림이 가요',
-              value: settings.weeklyReportEnabled,
-              onChanged: (v) => _handleToggle(
-                context,
-                ref,
-                NotificationToggleType.weeklyReport,
-              ),
-            ),
-          ],
+        _ToggleRow(
+          title: '식후 2시간 알림',
+          subtitle: '증상 기록을 위해 보내요.',
+          value: settings.postMealEnabled,
+          onChanged: (v) => _handleToggle(
+            context,
+            ref,
+            NotificationToggleType.postMeal,
+          ),
         ),
-        const SizedBox(height: AppSpacing.sectionGap),
-
-        // 알림 수신 시간 카드
-        const _SectionLabel(label: '알림 받을 시간'),
-        const SizedBox(height: 16),
-        // Figma 577:10290 — 시간 라디오 카드는 행 사이 구분선 없음(간격만).
-        _SectionCard(
-          children: DailyNotificationTime.values
-              .map((slot) => _RadioRow(
-                    label: slot.label,
-                    selected: settings.dailyTime == slot,
-                    onTap: () => _handleDailyTime(context, ref, slot),
-                  ))
-              .toList(),
+        const Divider(
+          height: 1,
+          indent: 24,
+          endIndent: 24,
+          color: AppColors.divider,
+        ),
+        _ToggleRow(
+          title: '식단 기록 알림',
+          subtitle: '식사, 증상 기록을 위해 보내요.',
+          value: settings.dailyRecordEnabled,
+          onChanged: (v) => _handleToggle(
+            context,
+            ref,
+            NotificationToggleType.dailyRecord,
+          ),
+        ),
+        const Divider(
+          height: 1,
+          indent: 24,
+          endIndent: 24,
+          color: AppColors.divider,
+        ),
+        _ToggleRow(
+          title: '주간 리포트',
+          subtitle: '매주 일요일 19:00에 알림이 가요.',
+          value: settings.weeklyReportEnabled,
+          onChanged: (v) => _handleToggle(
+            context,
+            ref,
+            NotificationToggleType.weeklyReport,
+          ),
         ),
       ],
     );
@@ -230,9 +209,19 @@ class _SettingsBody extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(
         horizontal: 24,
-        vertical: AppSpacing.cardPadding,
+        vertical: 24,
       ),
       children: [
+        // 마스터 토글 — OS 차단 여부와 무관하게 항상 활성 상태를 유지한다.
+        _MasterToggleRow(
+          value: settings.marketingPushEnabled,
+          onChanged: (v) => _handleToggle(
+            context,
+            ref,
+            NotificationToggleType.marketing,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.contentGap),
         if (osBlocked) ...[
           const _OsBlockedBanner(),
           const SizedBox(height: AppSpacing.sectionGap),
@@ -240,10 +229,10 @@ class _SettingsBody extends ConsumerWidget {
         if (osBlocked)
           Opacity(
             opacity: 0.5,
-            child: IgnorePointer(child: sections),
+            child: IgnorePointer(child: toggleCard),
           )
         else
-          sections,
+          toggleCard,
       ],
     );
   }
@@ -260,22 +249,6 @@ class _SettingsBody extends ConsumerWidget {
     } catch (_) {
       if (context.mounted) {
         await showAppToast(context, '알림 설정 변경에 실패했어요.');
-      }
-    }
-  }
-
-  Future<void> _handleDailyTime(
-    BuildContext context,
-    WidgetRef ref,
-    DailyNotificationTime time,
-  ) async {
-    try {
-      await ref
-          .read(notificationSettingsControllerProvider.notifier)
-          .updateDailyTime(time);
-    } catch (_) {
-      if (context.mounted) {
-        await showAppToast(context, '알림 시간 변경에 실패했어요.');
       }
     }
   }
@@ -355,22 +328,47 @@ class _OsBlockedBanner extends ConsumerWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 공용 섹션 라벨
+// 마스터 토글 행 (마케팅·푸시 알림 수신, Figma 577:10290)
 // ---------------------------------------------------------------------------
 
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel({required this.label});
-  final String label;
+/// 카드가 아닌 bare row — OS 차단 여부와 무관하게 항상 활성 상태를 유지한다.
+class _MasterToggleRow extends StatelessWidget {
+  const _MasterToggleRow({required this.value, required this.onChanged});
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.zero,
-      child: Text(
-        label,
-        style: AppTextStyles.body2Bold.copyWith(
-          color: AppColors.textSecondary,
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '마케팅·푸시 알림 수신',
+                  style: AppTextStyles.body1Medium.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '식단 기록, 리포트 등 알림을 보내드릴게요.',
+                  style: AppTextStyles.body2Medium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch.adaptive(
+            value: value,
+            onChanged: onChanged,
+          ),
+        ],
       ),
     );
   }
@@ -453,61 +451,6 @@ class _ToggleRow extends StatelessWidget {
             onChanged: onChanged,
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// 라디오 행
-// ---------------------------------------------------------------------------
-
-class _RadioRow extends StatelessWidget {
-  const _RadioRow({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 24,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                style: AppTextStyles.body1Medium.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-            // Figma 577:10290 — 선택=초록 원+흰 체크(verdict grade 재사용),
-            // 미선택=흰 원+#EAEAEA 1px 링.
-            if (selected)
-              SvgPicture.asset(AppIcons.verdictRecommend, width: 32, height: 32)
-            else
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.border),
-                ),
-              ),
-          ],
-        ),
       ),
     );
   }
