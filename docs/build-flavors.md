@@ -7,9 +7,9 @@
 
 | 플랫폼 | 운영(prod) | 개발(dev) | 방식 |
 |---|---|---|---|
-| **iOS 번들 ID** | `com.canieatthis.canIEatThis` | `com.canieatthis.canIEatThis.dev` | 접미사 `.dev` (xcconfig, iOS 플레이버 타겟 준비 시 적용) |
+| **iOS 번들 ID** | `com.canieatthis.canIEatThis` | `com.canieatthis.canIEatThis.dev` | 접미사 `.dev` (Xcode 컨피그 `*-prod`/`*-dev` 빌드세팅, 구현됨) |
 | **Android 패키지** | `com.canieatthis.can_i_eat_this` | `com.canieatthis.can_i_eat_this.dev` | `applicationIdSuffix = ".dev"` (구현됨) |
-| **앱 표시명** | `먹어도돼?` | `먹어도돼? Dev` | Android resValue / iOS xcconfig |
+| **앱 표시명** | `먹어도돼?` | `먹어도돼? Dev` | Android resValue / iOS `APP_DISPLAY_NAME` 빌드세팅 |
 
 > ⚠️ **기존 표기 불일치(주의)**: iOS 번들은 camelCase(`canIEatThis`), Android 패키지는
 > snake_case(`can_i_eat_this`)로 **원래부터 다르다**. `.dev` 접미사는 각 표기에 그대로 붙인다.
@@ -29,16 +29,40 @@
 ## 빌드 커맨드
 
 ```bash
-# 운영
-flutter build ios --flavor prod -t lib/main_prod.dart
-flutter build apk --flavor prod -t lib/main_prod.dart
-# 개발 (dev 서버/카카오/Firebase 준비 후)
-flutter run   --flavor dev  -t lib/main_dev.dart
+# 운영(prod)
+flutter build ios --flavor prod -t lib/main_prod.dart \
+  --dart-define=KAKAO_NATIVE_APP_KEY=2d007771e0083b600999053b9b1d4e83
+flutter build apk --flavor prod -t lib/main_prod.dart \
+  --dart-define=KAKAO_NATIVE_APP_KEY=2d007771e0083b600999053b9b1d4e83
+
+# 개발(dev)
+flutter run --flavor dev -t lib/main_dev.dart \
+  --dart-define=KAKAO_NATIVE_APP_KEY=92e00e2a84be177d37bc6819f3032a03
 ```
 
-카카오 네이티브 앱키는 리터럴을 커밋하지 않고 빌드 시 주입한다:
-`--dart-define=KAKAO_NATIVE_APP_KEY=<key>` (iOS Info.plist URL scheme `kakao<key>` 와 일치해야 함).
-현재 운영 키: `2d007771e0083b600999053b9b1d4e83` (Info.plist scheme `kakao2d007771e0083b600999053b9b1d4e83`).
+카카오 네이티브 앱키의 **SDK init 값**은 리터럴을 커밋하지 않고 빌드 시 주입한다
+(`FlavorConfig.kakaoNativeAppKey` = `--dart-define=KAKAO_NATIVE_APP_KEY`). 반면
+**URL scheme(`kakao<key>`)** 은 네이티브 설정에 반드시 들어가므로 iOS 빌드세팅
+`KAKAO_URL_SCHEME`(컨피그별) · Android `manifestPlaceholders[kakaoScheme]`(플레이버별)로
+커밋된다(클라 식별자로 노출 정상, 기존 prod 패턴과 동일). 빌드 시 dart-define 키와
+네이티브 scheme 키가 **같은 플레이버 값**이어야 한다.
+
+| | 운영(prod) | 개발(dev) |
+|---|---|---|
+| 카카오 네이티브 앱키 | `2d007771e0083b600999053b9b1d4e83` | `92e00e2a84be177d37bc6819f3032a03` |
+
+## Firebase (네이티브 설정, 커밋됨)
+
+플레이버별 Firebase 앱(같은 프로젝트 `canieatthis-38b4e`, 번들ID로 구분):
+
+| | Android (`google-services.json`) | iOS (`GoogleService-Info.plist`) |
+|---|---|---|
+| **prod** | `android/app/src/prod/` | `ios/config/prod/` |
+| **dev** | `android/app/src/dev/` | `ios/config/dev/` |
+
+- Android: google-services 플러그인이 `src/<flavor>` 를 자동 인식(루트 파일 없음).
+- iOS: 정적 번들 대신 **Run Script build phase** 가 `GOOGLE_SERVICE_FLAVOR` 빌드세팅을 읽어
+  `ios/config/<flavor>/GoogleService-Info.plist` 를 앱 번들로 복사한다.
 
 ## 앱 아이콘
 
