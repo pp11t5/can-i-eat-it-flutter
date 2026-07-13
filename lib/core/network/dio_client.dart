@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../config/app_config.dart';
+import '../config/flavor_config.dart';
 import '../security/token_store.dart';
 import 'auth_interceptor.dart';
 
@@ -59,7 +59,7 @@ String maskTokensForLog(String text) {
 ///   `requestHeader: false`, 응답 바디는 accessToken/refreshToken 마스킹.
 @riverpod
 Dio dio(Ref ref) {
-  const config = AppConfig.dev;
+  final config = FlavorConfig.current;
 
   // refresh 전용 bare Dio — 인터셉터 없음, validateStatus 기본값 유지 (재귀 방지)
   final refreshDio = Dio(
