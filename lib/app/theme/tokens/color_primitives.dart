@@ -26,6 +26,9 @@ abstract final class ColorPrimitives {
   /// 주의(caution)
   static const Color semanticOrange = Color(0xFFFF8D28);
 
+  /// 토요일/주말 강조 (Figma 캘린더 2794-26223 실측 #007AFF)
+  static const Color semanticBlue = Color(0xFF007AFF);
+
   // semanticGreen = green100
 
   // --- Foundation ---
