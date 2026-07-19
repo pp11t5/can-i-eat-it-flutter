@@ -123,7 +123,12 @@ class AuthRepositoryImpl implements AuthRepository {
       if (agreed == null) {
         // 로컬 UI가 표시하지 않는(미인식) code.
         if (term.isRequired) {
-          throw const NetworkFailure('필수 약관에 모두 동의해야 계속할 수 있어요.');
+          // 서버 필수 약관 code 를 로컬이 인식하지 못함(앱-서버 약관 드리프트).
+          // 실제 사용자 미동의(아래 :132)와 구분되는 메시지 — 코드 매핑 오류를
+          // 사용자 미동의로 오귀속하지 않도록 함(PR #179 리뷰 H1).
+          throw const NetworkFailure(
+            '약관 정보를 처리할 수 없어요. 앱을 최신 버전으로 업데이트해 주세요.',
+          );
         }
         // 선택 항목이면 대응 로컬 슬롯이 없으므로 consents에서 생략.
         continue;

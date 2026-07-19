@@ -48,7 +48,10 @@ class SceneDelegate: FlutterSceneDelegate {
     openURLContexts URLContexts: Set<UIOpenURLContext>
   ) {
     for context in URLContexts {
-      NSLog("[KakaoBridge] openURL: \(context.url.absoluteString)")
+      #if DEBUG
+      // 진단 로그(디버그 전용). 인가 code 노출 방지 위해 scheme 만 기록한다.
+      NSLog("[KakaoBridge] openURL scheme: \(context.url.scheme ?? "nil")")
+      #endif
       if let appDelegate = UIApplication.shared.delegate as? FlutterAppDelegate {
         _ = appDelegate.application(
           UIApplication.shared,
