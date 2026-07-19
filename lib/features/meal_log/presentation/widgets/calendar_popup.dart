@@ -77,12 +77,9 @@ class _CalendarPopupState extends State<_CalendarPopup> {
   }
 
   void _selectDay(DateTime day) {
-    if (_isFuture(day)) return;
-    setState(() {
-      // 전/후월 날짜를 탭하면 그 달로 이동해 선택한다(일반 캘린더 관행).
-      _month = DateTime(day.year, day.month, 1);
-      _selected = day;
-    });
+    // 그리드 onTap 이 '당월 + 비미래' 날짜만 전달한다(전/후월·미래 셀은 탭 불가).
+    // 따라서 여기서는 선택일만 갱신하면 된다 — 월 이동은 헤더 chevron 전용.
+    setState(() => _selected = day);
   }
 
   @override
