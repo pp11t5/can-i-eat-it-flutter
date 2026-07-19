@@ -70,12 +70,6 @@ class _CalendarPopupState extends State<_CalendarPopup> {
     setState(() => _month = DateTime(_month.year, _month.month + 1, 1));
   }
 
-  bool _isFuture(DateTime day) {
-    final d = DateTime(day.year, day.month, day.day);
-    final t = DateTime(widget.today.year, widget.today.month, widget.today.day);
-    return d.isAfter(t);
-  }
-
   void _selectDay(DateTime day) {
     // 그리드 onTap 이 '당월 + 비미래' 날짜만 전달한다(전/후월·미래 셀은 탭 불가).
     // 따라서 여기서는 선택일만 갱신하면 된다 — 월 이동은 헤더 chevron 전용.
@@ -112,7 +106,6 @@ class _CalendarPopupState extends State<_CalendarPopup> {
                 month: _month,
                 selected: _selected,
                 today: widget.today,
-                isFuture: _isFuture,
                 onDayTap: _selectDay,
               ),
             ),
@@ -194,14 +187,12 @@ class _CalendarGrid extends StatelessWidget {
     required this.month,
     required this.selected,
     required this.today,
-    required this.isFuture,
     required this.onDayTap,
   });
 
   final DateTime month;
   final DateTime selected;
   final DateTime today;
-  final bool Function(DateTime day) isFuture;
   final ValueChanged<DateTime> onDayTap;
 
   static const _weekdayHeaders = ['일', '월', '화', '수', '목', '금', '토'];
@@ -263,32 +254,36 @@ class _CalendarGrid extends StatelessWidget {
                   day.month == month.month && day.year == month.year;
               final isSelected = _isSameDay(day, selected);
               final isToday = _isSameDay(day, today);
-              final future = isFuture(day);
-              // 선택 가능 = 당월 + 미래 아님 (미래 식사는 기록 불가 — 앱 규칙 유지).
-              final selectable = inCurrentMonth && !future;
+              final todayDate =
+                  DateTime(today.year, today.month, today.day);
+              final dayDate = DateTime(day.year, day.month, day.day);
+              final isPast = dayDate.isBefore(todayDate);
+              // 당월 날짜만 선택 가능(전/후월 타월은 탭 불가 — 월이동은 chevron).
+              final selectable = inCurrentMonth;
 
-              // 텍스트 색: 선택(흰) > 비활성(회색 #8C8C99) > 활성(요일 열 색).
+              // 색·배경 (Figma 2794-26223):
+              //  선택 = 흰 글씨 + green 라운드사각 r8.
+              //  타월(전/후월) = 회색 글씨, 배경 없음.
+              //  당월 '오늘 이전(과거)' = 회색 글씨 + 연회색 라운드 배경(#F5F5F5).
+              //  당월 '오늘·이후(미래)' = 요일 열 색(일 red / 토 blue / 평일 #1A1A1F).
               Color textColor;
-              if (isSelected) {
-                textColor = AppColors.onPrimary;
-              } else if (!selectable) {
-                textColor = AppColors.textTertiary; // #8C8C99
-              } else {
-                textColor = _columnColor(columnIndex);
-              }
-
-              // 배경(Figma 실측): 선택일 = green 라운드사각 r8. 비활성 당월 = 연회색 r8.
               BoxDecoration? decoration;
               if (isSelected) {
+                textColor = AppColors.onPrimary;
                 decoration = BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(8),
                 );
-              } else if (inCurrentMonth && future) {
+              } else if (!inCurrentMonth) {
+                textColor = AppColors.textTertiary; // #8C8C99 타월
+              } else if (isPast) {
+                textColor = AppColors.textTertiary; // #8C8C99 과거
                 decoration = BoxDecoration(
                   color: AppColors.surfaceMuted, // #F5F5F5
                   borderRadius: BorderRadius.circular(8),
                 );
+              } else {
+                textColor = _columnColor(columnIndex); // 오늘·미래
               }
 
               // 오늘 셀은 숫자 대신 "오늘" (당월일 때만).
