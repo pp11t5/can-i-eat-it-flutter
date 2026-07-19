@@ -14,11 +14,17 @@ Map<String, dynamic> _stateRecordsJson({
     {'total': total, 'records': records};
 
 Map<String, dynamic> _stateRecordJson({
+  int stateRecordId = 1,
   String label = '속쓰림',
   String date = '2026-06-10',
-  String timing = '식후 30분',
+  int timingMinutes = 30,
 }) =>
-    {'label': label, 'date': date, 'timing': timing};
+    {
+      'stateRecordId': stateRecordId,
+      'label': label,
+      'date': date,
+      'timingMinutes': timingMinutes,
+    };
 
 Map<String, dynamic> _itemJson({
   String emphasis = '트리거/증상 분석',
@@ -111,9 +117,10 @@ void main() {
       // stateRecords가 명시적으로 제공된 경우 — non-null 보장
       expect(dto.stateRecords!.total, 3);
       expect(dto.stateRecords!.records.length, 1);
+      expect(dto.stateRecords!.records[0].stateRecordId, 1);
       expect(dto.stateRecords!.records[0].label, '속쓰림');
       expect(dto.stateRecords!.records[0].date, '2026-06-10');
-      expect(dto.stateRecords!.records[0].timing, '식후 30분');
+      expect(dto.stateRecords!.records[0].timingMinutes, 30);
     });
 
     test('substitutes 역직렬화', () {

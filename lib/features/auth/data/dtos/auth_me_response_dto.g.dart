@@ -9,8 +9,8 @@ part of 'auth_me_response_dto.dart';
 _AuthMeResponseDto _$AuthMeResponseDtoFromJson(Map<String, dynamic> json) =>
     _AuthMeResponseDto(
       userId: json['userId'] as String,
-      nickname: json['nickname'] as String,
-      email: json['email'] as String,
+      nickname: json['nickname'] as String?,
+      email: json['email'] as String?,
       profileImage: json['profileImage'] as String?,
     );
 

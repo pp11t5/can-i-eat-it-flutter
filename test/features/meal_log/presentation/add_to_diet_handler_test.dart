@@ -62,7 +62,7 @@ class _SpyMealRepository implements MealRepository {
   Future<List<TimelineItem>> timeline(DateTime date) async => [];
 
   @override
-  Future<List<WeeklyDay>> weekly(DateTime date) async => [];
+  Future<List<MonthlyDay>> getMonthly(DateTime month) async => [];
 
   @override
   Future<MealRecord> mealDetail(String mealRecordId) =>

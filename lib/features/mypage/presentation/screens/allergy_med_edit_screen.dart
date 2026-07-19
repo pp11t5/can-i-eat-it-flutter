@@ -11,6 +11,7 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_button.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
@@ -113,10 +114,12 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
     try {
       // PATCH이므로 allergies/medications 두 필드만 전송한다 — 다른 건강 정보를
       // 재제출하지 않으므로 base 프로필 부재를 경고할 필요가 없다(W7 마이그레이션).
-      await profileController.updateHealthInfo(
-        allergies: _selectedAllergies.toList(),
-        medications: _medications,
-      );
+      await ref.read(globalLoadingControllerProvider.notifier).run(
+            () => profileController.updateHealthInfo(
+              allergies: _selectedAllergies.toList(),
+              medications: _medications,
+            ),
+          );
 
       if (!mounted) return;
       // T9 토스트

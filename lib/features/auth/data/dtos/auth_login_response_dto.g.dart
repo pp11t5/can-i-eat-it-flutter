@@ -12,7 +12,7 @@ _AuthLoginResponseDto _$AuthLoginResponseDtoFromJson(
       accessToken: json['accessToken'] as String,
       refreshToken: json['refreshToken'] as String,
       userId: json['userId'] as String,
-      email: json['email'] as String,
+      email: json['email'] as String?,
       role: json['role'] as String,
     );
 

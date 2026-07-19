@@ -3150,28 +3150,28 @@ class __$ConnectedSymptomsDtoCopyWithImpl<$Res>
 }
 
 /// @nodoc
-mixin _$WeeklyDayDto {
-  String get date;
-  String get dayOfWeek; // 서버 키 'judgementList'와 필드명 동일 → JsonKey 불필요.
+mixin _$MonthlyJudgementDto {
+  int get day;
+  String get dayOfWeek; // 서버 키 'judgementList'와 필드명 동일 → JsonKey 불필요. 최대 3개.
   List<String> get judgementList;
 
-  /// Create a copy of WeeklyDayDto
+  /// Create a copy of MonthlyJudgementDto
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $WeeklyDayDtoCopyWith<WeeklyDayDto> get copyWith =>
-      _$WeeklyDayDtoCopyWithImpl<WeeklyDayDto>(
-          this as WeeklyDayDto, _$identity);
+  $MonthlyJudgementDtoCopyWith<MonthlyJudgementDto> get copyWith =>
+      _$MonthlyJudgementDtoCopyWithImpl<MonthlyJudgementDto>(
+          this as MonthlyJudgementDto, _$identity);
 
-  /// Serializes this WeeklyDayDto to a JSON map.
+  /// Serializes this MonthlyJudgementDto to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is WeeklyDayDto &&
-            (identical(other.date, date) || other.date == date) &&
+            other is MonthlyJudgementDto &&
+            (identical(other.day, day) || other.day == day) &&
             (identical(other.dayOfWeek, dayOfWeek) ||
                 other.dayOfWeek == dayOfWeek) &&
             const DeepCollectionEquality()
@@ -3180,45 +3180,46 @@ mixin _$WeeklyDayDto {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, date, dayOfWeek,
+  int get hashCode => Object.hash(runtimeType, day, dayOfWeek,
       const DeepCollectionEquality().hash(judgementList));
 
   @override
   String toString() {
-    return 'WeeklyDayDto(date: $date, dayOfWeek: $dayOfWeek, judgementList: $judgementList)';
+    return 'MonthlyJudgementDto(day: $day, dayOfWeek: $dayOfWeek, judgementList: $judgementList)';
   }
 }
 
 /// @nodoc
-abstract mixin class $WeeklyDayDtoCopyWith<$Res> {
-  factory $WeeklyDayDtoCopyWith(
-          WeeklyDayDto value, $Res Function(WeeklyDayDto) _then) =
-      _$WeeklyDayDtoCopyWithImpl;
+abstract mixin class $MonthlyJudgementDtoCopyWith<$Res> {
+  factory $MonthlyJudgementDtoCopyWith(
+          MonthlyJudgementDto value, $Res Function(MonthlyJudgementDto) _then) =
+      _$MonthlyJudgementDtoCopyWithImpl;
   @useResult
-  $Res call({String date, String dayOfWeek, List<String> judgementList});
+  $Res call({int day, String dayOfWeek, List<String> judgementList});
 }
 
 /// @nodoc
-class _$WeeklyDayDtoCopyWithImpl<$Res> implements $WeeklyDayDtoCopyWith<$Res> {
-  _$WeeklyDayDtoCopyWithImpl(this._self, this._then);
+class _$MonthlyJudgementDtoCopyWithImpl<$Res>
+    implements $MonthlyJudgementDtoCopyWith<$Res> {
+  _$MonthlyJudgementDtoCopyWithImpl(this._self, this._then);
 
-  final WeeklyDayDto _self;
-  final $Res Function(WeeklyDayDto) _then;
+  final MonthlyJudgementDto _self;
+  final $Res Function(MonthlyJudgementDto) _then;
 
-  /// Create a copy of WeeklyDayDto
+  /// Create a copy of MonthlyJudgementDto
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? date = null,
+    Object? day = null,
     Object? dayOfWeek = null,
     Object? judgementList = null,
   }) {
     return _then(_self.copyWith(
-      date: null == date
-          ? _self.date
-          : date // ignore: cast_nullable_to_non_nullable
-              as String,
+      day: null == day
+          ? _self.day
+          : day // ignore: cast_nullable_to_non_nullable
+              as int,
       dayOfWeek: null == dayOfWeek
           ? _self.dayOfWeek
           : dayOfWeek // ignore: cast_nullable_to_non_nullable
@@ -3231,8 +3232,8 @@ class _$WeeklyDayDtoCopyWithImpl<$Res> implements $WeeklyDayDtoCopyWith<$Res> {
   }
 }
 
-/// Adds pattern-matching-related methods to [WeeklyDayDto].
-extension WeeklyDayDtoPatterns on WeeklyDayDto {
+/// Adds pattern-matching-related methods to [MonthlyJudgementDto].
+extension MonthlyJudgementDtoPatterns on MonthlyJudgementDto {
   /// A variant of `map` that fallback to returning `orElse`.
   ///
   /// It is equivalent to doing:
@@ -3247,12 +3248,12 @@ extension WeeklyDayDtoPatterns on WeeklyDayDto {
 
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>(
-    TResult Function(_WeeklyDayDto value)? $default, {
+    TResult Function(_MonthlyJudgementDto value)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _WeeklyDayDto() when $default != null:
+      case _MonthlyJudgementDto() when $default != null:
         return $default(_that);
       case _:
         return orElse();
@@ -3274,11 +3275,11 @@ extension WeeklyDayDtoPatterns on WeeklyDayDto {
 
   @optionalTypeArgs
   TResult map<TResult extends Object?>(
-    TResult Function(_WeeklyDayDto value) $default,
+    TResult Function(_MonthlyJudgementDto value) $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _WeeklyDayDto():
+      case _MonthlyJudgementDto():
         return $default(_that);
       case _:
         throw StateError('Unexpected subclass');
@@ -3299,11 +3300,11 @@ extension WeeklyDayDtoPatterns on WeeklyDayDto {
 
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_WeeklyDayDto value)? $default,
+    TResult? Function(_MonthlyJudgementDto value)? $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _WeeklyDayDto() when $default != null:
+      case _MonthlyJudgementDto() when $default != null:
         return $default(_that);
       case _:
         return null;
@@ -3324,14 +3325,14 @@ extension WeeklyDayDtoPatterns on WeeklyDayDto {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String date, String dayOfWeek, List<String> judgementList)?
+    TResult Function(int day, String dayOfWeek, List<String> judgementList)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _WeeklyDayDto() when $default != null:
-        return $default(_that.date, _that.dayOfWeek, _that.judgementList);
+      case _MonthlyJudgementDto() when $default != null:
+        return $default(_that.day, _that.dayOfWeek, _that.judgementList);
       case _:
         return orElse();
     }
@@ -3352,13 +3353,13 @@ extension WeeklyDayDtoPatterns on WeeklyDayDto {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String date, String dayOfWeek, List<String> judgementList)
+    TResult Function(int day, String dayOfWeek, List<String> judgementList)
         $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _WeeklyDayDto():
-        return $default(_that.date, _that.dayOfWeek, _that.judgementList);
+      case _MonthlyJudgementDto():
+        return $default(_that.day, _that.dayOfWeek, _that.judgementList);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -3378,14 +3379,13 @@ extension WeeklyDayDtoPatterns on WeeklyDayDto {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(
-            String date, String dayOfWeek, List<String> judgementList)?
+    TResult? Function(int day, String dayOfWeek, List<String> judgementList)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _WeeklyDayDto() when $default != null:
-        return $default(_that.date, _that.dayOfWeek, _that.judgementList);
+      case _MonthlyJudgementDto() when $default != null:
+        return $default(_that.day, _that.dayOfWeek, _that.judgementList);
       case _:
         return null;
     }
@@ -3394,22 +3394,22 @@ extension WeeklyDayDtoPatterns on WeeklyDayDto {
 
 /// @nodoc
 @JsonSerializable()
-class _WeeklyDayDto implements WeeklyDayDto {
-  const _WeeklyDayDto(
-      {required this.date,
+class _MonthlyJudgementDto implements MonthlyJudgementDto {
+  const _MonthlyJudgementDto(
+      {required this.day,
       required this.dayOfWeek,
       final List<String> judgementList = const <String>[]})
       : _judgementList = judgementList;
-  factory _WeeklyDayDto.fromJson(Map<String, dynamic> json) =>
-      _$WeeklyDayDtoFromJson(json);
+  factory _MonthlyJudgementDto.fromJson(Map<String, dynamic> json) =>
+      _$MonthlyJudgementDtoFromJson(json);
 
   @override
-  final String date;
+  final int day;
   @override
   final String dayOfWeek;
-// 서버 키 'judgementList'와 필드명 동일 → JsonKey 불필요.
+// 서버 키 'judgementList'와 필드명 동일 → JsonKey 불필요. 최대 3개.
   final List<String> _judgementList;
-// 서버 키 'judgementList'와 필드명 동일 → JsonKey 불필요.
+// 서버 키 'judgementList'와 필드명 동일 → JsonKey 불필요. 최대 3개.
   @override
   @JsonKey()
   List<String> get judgementList {
@@ -3418,17 +3418,18 @@ class _WeeklyDayDto implements WeeklyDayDto {
     return EqualUnmodifiableListView(_judgementList);
   }
 
-  /// Create a copy of WeeklyDayDto
+  /// Create a copy of MonthlyJudgementDto
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  _$WeeklyDayDtoCopyWith<_WeeklyDayDto> get copyWith =>
-      __$WeeklyDayDtoCopyWithImpl<_WeeklyDayDto>(this, _$identity);
+  _$MonthlyJudgementDtoCopyWith<_MonthlyJudgementDto> get copyWith =>
+      __$MonthlyJudgementDtoCopyWithImpl<_MonthlyJudgementDto>(
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$WeeklyDayDtoToJson(
+    return _$MonthlyJudgementDtoToJson(
       this,
     );
   }
@@ -3437,8 +3438,8 @@ class _WeeklyDayDto implements WeeklyDayDto {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _WeeklyDayDto &&
-            (identical(other.date, date) || other.date == date) &&
+            other is _MonthlyJudgementDto &&
+            (identical(other.day, day) || other.day == day) &&
             (identical(other.dayOfWeek, dayOfWeek) ||
                 other.dayOfWeek == dayOfWeek) &&
             const DeepCollectionEquality()
@@ -3447,48 +3448,48 @@ class _WeeklyDayDto implements WeeklyDayDto {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, date, dayOfWeek,
+  int get hashCode => Object.hash(runtimeType, day, dayOfWeek,
       const DeepCollectionEquality().hash(_judgementList));
 
   @override
   String toString() {
-    return 'WeeklyDayDto(date: $date, dayOfWeek: $dayOfWeek, judgementList: $judgementList)';
+    return 'MonthlyJudgementDto(day: $day, dayOfWeek: $dayOfWeek, judgementList: $judgementList)';
   }
 }
 
 /// @nodoc
-abstract mixin class _$WeeklyDayDtoCopyWith<$Res>
-    implements $WeeklyDayDtoCopyWith<$Res> {
-  factory _$WeeklyDayDtoCopyWith(
-          _WeeklyDayDto value, $Res Function(_WeeklyDayDto) _then) =
-      __$WeeklyDayDtoCopyWithImpl;
+abstract mixin class _$MonthlyJudgementDtoCopyWith<$Res>
+    implements $MonthlyJudgementDtoCopyWith<$Res> {
+  factory _$MonthlyJudgementDtoCopyWith(_MonthlyJudgementDto value,
+          $Res Function(_MonthlyJudgementDto) _then) =
+      __$MonthlyJudgementDtoCopyWithImpl;
   @override
   @useResult
-  $Res call({String date, String dayOfWeek, List<String> judgementList});
+  $Res call({int day, String dayOfWeek, List<String> judgementList});
 }
 
 /// @nodoc
-class __$WeeklyDayDtoCopyWithImpl<$Res>
-    implements _$WeeklyDayDtoCopyWith<$Res> {
-  __$WeeklyDayDtoCopyWithImpl(this._self, this._then);
+class __$MonthlyJudgementDtoCopyWithImpl<$Res>
+    implements _$MonthlyJudgementDtoCopyWith<$Res> {
+  __$MonthlyJudgementDtoCopyWithImpl(this._self, this._then);
 
-  final _WeeklyDayDto _self;
-  final $Res Function(_WeeklyDayDto) _then;
+  final _MonthlyJudgementDto _self;
+  final $Res Function(_MonthlyJudgementDto) _then;
 
-  /// Create a copy of WeeklyDayDto
+  /// Create a copy of MonthlyJudgementDto
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? date = null,
+    Object? day = null,
     Object? dayOfWeek = null,
     Object? judgementList = null,
   }) {
-    return _then(_WeeklyDayDto(
-      date: null == date
-          ? _self.date
-          : date // ignore: cast_nullable_to_non_nullable
-              as String,
+    return _then(_MonthlyJudgementDto(
+      day: null == day
+          ? _self.day
+          : day // ignore: cast_nullable_to_non_nullable
+              as int,
       dayOfWeek: null == dayOfWeek
           ? _self.dayOfWeek
           : dayOfWeek // ignore: cast_nullable_to_non_nullable

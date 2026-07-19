@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/food_check/data/food_check_providers.dart';
@@ -134,7 +135,10 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
         if (handler != null) {
           final ctx = widget.args.recordContext ??
               MealRecordContext(eatenAt: nowKst());
-          onAddToDiet = () => handler(context, verdict, ctx);
+          // 식사 기록 저장(API mutation) — 전역 로딩 오버레이로 중복 탭 방지.
+          onAddToDiet = () => ref
+              .read(globalLoadingControllerProvider.notifier)
+              .run(() => handler(context, verdict, ctx));
         }
         return VerdictResultScreen(
           verdict: verdict,

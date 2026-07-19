@@ -55,14 +55,36 @@ class NotificationSettingsController
         NotificationToggleType.weeklyReport => settings.copyWith(
             weeklyReportEnabled: !settings.weeklyReportEnabled,
           ),
-        NotificationToggleType.marketing => settings.copyWith(
-            marketingPushEnabled: !settings.marketingPushEnabled,
-          ),
       };
     });
 
     try {
       await ref.read(notificationRepositoryProvider).toggle(type);
+    } catch (_) {
+      // 실패 시 이전 상태 복원
+      state = previous;
+      rethrow;
+    }
+  }
+
+  /// 마케팅·푸시 알림 수신 동의를 낙관적으로 갱신하고 서버에 PATCH 요청한다.
+  ///
+  /// `/notifications/settings/toggle`이 아닌 `/consent/marketing/toggle`을
+  /// 별도로 호출한다(A2).
+  Future<void> toggleMarketing() async {
+    final previous = state;
+    // 낙관적 갱신
+    state = previous.whenData(
+      (settings) => settings.copyWith(
+        marketingPushEnabled: !settings.marketingPushEnabled,
+      ),
+    );
+
+    try {
+      final newValue = state.valueOrNull?.marketingPushEnabled ?? true;
+      await ref
+          .read(notificationRepositoryProvider)
+          .toggleMarketingConsent(newValue);
     } catch (_) {
       // 실패 시 이전 상태 복원
       state = previous;

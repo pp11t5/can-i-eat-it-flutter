@@ -17,6 +17,7 @@ import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart'
 import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 import 'package:can_i_eat_it/features/auth/domain/repositories/auth_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
+import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
 
 part 'auth_providers.g.dart';
 
@@ -160,6 +161,20 @@ class AuthController extends _$AuthController {
     final session = await ref.read(authRepositoryProvider).getMe();
     state = AsyncValue.data(session);
     return session;
+  }
+
+  /// 닉네임을 변경한다 (D3, `PATCH /my-page/nickname`).
+  ///
+  /// [myPageRepositoryProvider]를 호출해 서버 성공을 확인한 뒤에만 세션의
+  /// [AuthSession.displayName]을 갱신한다(낙관적 갱신 금지 — updateHealthInfo와 동일 원칙).
+  /// 실패(400/401/409/500)는 예외를 그대로 rethrow하여 호출자(NameEditScreen)가
+  /// Failure 타입별로 에러 문구를 분기하도록 한다.
+  Future<void> updateNickname(String nickname) async {
+    await ref.read(myPageRepositoryProvider).updateNickname(nickname);
+    final current = state.valueOrNull;
+    if (current != null) {
+      state = AsyncValue.data(current.copyWith(displayName: nickname));
+    }
   }
 
   /// 계정 탈퇴: 서버 withdraw + 로컬 세션·프로필 캐시 초기화.

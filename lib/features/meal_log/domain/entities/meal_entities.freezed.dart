@@ -3189,78 +3189,70 @@ class _$TimelineSymptomCopyWithImpl<$Res>
 }
 
 /// @nodoc
-mixin _$WeeklyDay {
-  /// 'YYYY-MM-DD'.
-  String get date;
-
-  /// SAT|SUN|MON… (표시 안 쓰면 보관만).
-  String get dayOfWeek;
+mixin _$MonthlyDay {
+  /// 해당 월의 일(day). 서버는 date 문자열이 아닌 day:int만 제공한다.
+  /// 표시월(연/월)과 조합한 DateTime 조립은 호출부(화면) 책임.
+  int get day;
 
   /// judgementList[], ≤3, 대문자 grade → VerdictLevel.
   List<VerdictLevel> get judgements;
 
-  /// Create a copy of WeeklyDay
+  /// Create a copy of MonthlyDay
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $WeeklyDayCopyWith<WeeklyDay> get copyWith =>
-      _$WeeklyDayCopyWithImpl<WeeklyDay>(this as WeeklyDay, _$identity);
+  $MonthlyDayCopyWith<MonthlyDay> get copyWith =>
+      _$MonthlyDayCopyWithImpl<MonthlyDay>(this as MonthlyDay, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is WeeklyDay &&
-            (identical(other.date, date) || other.date == date) &&
-            (identical(other.dayOfWeek, dayOfWeek) ||
-                other.dayOfWeek == dayOfWeek) &&
+            other is MonthlyDay &&
+            (identical(other.day, day) || other.day == day) &&
             const DeepCollectionEquality()
                 .equals(other.judgements, judgements));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, date, dayOfWeek,
-      const DeepCollectionEquality().hash(judgements));
+  int get hashCode => Object.hash(
+      runtimeType, day, const DeepCollectionEquality().hash(judgements));
 
   @override
   String toString() {
-    return 'WeeklyDay(date: $date, dayOfWeek: $dayOfWeek, judgements: $judgements)';
+    return 'MonthlyDay(day: $day, judgements: $judgements)';
   }
 }
 
 /// @nodoc
-abstract mixin class $WeeklyDayCopyWith<$Res> {
-  factory $WeeklyDayCopyWith(WeeklyDay value, $Res Function(WeeklyDay) _then) =
-      _$WeeklyDayCopyWithImpl;
+abstract mixin class $MonthlyDayCopyWith<$Res> {
+  factory $MonthlyDayCopyWith(
+          MonthlyDay value, $Res Function(MonthlyDay) _then) =
+      _$MonthlyDayCopyWithImpl;
   @useResult
-  $Res call({String date, String dayOfWeek, List<VerdictLevel> judgements});
+  $Res call({int day, List<VerdictLevel> judgements});
 }
 
 /// @nodoc
-class _$WeeklyDayCopyWithImpl<$Res> implements $WeeklyDayCopyWith<$Res> {
-  _$WeeklyDayCopyWithImpl(this._self, this._then);
+class _$MonthlyDayCopyWithImpl<$Res> implements $MonthlyDayCopyWith<$Res> {
+  _$MonthlyDayCopyWithImpl(this._self, this._then);
 
-  final WeeklyDay _self;
-  final $Res Function(WeeklyDay) _then;
+  final MonthlyDay _self;
+  final $Res Function(MonthlyDay) _then;
 
-  /// Create a copy of WeeklyDay
+  /// Create a copy of MonthlyDay
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? date = null,
-    Object? dayOfWeek = null,
+    Object? day = null,
     Object? judgements = null,
   }) {
     return _then(_self.copyWith(
-      date: null == date
-          ? _self.date
-          : date // ignore: cast_nullable_to_non_nullable
-              as String,
-      dayOfWeek: null == dayOfWeek
-          ? _self.dayOfWeek
-          : dayOfWeek // ignore: cast_nullable_to_non_nullable
-              as String,
+      day: null == day
+          ? _self.day
+          : day // ignore: cast_nullable_to_non_nullable
+              as int,
       judgements: null == judgements
           ? _self.judgements
           : judgements // ignore: cast_nullable_to_non_nullable
@@ -3269,8 +3261,8 @@ class _$WeeklyDayCopyWithImpl<$Res> implements $WeeklyDayCopyWith<$Res> {
   }
 }
 
-/// Adds pattern-matching-related methods to [WeeklyDay].
-extension WeeklyDayPatterns on WeeklyDay {
+/// Adds pattern-matching-related methods to [MonthlyDay].
+extension MonthlyDayPatterns on MonthlyDay {
   /// A variant of `map` that fallback to returning `orElse`.
   ///
   /// It is equivalent to doing:
@@ -3285,12 +3277,12 @@ extension WeeklyDayPatterns on WeeklyDay {
 
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>(
-    TResult Function(_WeeklyDay value)? $default, {
+    TResult Function(_MonthlyDay value)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _WeeklyDay() when $default != null:
+      case _MonthlyDay() when $default != null:
         return $default(_that);
       case _:
         return orElse();
@@ -3312,11 +3304,11 @@ extension WeeklyDayPatterns on WeeklyDay {
 
   @optionalTypeArgs
   TResult map<TResult extends Object?>(
-    TResult Function(_WeeklyDay value) $default,
+    TResult Function(_MonthlyDay value) $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _WeeklyDay():
+      case _MonthlyDay():
         return $default(_that);
       case _:
         throw StateError('Unexpected subclass');
@@ -3337,11 +3329,11 @@ extension WeeklyDayPatterns on WeeklyDay {
 
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_WeeklyDay value)? $default,
+    TResult? Function(_MonthlyDay value)? $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _WeeklyDay() when $default != null:
+      case _MonthlyDay() when $default != null:
         return $default(_that);
       case _:
         return null;
@@ -3362,15 +3354,13 @@ extension WeeklyDayPatterns on WeeklyDay {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(
-            String date, String dayOfWeek, List<VerdictLevel> judgements)?
-        $default, {
+    TResult Function(int day, List<VerdictLevel> judgements)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _WeeklyDay() when $default != null:
-        return $default(_that.date, _that.dayOfWeek, _that.judgements);
+      case _MonthlyDay() when $default != null:
+        return $default(_that.day, _that.judgements);
       case _:
         return orElse();
     }
@@ -3391,14 +3381,12 @@ extension WeeklyDayPatterns on WeeklyDay {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(
-            String date, String dayOfWeek, List<VerdictLevel> judgements)
-        $default,
+    TResult Function(int day, List<VerdictLevel> judgements) $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _WeeklyDay():
-        return $default(_that.date, _that.dayOfWeek, _that.judgements);
+      case _MonthlyDay():
+        return $default(_that.day, _that.judgements);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -3418,14 +3406,12 @@ extension WeeklyDayPatterns on WeeklyDay {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(
-            String date, String dayOfWeek, List<VerdictLevel> judgements)?
-        $default,
+    TResult? Function(int day, List<VerdictLevel> judgements)? $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _WeeklyDay() when $default != null:
-        return $default(_that.date, _that.dayOfWeek, _that.judgements);
+      case _MonthlyDay() when $default != null:
+        return $default(_that.day, _that.judgements);
       case _:
         return null;
     }
@@ -3434,20 +3420,16 @@ extension WeeklyDayPatterns on WeeklyDay {
 
 /// @nodoc
 
-class _WeeklyDay implements WeeklyDay {
-  const _WeeklyDay(
-      {required this.date,
-      required this.dayOfWeek,
+class _MonthlyDay implements MonthlyDay {
+  const _MonthlyDay(
+      {required this.day,
       final List<VerdictLevel> judgements = const <VerdictLevel>[]})
       : _judgements = judgements;
 
-  /// 'YYYY-MM-DD'.
+  /// 해당 월의 일(day). 서버는 date 문자열이 아닌 day:int만 제공한다.
+  /// 표시월(연/월)과 조합한 DateTime 조립은 호출부(화면) 책임.
   @override
-  final String date;
-
-  /// SAT|SUN|MON… (표시 안 쓰면 보관만).
-  @override
-  final String dayOfWeek;
+  final int day;
 
   /// judgementList[], ≤3, 대문자 grade → VerdictLevel.
   final List<VerdictLevel> _judgements;
@@ -3461,72 +3443,65 @@ class _WeeklyDay implements WeeklyDay {
     return EqualUnmodifiableListView(_judgements);
   }
 
-  /// Create a copy of WeeklyDay
+  /// Create a copy of MonthlyDay
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  _$WeeklyDayCopyWith<_WeeklyDay> get copyWith =>
-      __$WeeklyDayCopyWithImpl<_WeeklyDay>(this, _$identity);
+  _$MonthlyDayCopyWith<_MonthlyDay> get copyWith =>
+      __$MonthlyDayCopyWithImpl<_MonthlyDay>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _WeeklyDay &&
-            (identical(other.date, date) || other.date == date) &&
-            (identical(other.dayOfWeek, dayOfWeek) ||
-                other.dayOfWeek == dayOfWeek) &&
+            other is _MonthlyDay &&
+            (identical(other.day, day) || other.day == day) &&
             const DeepCollectionEquality()
                 .equals(other._judgements, _judgements));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, date, dayOfWeek,
-      const DeepCollectionEquality().hash(_judgements));
+  int get hashCode => Object.hash(
+      runtimeType, day, const DeepCollectionEquality().hash(_judgements));
 
   @override
   String toString() {
-    return 'WeeklyDay(date: $date, dayOfWeek: $dayOfWeek, judgements: $judgements)';
+    return 'MonthlyDay(day: $day, judgements: $judgements)';
   }
 }
 
 /// @nodoc
-abstract mixin class _$WeeklyDayCopyWith<$Res>
-    implements $WeeklyDayCopyWith<$Res> {
-  factory _$WeeklyDayCopyWith(
-          _WeeklyDay value, $Res Function(_WeeklyDay) _then) =
-      __$WeeklyDayCopyWithImpl;
+abstract mixin class _$MonthlyDayCopyWith<$Res>
+    implements $MonthlyDayCopyWith<$Res> {
+  factory _$MonthlyDayCopyWith(
+          _MonthlyDay value, $Res Function(_MonthlyDay) _then) =
+      __$MonthlyDayCopyWithImpl;
   @override
   @useResult
-  $Res call({String date, String dayOfWeek, List<VerdictLevel> judgements});
+  $Res call({int day, List<VerdictLevel> judgements});
 }
 
 /// @nodoc
-class __$WeeklyDayCopyWithImpl<$Res> implements _$WeeklyDayCopyWith<$Res> {
-  __$WeeklyDayCopyWithImpl(this._self, this._then);
+class __$MonthlyDayCopyWithImpl<$Res> implements _$MonthlyDayCopyWith<$Res> {
+  __$MonthlyDayCopyWithImpl(this._self, this._then);
 
-  final _WeeklyDay _self;
-  final $Res Function(_WeeklyDay) _then;
+  final _MonthlyDay _self;
+  final $Res Function(_MonthlyDay) _then;
 
-  /// Create a copy of WeeklyDay
+  /// Create a copy of MonthlyDay
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? date = null,
-    Object? dayOfWeek = null,
+    Object? day = null,
     Object? judgements = null,
   }) {
-    return _then(_WeeklyDay(
-      date: null == date
-          ? _self.date
-          : date // ignore: cast_nullable_to_non_nullable
-              as String,
-      dayOfWeek: null == dayOfWeek
-          ? _self.dayOfWeek
-          : dayOfWeek // ignore: cast_nullable_to_non_nullable
-              as String,
+    return _then(_MonthlyDay(
+      day: null == day
+          ? _self.day
+          : day // ignore: cast_nullable_to_non_nullable
+              as int,
       judgements: null == judgements
           ? _self._judgements
           : judgements // ignore: cast_nullable_to_non_nullable

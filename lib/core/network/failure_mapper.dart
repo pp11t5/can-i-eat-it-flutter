@@ -44,6 +44,12 @@ class FailureMapper {
       requirements: {TermsRequirement.nickname},
     ),
 
+    // ── 약관 신 계약 (POST /consent, 약관 마이그레이션) ─────────────────────────
+    // ONBOARD400_1: 필수 약관 미동의(서버 측 최종 검증 거부).
+    // AuthRepositoryImpl.recordTermsAgreement 의 로컬 requiredButNotAgreed
+    // 검증과 동일한 사용자 메시지로 통일한다.
+    'ONBOARD400_1': const NetworkFailure('필수 약관에 모두 동의해야 계속할 수 있어요.'),
+
     // ── 복구 가능 계정 (HTTP 403) ─────────────────────────────────────────────
     'AUTH403_2': const RecoverableAccountFailure(reason: RecoverReason.inactive),
     'AUTH403_5': const RecoverableAccountFailure(

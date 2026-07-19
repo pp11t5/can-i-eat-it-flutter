@@ -18,10 +18,18 @@ class MockMyPageRepository implements MyPageRepository {
   factory MockMyPageRepository.seeded() =>
       MockMyPageRepository(initial: _seededSummary);
 
-  final MyPageSummary _summary;
+  MyPageSummary _summary;
 
   @override
   Future<MyPageSummary> getSummary() async => _summary;
+
+  /// 로컬 in-memory 닉네임 갱신(항상 성공) — UI 선개발·테스트용.
+  @override
+  Future<void> updateNickname(String nickname) async {
+    _summary = _summary.copyWith(
+      profile: _summary.profile.copyWith(nickName: nickname),
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------

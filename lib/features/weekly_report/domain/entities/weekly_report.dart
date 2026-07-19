@@ -78,23 +78,59 @@ abstract class MealCount with _$MealCount {
 // SymptomReport — 기록된 증상 카드 (Figma node 2523:14131)
 // ---------------------------------------------------------------------------
 
-/// 기록된 증상 집계 엔티티. 서버 필드 확정 전까지 [WeeklyReport.symptomReport]에서
-/// nullable seam으로 노출한다.
+/// 기록된 증상 집계 엔티티 (Swagger `recordedSymptom` 대응, A3 정합).
+///
+/// 서버는 증상 종류별 카운트를 배열이 아닌 4개 고정 필드로 내려준다
+/// ([throatForeignBodyCount]/[acidRefluxCount]/[coughCount]/[chestTightnessCount]).
+/// [typeCounts]는 막대 그래프 렌더링(화면 소비부) 호환을 위해 이 4개 필드로부터
+/// 계산되는 getter다.
 @freezed
 abstract class SymptomReport with _$SymptomReport {
   const factory SymptomReport({
-    /// 이번 주 증상 기록 총 횟수.
-    required int recordedCount,
+    /// 이번 주 증상 기록 총 횟수 (서버 `symptomCount`).
+    required int symptomCount,
 
-    /// 평균 기록 시간 라벨 (서버 원문, 예: '16:30'). 값 없으면 pill 미노출.
-    String? averageTimeLabel,
+    /// 평균 기록 시간 라벨 (서버 `averageTime`, 예: '16:30'). 값 없으면 pill 미노출.
+    String? averageTime,
 
-    /// 평균 강도. 값 없으면 pill 미노출.
-    int? averageIntensity,
+    /// 평균 강도 (서버 `averageLevel`). 값 없으면 pill 미노출.
+    int? averageLevel,
 
-    /// 증상 종류별 카운트 (막대 그래프용).
-    @Default([]) List<SymptomTypeCount> typeCounts,
+    /// 이물감 기록 횟수 (서버 `throatForeignBodyCount`).
+    @Default(0) int throatForeignBodyCount,
+
+    /// 신물 기록 횟수 (서버 `acidRefluxCount`).
+    @Default(0) int acidRefluxCount,
+
+    /// 기침 기록 횟수 (서버 `coughCount`).
+    @Default(0) int coughCount,
+
+    /// 답답함 기록 횟수 (서버 `chestTightnessCount`).
+    @Default(0) int chestTightnessCount,
   }) = _SymptomReport;
+
+  const SymptomReport._();
+
+  /// 증상 종류별 카운트 (막대 그래프용). 서버가 4개 고정 카운트 필드로 내려주므로
+  /// 화면 소비부(막대 렌더링) 호환을 위해 여기서 [SymptomTypeCount] 리스트로 구성한다.
+  List<SymptomTypeCount> get typeCounts => [
+        SymptomTypeCount(
+          type: 'throat_foreign_body',
+          label: '이물감',
+          count: throatForeignBodyCount,
+        ),
+        SymptomTypeCount(
+          type: 'acid_reflux',
+          label: '신물',
+          count: acidRefluxCount,
+        ),
+        SymptomTypeCount(type: 'cough', label: '기침', count: coughCount),
+        SymptomTypeCount(
+          type: 'chest_tightness',
+          label: '답답함',
+          count: chestTightnessCount,
+        ),
+      ];
 }
 
 // ---------------------------------------------------------------------------

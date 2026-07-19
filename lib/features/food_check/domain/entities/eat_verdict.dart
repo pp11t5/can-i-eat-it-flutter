@@ -73,10 +73,23 @@ abstract class VerdictItem with _$VerdictItem {
 @freezed
 abstract class VerdictStateRecord with _$VerdictStateRecord {
   const factory VerdictStateRecord({
+    required int stateRecordId,
     required String label,
     required String date,    // "YYYY-MM-DD" 문자열 그대로 (표시 전용)
-    required String timing,
+    required int timingMinutes,
   }) = _VerdictStateRecord;
+
+  const VerdictStateRecord._();
+
+  /// [timingMinutes] → 표시용 라벨 ("N분 후"/"N시간 후"/"N시간 M분 후").
+  ///
+  /// 60분 미만은 분 단위, 60분 이상은 시간(+나머지 분) 단위로 표시한다.
+  String get timingLabel {
+    if (timingMinutes < 60) return '$timingMinutes분 후';
+    final hours = timingMinutes ~/ 60;
+    final minutes = timingMinutes % 60;
+    return minutes == 0 ? '$hours시간 후' : '$hours시간 $minutes분 후';
+  }
 }
 
 /// 연관 섭취 기록 요약 (stateRecords 대응).
@@ -197,9 +210,10 @@ abstract class EatVerdict with _$EatVerdict {
           total: 2,
           records: [
             VerdictStateRecord(
+              stateRecordId: 1,
               label: '속쓰림',
               date: '2026-06-10',
-              timing: '식후 30분',
+              timingMinutes: 30,
             ),
           ],
         ),
@@ -230,9 +244,10 @@ abstract class EatVerdict with _$EatVerdict {
           total: 5,
           records: [
             VerdictStateRecord(
+              stateRecordId: 1,
               label: '속쓰림',
               date: '2026-06-10',
-              timing: '식후 30분',
+              timingMinutes: 30,
             ),
           ],
         ),

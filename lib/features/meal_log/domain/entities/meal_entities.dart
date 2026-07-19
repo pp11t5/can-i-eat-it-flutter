@@ -218,22 +218,20 @@ sealed class TimelineItem with _$TimelineItem {
 }
 
 // ---------------------------------------------------------------------------
-// WeeklyDay — 주간 도트
+// MonthlyDay — 월별 판정 집계
 // ---------------------------------------------------------------------------
 
-/// 주간 도트 단일 (GET /timeline/weekly?date= result[] 대응).
+/// 월별 판정 집계 단일 (GET /timeline/monthly?month= result[] 대응, 구 WeeklyDay 대체).
 @freezed
-abstract class WeeklyDay with _$WeeklyDay {
-  const factory WeeklyDay({
-    /// 'YYYY-MM-DD'.
-    required String date,
-
-    /// SAT|SUN|MON… (표시 안 쓰면 보관만).
-    required String dayOfWeek,
+abstract class MonthlyDay with _$MonthlyDay {
+  const factory MonthlyDay({
+    /// 해당 월의 일(day). 서버는 date 문자열이 아닌 day:int만 제공한다.
+    /// 표시월(연/월)과 조합한 DateTime 조립은 호출부(화면) 책임.
+    required int day,
 
     /// judgementList[], ≤3, 대문자 grade → VerdictLevel.
     @Default(<VerdictLevel>[]) List<VerdictLevel> judgements,
-  }) = _WeeklyDay;
+  }) = _MonthlyDay;
 }
 
 // ---------------------------------------------------------------------------

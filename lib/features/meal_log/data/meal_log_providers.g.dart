@@ -223,57 +223,57 @@ class _TimelineControllerProviderElement
   DateTime get date => (origin as TimelineControllerProvider).date;
 }
 
-String _$weeklyControllerHash() => r'0db06eb54d1c43b92a1d74e4c81297b49dc56822';
+String _$monthlyControllerHash() => r'a1f9ef17423fc089644b9a2faee3685da555f861';
 
-abstract class _$WeeklyController
-    extends BuildlessAutoDisposeAsyncNotifier<List<WeeklyDay>> {
-  late final DateTime weekStart;
+abstract class _$MonthlyController
+    extends BuildlessAutoDisposeAsyncNotifier<List<MonthlyDay>> {
+  late final DateTime month;
 
-  FutureOr<List<WeeklyDay>> build(
-    DateTime weekStart,
+  FutureOr<List<MonthlyDay>> build(
+    DateTime month,
   );
 }
 
-/// 주간 도트 컨트롤러.
+/// 월별 판정 집계 컨트롤러 (구 WeeklyController 대체 — 월 캘린더 재설계).
 ///
-/// [weekStart] 가 속한 주의 [WeeklyDay] 목록을 조회한다.
+/// [month] 가 속한 월(연/월만 사용, day 값은 무시)의 [MonthlyDay] 목록을 조회한다.
 ///
-/// Copied from [WeeklyController].
-@ProviderFor(WeeklyController)
-const weeklyControllerProvider = WeeklyControllerFamily();
+/// Copied from [MonthlyController].
+@ProviderFor(MonthlyController)
+const monthlyControllerProvider = MonthlyControllerFamily();
 
-/// 주간 도트 컨트롤러.
+/// 월별 판정 집계 컨트롤러 (구 WeeklyController 대체 — 월 캘린더 재설계).
 ///
-/// [weekStart] 가 속한 주의 [WeeklyDay] 목록을 조회한다.
+/// [month] 가 속한 월(연/월만 사용, day 값은 무시)의 [MonthlyDay] 목록을 조회한다.
 ///
-/// Copied from [WeeklyController].
-class WeeklyControllerFamily extends Family<AsyncValue<List<WeeklyDay>>> {
-  /// 주간 도트 컨트롤러.
+/// Copied from [MonthlyController].
+class MonthlyControllerFamily extends Family<AsyncValue<List<MonthlyDay>>> {
+  /// 월별 판정 집계 컨트롤러 (구 WeeklyController 대체 — 월 캘린더 재설계).
   ///
-  /// [weekStart] 가 속한 주의 [WeeklyDay] 목록을 조회한다.
+  /// [month] 가 속한 월(연/월만 사용, day 값은 무시)의 [MonthlyDay] 목록을 조회한다.
   ///
-  /// Copied from [WeeklyController].
-  const WeeklyControllerFamily();
+  /// Copied from [MonthlyController].
+  const MonthlyControllerFamily();
 
-  /// 주간 도트 컨트롤러.
+  /// 월별 판정 집계 컨트롤러 (구 WeeklyController 대체 — 월 캘린더 재설계).
   ///
-  /// [weekStart] 가 속한 주의 [WeeklyDay] 목록을 조회한다.
+  /// [month] 가 속한 월(연/월만 사용, day 값은 무시)의 [MonthlyDay] 목록을 조회한다.
   ///
-  /// Copied from [WeeklyController].
-  WeeklyControllerProvider call(
-    DateTime weekStart,
+  /// Copied from [MonthlyController].
+  MonthlyControllerProvider call(
+    DateTime month,
   ) {
-    return WeeklyControllerProvider(
-      weekStart,
+    return MonthlyControllerProvider(
+      month,
     );
   }
 
   @override
-  WeeklyControllerProvider getProviderOverride(
-    covariant WeeklyControllerProvider provider,
+  MonthlyControllerProvider getProviderOverride(
+    covariant MonthlyControllerProvider provider,
   ) {
     return call(
-      provider.weekStart,
+      provider.month,
     );
   }
 
@@ -289,89 +289,89 @@ class WeeklyControllerFamily extends Family<AsyncValue<List<WeeklyDay>>> {
       _allTransitiveDependencies;
 
   @override
-  String? get name => r'weeklyControllerProvider';
+  String? get name => r'monthlyControllerProvider';
 }
 
-/// 주간 도트 컨트롤러.
+/// 월별 판정 집계 컨트롤러 (구 WeeklyController 대체 — 월 캘린더 재설계).
 ///
-/// [weekStart] 가 속한 주의 [WeeklyDay] 목록을 조회한다.
+/// [month] 가 속한 월(연/월만 사용, day 값은 무시)의 [MonthlyDay] 목록을 조회한다.
 ///
-/// Copied from [WeeklyController].
-class WeeklyControllerProvider extends AutoDisposeAsyncNotifierProviderImpl<
-    WeeklyController, List<WeeklyDay>> {
-  /// 주간 도트 컨트롤러.
+/// Copied from [MonthlyController].
+class MonthlyControllerProvider extends AutoDisposeAsyncNotifierProviderImpl<
+    MonthlyController, List<MonthlyDay>> {
+  /// 월별 판정 집계 컨트롤러 (구 WeeklyController 대체 — 월 캘린더 재설계).
   ///
-  /// [weekStart] 가 속한 주의 [WeeklyDay] 목록을 조회한다.
+  /// [month] 가 속한 월(연/월만 사용, day 값은 무시)의 [MonthlyDay] 목록을 조회한다.
   ///
-  /// Copied from [WeeklyController].
-  WeeklyControllerProvider(
-    DateTime weekStart,
+  /// Copied from [MonthlyController].
+  MonthlyControllerProvider(
+    DateTime month,
   ) : this._internal(
-          () => WeeklyController()..weekStart = weekStart,
-          from: weeklyControllerProvider,
-          name: r'weeklyControllerProvider',
+          () => MonthlyController()..month = month,
+          from: monthlyControllerProvider,
+          name: r'monthlyControllerProvider',
           debugGetCreateSourceHash:
               const bool.fromEnvironment('dart.vm.product')
                   ? null
-                  : _$weeklyControllerHash,
-          dependencies: WeeklyControllerFamily._dependencies,
+                  : _$monthlyControllerHash,
+          dependencies: MonthlyControllerFamily._dependencies,
           allTransitiveDependencies:
-              WeeklyControllerFamily._allTransitiveDependencies,
-          weekStart: weekStart,
+              MonthlyControllerFamily._allTransitiveDependencies,
+          month: month,
         );
 
-  WeeklyControllerProvider._internal(
+  MonthlyControllerProvider._internal(
     super._createNotifier, {
     required super.name,
     required super.dependencies,
     required super.allTransitiveDependencies,
     required super.debugGetCreateSourceHash,
     required super.from,
-    required this.weekStart,
+    required this.month,
   }) : super.internal();
 
-  final DateTime weekStart;
+  final DateTime month;
 
   @override
-  FutureOr<List<WeeklyDay>> runNotifierBuild(
-    covariant WeeklyController notifier,
+  FutureOr<List<MonthlyDay>> runNotifierBuild(
+    covariant MonthlyController notifier,
   ) {
     return notifier.build(
-      weekStart,
+      month,
     );
   }
 
   @override
-  Override overrideWith(WeeklyController Function() create) {
+  Override overrideWith(MonthlyController Function() create) {
     return ProviderOverride(
       origin: this,
-      override: WeeklyControllerProvider._internal(
-        () => create()..weekStart = weekStart,
+      override: MonthlyControllerProvider._internal(
+        () => create()..month = month,
         from: from,
         name: null,
         dependencies: null,
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
-        weekStart: weekStart,
+        month: month,
       ),
     );
   }
 
   @override
-  AutoDisposeAsyncNotifierProviderElement<WeeklyController, List<WeeklyDay>>
+  AutoDisposeAsyncNotifierProviderElement<MonthlyController, List<MonthlyDay>>
       createElement() {
-    return _WeeklyControllerProviderElement(this);
+    return _MonthlyControllerProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is WeeklyControllerProvider && other.weekStart == weekStart;
+    return other is MonthlyControllerProvider && other.month == month;
   }
 
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, weekStart.hashCode);
+    hash = _SystemHash.combine(hash, month.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -379,19 +379,19 @@ class WeeklyControllerProvider extends AutoDisposeAsyncNotifierProviderImpl<
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin WeeklyControllerRef
-    on AutoDisposeAsyncNotifierProviderRef<List<WeeklyDay>> {
-  /// The parameter `weekStart` of this provider.
-  DateTime get weekStart;
+mixin MonthlyControllerRef
+    on AutoDisposeAsyncNotifierProviderRef<List<MonthlyDay>> {
+  /// The parameter `month` of this provider.
+  DateTime get month;
 }
 
-class _WeeklyControllerProviderElement
-    extends AutoDisposeAsyncNotifierProviderElement<WeeklyController,
-        List<WeeklyDay>> with WeeklyControllerRef {
-  _WeeklyControllerProviderElement(super.provider);
+class _MonthlyControllerProviderElement
+    extends AutoDisposeAsyncNotifierProviderElement<MonthlyController,
+        List<MonthlyDay>> with MonthlyControllerRef {
+  _MonthlyControllerProviderElement(super.provider);
 
   @override
-  DateTime get weekStart => (origin as WeeklyControllerProvider).weekStart;
+  DateTime get month => (origin as MonthlyControllerProvider).month;
 }
 
 String _$mealRecordDetailControllerHash() =>

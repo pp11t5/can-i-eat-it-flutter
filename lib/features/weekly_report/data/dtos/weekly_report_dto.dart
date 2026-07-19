@@ -1,3 +1,4 @@
+// ignore_for_file: invalid_annotation_target
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:can_i_eat_it/features/weekly_report/domain/entities/weekly_report.dart';
@@ -58,45 +59,23 @@ extension MealCountDtoMapper on MealCountDto {
 }
 
 // ---------------------------------------------------------------------------
-// SymptomTypeCountDto — GET /my-page/reports symptomReport.typeCounts[]
+// SymptomReportDto — GET /my-page/reports recordedSymptom (A3 정합)
 // ---------------------------------------------------------------------------
 
-/// 증상 종류별 카운트 DTO (GET /my-page/reports result.symptomReport.typeCounts[] 대응).
-@freezed
-abstract class SymptomTypeCountDto with _$SymptomTypeCountDto {
-  const factory SymptomTypeCountDto({
-    @Default('') String type,
-    @Default('') String label,
-    @Default(0) int count,
-  }) = _SymptomTypeCountDto;
-
-  factory SymptomTypeCountDto.fromJson(Map<String, dynamic> json) =>
-      _$SymptomTypeCountDtoFromJson(json);
-}
-
-extension SymptomTypeCountDtoMapper on SymptomTypeCountDto {
-  SymptomTypeCount toEntity() => SymptomTypeCount(
-        type: type,
-        label: label,
-        count: count,
-      );
-}
-
-// ---------------------------------------------------------------------------
-// SymptomReportDto — GET /my-page/reports symptomReport (서버 필드 미정 seam)
-// ---------------------------------------------------------------------------
-
-/// 기록된 증상 집계 DTO (GET /my-page/reports result.symptomReport 대응).
+/// 기록된 증상 집계 DTO (GET /my-page/reports result.recordedSymptom 대응).
 ///
-/// 서버 응답에 아직 필드가 없으므로 [WeeklyReportDto.symptomReport]는 nullable로
-/// 두고, 이 DTO 자체도 개별 필드를 전부 nullable/Default로 관대하게 파싱한다.
+/// 서버가 항상 필드를 채워 보낸다고 가정할 수 없으므로 개별 필드를 전부
+/// nullable/Default로 관대하게 파싱한다.
 @freezed
 abstract class SymptomReportDto with _$SymptomReportDto {
   const factory SymptomReportDto({
-    @Default(0) int recordedCount,
-    String? averageTimeLabel,
-    int? averageIntensity,
-    @Default([]) List<SymptomTypeCountDto> typeCounts,
+    @Default(0) int symptomCount,
+    String? averageTime,
+    int? averageLevel,
+    @Default(0) int throatForeignBodyCount,
+    @Default(0) int acidRefluxCount,
+    @Default(0) int coughCount,
+    @Default(0) int chestTightnessCount,
   }) = _SymptomReportDto;
 
   factory SymptomReportDto.fromJson(Map<String, dynamic> json) =>
@@ -105,10 +84,13 @@ abstract class SymptomReportDto with _$SymptomReportDto {
 
 extension SymptomReportDtoMapper on SymptomReportDto {
   SymptomReport toEntity() => SymptomReport(
-        recordedCount: recordedCount,
-        averageTimeLabel: averageTimeLabel,
-        averageIntensity: averageIntensity,
-        typeCounts: typeCounts.map((e) => e.toEntity()).toList(),
+        symptomCount: symptomCount,
+        averageTime: averageTime,
+        averageLevel: averageLevel,
+        throatForeignBodyCount: throatForeignBodyCount,
+        acidRefluxCount: acidRefluxCount,
+        coughCount: coughCount,
+        chestTightnessCount: chestTightnessCount,
       );
 }
 
@@ -126,8 +108,9 @@ abstract class WeeklyReportDto with _$WeeklyReportDto {
     required ComfortableStateDto comfortableState,
     required MealCountDto mealCount,
 
-    /// 서버 응답에 없으면 null — [SymptomReport] 빈상태로 렌더.
-    SymptomReportDto? symptomReport,
+    /// 서버 필드명은 `recordedSymptom`(A3). 응답에 없으면 null —
+    /// [SymptomReport] 빈상태로 렌더.
+    @JsonKey(name: 'recordedSymptom') SymptomReportDto? symptomReport,
   }) = _WeeklyReportDto;
 
   factory WeeklyReportDto.fromJson(Map<String, dynamic> json) =>

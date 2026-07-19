@@ -42,6 +42,13 @@ class ApiEndpoints {
   /// `GET/POST /consent`
   static const String consent = '/consent';
 
+  /// `GET /consent/terms` — 약관 목록(TermResponseDTO[]). termId 조인용.
+  static const String consentTerms = '/consent/terms';
+
+  /// `PATCH /consent/marketing/toggle` — 마케팅·푸시 알림 수신 동의 토글
+  /// (A2: `/notifications/settings/toggle`과 분리된 별도 경로).
+  static const String consentMarketingToggle = '/consent/marketing/toggle';
+
   /// `POST /onboarding`
   static const String onboarding = '/onboarding';
 
@@ -124,7 +131,12 @@ class ApiEndpoints {
   static const String timeline = '/timeline';
 
   /// `GET /timeline/weekly?date=YYYY-MM-DD`
+  ///
+  /// @deprecated Swagger에서 제거됨. [timelineMonthly] 사용. (B1에서 사용처 제거 예정)
   static const String timelineWeekly = '/timeline/weekly';
+
+  /// `GET /timeline/monthly?month=YYYY-MM` — 월 판정 집계(MonthlyJudgementResponseDTO[]).
+  static const String timelineMonthly = '/timeline/monthly';
 
   // ---------------------------------------------------------------------------
   // Food Dictionary (W6-1, 내 도감)
@@ -199,6 +211,9 @@ class ApiEndpoints {
 
   /// `GET /my-page/profile`
   static const String myPageProfile = '/my-page/profile';
+
+  /// `PATCH /my-page/nickname` — 닉네임 변경(NicknameUpdateRequestDTO{nickname}).
+  static const String myPageNickname = '/my-page/nickname';
 
   /// `GET /my-page/health-info` · `PATCH /my-page/health-info`
   static const String myPageHealthInfo = '/my-page/health-info';

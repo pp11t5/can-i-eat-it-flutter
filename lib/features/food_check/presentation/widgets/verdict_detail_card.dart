@@ -286,7 +286,7 @@ class _StateRecordCard extends StatelessWidget {
           ),
           // 우측 날짜 · 타이밍 (회색)
           Text(
-            '${record.date} · ${record.timing}',
+            '${record.date} · ${record.timingLabel}',
             style: const TextStyle(
               fontFamily: 'Pretendard',
               fontSize: 14,

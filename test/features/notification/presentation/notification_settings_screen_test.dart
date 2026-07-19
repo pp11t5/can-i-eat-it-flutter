@@ -72,7 +72,8 @@ void main() {
   });
 
   group('NotificationSettingsScreen — 토글 상호작용', () {
-    testWidgets('마스터 토글 탭 시 toggle(marketing) 호출된다', (tester) async {
+    testWidgets('마스터 토글 탭 시 toggleMarketingConsent(false) 호출된다 (A2: 별도 경로)',
+        (tester) async {
       final mock = MockNotificationRepository(
         seed: const NotificationSettings(
           postMealEnabled: false,
@@ -91,7 +92,10 @@ void main() {
       await tester.tap(switches.first);
       await tester.pumpAndSettle();
 
-      expect(mock.toggleCalls, contains(NotificationToggleType.marketing));
+      // 마케팅 토글은 더 이상 toggleCalls(/notifications/settings/toggle)가 아닌
+      // 별도 경로(toggleMarketingConsent)를 호출한다 (A2).
+      expect(mock.toggleCalls, isEmpty);
+      expect(mock.marketingToggleCalls, contains(false));
     });
 
     testWidgets('식후 알림 토글 탭 시 toggle(postMeal) 호출된다', (tester) async {

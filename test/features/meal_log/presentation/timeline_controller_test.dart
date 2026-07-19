@@ -80,16 +80,16 @@ void main() {
     });
   });
 
-  group('WeeklyController — 도트 데이터', () {
-    test('seeded mock: AsyncData<List<WeeklyDay>> 반환', () async {
+  group('MonthlyController — 도트 데이터', () {
+    test('seeded mock: AsyncData<List<MonthlyDay>> 반환', () async {
       final container = makeContainer(seeded: true);
       addTearDown(container.dispose);
 
-      final provider = weeklyControllerProvider(today);
+      final provider = monthlyControllerProvider(DateTime(today.year, today.month, 1));
       await container.read(provider.future);
 
       final state = container.read(provider);
-      expect(state, isA<AsyncData<List<WeeklyDay>>>());
+      expect(state, isA<AsyncData<List<MonthlyDay>>>());
       expect(state.value!, isNotEmpty);
     });
   });

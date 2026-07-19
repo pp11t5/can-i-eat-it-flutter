@@ -20,9 +20,9 @@ void main() {
       expect(await repo.timeline(DateTime(2026, 6, 17)), isEmpty);
     });
 
-    test('empty 팩토리는 weekly가 빈 목록이다', () async {
+    test('empty 팩토리는 getMonthly가 빈 목록이다', () async {
       final repo = MockMealRepository.empty();
-      expect(await repo.weekly(DateTime(2026, 6, 17)), isEmpty);
+      expect(await repo.getMonthly(DateTime(2026, 6, 1)), isEmpty);
     });
   });
 
@@ -57,11 +57,11 @@ void main() {
       expect(food.analysis!.allergy, isNotNull);
     });
 
-    test('seeded weekly는 judgements를 보유한다', () async {
+    test('seeded getMonthly는 judgements를 보유한다', () async {
       final repo = MockMealRepository.seeded();
-      final weekly = await repo.weekly(DateTime(2026, 6, 17));
-      expect(weekly, isNotEmpty);
-      expect(weekly[0].judgements, isNotEmpty);
+      final monthly = await repo.getMonthly(DateTime(2026, 6, 1));
+      expect(monthly, isNotEmpty);
+      expect(monthly[0].judgements, isNotEmpty);
     });
 
     test('seeded candidates는 후보를 보유한다', () async {

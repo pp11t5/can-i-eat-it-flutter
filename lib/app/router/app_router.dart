@@ -20,6 +20,7 @@ import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/timeline_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/allergy_med_edit_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
+import 'package:can_i_eat_it/features/mypage/presentation/screens/name_edit_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/profile_info_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/withdraw_screen.dart';
 import 'package:can_i_eat_it/features/notification/presentation/screens/notification_settings_screen.dart';
@@ -256,6 +257,11 @@ GoRouter appRouter(Ref ref) {
                         name: 'mypage-profile-allergy-med',
                         builder: (context, state) =>
                             const AllergyMedEditScreen(),
+                      ),
+                      GoRoute(
+                        path: 'name-edit',
+                        name: 'mypage-profile-name-edit',
+                        builder: (context, state) => const NameEditScreen(),
                       ),
                     ],
                   ),

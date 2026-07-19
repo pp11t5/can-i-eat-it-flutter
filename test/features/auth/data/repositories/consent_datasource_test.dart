@@ -9,6 +9,7 @@ import 'package:can_i_eat_it/features/auth/data/repositories/auth_repository_imp
 import 'package:can_i_eat_it/features/auth/data/services/apple_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/data/services/kakao_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
+import 'package:can_i_eat_it/features/auth/data/dtos/consent_request_dto.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 import 'package:can_i_eat_it/core/config/terms_catalog.dart';
 
@@ -47,6 +48,26 @@ Map<String, dynamic> _ok(Object? result) => {
       'result': result,
     };
 
+/// `GET /consent/terms` 응답 원소 헬퍼 — TermResponseDTO 목.
+Map<String, dynamic> _termJson({
+  required int id,
+  required String code,
+  bool required = true,
+  String version = 'v1.0',
+  String title = '약관',
+  String content = '내용',
+  String? effectiveDate,
+}) =>
+    {
+      'id': id,
+      'code': code,
+      'version': version,
+      'title': title,
+      'content': content,
+      'required': required,
+      'effectiveDate': effectiveDate,
+    };
+
 // ---------------------------------------------------------------------------
 // 테스트
 // ---------------------------------------------------------------------------
@@ -83,105 +104,256 @@ void main() {
       kakaoAuthService: _NoOpKakaoAuthService(),
       appleAuthService: _NoOpAppleAuthService(),
     );
-
-    // 세션을 미리 설정 (recordTermsAgreement 는 활성 세션 필요)
-    // 내부 _session 을 직접 주입할 수 없으므로 signIn 흐름 없이
-    // recoverAccount 로 세션을 합성한다.
   });
 
-  group('recordTermsAgreement — POST /consent 바디 매핑', () {
-    test(
-        'TermsAgreement 가 올바른 ConsentRequestDto 바디로 POST 된다'
-        '(tos/privacy/healthSensitive/marketing 매핑)', () async {
-      // 세션 합성: recoverAccount → _session 설정
-      dioAdapter.onPost(
-        '/auth/kakao/recover',
+  /// 세션 합성 헬퍼: recoverAccount → 내부 _session 설정.
+  /// (recordTermsAgreement 는 활성 세션이 필요하므로 signIn 흐름 없이 합성한다.)
+  Future<void> synthesizeSession() async {
+    dioAdapter.onPost(
+      '/auth/kakao/recover',
+      (server) => server.reply(
+        200,
+        _ok({
+          'accessToken': 'acc',
+          'refreshToken': 'ref',
+          'userId': 'u1',
+          'email': 'e@e.com',
+          'role': 'USER',
+        }),
+      ),
+      data: Matchers.any,
+    );
+    await repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token');
+  }
+
+  group('recordTermsAgreement — GET /consent/terms → POST /consent (신 계약)', () {
+    test('GET /consent/terms 목록을 termId 로 조인해 POST 바디를 {consents:[...]}로 구성한다',
+        () async {
+      await synthesizeSession();
+
+      dioAdapter.onGet(
+        ApiEndpoints.consentTerms,
         (server) => server.reply(
           200,
-          _ok({
-            'accessToken': 'acc',
-            'refreshToken': 'ref',
-            'userId': 'u1',
-            'email': 'e@e.com',
-            'role': 'USER',
-          }),
+          _ok([
+            _termJson(id: 1, code: TermsCatalogCodes.tos),
+            _termJson(id: 2, code: TermsCatalogCodes.privacy),
+            _termJson(id: 3, code: TermsCatalogCodes.healthSensitive),
+            _termJson(id: 4, code: TermsCatalogCodes.marketing, required: false),
+          ]),
         ),
-        data: Matchers.any,
       );
-      await repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token');
 
-      // POST /consent 바디 검증
       dioAdapter.onPost(
         ApiEndpoints.consent,
         (server) => server.reply(200, _ok(null)),
+        // NOTE: ConsentRequestDto/ConsentItemDto 는 json_serializable
+        // 기본값(explicitToJson: false) 이라 dto.toJson() 이 반환하는
+        // 'consents' 값은 List<Map> 이 아니라 List<ConsentItemDto> 그대로다
+        // (실서버 전송 시엔 dart:convert 의 암묵적 toJson() 폴백으로 정상
+        // 직렬화되지만, http_mock_adapter 의 매처는 그 이전 단계에서 값을
+        // 비교한다). 매처 기대값도 동일 타입(ConsentItemDto)으로 맞춘다.
         data: {
-          'tos': true,
-          'privacy': true,
-          'healthSensitive': true,
-          'marketing': false,
+          'consents': [
+            const ConsentItemDto(termId: 1, agreed: true),
+            const ConsentItemDto(termId: 2, agreed: true),
+            const ConsentItemDto(termId: 3, agreed: true),
+            const ConsentItemDto(termId: 4, agreed: false),
+          ],
         },
       );
 
-      // 예외 없이 완료되면 올바른 바디로 매칭된 것.
       await expectLater(
         repo.recordTermsAgreement(agreement),
         completes,
       );
     });
 
-    test('marketing=true 일 때 바디에 marketing:true 가 포함된다', () async {
-      dioAdapter.onPost(
-        '/auth/kakao/recover',
+    test('marketing=true 일 때 termId 4(marketing) 의 agreed 도 true 로 전송된다',
+        () async {
+      await synthesizeSession();
+
+      dioAdapter.onGet(
+        ApiEndpoints.consentTerms,
         (server) => server.reply(
           200,
-          _ok({
-            'accessToken': 'acc',
-            'refreshToken': 'ref',
-            'userId': 'u1',
-            'email': 'e@e.com',
-            'role': 'USER',
-          }),
+          _ok([
+            _termJson(id: 1, code: TermsCatalogCodes.tos),
+            _termJson(id: 2, code: TermsCatalogCodes.privacy),
+            _termJson(id: 3, code: TermsCatalogCodes.healthSensitive),
+            _termJson(id: 4, code: TermsCatalogCodes.marketing, required: false),
+          ]),
         ),
-        data: Matchers.any,
       );
-      await repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token');
 
       dioAdapter.onPost(
         ApiEndpoints.consent,
         (server) => server.reply(200, _ok(null)),
+        // NOTE: 위 테스트와 동일한 이유로 ConsentItemDto 인스턴스로 기대값 구성.
         data: {
-          'tos': true,
-          'privacy': true,
-          'healthSensitive': true,
-          'marketing': true,
+          'consents': [
+            const ConsentItemDto(termId: 1, agreed: true),
+            const ConsentItemDto(termId: 2, agreed: true),
+            const ConsentItemDto(termId: 3, agreed: true),
+            const ConsentItemDto(termId: 4, agreed: true),
+          ],
         },
       );
 
       await expectLater(
-        repo.recordTermsAgreement(
-          agreement.copyWith(marketing: true),
-        ),
+        repo.recordTermsAgreement(agreement.copyWith(marketing: true)),
         completes,
       );
     });
 
-    test('서버 오류 시 NetworkFailure 를 throw 하고 세션 hasAgreedTerms 는 갱신되지 않는다',
+    test('GET /consent/terms 가 빈 배열이면(현재 dev 서버) POST 바디는 {consents:[]}이다',
         () async {
+      await synthesizeSession();
+
+      dioAdapter.onGet(
+        ApiEndpoints.consentTerms,
+        (server) => server.reply(200, _ok(<dynamic>[])),
+      );
+
       dioAdapter.onPost(
-        '/auth/kakao/recover',
+        ApiEndpoints.consent,
+        (server) => server.reply(200, _ok(null)),
+        data: {'consents': <dynamic>[]},
+      );
+
+      await expectLater(
+        repo.recordTermsAgreement(agreement),
+        completes,
+      );
+    });
+
+    test(
+        '필수 약관(required=true)이 agreed=false 로 매핑되면 로컬 검증에서 '
+        'NetworkFailure 를 throw 하고 POST /consent 는 호출되지 않는다', () async {
+      await synthesizeSession();
+
+      dioAdapter.onGet(
+        ApiEndpoints.consentTerms,
         (server) => server.reply(
           200,
-          _ok({
-            'accessToken': 'acc',
-            'refreshToken': 'ref',
-            'userId': 'u1',
-            'email': 'e@e.com',
-            'role': 'USER',
-          }),
+          _ok([
+            _termJson(id: 1, code: TermsCatalogCodes.tos),
+          ]),
         ),
-        data: Matchers.any,
       );
-      await repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token');
+
+      final notAgreed = agreement.copyWith(termsOfService: false);
+
+      await expectLater(
+        repo.recordTermsAgreement(notAgreed),
+        throwsA(isA<NetworkFailure>()),
+      );
+    });
+
+    test(
+        '필수 약관(required=true)의 code 가 로컬 UI에 없는(미인식) 항목이면 '
+        'NetworkFailure 를 throw 한다', () async {
+      await synthesizeSession();
+
+      dioAdapter.onGet(
+        ApiEndpoints.consentTerms,
+        (server) => server.reply(
+          200,
+          _ok([
+            _termJson(id: 1, code: TermsCatalogCodes.tos),
+            _termJson(id: 99, code: 'unknown_required_term'),
+          ]),
+        ),
+      );
+
+      await expectLater(
+        repo.recordTermsAgreement(agreement),
+        throwsA(isA<NetworkFailure>()),
+      );
+    });
+
+    test('선택 약관(required=false)의 미인식 code 는 consents 에서 생략된다', () async {
+      await synthesizeSession();
+
+      dioAdapter.onGet(
+        ApiEndpoints.consentTerms,
+        (server) => server.reply(
+          200,
+          _ok([
+            _termJson(id: 1, code: TermsCatalogCodes.tos),
+            _termJson(id: 2, code: TermsCatalogCodes.privacy),
+            _termJson(id: 3, code: TermsCatalogCodes.healthSensitive),
+            _termJson(
+              id: 5,
+              code: 'unknown_optional_term',
+              required: false,
+            ),
+          ]),
+        ),
+      );
+
+      dioAdapter.onPost(
+        ApiEndpoints.consent,
+        (server) => server.reply(200, _ok(null)),
+        // NOTE: 위 테스트와 동일한 이유로 ConsentItemDto 인스턴스로 기대값 구성.
+        data: {
+          'consents': [
+            const ConsentItemDto(termId: 1, agreed: true),
+            const ConsentItemDto(termId: 2, agreed: true),
+            const ConsentItemDto(termId: 3, agreed: true),
+          ],
+        },
+      );
+
+      await expectLater(
+        repo.recordTermsAgreement(agreement),
+        completes,
+      );
+    });
+
+    test('GET /consent/terms 실패 시 NetworkFailure 를 throw 하고 세션은 갱신되지 않는다(참조 불변)',
+        () async {
+      await synthesizeSession();
+      // recoverAccount 직후 세션(hasAgreedTerms 등)을 스냅샷 — recordTermsAgreement 는
+      // POST /consent 성공 시에만 _session 을 copyWith 로 교체한다. GET 단계 실패는
+      // 그 이전이므로 세션이 값 동일성 그대로 유지돼야 한다.
+      final sessionBefore = await repo.currentSession();
+
+      dioAdapter.onGet(
+        ApiEndpoints.consentTerms,
+        (server) => server.throws(
+          500,
+          DioException(
+            requestOptions: RequestOptions(path: ApiEndpoints.consentTerms),
+            type: DioExceptionType.connectionError,
+          ),
+        ),
+      );
+
+      await expectLater(
+        repo.recordTermsAgreement(agreement),
+        throwsA(isA<NetworkFailure>()),
+      );
+
+      final sessionAfter = await repo.currentSession();
+      expect(sessionAfter, equals(sessionBefore));
+    });
+
+    test('POST /consent 서버 오류 시 NetworkFailure 를 throw 하고 세션 hasAgreedTerms 는 갱신되지 않는다',
+        () async {
+      await synthesizeSession();
+
+      dioAdapter.onGet(
+        ApiEndpoints.consentTerms,
+        (server) => server.reply(
+          200,
+          _ok([
+            _termJson(id: 1, code: TermsCatalogCodes.tos),
+            _termJson(id: 2, code: TermsCatalogCodes.privacy),
+            _termJson(id: 3, code: TermsCatalogCodes.healthSensitive),
+          ]),
+        ),
+      );
 
       dioAdapter.onPost(
         ApiEndpoints.consent,

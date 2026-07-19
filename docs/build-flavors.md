@@ -37,7 +37,7 @@ flutter build apk --flavor prod -t lib/main_prod.dart \
 
 # 개발(dev)
 flutter run --flavor dev -t lib/main_dev.dart \
-  --dart-define=KAKAO_NATIVE_APP_KEY=92e00e2a84be177d37bc6819f3032a03
+  --dart-define=KAKAO_NATIVE_APP_KEY=cd24aa08a740a475401f84390c8219df
 ```
 
 카카오 네이티브 앱키의 **SDK init 값**은 리터럴을 커밋하지 않고 빌드 시 주입한다
@@ -49,7 +49,7 @@ flutter run --flavor dev -t lib/main_dev.dart \
 
 | | 운영(prod) | 개발(dev) |
 |---|---|---|
-| 카카오 네이티브 앱키 | `2d007771e0083b600999053b9b1d4e83` | `92e00e2a84be177d37bc6819f3032a03` |
+| 카카오 네이티브 앱키 | `2d007771e0083b600999053b9b1d4e83` | `cd24aa08a740a475401f84390c8219df` |
 
 ## Firebase (네이티브 설정, 커밋됨)
 

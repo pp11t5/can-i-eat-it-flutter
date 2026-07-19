@@ -13,16 +13,18 @@ import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dar
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/widgets/calendar_popup.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/fab_action_sheet.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/meal_timeline_list.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/week_nav.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/week_strip.dart';
 
-/// 식사 타임라인 화면 (F3-2a 골격).
+/// 식사 타임라인 화면 (횡스크롤 월 캘린더 재설계).
 ///
 /// 구조:
-/// - WeekNav: 주차 네비게이션 (이전/다음 주 이동)
-/// - WeekStrip: 일~토 7칸 주간 스트립 (오늘/선택일 강조, 도트 표시)
+/// - MonthNav: 월 네비게이션 (이전/다음 달 이동 + 캘린더 팝업 진입)
+/// - WeekStrip: 해당월 1일~말일 횡스크롤 단일행 (오늘/선택일 강조, 도트 표시)
+/// - CalendarPopup: MonthNav 우측 캘린더 아이콘 탭 시 모달 진입
 /// - 타임라인 리스트: AsyncValue.when (loading → 스켈레톤, error → 재시도, data → 그룹 타일)
 /// - FAB 자리: 비배선 placeholder (F3-2c에서 연결)
 ///
@@ -44,15 +46,15 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
   /// 현재 선택된 날짜 (KST 오늘로 초기화).
   late DateTime _selectedDate;
 
-  /// 현재 표시 중인 주의 일요일.
-  late DateTime _weekStart;
+  /// 현재 표시 중인 월 (DateTime(year, month, 1)).
+  late DateTime _visibleMonth;
 
   @override
   void initState() {
     super.initState();
     final today = _today();
     _selectedDate = today;
-    _weekStart = _sundayOf(today);
+    _visibleMonth = DateTime(today.year, today.month, 1);
   }
 
   /// 오늘 날짜. todayOverride가 있으면 그 값을 사용, 없으면 KST 오늘.
@@ -62,28 +64,34 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
     return DateTime(k.year, k.month, k.day);
   }
 
-  /// 주어진 날짜가 속한 주의 일요일을 반환.
-  static DateTime _sundayOf(DateTime date) {
-    // DateTime.weekday: 1=월 ~ 7=일
-    final daysFromSunday = date.weekday % 7; // 일=0, 월=1, ..., 토=6
-    return DateTime(date.year, date.month, date.day)
-        .subtract(Duration(days: daysFromSunday));
+  /// [month]가 [today]가 속한 월보다 이전이면 true — 다음 달 이동 가능 여부
+  /// (현실 시간 기준 미래 월로는 이동할 수 없음, MonthNav의 `›` 숨김에도 사용).
+  bool _canGoNextFrom(DateTime month, DateTime today) {
+    return DateTime(month.year, month.month)
+        .isBefore(DateTime(today.year, today.month));
   }
 
-  void _onPrevWeek() {
+  void _onPrevMonth() {
+    final newMonth = DateTime(_visibleMonth.year, _visibleMonth.month - 1, 1);
+    // 이전 달로 이동하면 선택일 = 그 달의 말일 (전월 말일은 항상 오늘보다
+    // 과거이므로 항상 유효 — 미래 월 자체는 canGoNext 가드로 막혀 있음).
+    final newSelected = DateTime(newMonth.year, newMonth.month + 1, 0);
     setState(() {
-      _weekStart = _weekStart.subtract(const Duration(days: 7));
-      _selectedDate = _selectedDate.subtract(const Duration(days: 7));
+      _visibleMonth = newMonth;
+      _selectedDate = newSelected;
     });
-    _reloadTimeline(_selectedDate);
+    _reloadTimeline(newSelected);
   }
 
-  void _onNextWeek() {
+  void _onNextMonth() {
+    if (!_canGoNextFrom(_visibleMonth, _today())) return; // 미래월 진입 차단
+    final newMonth = DateTime(_visibleMonth.year, _visibleMonth.month + 1, 1);
+    // 다음 달로 이동하면 선택일 = 그 달의 1일.
     setState(() {
-      _weekStart = _weekStart.add(const Duration(days: 7));
-      _selectedDate = _selectedDate.add(const Duration(days: 7));
+      _visibleMonth = newMonth;
+      _selectedDate = newMonth;
     });
-    _reloadTimeline(_selectedDate);
+    _reloadTimeline(newMonth);
   }
 
   void _onDaySelected(DateTime day) {
@@ -92,6 +100,21 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
       _selectedDate = day;
     });
     _reloadTimeline(day);
+  }
+
+  Future<void> _openCalendarPopup() async {
+    final picked = await showCalendarPopup(
+      context,
+      initialMonth: _visibleMonth,
+      initialSelectedDate: _selectedDate,
+      today: _today(),
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _visibleMonth = DateTime(picked.year, picked.month, 1);
+      _selectedDate = picked;
+    });
+    _reloadTimeline(picked);
   }
 
   void _reloadTimeline(DateTime date) {
@@ -107,7 +130,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
   Widget build(BuildContext context) {
     final timelineAsync =
         ref.watch(timelineControllerProvider(_selectedDate));
-    final weeklyAsync = ref.watch(weeklyControllerProvider(_weekStart));
+    final monthlyAsync = ref.watch(monthlyControllerProvider(_visibleMonth));
 
     return Scaffold(
       // Figma 실측: #FCFCFC (surfaceBackground #F5F5F5 과 구분되는 타임라인 전용 배경)
@@ -115,7 +138,9 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // --- 주차 네비 + 주간 스트립 카드 ---
+            // --- 월 네비 + 횡스크롤 월 캘린더 ---
+            // MonthNav(2756:22551)와 WeekStrip(2756:22501)은 별개 Figma 프레임 —
+            // WeekStrip이 자체 카드 데코레이션(bg·stroke·radius·shadow)을 갖는다.
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.screenPadding,
@@ -123,39 +148,27 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
                 AppSpacing.screenPadding,
                 AppSpacing.itemGap,
               ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: AppColors.weekStripShadow,
-                      blurRadius: 8,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(AppSpacing.screenPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 주차 네비 (좌측 밀착)
-                    WeekNav(
-                      label: weekNavLabel(_selectedDate),
-                      onPrevWeek: _onPrevWeek,
-                      onNextWeek: _onNextWeek,
-                    ),
-                    const SizedBox(height: AppSpacing.itemGap),
-                    // 주간 스트립 — weekly() 연동 도트
-                    WeekStrip(
-                      weekStart: _weekStart,
-                      selectedDate: _selectedDate,
-                      today: _today(),
-                      dotsByDate: _buildDotsByDate(weeklyAsync.valueOrNull),
-                      onDaySelected: _onDaySelected,
-                    ),
-                  ],
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 월 네비 (좌측 chevron+라벨 클러스터 + 우측 캘린더 아이콘)
+                  MonthNav(
+                    label: monthNavLabel(_visibleMonth),
+                    onPrevMonth: _onPrevMonth,
+                    onNextMonth: _onNextMonth,
+                    onOpenCalendar: _openCalendarPopup,
+                    canGoNext: _canGoNextFrom(_visibleMonth, _today()),
+                  ),
+                  const SizedBox(height: AppSpacing.itemGap),
+                  // 횡스크롤 월 캘린더 — monthly() 연동 도트
+                  WeekStrip(
+                    visibleMonth: _visibleMonth,
+                    selectedDate: _selectedDate,
+                    today: _today(),
+                    dotsByDate: _buildDotsByDate(monthlyAsync.valueOrNull),
+                    onDaySelected: _onDaySelected,
+                  ),
+                ],
               ),
             ),
             // --- 타임라인 리스트 ---
@@ -188,25 +201,16 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
     );
   }
 
-  /// 주간 데이터에서 도트 맵 생성 (GET /timeline/weekly 연동).
+  /// 월별 데이터에서 도트 맵 생성 (GET /timeline/monthly 연동).
   ///
-  /// 각 [WeeklyDay] 의 judgements(≤3, fromGrade 완료)를 날짜별로 매핑한다.
-  Map<DateTime, List<VerdictLevel>> _buildDotsByDate(List<WeeklyDay>? days) {
+  /// 서버는 [MonthlyDay.day](int)만 제공하므로 현재 표시월([_visibleMonth])의
+  /// 연/월과 조합해 DateTime 키를 조립한다.
+  Map<DateTime, List<VerdictLevel>> _buildDotsByDate(List<MonthlyDay>? days) {
     if (days == null || days.isEmpty) return {};
     return {
       for (final d in days)
-        if (_parseDate(d.date) case final key?) key: d.judgements,
+        DateTime(_visibleMonth.year, _visibleMonth.month, d.day): d.judgements,
     };
-  }
-
-  /// 'YYYY-MM-DD' → DateTime(year, month, day). 파싱 실패 시 null.
-  static DateTime? _parseDate(String date) {
-    try {
-      final dt = DateTime.parse(date);
-      return DateTime(dt.year, dt.month, dt.day);
-    } catch (_) {
-      return null;
-    }
   }
 }
 
@@ -266,9 +270,14 @@ class _TimelineErrorView extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 빈 상태 안내
+// 빈 상태 안내 (Figma 2699:21467 — 해당일 기록 0건)
 // ---------------------------------------------------------------------------
 
+/// 타임라인 빈 상태.
+///
+/// TODO(figma): 최초 진입 안내(node 2694:20716, 손글씨 일러스트)는 "전체 기록
+/// 0건 여부" 같은 별도 신호가 필요해 이번 패스에서는 미분기. 데이터 신호
+/// 확정 후 isFirstVisit 분기를 추가하고 일러스트 에셋을 연결한다.
 class _TimelineEmptyView extends StatelessWidget {
   const _TimelineEmptyView();
 
@@ -284,7 +293,7 @@ class _TimelineEmptyView extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.itemGap),
           Text(
-            '오늘 먹은 음식을 기록해보세요',
+            '기록이 없어요',
             style: AppTextStyles.body2Regular.copyWith(
               color: AppColors.textSecondary,
             ),

@@ -17,7 +17,7 @@ mixin _$AuthLoginResponseDto {
   String get accessToken;
   String get refreshToken;
   String get userId;
-  String get email;
+  String? get email;
   String get role;
 
   /// Create a copy of AuthLoginResponseDto
@@ -66,7 +66,7 @@ abstract mixin class $AuthLoginResponseDtoCopyWith<$Res> {
       {String accessToken,
       String refreshToken,
       String userId,
-      String email,
+      String? email,
       String role});
 }
 
@@ -86,7 +86,7 @@ class _$AuthLoginResponseDtoCopyWithImpl<$Res>
     Object? accessToken = null,
     Object? refreshToken = null,
     Object? userId = null,
-    Object? email = null,
+    Object? email = freezed,
     Object? role = null,
   }) {
     return _then(_self.copyWith(
@@ -102,10 +102,10 @@ class _$AuthLoginResponseDtoCopyWithImpl<$Res>
           ? _self.userId
           : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      email: null == email
+      email: freezed == email
           ? _self.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       role: null == role
           ? _self.role
           : role // ignore: cast_nullable_to_non_nullable
@@ -208,7 +208,7 @@ extension AuthLoginResponseDtoPatterns on AuthLoginResponseDto {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(String accessToken, String refreshToken, String userId,
-            String email, String role)?
+            String? email, String role)?
         $default, {
     required TResult orElse(),
   }) {
@@ -238,7 +238,7 @@ extension AuthLoginResponseDtoPatterns on AuthLoginResponseDto {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(String accessToken, String refreshToken, String userId,
-            String email, String role)
+            String? email, String role)
         $default,
   ) {
     final _that = this;
@@ -266,7 +266,7 @@ extension AuthLoginResponseDtoPatterns on AuthLoginResponseDto {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(String accessToken, String refreshToken, String userId,
-            String email, String role)?
+            String? email, String role)?
         $default,
   ) {
     final _that = this;
@@ -287,7 +287,7 @@ class _AuthLoginResponseDto implements AuthLoginResponseDto {
       {required this.accessToken,
       required this.refreshToken,
       required this.userId,
-      required this.email,
+      this.email,
       required this.role});
   factory _AuthLoginResponseDto.fromJson(Map<String, dynamic> json) =>
       _$AuthLoginResponseDtoFromJson(json);
@@ -299,7 +299,7 @@ class _AuthLoginResponseDto implements AuthLoginResponseDto {
   @override
   final String userId;
   @override
-  final String email;
+  final String? email;
   @override
   final String role;
 
@@ -356,7 +356,7 @@ abstract mixin class _$AuthLoginResponseDtoCopyWith<$Res>
       {String accessToken,
       String refreshToken,
       String userId,
-      String email,
+      String? email,
       String role});
 }
 
@@ -376,7 +376,7 @@ class __$AuthLoginResponseDtoCopyWithImpl<$Res>
     Object? accessToken = null,
     Object? refreshToken = null,
     Object? userId = null,
-    Object? email = null,
+    Object? email = freezed,
     Object? role = null,
   }) {
     return _then(_AuthLoginResponseDto(
@@ -392,10 +392,10 @@ class __$AuthLoginResponseDtoCopyWithImpl<$Res>
           ? _self.userId
           : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      email: null == email
+      email: freezed == email
           ? _self.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       role: null == role
           ? _self.role
           : role // ignore: cast_nullable_to_non_nullable

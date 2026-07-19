@@ -1245,17 +1245,26 @@ class __$MealCountCopyWithImpl<$Res> implements _$MealCountCopyWith<$Res> {
 
 /// @nodoc
 mixin _$SymptomReport {
-  /// 이번 주 증상 기록 총 횟수.
-  int get recordedCount;
+  /// 이번 주 증상 기록 총 횟수 (서버 `symptomCount`).
+  int get symptomCount;
 
-  /// 평균 기록 시간 라벨 (서버 원문, 예: '16:30'). 값 없으면 pill 미노출.
-  String? get averageTimeLabel;
+  /// 평균 기록 시간 라벨 (서버 `averageTime`, 예: '16:30'). 값 없으면 pill 미노출.
+  String? get averageTime;
 
-  /// 평균 강도. 값 없으면 pill 미노출.
-  int? get averageIntensity;
+  /// 평균 강도 (서버 `averageLevel`). 값 없으면 pill 미노출.
+  int? get averageLevel;
 
-  /// 증상 종류별 카운트 (막대 그래프용).
-  List<SymptomTypeCount> get typeCounts;
+  /// 이물감 기록 횟수 (서버 `throatForeignBodyCount`).
+  int get throatForeignBodyCount;
+
+  /// 신물 기록 횟수 (서버 `acidRefluxCount`).
+  int get acidRefluxCount;
+
+  /// 기침 기록 횟수 (서버 `coughCount`).
+  int get coughCount;
+
+  /// 답답함 기록 횟수 (서버 `chestTightnessCount`).
+  int get chestTightnessCount;
 
   /// Create a copy of SymptomReport
   /// with the given fields replaced by the non-null parameter values.
@@ -1270,23 +1279,36 @@ mixin _$SymptomReport {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SymptomReport &&
-            (identical(other.recordedCount, recordedCount) ||
-                other.recordedCount == recordedCount) &&
-            (identical(other.averageTimeLabel, averageTimeLabel) ||
-                other.averageTimeLabel == averageTimeLabel) &&
-            (identical(other.averageIntensity, averageIntensity) ||
-                other.averageIntensity == averageIntensity) &&
-            const DeepCollectionEquality()
-                .equals(other.typeCounts, typeCounts));
+            (identical(other.symptomCount, symptomCount) ||
+                other.symptomCount == symptomCount) &&
+            (identical(other.averageTime, averageTime) ||
+                other.averageTime == averageTime) &&
+            (identical(other.averageLevel, averageLevel) ||
+                other.averageLevel == averageLevel) &&
+            (identical(other.throatForeignBodyCount, throatForeignBodyCount) ||
+                other.throatForeignBodyCount == throatForeignBodyCount) &&
+            (identical(other.acidRefluxCount, acidRefluxCount) ||
+                other.acidRefluxCount == acidRefluxCount) &&
+            (identical(other.coughCount, coughCount) ||
+                other.coughCount == coughCount) &&
+            (identical(other.chestTightnessCount, chestTightnessCount) ||
+                other.chestTightnessCount == chestTightnessCount));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, recordedCount, averageTimeLabel,
-      averageIntensity, const DeepCollectionEquality().hash(typeCounts));
+  int get hashCode => Object.hash(
+      runtimeType,
+      symptomCount,
+      averageTime,
+      averageLevel,
+      throatForeignBodyCount,
+      acidRefluxCount,
+      coughCount,
+      chestTightnessCount);
 
   @override
   String toString() {
-    return 'SymptomReport(recordedCount: $recordedCount, averageTimeLabel: $averageTimeLabel, averageIntensity: $averageIntensity, typeCounts: $typeCounts)';
+    return 'SymptomReport(symptomCount: $symptomCount, averageTime: $averageTime, averageLevel: $averageLevel, throatForeignBodyCount: $throatForeignBodyCount, acidRefluxCount: $acidRefluxCount, coughCount: $coughCount, chestTightnessCount: $chestTightnessCount)';
   }
 }
 
@@ -1297,10 +1319,13 @@ abstract mixin class $SymptomReportCopyWith<$Res> {
       _$SymptomReportCopyWithImpl;
   @useResult
   $Res call(
-      {int recordedCount,
-      String? averageTimeLabel,
-      int? averageIntensity,
-      List<SymptomTypeCount> typeCounts});
+      {int symptomCount,
+      String? averageTime,
+      int? averageLevel,
+      int throatForeignBodyCount,
+      int acidRefluxCount,
+      int coughCount,
+      int chestTightnessCount});
 }
 
 /// @nodoc
@@ -1316,28 +1341,43 @@ class _$SymptomReportCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? recordedCount = null,
-    Object? averageTimeLabel = freezed,
-    Object? averageIntensity = freezed,
-    Object? typeCounts = null,
+    Object? symptomCount = null,
+    Object? averageTime = freezed,
+    Object? averageLevel = freezed,
+    Object? throatForeignBodyCount = null,
+    Object? acidRefluxCount = null,
+    Object? coughCount = null,
+    Object? chestTightnessCount = null,
   }) {
     return _then(_self.copyWith(
-      recordedCount: null == recordedCount
-          ? _self.recordedCount
-          : recordedCount // ignore: cast_nullable_to_non_nullable
+      symptomCount: null == symptomCount
+          ? _self.symptomCount
+          : symptomCount // ignore: cast_nullable_to_non_nullable
               as int,
-      averageTimeLabel: freezed == averageTimeLabel
-          ? _self.averageTimeLabel
-          : averageTimeLabel // ignore: cast_nullable_to_non_nullable
+      averageTime: freezed == averageTime
+          ? _self.averageTime
+          : averageTime // ignore: cast_nullable_to_non_nullable
               as String?,
-      averageIntensity: freezed == averageIntensity
-          ? _self.averageIntensity
-          : averageIntensity // ignore: cast_nullable_to_non_nullable
+      averageLevel: freezed == averageLevel
+          ? _self.averageLevel
+          : averageLevel // ignore: cast_nullable_to_non_nullable
               as int?,
-      typeCounts: null == typeCounts
-          ? _self.typeCounts
-          : typeCounts // ignore: cast_nullable_to_non_nullable
-              as List<SymptomTypeCount>,
+      throatForeignBodyCount: null == throatForeignBodyCount
+          ? _self.throatForeignBodyCount
+          : throatForeignBodyCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      acidRefluxCount: null == acidRefluxCount
+          ? _self.acidRefluxCount
+          : acidRefluxCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      coughCount: null == coughCount
+          ? _self.coughCount
+          : coughCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      chestTightnessCount: null == chestTightnessCount
+          ? _self.chestTightnessCount
+          : chestTightnessCount // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -1435,16 +1475,28 @@ extension SymptomReportPatterns on SymptomReport {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(int recordedCount, String? averageTimeLabel,
-            int? averageIntensity, List<SymptomTypeCount> typeCounts)?
+    TResult Function(
+            int symptomCount,
+            String? averageTime,
+            int? averageLevel,
+            int throatForeignBodyCount,
+            int acidRefluxCount,
+            int coughCount,
+            int chestTightnessCount)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _SymptomReport() when $default != null:
-        return $default(_that.recordedCount, _that.averageTimeLabel,
-            _that.averageIntensity, _that.typeCounts);
+        return $default(
+            _that.symptomCount,
+            _that.averageTime,
+            _that.averageLevel,
+            _that.throatForeignBodyCount,
+            _that.acidRefluxCount,
+            _that.coughCount,
+            _that.chestTightnessCount);
       case _:
         return orElse();
     }
@@ -1465,15 +1517,27 @@ extension SymptomReportPatterns on SymptomReport {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(int recordedCount, String? averageTimeLabel,
-            int? averageIntensity, List<SymptomTypeCount> typeCounts)
+    TResult Function(
+            int symptomCount,
+            String? averageTime,
+            int? averageLevel,
+            int throatForeignBodyCount,
+            int acidRefluxCount,
+            int coughCount,
+            int chestTightnessCount)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SymptomReport():
-        return $default(_that.recordedCount, _that.averageTimeLabel,
-            _that.averageIntensity, _that.typeCounts);
+        return $default(
+            _that.symptomCount,
+            _that.averageTime,
+            _that.averageLevel,
+            _that.throatForeignBodyCount,
+            _that.acidRefluxCount,
+            _that.coughCount,
+            _that.chestTightnessCount);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -1493,15 +1557,27 @@ extension SymptomReportPatterns on SymptomReport {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(int recordedCount, String? averageTimeLabel,
-            int? averageIntensity, List<SymptomTypeCount> typeCounts)?
+    TResult? Function(
+            int symptomCount,
+            String? averageTime,
+            int? averageLevel,
+            int throatForeignBodyCount,
+            int acidRefluxCount,
+            int coughCount,
+            int chestTightnessCount)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SymptomReport() when $default != null:
-        return $default(_that.recordedCount, _that.averageTimeLabel,
-            _that.averageIntensity, _that.typeCounts);
+        return $default(
+            _that.symptomCount,
+            _that.averageTime,
+            _that.averageLevel,
+            _that.throatForeignBodyCount,
+            _that.acidRefluxCount,
+            _that.coughCount,
+            _that.chestTightnessCount);
       case _:
         return null;
     }
@@ -1510,37 +1586,48 @@ extension SymptomReportPatterns on SymptomReport {
 
 /// @nodoc
 
-class _SymptomReport implements SymptomReport {
+class _SymptomReport extends SymptomReport {
   const _SymptomReport(
-      {required this.recordedCount,
-      this.averageTimeLabel,
-      this.averageIntensity,
-      final List<SymptomTypeCount> typeCounts = const []})
-      : _typeCounts = typeCounts;
+      {required this.symptomCount,
+      this.averageTime,
+      this.averageLevel,
+      this.throatForeignBodyCount = 0,
+      this.acidRefluxCount = 0,
+      this.coughCount = 0,
+      this.chestTightnessCount = 0})
+      : super._();
 
-  /// 이번 주 증상 기록 총 횟수.
+  /// 이번 주 증상 기록 총 횟수 (서버 `symptomCount`).
   @override
-  final int recordedCount;
+  final int symptomCount;
 
-  /// 평균 기록 시간 라벨 (서버 원문, 예: '16:30'). 값 없으면 pill 미노출.
+  /// 평균 기록 시간 라벨 (서버 `averageTime`, 예: '16:30'). 값 없으면 pill 미노출.
   @override
-  final String? averageTimeLabel;
+  final String? averageTime;
 
-  /// 평균 강도. 값 없으면 pill 미노출.
+  /// 평균 강도 (서버 `averageLevel`). 값 없으면 pill 미노출.
   @override
-  final int? averageIntensity;
+  final int? averageLevel;
 
-  /// 증상 종류별 카운트 (막대 그래프용).
-  final List<SymptomTypeCount> _typeCounts;
-
-  /// 증상 종류별 카운트 (막대 그래프용).
+  /// 이물감 기록 횟수 (서버 `throatForeignBodyCount`).
   @override
   @JsonKey()
-  List<SymptomTypeCount> get typeCounts {
-    if (_typeCounts is EqualUnmodifiableListView) return _typeCounts;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_typeCounts);
-  }
+  final int throatForeignBodyCount;
+
+  /// 신물 기록 횟수 (서버 `acidRefluxCount`).
+  @override
+  @JsonKey()
+  final int acidRefluxCount;
+
+  /// 기침 기록 횟수 (서버 `coughCount`).
+  @override
+  @JsonKey()
+  final int coughCount;
+
+  /// 답답함 기록 횟수 (서버 `chestTightnessCount`).
+  @override
+  @JsonKey()
+  final int chestTightnessCount;
 
   /// Create a copy of SymptomReport
   /// with the given fields replaced by the non-null parameter values.
@@ -1555,23 +1642,36 @@ class _SymptomReport implements SymptomReport {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _SymptomReport &&
-            (identical(other.recordedCount, recordedCount) ||
-                other.recordedCount == recordedCount) &&
-            (identical(other.averageTimeLabel, averageTimeLabel) ||
-                other.averageTimeLabel == averageTimeLabel) &&
-            (identical(other.averageIntensity, averageIntensity) ||
-                other.averageIntensity == averageIntensity) &&
-            const DeepCollectionEquality()
-                .equals(other._typeCounts, _typeCounts));
+            (identical(other.symptomCount, symptomCount) ||
+                other.symptomCount == symptomCount) &&
+            (identical(other.averageTime, averageTime) ||
+                other.averageTime == averageTime) &&
+            (identical(other.averageLevel, averageLevel) ||
+                other.averageLevel == averageLevel) &&
+            (identical(other.throatForeignBodyCount, throatForeignBodyCount) ||
+                other.throatForeignBodyCount == throatForeignBodyCount) &&
+            (identical(other.acidRefluxCount, acidRefluxCount) ||
+                other.acidRefluxCount == acidRefluxCount) &&
+            (identical(other.coughCount, coughCount) ||
+                other.coughCount == coughCount) &&
+            (identical(other.chestTightnessCount, chestTightnessCount) ||
+                other.chestTightnessCount == chestTightnessCount));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, recordedCount, averageTimeLabel,
-      averageIntensity, const DeepCollectionEquality().hash(_typeCounts));
+  int get hashCode => Object.hash(
+      runtimeType,
+      symptomCount,
+      averageTime,
+      averageLevel,
+      throatForeignBodyCount,
+      acidRefluxCount,
+      coughCount,
+      chestTightnessCount);
 
   @override
   String toString() {
-    return 'SymptomReport(recordedCount: $recordedCount, averageTimeLabel: $averageTimeLabel, averageIntensity: $averageIntensity, typeCounts: $typeCounts)';
+    return 'SymptomReport(symptomCount: $symptomCount, averageTime: $averageTime, averageLevel: $averageLevel, throatForeignBodyCount: $throatForeignBodyCount, acidRefluxCount: $acidRefluxCount, coughCount: $coughCount, chestTightnessCount: $chestTightnessCount)';
   }
 }
 
@@ -1584,10 +1684,13 @@ abstract mixin class _$SymptomReportCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {int recordedCount,
-      String? averageTimeLabel,
-      int? averageIntensity,
-      List<SymptomTypeCount> typeCounts});
+      {int symptomCount,
+      String? averageTime,
+      int? averageLevel,
+      int throatForeignBodyCount,
+      int acidRefluxCount,
+      int coughCount,
+      int chestTightnessCount});
 }
 
 /// @nodoc
@@ -1603,28 +1706,43 @@ class __$SymptomReportCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? recordedCount = null,
-    Object? averageTimeLabel = freezed,
-    Object? averageIntensity = freezed,
-    Object? typeCounts = null,
+    Object? symptomCount = null,
+    Object? averageTime = freezed,
+    Object? averageLevel = freezed,
+    Object? throatForeignBodyCount = null,
+    Object? acidRefluxCount = null,
+    Object? coughCount = null,
+    Object? chestTightnessCount = null,
   }) {
     return _then(_SymptomReport(
-      recordedCount: null == recordedCount
-          ? _self.recordedCount
-          : recordedCount // ignore: cast_nullable_to_non_nullable
+      symptomCount: null == symptomCount
+          ? _self.symptomCount
+          : symptomCount // ignore: cast_nullable_to_non_nullable
               as int,
-      averageTimeLabel: freezed == averageTimeLabel
-          ? _self.averageTimeLabel
-          : averageTimeLabel // ignore: cast_nullable_to_non_nullable
+      averageTime: freezed == averageTime
+          ? _self.averageTime
+          : averageTime // ignore: cast_nullable_to_non_nullable
               as String?,
-      averageIntensity: freezed == averageIntensity
-          ? _self.averageIntensity
-          : averageIntensity // ignore: cast_nullable_to_non_nullable
+      averageLevel: freezed == averageLevel
+          ? _self.averageLevel
+          : averageLevel // ignore: cast_nullable_to_non_nullable
               as int?,
-      typeCounts: null == typeCounts
-          ? _self._typeCounts
-          : typeCounts // ignore: cast_nullable_to_non_nullable
-              as List<SymptomTypeCount>,
+      throatForeignBodyCount: null == throatForeignBodyCount
+          ? _self.throatForeignBodyCount
+          : throatForeignBodyCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      acidRefluxCount: null == acidRefluxCount
+          ? _self.acidRefluxCount
+          : acidRefluxCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      coughCount: null == coughCount
+          ? _self.coughCount
+          : coughCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      chestTightnessCount: null == chestTightnessCount
+          ? _self.chestTightnessCount
+          : chestTightnessCount // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }

@@ -13,11 +13,324 @@ part of 'consent_request_dto.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
+mixin _$ConsentItemDto {
+  int get termId;
+  bool get agreed;
+
+  /// Create a copy of ConsentItemDto
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $ConsentItemDtoCopyWith<ConsentItemDto> get copyWith =>
+      _$ConsentItemDtoCopyWithImpl<ConsentItemDto>(
+          this as ConsentItemDto, _$identity);
+
+  /// Serializes this ConsentItemDto to a JSON map.
+  Map<String, dynamic> toJson();
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is ConsentItemDto &&
+            (identical(other.termId, termId) || other.termId == termId) &&
+            (identical(other.agreed, agreed) || other.agreed == agreed));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, termId, agreed);
+
+  @override
+  String toString() {
+    return 'ConsentItemDto(termId: $termId, agreed: $agreed)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $ConsentItemDtoCopyWith<$Res> {
+  factory $ConsentItemDtoCopyWith(
+          ConsentItemDto value, $Res Function(ConsentItemDto) _then) =
+      _$ConsentItemDtoCopyWithImpl;
+  @useResult
+  $Res call({int termId, bool agreed});
+}
+
+/// @nodoc
+class _$ConsentItemDtoCopyWithImpl<$Res>
+    implements $ConsentItemDtoCopyWith<$Res> {
+  _$ConsentItemDtoCopyWithImpl(this._self, this._then);
+
+  final ConsentItemDto _self;
+  final $Res Function(ConsentItemDto) _then;
+
+  /// Create a copy of ConsentItemDto
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? termId = null,
+    Object? agreed = null,
+  }) {
+    return _then(_self.copyWith(
+      termId: null == termId
+          ? _self.termId
+          : termId // ignore: cast_nullable_to_non_nullable
+              as int,
+      agreed: null == agreed
+          ? _self.agreed
+          : agreed // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [ConsentItemDto].
+extension ConsentItemDtoPatterns on ConsentItemDto {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_ConsentItemDto value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _ConsentItemDto() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_ConsentItemDto value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _ConsentItemDto():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_ConsentItemDto value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _ConsentItemDto() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(int termId, bool agreed)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _ConsentItemDto() when $default != null:
+        return $default(_that.termId, _that.agreed);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(int termId, bool agreed) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _ConsentItemDto():
+        return $default(_that.termId, _that.agreed);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(int termId, bool agreed)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _ConsentItemDto() when $default != null:
+        return $default(_that.termId, _that.agreed);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _ConsentItemDto implements ConsentItemDto {
+  const _ConsentItemDto({required this.termId, required this.agreed});
+  factory _ConsentItemDto.fromJson(Map<String, dynamic> json) =>
+      _$ConsentItemDtoFromJson(json);
+
+  @override
+  final int termId;
+  @override
+  final bool agreed;
+
+  /// Create a copy of ConsentItemDto
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$ConsentItemDtoCopyWith<_ConsentItemDto> get copyWith =>
+      __$ConsentItemDtoCopyWithImpl<_ConsentItemDto>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$ConsentItemDtoToJson(
+      this,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _ConsentItemDto &&
+            (identical(other.termId, termId) || other.termId == termId) &&
+            (identical(other.agreed, agreed) || other.agreed == agreed));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, termId, agreed);
+
+  @override
+  String toString() {
+    return 'ConsentItemDto(termId: $termId, agreed: $agreed)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$ConsentItemDtoCopyWith<$Res>
+    implements $ConsentItemDtoCopyWith<$Res> {
+  factory _$ConsentItemDtoCopyWith(
+          _ConsentItemDto value, $Res Function(_ConsentItemDto) _then) =
+      __$ConsentItemDtoCopyWithImpl;
+  @override
+  @useResult
+  $Res call({int termId, bool agreed});
+}
+
+/// @nodoc
+class __$ConsentItemDtoCopyWithImpl<$Res>
+    implements _$ConsentItemDtoCopyWith<$Res> {
+  __$ConsentItemDtoCopyWithImpl(this._self, this._then);
+
+  final _ConsentItemDto _self;
+  final $Res Function(_ConsentItemDto) _then;
+
+  /// Create a copy of ConsentItemDto
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? termId = null,
+    Object? agreed = null,
+  }) {
+    return _then(_ConsentItemDto(
+      termId: null == termId
+          ? _self.termId
+          : termId // ignore: cast_nullable_to_non_nullable
+              as int,
+      agreed: null == agreed
+          ? _self.agreed
+          : agreed // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+}
+
+/// @nodoc
 mixin _$ConsentRequestDto {
-  bool get tos;
-  bool get privacy;
-  bool get healthSensitive;
-  bool get marketing;
+  List<ConsentItemDto> get consents;
 
   /// Create a copy of ConsentRequestDto
   /// with the given fields replaced by the non-null parameter values.
@@ -35,22 +348,17 @@ mixin _$ConsentRequestDto {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ConsentRequestDto &&
-            (identical(other.tos, tos) || other.tos == tos) &&
-            (identical(other.privacy, privacy) || other.privacy == privacy) &&
-            (identical(other.healthSensitive, healthSensitive) ||
-                other.healthSensitive == healthSensitive) &&
-            (identical(other.marketing, marketing) ||
-                other.marketing == marketing));
+            const DeepCollectionEquality().equals(other.consents, consents));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, tos, privacy, healthSensitive, marketing);
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(consents));
 
   @override
   String toString() {
-    return 'ConsentRequestDto(tos: $tos, privacy: $privacy, healthSensitive: $healthSensitive, marketing: $marketing)';
+    return 'ConsentRequestDto(consents: $consents)';
   }
 }
 
@@ -60,7 +368,7 @@ abstract mixin class $ConsentRequestDtoCopyWith<$Res> {
           ConsentRequestDto value, $Res Function(ConsentRequestDto) _then) =
       _$ConsentRequestDtoCopyWithImpl;
   @useResult
-  $Res call({bool tos, bool privacy, bool healthSensitive, bool marketing});
+  $Res call({List<ConsentItemDto> consents});
 }
 
 /// @nodoc
@@ -76,28 +384,13 @@ class _$ConsentRequestDtoCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? tos = null,
-    Object? privacy = null,
-    Object? healthSensitive = null,
-    Object? marketing = null,
+    Object? consents = null,
   }) {
     return _then(_self.copyWith(
-      tos: null == tos
-          ? _self.tos
-          : tos // ignore: cast_nullable_to_non_nullable
-              as bool,
-      privacy: null == privacy
-          ? _self.privacy
-          : privacy // ignore: cast_nullable_to_non_nullable
-              as bool,
-      healthSensitive: null == healthSensitive
-          ? _self.healthSensitive
-          : healthSensitive // ignore: cast_nullable_to_non_nullable
-              as bool,
-      marketing: null == marketing
-          ? _self.marketing
-          : marketing // ignore: cast_nullable_to_non_nullable
-              as bool,
+      consents: null == consents
+          ? _self.consents
+          : consents // ignore: cast_nullable_to_non_nullable
+              as List<ConsentItemDto>,
     ));
   }
 }
@@ -195,16 +488,13 @@ extension ConsentRequestDtoPatterns on ConsentRequestDto {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(
-            bool tos, bool privacy, bool healthSensitive, bool marketing)?
-        $default, {
+    TResult Function(List<ConsentItemDto> consents)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _ConsentRequestDto() when $default != null:
-        return $default(
-            _that.tos, _that.privacy, _that.healthSensitive, _that.marketing);
+        return $default(_that.consents);
       case _:
         return orElse();
     }
@@ -225,15 +515,12 @@ extension ConsentRequestDtoPatterns on ConsentRequestDto {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(
-            bool tos, bool privacy, bool healthSensitive, bool marketing)
-        $default,
+    TResult Function(List<ConsentItemDto> consents) $default,
   ) {
     final _that = this;
     switch (_that) {
       case _ConsentRequestDto():
-        return $default(
-            _that.tos, _that.privacy, _that.healthSensitive, _that.marketing);
+        return $default(_that.consents);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -253,15 +540,12 @@ extension ConsentRequestDtoPatterns on ConsentRequestDto {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(
-            bool tos, bool privacy, bool healthSensitive, bool marketing)?
-        $default,
+    TResult? Function(List<ConsentItemDto> consents)? $default,
   ) {
     final _that = this;
     switch (_that) {
       case _ConsentRequestDto() when $default != null:
-        return $default(
-            _that.tos, _that.privacy, _that.healthSensitive, _that.marketing);
+        return $default(_that.consents);
       case _:
         return null;
     }
@@ -270,24 +554,19 @@ extension ConsentRequestDtoPatterns on ConsentRequestDto {
 
 /// @nodoc
 @JsonSerializable()
-class _ConsentRequestDto extends ConsentRequestDto {
-  const _ConsentRequestDto(
-      {required this.tos,
-      required this.privacy,
-      required this.healthSensitive,
-      required this.marketing})
-      : super._();
+class _ConsentRequestDto implements ConsentRequestDto {
+  const _ConsentRequestDto({required final List<ConsentItemDto> consents})
+      : _consents = consents;
   factory _ConsentRequestDto.fromJson(Map<String, dynamic> json) =>
       _$ConsentRequestDtoFromJson(json);
 
+  final List<ConsentItemDto> _consents;
   @override
-  final bool tos;
-  @override
-  final bool privacy;
-  @override
-  final bool healthSensitive;
-  @override
-  final bool marketing;
+  List<ConsentItemDto> get consents {
+    if (_consents is EqualUnmodifiableListView) return _consents;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_consents);
+  }
 
   /// Create a copy of ConsentRequestDto
   /// with the given fields replaced by the non-null parameter values.
@@ -309,22 +588,17 @@ class _ConsentRequestDto extends ConsentRequestDto {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _ConsentRequestDto &&
-            (identical(other.tos, tos) || other.tos == tos) &&
-            (identical(other.privacy, privacy) || other.privacy == privacy) &&
-            (identical(other.healthSensitive, healthSensitive) ||
-                other.healthSensitive == healthSensitive) &&
-            (identical(other.marketing, marketing) ||
-                other.marketing == marketing));
+            const DeepCollectionEquality().equals(other._consents, _consents));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, tos, privacy, healthSensitive, marketing);
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(_consents));
 
   @override
   String toString() {
-    return 'ConsentRequestDto(tos: $tos, privacy: $privacy, healthSensitive: $healthSensitive, marketing: $marketing)';
+    return 'ConsentRequestDto(consents: $consents)';
   }
 }
 
@@ -336,7 +610,7 @@ abstract mixin class _$ConsentRequestDtoCopyWith<$Res>
       __$ConsentRequestDtoCopyWithImpl;
   @override
   @useResult
-  $Res call({bool tos, bool privacy, bool healthSensitive, bool marketing});
+  $Res call({List<ConsentItemDto> consents});
 }
 
 /// @nodoc
@@ -352,28 +626,13 @@ class __$ConsentRequestDtoCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? tos = null,
-    Object? privacy = null,
-    Object? healthSensitive = null,
-    Object? marketing = null,
+    Object? consents = null,
   }) {
     return _then(_ConsentRequestDto(
-      tos: null == tos
-          ? _self.tos
-          : tos // ignore: cast_nullable_to_non_nullable
-              as bool,
-      privacy: null == privacy
-          ? _self.privacy
-          : privacy // ignore: cast_nullable_to_non_nullable
-              as bool,
-      healthSensitive: null == healthSensitive
-          ? _self.healthSensitive
-          : healthSensitive // ignore: cast_nullable_to_non_nullable
-              as bool,
-      marketing: null == marketing
-          ? _self.marketing
-          : marketing // ignore: cast_nullable_to_non_nullable
-              as bool,
+      consents: null == consents
+          ? _self._consents
+          : consents // ignore: cast_nullable_to_non_nullable
+              as List<ConsentItemDto>,
     ));
   }
 }

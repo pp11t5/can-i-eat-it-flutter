@@ -10,6 +10,7 @@ import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
@@ -138,8 +139,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _handleKakaoPressed(BuildContext context) async {
     try {
-      final outcome =
-          await ref.read(authControllerProvider.notifier).signInWithKakao();
+      final outcome = await ref
+          .read(globalLoadingControllerProvider.notifier)
+          .run(() => ref.read(authControllerProvider.notifier).signInWithKakao());
       if (!context.mounted) return;
       await _handlePostSignIn(context, outcome);
     } catch (e) {
@@ -150,8 +152,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _handleApplePressed(BuildContext context) async {
     try {
-      final outcome =
-          await ref.read(authControllerProvider.notifier).signInWithApple();
+      final outcome = await ref
+          .read(globalLoadingControllerProvider.notifier)
+          .run(() => ref.read(authControllerProvider.notifier).signInWithApple());
       if (!context.mounted) return;
       await _handlePostSignIn(context, outcome);
     } catch (e) {

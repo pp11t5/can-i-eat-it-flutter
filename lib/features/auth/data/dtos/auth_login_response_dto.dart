@@ -8,13 +8,16 @@ part 'auth_login_response_dto.g.dart';
 /// `POST /auth/{provider}/login` 성공(200) 응답 DTO (ADR-0007 §3-1 (5)).
 ///
 /// 서버 JSON camelCase 그대로 매핑. `@JsonKey` 는 불필요.
+///
+/// [email] 은 nullable(관대 파싱, A5) — Swagger 계약에는 없는 필드지만 라이브
+/// 서버가 보낼 수도 있으므로 있으면 사용하고 없어도 throw 하지 않는다.
 @freezed
 abstract class AuthLoginResponseDto with _$AuthLoginResponseDto {
   const factory AuthLoginResponseDto({
     required String accessToken,
     required String refreshToken,
     required String userId,
-    required String email,
+    String? email,
     required String role,
   }) = _AuthLoginResponseDto;
 

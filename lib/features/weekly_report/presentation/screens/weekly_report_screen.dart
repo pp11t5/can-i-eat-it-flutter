@@ -579,7 +579,7 @@ class _LegendRow extends StatelessWidget {
 // _SymptomRecordCard — 카드3 (Figma node 2523:14131)
 // ---------------------------------------------------------------------------
 
-/// 기록된 증상 카드. [symptomReport]가 null이거나 recordedCount가 0이면 빈상태.
+/// 기록된 증상 카드. [symptomReport]가 null이거나 symptomCount가 0이면 빈상태.
 ///
 /// [_ReportCard]와 달리 자체 컨테이너(radius 20/padding 24, Figma 실측)를 쓴다 —
 /// 헤더가 단순 타이틀이 아니라 카운트+pill 2개를 담는 커스텀 Row라서.
@@ -591,7 +591,7 @@ class _SymptomRecordCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final report = symptomReport;
-    final isEmpty = report == null || report.recordedCount == 0;
+    final isEmpty = report == null || report.symptomCount == 0;
 
     return Container(
       width: double.infinity,
@@ -635,8 +635,8 @@ class _SymptomRecordHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final averageTimeLabel = report.averageTimeLabel;
-    final averageIntensity = report.averageIntensity;
+    final averageTimeLabel = report.averageTime;
+    final averageIntensity = report.averageLevel;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -658,7 +658,7 @@ class _SymptomRecordHeader extends StatelessWidget {
               textBaseline: TextBaseline.alphabetic,
               children: [
                 Text(
-                  '${report.recordedCount}',
+                  '${report.symptomCount}',
                   style: AppTextStyles.header2Bold.copyWith(
                     color: AppColors.textPrimary,
                   ),

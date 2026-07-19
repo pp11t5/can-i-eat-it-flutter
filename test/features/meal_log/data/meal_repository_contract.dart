@@ -29,11 +29,11 @@ void mealRepositoryContract(
   });
 
   // -------------------------------------------------------------------------
-  group('weekly — 반환 형태', () {
-    test('weekly는 List<WeeklyDay>을 반환한다', () async {
+  group('getMonthly — 반환 형태', () {
+    test('getMonthly는 List<MonthlyDay>을 반환한다', () async {
       final repo = create();
-      final result = await repo.weekly(DateTime(2026, 6, 17));
-      expect(result, isA<List<WeeklyDay>>());
+      final result = await repo.getMonthly(DateTime(2026, 6, 1));
+      expect(result, isA<List<MonthlyDay>>());
     });
   });
 

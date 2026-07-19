@@ -10,13 +10,14 @@ import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
+import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 
-/// 프로필 정보 화면 (Figma 577-10289).
+/// 프로필 정보 화면 (Figma node 2760-24140).
 ///
 /// 진입 시 AuthController.getMe() 1회 호출 → 식별정보 갱신.
 /// 실패 시 기존 세션값/빈 표시 (크래시 금지).
@@ -88,14 +89,14 @@ class _ProfileInfoScreenState extends ConsumerState<ProfileInfoScreen> {
           AppSpacing.cardPadding,
         ),
         children: [
-          // 헤더: 아바타 + 닉네임 + 이메일·연동
+          // 헤더: 아바타 + 닉네임(표시 전용, 탭 불가)
           _ProfileHeader(session: session),
           const SizedBox(height: AppSpacing.contentGap),
 
-          // 내 건강 정보 섹션
-          const _SectionLabel(label: '내 건강 정보'),
+          // 내 정보 섹션 (닉네임/건강 고민/알레르기·복용약)
+          const _SectionLabel(label: '내 정보'),
           const SizedBox(height: AppSpacing.itemGap),
-          _HealthInfoCard(profile: profile),
+          _MyInfoCard(session: session, profile: profile),
           const SizedBox(height: AppSpacing.contentGap),
 
           // 내 계정 섹션
@@ -128,33 +129,13 @@ class _SectionLabel extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 프로필 헤더
+// 프로필 헤더 — 아바타 + 닉네임만(이메일·연동 서브텍스트 제거, D1)
 // ---------------------------------------------------------------------------
 
 class _ProfileHeader extends StatelessWidget {
   const _ProfileHeader({required this.session});
 
   final AuthSession? session;
-
-  String get _providerLabel {
-    switch (session?.provider) {
-      case AuthProvider.kakao:
-        return '카카오 연동';
-      case AuthProvider.apple:
-        return '애플 연동';
-      case null:
-        return '';
-    }
-  }
-
-  String get _subtext {
-    final email = session?.email ?? '';
-    final provider = _providerLabel;
-    if (email.isEmpty && provider.isEmpty) return '';
-    if (email.isEmpty) return provider;
-    if (provider.isEmpty) return email;
-    return '$email · $provider';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -177,27 +158,19 @@ class _ProfileHeader extends StatelessWidget {
             color: AppColors.textPrimary,
           ),
         ),
-        if (_subtext.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.itemGap),
-          Text(
-            _subtext,
-            style: AppTextStyles.caption1Medium.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
       ],
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// 내 건강 정보 카드
+// 내 정보 카드 (D1: 닉네임 · 건강 고민 · 알레르기/복용약, 기존 _HealthInfoCard 확장)
 // ---------------------------------------------------------------------------
 
-class _HealthInfoCard extends StatelessWidget {
-  const _HealthInfoCard({required this.profile});
+class _MyInfoCard extends StatelessWidget {
+  const _MyInfoCard({required this.session, required this.profile});
 
+  final AuthSession? session;
   final HealthProfile? profile;
 
   String get _conditionLabel {
@@ -228,97 +201,106 @@ class _HealthInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.all(AppSpacing.sectionGap), // 24
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
-        border: Border.all(color: AppColors.border),
+        // Figma 실측 fill #FEFEFE(카드 전용값, scaffoldBackground와 우연히 동일 hex).
+        color: const Color(0xFFFEFEFE),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusModal), // 16
+        border: Border.all(color: AppColors.border), // #EAEAEA
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 건강 고민 행 — 가로 ListTile: [선행아이콘] [라벨] …Spacer… [값] [자물쇠] (읽기전용, 탭 불가)
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.cardPadding,
-              vertical: AppSpacing.cardPadding,
-            ),
+          // 닉네임 행 — 값 + "수정하기" → name-edit 이동 (D1 신규)
+          InkWell(
+            onTap: () => context.push('/mypage/profile/name-edit'),
             child: Row(
               children: [
-                const AppIcon(
-                  AppIcons.sad,
-                  size: AppIconSizes.s24,
+                Expanded(
+                  child: Text(
+                    session?.displayName ?? '사용자',
+                    style: AppTextStyles.body1Medium.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  '수정하기',
+                  style: AppTextStyles.body2Medium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.itemGap),
+                SvgPicture.asset(
+                  'assets/figma_extracted/chevron_right.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.textTertiary,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 24, thickness: 1, color: AppColors.border),
+
+          // 건강 고민 행 — 읽기전용(자물쇠), 탭 불가. 선행 아이콘 제거(D1).
+          Row(
+            children: [
+              Text(
+                '건강 고민',
+                style: AppTextStyles.body1Medium.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                _conditionLabel,
+                style: AppTextStyles.body2Medium.copyWith(
                   color: AppColors.textSecondary,
                 ),
-                const SizedBox(width: AppSpacing.cardPadding),
+              ),
+              const SizedBox(width: AppSpacing.itemGap),
+              const AppIcon(
+                AppIcons.lock,
+                size: AppIconSizes.s24,
+                color: AppColors.textTertiary,
+              ),
+            ],
+          ),
+          const Divider(height: 24, thickness: 1, color: AppColors.border),
+
+          // 알레르기·복용약 행 — 선행 아이콘 제거(D1).
+          InkWell(
+            onTap: () => context.push('/mypage/profile/allergy-med'),
+            child: Row(
+              children: [
                 Text(
-                  '건강 고민',
+                  '알레르기・복용약',
                   style: AppTextStyles.body1Medium.copyWith(
                     color: AppColors.textPrimary,
                   ),
                 ),
                 const Spacer(),
                 Text(
-                  _conditionLabel,
+                  _allergyMedLabel,
                   style: AppTextStyles.body2Medium.copyWith(
                     color: AppColors.textSecondary,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.itemGap),
-                const AppIcon(
-                  AppIcons.lock,
-                  size: AppIconSizes.s24,
-                  color: AppColors.textTertiary,
+                SvgPicture.asset(
+                  'assets/figma_extracted/chevron_right.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.textTertiary,
+                    BlendMode.srcIn,
+                  ),
                 ),
               ],
-            ),
-          ),
-          const Divider(height: 1, color: AppColors.divider),
-
-          // 알레르기·복용약 행 — 가로 ListTile: [선행아이콘] [라벨] …Spacer… [값] [chevron]
-          InkWell(
-            onTap: () => context.push('/mypage/profile/allergy-med'),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(AppSpacing.radiusModal),
-              bottomRight: Radius.circular(AppSpacing.radiusModal),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.cardPadding,
-                vertical: AppSpacing.cardPadding,
-              ),
-              child: Row(
-                children: [
-                  const AppIcon(
-                    AppIcons.pill,
-                    size: AppIconSizes.s24,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: AppSpacing.cardPadding),
-                  Text(
-                    '알레르기・복용약',
-                    style: AppTextStyles.body1Medium.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    _allergyMedLabel,
-                    style: AppTextStyles.body2Medium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.itemGap),
-                  SvgPicture.asset(
-                    'assets/figma_extracted/chevron_right.svg',
-                    width: 24,
-                    height: 24,
-                    colorFilter: const ColorFilter.mode(
-                      AppColors.textTertiary,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ],
-              ),
             ),
           ),
         ],
@@ -328,7 +310,7 @@ class _HealthInfoCard extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 내 계정 카드
+// 내 계정 카드 (D1: padding 24로 통일)
 // ---------------------------------------------------------------------------
 
 class _AccountCard extends ConsumerWidget {
@@ -347,7 +329,7 @@ class _AccountCard extends ConsumerWidget {
           InkWell(
             onTap: () => _onLogout(context, ref),
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.cardPadding),
+              padding: const EdgeInsets.all(AppSpacing.sectionGap),
               child: Row(
                 children: [
                   Expanded(
@@ -372,7 +354,7 @@ class _AccountCard extends ConsumerWidget {
               bottomRight: Radius.circular(AppSpacing.radiusModal),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.cardPadding),
+              padding: const EdgeInsets.all(AppSpacing.sectionGap),
               child: Row(
                 children: [
                   Expanded(
@@ -404,7 +386,9 @@ class _AccountCard extends ConsumerWidget {
 
     // primary(취소) 또는 바깥 닫힘(null)이면 아무 것도 하지 않는다.
     if (action != ConfirmModalAction.secondary) return;
-    await ref.read(authControllerProvider.notifier).logout();
+    await ref
+        .read(globalLoadingControllerProvider.notifier)
+        .run(() => ref.read(authControllerProvider.notifier).logout());
     if (!context.mounted) return;
     context.go('/login');
   }

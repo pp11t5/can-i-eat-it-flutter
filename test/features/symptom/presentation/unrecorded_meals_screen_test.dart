@@ -25,7 +25,7 @@ class _MockMealRepository implements MealRepository {
   @override
   Future<List<TimelineItem>> timeline(DateTime date) async => [];
   @override
-  Future<List<WeeklyDay>> weekly(DateTime date) async => [];
+  Future<List<MonthlyDay>> getMonthly(DateTime month) async => [];
   @override
   Future<MealFood> appendFood({
     required String foodExternalId,
