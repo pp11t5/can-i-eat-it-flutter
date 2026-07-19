@@ -114,6 +114,7 @@ class _CalendarPopupState extends State<_CalendarPopup> {
               child: _CalendarGrid(
                 month: _month,
                 selected: _selected,
+                today: widget.today,
                 isFuture: _isFuture,
                 onDayTap: _selectDay,
               ),
@@ -195,16 +196,25 @@ class _CalendarGrid extends StatelessWidget {
   const _CalendarGrid({
     required this.month,
     required this.selected,
+    required this.today,
     required this.isFuture,
     required this.onDayTap,
   });
 
   final DateTime month;
   final DateTime selected;
+  final DateTime today;
   final bool Function(DateTime day) isFuture;
   final ValueChanged<DateTime> onDayTap;
 
-  static const _weekdayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  static const _weekdayHeaders = ['일', '월', '화', '수', '목', '금', '토'];
+
+  /// 요일 열 색 (Figma 2794-26223): 일(0)=빨강, 토(6)=파랑, 평일=textPrimary(#1A1A1F).
+  static Color _columnColor(int columnIndex) {
+    if (columnIndex == 0) return AppColors.calendarSunday;
+    if (columnIndex == 6) return AppColors.calendarSaturday;
+    return AppColors.textPrimary;
+  }
 
   /// 표시월 그리드용 42(7×6)일 목록 — 일요일 시작, 전/후월 날짜로 채움.
   List<DateTime> _buildGridDays() {
@@ -226,13 +236,13 @@ class _CalendarGrid extends StatelessWidget {
       children: [
         Row(
           children: [
-            for (final h in _weekdayHeaders)
+            for (var i = 0; i < _weekdayHeaders.length; i++)
               Expanded(
                 child: Center(
                   child: Text(
-                    h,
+                    _weekdayHeaders[i],
                     style: AppTextStyles.caption1Medium.copyWith(
-                      color: const Color(0xFF000000),
+                      color: _columnColor(i),
                     ),
                   ),
                 ),
@@ -251,38 +261,55 @@ class _CalendarGrid extends StatelessWidget {
             itemCount: days.length,
             itemBuilder: (context, index) {
               final day = days[index];
-              final inCurrentMonth = day.month == month.month && day.year == month.year;
+              final columnIndex = index % 7; // 0=일 ... 6=토
+              final inCurrentMonth =
+                  day.month == month.month && day.year == month.year;
               final isSelected = _isSameDay(day, selected);
+              final isToday = _isSameDay(day, today);
               final future = isFuture(day);
+              // 선택 가능 = 당월 + 미래 아님 (미래 식사는 기록 불가 — 앱 규칙 유지).
+              final selectable = inCurrentMonth && !future;
 
+              // 텍스트 색: 선택(흰) > 비활성(회색 #8C8C99) > 활성(요일 열 색).
               Color textColor;
               if (isSelected) {
-                textColor = AppColors.surface;
-              } else if (future) {
-                textColor = const Color(0xFFBBBBBB);
-              } else if (inCurrentMonth) {
-                textColor = const Color(0xFF000000);
+                textColor = AppColors.onPrimary;
+              } else if (!selectable) {
+                textColor = AppColors.textTertiary; // #8C8C99
               } else {
-                textColor = const Color(0xFF8C8C99);
+                textColor = _columnColor(columnIndex);
               }
 
+              // 배경(Figma 실측): 선택일 = green 라운드사각 r8. 비활성 당월 = 연회색 r8.
+              BoxDecoration? decoration;
+              if (isSelected) {
+                decoration = BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(8),
+                );
+              } else if (inCurrentMonth && future) {
+                decoration = BoxDecoration(
+                  color: AppColors.surfaceMuted, // #F5F5F5
+                  borderRadius: BorderRadius.circular(8),
+                );
+              }
+
+              // 오늘 셀은 숫자 대신 "오늘" (당월일 때만).
+              final showToday = isToday && inCurrentMonth;
+
               return GestureDetector(
-                onTap: future ? null : () => onDayTap(day),
+                onTap: selectable ? () => onDayTap(day) : null,
                 behavior: HitTestBehavior.opaque,
                 child: Center(
                   child: Container(
-                    width: 28,
-                    height: 28,
-                    decoration: isSelected
-                        ? const BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
-                          )
-                        : null,
+                    width: 34,
+                    height: 34,
+                    decoration: decoration,
                     alignment: Alignment.center,
                     child: Text(
-                      '${day.day}',
-                      style: AppTextStyles.caption1Medium.copyWith(color: textColor),
+                      showToday ? '오늘' : '${day.day}',
+                      style: AppTextStyles.caption1Medium
+                          .copyWith(color: textColor),
                     ),
                   ),
                 ),

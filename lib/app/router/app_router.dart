@@ -218,6 +218,35 @@ GoRouter appRouter(Ref ref) {
           child: WeeklyReportScreen(),
         ),
       ),
+
+      // 마이페이지 상세 — 최상위(shell 밖) push 라 바텀네비를 덮는다.
+      GoRoute(
+        path: '/mypage/profile',
+        name: 'mypage-profile',
+        builder: (context, state) => const ProfileInfoScreen(),
+        routes: [
+          GoRoute(
+            path: 'allergy-med',
+            name: 'mypage-profile-allergy-med',
+            builder: (context, state) => const AllergyMedEditScreen(),
+          ),
+          GoRoute(
+            path: 'name-edit',
+            name: 'mypage-profile-name-edit',
+            builder: (context, state) => const NameEditScreen(),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/mypage/notification-settings',
+        name: 'mypage-notification-settings',
+        builder: (context, state) => const NotificationSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/mypage/withdraw',
+        name: 'mypage-withdraw',
+        builder: (context, state) => const WithdrawScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),
@@ -246,37 +275,6 @@ GoRouter appRouter(Ref ref) {
                 path: '/mypage',
                 name: 'mypage',
                 builder: (context, state) => const MypageScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'profile',
-                    name: 'mypage-profile',
-                    builder: (context, state) => const ProfileInfoScreen(),
-                    routes: [
-                      GoRoute(
-                        path: 'allergy-med',
-                        name: 'mypage-profile-allergy-med',
-                        builder: (context, state) =>
-                            const AllergyMedEditScreen(),
-                      ),
-                      GoRoute(
-                        path: 'name-edit',
-                        name: 'mypage-profile-name-edit',
-                        builder: (context, state) => const NameEditScreen(),
-                      ),
-                    ],
-                  ),
-                  GoRoute(
-                    path: 'notification-settings',
-                    name: 'mypage-notification-settings',
-                    builder: (context, state) =>
-                        const NotificationSettingsScreen(),
-                  ),
-                  GoRoute(
-                    path: 'withdraw',
-                    name: 'mypage-withdraw',
-                    builder: (context, state) => const WithdrawScreen(),
-                  ),
-                ],
               ),
             ],
           ),

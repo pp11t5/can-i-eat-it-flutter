@@ -172,6 +172,7 @@ class _WeekStripState extends State<WeekStrip> {
                 final isToday = _isSameDay(day, widget.today);
                 final isFuture = _isAfterDay(day, widget.today);
                 final isSunday = day.weekday == DateTime.sunday;
+                final isSaturday = day.weekday == DateTime.saturday;
                 final dots = widget.dotsByDate[
                         DateTime(day.year, day.month, day.day)] ??
                     [];
@@ -184,6 +185,7 @@ class _WeekStripState extends State<WeekStrip> {
                     dayNumber: day.day,
                     isSelected: isSelected,
                     isSunday: isSunday,
+                    isSaturday: isSaturday,
                     isFuture: isFuture,
                     dots: dots.take(3).toList(),
                     onTap: () => widget.onDaySelected(day),
@@ -215,6 +217,7 @@ class _DayCell extends StatelessWidget {
     required this.dayNumber,
     required this.isSelected,
     required this.isSunday,
+    required this.isSaturday,
     required this.isFuture,
     required this.dots,
     required this.onTap,
@@ -224,6 +227,7 @@ class _DayCell extends StatelessWidget {
   final int dayNumber;
   final bool isSelected;
   final bool isSunday;
+  final bool isSaturday;
   final bool isFuture;
   final List<VerdictLevel> dots;
   final VoidCallback onTap;
@@ -231,11 +235,13 @@ class _DayCell extends StatelessWidget {
   /// 요일 라벨 색상 결정.
   ///
   /// 선택일 라벨은 검정 캡슐 안에 놓이므로 흰색(surface)이 최우선.
-  /// 그 외 우선순위: 미래(회색) < 일요일(빨강) < 기본(secondary).
+  /// 그 외 우선순위: 미래(회색) < 일요일(빨강) < 토요일(파랑) < 기본(secondary).
+  /// (Figma 2794-26223: 주말만 색상, 평일은 secondary. 미래=비활성 회색.)
   Color _labelColor() {
     if (isSelected) return AppColors.surface; // 선택 캡슐 안 흰색
     if (isFuture) return AppColors.textSecondary; // 미래에도 요일 라벨은 회색 유지
-    if (isSunday) return AppColors.calendarSunday;
+    if (isSunday) return AppColors.calendarSunday; // 일요일 빨강
+    if (isSaturday) return AppColors.calendarSaturday; // 토요일 파랑
     return AppColors.textSecondary;
   }
 
