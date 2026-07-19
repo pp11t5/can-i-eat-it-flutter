@@ -57,18 +57,18 @@ class TimelineController extends _$TimelineController {
 }
 
 // ---------------------------------------------------------------------------
-// WeeklyController
+// MonthlyController
 // ---------------------------------------------------------------------------
 
-/// 주간 도트 컨트롤러.
+/// 월별 판정 집계 컨트롤러 (구 WeeklyController 대체 — 월 캘린더 재설계).
 ///
-/// [weekStart] 가 속한 주의 [WeeklyDay] 목록을 조회한다.
+/// [month] 가 속한 월(연/월만 사용, day 값은 무시)의 [MonthlyDay] 목록을 조회한다.
 @riverpod
-class WeeklyController extends _$WeeklyController {
+class MonthlyController extends _$MonthlyController {
   @override
-  Future<List<WeeklyDay>> build(DateTime weekStart) async {
+  Future<List<MonthlyDay>> build(DateTime month) async {
     final repo = ref.watch(mealRepositoryProvider);
-    return repo.weekly(weekStart);
+    return repo.getMonthly(month);
   }
 }
 

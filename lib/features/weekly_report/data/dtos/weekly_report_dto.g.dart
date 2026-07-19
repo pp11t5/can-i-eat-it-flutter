@@ -38,39 +38,27 @@ Map<String, dynamic> _$MealCountDtoToJson(_MealCountDto instance) =>
       'unknownCount': instance.unknownCount,
     };
 
-_SymptomTypeCountDto _$SymptomTypeCountDtoFromJson(Map<String, dynamic> json) =>
-    _SymptomTypeCountDto(
-      type: json['type'] as String? ?? '',
-      label: json['label'] as String? ?? '',
-      count: (json['count'] as num?)?.toInt() ?? 0,
-    );
-
-Map<String, dynamic> _$SymptomTypeCountDtoToJson(
-        _SymptomTypeCountDto instance) =>
-    <String, dynamic>{
-      'type': instance.type,
-      'label': instance.label,
-      'count': instance.count,
-    };
-
 _SymptomReportDto _$SymptomReportDtoFromJson(Map<String, dynamic> json) =>
     _SymptomReportDto(
-      recordedCount: (json['recordedCount'] as num?)?.toInt() ?? 0,
-      averageTimeLabel: json['averageTimeLabel'] as String?,
-      averageIntensity: (json['averageIntensity'] as num?)?.toInt(),
-      typeCounts: (json['typeCounts'] as List<dynamic>?)
-              ?.map((e) =>
-                  SymptomTypeCountDto.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
+      symptomCount: (json['symptomCount'] as num?)?.toInt() ?? 0,
+      averageTime: json['averageTime'] as String?,
+      averageLevel: (json['averageLevel'] as num?)?.toInt(),
+      throatForeignBodyCount:
+          (json['throatForeignBodyCount'] as num?)?.toInt() ?? 0,
+      acidRefluxCount: (json['acidRefluxCount'] as num?)?.toInt() ?? 0,
+      coughCount: (json['coughCount'] as num?)?.toInt() ?? 0,
+      chestTightnessCount: (json['chestTightnessCount'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$SymptomReportDtoToJson(_SymptomReportDto instance) =>
     <String, dynamic>{
-      'recordedCount': instance.recordedCount,
-      'averageTimeLabel': instance.averageTimeLabel,
-      'averageIntensity': instance.averageIntensity,
-      'typeCounts': instance.typeCounts,
+      'symptomCount': instance.symptomCount,
+      'averageTime': instance.averageTime,
+      'averageLevel': instance.averageLevel,
+      'throatForeignBodyCount': instance.throatForeignBodyCount,
+      'acidRefluxCount': instance.acidRefluxCount,
+      'coughCount': instance.coughCount,
+      'chestTightnessCount': instance.chestTightnessCount,
     };
 
 _WeeklyReportDto _$WeeklyReportDtoFromJson(Map<String, dynamic> json) =>
@@ -82,10 +70,10 @@ _WeeklyReportDto _$WeeklyReportDtoFromJson(Map<String, dynamic> json) =>
           json['comfortableState'] as Map<String, dynamic>),
       mealCount:
           MealCountDto.fromJson(json['mealCount'] as Map<String, dynamic>),
-      symptomReport: json['symptomReport'] == null
+      symptomReport: json['recordedSymptom'] == null
           ? null
           : SymptomReportDto.fromJson(
-              json['symptomReport'] as Map<String, dynamic>),
+              json['recordedSymptom'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$WeeklyReportDtoToJson(_WeeklyReportDto instance) =>
@@ -95,5 +83,5 @@ Map<String, dynamic> _$WeeklyReportDtoToJson(_WeeklyReportDto instance) =>
       'weekLabel': instance.weekLabel,
       'comfortableState': instance.comfortableState,
       'mealCount': instance.mealCount,
-      'symptomReport': instance.symptomReport,
+      'recordedSymptom': instance.symptomReport,
     };

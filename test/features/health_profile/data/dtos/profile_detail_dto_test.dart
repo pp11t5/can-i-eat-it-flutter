@@ -57,8 +57,13 @@ void main() {
       expect(dto.providerType, ProfileProvider.kakao);
     });
 
-    test('미지 값은 ProfileProvider.unknown으로 폴백된다', () {
+    test('APPLE은 ProfileProvider.apple로 매핑된다 (A6)', () {
       final dto = ProfileDetailDto.fromJson({'provider': 'APPLE'});
+      expect(dto.providerType, ProfileProvider.apple);
+    });
+
+    test('미지 값은 ProfileProvider.unknown으로 폴백된다', () {
+      final dto = ProfileDetailDto.fromJson({'provider': 'NAVER'});
       expect(dto.providerType, ProfileProvider.unknown);
     });
   });

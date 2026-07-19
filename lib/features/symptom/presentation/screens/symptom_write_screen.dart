@@ -9,6 +9,7 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
+import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
@@ -235,7 +236,9 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
         _isEditMode ? widget.existingSymptom!.symptomId : null,
       ).notifier,
     );
-    final id = await ctrl.submit(_formState);
+    final id = await ref
+        .read(globalLoadingControllerProvider.notifier)
+        .run(() => ctrl.submit(_formState));
     if (!mounted) return;
     if (id != null) {
       await showAppToast(
@@ -467,16 +470,9 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
                   ),
                   textStyle: AppTextStyles.body1Bold,
                 ),
-                child: isLoading
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.onPrimary,
-                        ),
-                      )
-                    : const Text('저장하기'),
+                // 진행 중 스피너는 전역 로딩 오버레이가 담당(이중 표시 방지) —
+                // 이 버튼은 비활성 색상으로만 진행 중임을 표시한다.
+                child: const Text('저장하기'),
               ),
             ),
           ),

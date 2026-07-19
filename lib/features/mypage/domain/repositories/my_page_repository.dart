@@ -9,4 +9,10 @@ abstract interface class MyPageRepository {
   ///
   /// 대응 API: GET /my-page/summary.
   Future<MyPageSummary> getSummary();
+
+  /// 닉네임을 변경한다.
+  ///
+  /// 대응 API: PATCH /my-page/nickname (바디 `{nickname}`, maxLength 12, minLength 1).
+  /// 실패 시 [Failure]를 throw한다 — 409(중복)는 [DuplicateNicknameFailure].
+  Future<void> updateNickname(String nickname);
 }

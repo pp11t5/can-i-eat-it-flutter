@@ -12,6 +12,7 @@ import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_search_bar.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
+import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
 import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
 
@@ -57,19 +58,28 @@ class HomeScreen extends ConsumerWidget {
                     HomeSuggestionChip(
                       label: '된장찌개',
                       iconAsset: 'assets/illustrations/food_soup.png',
-                      onTap: () => context.push('/check'),
+                      onTap: () => context.push(
+                        '/verdict',
+                        extra: const VerdictArgs(text: '된장찌개'),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     HomeSuggestionChip(
                       label: '아메리카노',
                       iconAsset: 'assets/illustrations/food_drink.png',
-                      onTap: () => context.push('/check'),
+                      onTap: () => context.push(
+                        '/verdict',
+                        extra: const VerdictArgs(text: '아메리카노'),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     HomeSuggestionChip(
                       label: '김치볶음밥',
                       iconAsset: 'assets/illustrations/food_rice.png',
-                      onTap: () => context.push('/check'),
+                      onTap: () => context.push(
+                        '/verdict',
+                        extra: const VerdictArgs(text: '김치볶음밥'),
+                      ),
                     ),
                   ],
                 ),

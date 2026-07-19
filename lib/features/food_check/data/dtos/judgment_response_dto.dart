@@ -28,9 +28,10 @@ abstract class JudgmentItemDto with _$JudgmentItemDto {
 @freezed
 abstract class StateRecordDto with _$StateRecordDto {
   const factory StateRecordDto({
+    required int stateRecordId,
     required String label,
     required String date,   // "YYYY-MM-DD" 문자열 그대로
-    required String timing,
+    required int timingMinutes,
   }) = _StateRecordDto;
 
   factory StateRecordDto.fromJson(Map<String, dynamic> j) =>
@@ -136,9 +137,10 @@ extension JudgmentResponseDtoMapper on JudgmentResponseDto {
                 records: stateRecords!.records
                     .map(
                       (r) => VerdictStateRecord(
+                        stateRecordId: r.stateRecordId,
                         label: r.label,
                         date: r.date,
-                        timing: r.timing,
+                        timingMinutes: r.timingMinutes,
                       ),
                     )
                     .toList(),
@@ -175,9 +177,10 @@ extension TextJudgmentResponseDtoMapper on TextJudgmentResponseDto {
                 records: stateRecords!.records
                     .map(
                       (r) => VerdictStateRecord(
+                        stateRecordId: r.stateRecordId,
                         label: r.label,
                         date: r.date,
-                        timing: r.timing,
+                        timingMinutes: r.timingMinutes,
                       ),
                     )
                     .toList(),

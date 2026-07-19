@@ -215,11 +215,7 @@ class _SettingsBody extends ConsumerWidget {
         // 마스터 토글 — OS 차단 여부와 무관하게 항상 활성 상태를 유지한다.
         _MasterToggleRow(
           value: settings.marketingPushEnabled,
-          onChanged: (v) => _handleToggle(
-            context,
-            ref,
-            NotificationToggleType.marketing,
-          ),
+          onChanged: (v) => _handleMarketingToggle(context, ref),
         ),
         const SizedBox(height: AppSpacing.contentGap),
         if (osBlocked) ...[
@@ -246,6 +242,22 @@ class _SettingsBody extends ConsumerWidget {
       await ref
           .read(notificationSettingsControllerProvider.notifier)
           .toggle(type);
+    } catch (_) {
+      if (context.mounted) {
+        await showAppToast(context, '알림 설정 변경에 실패했어요.');
+      }
+    }
+  }
+
+  /// 마케팅·푸시 알림 수신 동의 마스터 토글 핸들러 — 별도 경로(A2)를 호출한다.
+  Future<void> _handleMarketingToggle(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    try {
+      await ref
+          .read(notificationSettingsControllerProvider.notifier)
+          .toggleMarketing();
     } catch (_) {
       if (context.mounted) {
         await showAppToast(context, '알림 설정 변경에 실패했어요.');

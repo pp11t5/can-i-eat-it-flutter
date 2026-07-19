@@ -742,346 +742,14 @@ class __$MealCountDtoCopyWithImpl<$Res>
 }
 
 /// @nodoc
-mixin _$SymptomTypeCountDto {
-  String get type;
-  String get label;
-  int get count;
-
-  /// Create a copy of SymptomTypeCountDto
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  $SymptomTypeCountDtoCopyWith<SymptomTypeCountDto> get copyWith =>
-      _$SymptomTypeCountDtoCopyWithImpl<SymptomTypeCountDto>(
-          this as SymptomTypeCountDto, _$identity);
-
-  /// Serializes this SymptomTypeCountDto to a JSON map.
-  Map<String, dynamic> toJson();
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is SymptomTypeCountDto &&
-            (identical(other.type, type) || other.type == type) &&
-            (identical(other.label, label) || other.label == label) &&
-            (identical(other.count, count) || other.count == count));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, type, label, count);
-
-  @override
-  String toString() {
-    return 'SymptomTypeCountDto(type: $type, label: $label, count: $count)';
-  }
-}
-
-/// @nodoc
-abstract mixin class $SymptomTypeCountDtoCopyWith<$Res> {
-  factory $SymptomTypeCountDtoCopyWith(
-          SymptomTypeCountDto value, $Res Function(SymptomTypeCountDto) _then) =
-      _$SymptomTypeCountDtoCopyWithImpl;
-  @useResult
-  $Res call({String type, String label, int count});
-}
-
-/// @nodoc
-class _$SymptomTypeCountDtoCopyWithImpl<$Res>
-    implements $SymptomTypeCountDtoCopyWith<$Res> {
-  _$SymptomTypeCountDtoCopyWithImpl(this._self, this._then);
-
-  final SymptomTypeCountDto _self;
-  final $Res Function(SymptomTypeCountDto) _then;
-
-  /// Create a copy of SymptomTypeCountDto
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? type = null,
-    Object? label = null,
-    Object? count = null,
-  }) {
-    return _then(_self.copyWith(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as String,
-      label: null == label
-          ? _self.label
-          : label // ignore: cast_nullable_to_non_nullable
-              as String,
-      count: null == count
-          ? _self.count
-          : count // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
-  }
-}
-
-/// Adds pattern-matching-related methods to [SymptomTypeCountDto].
-extension SymptomTypeCountDtoPatterns on SymptomTypeCountDto {
-  /// A variant of `map` that fallback to returning `orElse`.
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case final Subclass value:
-  ///     return ...;
-  ///   case _:
-  ///     return orElse();
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>(
-    TResult Function(_SymptomTypeCountDto value)? $default, {
-    required TResult orElse(),
-  }) {
-    final _that = this;
-    switch (_that) {
-      case _SymptomTypeCountDto() when $default != null:
-        return $default(_that);
-      case _:
-        return orElse();
-    }
-  }
-
-  /// A `switch`-like method, using callbacks.
-  ///
-  /// Callbacks receives the raw object, upcasted.
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case final Subclass value:
-  ///     return ...;
-  ///   case final Subclass2 value:
-  ///     return ...;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>(
-    TResult Function(_SymptomTypeCountDto value) $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _SymptomTypeCountDto():
-        return $default(_that);
-      case _:
-        throw StateError('Unexpected subclass');
-    }
-  }
-
-  /// A variant of `map` that fallback to returning `null`.
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case final Subclass value:
-  ///     return ...;
-  ///   case _:
-  ///     return null;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_SymptomTypeCountDto value)? $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _SymptomTypeCountDto() when $default != null:
-        return $default(_that);
-      case _:
-        return null;
-    }
-  }
-
-  /// A variant of `when` that fallback to an `orElse` callback.
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case Subclass(:final field):
-  ///     return ...;
-  ///   case _:
-  ///     return orElse();
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String type, String label, int count)? $default, {
-    required TResult orElse(),
-  }) {
-    final _that = this;
-    switch (_that) {
-      case _SymptomTypeCountDto() when $default != null:
-        return $default(_that.type, _that.label, _that.count);
-      case _:
-        return orElse();
-    }
-  }
-
-  /// A `switch`-like method, using callbacks.
-  ///
-  /// As opposed to `map`, this offers destructuring.
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case Subclass(:final field):
-  ///     return ...;
-  ///   case Subclass2(:final field2):
-  ///     return ...;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>(
-    TResult Function(String type, String label, int count) $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _SymptomTypeCountDto():
-        return $default(_that.type, _that.label, _that.count);
-      case _:
-        throw StateError('Unexpected subclass');
-    }
-  }
-
-  /// A variant of `when` that fallback to returning `null`
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case Subclass(:final field):
-  ///     return ...;
-  ///   case _:
-  ///     return null;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String type, String label, int count)? $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _SymptomTypeCountDto() when $default != null:
-        return $default(_that.type, _that.label, _that.count);
-      case _:
-        return null;
-    }
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class _SymptomTypeCountDto implements SymptomTypeCountDto {
-  const _SymptomTypeCountDto({this.type = '', this.label = '', this.count = 0});
-  factory _SymptomTypeCountDto.fromJson(Map<String, dynamic> json) =>
-      _$SymptomTypeCountDtoFromJson(json);
-
-  @override
-  @JsonKey()
-  final String type;
-  @override
-  @JsonKey()
-  final String label;
-  @override
-  @JsonKey()
-  final int count;
-
-  /// Create a copy of SymptomTypeCountDto
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  _$SymptomTypeCountDtoCopyWith<_SymptomTypeCountDto> get copyWith =>
-      __$SymptomTypeCountDtoCopyWithImpl<_SymptomTypeCountDto>(
-          this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$SymptomTypeCountDtoToJson(
-      this,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _SymptomTypeCountDto &&
-            (identical(other.type, type) || other.type == type) &&
-            (identical(other.label, label) || other.label == label) &&
-            (identical(other.count, count) || other.count == count));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, type, label, count);
-
-  @override
-  String toString() {
-    return 'SymptomTypeCountDto(type: $type, label: $label, count: $count)';
-  }
-}
-
-/// @nodoc
-abstract mixin class _$SymptomTypeCountDtoCopyWith<$Res>
-    implements $SymptomTypeCountDtoCopyWith<$Res> {
-  factory _$SymptomTypeCountDtoCopyWith(_SymptomTypeCountDto value,
-          $Res Function(_SymptomTypeCountDto) _then) =
-      __$SymptomTypeCountDtoCopyWithImpl;
-  @override
-  @useResult
-  $Res call({String type, String label, int count});
-}
-
-/// @nodoc
-class __$SymptomTypeCountDtoCopyWithImpl<$Res>
-    implements _$SymptomTypeCountDtoCopyWith<$Res> {
-  __$SymptomTypeCountDtoCopyWithImpl(this._self, this._then);
-
-  final _SymptomTypeCountDto _self;
-  final $Res Function(_SymptomTypeCountDto) _then;
-
-  /// Create a copy of SymptomTypeCountDto
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $Res call({
-    Object? type = null,
-    Object? label = null,
-    Object? count = null,
-  }) {
-    return _then(_SymptomTypeCountDto(
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as String,
-      label: null == label
-          ? _self.label
-          : label // ignore: cast_nullable_to_non_nullable
-              as String,
-      count: null == count
-          ? _self.count
-          : count // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
-  }
-}
-
-/// @nodoc
 mixin _$SymptomReportDto {
-  int get recordedCount;
-  String? get averageTimeLabel;
-  int? get averageIntensity;
-  List<SymptomTypeCountDto> get typeCounts;
+  int get symptomCount;
+  String? get averageTime;
+  int? get averageLevel;
+  int get throatForeignBodyCount;
+  int get acidRefluxCount;
+  int get coughCount;
+  int get chestTightnessCount;
 
   /// Create a copy of SymptomReportDto
   /// with the given fields replaced by the non-null parameter values.
@@ -1099,24 +767,37 @@ mixin _$SymptomReportDto {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SymptomReportDto &&
-            (identical(other.recordedCount, recordedCount) ||
-                other.recordedCount == recordedCount) &&
-            (identical(other.averageTimeLabel, averageTimeLabel) ||
-                other.averageTimeLabel == averageTimeLabel) &&
-            (identical(other.averageIntensity, averageIntensity) ||
-                other.averageIntensity == averageIntensity) &&
-            const DeepCollectionEquality()
-                .equals(other.typeCounts, typeCounts));
+            (identical(other.symptomCount, symptomCount) ||
+                other.symptomCount == symptomCount) &&
+            (identical(other.averageTime, averageTime) ||
+                other.averageTime == averageTime) &&
+            (identical(other.averageLevel, averageLevel) ||
+                other.averageLevel == averageLevel) &&
+            (identical(other.throatForeignBodyCount, throatForeignBodyCount) ||
+                other.throatForeignBodyCount == throatForeignBodyCount) &&
+            (identical(other.acidRefluxCount, acidRefluxCount) ||
+                other.acidRefluxCount == acidRefluxCount) &&
+            (identical(other.coughCount, coughCount) ||
+                other.coughCount == coughCount) &&
+            (identical(other.chestTightnessCount, chestTightnessCount) ||
+                other.chestTightnessCount == chestTightnessCount));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, recordedCount, averageTimeLabel,
-      averageIntensity, const DeepCollectionEquality().hash(typeCounts));
+  int get hashCode => Object.hash(
+      runtimeType,
+      symptomCount,
+      averageTime,
+      averageLevel,
+      throatForeignBodyCount,
+      acidRefluxCount,
+      coughCount,
+      chestTightnessCount);
 
   @override
   String toString() {
-    return 'SymptomReportDto(recordedCount: $recordedCount, averageTimeLabel: $averageTimeLabel, averageIntensity: $averageIntensity, typeCounts: $typeCounts)';
+    return 'SymptomReportDto(symptomCount: $symptomCount, averageTime: $averageTime, averageLevel: $averageLevel, throatForeignBodyCount: $throatForeignBodyCount, acidRefluxCount: $acidRefluxCount, coughCount: $coughCount, chestTightnessCount: $chestTightnessCount)';
   }
 }
 
@@ -1127,10 +808,13 @@ abstract mixin class $SymptomReportDtoCopyWith<$Res> {
       _$SymptomReportDtoCopyWithImpl;
   @useResult
   $Res call(
-      {int recordedCount,
-      String? averageTimeLabel,
-      int? averageIntensity,
-      List<SymptomTypeCountDto> typeCounts});
+      {int symptomCount,
+      String? averageTime,
+      int? averageLevel,
+      int throatForeignBodyCount,
+      int acidRefluxCount,
+      int coughCount,
+      int chestTightnessCount});
 }
 
 /// @nodoc
@@ -1146,28 +830,43 @@ class _$SymptomReportDtoCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? recordedCount = null,
-    Object? averageTimeLabel = freezed,
-    Object? averageIntensity = freezed,
-    Object? typeCounts = null,
+    Object? symptomCount = null,
+    Object? averageTime = freezed,
+    Object? averageLevel = freezed,
+    Object? throatForeignBodyCount = null,
+    Object? acidRefluxCount = null,
+    Object? coughCount = null,
+    Object? chestTightnessCount = null,
   }) {
     return _then(_self.copyWith(
-      recordedCount: null == recordedCount
-          ? _self.recordedCount
-          : recordedCount // ignore: cast_nullable_to_non_nullable
+      symptomCount: null == symptomCount
+          ? _self.symptomCount
+          : symptomCount // ignore: cast_nullable_to_non_nullable
               as int,
-      averageTimeLabel: freezed == averageTimeLabel
-          ? _self.averageTimeLabel
-          : averageTimeLabel // ignore: cast_nullable_to_non_nullable
+      averageTime: freezed == averageTime
+          ? _self.averageTime
+          : averageTime // ignore: cast_nullable_to_non_nullable
               as String?,
-      averageIntensity: freezed == averageIntensity
-          ? _self.averageIntensity
-          : averageIntensity // ignore: cast_nullable_to_non_nullable
+      averageLevel: freezed == averageLevel
+          ? _self.averageLevel
+          : averageLevel // ignore: cast_nullable_to_non_nullable
               as int?,
-      typeCounts: null == typeCounts
-          ? _self.typeCounts
-          : typeCounts // ignore: cast_nullable_to_non_nullable
-              as List<SymptomTypeCountDto>,
+      throatForeignBodyCount: null == throatForeignBodyCount
+          ? _self.throatForeignBodyCount
+          : throatForeignBodyCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      acidRefluxCount: null == acidRefluxCount
+          ? _self.acidRefluxCount
+          : acidRefluxCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      coughCount: null == coughCount
+          ? _self.coughCount
+          : coughCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      chestTightnessCount: null == chestTightnessCount
+          ? _self.chestTightnessCount
+          : chestTightnessCount // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -1265,16 +964,28 @@ extension SymptomReportDtoPatterns on SymptomReportDto {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(int recordedCount, String? averageTimeLabel,
-            int? averageIntensity, List<SymptomTypeCountDto> typeCounts)?
+    TResult Function(
+            int symptomCount,
+            String? averageTime,
+            int? averageLevel,
+            int throatForeignBodyCount,
+            int acidRefluxCount,
+            int coughCount,
+            int chestTightnessCount)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _SymptomReportDto() when $default != null:
-        return $default(_that.recordedCount, _that.averageTimeLabel,
-            _that.averageIntensity, _that.typeCounts);
+        return $default(
+            _that.symptomCount,
+            _that.averageTime,
+            _that.averageLevel,
+            _that.throatForeignBodyCount,
+            _that.acidRefluxCount,
+            _that.coughCount,
+            _that.chestTightnessCount);
       case _:
         return orElse();
     }
@@ -1295,15 +1006,27 @@ extension SymptomReportDtoPatterns on SymptomReportDto {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(int recordedCount, String? averageTimeLabel,
-            int? averageIntensity, List<SymptomTypeCountDto> typeCounts)
+    TResult Function(
+            int symptomCount,
+            String? averageTime,
+            int? averageLevel,
+            int throatForeignBodyCount,
+            int acidRefluxCount,
+            int coughCount,
+            int chestTightnessCount)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SymptomReportDto():
-        return $default(_that.recordedCount, _that.averageTimeLabel,
-            _that.averageIntensity, _that.typeCounts);
+        return $default(
+            _that.symptomCount,
+            _that.averageTime,
+            _that.averageLevel,
+            _that.throatForeignBodyCount,
+            _that.acidRefluxCount,
+            _that.coughCount,
+            _that.chestTightnessCount);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -1323,15 +1046,27 @@ extension SymptomReportDtoPatterns on SymptomReportDto {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(int recordedCount, String? averageTimeLabel,
-            int? averageIntensity, List<SymptomTypeCountDto> typeCounts)?
+    TResult? Function(
+            int symptomCount,
+            String? averageTime,
+            int? averageLevel,
+            int throatForeignBodyCount,
+            int acidRefluxCount,
+            int coughCount,
+            int chestTightnessCount)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SymptomReportDto() when $default != null:
-        return $default(_that.recordedCount, _that.averageTimeLabel,
-            _that.averageIntensity, _that.typeCounts);
+        return $default(
+            _that.symptomCount,
+            _that.averageTime,
+            _that.averageLevel,
+            _that.throatForeignBodyCount,
+            _that.acidRefluxCount,
+            _that.coughCount,
+            _that.chestTightnessCount);
       case _:
         return null;
     }
@@ -1342,29 +1077,35 @@ extension SymptomReportDtoPatterns on SymptomReportDto {
 @JsonSerializable()
 class _SymptomReportDto implements SymptomReportDto {
   const _SymptomReportDto(
-      {this.recordedCount = 0,
-      this.averageTimeLabel,
-      this.averageIntensity,
-      final List<SymptomTypeCountDto> typeCounts = const []})
-      : _typeCounts = typeCounts;
+      {this.symptomCount = 0,
+      this.averageTime,
+      this.averageLevel,
+      this.throatForeignBodyCount = 0,
+      this.acidRefluxCount = 0,
+      this.coughCount = 0,
+      this.chestTightnessCount = 0});
   factory _SymptomReportDto.fromJson(Map<String, dynamic> json) =>
       _$SymptomReportDtoFromJson(json);
 
   @override
   @JsonKey()
-  final int recordedCount;
+  final int symptomCount;
   @override
-  final String? averageTimeLabel;
+  final String? averageTime;
   @override
-  final int? averageIntensity;
-  final List<SymptomTypeCountDto> _typeCounts;
+  final int? averageLevel;
   @override
   @JsonKey()
-  List<SymptomTypeCountDto> get typeCounts {
-    if (_typeCounts is EqualUnmodifiableListView) return _typeCounts;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_typeCounts);
-  }
+  final int throatForeignBodyCount;
+  @override
+  @JsonKey()
+  final int acidRefluxCount;
+  @override
+  @JsonKey()
+  final int coughCount;
+  @override
+  @JsonKey()
+  final int chestTightnessCount;
 
   /// Create a copy of SymptomReportDto
   /// with the given fields replaced by the non-null parameter values.
@@ -1386,24 +1127,37 @@ class _SymptomReportDto implements SymptomReportDto {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _SymptomReportDto &&
-            (identical(other.recordedCount, recordedCount) ||
-                other.recordedCount == recordedCount) &&
-            (identical(other.averageTimeLabel, averageTimeLabel) ||
-                other.averageTimeLabel == averageTimeLabel) &&
-            (identical(other.averageIntensity, averageIntensity) ||
-                other.averageIntensity == averageIntensity) &&
-            const DeepCollectionEquality()
-                .equals(other._typeCounts, _typeCounts));
+            (identical(other.symptomCount, symptomCount) ||
+                other.symptomCount == symptomCount) &&
+            (identical(other.averageTime, averageTime) ||
+                other.averageTime == averageTime) &&
+            (identical(other.averageLevel, averageLevel) ||
+                other.averageLevel == averageLevel) &&
+            (identical(other.throatForeignBodyCount, throatForeignBodyCount) ||
+                other.throatForeignBodyCount == throatForeignBodyCount) &&
+            (identical(other.acidRefluxCount, acidRefluxCount) ||
+                other.acidRefluxCount == acidRefluxCount) &&
+            (identical(other.coughCount, coughCount) ||
+                other.coughCount == coughCount) &&
+            (identical(other.chestTightnessCount, chestTightnessCount) ||
+                other.chestTightnessCount == chestTightnessCount));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, recordedCount, averageTimeLabel,
-      averageIntensity, const DeepCollectionEquality().hash(_typeCounts));
+  int get hashCode => Object.hash(
+      runtimeType,
+      symptomCount,
+      averageTime,
+      averageLevel,
+      throatForeignBodyCount,
+      acidRefluxCount,
+      coughCount,
+      chestTightnessCount);
 
   @override
   String toString() {
-    return 'SymptomReportDto(recordedCount: $recordedCount, averageTimeLabel: $averageTimeLabel, averageIntensity: $averageIntensity, typeCounts: $typeCounts)';
+    return 'SymptomReportDto(symptomCount: $symptomCount, averageTime: $averageTime, averageLevel: $averageLevel, throatForeignBodyCount: $throatForeignBodyCount, acidRefluxCount: $acidRefluxCount, coughCount: $coughCount, chestTightnessCount: $chestTightnessCount)';
   }
 }
 
@@ -1416,10 +1170,13 @@ abstract mixin class _$SymptomReportDtoCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {int recordedCount,
-      String? averageTimeLabel,
-      int? averageIntensity,
-      List<SymptomTypeCountDto> typeCounts});
+      {int symptomCount,
+      String? averageTime,
+      int? averageLevel,
+      int throatForeignBodyCount,
+      int acidRefluxCount,
+      int coughCount,
+      int chestTightnessCount});
 }
 
 /// @nodoc
@@ -1435,28 +1192,43 @@ class __$SymptomReportDtoCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? recordedCount = null,
-    Object? averageTimeLabel = freezed,
-    Object? averageIntensity = freezed,
-    Object? typeCounts = null,
+    Object? symptomCount = null,
+    Object? averageTime = freezed,
+    Object? averageLevel = freezed,
+    Object? throatForeignBodyCount = null,
+    Object? acidRefluxCount = null,
+    Object? coughCount = null,
+    Object? chestTightnessCount = null,
   }) {
     return _then(_SymptomReportDto(
-      recordedCount: null == recordedCount
-          ? _self.recordedCount
-          : recordedCount // ignore: cast_nullable_to_non_nullable
+      symptomCount: null == symptomCount
+          ? _self.symptomCount
+          : symptomCount // ignore: cast_nullable_to_non_nullable
               as int,
-      averageTimeLabel: freezed == averageTimeLabel
-          ? _self.averageTimeLabel
-          : averageTimeLabel // ignore: cast_nullable_to_non_nullable
+      averageTime: freezed == averageTime
+          ? _self.averageTime
+          : averageTime // ignore: cast_nullable_to_non_nullable
               as String?,
-      averageIntensity: freezed == averageIntensity
-          ? _self.averageIntensity
-          : averageIntensity // ignore: cast_nullable_to_non_nullable
+      averageLevel: freezed == averageLevel
+          ? _self.averageLevel
+          : averageLevel // ignore: cast_nullable_to_non_nullable
               as int?,
-      typeCounts: null == typeCounts
-          ? _self._typeCounts
-          : typeCounts // ignore: cast_nullable_to_non_nullable
-              as List<SymptomTypeCountDto>,
+      throatForeignBodyCount: null == throatForeignBodyCount
+          ? _self.throatForeignBodyCount
+          : throatForeignBodyCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      acidRefluxCount: null == acidRefluxCount
+          ? _self.acidRefluxCount
+          : acidRefluxCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      coughCount: null == coughCount
+          ? _self.coughCount
+          : coughCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      chestTightnessCount: null == chestTightnessCount
+          ? _self.chestTightnessCount
+          : chestTightnessCount // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -1469,7 +1241,9 @@ mixin _$WeeklyReportDto {
   ComfortableStateDto get comfortableState;
   MealCountDto get mealCount;
 
-  /// 서버 응답에 없으면 null — [SymptomReport] 빈상태로 렌더.
+  /// 서버 필드명은 `recordedSymptom`(A3). 응답에 없으면 null —
+  /// [SymptomReport] 빈상태로 렌더.
+  @JsonKey(name: 'recordedSymptom')
   SymptomReportDto? get symptomReport;
 
   /// Create a copy of WeeklyReportDto
@@ -1524,7 +1298,7 @@ abstract mixin class $WeeklyReportDtoCopyWith<$Res> {
       String weekLabel,
       ComfortableStateDto comfortableState,
       MealCountDto mealCount,
-      SymptomReportDto? symptomReport});
+      @JsonKey(name: 'recordedSymptom') SymptomReportDto? symptomReport});
 
   $ComfortableStateDtoCopyWith<$Res> get comfortableState;
   $MealCountDtoCopyWith<$Res> get mealCount;
@@ -1713,7 +1487,7 @@ extension WeeklyReportDtoPatterns on WeeklyReportDto {
             String weekLabel,
             ComfortableStateDto comfortableState,
             MealCountDto mealCount,
-            SymptomReportDto? symptomReport)?
+            @JsonKey(name: 'recordedSymptom') SymptomReportDto? symptomReport)?
         $default, {
     required TResult orElse(),
   }) {
@@ -1748,7 +1522,7 @@ extension WeeklyReportDtoPatterns on WeeklyReportDto {
             String weekLabel,
             ComfortableStateDto comfortableState,
             MealCountDto mealCount,
-            SymptomReportDto? symptomReport)
+            @JsonKey(name: 'recordedSymptom') SymptomReportDto? symptomReport)
         $default,
   ) {
     final _that = this;
@@ -1781,7 +1555,7 @@ extension WeeklyReportDtoPatterns on WeeklyReportDto {
             String weekLabel,
             ComfortableStateDto comfortableState,
             MealCountDto mealCount,
-            SymptomReportDto? symptomReport)?
+            @JsonKey(name: 'recordedSymptom') SymptomReportDto? symptomReport)?
         $default,
   ) {
     final _that = this;
@@ -1804,7 +1578,7 @@ class _WeeklyReportDto implements WeeklyReportDto {
       required this.weekLabel,
       required this.comfortableState,
       required this.mealCount,
-      this.symptomReport});
+      @JsonKey(name: 'recordedSymptom') this.symptomReport});
   factory _WeeklyReportDto.fromJson(Map<String, dynamic> json) =>
       _$WeeklyReportDtoFromJson(json);
 
@@ -1819,8 +1593,10 @@ class _WeeklyReportDto implements WeeklyReportDto {
   @override
   final MealCountDto mealCount;
 
-  /// 서버 응답에 없으면 null — [SymptomReport] 빈상태로 렌더.
+  /// 서버 필드명은 `recordedSymptom`(A3). 응답에 없으면 null —
+  /// [SymptomReport] 빈상태로 렌더.
   @override
+  @JsonKey(name: 'recordedSymptom')
   final SymptomReportDto? symptomReport;
 
   /// Create a copy of WeeklyReportDto
@@ -1881,7 +1657,7 @@ abstract mixin class _$WeeklyReportDtoCopyWith<$Res>
       String weekLabel,
       ComfortableStateDto comfortableState,
       MealCountDto mealCount,
-      SymptomReportDto? symptomReport});
+      @JsonKey(name: 'recordedSymptom') SymptomReportDto? symptomReport});
 
   @override
   $ComfortableStateDtoCopyWith<$Res> get comfortableState;

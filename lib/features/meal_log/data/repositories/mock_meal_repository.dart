@@ -17,13 +17,13 @@ class MockMealRepository implements MealRepository {
     List<TimelineItem>? initialTimeline,
     Map<String, MealRecord>? initialMealDetails,
     Map<String, MealFood>? initialFoodDetails,
-    List<WeeklyDay>? initialWeekly,
+    Map<String, List<MonthlyDay>>? initialMonthly,
     List<MealCandidatesDay>? initialCandidates,
   })  : _timeline =
             initialTimeline != null ? List.from(initialTimeline) : [],
         _mealDetails = {...?initialMealDetails},
         _foodDetails = {...?initialFoodDetails},
-        _weekly = initialWeekly != null ? List.from(initialWeekly) : [],
+        _monthly = {...?initialMonthly},
         _candidates =
             initialCandidates != null ? List.from(initialCandidates) : [];
 
@@ -38,7 +38,7 @@ class MockMealRepository implements MealRepository {
       initialTimeline: _buildSeedTimeline(base),
       initialMealDetails: _buildSeedMealDetails(base),
       initialFoodDetails: _buildSeedFoodDetails(base),
-      initialWeekly: _buildSeedWeekly(base),
+      initialMonthly: _buildSeedMonthly(base),
       initialCandidates: _buildSeedCandidates(base),
     );
   }
@@ -46,7 +46,9 @@ class MockMealRepository implements MealRepository {
   final List<TimelineItem> _timeline;
   final Map<String, MealRecord> _mealDetails;
   final Map<String, MealFood> _foodDetails;
-  final List<WeeklyDay> _weekly;
+
+  /// 월별 판정 집계. key: 'YYYY-MM'([_monthKey]), value: 해당 월의 [MonthlyDay] 목록.
+  final Map<String, List<MonthlyDay>> _monthly;
   final List<MealCandidatesDay> _candidates;
 
   int _seq = 0;
@@ -69,15 +71,10 @@ class MockMealRepository implements MealRepository {
   }
 
   @override
-  Future<List<WeeklyDay>> weekly(DateTime date) async {
-    final start = DateTime(date.year, date.month, date.day);
-    final end = start.add(const Duration(days: 7));
-    final items = _weekly.where((day) {
-      final parsed = _tryParseDate(day.date);
-      if (parsed == null) return false;
-      return !parsed.isBefore(start) && parsed.isBefore(end);
-    }).toList();
-    return List<WeeklyDay>.unmodifiable(items);
+  Future<List<MonthlyDay>> getMonthly(DateTime month) async {
+    return List<MonthlyDay>.unmodifiable(
+      _monthly[_monthKey(month)] ?? const <MonthlyDay>[],
+    );
   }
 
   /// [appendFood]/[appendFoodByText] 공통 로직 — 음식 생성 + 식사 상세 캐시 반영.
@@ -202,13 +199,11 @@ DateTime? _tryParseKst(String iso) {
   }
 }
 
-/// 'YYYY-MM-DD' 문자열을 [DateTime] 으로 파싱한다. 실패 시 null.
-DateTime? _tryParseDate(String ymd) {
-  try {
-    return DateTime.parse(ymd);
-  } catch (_) {
-    return null;
-  }
+/// [month] 의 연/월을 'YYYY-MM' 키로 반환한다 (`_monthly` 맵 키, [getMonthly] 조회용).
+String _monthKey(DateTime month) {
+  final y = month.year.toString().padLeft(4, '0');
+  final m = month.month.toString().padLeft(2, '0');
+  return '$y-$m';
 }
 
 // ---------------------------------------------------------------------------
@@ -360,21 +355,22 @@ Map<String, MealFood> _buildSeedFoodDetails(DateTime base) {
   };
 }
 
-List<WeeklyDay> _buildSeedWeekly(DateTime base) {
+Map<String, List<MonthlyDay>> _buildSeedMonthly(DateTime base) {
   // 신호등 dots 는 타임라인 데이터가 존재하는 날(base)에만 부여한다 — dots 가
   // 있는데 탭하면 빈 타임라인이 나오는 불일치를 막기 위함(실 API 는 dots·타임라인이
   // 같은 날짜 데이터에서 나온다). base 하루에 최대 3개 판정색 dots.
-  return <WeeklyDay>[
-    WeeklyDay(
-      date: _ymd(base),
-      dayOfWeek: 'WED',
-      judgements: const [
-        VerdictLevel.recommend,
-        VerdictLevel.caution,
-        VerdictLevel.risk,
-      ],
-    ),
-  ];
+  return {
+    _monthKey(base): [
+      MonthlyDay(
+        day: base.day,
+        judgements: const [
+          VerdictLevel.recommend,
+          VerdictLevel.caution,
+          VerdictLevel.risk,
+        ],
+      ),
+    ],
+  };
 }
 
 List<MealCandidatesDay> _buildSeedCandidates(DateTime base) {

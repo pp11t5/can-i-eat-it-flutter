@@ -48,11 +48,15 @@ enum DailyNotificationTime {
 }
 
 /// 알림 토글 타입.
+///
+/// ⚠️ `marketing`은 이 enum에 포함하지 않는다 — Swagger toggle enum은
+/// `post_meal | daily_record | weekly_report`만 유효하다. 마케팅·푸시 알림
+/// 수신 동의는 별도 경로(`PATCH /consent/marketing/toggle`)로 처리한다
+/// ([NotificationRepository.toggleMarketingConsent] 참고).
 enum NotificationToggleType {
   postMeal,
   dailyRecord,
-  weeklyReport,
-  marketing;
+  weeklyReport;
 
   /// 서버 전송 문자열 (`toServer`).
   String toServer() {
@@ -60,7 +64,6 @@ enum NotificationToggleType {
       NotificationToggleType.postMeal => 'post_meal',
       NotificationToggleType.dailyRecord => 'daily_record',
       NotificationToggleType.weeklyReport => 'weekly_report',
-      NotificationToggleType.marketing => 'marketing',
     };
   }
 }

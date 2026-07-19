@@ -49,7 +49,7 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
         ctx.eatenAt.day,
       );
       ref.invalidate(timelineControllerProvider(dateKey));
-      ref.invalidate(weeklyControllerProvider);
+      ref.invalidate(monthlyControllerProvider);
 
       // 모달 스택 pop — /verdict + /check + /meal/record 최대 3단
       if (context.mounted) {

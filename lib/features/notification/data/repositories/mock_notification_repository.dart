@@ -27,6 +27,9 @@ class MockNotificationRepository implements NotificationRepository {
   /// 마지막으로 설정된 daily-time 목록 (테스트 검증용).
   final List<DailyNotificationTime> dailyTimeCalls = [];
 
+  /// 마지막으로 호출된 마케팅 동의 토글 값 목록 (테스트 검증용, A2).
+  final List<bool> marketingToggleCalls = [];
+
   @override
   Future<NotificationSettings> fetch() async => _settings;
 
@@ -43,9 +46,6 @@ class MockNotificationRepository implements NotificationRepository {
       NotificationToggleType.weeklyReport => _settings.copyWith(
           weeklyReportEnabled: !_settings.weeklyReportEnabled,
         ),
-      NotificationToggleType.marketing => _settings.copyWith(
-          marketingPushEnabled: !_settings.marketingPushEnabled,
-        ),
     };
   }
 
@@ -53,5 +53,11 @@ class MockNotificationRepository implements NotificationRepository {
   Future<void> updateDailyTime(DailyNotificationTime time) async {
     dailyTimeCalls.add(time);
     _settings = _settings.copyWith(dailyTime: time);
+  }
+
+  @override
+  Future<void> toggleMarketingConsent(bool enabled) async {
+    marketingToggleCalls.add(enabled);
+    _settings = _settings.copyWith(marketingPushEnabled: enabled);
   }
 }

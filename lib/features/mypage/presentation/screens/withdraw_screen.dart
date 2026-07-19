@@ -7,6 +7,7 @@ import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
+import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 
 /// 계정 탈퇴 화면 (Figma 577-10287).
@@ -27,7 +28,9 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
   Future<void> _handleWithdraw() async {
     setState(() => _isLoading = true);
     try {
-      await ref.read(authControllerProvider.notifier).withdraw();
+      await ref
+          .read(globalLoadingControllerProvider.notifier)
+          .run(() => ref.read(authControllerProvider.notifier).withdraw());
       // 성공 시 auth redirect 가드가 /login 으로 이동시킴 — 별도 navigation 불필요.
     } catch (e) {
       if (mounted) {
@@ -154,16 +157,9 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
                   ),
                   textStyle: AppTextStyles.body1Bold,
                 ),
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.surface,
-                        ),
-                      )
-                    : const Text('데이터 영구 삭제'),
+                // 진행 중 스피너는 전역 로딩 오버레이가 담당(이중 표시 방지) —
+                // 이 버튼은 비활성 색상으로만 진행 중임을 표시한다.
+                child: const Text('데이터 영구 삭제'),
               ),
             ),
           ],

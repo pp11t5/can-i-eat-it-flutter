@@ -190,64 +190,87 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  group('weekly — GET /timeline/weekly?date= (result[] 직접 배열, F-9)', () {
-    test('result[] 를 WeeklyDay 목록으로 unwrap한다', () async {
+  group(
+      'getMonthly — GET /timeline/monthly?month=yyyy-MM (result[] 직접 배열, '
+      '구 weekly?date= 대체 — B1)', () {
+    test('month 쿼리가 "yyyy-MM" 형식(day 없이)으로 전달된다', () async {
       adapter.onGet(
-        ApiEndpoints.timelineWeekly,
+        ApiEndpoints.timelineMonthly,
         (server) => server.reply(
           200,
           _envelope([
             {
-              'date': '2026-06-17',
+              'day': 17,
               'dayOfWeek': 'WED',
               'judgementList': ['RECOMMEND', 'RISK'],
             },
           ]),
         ),
-        queryParameters: {'date': '2026-06-17'},
+        queryParameters: {'month': '2026-06'},
       );
-      final result = await repo.weekly(DateTime.utc(2026, 6, 17));
+      // day 값(24)은 무시되고 연/월만 쿼리에 반영되어야 한다.
+      final result = await repo.getMonthly(DateTime.utc(2026, 6, 24));
       expect(result.length, 1);
+    });
+
+    test('result[] 를 MonthlyDay 목록으로 unwrap한다', () async {
+      adapter.onGet(
+        ApiEndpoints.timelineMonthly,
+        (server) => server.reply(
+          200,
+          _envelope([
+            {
+              'day': 17,
+              'dayOfWeek': 'WED',
+              'judgementList': ['RECOMMEND', 'RISK'],
+            },
+          ]),
+        ),
+        queryParameters: {'month': '2026-06'},
+      );
+      final result = await repo.getMonthly(DateTime.utc(2026, 6, 1));
+      expect(result.length, 1);
+      expect(result[0].day, 17);
       expect(result[0].judgements, [VerdictLevel.recommend, VerdictLevel.risk]);
     });
 
     // 계약: judgementList 대문자 grade → VerdictLevel, UNKNOWN 폴백
     test('judgementList UNKNOWN grade → VerdictLevel.unknown 폴백', () async {
       adapter.onGet(
-        ApiEndpoints.timelineWeekly,
+        ApiEndpoints.timelineMonthly,
         (server) => server.reply(
           200,
           _envelope([
             {
-              'date': '2026-06-24',
+              'day': 24,
               'dayOfWeek': 'WED',
               'judgementList': ['UNKNOWN'],
             },
           ]),
         ),
-        queryParameters: {'date': '2026-06-24'},
+        queryParameters: {'month': '2026-06'},
       );
-      final result = await repo.weekly(DateTime.utc(2026, 6, 24));
+      final result = await repo.getMonthly(DateTime.utc(2026, 6, 1));
       expect(result[0].judgements[0], VerdictLevel.unknown);
     });
 
     // 계약: judgementList ≤3 (서버가 최대 3개 보냄, 클라이언트 통과 검증)
     test('judgementList 3개 모두 매핑된다 (≤3 경계)', () async {
       adapter.onGet(
-        ApiEndpoints.timelineWeekly,
+        ApiEndpoints.timelineMonthly,
         (server) => server.reply(
           200,
           _envelope([
             {
-              'date': '2026-06-24',
+              'day': 24,
               'dayOfWeek': 'WED',
               'judgementList': ['RECOMMEND', 'CAUTION', 'RISK'],
             },
           ]),
         ),
-        queryParameters: {'date': '2026-06-24'},
+        queryParameters: {'month': '2026-06'},
       );
-      final result = await repo.weekly(DateTime.utc(2026, 6, 24));
+      final result = await repo.getMonthly(DateTime.utc(2026, 6, 1));
       expect(result[0].judgements.length, 3);
       expect(result[0].judgements, [
         VerdictLevel.recommend,

@@ -15,8 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AuthMeResponseDto {
   String get userId;
-  String get nickname;
-  String get email;
+  String? get nickname;
+  String? get email;
   String? get profileImage;
 
   /// Create a copy of AuthMeResponseDto
@@ -61,7 +61,7 @@ abstract mixin class $AuthMeResponseDtoCopyWith<$Res> {
       _$AuthMeResponseDtoCopyWithImpl;
   @useResult
   $Res call(
-      {String userId, String nickname, String email, String? profileImage});
+      {String userId, String? nickname, String? email, String? profileImage});
 }
 
 /// @nodoc
@@ -78,8 +78,8 @@ class _$AuthMeResponseDtoCopyWithImpl<$Res>
   @override
   $Res call({
     Object? userId = null,
-    Object? nickname = null,
-    Object? email = null,
+    Object? nickname = freezed,
+    Object? email = freezed,
     Object? profileImage = freezed,
   }) {
     return _then(_self.copyWith(
@@ -87,14 +87,14 @@ class _$AuthMeResponseDtoCopyWithImpl<$Res>
           ? _self.userId
           : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      nickname: null == nickname
+      nickname: freezed == nickname
           ? _self.nickname
           : nickname // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
+              as String?,
+      email: freezed == email
           ? _self.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       profileImage: freezed == profileImage
           ? _self.profileImage
           : profileImage // ignore: cast_nullable_to_non_nullable
@@ -196,8 +196,8 @@ extension AuthMeResponseDtoPatterns on AuthMeResponseDto {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(
-            String userId, String nickname, String email, String? profileImage)?
+    TResult Function(String userId, String? nickname, String? email,
+            String? profileImage)?
         $default, {
     required TResult orElse(),
   }) {
@@ -226,8 +226,8 @@ extension AuthMeResponseDtoPatterns on AuthMeResponseDto {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(
-            String userId, String nickname, String email, String? profileImage)
+    TResult Function(String userId, String? nickname, String? email,
+            String? profileImage)
         $default,
   ) {
     final _that = this;
@@ -254,8 +254,8 @@ extension AuthMeResponseDtoPatterns on AuthMeResponseDto {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(
-            String userId, String nickname, String email, String? profileImage)?
+    TResult? Function(String userId, String? nickname, String? email,
+            String? profileImage)?
         $default,
   ) {
     final _that = this;
@@ -273,19 +273,16 @@ extension AuthMeResponseDtoPatterns on AuthMeResponseDto {
 @JsonSerializable()
 class _AuthMeResponseDto implements AuthMeResponseDto {
   const _AuthMeResponseDto(
-      {required this.userId,
-      required this.nickname,
-      required this.email,
-      this.profileImage});
+      {required this.userId, this.nickname, this.email, this.profileImage});
   factory _AuthMeResponseDto.fromJson(Map<String, dynamic> json) =>
       _$AuthMeResponseDtoFromJson(json);
 
   @override
   final String userId;
   @override
-  final String nickname;
+  final String? nickname;
   @override
-  final String email;
+  final String? email;
   @override
   final String? profileImage;
 
@@ -337,7 +334,7 @@ abstract mixin class _$AuthMeResponseDtoCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String userId, String nickname, String email, String? profileImage});
+      {String userId, String? nickname, String? email, String? profileImage});
 }
 
 /// @nodoc
@@ -354,8 +351,8 @@ class __$AuthMeResponseDtoCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   $Res call({
     Object? userId = null,
-    Object? nickname = null,
-    Object? email = null,
+    Object? nickname = freezed,
+    Object? email = freezed,
     Object? profileImage = freezed,
   }) {
     return _then(_AuthMeResponseDto(
@@ -363,14 +360,14 @@ class __$AuthMeResponseDtoCopyWithImpl<$Res>
           ? _self.userId
           : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      nickname: null == nickname
+      nickname: freezed == nickname
           ? _self.nickname
           : nickname // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
+              as String?,
+      email: freezed == email
           ? _self.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       profileImage: freezed == profileImage
           ? _self.profileImage
           : profileImage // ignore: cast_nullable_to_non_nullable

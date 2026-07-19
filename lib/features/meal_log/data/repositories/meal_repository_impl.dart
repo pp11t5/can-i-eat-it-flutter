@@ -45,11 +45,11 @@ class MealRepositoryImpl implements MealRepository {
   }
 
   @override
-  Future<List<WeeklyDay>> weekly(DateTime date) async {
+  Future<List<MonthlyDay>> getMonthly(DateTime month) async {
     try {
       final response = await _dio.get<dynamic>(
-        ApiEndpoints.timelineWeekly,
-        queryParameters: {'date': toServerDate(date)},
+        ApiEndpoints.timelineMonthly,
+        queryParameters: {'month': _toServerMonth(month)},
       );
       // result 는 직접 배열 → unwrap<List>.
       final items = unwrap<List<dynamic>>(
@@ -57,7 +57,10 @@ class MealRepositoryImpl implements MealRepository {
         (json) => json as List<dynamic>,
       );
       return items
-          .map((e) => WeeklyDayDto.fromJson(e as Map<String, dynamic>).toEntity())
+          .map(
+            (e) => MonthlyJudgementDto.fromJson(e as Map<String, dynamic>)
+                .toEntity(),
+          )
           .toList();
     } on DioException catch (e) {
       throw FailureMapper.fromDioException(e);
@@ -205,4 +208,14 @@ class MealRepositoryImpl implements MealRepository {
       throw FailureMapper.fromDioException(e);
     }
   }
+}
+
+/// [month] 의 연/월을 'YYYY-MM' 형식으로 반환한다 (GET /timeline/monthly 쿼리).
+///
+/// kst_time.dart 의 toServerDate/toServerOffset 은 일 단위까지 포맷하므로
+/// 재사용하지 않고 로컬 헬퍼로 둔다(core/utils 는 이번 배치 편집 범위 밖).
+String _toServerMonth(DateTime month) {
+  final y = month.year.toString().padLeft(4, '0');
+  final m = month.month.toString().padLeft(2, '0');
+  return '$y-$m';
 }

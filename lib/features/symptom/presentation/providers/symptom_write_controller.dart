@@ -111,7 +111,7 @@ class SymptomWriteController extends _$SymptomWriteController {
 
       // 타임라인·주간 캐시 invalidate
       ref.invalidate(timelineControllerProvider);
-      ref.invalidate(weeklyControllerProvider);
+      ref.invalidate(monthlyControllerProvider);
 
       state = const AsyncData(null);
       return symptomId;

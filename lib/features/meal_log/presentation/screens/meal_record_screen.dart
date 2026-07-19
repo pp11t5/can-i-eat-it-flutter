@@ -13,7 +13,7 @@ import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_arg
 
 /// 식사 기록 화면 — 섭취 시각 선택 후 음식 검색으로 이어지는 흐름.
 ///
-/// Figma node 554-7335.
+/// Figma node 554-7335(휠 히든, 기본) / 2760-24389(휠 노출, "직접 입력" 선택 시).
 ///
 /// 진입 경로:
 /// - FAB 액션시트 → '/meal/record' (mealRecordId null)
@@ -34,19 +34,19 @@ class _MealRecordScreenState extends State<MealRecordScreen> {
   // 선택된 시각의 단일 진실. 기본: KST now.
   late DateTime _selectedDateTime;
 
-  // 빠른 선택 칩 오프셋(분). null = 어느 칩도 선택 안 됨(휠로 직접 설정).
-  int? _selectedOffsetMinutes;
+  // 빠른 선택 칩 오프셋(분). _manualOffset이면 "직접 입력" 칩 선택(휠 노출) 상태.
+  int _selectedOffsetMinutes = 0;
 
   // 휠 컨트롤러
   late FixedExtentScrollController _dateCtrl;
   late FixedExtentScrollController _hourCtrl;
   late FixedExtentScrollController _minuteCtrl;
 
-  // 휠 업데이트 중 상호 재진입 방지 플래그
-  bool _updatingFromChip = false;
+  /// "직접 입력" 칩을 나타내는 오프셋 sentinel(실제 분 단위 오프셋이 아님).
+  static const int _manualOffset = -1;
 
-  static const _quickOffsets = [0, 10, 30, 60, 120];
-  static const _quickLabels = ['지금', '10분 전', '30분 전', '1시간 전', '2시간 전'];
+  static const _quickOffsets = [0, 10, 30, 60, 120, _manualOffset];
+  static const _quickLabels = ['지금', '10분 전', '30분 전', '1시간 전', '2시간 전', '직접 입력'];
 
   @override
   void initState() {
@@ -85,43 +85,52 @@ class _MealRecordScreenState extends State<MealRecordScreen> {
     return '${date.month}월 ${date.day}일 ($wd)';
   }
 
+  /// 빠른 선택 칩 탭. "직접 입력" sentinel이면 [_enterManualMode]로 위임.
+  ///
+  /// 이미 직접 입력 모드인 상태에서 같은 칩을 다시 탭한 경우는 무시한다
+  /// (현재 노출·attach된 휠 컨트롤러를 불필요하게 재생성하지 않기 위함).
   void _onChipTap(int offsetMinutes) {
+    if (offsetMinutes == _manualOffset) {
+      if (_selectedOffsetMinutes != _manualOffset) {
+        _enterManualMode();
+      }
+      return;
+    }
     final base = nowKst();
     final newDt = base.subtract(Duration(minutes: offsetMinutes));
-    final dates = _dateOptions();
-    final targetDate = DateTime(newDt.year, newDt.month, newDt.day);
-    final dateIdx = dates.indexWhere((d) => d == targetDate);
 
     setState(() {
       _selectedDateTime = newDt;
       _selectedOffsetMinutes = offsetMinutes;
     });
+  }
 
-    _updatingFromChip = true;
-    if (dateIdx >= 0) {
-      _dateCtrl.animateToItem(
-        dateIdx,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
+  /// "직접 입력" 칩 선택 → 휠 노출 + 휠을 현재 [_selectedDateTime]으로 초기화.
+  ///
+  /// 휠은 조건부로만 빌드되므로(기본 숨김) 컨트롤러는 노출 시점에
+  /// 재생성해 현재 시각을 반영한다(재진입 시에도 동일하게 최신화).
+  void _enterManualMode() {
+    final dt = _selectedDateTime;
+    final dates = _dateOptions();
+    final targetDate = DateTime(dt.year, dt.month, dt.day);
+    final dateIdx = dates.indexWhere((d) => d == targetDate);
+
+    _dateCtrl.dispose();
+    _hourCtrl.dispose();
+    _minuteCtrl.dispose();
+
+    setState(() {
+      _selectedOffsetMinutes = _manualOffset;
+      _dateCtrl = FixedExtentScrollController(
+        initialItem: dateIdx >= 0 ? dateIdx : 0,
       );
-    }
-    _hourCtrl.animateToItem(
-      newDt.hour,
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeOut,
-    );
-    _minuteCtrl.animateToItem(
-      newDt.minute,
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeOut,
-    );
-    Future.delayed(const Duration(milliseconds: 250), () {
-      _updatingFromChip = false;
+      _hourCtrl = FixedExtentScrollController(initialItem: dt.hour);
+      _minuteCtrl = FixedExtentScrollController(initialItem: dt.minute);
     });
   }
 
+  /// 휠 스크롤이 시각의 단일 진실(직접 입력 모드에서만 호출됨).
   void _onWheelChanged() {
-    if (_updatingFromChip) return;
     final dates = _dateOptions();
     final dateIdx = _dateCtrl.selectedItem.clamp(0, dates.length - 1);
     final hour = _hourCtrl.selectedItem.clamp(0, 23);
@@ -129,17 +138,8 @@ class _MealRecordScreenState extends State<MealRecordScreen> {
     final base = dates[dateIdx];
     final newDt = DateTime(base.year, base.month, base.day, hour, minute);
 
-    // '지금' 칩과 일치하는지 확인
-    final now = nowKst();
-    final isNow = newDt.year == now.year &&
-        newDt.month == now.month &&
-        newDt.day == now.day &&
-        newDt.hour == now.hour &&
-        newDt.minute == now.minute;
-
     setState(() {
       _selectedDateTime = newDt;
-      _selectedOffsetMinutes = isNow ? 0 : null;
     });
   }
 
@@ -153,7 +153,7 @@ class _MealRecordScreenState extends State<MealRecordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dates = _dateOptions();
+    final showWheel = _selectedOffsetMinutes == _manualOffset;
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
@@ -218,23 +218,24 @@ class _MealRecordScreenState extends State<MealRecordScreen> {
                     selectedOffset: _selectedOffsetMinutes,
                     onTap: _onChipTap,
                   ),
-                  const SizedBox(height: AppSpacing.sectionGap),
-
-                  // 직접 선택
-                  Text(
-                    '직접 선택',
-                    style: AppTextStyles.body1Bold
-                        .copyWith(color: AppColors.textPrimary),
-                  ),
-                  const SizedBox(height: AppSpacing.itemGap),
-                  _WheelPicker(
-                    dateOptions: dates,
-                    dateLabel: _dateLabel,
-                    dateCtrl: _dateCtrl,
-                    hourCtrl: _hourCtrl,
-                    minuteCtrl: _minuteCtrl,
-                    onChanged: _onWheelChanged,
-                  ),
+                  // 직접 선택 — "직접 입력" 칩 선택 시에만 노출(Figma 2760-24389).
+                  if (showWheel) ...[
+                    const SizedBox(height: AppSpacing.sectionGap),
+                    Text(
+                      '직접 선택',
+                      style: AppTextStyles.body1Medium
+                          .copyWith(color: AppColors.textPrimary),
+                    ),
+                    const SizedBox(height: AppSpacing.itemGap),
+                    _WheelPicker(
+                      dateOptions: _dateOptions(),
+                      dateLabel: _dateLabel,
+                      dateCtrl: _dateCtrl,
+                      hourCtrl: _hourCtrl,
+                      minuteCtrl: _minuteCtrl,
+                      onChanged: _onWheelChanged,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -285,12 +286,13 @@ class _QuickChips extends StatelessWidget {
 
   final List<int> offsets;
   final List<String> labels;
-  final int? selectedOffset;
+  final int selectedOffset;
   final void Function(int offsetMinutes) onTap;
 
   @override
   Widget build(BuildContext context) {
-    // Figma 554:7335: 빠른선택 칩 = 흰 배경+테두리, 선택 시 green 아웃라인
+    // Figma 554:7335: 빠른선택 칩 6종(지금·10분 전·30분 전·1시간 전·2시간 전·직접 입력)
+    // = 흰 배경+테두리, 선택 시 green 아웃라인
     // (SelectableChip 공유 — 증상 시간선택과 동일 스타일, 회색 fill 아님).
     return Wrap(
       spacing: AppSpacing.itemGap,
@@ -327,12 +329,14 @@ class _WheelPicker extends StatelessWidget {
   final FixedExtentScrollController minuteCtrl;
   final VoidCallback onChanged;
 
-  static const double _itemExtent = 48.0;
-  static const double _pickerHeight = 200.0;
+  // Figma 2760-24389 실측: 휠 전체 ~324×174, 아이템 행 높이 ~32, 하이라이트 radius 7.6.
+  static const double _itemExtent = 32.0;
+  static const double _pickerHeight = 174.0;
+  static const double _highlightRadius = 7.6;
 
   @override
   Widget build(BuildContext context) {
-    // Figma 554:7335: 휠은 흰 화면 위에 놓이며 회색 카드로 감싸지 않는다.
+    // Figma 2760-24389: 휠은 흰 화면 위에 놓이며 회색 카드로 감싸지 않는다.
     // 선택행만 회색(surfaceMuted) 하이라이트 pill.
     return SizedBox(
       height: _pickerHeight,
@@ -348,7 +352,7 @@ class _WheelPicker extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: AppColors.surfaceMuted,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+                borderRadius: BorderRadius.circular(_highlightRadius),
               ),
             ),
           ),
@@ -405,7 +409,8 @@ class _WheelColumn extends StatelessWidget {
   final String Function(int) itemBuilder;
   final VoidCallback onChanged;
 
-  static const double _itemExtent = 48.0;
+  // _WheelPicker._itemExtent와 동일 값(Figma 2760-24389).
+  static const double _itemExtent = 32.0;
 
   @override
   Widget build(BuildContext context) {

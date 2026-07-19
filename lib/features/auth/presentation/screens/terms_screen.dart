@@ -8,6 +8,7 @@ import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_button.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/core/config/terms_catalog.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
@@ -65,7 +66,11 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
       sensitiveInfo: _sensitiveInfo,
       marketing: _marketing,
     );
-    await ref.read(authControllerProvider.notifier).agreeToTerms(agreement);
+    await ref.read(globalLoadingControllerProvider.notifier).run(
+          () => ref
+              .read(authControllerProvider.notifier)
+              .agreeToTerms(agreement),
+        );
     if (!mounted) return;
     // 약관은 login 이 context.push 로 띄운 명령형 라우트라, 상태가 needsOnboarding 이
     // 돼도 가드 redirect 가 이 라우트를 교체하지 못해 그대로 멈춘다. 따라서 명시적으로

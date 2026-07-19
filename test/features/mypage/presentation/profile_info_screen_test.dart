@@ -13,6 +13,7 @@ import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
+import 'package:can_i_eat_it/features/mypage/presentation/screens/name_edit_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/profile_info_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/withdraw_screen.dart';
 
@@ -101,6 +102,46 @@ Widget _buildWithWithdrawRouter({AuthSession? session}) {
   );
 }
 
+/// ProfileInfoScreen "내 정보" 카드의 닉네임 행은 탭 시
+/// context.push('/mypage/profile/name-edit')를 호출한다.
+/// _buildWithWithdrawRouter와 동일 패턴으로 해당 경로를 선언해 검증한다.
+Widget _buildWithNameEditRouter({AuthSession? session}) {
+  final repo = MockAuthRepository(initialSession: session);
+  final router = GoRouter(
+    initialLocation: '/mypage/profile',
+    routes: [
+      GoRoute(
+        path: '/mypage/profile',
+        builder: (context, state) => const ProfileInfoScreen(),
+      ),
+      GoRoute(
+        path: '/mypage/profile/name-edit',
+        builder: (context, state) => const NameEditScreen(),
+      ),
+    ],
+  );
+
+  return ProviderScope(
+    overrides: [
+      // ignore: scoped_providers_should_specify_dependencies
+      authRepositoryProvider.overrideWithValue(repo),
+      // ignore: scoped_providers_should_specify_dependencies
+      healthProfileRepositoryProvider.overrideWithValue(
+        MockHealthProfileRepository.completed(),
+      ),
+      // ignore: scoped_providers_should_specify_dependencies
+      analyticsServiceProvider.overrideWithValue(_NoopAnalytics()),
+      // ignore: scoped_providers_should_specify_dependencies
+      profileCacheProvider.overrideWithValue(InMemoryProfileCache()),
+    ],
+    child: MaterialApp.router(
+      theme: AppTheme.light,
+      debugShowCheckedModeBanner: false,
+      routerConfig: router,
+    ),
+  );
+}
+
 void main() {
   group('ProfileInfoScreen', () {
     testWidgets('앱바에 "프로필 정보" 타이틀이 표시된다', (tester) async {
@@ -110,14 +151,17 @@ void main() {
       expect(find.text('프로필 정보'), findsOneWidget);
     });
 
+    // Figma 2760-24140 신 프로필 디자인: 닉네임은 헤더(Bold 20)와
+    // "내 정보" 카드 첫 행(값+"수정하기") 양쪽에 노출된다(의도된 중복).
     testWidgets('session이 null일 때 닉네임이 "사용자"로 표시된다', (tester) async {
       await tester.pumpWidget(_buildProfileInfoScreen(session: null));
       await tester.pumpAndSettle();
 
-      expect(find.text('사용자'), findsOneWidget);
+      expect(find.text('사용자'), findsNWidgets(2));
     });
 
-    testWidgets('displayName이 있으면 해당 닉네임이 표시된다', (tester) async {
+    testWidgets('displayName이 있으면 해당 닉네임이 헤더와 내 정보 카드 양쪽에 표시된다',
+        (tester) async {
       const session = AuthSession(
         userId: 'test-user',
         provider: AuthProvider.kakao,
@@ -127,10 +171,14 @@ void main() {
       await tester.pumpWidget(_buildProfileInfoScreen(session: session));
       await tester.pumpAndSettle();
 
-      expect(find.text('김테스트'), findsOneWidget);
+      expect(find.text('김테스트'), findsNWidgets(2));
     });
 
-    testWidgets('카카오 연동 표시가 나타난다 (email+provider)', (tester) async {
+    // D1(#174)에서 헤더의 이메일·연동 서브텍스트가 의도적으로 제거됐다
+    // (_ProfileHeader 주석 "이메일·연동 서브텍스트 제거, D1" 참조).
+    // 회귀 방지를 위해 부재를 명시적으로 검증한다.
+    testWidgets('헤더에는 이메일/연동(예: "카카오 연동") 서브텍스트가 더 이상 표시되지 않는다 (D1)',
+        (tester) async {
       const session = AuthSession(
         userId: 'test-user',
         provider: AuthProvider.kakao,
@@ -140,7 +188,25 @@ void main() {
       await tester.pumpWidget(_buildProfileInfoScreen(session: session));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('카카오 연동'), findsOneWidget);
+      expect(find.textContaining('연동'), findsNothing);
+      expect(find.text('test@kakao.com'), findsNothing);
+    });
+
+    testWidgets('내 정보 카드의 닉네임 "수정하기" 행 탭 시 name-edit 화면으로 push된다', (tester) async {
+      const session = AuthSession(
+        userId: 'test-user',
+        provider: AuthProvider.kakao,
+        hasAgreedTerms: true,
+        displayName: '김테스트',
+      );
+      await tester.pumpWidget(_buildWithNameEditRouter(session: session));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('수정하기'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NameEditScreen), findsOneWidget);
+      expect(find.text('이름 변경'), findsOneWidget);
     });
 
     testWidgets('건강 고민에 질환 라벨이 표시된다 (GERD → 역류성 식도염)', (tester) async {
@@ -227,8 +293,8 @@ void main() {
       await tester.pumpWidget(_buildProfileInfoScreen(session: null));
       await tester.pumpAndSettle();
 
-      // 크래시 없이 "사용자"(기본값) 표시
-      expect(find.text('사용자'), findsOneWidget);
+      // 크래시 없이 "사용자"(기본값) 표시 — 헤더 + 내 정보 카드 양쪽(의도된 중복).
+      expect(find.text('사용자'), findsNWidgets(2));
     });
   });
 }

@@ -45,7 +45,7 @@ android {
             applicationIdSuffix = ".dev"
             resValue "string", "app_name", "먹어도돼? Dev"
             // dev 카카오 테스트앱 네이티브 앱키 기반 스킴.
-            manifestPlaceholders["kakaoScheme"] = "kakao92e00e2a84be177d37bc6819f3032a03"
+            manifestPlaceholders["kakaoScheme"] = "kakaocd24aa08a740a475401f84390c8219df"
         }
     }
 

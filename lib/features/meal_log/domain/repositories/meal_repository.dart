@@ -10,10 +10,12 @@ abstract interface class MealRepository {
   /// 대응 API: GET /timeline?date=YYYY-MM-DD (result.items[]).
   Future<List<TimelineItem>> timeline(DateTime date);
 
-  /// [date] 가 속한 주의 주간 도트 목록을 반환한다.
+  /// [month] 가 속한 월의 판정 집계 목록을 반환한다.
   ///
-  /// 대응 API: GET /timeline/weekly?date=YYYY-MM-DD (result[]).
-  Future<List<WeeklyDay>> weekly(DateTime date);
+  /// 대응 API: GET /timeline/monthly?month=YYYY-MM (result[]).
+  /// [month]: 표시월 DateTime(year, month, 1) — day 값은 무시하고 연/월만 사용.
+  /// (구 `weekly(DateTime date)` 대체 — B1 월 캘린더 재설계.)
+  Future<List<MonthlyDay>> getMonthly(DateTime month);
 
   /// 음식 ID로 음식을 추가한다 (by-id).
   ///

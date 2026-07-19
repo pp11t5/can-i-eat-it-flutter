@@ -588,17 +588,17 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  // WeeklyDayDto
+  // MonthlyJudgementDto (구 WeeklyDayDto 대체 — B1 월 캘린더 재설계)
   // -------------------------------------------------------------------------
-  group('WeeklyDayDto', () {
+  group('MonthlyJudgementDto', () {
     test('judgementList를 VerdictLevel 목록으로 매핑한다', () {
-      final entity = WeeklyDayDto.fromJson(const {
-        'date': '2026-06-17',
+      final entity = MonthlyJudgementDto.fromJson(const {
+        'day': 17,
         'dayOfWeek': 'WED',
         'judgementList': ['RECOMMEND', 'CAUTION', 'RISK'],
       }).toEntity();
-      expect(entity, isA<WeeklyDay>());
-      expect(entity.date, '2026-06-17');
+      expect(entity, isA<MonthlyDay>());
+      expect(entity.day, 17);
       expect(entity.judgements, [
         VerdictLevel.recommend,
         VerdictLevel.caution,
@@ -607,8 +607,8 @@ void main() {
     });
 
     test('judgementList 누락 시 빈 목록으로 폴백된다', () {
-      final entity = WeeklyDayDto.fromJson(const {
-        'date': '2026-06-17',
+      final entity = MonthlyJudgementDto.fromJson(const {
+        'day': 17,
         'dayOfWeek': 'WED',
       }).toEntity();
       expect(entity.judgements, isEmpty);
@@ -616,8 +616,8 @@ void main() {
 
     // 계약: judgementList ≤3 대문자 grade
     test('judgementList는 최대 3개(계약 ≤3) — 3개 모두 매핑된다', () {
-      final entity = WeeklyDayDto.fromJson(const {
-        'date': '2026-06-24',
+      final entity = MonthlyJudgementDto.fromJson(const {
+        'day': 24,
         'dayOfWeek': 'WED',
         'judgementList': ['RECOMMEND', 'CAUTION', 'RISK'],
       }).toEntity();
@@ -627,8 +627,8 @@ void main() {
 
     // 계약: 미지 grade는 unknown 폴백
     test('미지 grade 문자열은 VerdictLevel.unknown으로 폴백된다', () {
-      final entity = WeeklyDayDto.fromJson(const {
-        'date': '2026-06-24',
+      final entity = MonthlyJudgementDto.fromJson(const {
+        'day': 24,
         'dayOfWeek': 'WED',
         'judgementList': ['UNKNOWN', 'NEWGRADE'],
       }).toEntity();
@@ -636,14 +636,15 @@ void main() {
       expect(entity.judgements[1], VerdictLevel.unknown);
     });
 
-    // 계약: dayOfWeek 'WED' 보존
-    test('dayOfWeek 값이 엔티티에 보존된다', () {
-      final entity = WeeklyDayDto.fromJson(const {
-        'date': '2026-06-24',
+    // 계약: dayOfWeek 'WED' 는 DTO에 보존된다 (엔티티는 day만 보관 — 표시월과
+    // 조합한 DateTime 조립은 호출부 책임이므로 dayOfWeek 자체는 엔티티에 없다).
+    test('dayOfWeek 값이 DTO에 보존된다', () {
+      final dto = MonthlyJudgementDto.fromJson(const {
+        'day': 24,
         'dayOfWeek': 'WED',
         'judgementList': ['RECOMMEND'],
-      }).toEntity();
-      expect(entity.dayOfWeek, 'WED');
+      });
+      expect(dto.dayOfWeek, 'WED');
     });
   });
 

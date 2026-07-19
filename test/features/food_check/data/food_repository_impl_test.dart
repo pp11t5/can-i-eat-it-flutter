@@ -89,7 +89,12 @@ Map<String, dynamic> _idJudgmentJson({
       'stateRecords': {
         'total': 2,
         'records': [
-          {'label': '속쓰림', 'date': '2026-06-10', 'timing': '식후 30분'},
+          {
+            'stateRecordId': 1,
+            'label': '속쓰림',
+            'date': '2026-06-10',
+            'timingMinutes': 30,
+          },
         ],
       },
       'substitutes': [

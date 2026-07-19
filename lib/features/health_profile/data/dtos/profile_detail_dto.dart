@@ -7,11 +7,11 @@ part 'profile_detail_dto.g.dart';
 // 계정 제공자
 // ---------------------------------------------------------------------------
 
-/// 계정 제공자. 서버 `provider` 필드(LOCAL|KAKAO)와 매핑.
+/// 계정 제공자. 서버 `provider` 필드(LOCAL|KAKAO|APPLE)와 매핑.
 ///
 /// 현재 화면 표시는 [AuthSession.provider](auth 피처)를 그대로 쓰므로 이 값은
 /// 아직 UI에 연결하지 않는다 — 계약 보존을 위해 DTO 레벨에만 우선 반영.
-enum ProfileProvider { local, kakao, unknown }
+enum ProfileProvider { local, kakao, apple, unknown }
 
 /// [ProfileProvider] 서버 변환 확장.
 extension ProfileProviderMapper on ProfileProvider {
@@ -19,6 +19,7 @@ extension ProfileProviderMapper on ProfileProvider {
   static ProfileProvider fromServer(String v) => switch (v) {
         'LOCAL' => ProfileProvider.local,
         'KAKAO' => ProfileProvider.kakao,
+        'APPLE' => ProfileProvider.apple,
         _ => ProfileProvider.unknown,
       };
 }

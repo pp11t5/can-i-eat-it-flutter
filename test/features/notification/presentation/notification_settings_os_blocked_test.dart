@@ -120,7 +120,8 @@ void main() {
       await tester.tap(masterSwitch);
       await tester.pumpAndSettle();
 
-      expect(mock.toggleCalls, contains(NotificationToggleType.marketing));
+      // 마케팅 토글은 별도 경로(toggleMarketingConsent)를 호출한다 (A2).
+      expect(mock.marketingToggleCalls, contains(false));
     });
 
     testWidgets('"설정 바로 가기" 탭 시 openAppSettingsProvider 콜백이 호출된다',

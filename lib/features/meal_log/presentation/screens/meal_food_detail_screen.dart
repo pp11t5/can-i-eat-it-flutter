@@ -54,7 +54,7 @@ class MealFoodDetailScreen extends ConsumerWidget {
       if (!context.mounted) return;
       // 마지막 음식이면 서버가 식사도 삭제 → 타임라인/weekly invalidate로 동기화.
       ref.invalidate(timelineControllerProvider);
-      ref.invalidate(weeklyControllerProvider);
+      ref.invalidate(monthlyControllerProvider);
       // 부모 식사 상세가 떠 있을 수 있으므로 식사상세 family도 무효화.
       ref.invalidate(mealRecordDetailControllerProvider);
       showAppToast(context, '음식을 삭제했어요.');

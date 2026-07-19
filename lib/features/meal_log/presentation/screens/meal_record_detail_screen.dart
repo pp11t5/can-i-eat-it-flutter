@@ -15,6 +15,7 @@ import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/state_record_card.dart';
+import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_write_screen.dart';
 
 /// 식사 상세 화면 (GET /meal-records/{mealRecordId}).
 ///
@@ -43,6 +44,15 @@ class MealRecordDetailScreen extends ConsumerWidget {
     }
   }
 
+  /// 증상 기록 프리필용 식사 표시명 ("첫 음식명 외 N개 음식").
+  /// [unrecorded_meals_screen.dart]의 `_mealDisplayName`과 동일 패턴.
+  static String _mealDisplayName(MealRecord record) {
+    if (record.foods.isEmpty) return '';
+    final first = record.foods.first.name;
+    final rest = record.foods.length - 1;
+    return rest > 0 ? '$first 외 $rest개 음식' : first;
+  }
+
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
     // Figma 2469:9839 — 무확인 즉시삭제 방지. Primary(초록)="취소하기",
     // Secondary(빨강)="삭제하기"(파괴 액션). secondary 선택 시에만 진행.
@@ -64,7 +74,7 @@ class MealRecordDetailScreen extends ConsumerWidget {
           .deleteMeal();
       if (!context.mounted) return;
       ref.invalidate(timelineControllerProvider);
-      ref.invalidate(weeklyControllerProvider);
+      ref.invalidate(monthlyControllerProvider);
       showAppToast(context, '식사를 삭제했어요.');
       context.pop();
     } catch (_) {
@@ -146,23 +156,133 @@ class _Body extends StatelessWidget {
               onTap: () => context.push('/meal/food/${food.mealFoodId}'),
             ),
           ),
-          if (record.stateRecords.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.sectionGap),
-            Text(
-              '${record.stateRecords.length}개의 증상 기록',
-              style: AppTextStyles.body1Bold.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.itemGap),
-            ...record.stateRecords.map(
-              (r) => Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.itemGap),
-                child: StateRecordCard(record: r),
-              ),
-            ),
-          ],
+          const SizedBox(height: AppSpacing.sectionGap),
+          _SymptomSection(record: record),
         ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 증상 섹션 (기록 있음: 목록 / 기록 없음: 빈 상태 카드, Figma 2221-4405)
+// ---------------------------------------------------------------------------
+
+class _SymptomSection extends StatelessWidget {
+  const _SymptomSection({required this.record});
+
+  final MealRecord record;
+
+  void _goToSymptomRecord(BuildContext context) {
+    context.push(
+      '/symptom/record',
+      extra: SymptomWriteArgs(
+        initialMealRecordId: record.mealRecordId,
+        initialMealName: MealRecordDetailScreen._mealDisplayName(record),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (record.stateRecords.isNotEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${record.stateRecords.length}개의 증상 기록',
+            style: AppTextStyles.body1Bold.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.itemGap),
+          ...record.stateRecords.map(
+            (r) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.itemGap),
+              child: StateRecordCard(record: r),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '증상 기록',
+          style: AppTextStyles.body1Bold.copyWith(
+            height: 1.5,
+            letterSpacing: 0,
+            color: const Color(0xFF4D4D59),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.itemGap),
+        _SymptomEmptyCard(onTap: () => _goToSymptomRecord(context)),
+      ],
+    );
+  }
+}
+
+/// 증상 미기록 빈 상태 카드 — 카드 전체 탭 시 증상 기록 화면으로 이동.
+class _SymptomEmptyCard extends StatelessWidget {
+  const _SymptomEmptyCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.borderCard),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.cardPadding),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  // TODO(design): 전용 disable 얼굴 일러스트가 확정되면 교체.
+                  // 현재는 회색 틴팅한 sad 아이콘(ic_sad.svg)으로 근사.
+                  const AppIcon(
+                    AppIcons.sad,
+                    size: AppIconSizes.s32,
+                    color: AppColors.textTertiary,
+                  ),
+                  const SizedBox(width: AppSpacing.itemGap),
+                  Text(
+                    '아직 기록된 증상이 없어요',
+                    style: AppTextStyles.body2Bold.copyWith(
+                      color: AppColors.textStrong,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Text(
+                    '증상 기록',
+                    style: AppTextStyles.body2Medium.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.itemGap),
+                  const AppIcon(
+                    AppIcons.chevronRight,
+                    size: AppIconSizes.s24,
+                    color: AppColors.textTertiary,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

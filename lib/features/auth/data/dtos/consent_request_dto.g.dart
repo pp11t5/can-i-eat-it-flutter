@@ -6,18 +6,26 @@ part of 'consent_request_dto.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+_ConsentItemDto _$ConsentItemDtoFromJson(Map<String, dynamic> json) =>
+    _ConsentItemDto(
+      termId: (json['termId'] as num).toInt(),
+      agreed: json['agreed'] as bool,
+    );
+
+Map<String, dynamic> _$ConsentItemDtoToJson(_ConsentItemDto instance) =>
+    <String, dynamic>{
+      'termId': instance.termId,
+      'agreed': instance.agreed,
+    };
+
 _ConsentRequestDto _$ConsentRequestDtoFromJson(Map<String, dynamic> json) =>
     _ConsentRequestDto(
-      tos: json['tos'] as bool,
-      privacy: json['privacy'] as bool,
-      healthSensitive: json['healthSensitive'] as bool,
-      marketing: json['marketing'] as bool,
+      consents: (json['consents'] as List<dynamic>)
+          .map((e) => ConsentItemDto.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$ConsentRequestDtoToJson(_ConsentRequestDto instance) =>
     <String, dynamic>{
-      'tos': instance.tos,
-      'privacy': instance.privacy,
-      'healthSensitive': instance.healthSensitive,
-      'marketing': instance.marketing,
+      'consents': instance.consents,
     };

@@ -100,3 +100,15 @@ class FoodNotFoundFailure extends Failure {
   const FoodNotFoundFailure(
       [super.message = '해당 음식을 찾을 수 없어요.']);
 }
+
+// ---------------------------------------------------------------------------
+// 마이페이지 관련 Failure (D3, PATCH /my-page/nickname)
+// ---------------------------------------------------------------------------
+
+/// 닉네임 중복 (HTTP 409) — PATCH /my-page/nickname.
+///
+/// 서버 `code` 문자열이 확정되지 않아 FailureMapper 테이블이 아닌
+/// MyPageRepositoryImpl.updateNickname에서 HTTP status 409를 직접 감지해 던진다.
+class DuplicateNicknameFailure extends Failure {
+  const DuplicateNicknameFailure([super.message = '이미 사용 중인 이름이에요.']);
+}

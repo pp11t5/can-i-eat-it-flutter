@@ -90,7 +90,7 @@ class SymptomDetailScreen extends ConsumerWidget {
           .deleteSymptom();
       if (!context.mounted) return;
       ref.invalidate(timelineControllerProvider);
-      ref.invalidate(weeklyControllerProvider);
+      ref.invalidate(monthlyControllerProvider);
       showAppToast(context, '증상 기록을 삭제했어요.');
       context.pop();
     } catch (_) {

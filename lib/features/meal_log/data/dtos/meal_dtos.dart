@@ -301,27 +301,31 @@ abstract final class TimelineItemDto {
 }
 
 // ---------------------------------------------------------------------------
-// WeeklyDayDto
+// MonthlyJudgementDto
 // ---------------------------------------------------------------------------
 
-/// 주간 도트 DTO (GET /timeline/weekly result[] 항목).
+/// 월별 판정 집계 DTO (GET /timeline/monthly?month=yyyy-MM result[] 항목).
+///
+/// 서버는 `date`(전체 일자 문자열)가 아닌 `day:int`만 내려준다. 표시월(연/월)은
+/// 호출부(화면)가 이미 알고 있으므로 DTO/엔티티는 day만 보관하고, 실제
+/// `DateTime` 조립은 화면(TimelineScreen._buildDotsByDate)이 표시월과 결합해
+/// 수행한다(구 WeeklyDayDto{date:String} 대체).
 @freezed
-abstract class WeeklyDayDto with _$WeeklyDayDto {
-  const factory WeeklyDayDto({
-    required String date,
+abstract class MonthlyJudgementDto with _$MonthlyJudgementDto {
+  const factory MonthlyJudgementDto({
+    required int day,
     required String dayOfWeek,
-    // 서버 키 'judgementList'와 필드명 동일 → JsonKey 불필요.
+    // 서버 키 'judgementList'와 필드명 동일 → JsonKey 불필요. 최대 3개.
     @Default(<String>[]) List<String> judgementList,
-  }) = _WeeklyDayDto;
+  }) = _MonthlyJudgementDto;
 
-  factory WeeklyDayDto.fromJson(Map<String, dynamic> json) =>
-      _$WeeklyDayDtoFromJson(json);
+  factory MonthlyJudgementDto.fromJson(Map<String, dynamic> json) =>
+      _$MonthlyJudgementDtoFromJson(json);
 }
 
-extension WeeklyDayDtoMapper on WeeklyDayDto {
-  WeeklyDay toEntity() => WeeklyDay(
-        date: date,
-        dayOfWeek: dayOfWeek,
+extension MonthlyJudgementDtoMapper on MonthlyJudgementDto {
+  MonthlyDay toEntity() => MonthlyDay(
+        day: day,
         judgements: judgementList.map(VerdictLevelGrade.fromGrade).toList(),
       );
 }

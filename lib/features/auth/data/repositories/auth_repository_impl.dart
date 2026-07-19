@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import 'package:can_i_eat_it/core/config/terms_catalog.dart';
 import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/core/network/api_endpoints.dart';
 import 'package:can_i_eat_it/core/network/failure_mapper.dart';
@@ -8,6 +9,7 @@ import 'package:can_i_eat_it/features/auth/data/dtos/auth_login_response_dto.dar
 import 'package:can_i_eat_it/features/auth/data/dtos/auth_me_response_dto.dart';
 import 'package:can_i_eat_it/features/auth/data/dtos/consent_request_dto.dart';
 import 'package:can_i_eat_it/features/auth/data/dtos/onboarding_status_dto.dart';
+import 'package:can_i_eat_it/features/auth/data/dtos/term_response_dto.dart';
 import 'package:can_i_eat_it/features/auth/data/services/apple_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/data/services/kakao_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
@@ -95,7 +97,52 @@ class AuthRepositoryImpl implements AuthRepository {
         'recordTermsAgreement: 활성 세션이 없습니다. signIn 후 호출해야 합니다.',
       );
     }
-    final dto = ConsentRequestDto.fromEntity(agreement);
+
+    // 1) GET /consent/terms — termId 조인용 약관 목록. 하드코딩 절대 금지(규제성).
+    //    폴백 없이 실패 시 재시도 유도(원인과 무관하게 동일 메시지로 통일).
+    final List<TermResponseDto> terms;
+    try {
+      final response = await _dio.get<dynamic>(ApiEndpoints.consentTerms);
+      final items = unwrap<List<dynamic>>(
+        response,
+        (json) => json as List<dynamic>,
+      );
+      terms = items
+          .map((e) => TermResponseDto.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      throw const NetworkFailure('약관 정보를 불러오지 못했어요. 다시 시도해 주세요');
+    }
+
+    // 2) 서버 term.code → 로컬 슬롯 매핑 + requiredButNotAgreed 로컬 검증.
+    //    required=true 인데 (a) agreed=false 이거나 (b) UI 미표시(미인식) code 면
+    //    무성 400 대신 여기서 명시적으로 실패시킨다.
+    final consents = <ConsentItemDto>[];
+    for (final term in terms) {
+      final agreed = _resolveLocalAgreement(term.code, agreement);
+      if (agreed == null) {
+        // 로컬 UI가 표시하지 않는(미인식) code.
+        if (term.isRequired) {
+          // 서버 필수 약관 code 를 로컬이 인식하지 못함(앱-서버 약관 드리프트).
+          // 실제 사용자 미동의(아래 :132)와 구분되는 메시지 — 코드 매핑 오류를
+          // 사용자 미동의로 오귀속하지 않도록 함(PR #179 리뷰 H1).
+          throw const NetworkFailure(
+            '약관 정보를 처리할 수 없어요. 앱을 최신 버전으로 업데이트해 주세요.',
+          );
+        }
+        // 선택 항목이면 대응 로컬 슬롯이 없으므로 consents에서 생략.
+        continue;
+      }
+      if (term.isRequired && !agreed) {
+        throw const NetworkFailure('필수 약관에 모두 동의해야 계속할 수 있어요.');
+      }
+      consents.add(ConsentItemDto(termId: term.id, agreed: agreed));
+    }
+    // 서버가 아직 약관을 시드하지 않은 경우(현재 dev: GET /consent/terms → [])
+    // consents 는 빈 배열이 된다 — 전방호환 정상 동작(서버 시드 시 자동 반영).
+
+    // 3) POST /consent
+    final dto = ConsentRequestDto(consents: consents);
     try {
       final response = await _dio.post<dynamic>(
         ApiEndpoints.consent,
@@ -106,6 +153,25 @@ class AuthRepositoryImpl implements AuthRepository {
       throw FailureMapper.fromDioException(e);
     }
     _session = _session!.copyWith(hasAgreedTerms: true);
+  }
+
+  /// 서버 약관 [code] → 로컬 [TermsAgreement] 슬롯 매핑.
+  ///
+  /// 반환값 `null`은 미인식 code(로컬 UI가 표시하지 않는 약관 항목)를 뜻하며
+  /// 호출부가 [TermResponseDto.isRequired] 여부에 따라 처리한다.
+  bool? _resolveLocalAgreement(String code, TermsAgreement agreement) {
+    switch (code) {
+      case TermsCatalogCodes.tos:
+        return agreement.termsOfService;
+      case TermsCatalogCodes.privacy:
+        return agreement.privacy;
+      case TermsCatalogCodes.healthSensitive:
+        return agreement.sensitiveInfo;
+      case TermsCatalogCodes.marketing:
+        return agreement.marketing;
+      default:
+        return null;
+    }
   }
 
   @override

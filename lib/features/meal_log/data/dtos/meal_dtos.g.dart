@@ -155,9 +155,9 @@ Map<String, dynamic> _$ConnectedSymptomsDtoToJson(
       'etcCount': instance.etcCount,
     };
 
-_WeeklyDayDto _$WeeklyDayDtoFromJson(Map<String, dynamic> json) =>
-    _WeeklyDayDto(
-      date: json['date'] as String,
+_MonthlyJudgementDto _$MonthlyJudgementDtoFromJson(Map<String, dynamic> json) =>
+    _MonthlyJudgementDto(
+      day: (json['day'] as num).toInt(),
       dayOfWeek: json['dayOfWeek'] as String,
       judgementList: (json['judgementList'] as List<dynamic>?)
               ?.map((e) => e as String)
@@ -165,9 +165,10 @@ _WeeklyDayDto _$WeeklyDayDtoFromJson(Map<String, dynamic> json) =>
           const <String>[],
     );
 
-Map<String, dynamic> _$WeeklyDayDtoToJson(_WeeklyDayDto instance) =>
+Map<String, dynamic> _$MonthlyJudgementDtoToJson(
+        _MonthlyJudgementDto instance) =>
     <String, dynamic>{
-      'date': instance.date,
+      'day': instance.day,
       'dayOfWeek': instance.dayOfWeek,
       'judgementList': instance.judgementList,
     };

@@ -315,9 +315,10 @@ class __$VerdictItemCopyWithImpl<$Res> implements _$VerdictItemCopyWith<$Res> {
 
 /// @nodoc
 mixin _$VerdictStateRecord {
+  int get stateRecordId;
   String get label;
   String get date; // "YYYY-MM-DD" 문자열 그대로 (표시 전용)
-  String get timing;
+  int get timingMinutes;
 
   /// Create a copy of VerdictStateRecord
   /// with the given fields replaced by the non-null parameter values.
@@ -332,17 +333,21 @@ mixin _$VerdictStateRecord {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is VerdictStateRecord &&
+            (identical(other.stateRecordId, stateRecordId) ||
+                other.stateRecordId == stateRecordId) &&
             (identical(other.label, label) || other.label == label) &&
             (identical(other.date, date) || other.date == date) &&
-            (identical(other.timing, timing) || other.timing == timing));
+            (identical(other.timingMinutes, timingMinutes) ||
+                other.timingMinutes == timingMinutes));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, label, date, timing);
+  int get hashCode =>
+      Object.hash(runtimeType, stateRecordId, label, date, timingMinutes);
 
   @override
   String toString() {
-    return 'VerdictStateRecord(label: $label, date: $date, timing: $timing)';
+    return 'VerdictStateRecord(stateRecordId: $stateRecordId, label: $label, date: $date, timingMinutes: $timingMinutes)';
   }
 }
 
@@ -352,7 +357,7 @@ abstract mixin class $VerdictStateRecordCopyWith<$Res> {
           VerdictStateRecord value, $Res Function(VerdictStateRecord) _then) =
       _$VerdictStateRecordCopyWithImpl;
   @useResult
-  $Res call({String label, String date, String timing});
+  $Res call({int stateRecordId, String label, String date, int timingMinutes});
 }
 
 /// @nodoc
@@ -368,11 +373,16 @@ class _$VerdictStateRecordCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? stateRecordId = null,
     Object? label = null,
     Object? date = null,
-    Object? timing = null,
+    Object? timingMinutes = null,
   }) {
     return _then(_self.copyWith(
+      stateRecordId: null == stateRecordId
+          ? _self.stateRecordId
+          : stateRecordId // ignore: cast_nullable_to_non_nullable
+              as int,
       label: null == label
           ? _self.label
           : label // ignore: cast_nullable_to_non_nullable
@@ -381,10 +391,10 @@ class _$VerdictStateRecordCopyWithImpl<$Res>
           ? _self.date
           : date // ignore: cast_nullable_to_non_nullable
               as String,
-      timing: null == timing
-          ? _self.timing
-          : timing // ignore: cast_nullable_to_non_nullable
-              as String,
+      timingMinutes: null == timingMinutes
+          ? _self.timingMinutes
+          : timingMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -482,13 +492,16 @@ extension VerdictStateRecordPatterns on VerdictStateRecord {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String label, String date, String timing)? $default, {
+    TResult Function(
+            int stateRecordId, String label, String date, int timingMinutes)?
+        $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _VerdictStateRecord() when $default != null:
-        return $default(_that.label, _that.date, _that.timing);
+        return $default(
+            _that.stateRecordId, _that.label, _that.date, _that.timingMinutes);
       case _:
         return orElse();
     }
@@ -509,12 +522,15 @@ extension VerdictStateRecordPatterns on VerdictStateRecord {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String label, String date, String timing) $default,
+    TResult Function(
+            int stateRecordId, String label, String date, int timingMinutes)
+        $default,
   ) {
     final _that = this;
     switch (_that) {
       case _VerdictStateRecord():
-        return $default(_that.label, _that.date, _that.timing);
+        return $default(
+            _that.stateRecordId, _that.label, _that.date, _that.timingMinutes);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -534,12 +550,15 @@ extension VerdictStateRecordPatterns on VerdictStateRecord {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String label, String date, String timing)? $default,
+    TResult? Function(
+            int stateRecordId, String label, String date, int timingMinutes)?
+        $default,
   ) {
     final _that = this;
     switch (_that) {
       case _VerdictStateRecord() when $default != null:
-        return $default(_that.label, _that.date, _that.timing);
+        return $default(
+            _that.stateRecordId, _that.label, _that.date, _that.timingMinutes);
       case _:
         return null;
     }
@@ -548,17 +567,23 @@ extension VerdictStateRecordPatterns on VerdictStateRecord {
 
 /// @nodoc
 
-class _VerdictStateRecord implements VerdictStateRecord {
+class _VerdictStateRecord extends VerdictStateRecord {
   const _VerdictStateRecord(
-      {required this.label, required this.date, required this.timing});
+      {required this.stateRecordId,
+      required this.label,
+      required this.date,
+      required this.timingMinutes})
+      : super._();
 
+  @override
+  final int stateRecordId;
   @override
   final String label;
   @override
   final String date;
 // "YYYY-MM-DD" 문자열 그대로 (표시 전용)
   @override
-  final String timing;
+  final int timingMinutes;
 
   /// Create a copy of VerdictStateRecord
   /// with the given fields replaced by the non-null parameter values.
@@ -573,17 +598,21 @@ class _VerdictStateRecord implements VerdictStateRecord {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _VerdictStateRecord &&
+            (identical(other.stateRecordId, stateRecordId) ||
+                other.stateRecordId == stateRecordId) &&
             (identical(other.label, label) || other.label == label) &&
             (identical(other.date, date) || other.date == date) &&
-            (identical(other.timing, timing) || other.timing == timing));
+            (identical(other.timingMinutes, timingMinutes) ||
+                other.timingMinutes == timingMinutes));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, label, date, timing);
+  int get hashCode =>
+      Object.hash(runtimeType, stateRecordId, label, date, timingMinutes);
 
   @override
   String toString() {
-    return 'VerdictStateRecord(label: $label, date: $date, timing: $timing)';
+    return 'VerdictStateRecord(stateRecordId: $stateRecordId, label: $label, date: $date, timingMinutes: $timingMinutes)';
   }
 }
 
@@ -595,7 +624,7 @@ abstract mixin class _$VerdictStateRecordCopyWith<$Res>
       __$VerdictStateRecordCopyWithImpl;
   @override
   @useResult
-  $Res call({String label, String date, String timing});
+  $Res call({int stateRecordId, String label, String date, int timingMinutes});
 }
 
 /// @nodoc
@@ -611,11 +640,16 @@ class __$VerdictStateRecordCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
+    Object? stateRecordId = null,
     Object? label = null,
     Object? date = null,
-    Object? timing = null,
+    Object? timingMinutes = null,
   }) {
     return _then(_VerdictStateRecord(
+      stateRecordId: null == stateRecordId
+          ? _self.stateRecordId
+          : stateRecordId // ignore: cast_nullable_to_non_nullable
+              as int,
       label: null == label
           ? _self.label
           : label // ignore: cast_nullable_to_non_nullable
@@ -624,10 +658,10 @@ class __$VerdictStateRecordCopyWithImpl<$Res>
           ? _self.date
           : date // ignore: cast_nullable_to_non_nullable
               as String,
-      timing: null == timing
-          ? _self.timing
-          : timing // ignore: cast_nullable_to_non_nullable
-              as String,
+      timingMinutes: null == timingMinutes
+          ? _self.timingMinutes
+          : timingMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
