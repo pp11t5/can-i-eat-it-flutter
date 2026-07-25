@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/features/food_check/data/repositories/mock_food_repository.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/recent_food.dart';
-import 'package:can_i_eat_it/features/food_check/domain/repositories/food_repository.dart';
 
 RecentFood _item(int id, String query, DateTime searchedAt) => RecentFood(
       id: id,
