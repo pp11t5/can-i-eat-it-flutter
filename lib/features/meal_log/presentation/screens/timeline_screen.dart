@@ -19,14 +19,15 @@ import 'package:can_i_eat_it/features/meal_log/presentation/widgets/meal_timelin
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/week_nav.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/week_strip.dart';
 
-/// 식사 타임라인 화면 (횡스크롤 월 캘린더 재설계).
+/// 식사 타임라인 화면 (횡스크롤 연속 날짜 스트립).
 ///
 /// 구조:
 /// - MonthNav: 월 네비게이션 (이전/다음 달 이동 + 캘린더 팝업 진입)
-/// - WeekStrip: 해당월 1일~말일 횡스크롤 단일행 (오늘/선택일 강조, 도트 표시)
+/// - WeekStrip: 오늘부터 연속 횡스크롤 (월 경계로 끊지 않음). 날짜 탭 시
+///   상단 YYYY년 M월 라벨([_visibleMonth])이 해당 연/월로 갱신.
 /// - CalendarPopup: MonthNav 우측 캘린더 아이콘 탭 시 모달 진입
 /// - 타임라인 리스트: AsyncValue.when (loading → 스켈레톤, error → 재시도, data → 그룹 타일)
-/// - FAB 자리: 비배선 placeholder (F3-2c에서 연결)
+/// - FAB: 기록 추가 액션 시트
 ///
 /// 하단 탭은 AppShell(StatefulShellRoute)이 제공 — 이 화면에서 중복 추가 금지.
 ///
@@ -64,18 +65,25 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
     return DateTime(k.year, k.month, k.day);
   }
 
-  /// [month]가 [today]가 속한 월보다 이전이면 true — 다음 달 이동 가능 여부
-  /// (현실 시간 기준 미래 월로는 이동할 수 없음, MonthNav의 `›` 숨김에도 사용).
-  bool _canGoNextFrom(DateTime month, DateTime today) {
+  /// [month]가 오늘 월보다 이후이면 true — 이전 달(과거 전용 월) 이동 가능 여부.
+  bool _canGoPrevFrom(DateTime month, DateTime today) {
     return DateTime(month.year, month.month)
-        .isBefore(DateTime(today.year, today.month));
+        .isAfter(DateTime(today.year, today.month));
+  }
+
+  /// 오늘·이후 날짜 선택 허용 → 미래 월 이동은 항상 가능.
+  bool _canGoNextFrom(DateTime month, DateTime today) {
+    // 시그니처 유지(MonthNav 대칭). 미래 월 상한 없음.
+    return true;
   }
 
   void _onPrevMonth() {
+    final today = _today();
+    if (!_canGoPrevFrom(_visibleMonth, today)) return; // 오늘 월 이전 차단
     final newMonth = DateTime(_visibleMonth.year, _visibleMonth.month - 1, 1);
-    // 이전 달로 이동하면 선택일 = 그 달의 말일 (전월 말일은 항상 오늘보다
-    // 과거이므로 항상 유효 — 미래 월 자체는 canGoNext 가드로 막혀 있음).
-    final newSelected = DateTime(newMonth.year, newMonth.month + 1, 0);
+    // 이전 달로 이동 시 선택일: 그 달 1일, 단 오늘보다 과거면 오늘로 보정.
+    var newSelected = DateTime(newMonth.year, newMonth.month, 1);
+    if (newSelected.isBefore(today)) newSelected = today;
     setState(() {
       _visibleMonth = newMonth;
       _selectedDate = newSelected;
@@ -84,9 +92,8 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
   }
 
   void _onNextMonth() {
-    if (!_canGoNextFrom(_visibleMonth, _today())) return; // 미래월 진입 차단
     final newMonth = DateTime(_visibleMonth.year, _visibleMonth.month + 1, 1);
-    // 다음 달로 이동하면 선택일 = 그 달의 1일.
+    // 다음 달로 이동하면 선택일 = 그 달의 1일 (미래 월이면 항상 선택 가능).
     setState(() {
       _visibleMonth = newMonth;
       _selectedDate = newMonth;
@@ -95,11 +102,17 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
   }
 
   void _onDaySelected(DateTime day) {
+    final today = _today();
+    final d = DateTime(day.year, day.month, day.day);
+    // 오늘 이전은 선택 불가.
+    if (d.isBefore(today)) return;
     if (_isSameDay(day, _selectedDate)) return;
     setState(() {
-      _selectedDate = day;
+      _selectedDate = d;
+      // 스트립 탭 시 상단 "YYYY년 M월" 을 선택 일의 연/월로 동기화.
+      _visibleMonth = DateTime(d.year, d.month, 1);
     });
-    _reloadTimeline(day);
+    _reloadTimeline(d);
   }
 
   Future<void> _openCalendarPopup() async {
@@ -157,12 +170,12 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
                     onPrevMonth: _onPrevMonth,
                     onNextMonth: _onNextMonth,
                     onOpenCalendar: _openCalendarPopup,
+                    canGoPrev: _canGoPrevFrom(_visibleMonth, _today()),
                     canGoNext: _canGoNextFrom(_visibleMonth, _today()),
                   ),
                   const SizedBox(height: AppSpacing.itemGap),
-                  // 횡스크롤 월 캘린더 — monthly() 연동 도트
+                  // 연속 횡스크롤 날짜 스트립 — monthly() 연동 도트
                   WeekStrip(
-                    visibleMonth: _visibleMonth,
                     selectedDate: _selectedDate,
                     today: _today(),
                     dotsByDate: _buildDotsByDate(monthlyAsync.valueOrNull),
