@@ -32,20 +32,19 @@ void main() {
     test('withRecent 팩토리는 초기 최근검색 목록을 반환한다', () async {
       final items = [
         RecentFood(
-          foodExternalId: 'food-1',
-          name: '두부',
+          id: 1,
+          query: '두부',
           searchedAt: DateTime(2026, 6, 1),
         ),
         RecentFood(
-          foodExternalId: 'food-2',
-          name: '된장찌개',
+          id: 2,
+          query: '된장찌개',
           searchedAt: DateTime(2026, 6, 2),
         ),
       ];
       final repo = MockFoodRepository.withRecent(items);
       final results = await repo.recentSearches();
-      expect(
-          results.map((r) => r.foodExternalId), equals(['food-1', 'food-2']));
+      expect(results.map((r) => r.id), equals([1, 2]));
     });
   });
 
@@ -128,32 +127,6 @@ void main() {
       final repo = MockFoodRepository.empty();
       final result = await repo.judgeById('food-ext-1');
       expect(result, isA<EatVerdict>());
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  group('addRecent — 최대 개수 제한', () {
-    test('10개 이하일 때는 모두 유지된다', () async {
-      final repo = MockFoodRepository.empty();
-      for (var i = 1; i <= 10; i++) {
-        await repo.addRecent('food-$i');
-      }
-      expect((await repo.recentSearches()).length, equals(10));
-    });
-
-    test('11번째 항목을 추가하면 오래된 항목이 잘려 목록이 10개로 유지된다', () async {
-      final repo = MockFoodRepository.empty();
-      for (var i = 1; i <= 10; i++) {
-        await repo.addRecent('food-$i');
-      }
-      await repo.addRecent('food-new');
-      final results = await repo.recentSearches();
-      expect(results.length, equals(10));
-      expect(results.first.foodExternalId, equals('food-new'));
-      expect(
-        results.map((r) => r.foodExternalId),
-        isNot(contains('food-1')),
-      );
     });
   });
 }

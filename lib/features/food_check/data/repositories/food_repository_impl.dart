@@ -12,7 +12,7 @@ import 'package:can_i_eat_it/features/food_check/domain/repositories/food_reposi
 
 /// [FoodRepository] 실 서버 구현 (ADR-0007 §3-1 (5), 수기 dio).
 ///
-/// - search / recent CRUD: 실 `/foods/*` 엔드포인트.
+/// - search / recent 조회·삭제: 실 `/foods/*` 엔드포인트.
 /// - judgeByText: GET /foods/judgment?name= (W3-3 충실 정합).
 /// - judgeById: GET /foods/{foodExternalId}/judgment (W3-3 충실 정합).
 ///
@@ -118,23 +118,10 @@ class FoodRepositoryImpl implements FoodRepository {
   }
 
   @override
-  Future<void> addRecent(String foodExternalId) async {
-    try {
-      final response = await _dio.post<dynamic>(
-        ApiEndpoints.foodsRecent,
-        data: {'foodExternalId': foodExternalId},
-      );
-      unwrapVoid(response);
-    } on DioException catch (e) {
-      throw FailureMapper.fromDioException(e);
-    }
-  }
-
-  @override
-  Future<void> removeRecent(String foodExternalId) async {
+  Future<void> removeRecent(int id) async {
     try {
       final response = await _dio.delete<dynamic>(
-        ApiEndpoints.foodsRecentItem(foodExternalId),
+        ApiEndpoints.foodsRecentItem(id),
       );
       unwrapVoid(response);
     } on DioException catch (e) {

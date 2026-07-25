@@ -46,15 +46,13 @@ Map<String, dynamic> _searchResultJson({
     {'foods': foods, 'hasExactMatch': hasExactMatch};
 
 Map<String, dynamic> _recentFoodJson({
-  String id = 'f-1',
-  String name = '두부',
-  String? category = '한식',
+  int id = 1,
+  String query = '두부',
   String searchedAt = '2026-06-01T12:00:00.000Z',
 }) =>
     {
-      'foodExternalId': id,
-      'name': name,
-      'category': category,
+      'id': id,
+      'query': query,
       'searchedAt': searchedAt,
     };
 
@@ -291,8 +289,8 @@ void main() {
       final results = await repo.recentSearches();
 
       expect(results.length, 1);
-      expect(results.first.foodExternalId, 'f-1');
-      expect(results.first.name, '두부');
+      expect(results.first.id, 1);
+      expect(results.first.query, '두부');
       expect(results.first.searchedAt, isA<DateTime>());
     });
 
@@ -307,43 +305,31 @@ void main() {
       expect(results, isEmpty);
     });
 
-    test('category null 이어도 toEntity 성공', () async {
+    test('서버 recent DTO(id·query·searchedAt)를 파싱한다', () async {
       adapter.onGet(
         ApiEndpoints.foodsRecent,
         (server) => server.reply(
           200,
-          _envelope([_recentFoodJson(category: null)]),
+          _envelope([_recentFoodJson(id: 42, query: '된장찌개')]),
         ),
         queryParameters: {'size': 10},
       );
 
       final results = await repo.recentSearches();
-      expect(results.first.category, isNull);
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  group('addRecent — 경로 + 바디', () {
-    test('POST /foods/recent {foodExternalId} 성공', () async {
-      adapter.onPost(
-        ApiEndpoints.foodsRecent,
-        (server) => server.reply(200, _envelope(null)),
-        data: {'foodExternalId': 'f-1'},
-      );
-
-      await expectLater(repo.addRecent('f-1'), completes);
+      expect(results.first.id, 42);
+      expect(results.first.query, '된장찌개');
     });
   });
 
   // -------------------------------------------------------------------------
   group('removeRecent — 경로', () {
-    test('DELETE /foods/recent/f-1 성공', () async {
+    test('DELETE /foods/recent/{id} 성공', () async {
       adapter.onDelete(
-        ApiEndpoints.foodsRecentItem('f-1'),
+        ApiEndpoints.foodsRecentItem(42),
         (server) => server.reply(200, _envelope(null)),
       );
 
-      await expectLater(repo.removeRecent('f-1'), completes);
+      await expectLater(repo.removeRecent(42), completes);
     });
   });
 

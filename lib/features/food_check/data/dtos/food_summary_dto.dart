@@ -9,7 +9,7 @@ part 'food_summary_dto.g.dart';
 ///
 /// 서버 JSON 필드: camelCase.
 /// - 검색(search): 키 이름이 'externalId' → 필드명을 externalId로 선언.
-/// - 최근 조회(recent)는 [RecentFoodDto] 참조 (키 이름 'foodExternalId', 변경 금지).
+/// - 최근 조회(recent)는 [RecentFoodDto]를 사용하며 검색 기록 id·query를 별도 보관한다.
 /// entity 변환: [toEntity].
 @freezed
 abstract class FoodSummaryDto with _$FoodSummaryDto {

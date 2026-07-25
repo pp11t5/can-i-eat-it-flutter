@@ -48,16 +48,10 @@ abstract interface class FoodRepository {
   /// 대응 API: GET /foods/recent?size=[size]
   Future<List<RecentFood>> recentSearches({int size = kRecentFoodMaxCount});
 
-  /// 최근 검색 항목을 추가한다.
-  ///
-  /// [foodExternalId]: 서버측 음식 식별자.
-  /// 대응 API: POST /foods/recent { "foodExternalId": [foodExternalId] }
-  Future<void> addRecent(String foodExternalId);
-
   /// 특정 최근 검색 항목을 제거한다. 존재하지 않으면 무시한다.
   ///
-  /// 대응 API: DELETE /foods/recent/{foodExternalId}
-  Future<void> removeRecent(String foodExternalId);
+  /// 대응 API: DELETE /foods/recent/{id}
+  Future<void> removeRecent(int id);
 
   /// 모든 최근 검색 항목을 삭제한다.
   ///
