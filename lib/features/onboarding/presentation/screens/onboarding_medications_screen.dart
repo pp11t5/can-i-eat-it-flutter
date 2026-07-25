@@ -59,232 +59,313 @@ class _OnboardingMedicationsScreenState
     final isLoading = submitState is AsyncLoading;
     final hasError = submitState is AsyncError;
 
-    return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── 탑바 (Figma — 64px-high TopBar, chevron 세로 중앙) ────────────
-            SizedBox(
-              height: 64,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.screenPadding,
-                ),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: GestureDetector(
-                    onTap: () => context.canPop()
-                        ? context.pop()
-                        : context.go('/onboarding/condition'),
-                    child: SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: SvgPicture.asset(
-                        'assets/figma_extracted/chevron_left.svg',
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      behavior: HitTestBehavior.translucent,
+      child: Scaffold(
+        backgroundColor: AppColors.scaffoldBackground,
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── 탑바 (Figma — 64px-high TopBar, chevron 세로 중앙) ────────────
+              SizedBox(
+                height: 64,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screenPadding,
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: GestureDetector(
+                      onTap: () => context.canPop()
+                          ? context.pop()
+                          : context.go('/onboarding/condition'),
+                      child: SizedBox(
                         width: 32,
                         height: 32,
+                        child: SvgPicture.asset(
+                          'assets/figma_extracted/chevron_left.svg',
+                          width: 32,
+                          height: 32,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            // ── TopBar 하단 구분선 (Figma gray/30 #F5F5F5) ────────────────────
-            Container(height: 1, color: const Color(0xFFF5F5F5)),
-            // ── StepProgress (0px gap after TopBar per Figma, 16px 유지) ──────
-            const Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-              ),
-              child: StepProgress(currentStep: 4, totalSteps: 4),
-            ),
-            const SizedBox(height: AppSpacing.sectionGap),
-            // ── Title (Figma p4 한정: 가로 padding 24px) ──────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '알레르기와 복용 중인 약을\n알려주세요',
-                    style: AppTextStyles.header1Bold.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '없으면 완료를 눌러주세요',
-                    style: AppTextStyles.body1Medium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.contentGap),
-                ],
-              ),
-            ),
-            // ── 스크롤 영역 (Figma p4 한정: 가로 padding 24px) ────────────────
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ── 알레르기 섹션 ─────────────────────────────────────────
-                    Text(
-                      '알레르기',
-                      style: AppTextStyles.body1Bold.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: AppSpacing.itemGap,
-                      runSpacing: AppSpacing.itemGap,
-                      children: allergyOptions.map((entry) {
-                        final isSelected =
-                            draft.allergies.contains(entry.code);
-                        return SelectableChip(
-                          label: entry.label,
-                          selected: isSelected,
-                          onTap: () => notifier.toggleAllergy(entry.code),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: AppSpacing.sectionGap),
-
-                    // ── 복용약 섹션 ───────────────────────────────────────────
-                    Text(
-                      '복용 중인 약',
-                      style: AppTextStyles.body1Bold.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _medController,
-                      style: AppTextStyles.body1Regular.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'PPI, 제산제',
-                        hintStyle: AppTextStyles.body1Regular.copyWith(
-                          color: AppColors.textTertiary,
+              // ── TopBar 하단 구분선 (Figma gray/30 #F5F5F5) ────────────────────
+              Container(height: 1, color: const Color(0xFFF5F5F5)),
+              // ── 스크롤 영역: step ~ CTA 전부 포함 (키보드/로딩 overflow 방지) ─
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.cardPadding,
-                          vertical: AppSpacing.cardPadding,
-                        ),
-                        // Figma 1064:12268 — 필드 우측 인라인 추가 버튼(초록 원+흰 plus).
-                        suffixIcon: Padding(
-                          padding: const EdgeInsets.only(
-                            right: AppSpacing.itemGap,
-                          ),
-                          child: GestureDetector(
-                            onTap: _addMedication,
-                            child: const AppIcon(AppIcons.plusCircle, size: 24),
-                          ),
-                        ),
-                        suffixIconConstraints: const BoxConstraints(
-                          minWidth: 40,
-                          minHeight: 40,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.radiusCard,
-                          ),
-                          borderSide:
-                              const BorderSide(color: AppColors.border),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.radiusCard,
-                          ),
-                          borderSide:
-                              const BorderSide(color: AppColors.primary),
-                        ),
-                      ),
-                      onSubmitted: (_) => _addMedication(),
-                    ),
-                    // 추가된 약 목록
-                    if (draft.medications.isNotEmpty) ...[
-                      const SizedBox(height: AppSpacing.sectionGap),
-                      Wrap(
-                        spacing: AppSpacing.itemGap,
-                        runSpacing: AppSpacing.itemGap,
-                        children: draft.medications.map((med) {
-                          return _MedicationChip(
-                            label: med,
-                            onRemove: () => notifier.removeMedication(med),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                    const SizedBox(height: AppSpacing.sectionGap),
-                  ],
-                ),
-              ),
-            ),
-            // ── 에러 + 면책 고지 + CTA (Figma p4: top16/bottom32) ─────────────
-            Padding(
-              padding: const EdgeInsets.only(
-                left: AppSpacing.screenPadding,
-                right: AppSpacing.screenPadding,
-                top: 16,
-                bottom: 32,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (hasError) ...[
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceMuted,
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusCard),
-                      ),
-                      child: Row(
-                        children: [
-                          const AppIcon(AppIcons.error, size: 20),
-                          const SizedBox(width: AppSpacing.itemGap),
-                          Expanded(
-                            child: Text(
-                              '저장 중 오류가 발생했어요. 다시 시도해 주세요.',
-                              style: AppTextStyles.body2Regular.copyWith(
-                                color: AppColors.verdictDanger,
+                        child: IntrinsicHeight(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // ── StepProgress (0px gap after TopBar per Figma) ─
+                              const Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.screenPadding,
+                                ),
+                                child: StepProgress(
+                                  currentStep: 4,
+                                  totalSteps: 4,
+                                ),
                               ),
-                            ),
+                              const SizedBox(height: AppSpacing.sectionGap),
+                              // ── Title (Figma p4 한정: 가로 padding 24px) ─────
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 24),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '알레르기와 복용 중인 약을\n알려주세요',
+                                      style: AppTextStyles.header1Bold
+                                          .copyWith(
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      '없으면 완료를 눌러주세요. 지금까지 입력한 내용은\n'
+                                      '마이페이지에서 수정할 수 있어요.',
+                                      style: AppTextStyles.body1Medium
+                                          .copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: AppSpacing.contentGap,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // ── 본문 (Figma p4 한정: 가로 padding 24px) ──────
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 24),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // ── 알레르기 섹션 ──────────────────────────
+                                    Text(
+                                      '알레르기',
+                                      style: AppTextStyles.body1Bold.copyWith(
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Wrap(
+                                      spacing: AppSpacing.itemGap,
+                                      runSpacing: AppSpacing.itemGap,
+                                      children: allergyOptions.map((entry) {
+                                        final isSelected = draft.allergies
+                                            .contains(entry.code);
+                                        return SelectableChip(
+                                          label: entry.label,
+                                          selected: isSelected,
+                                          onTap: () => notifier
+                                              .toggleAllergy(entry.code),
+                                        );
+                                      }).toList(),
+                                    ),
+                                    const SizedBox(
+                                      height: AppSpacing.sectionGap,
+                                    ),
+
+                                    // ── 복용약 섹션 ────────────────────────────
+                                    Text(
+                                      '복용 중인 약',
+                                      style: AppTextStyles.body1Bold.copyWith(
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    TextField(
+                                      controller: _medController,
+                                      style: AppTextStyles.body1Regular
+                                          .copyWith(
+                                        color: AppColors.textPrimary,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: 'PPI, 제산제',
+                                        hintStyle: AppTextStyles.body1Regular
+                                            .copyWith(
+                                          color: AppColors.textTertiary,
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                          horizontal: AppSpacing.cardPadding,
+                                          vertical: AppSpacing.cardPadding,
+                                        ),
+                                        // Figma 1064:12268 — 필드 우측 인라인 추가 버튼.
+                                        suffixIcon: Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: AppSpacing.itemGap,
+                                          ),
+                                          child: GestureDetector(
+                                            onTap: _addMedication,
+                                            child: const AppIcon(
+                                              AppIcons.plusCircle,
+                                              size: 24,
+                                            ),
+                                          ),
+                                        ),
+                                        suffixIconConstraints:
+                                            const BoxConstraints(
+                                          minWidth: 40,
+                                          minHeight: 40,
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            AppSpacing.radiusCard,
+                                          ),
+                                          borderSide: const BorderSide(
+                                            color: AppColors.border,
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            AppSpacing.radiusCard,
+                                          ),
+                                          borderSide: const BorderSide(
+                                            color: AppColors.primary,
+                                          ),
+                                        ),
+                                      ),
+                                      onSubmitted: (_) => _addMedication(),
+                                    ),
+                                    // 추가된 약 목록
+                                    if (draft.medications.isNotEmpty) ...[
+                                      const SizedBox(
+                                        height: AppSpacing.sectionGap,
+                                      ),
+                                      Wrap(
+                                        spacing: AppSpacing.itemGap,
+                                        runSpacing: AppSpacing.itemGap,
+                                        children:
+                                            draft.medications.map((med) {
+                                          return _MedicationChip(
+                                            label: med,
+                                            onRemove: () => notifier
+                                                .removeMedication(med),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ],
+                                    const SizedBox(
+                                      height: AppSpacing.sectionGap,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Spacer(),
+                              // ── 에러 + 면책 고지 + CTA (Figma p4: top16/bottom32)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: AppSpacing.screenPadding,
+                                  right: AppSpacing.screenPadding,
+                                  top: 16,
+                                  bottom: 32,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (hasError) ...[
+                                      Container(
+                                        padding: const EdgeInsets.all(
+                                          AppSpacing.cardPadding,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.surfaceMuted,
+                                          borderRadius: BorderRadius.circular(
+                                            AppSpacing.radiusCard,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            const AppIcon(
+                                              AppIcons.error,
+                                              size: 20,
+                                            ),
+                                            const SizedBox(
+                                              width: AppSpacing.itemGap,
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                '저장 중 오류가 발생했어요. 다시 시도해 주세요.',
+                                                style: AppTextStyles
+                                                    .body2Regular
+                                                    .copyWith(
+                                                  color:
+                                                      AppColors.verdictDanger,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: AppSpacing.itemGap,
+                                      ),
+                                    ],
+                                    if (isLoading) ...[
+                                      const Center(
+                                        child: CircularProgressIndicator(
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: AppSpacing.itemGap,
+                                      ),
+                                    ],
+                                    const MedicalDisclaimer(
+                                      message: kOnboardingDisclaimerText,
+                                    ),
+                                    const SizedBox(
+                                      height: AppSpacing.itemGap,
+                                    ),
+                                    AppButton.primary(
+                                      label: '완료',
+                                      onPressed: isLoading
+                                          ? null
+                                          : () {
+                                              FocusManager
+                                                  .instance.primaryFocus
+                                                  ?.unfocus();
+                                              ref
+                                                  .read(
+                                                    onboardingSubmitProvider
+                                                        .notifier,
+                                                  )
+                                                  .submit();
+                                            },
+                                      isExpanded: true,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.itemGap),
-                  ],
-                  if (isLoading) ...[
-                    const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.itemGap),
-                  ],
-                  const MedicalDisclaimer(message: kOnboardingDisclaimerText),
-                  const SizedBox(height: AppSpacing.itemGap),
-                  AppButton.primary(
-                    label: '완료',
-                    onPressed: isLoading
-                        ? null
-                        : () => ref
-                            .read(onboardingSubmitProvider.notifier)
-                            .submit(),
-                    isExpanded: true,
-                  ),
-                ],
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
