@@ -12,8 +12,8 @@ import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 /// Figma node 2756:22551:
 /// - 좌측 밀착 클러스터(gap 4): ‹ YYYY년 M월 › (chevron 이 라벨에 밀착) — ±1개월 이동.
 /// - 우측 정렬: 캘린더 아이콘(32) — 탭 시 캘린더 팝업([showCalendarPopup]) 오픈.
-/// - [canGoNext]가 false면 현실 시간 기준 다음 달로 이동할 수 없다는 뜻이므로
-///   `›` 버튼을 아예 렌더하지 않는다(공간도 차지하지 않음, `Spacer`가 정렬 유지).
+/// - `‹` `›` 는 **항상 표시**. [canGoPrev]/[canGoNext]가 false면
+///   Foundation gray/60(navi) 색 + 탭 불가.
 class MonthNav extends StatelessWidget {
   const MonthNav({
     super.key,
@@ -21,6 +21,7 @@ class MonthNav extends StatelessWidget {
     required this.onPrevMonth,
     required this.onNextMonth,
     required this.onOpenCalendar,
+    this.canGoPrev = true,
     this.canGoNext = true,
   });
 
@@ -36,7 +37,10 @@ class MonthNav extends StatelessWidget {
   /// 캘린더 팝업 오픈 콜백.
   final VoidCallback onOpenCalendar;
 
-  /// 다음 달로 이동 가능한지 여부 — false면 `›` 버튼을 숨긴다.
+  /// 이전 달로 이동 가능한지 여부 — false면 `‹` 비활성(gray/60, 탭 불가).
+  final bool canGoPrev;
+
+  /// 다음 달로 이동 가능한지 여부 — false면 `›` 비활성(gray/60, 탭 불가).
   final bool canGoNext;
 
   @override
@@ -44,11 +48,11 @@ class MonthNav extends StatelessWidget {
     return Row(
       children: [
         IconButton(
-          onPressed: onPrevMonth,
-          icon: const AppIcon(
+          onPressed: canGoPrev ? onPrevMonth : null,
+          icon: AppIcon(
             AppIcons.chevronLeft,
             size: AppIconSizes.s32,
-            color: AppColors.textPrimary,
+            color: canGoPrev ? AppColors.textPrimary : AppColors.navi,
             semanticsLabel: '이전 달',
           ),
           padding: EdgeInsets.zero,
@@ -62,21 +66,19 @@ class MonthNav extends StatelessWidget {
             color: AppColors.textPrimary, // Figma 실측 #1A1A1F = fontColor100
           ),
         ),
-        if (canGoNext) ...[
-          const SizedBox(width: 4),
-          IconButton(
-            onPressed: onNextMonth,
-            icon: const AppIcon(
-              AppIcons.chevronRight,
-              size: AppIconSizes.s32,
-              color: AppColors.textPrimary,
-              semanticsLabel: '다음 달',
-            ),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            visualDensity: VisualDensity.compact,
+        const SizedBox(width: 4),
+        IconButton(
+          onPressed: canGoNext ? onNextMonth : null,
+          icon: AppIcon(
+            AppIcons.chevronRight,
+            size: AppIconSizes.s32,
+            color: canGoNext ? AppColors.textPrimary : AppColors.navi,
+            semanticsLabel: '다음 달',
           ),
-        ],
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          visualDensity: VisualDensity.compact,
+        ),
         const Spacer(),
         IconButton(
           onPressed: onOpenCalendar,

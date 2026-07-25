@@ -13,7 +13,10 @@ import 'package:can_i_eat_it/features/meal_log/presentation/widgets/week_nav.dar
 ///
 /// [initialMonth]: 팝업 오픈 시 표시할 월 (연/월만 사용).
 /// [initialSelectedDate]: 팝업 오픈 시 프리셀렉트할 날짜 (보통 타임라인 선택일).
-/// [today]: 미래일 판별 기준 (외부 주입 — 테스트·골든 결정성).
+/// [today]: 선택 가능 하한·라벨 기준 (외부 주입 — 테스트·골든 결정성).
+///
+/// 선택 가능: `day ≥ today` 이고 당월인 날짜 (과거 탭 불가, 오늘·이후 전부 가능).
+/// 오늘 셀 라벨은 숫자 대신 `"오늘"`.
 ///
 /// 반환값: "확인" 탭 시 선택된 날짜, "취소"·바깥탭 시 null.
 /// 호출부는 null 이 아니면 선택일 반영 + 타임라인 재조회를 수행한다.
@@ -55,24 +58,49 @@ class _CalendarPopupState extends State<_CalendarPopup> {
   late DateTime _month; // DateTime(year, month, 1)
   late DateTime _selected;
 
+  DateTime get _todayDate =>
+      DateTime(widget.today.year, widget.today.month, widget.today.day);
+
+  /// 오늘 이전 월로는 이동 불가 (과거 전용 월은 선택 가능 일이 없음).
+  bool get _canGoPrev {
+    final todayMonth = DateTime(_todayDate.year, _todayDate.month, 1);
+    return _month.isAfter(todayMonth);
+  }
+
+  /// 오늘·이후 날짜 선택이 가능하므로 미래 월 이동은 항상 허용.
+  bool get _canGoNext => true;
+
   @override
   void initState() {
     super.initState();
     _month = DateTime(widget.initialMonth.year, widget.initialMonth.month, 1);
-    _selected = widget.initialSelectedDate;
+    // 표시 월이 오늘보다 이전이면 오늘 월로 보정.
+    final todayMonth = DateTime(_todayDate.year, _todayDate.month, 1);
+    if (_month.isBefore(todayMonth)) {
+      _month = todayMonth;
+    }
+    _selected = _clampToSelectable(widget.initialSelectedDate);
+  }
+
+  /// 선택 가능 하한 = 오늘. 과거면 오늘로 클램프. 상한 없음(미래 허용).
+  DateTime _clampToSelectable(DateTime day) {
+    var d = DateTime(day.year, day.month, day.day);
+    if (d.isBefore(_todayDate)) d = _todayDate;
+    return d;
   }
 
   void _prevMonth() {
+    if (!_canGoPrev) return;
     setState(() => _month = DateTime(_month.year, _month.month - 1, 1));
   }
 
   void _nextMonth() {
+    if (!_canGoNext) return;
     setState(() => _month = DateTime(_month.year, _month.month + 1, 1));
   }
 
   void _selectDay(DateTime day) {
-    // 그리드 onTap 이 '당월 + 비미래' 날짜만 전달한다(전/후월·미래 셀은 탭 불가).
-    // 따라서 여기서는 선택일만 갱신하면 된다 — 월 이동은 헤더 chevron 전용.
+    // 그리드 onTap 이 선택 가능 날짜만 전달한다.
     setState(() => _selected = day);
   }
 
@@ -99,6 +127,8 @@ class _CalendarPopupState extends State<_CalendarPopup> {
               label: monthNavLabel(_month),
               onPrev: _prevMonth,
               onNext: _nextMonth,
+              canGoPrev: _canGoPrev,
+              canGoNext: _canGoNext,
             ),
             const SizedBox(height: AppSpacing.itemGap * 2), // gap 16
             Expanded(
@@ -130,11 +160,17 @@ class _CalendarHeader extends StatelessWidget {
     required this.label,
     required this.onPrev,
     required this.onNext,
+    required this.canGoPrev,
+    required this.canGoNext,
   });
 
   final String label;
   final VoidCallback onPrev;
   final VoidCallback onNext;
+  /// false면 `‹` 항상 보이되 gray/60(navi) + 탭 불가.
+  final bool canGoPrev;
+  /// false면 `›` 항상 보이되 gray/60(navi) + 탭 불가.
+  final bool canGoNext;
 
   @override
   Widget build(BuildContext context) {
@@ -149,11 +185,11 @@ class _CalendarHeader extends StatelessWidget {
           ),
         ),
         IconButton(
-          onPressed: onPrev,
-          icon: const AppIcon(
+          onPressed: canGoPrev ? onPrev : null,
+          icon: AppIcon(
             AppIcons.chevronLeft,
             size: AppIconSizes.s32,
-            color: AppColors.textPrimary,
+            color: canGoPrev ? AppColors.textPrimary : AppColors.navi,
             semanticsLabel: '이전 달',
           ),
           padding: EdgeInsets.zero,
@@ -162,11 +198,11 @@ class _CalendarHeader extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         IconButton(
-          onPressed: onNext,
-          icon: const AppIcon(
+          onPressed: canGoNext ? onNext : null,
+          icon: AppIcon(
             AppIcons.chevronRight,
             size: AppIconSizes.s32,
-            color: AppColors.textPrimary,
+            color: canGoNext ? AppColors.textPrimary : AppColors.navi,
             semanticsLabel: '다음 달',
           ),
           padding: EdgeInsets.zero,
@@ -215,9 +251,12 @@ class _CalendarGrid extends StatelessWidget {
   static bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
+  static DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
   @override
   Widget build(BuildContext context) {
     final days = _buildGridDays();
+    final todayDate = _dateOnly(today);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -254,21 +293,18 @@ class _CalendarGrid extends StatelessWidget {
                   day.month == month.month && day.year == month.year;
               final isSelected = _isSameDay(day, selected);
               final isToday = _isSameDay(day, today);
-              final todayDate =
-                  DateTime(today.year, today.month, today.day);
-              final dayDate = DateTime(day.year, day.month, day.day);
+              final dayDate = _dateOnly(day);
               final isPast = dayDate.isBefore(todayDate);
-              // 당월 날짜만 선택 가능(전/후월 타월은 탭 불가 — 월이동은 chevron).
-              final selectable = inCurrentMonth;
 
-              // 색·배경 (Figma 2794-26223):
-              //  선택 = 흰 글씨 + green 라운드사각 r8.
-              //  타월(전/후월) = 회색 글씨, 배경 없음.
-              //  당월 '오늘 이전(과거)' = 회색 글씨 + 연회색 라운드 배경(#F5F5F5).
-              //  당월 '오늘·이후(미래)' = 요일 열 색(일 red / 토 blue / 평일 #1A1A1F).
+              // 선택 가능: 당월 ∩ day ≥ today (과거 불가, 오늘·이후 가능).
+              final selectable = inCurrentMonth && !isPast;
+
+              // 비활성(회색): 타월 / 과거.
+              final isDisabledLook = !inCurrentMonth || isPast;
+
               Color textColor;
               BoxDecoration? decoration;
-              if (isSelected) {
+              if (isSelected && selectable) {
                 textColor = AppColors.onPrimary;
                 decoration = BoxDecoration(
                   color: AppColors.primary,
@@ -276,14 +312,15 @@ class _CalendarGrid extends StatelessWidget {
                 );
               } else if (!inCurrentMonth) {
                 textColor = AppColors.textTertiary; // #8C8C99 타월
-              } else if (isPast) {
-                textColor = AppColors.textTertiary; // #8C8C99 과거
+              } else if (isDisabledLook) {
+                // 과거 — 회색 글씨 + 연회색 라운드 (탭 불가 시각)
+                textColor = AppColors.textTertiary;
                 decoration = BoxDecoration(
                   color: AppColors.surfaceMuted, // #F5F5F5
                   borderRadius: BorderRadius.circular(8),
                 );
               } else {
-                textColor = _columnColor(columnIndex); // 오늘·미래
+                textColor = _columnColor(columnIndex); // 오늘·이후
               }
 
               // 오늘 셀은 숫자 대신 "오늘" (당월일 때만).
@@ -342,7 +379,8 @@ class _CalendarFooter extends StatelessWidget {
             ),
             child: Text(
               '취소',
-              style: AppTextStyles.body2Bold.copyWith(color: const Color(0xFF8C8C99)),
+              style: AppTextStyles.body2Bold
+                  .copyWith(color: const Color(0xFF8C8C99)),
             ),
           ),
         ),
@@ -361,7 +399,8 @@ class _CalendarFooter extends StatelessWidget {
             ),
             child: Text(
               '확인',
-              style: AppTextStyles.body2Bold.copyWith(color: AppColors.onPrimary),
+              style:
+                  AppTextStyles.body2Bold.copyWith(color: AppColors.onPrimary),
             ),
           ),
         ),
