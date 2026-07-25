@@ -77,7 +77,7 @@ class ApiEndpoints {
   // Food — 판정 (W3-3, judgment 2엔드포인트)
   // ---------------------------------------------------------------------------
 
-  /// `GET /foods/judgment?foodTextInput=`
+  /// `GET /foods/judgment?name=`
   ///
   /// baseUrl = https://…/api/v1 이므로 prefix 없이 `/foods/judgment` 사용.
   /// (기존 search/recent와 동일 prefix 규칙 — R1 정합)
@@ -234,7 +234,8 @@ class ApiEndpoints {
   // ---------------------------------------------------------------------------
 
   /// 음식별 증상 이력 경로 템플릿. [foodSymptoms] 로 치환.
-  static const String _foodSymptomsTemplate = '/foods/{foodExternalId}/symptoms';
+  static const String _foodSymptomsTemplate =
+      '/foods/{foodExternalId}/symptoms';
 
   /// `GET /foods/{foodExternalId}/symptoms`
   static String foodSymptoms(String foodExternalId) =>

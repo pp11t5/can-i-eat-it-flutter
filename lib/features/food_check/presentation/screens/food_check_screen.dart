@@ -14,6 +14,7 @@ import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/features/food_check/data/food_check_providers.dart';
 import 'package:can_i_eat_it/features/food_check/data/recent_food_providers.dart';
+import 'package:can_i_eat_it/features/food_check/domain/entities/food_search_result.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/recent_food.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
@@ -48,8 +49,8 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
   /// 검색 결과 로딩 중 여부.
   bool _searchLoading = false;
 
-  /// 검색 결과 목록. null = 결과 패널 미표시(초기/입력 없음).
-  List<FoodSummary>? _searchResults;
+  /// 검색 결과. null = 결과 패널 미표시(초기/입력 없음).
+  FoodSearchResult? _searchResult;
 
   /// 검색 에러 메시지. null = 에러 없음.
   String? _searchError;
@@ -79,7 +80,7 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
     if (trimmed.isEmpty) {
       setState(() {
         _query = '';
-        _searchResults = null;
+        _searchResult = null;
         _searchError = null;
         _searchLoading = false;
       });
@@ -108,17 +109,17 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
       _searchError = null;
     });
     try {
-      final results = await ref.read(foodRepositoryProvider).search(q);
+      final result = await ref.read(foodRepositoryProvider).search(q);
       // staleness 가드: 응답 도착 사이 더 최신 쿼리가 시작됐으면 덮어쓰지 않는다.
       if (!mounted || _query != q) return;
       setState(() {
-        _searchResults = results;
+        _searchResult = result;
         _searchLoading = false;
       });
     } catch (_) {
       if (!mounted || _query != q) return;
       setState(() {
-        _searchResults = [];
+        _searchResult = null;
         _searchError = '검색 중 오류가 발생했어요.';
         _searchLoading = false;
       });
@@ -196,7 +197,7 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
                   ? _SearchResultPanel(
                       query: _query,
                       loading: _searchLoading,
-                      results: _searchResults,
+                      result: _searchResult,
                       error: _searchError,
                       onTap: _onResultTap,
                       onDirectAnalyze: _onDirectAnalyze,
@@ -236,7 +237,8 @@ class _TopBar extends StatelessWidget {
     return SizedBox(
       height: 64,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
         child: Row(
           children: [
             // 뒤로(chevron) 또는 닫기(X) — 진입 흐름에 따라 결정.
@@ -272,18 +274,15 @@ class _TopBar extends StatelessWidget {
                   fillColor: AppColors.surfaceMuted,
                   contentPadding: const EdgeInsets.all(AppSpacing.cardPadding),
                   border: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusCard),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
                     borderSide: BorderSide.none,
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusCard),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
                     borderSide: BorderSide.none,
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusCard),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
                     borderSide: BorderSide.none,
                   ),
                 ),
@@ -307,7 +306,7 @@ class _SearchResultPanel extends StatelessWidget {
   const _SearchResultPanel({
     required this.query,
     required this.loading,
-    required this.results,
+    required this.result,
     required this.error,
     required this.onTap,
     required this.onDirectAnalyze,
@@ -315,7 +314,7 @@ class _SearchResultPanel extends StatelessWidget {
 
   final String query;
   final bool loading;
-  final List<FoodSummary>? results;
+  final FoodSearchResult? result;
   final String? error;
   final Future<void> Function(FoodSummary) onTap;
   final VoidCallback onDirectAnalyze;
@@ -332,38 +331,37 @@ class _SearchResultPanel extends StatelessWidget {
         onDirectAnalyze: onDirectAnalyze,
       );
     }
-    final list = results ?? [];
-    // 결과가 있든 없든 항상 직접분석 CTA 카드를 포함한 리스트를 렌더한다
-    // (Figma 554-5322: 리스트 맨 아래 365-1849 카드 상시 노출).
+    final searchResult = result;
+    final foods = searchResult?.foods ?? const <FoodSummary>[];
     return _ResultList(
       query: query,
-      items: list,
+      items: foods,
+      showDirectAnalyze: searchResult?.hasExactMatch == false,
       onTap: onTap,
       onDirectAnalyze: onDirectAnalyze,
     );
   }
 }
 
-/// 검색 결과 카드 리스트 + 하단 직접분석 CTA (Figma 554-5322).
-///
-/// 결과가 없을 때도 직접분석 CTA 카드만 표시한다.
+/// 검색 결과 카드 리스트와, 정확 일치가 없을 때의 직접분석 CTA.
 class _ResultList extends StatelessWidget {
   const _ResultList({
     required this.query,
     required this.items,
+    required this.showDirectAnalyze,
     required this.onTap,
     required this.onDirectAnalyze,
   });
 
   final String query;
   final List<FoodSummary> items;
+  final bool showDirectAnalyze;
   final Future<void> Function(FoodSummary) onTap;
   final VoidCallback onDirectAnalyze;
 
   @override
   Widget build(BuildContext context) {
-    // 결과 카드 수 + CTA 카드 1개 + 헤더 1개
-    final itemCount = 1 + items.length + 1; // header + results + cta
+    final itemCount = 1 + items.length + (showDirectAnalyze ? 1 : 0);
 
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(
@@ -396,7 +394,7 @@ class _ResultList extends StatelessWidget {
             child: _ResultCard(food: food, onTap: () => onTap(food)),
           );
         }
-        // 마지막: 직접분석 CTA 카드 (365-1849) — 결과 있든 없든 항상 표시
+        // 마지막: 직접분석 CTA 카드 (hasExactMatch=false일 때만).
         return _DirectAnalyzeCta(
           query: query,
           onTap: onDirectAnalyze,

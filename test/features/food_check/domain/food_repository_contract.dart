@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
+import 'package:can_i_eat_it/features/food_check/domain/entities/food_search_result.dart';
 import 'package:can_i_eat_it/features/food_check/domain/repositories/food_repository.dart';
 
 /// [FoodRepository] 계약 테스트 스위트 (W3-3 충실 정합).
@@ -111,22 +112,22 @@ void foodRepositoryContract(
 
   // ---------------------------------------------------------------------------
   group('search — 결과 반환', () {
-    test('빈 쿼리는 빈 목록을 반환한다', () async {
+    test('빈 쿼리는 빈 foods를 반환한다', () async {
       final repo = create();
       final result = await repo.search('');
-      expect(result, isEmpty);
+      expect(result.foods, isEmpty);
     });
 
-    test('공백만 있는 쿼리는 빈 목록을 반환한다', () async {
+    test('공백만 있는 쿼리는 빈 foods를 반환한다', () async {
       final repo = create();
       final result = await repo.search('   ');
-      expect(result, isEmpty);
+      expect(result.foods, isEmpty);
     });
 
-    test('search 결과는 List 타입이다', () async {
+    test('search 결과는 FoodSearchResult 타입이다', () async {
       final repo = create();
       final result = await repo.search('두부');
-      expect(result, isA<List>());
+      expect(result, isA<FoodSearchResult>());
     });
   });
 

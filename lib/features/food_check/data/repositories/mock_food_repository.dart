@@ -1,4 +1,5 @@
 import '../../domain/entities/eat_verdict.dart';
+import '../../domain/entities/food_search_result.dart';
 import '../../domain/entities/food_summary.dart';
 import '../../domain/entities/recent_food.dart';
 import '../../domain/repositories/food_repository.dart';
@@ -18,8 +19,10 @@ class MockFoodRepository implements FoodRepository {
   MockFoodRepository({
     List<RecentFood>? initialRecent,
     List<FoodSummary>? searchResults,
+    bool hasExactMatch = false,
   })  : _recent = List<RecentFood>.from(initialRecent ?? []),
-        _searchResults = searchResults ?? [];
+        _searchResults = searchResults ?? [],
+        _hasExactMatch = hasExactMatch;
 
   // ---------------------------------------------------------------------------
   // 시나리오 named factory
@@ -33,8 +36,14 @@ class MockFoodRepository implements FoodRepository {
       MockFoodRepository(initialRecent: items);
 
   /// 검색 결과 고정값 있음.
-  factory MockFoodRepository.withSearchResults(List<FoodSummary> results) =>
-      MockFoodRepository(searchResults: results);
+  factory MockFoodRepository.withSearchResults(
+    List<FoodSummary> results, {
+    bool hasExactMatch = false,
+  }) =>
+      MockFoodRepository(
+        searchResults: results,
+        hasExactMatch: hasExactMatch,
+      );
 
   // ---------------------------------------------------------------------------
   // 내부 상태
@@ -42,6 +51,7 @@ class MockFoodRepository implements FoodRepository {
 
   final List<RecentFood> _recent;
   final List<FoodSummary> _searchResults;
+  final bool _hasExactMatch;
 
   // ---------------------------------------------------------------------------
   // FoodRepository 구현
@@ -85,9 +95,12 @@ class MockFoodRepository implements FoodRepository {
   }
 
   @override
-  Future<List<FoodSummary>> search(String q, {int size = 20}) async {
-    if (q.trim().isEmpty) return [];
-    return _searchResults.take(size).toList();
+  Future<FoodSearchResult> search(String q, {int size = 10}) async {
+    if (q.trim().isEmpty) return const FoodSearchResult();
+    return FoodSearchResult(
+      foods: _searchResults.take(size).toList(),
+      hasExactMatch: _hasExactMatch,
+    );
   }
 
   @override

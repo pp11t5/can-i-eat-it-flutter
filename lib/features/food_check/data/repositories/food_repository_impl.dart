@@ -2,18 +2,18 @@ import 'package:dio/dio.dart';
 
 import 'package:can_i_eat_it/core/network/api_endpoints.dart';
 import 'package:can_i_eat_it/core/network/failure_mapper.dart';
-import 'package:can_i_eat_it/features/food_check/data/dtos/food_summary_dto.dart';
+import 'package:can_i_eat_it/features/food_check/data/dtos/food_search_result_dto.dart';
 import 'package:can_i_eat_it/features/food_check/data/dtos/judgment_response_dto.dart';
 import 'package:can_i_eat_it/features/food_check/data/dtos/recent_food_dto.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
-import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
+import 'package:can_i_eat_it/features/food_check/domain/entities/food_search_result.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/recent_food.dart';
 import 'package:can_i_eat_it/features/food_check/domain/repositories/food_repository.dart';
 
 /// [FoodRepository] 실 서버 구현 (ADR-0007 §3-1 (5), 수기 dio).
 ///
 /// - search / recent CRUD: 실 `/foods/*` 엔드포인트.
-/// - judgeByText: GET /foods/judgment?foodTextInput= (W3-3 충실 정합).
+/// - judgeByText: GET /foods/judgment?name= (W3-3 충실 정합).
 /// - judgeById: GET /foods/{foodExternalId}/judgment (W3-3 충실 정합).
 ///
 /// Mock 위임(W3 이전) 완전 제거. FOOD 에러코드는 FailureMapper로 매핑.
@@ -28,7 +28,7 @@ class FoodRepositoryImpl implements FoodRepository {
 
   /// 자유 텍스트 음식명을 판정한다.
   ///
-  /// GET /foods/judgment?foodTextInput=<text>
+  /// GET /foods/judgment?name=<text>
   /// substitutes 없음, category 없음 (by-text 규약).
   /// FOOD400_1 → [InvalidFoodQueryFailure], 통신오류 → [NetworkFailure].
   @override
@@ -36,7 +36,7 @@ class FoodRepositoryImpl implements FoodRepository {
     try {
       final response = await _dio.get<dynamic>(
         ApiEndpoints.foodsJudgmentByText,
-        queryParameters: {'foodTextInput': foodTextInput},
+        queryParameters: {'name': foodTextInput},
       );
       final dto = unwrap<TextJudgmentResponseDto>(
         response,
@@ -74,20 +74,18 @@ class FoodRepositoryImpl implements FoodRepository {
   // ---------------------------------------------------------------------------
 
   @override
-  Future<List<FoodSummary>> search(String q, {int size = 20}) async {
-    if (q.trim().isEmpty) return [];
+  Future<FoodSearchResult> search(String q, {int size = 10}) async {
+    if (q.trim().isEmpty) return const FoodSearchResult();
     try {
       final response = await _dio.get<dynamic>(
         ApiEndpoints.foodsSearch,
         queryParameters: {'q': q, 'size': size},
       );
-      final items = unwrap<List<dynamic>>(
+      final dto = unwrap<FoodSearchResultDto>(
         response,
-        (json) => json as List<dynamic>,
+        (json) => FoodSearchResultDto.fromJson(json as Map<String, dynamic>),
       );
-      return items
-          .map((e) => FoodSummaryDto.fromJson(e as Map<String, dynamic>).toEntity())
-          .toList();
+      return dto.toEntity();
     } on DioException catch (e) {
       throw FailureMapper.fromDioException(e);
     }
@@ -111,7 +109,8 @@ class FoodRepositoryImpl implements FoodRepository {
         (json) => json as List<dynamic>,
       );
       return items
-          .map((e) => RecentFoodDto.fromJson(e as Map<String, dynamic>).toEntity())
+          .map((e) =>
+              RecentFoodDto.fromJson(e as Map<String, dynamic>).toEntity())
           .toList();
     } on DioException catch (e) {
       throw FailureMapper.fromDioException(e);

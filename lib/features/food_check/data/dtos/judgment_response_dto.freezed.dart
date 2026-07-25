@@ -332,7 +332,7 @@ class __$JudgmentItemDtoCopyWithImpl<$Res>
 
 /// @nodoc
 mixin _$StateRecordDto {
-  int get stateRecordId;
+  String get stateRecordId;
   String get label;
   String get date; // "YYYY-MM-DD" 문자열 그대로
   int get timingMinutes;
@@ -378,7 +378,8 @@ abstract mixin class $StateRecordDtoCopyWith<$Res> {
           StateRecordDto value, $Res Function(StateRecordDto) _then) =
       _$StateRecordDtoCopyWithImpl;
   @useResult
-  $Res call({int stateRecordId, String label, String date, int timingMinutes});
+  $Res call(
+      {String stateRecordId, String label, String date, int timingMinutes});
 }
 
 /// @nodoc
@@ -403,7 +404,7 @@ class _$StateRecordDtoCopyWithImpl<$Res>
       stateRecordId: null == stateRecordId
           ? _self.stateRecordId
           : stateRecordId // ignore: cast_nullable_to_non_nullable
-              as int,
+              as String,
       label: null == label
           ? _self.label
           : label // ignore: cast_nullable_to_non_nullable
@@ -514,7 +515,7 @@ extension StateRecordDtoPatterns on StateRecordDto {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            int stateRecordId, String label, String date, int timingMinutes)?
+            String stateRecordId, String label, String date, int timingMinutes)?
         $default, {
     required TResult orElse(),
   }) {
@@ -544,7 +545,7 @@ extension StateRecordDtoPatterns on StateRecordDto {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            int stateRecordId, String label, String date, int timingMinutes)
+            String stateRecordId, String label, String date, int timingMinutes)
         $default,
   ) {
     final _that = this;
@@ -572,7 +573,7 @@ extension StateRecordDtoPatterns on StateRecordDto {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            int stateRecordId, String label, String date, int timingMinutes)?
+            String stateRecordId, String label, String date, int timingMinutes)?
         $default,
   ) {
     final _that = this;
@@ -598,7 +599,7 @@ class _StateRecordDto implements StateRecordDto {
       _$StateRecordDtoFromJson(json);
 
   @override
-  final int stateRecordId;
+  final String stateRecordId;
   @override
   final String label;
   @override
@@ -654,7 +655,8 @@ abstract mixin class _$StateRecordDtoCopyWith<$Res>
       __$StateRecordDtoCopyWithImpl;
   @override
   @useResult
-  $Res call({int stateRecordId, String label, String date, int timingMinutes});
+  $Res call(
+      {String stateRecordId, String label, String date, int timingMinutes});
 }
 
 /// @nodoc
@@ -679,7 +681,7 @@ class __$StateRecordDtoCopyWithImpl<$Res>
       stateRecordId: null == stateRecordId
           ? _self.stateRecordId
           : stateRecordId // ignore: cast_nullable_to_non_nullable
-              as int,
+              as String,
       label: null == label
           ? _self.label
           : label // ignore: cast_nullable_to_non_nullable

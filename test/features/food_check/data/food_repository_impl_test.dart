@@ -39,6 +39,12 @@ Map<String, dynamic> _foodSummaryJson({
     // 실서버 GET /foods/search 응답 키는 'externalId' (recent는 'foodExternalId').
     {'externalId': id, 'name': name, 'category': category};
 
+Map<String, dynamic> _searchResultJson({
+  List<Map<String, dynamic>> foods = const [],
+  bool hasExactMatch = false,
+}) =>
+    {'foods': foods, 'hasExactMatch': hasExactMatch};
+
 Map<String, dynamic> _recentFoodJson({
   String id = 'f-1',
   String name = '두부',
@@ -90,7 +96,7 @@ Map<String, dynamic> _idJudgmentJson({
         'total': 2,
         'records': [
           {
-            'stateRecordId': 1,
+            'stateRecordId': 'state-1',
             'label': '속쓰림',
             'date': '2026-06-10',
             'timingMinutes': 30,
@@ -128,91 +134,132 @@ void main() {
 
   // -------------------------------------------------------------------------
   group('search — DTO 매핑 + 경로', () {
-    test('GET /foods/search?q=두부&size=20 → FoodSummary 리스트 반환', () async {
+    test('GET /foods/search?q=두부&size=10 → 결과와 정확 일치 여부를 반환', () async {
       adapter.onGet(
         ApiEndpoints.foodsSearch,
-        (server) => server.reply(200, _envelope([_foodSummaryJson()])),
-        queryParameters: {'q': '두부', 'size': 20},
+        (server) => server.reply(
+          200,
+          _envelope(_searchResultJson(
+            foods: [_foodSummaryJson()],
+            hasExactMatch: true,
+          )),
+        ),
+        queryParameters: {'q': '두부', 'size': 10},
       );
 
-      final results = await repo.search('두부');
+      final result = await repo.search('두부');
 
-      expect(results.length, 1);
-      expect(results.first.externalId, 'f-1');
-      expect(results.first.name, '두부');
-      expect(results.first.category, '한식');
+      expect(result.foods, hasLength(1));
+      expect(result.foods.first.externalId, 'f-1');
+      expect(result.foods.first.name, '두부');
+      expect(result.foods.first.category, '한식');
+      expect(result.hasExactMatch, isTrue);
     });
 
     test('빈 쿼리는 서버 호출 없이 빈 목록 반환', () async {
-      final results = await repo.search('');
-      expect(results, isEmpty);
+      final result = await repo.search('');
+      expect(result.foods, isEmpty);
     });
 
     test('공백만 있는 쿼리도 빈 목록 반환', () async {
-      final results = await repo.search('   ');
-      expect(results, isEmpty);
+      final result = await repo.search('   ');
+      expect(result.foods, isEmpty);
     });
 
     test('size 파라미터가 쿼리에 포함된다', () async {
       adapter.onGet(
         ApiEndpoints.foodsSearch,
-        (server) => server.reply(200, _envelope(<dynamic>[])),
+        (server) => server.reply(200, _envelope(_searchResultJson())),
         queryParameters: {'q': '라면', 'size': 5},
       );
 
-      final results = await repo.search('라면', size: 5);
-      expect(results, isEmpty);
+      final result = await repo.search('라면', size: 5);
+      expect(result.foods, isEmpty);
     });
 
-    test('복수 결과 → FoodSummary 리스트 전체 반환', () async {
+    test('복수 결과와 hasExactMatch=false를 함께 반환', () async {
       adapter.onGet(
         ApiEndpoints.foodsSearch,
         (server) => server.reply(
           200,
-          _envelope([
-            _foodSummaryJson(id: 'f-1', name: '두부'),
-            _foodSummaryJson(id: 'f-2', name: '된장찌개', category: '찌개'),
-          ]),
+          _envelope(_searchResultJson(
+            foods: [
+              _foodSummaryJson(id: 'f-1', name: '두부'),
+              _foodSummaryJson(id: 'f-2', name: '된장찌개', category: '찌개'),
+            ],
+          )),
         ),
-        queryParameters: {'q': '두', 'size': 20},
+        queryParameters: {'q': '두', 'size': 10},
       );
 
-      final results = await repo.search('두');
-      expect(results.length, 2);
-      expect(results[0].externalId, 'f-1');
-      expect(results[1].name, '된장찌개');
+      final result = await repo.search('두');
+      expect(result.foods, hasLength(2));
+      expect(result.foods[0].externalId, 'f-1');
+      expect(result.foods[1].name, '된장찌개');
+      expect(result.hasExactMatch, isFalse);
     });
 
     // -----------------------------------------------------------------------
     // W3-4 회귀 테스트: 실서버 응답 형태(externalId 키) 6건 파싱 검증
-    // 실측: {"result":[{"externalId":"...","name":"...","category":"..."},...]}
+    // 실측: {"result":{"foods":[{"externalId":"...","name":"..."}],"hasExactMatch":false}}
     // -----------------------------------------------------------------------
     test('실서버 응답 형태(externalId 키) 6건 → FoodSummary 6건 정상 파싱', () async {
       final serverLikePayload = [
-        {'externalId': 'cc948505-46c9-454d-987e-e7577486cede', 'name': '된장찌개', 'category': 'soup_stew'},
-        {'externalId': 'aa111111-0000-0000-0000-000000000001', 'name': '김치찌개', 'category': 'soup_stew'},
-        {'externalId': 'bb222222-0000-0000-0000-000000000002', 'name': '두부', 'category': 'tofu'},
-        {'externalId': 'cc333333-0000-0000-0000-000000000003', 'name': '미역국', 'category': 'soup'},
-        {'externalId': 'dd444444-0000-0000-0000-000000000004', 'name': '고등어구이', 'category': 'fish'},
-        {'externalId': 'ee555555-0000-0000-0000-000000000005', 'name': '바나나', 'category': 'fruit'},
+        {
+          'externalId': 'cc948505-46c9-454d-987e-e7577486cede',
+          'name': '된장찌개',
+          'category': 'soup_stew'
+        },
+        {
+          'externalId': 'aa111111-0000-0000-0000-000000000001',
+          'name': '김치찌개',
+          'category': 'soup_stew'
+        },
+        {
+          'externalId': 'bb222222-0000-0000-0000-000000000002',
+          'name': '두부',
+          'category': 'tofu'
+        },
+        {
+          'externalId': 'cc333333-0000-0000-0000-000000000003',
+          'name': '미역국',
+          'category': 'soup'
+        },
+        {
+          'externalId': 'dd444444-0000-0000-0000-000000000004',
+          'name': '고등어구이',
+          'category': 'fish'
+        },
+        {
+          'externalId': 'ee555555-0000-0000-0000-000000000005',
+          'name': '바나나',
+          'category': 'fruit'
+        },
       ];
 
       adapter.onGet(
         ApiEndpoints.foodsSearch,
-        (server) => server.reply(200, _envelope(serverLikePayload)),
-        queryParameters: {'q': '찌개', 'size': 20},
+        (server) => server.reply(
+          200,
+          _envelope(_searchResultJson(foods: serverLikePayload)),
+        ),
+        queryParameters: {'q': '찌개', 'size': 10},
       );
 
-      final results = await repo.search('찌개');
+      final result = await repo.search('찌개');
 
-      expect(results.length, 6, reason: '실서버 externalId 키 파싱 실패 시 빈 목록 반환 버그 재현');
-      expect(results[0].externalId, 'cc948505-46c9-454d-987e-e7577486cede');
-      expect(results[0].name, '된장찌개');
-      expect(results[0].category, 'soup_stew');
-      expect(results[1].externalId, 'aa111111-0000-0000-0000-000000000001');
-      expect(results[1].name, '김치찌개');
-      expect(results[5].externalId, 'ee555555-0000-0000-0000-000000000005');
-      expect(results[5].name, '바나나');
+      expect(result.foods, hasLength(6),
+          reason: '실서버 externalId 키 파싱 실패 시 빈 목록 반환 버그 재현');
+      expect(
+          result.foods[0].externalId, 'cc948505-46c9-454d-987e-e7577486cede');
+      expect(result.foods[0].name, '된장찌개');
+      expect(result.foods[0].category, 'soup_stew');
+      expect(
+          result.foods[1].externalId, 'aa111111-0000-0000-0000-000000000001');
+      expect(result.foods[1].name, '김치찌개');
+      expect(
+          result.foods[5].externalId, 'ee555555-0000-0000-0000-000000000005');
+      expect(result.foods[5].name, '바나나');
     });
 
     test('FoodSummaryDto.fromJson — externalId 키로 직접 역직렬화', () {
@@ -314,11 +361,11 @@ void main() {
 
   // -------------------------------------------------------------------------
   group('judgeByText — DTO 매핑 + 경로 (W3-3)', () {
-    test('GET /foods/judgment?foodTextInput=두부 → EatVerdict recommend 반환', () async {
+    test('GET /foods/judgment?name=두부 → EatVerdict recommend 반환', () async {
       adapter.onGet(
         ApiEndpoints.foodsJudgmentByText,
         (server) => server.reply(200, _envelope(_textJudgmentJson())),
-        queryParameters: {'foodTextInput': '두부'},
+        queryParameters: {'name': '두부'},
       );
 
       final result = await repo.judgeByText('두부');
@@ -327,11 +374,12 @@ void main() {
       expect(result.foodName, '두부');
       expect(result.personalTitle, isNotEmpty);
       expect(result.items.length, 2);
-      expect(result.substitutes, isEmpty);  // by-text 규약
+      expect(result.substitutes, isEmpty); // by-text 규약
       expect(result.foodExternalId, isNull); // by-text 규약
     });
 
-    test('grade=UNKNOWN → VerdictLevel.unknown (성공 응답, AsyncData 경로)', () async {
+    test('grade=UNKNOWN → VerdictLevel.unknown (성공 응답, AsyncData 경로)',
+        () async {
       adapter.onGet(
         ApiEndpoints.foodsJudgmentByText,
         (server) => server.reply(
@@ -342,7 +390,7 @@ void main() {
             personalTitle: '모름음식, 확인이 어려워요',
           )),
         ),
-        queryParameters: {'foodTextInput': '모름음식'},
+        queryParameters: {'name': '모름음식'},
       );
 
       final result = await repo.judgeByText('모름음식');
@@ -358,7 +406,7 @@ void main() {
           400,
           _errorEnvelope('FOOD400_1', '잘못된 검색어입니다.'),
         ),
-        queryParameters: {'foodTextInput': ''},
+        queryParameters: {'name': ''},
       );
 
       await expectLater(
@@ -370,7 +418,8 @@ void main() {
 
   // -------------------------------------------------------------------------
   group('judgeById — DTO 매핑 + 경로 (W3-3)', () {
-    test('GET /foods/{id}/judgment → EatVerdict risk 반환 (substitutes 포함)', () async {
+    test('GET /foods/{id}/judgment → EatVerdict risk 반환 (substitutes 포함)',
+        () async {
       adapter.onGet(
         ApiEndpoints.foodsJudgmentById('food-ext-1'),
         (server) => server.reply(200, _envelope(_idJudgmentJson())),
