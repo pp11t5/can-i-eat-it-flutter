@@ -138,7 +138,8 @@ class _OnboardingMedicationsScreenState
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      '없으면 완료를 눌러주세요',
+                                      '없으면 완료를 눌러주세요. 지금까지 입력한 내용은\n'
+                                      '마이페이지에서 수정할 수 있어요.',
                                       style: AppTextStyles.body1Medium
                                           .copyWith(
                                         color: AppColors.textSecondary,

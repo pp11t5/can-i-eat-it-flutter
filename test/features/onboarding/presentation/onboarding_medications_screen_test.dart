@@ -59,11 +59,17 @@ void main() {
       expect(find.textContaining('알레르기와 복용 중인 약을'), findsOneWidget);
     });
 
-    testWidgets('서브타이틀 "없으면 완료를 눌러주세요"가 렌더된다', (tester) async {
+    testWidgets('서브타이틀 "없으면 완료를 눌러주세요…" 멘트가 렌더된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('없으면 완료를 눌러주세요'), findsOneWidget);
+      expect(
+        find.text(
+          '없으면 완료를 눌러주세요. 지금까지 입력한 내용은\n'
+          '마이페이지에서 수정할 수 있어요.',
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('StepProgress 위젯이 렌더된다', (tester) async {
