@@ -51,7 +51,7 @@ class VerdictController extends _$VerdictController {
 
   /// 자유 텍스트로 판정한다 (by-text, 검색 결과 없음 경로).
   ///
-  /// GET /foods/judgment?foodTextInput=<text>
+  /// GET /foods/judgment?name=<text>
   Future<void> judgeByText(String text) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {

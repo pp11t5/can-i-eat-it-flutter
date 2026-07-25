@@ -73,9 +73,9 @@ abstract class VerdictItem with _$VerdictItem {
 @freezed
 abstract class VerdictStateRecord with _$VerdictStateRecord {
   const factory VerdictStateRecord({
-    required int stateRecordId,
+    required String stateRecordId,
     required String label,
-    required String date,    // "YYYY-MM-DD" 문자열 그대로 (표시 전용)
+    required String date, // "YYYY-MM-DD" 문자열 그대로 (표시 전용)
     required int timingMinutes,
   }) = _VerdictStateRecord;
 
@@ -210,7 +210,7 @@ abstract class EatVerdict with _$EatVerdict {
           total: 2,
           records: [
             VerdictStateRecord(
-              stateRecordId: 1,
+              stateRecordId: 'state-1',
               label: '속쓰림',
               date: '2026-06-10',
               timingMinutes: 30,
@@ -244,7 +244,7 @@ abstract class EatVerdict with _$EatVerdict {
           total: 5,
           records: [
             VerdictStateRecord(
-              stateRecordId: 1,
+              stateRecordId: 'state-1',
               label: '속쓰림',
               date: '2026-06-10',
               timingMinutes: 30,

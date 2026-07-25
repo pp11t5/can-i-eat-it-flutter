@@ -21,9 +21,9 @@ void main() {
       expect(await repo.recentSearches(), isEmpty);
     });
 
-    test('empty 팩토리는 search 결과가 빈 목록이다', () async {
+    test('empty 팩토리는 빈 검색 결과 객체를 반환한다', () async {
       final repo = MockFoodRepository.empty();
-      expect(await repo.search('두부'), isEmpty);
+      expect((await repo.search('두부')).foods, isEmpty);
     });
   });
 
@@ -44,7 +44,8 @@ void main() {
       ];
       final repo = MockFoodRepository.withRecent(items);
       final results = await repo.recentSearches();
-      expect(results.map((r) => r.foodExternalId), equals(['food-1', 'food-2']));
+      expect(
+          results.map((r) => r.foodExternalId), equals(['food-1', 'food-2']));
     });
   });
 
@@ -54,7 +55,7 @@ void main() {
       final repo = MockFoodRepository.withSearchResults([
         const FoodSummary(externalId: 'f-1', name: '두부'),
       ]);
-      expect(await repo.search(''), isEmpty);
+      expect((await repo.search('')).foods, isEmpty);
     });
 
     test('withSearchResults 팩토리는 쿼리가 있으면 고정 결과를 반환한다', () async {
@@ -63,8 +64,8 @@ void main() {
         const FoodSummary(externalId: 'f-2', name: '두부조림'),
       ]);
       final result = await repo.search('두부');
-      expect(result.length, equals(2));
-      expect(result.first.name, equals('두부'));
+      expect(result.foods.length, equals(2));
+      expect(result.foods.first.name, equals('두부'));
     });
 
     test('size 인수가 결과 개수를 제한한다', () async {
@@ -75,7 +76,16 @@ void main() {
         ),
       );
       final result = await repo.search('음식', size: 3);
-      expect(result.length, equals(3));
+      expect(result.foods.length, equals(3));
+    });
+
+    test('hasExactMatch 설정을 검색 결과에 유지한다', () async {
+      final repo = MockFoodRepository.withSearchResults(
+        [const FoodSummary(externalId: 'f-1', name: '두부')],
+        hasExactMatch: true,
+      );
+
+      expect((await repo.search('두부')).hasExactMatch, isTrue);
     });
   });
 
@@ -86,7 +96,7 @@ void main() {
       final result = await repo.judgeByText('두부');
       final sample = EatVerdict.recommend(foodName: '두부');
       expect(result.level, equals(sample.level));
-      expect(result.substitutes, isEmpty);  // by-text 규약
+      expect(result.substitutes, isEmpty); // by-text 규약
     });
 
     test('caution 판정 named factory와 동일 level을 반환한다', () async {

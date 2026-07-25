@@ -315,7 +315,7 @@ class __$VerdictItemCopyWithImpl<$Res> implements _$VerdictItemCopyWith<$Res> {
 
 /// @nodoc
 mixin _$VerdictStateRecord {
-  int get stateRecordId;
+  String get stateRecordId;
   String get label;
   String get date; // "YYYY-MM-DD" 문자열 그대로 (표시 전용)
   int get timingMinutes;
@@ -357,7 +357,8 @@ abstract mixin class $VerdictStateRecordCopyWith<$Res> {
           VerdictStateRecord value, $Res Function(VerdictStateRecord) _then) =
       _$VerdictStateRecordCopyWithImpl;
   @useResult
-  $Res call({int stateRecordId, String label, String date, int timingMinutes});
+  $Res call(
+      {String stateRecordId, String label, String date, int timingMinutes});
 }
 
 /// @nodoc
@@ -382,7 +383,7 @@ class _$VerdictStateRecordCopyWithImpl<$Res>
       stateRecordId: null == stateRecordId
           ? _self.stateRecordId
           : stateRecordId // ignore: cast_nullable_to_non_nullable
-              as int,
+              as String,
       label: null == label
           ? _self.label
           : label // ignore: cast_nullable_to_non_nullable
@@ -493,7 +494,7 @@ extension VerdictStateRecordPatterns on VerdictStateRecord {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            int stateRecordId, String label, String date, int timingMinutes)?
+            String stateRecordId, String label, String date, int timingMinutes)?
         $default, {
     required TResult orElse(),
   }) {
@@ -523,7 +524,7 @@ extension VerdictStateRecordPatterns on VerdictStateRecord {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            int stateRecordId, String label, String date, int timingMinutes)
+            String stateRecordId, String label, String date, int timingMinutes)
         $default,
   ) {
     final _that = this;
@@ -551,7 +552,7 @@ extension VerdictStateRecordPatterns on VerdictStateRecord {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            int stateRecordId, String label, String date, int timingMinutes)?
+            String stateRecordId, String label, String date, int timingMinutes)?
         $default,
   ) {
     final _that = this;
@@ -576,7 +577,7 @@ class _VerdictStateRecord extends VerdictStateRecord {
       : super._();
 
   @override
-  final int stateRecordId;
+  final String stateRecordId;
   @override
   final String label;
   @override
@@ -624,7 +625,8 @@ abstract mixin class _$VerdictStateRecordCopyWith<$Res>
       __$VerdictStateRecordCopyWithImpl;
   @override
   @useResult
-  $Res call({int stateRecordId, String label, String date, int timingMinutes});
+  $Res call(
+      {String stateRecordId, String label, String date, int timingMinutes});
 }
 
 /// @nodoc
@@ -649,7 +651,7 @@ class __$VerdictStateRecordCopyWithImpl<$Res>
       stateRecordId: null == stateRecordId
           ? _self.stateRecordId
           : stateRecordId // ignore: cast_nullable_to_non_nullable
-              as int,
+              as String,
       label: null == label
           ? _self.label
           : label // ignore: cast_nullable_to_non_nullable

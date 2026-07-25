@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:can_i_eat_it/features/food_check/data/food_check_providers.dart';
 import 'package:can_i_eat_it/features/food_check/data/repositories/mock_food_repository.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
+import 'package:can_i_eat_it/features/food_check/domain/entities/food_search_result.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/recent_food.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/food_check_screen.dart';
@@ -53,14 +54,20 @@ RecentFood _recentFood(String id, String name) => RecentFood(
 FoodSummary _foodSummary(String id, String name) =>
     FoodSummary(externalId: id, name: name);
 
+class _FailingSearchRepository extends MockFoodRepository {
+  @override
+  Future<FoodSearchResult> search(String q, {int size = 10}) async {
+    throw Exception('network unavailable');
+  }
+}
+
 void main() {
   // -------------------------------------------------------------------------
   group('FoodCheckScreen — 빈 최근검색', () {
     testWidgets('검색 필드 placeholder와 빈 상태 문구가 렌더된다', (tester) async {
       await tester.pumpWidget(
         _wrap([
-          foodRepositoryProvider
-              .overrideWithValue(MockFoodRepository.empty()),
+          foodRepositoryProvider.overrideWithValue(MockFoodRepository.empty()),
         ]),
       );
       await tester.pumpAndSettle();
@@ -73,8 +80,7 @@ void main() {
     testWidgets('닫기 X 아이콘이 존재한다', (tester) async {
       await tester.pumpWidget(
         _wrap([
-          foodRepositoryProvider
-              .overrideWithValue(MockFoodRepository.empty()),
+          foodRepositoryProvider.overrideWithValue(MockFoodRepository.empty()),
         ]),
       );
       await tester.pumpAndSettle();
@@ -197,7 +203,7 @@ void main() {
       final repo = MockFoodRepository.withSearchResults([
         _foodSummary('f-1', '두부'),
         _foodSummary('f-2', '두부조림'),
-      ]);
+      ], hasExactMatch: true);
       await tester.pumpWidget(
         _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
       );
@@ -210,6 +216,7 @@ void main() {
 
       expect(find.text('두부'), findsWidgets);
       expect(find.text('두부조림'), findsOneWidget);
+      expect(find.text('찾는 음식이 없어요'), findsNothing);
     });
 
     testWidgets('빈 결과 → 직접분석 CTA 카드(찾는 음식이 없어요) 렌더', (tester) async {
@@ -228,10 +235,27 @@ void main() {
       expect(find.textContaining("'없는음식xyz'로 분석하기"), findsOneWidget);
     });
 
+    testWidgets('부분 일치 결과는 직접분석 CTA를 함께 렌더한다', (tester) async {
+      final repo = MockFoodRepository.withSearchResults([
+        _foodSummary('f-1', '두부조림'),
+      ]);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '두부');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+
+      expect(find.text('두부조림'), findsOneWidget);
+      expect(find.text('찾는 음식이 없어요'), findsOneWidget);
+    });
+
     testWidgets('결과 셀 탭 → addRecent 호출 후 /verdict 라우트 진입', (tester) async {
       final repo = MockFoodRepository.withSearchResults([
         _foodSummary('f-1', '두부'),
-      ]);
+      ], hasExactMatch: true);
       await tester.pumpWidget(
         _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
       );
@@ -267,6 +291,27 @@ void main() {
       // /verdict로 이동, extra = '특이한음식'
       expect(find.text('verdict:특이한음식'), findsOneWidget);
     });
+
+    testWidgets('검색 실패 시에도 직접분석 CTA를 표시하고 판정 화면으로 이동한다', (tester) async {
+      await tester.pumpWidget(
+        _wrap([
+          foodRepositoryProvider.overrideWithValue(_FailingSearchRepository()),
+        ]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '두부');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+
+      expect(find.text('검색 중 오류가 발생했어요.'), findsOneWidget);
+      expect(find.text('찾는 음식이 없어요'), findsOneWidget);
+
+      await tester.tap(find.text('찾는 음식이 없어요'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('verdict:두부'), findsOneWidget);
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -275,7 +320,7 @@ void main() {
     // 실 구현은 food_repository_impl_test.dart에서 검증.
     test('MockFoodRepository.empty search 빈 쿼리 → 빈 결과', () async {
       final repo = MockFoodRepository.empty();
-      expect(await repo.search(''), isEmpty);
+      expect((await repo.search('')).foods, isEmpty);
     });
 
     test('MockFoodRepository addRecent → recentSearches에 포함됨', () async {

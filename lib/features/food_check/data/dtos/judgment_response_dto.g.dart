@@ -20,7 +20,7 @@ Map<String, dynamic> _$JudgmentItemDtoToJson(_JudgmentItemDto instance) =>
 
 _StateRecordDto _$StateRecordDtoFromJson(Map<String, dynamic> json) =>
     _StateRecordDto(
-      stateRecordId: (json['stateRecordId'] as num).toInt(),
+      stateRecordId: json['stateRecordId'] as String,
       label: json['label'] as String,
       date: json['date'] as String,
       timingMinutes: (json['timingMinutes'] as num).toInt(),

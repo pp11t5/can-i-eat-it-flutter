@@ -14,7 +14,7 @@ Map<String, dynamic> _stateRecordsJson({
     {'total': total, 'records': records};
 
 Map<String, dynamic> _stateRecordJson({
-  int stateRecordId = 1,
+  String stateRecordId = 'state-1',
   String label = '속쓰림',
   String date = '2026-06-10',
   int timingMinutes = 30,
@@ -117,7 +117,7 @@ void main() {
       // stateRecords가 명시적으로 제공된 경우 — non-null 보장
       expect(dto.stateRecords!.total, 3);
       expect(dto.stateRecords!.records.length, 1);
-      expect(dto.stateRecords!.records[0].stateRecordId, 1);
+      expect(dto.stateRecords!.records[0].stateRecordId, 'state-1');
       expect(dto.stateRecords!.records[0].label, '속쓰림');
       expect(dto.stateRecords!.records[0].date, '2026-06-10');
       expect(dto.stateRecords!.records[0].timingMinutes, 30);
@@ -247,7 +247,9 @@ void main() {
       expect(() => JudgmentResponseDto.fromJson(json), returnsNormally);
     });
 
-    test('stateRecords 키 없는 UNKNOWN → toEntity level==unknown, stateRecords.total==0', () {
+    test(
+        'stateRecords 키 없는 UNKNOWN → toEntity level==unknown, stateRecords.total==0',
+        () {
       final json = {
         'foodExternalId': 'food-ext-unknown',
         'foodName': '정체불명음식',
@@ -304,7 +306,9 @@ void main() {
       expect(() => TextJudgmentResponseDto.fromJson(json), returnsNormally);
     });
 
-    test('stateRecords 키 없는 UNKNOWN → toEntity level==unknown, stateRecords 빈 폴백', () {
+    test(
+        'stateRecords 키 없는 UNKNOWN → toEntity level==unknown, stateRecords 빈 폴백',
+        () {
       final json = {
         'foodName': '정체불명음식',
         'grade': 'UNKNOWN',

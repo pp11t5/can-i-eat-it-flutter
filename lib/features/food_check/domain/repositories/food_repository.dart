@@ -1,5 +1,5 @@
 import '../entities/eat_verdict.dart';
-import '../entities/food_summary.dart';
+import '../entities/food_search_result.dart';
 import '../entities/recent_food.dart';
 
 /// 최대 보관 최근검색 항목 개수.
@@ -18,7 +18,7 @@ abstract interface class FoodRepository {
 
   /// 자유 텍스트 음식명을 판정한다 (substitutes 없음, category 없음).
   ///
-  /// 대응 API: GET /foods/judgment?foodTextInput=<text>
+  /// 대응 API: GET /foods/judgment?name=<text>
   /// 직접 분석 진입(매칭 없음·raw text) 경로에서 사용.
   Future<EatVerdict> judgeByText(String foodTextInput);
 
@@ -34,9 +34,9 @@ abstract interface class FoodRepository {
 
   /// 검색어 [q] 로 음식 목록을 조회한다.
   ///
-  /// [size]: 최대 반환 개수 (기본값 20).
+  /// [size]: 최대 반환 개수 (기본값 10).
   /// 대응 API: GET /foods/search?q=[q]&size=[size]
-  Future<List<FoodSummary>> search(String q, {int size = 20});
+  Future<FoodSearchResult> search(String q, {int size = 10});
 
   // ---------------------------------------------------------------------------
   // 최근 검색

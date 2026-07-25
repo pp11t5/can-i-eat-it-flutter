@@ -28,9 +28,9 @@ abstract class JudgmentItemDto with _$JudgmentItemDto {
 @freezed
 abstract class StateRecordDto with _$StateRecordDto {
   const factory StateRecordDto({
-    required int stateRecordId,
+    required String stateRecordId,
     required String label,
-    required String date,   // "YYYY-MM-DD" 문자열 그대로
+    required String date, // "YYYY-MM-DD" 문자열 그대로
     required int timingMinutes,
   }) = _StateRecordDto;
 
@@ -79,7 +79,7 @@ abstract class JudgmentResponseDto with _$JudgmentResponseDto {
     required String foodExternalId,
     required String foodName,
     String? category,
-    required String grade,         // RECOMMEND|CAUTION|RISK|UNKNOWN
+    required String grade, // RECOMMEND|CAUTION|RISK|UNKNOWN
     required String personalTitle,
     @Default(<JudgmentItemDto>[]) List<JudgmentItemDto> items,
     StateRecordsDto? stateRecords, // nullable: 누락/null 방어 (S1)
@@ -91,7 +91,7 @@ abstract class JudgmentResponseDto with _$JudgmentResponseDto {
 }
 
 // ---------------------------------------------------------------------------
-// by-text 응답 DTO — GET /foods/judgment?foodTextInput=
+// by-text 응답 DTO — GET /foods/judgment?name=
 // ---------------------------------------------------------------------------
 
 /// 자유 텍스트 판정 응답 DTO (by-text).
@@ -185,6 +185,6 @@ extension TextJudgmentResponseDtoMapper on TextJudgmentResponseDto {
                     )
                     .toList(),
               ),
-        substitutes: const [],   // by-text 규약: 서버가 항상 빈배열
+        substitutes: const [], // by-text 규약: 서버가 항상 빈배열
       );
 }
