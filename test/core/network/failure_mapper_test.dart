@@ -139,7 +139,7 @@ void main() {
   // fromDioException — Dio 영문 raw message UI 비노출
   // -------------------------------------------------------------------------
   group('FailureMapper.fromDioException', () {
-    DioException _dio(DioExceptionType type, {String? message}) =>
+    DioException dioEx(DioExceptionType type, {String? message}) =>
         DioException(
           requestOptions: RequestOptions(path: '/test'),
           type: type,
@@ -148,7 +148,7 @@ void main() {
 
     test('connectionError + Failed host lookup → 한글 NetworkFailure 치환', () {
       final failure = FailureMapper.fromDioException(
-        _dio(
+        dioEx(
           DioExceptionType.connectionError,
           message:
               "The connection errored: Failed host lookup: 'can-i-eat-it.com' "
@@ -162,7 +162,7 @@ void main() {
 
     test('connectionTimeout → Dio 영문 대신 한글 고정 문구', () {
       final failure = FailureMapper.fromDioException(
-        _dio(
+        dioEx(
           DioExceptionType.connectionTimeout,
           message: 'The request connection took longer than 0:00:10.000000...',
         ),
@@ -177,7 +177,7 @@ void main() {
         DioExceptionType.receiveTimeout,
       ]) {
         final failure = FailureMapper.fromDioException(
-          _dio(type, message: 'English timeout noise'),
+          dioEx(type, message: 'English timeout noise'),
         );
         expect(failure, isA<NetworkFailure>());
         expect(failure.message, '네트워크 연결을 확인해 주세요.');
@@ -186,7 +186,7 @@ void main() {
 
     test('message 가 null 이어도 한글 고정 문구', () {
       final failure = FailureMapper.fromDioException(
-        _dio(DioExceptionType.connectionError),
+        dioEx(DioExceptionType.connectionError),
       );
       expect(failure.message, '네트워크 연결을 확인해 주세요.');
     });
