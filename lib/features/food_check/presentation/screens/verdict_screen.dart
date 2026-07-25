@@ -1,10 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
@@ -42,10 +39,6 @@ class VerdictScreen extends ConsumerStatefulWidget {
 }
 
 class _VerdictScreenState extends ConsumerState<VerdictScreen> {
-  /// 도감(최근검색) 자동추가 one-shot 가드. by-id 진입 + 분류된 판정에서
-  /// 한 번만 [FoodRepository.addRecent] 를 호출하도록 막는다.
-  bool _savedToDictionary = false;
-
   @override
   void initState() {
     super.initState();
@@ -72,55 +65,18 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
     }
   }
 
-  /// 도감 자동추가 one-shot 훅.
-  ///
-  /// by-id 진입 + 판정 성공 + 분류된 결과(unknown 제외)일 때만
-  /// [FoodRepository.addRecent] 를 fire-and-forget 호출하고 토스트를 띄운다.
-  /// by-text 진입·unknown 판정·판정 실패(AsyncError)에는 아무 것도 하지 않는다.
-  void _maybeAutoAddToDictionary(
-    AsyncValue<EatVerdict>? previous,
-    AsyncValue<EatVerdict> next,
-  ) {
-    if (_savedToDictionary || !widget.args.isById) return;
-
-    final verdict = next.valueOrNull;
-    if (verdict == null ||
-        verdict.level == VerdictLevel.unknown ||
-        verdict.foodName.isEmpty) {
-      return;
-    }
-
-    _savedToDictionary = true;
-    unawaited(
-      ref
-          .read(foodRepositoryProvider)
-          .addRecent(widget.args.externalId!)
-          .catchError((_) {}),
-    );
-    if (mounted) {
-      showAppToast(context, '내 도감에 담았어요');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue<EatVerdict>>(
-      verdictControllerProvider,
-      _maybeAutoAddToDictionary,
-    );
     final verdictAsync = ref.watch(verdictControllerProvider);
 
     return verdictAsync.when(
       loading: () => const VerdictLoadingScreen(),
       error: (error, _) => _ErrorScreen(
-        message: error is Failure
-            ? error.message
-            : '분석 중 오류가 발생했어요.',
+        message: error is Failure ? error.message : '분석 중 오류가 발생했어요.',
         onRetry: _handleRetry,
       ),
       data: (verdict) {
-        if (verdict.level == VerdictLevel.unknown &&
-            verdict.foodName.isEmpty) {
+        if (verdict.level == VerdictLevel.unknown && verdict.foodName.isEmpty) {
           // 초기 idle 상태 — 로딩으로 표시.
           return const VerdictLoadingScreen();
         }
@@ -133,8 +89,8 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
         final handler = ref.read(addToDietHandlerProvider);
         VoidCallback? onAddToDiet;
         if (handler != null) {
-          final ctx = widget.args.recordContext ??
-              MealRecordContext(eatenAt: nowKst());
+          final ctx =
+              widget.args.recordContext ?? MealRecordContext(eatenAt: nowKst());
           // 식사 기록 저장(API mutation) — 전역 로딩 오버레이로 중복 탭 방지.
           onAddToDiet = () => ref
               .read(globalLoadingControllerProvider.notifier)
@@ -148,7 +104,6 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
       },
     );
   }
-
 }
 
 // ---------------------------------------------------------------------------

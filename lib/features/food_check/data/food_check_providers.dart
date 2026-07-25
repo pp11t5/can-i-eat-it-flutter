@@ -13,7 +13,7 @@ part 'food_check_providers.g.dart';
 /// [FoodRepository] 공급자.
 ///
 /// 기본값: [FoodRepositoryImpl] — 실 서버 연동 (ADR-0007 §3-1 (5), W3-3).
-/// - search / recent CRUD: 실 `/foods/*` 엔드포인트.
+/// - search / recent 조회·삭제: 실 `/foods/*` 엔드포인트.
 /// - judgeByText / judgeById: 실 `/foods/judgment` 엔드포인트 (W3-3 충실 정합).
 ///
 /// 테스트 / 오프라인 override:

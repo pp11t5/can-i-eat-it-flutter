@@ -111,26 +111,8 @@ class MockFoodRepository implements FoodRepository {
   }
 
   @override
-  Future<void> addRecent(String foodExternalId) async {
-    // 중복 제거 후 맨 앞에 삽입
-    _recent.removeWhere((r) => r.foodExternalId == foodExternalId);
-    _recent.insert(
-      0,
-      RecentFood(
-        foodExternalId: foodExternalId,
-        name: foodExternalId, // Mock에서는 name = externalId
-        searchedAt: DateTime.now(),
-      ),
-    );
-    // 최대 개수 초과 시 오래된 항목 잘라내기
-    if (_recent.length > kRecentFoodMaxCount) {
-      _recent.removeRange(kRecentFoodMaxCount, _recent.length);
-    }
-  }
-
-  @override
-  Future<void> removeRecent(String foodExternalId) async {
-    _recent.removeWhere((r) => r.foodExternalId == foodExternalId);
+  Future<void> removeRecent(int id) async {
+    _recent.removeWhere((r) => r.id == id);
   }
 
   @override

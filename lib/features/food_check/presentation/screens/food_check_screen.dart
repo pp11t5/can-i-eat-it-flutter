@@ -24,8 +24,8 @@ import 'package:can_i_eat_it/features/food_check/presentation/widgets/clear_sear
 ///
 /// W3 범위:
 /// - 디바운스(1초)+Submit 검색 → 결과 패널(FoodSummary 리스트)
-/// - 결과 셀 탭 → POST /foods/recent 기록 + 판정 화면 present-modal
-/// - 매칭 없음 → raw text 직접 분석 진입 (Figma 365-1849, externalId 없음 → recent 기록 생략)
+/// - 결과 셀 탭 → 판정 화면 present-modal
+/// - 매칭 없음 → raw text 직접 분석 진입 (Figma 365-1849)
 /// - 최근검색 RecentFood 엔티티 기반 (String 기반 SearchHistoryRepository 흡수)
 ///
 /// [recordContext]: 식사 기록 흐름에서 진입 시 전달 (FAB→시간선택→검색). null이면 단순 판정.
@@ -128,21 +128,12 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
 
   /// 검색 결과 항목 탭 핸들러.
   ///
-  /// 1. POST /foods/recent 기록 (externalId 있으므로 기록).
-  /// 2. 판정 화면 present-modal (go_router /verdict).
+  /// 판정 화면을 present-modal로 연다 (go_router /verdict).
   Future<void> _onResultTap(FoodSummary food) async {
-    // in-flight 가드: addRecent await 동안 다른 셀 탭으로 /verdict 중복 push 방지.
+    // in-flight 가드: 다른 셀 탭으로 /verdict 중복 push 방지.
     if (_navigating) return;
     _navigating = true;
     try {
-      // POST /foods/recent 기록 (DB 매칭 있으므로 기록)
-      try {
-        await ref
-            .read(recentFoodControllerProvider.notifier)
-            .addRecent(food.externalId);
-      } catch (_) {
-        // 기록 실패는 판정 진입을 막지 않는다.
-      }
       if (!mounted) return;
       // 판정 화면 present-modal — by-id 진입 (externalId 보유)
       context.push(
@@ -160,7 +151,6 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
 
   /// 매칭 없음 → raw text 직접 분석 진입 (by-text).
   ///
-  /// externalId 없으므로 POST /foods/recent 기록 생략 (ADR-0007 §3-1 (5)).
   void _onDirectAnalyze() {
     if (_navigating) return;
     final q = _query.trim();
@@ -634,7 +624,7 @@ class _RecentSection extends StatelessWidget {
                   item: items[i],
                   onRemove: () => ref
                       .read(recentFoodControllerProvider.notifier)
-                      .removeRecent(items[i].foodExternalId),
+                      .removeRecent(items[i].id),
                 ),
               ),
             ),
@@ -660,7 +650,7 @@ class _HistoryRow extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              item.name,
+              item.query,
               style: AppTextStyles.body1Medium.copyWith(
                 color: AppColors.textPrimary,
               ),

@@ -14,9 +14,8 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$RecentFoodDto {
-  String get foodExternalId;
-  String get name;
-  String? get category;
+  int get id;
+  String get query;
   DateTime get searchedAt;
 
   /// Create a copy of RecentFoodDto
@@ -35,23 +34,19 @@ mixin _$RecentFoodDto {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is RecentFoodDto &&
-            (identical(other.foodExternalId, foodExternalId) ||
-                other.foodExternalId == foodExternalId) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.category, category) ||
-                other.category == category) &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.query, query) || other.query == query) &&
             (identical(other.searchedAt, searchedAt) ||
                 other.searchedAt == searchedAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, foodExternalId, name, category, searchedAt);
+  int get hashCode => Object.hash(runtimeType, id, query, searchedAt);
 
   @override
   String toString() {
-    return 'RecentFoodDto(foodExternalId: $foodExternalId, name: $name, category: $category, searchedAt: $searchedAt)';
+    return 'RecentFoodDto(id: $id, query: $query, searchedAt: $searchedAt)';
   }
 }
 
@@ -61,11 +56,7 @@ abstract mixin class $RecentFoodDtoCopyWith<$Res> {
           RecentFoodDto value, $Res Function(RecentFoodDto) _then) =
       _$RecentFoodDtoCopyWithImpl;
   @useResult
-  $Res call(
-      {String foodExternalId,
-      String name,
-      String? category,
-      DateTime searchedAt});
+  $Res call({int id, String query, DateTime searchedAt});
 }
 
 /// @nodoc
@@ -81,24 +72,19 @@ class _$RecentFoodDtoCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? foodExternalId = null,
-    Object? name = null,
-    Object? category = freezed,
+    Object? id = null,
+    Object? query = null,
     Object? searchedAt = null,
   }) {
     return _then(_self.copyWith(
-      foodExternalId: null == foodExternalId
-          ? _self.foodExternalId
-          : foodExternalId // ignore: cast_nullable_to_non_nullable
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as int,
+      query: null == query
+          ? _self.query
+          : query // ignore: cast_nullable_to_non_nullable
               as String,
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      category: freezed == category
-          ? _self.category
-          : category // ignore: cast_nullable_to_non_nullable
-              as String?,
       searchedAt: null == searchedAt
           ? _self.searchedAt
           : searchedAt // ignore: cast_nullable_to_non_nullable
@@ -200,16 +186,13 @@ extension RecentFoodDtoPatterns on RecentFoodDto {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String foodExternalId, String name, String? category,
-            DateTime searchedAt)?
-        $default, {
+    TResult Function(int id, String query, DateTime searchedAt)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _RecentFoodDto() when $default != null:
-        return $default(
-            _that.foodExternalId, _that.name, _that.category, _that.searchedAt);
+        return $default(_that.id, _that.query, _that.searchedAt);
       case _:
         return orElse();
     }
@@ -230,15 +213,12 @@ extension RecentFoodDtoPatterns on RecentFoodDto {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String foodExternalId, String name, String? category,
-            DateTime searchedAt)
-        $default,
+    TResult Function(int id, String query, DateTime searchedAt) $default,
   ) {
     final _that = this;
     switch (_that) {
       case _RecentFoodDto():
-        return $default(
-            _that.foodExternalId, _that.name, _that.category, _that.searchedAt);
+        return $default(_that.id, _that.query, _that.searchedAt);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -258,15 +238,12 @@ extension RecentFoodDtoPatterns on RecentFoodDto {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String foodExternalId, String name, String? category,
-            DateTime searchedAt)?
-        $default,
+    TResult? Function(int id, String query, DateTime searchedAt)? $default,
   ) {
     final _that = this;
     switch (_that) {
       case _RecentFoodDto() when $default != null:
-        return $default(
-            _that.foodExternalId, _that.name, _that.category, _that.searchedAt);
+        return $default(_that.id, _that.query, _that.searchedAt);
       case _:
         return null;
     }
@@ -277,19 +254,14 @@ extension RecentFoodDtoPatterns on RecentFoodDto {
 @JsonSerializable()
 class _RecentFoodDto implements RecentFoodDto {
   const _RecentFoodDto(
-      {required this.foodExternalId,
-      required this.name,
-      this.category,
-      required this.searchedAt});
+      {required this.id, required this.query, required this.searchedAt});
   factory _RecentFoodDto.fromJson(Map<String, dynamic> json) =>
       _$RecentFoodDtoFromJson(json);
 
   @override
-  final String foodExternalId;
+  final int id;
   @override
-  final String name;
-  @override
-  final String? category;
+  final String query;
   @override
   final DateTime searchedAt;
 
@@ -313,23 +285,19 @@ class _RecentFoodDto implements RecentFoodDto {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _RecentFoodDto &&
-            (identical(other.foodExternalId, foodExternalId) ||
-                other.foodExternalId == foodExternalId) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.category, category) ||
-                other.category == category) &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.query, query) || other.query == query) &&
             (identical(other.searchedAt, searchedAt) ||
                 other.searchedAt == searchedAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, foodExternalId, name, category, searchedAt);
+  int get hashCode => Object.hash(runtimeType, id, query, searchedAt);
 
   @override
   String toString() {
-    return 'RecentFoodDto(foodExternalId: $foodExternalId, name: $name, category: $category, searchedAt: $searchedAt)';
+    return 'RecentFoodDto(id: $id, query: $query, searchedAt: $searchedAt)';
   }
 }
 
@@ -341,11 +309,7 @@ abstract mixin class _$RecentFoodDtoCopyWith<$Res>
       __$RecentFoodDtoCopyWithImpl;
   @override
   @useResult
-  $Res call(
-      {String foodExternalId,
-      String name,
-      String? category,
-      DateTime searchedAt});
+  $Res call({int id, String query, DateTime searchedAt});
 }
 
 /// @nodoc
@@ -361,24 +325,19 @@ class __$RecentFoodDtoCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? foodExternalId = null,
-    Object? name = null,
-    Object? category = freezed,
+    Object? id = null,
+    Object? query = null,
     Object? searchedAt = null,
   }) {
     return _then(_RecentFoodDto(
-      foodExternalId: null == foodExternalId
-          ? _self.foodExternalId
-          : foodExternalId // ignore: cast_nullable_to_non_nullable
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as int,
+      query: null == query
+          ? _self.query
+          : query // ignore: cast_nullable_to_non_nullable
               as String,
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      category: freezed == category
-          ? _self.category
-          : category // ignore: cast_nullable_to_non_nullable
-              as String?,
       searchedAt: null == searchedAt
           ? _self.searchedAt
           : searchedAt // ignore: cast_nullable_to_non_nullable

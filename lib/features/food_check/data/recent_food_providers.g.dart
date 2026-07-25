@@ -7,12 +7,12 @@ part of 'recent_food_providers.dart';
 // **************************************************************************
 
 String _$recentFoodControllerHash() =>
-    r'389df54e03585e38b5697aa8bb1b675dc3c801f4';
+    r'53f9c9ffd7623474afd9d64afc40a39c71621d9c';
 
 /// 최근 검색 상태 컨트롤러 (ADR-0007 §3-1 (C), 티켓 6).
 ///
 /// [SearchHistoryController] (String 기반)를 [RecentFood] 엔티티 기반으로 대체한다.
-/// [FoodRepository.recentSearches] / [addRecent] / [removeRecent] / [clearRecent]
+/// [FoodRepository.recentSearches] / [removeRecent] / [clearRecent]
 /// 를 단일 [FoodRepository]를 통해 호출한다.
 ///
 /// 테스트 override:

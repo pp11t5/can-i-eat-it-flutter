@@ -8,7 +8,7 @@ part 'recent_food_providers.g.dart';
 /// 최근 검색 상태 컨트롤러 (ADR-0007 §3-1 (C), 티켓 6).
 ///
 /// [SearchHistoryController] (String 기반)를 [RecentFood] 엔티티 기반으로 대체한다.
-/// [FoodRepository.recentSearches] / [addRecent] / [removeRecent] / [clearRecent]
+/// [FoodRepository.recentSearches] / [removeRecent] / [clearRecent]
 /// 를 단일 [FoodRepository]를 통해 호출한다.
 ///
 /// 테스트 override:
@@ -20,21 +20,12 @@ class RecentFoodController extends _$RecentFoodController {
     return ref.watch(foodRepositoryProvider).recentSearches();
   }
 
-  /// 최근 검색 항목을 추가하고 목록을 갱신한다.
-  ///
-  /// [foodExternalId]: 서버측 음식 식별자 (POST /foods/recent).
-  Future<void> addRecent(String foodExternalId) async {
-    final repo = ref.read(foodRepositoryProvider);
-    await repo.addRecent(foodExternalId);
-    state = AsyncData(await repo.recentSearches());
-  }
-
   /// 특정 최근 검색 항목을 제거하고 목록을 갱신한다.
   ///
-  /// [foodExternalId]: 제거할 항목의 서버측 식별자 (DELETE /foods/recent/{id}).
-  Future<void> removeRecent(String foodExternalId) async {
+  /// [id]: 최근 검색 기록 식별자 (DELETE /foods/recent/{id}).
+  Future<void> removeRecent(int id) async {
     final repo = ref.read(foodRepositoryProvider);
-    await repo.removeRecent(foodExternalId);
+    await repo.removeRecent(id);
     state = AsyncData(await repo.recentSearches());
   }
 

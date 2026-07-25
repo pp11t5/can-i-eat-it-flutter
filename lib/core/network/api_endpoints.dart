@@ -65,13 +65,12 @@ class ApiEndpoints {
   /// `GET /foods/recent`
   static const String foodsRecent = '/foods/recent';
 
-  /// 최근 검색 항목 삭제. `{foodExternalId}` 는 [foodsRecentItem] 으로 치환.
-  static const String _foodsRecentItemTemplate =
-      '/foods/recent/{foodExternalId}';
+  /// 최근 검색 항목 삭제. `{id}` 는 [foodsRecentItem] 으로 치환.
+  static const String _foodsRecentItemTemplate = '/foods/recent/{id}';
 
-  /// `DELETE /foods/recent/{foodExternalId}`
-  static String foodsRecentItem(String foodExternalId) =>
-      _foodsRecentItemTemplate.replaceFirst('{foodExternalId}', foodExternalId);
+  /// `DELETE /foods/recent/{id}`
+  static String foodsRecentItem(int id) =>
+      _foodsRecentItemTemplate.replaceFirst('{id}', id.toString());
 
   // ---------------------------------------------------------------------------
   // Food — 판정 (W3-3, judgment 2엔드포인트)

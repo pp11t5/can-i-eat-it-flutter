@@ -44,9 +44,9 @@ Widget _wrap(List<Override> overrides) => ProviderScope(
     );
 
 // 샘플 최근검색 항목.
-RecentFood _recentFood(String id, String name) => RecentFood(
-      foodExternalId: id,
-      name: name,
+RecentFood _recentFood(int id, String query) => RecentFood(
+      id: id,
+      query: query,
       searchedAt: DateTime(2026, 6, 1),
     );
 
@@ -95,8 +95,8 @@ void main() {
 
     setUp(() {
       repo = MockFoodRepository.withRecent([
-        _recentFood('r-1', '된장찌개'),
-        _recentFood('r-2', '오렌지주스'),
+        _recentFood(1, '된장찌개'),
+        _recentFood(2, '오렌지주스'),
       ]);
     });
 
@@ -140,8 +140,8 @@ void main() {
   group('FoodCheckScreen — 전체 삭제 다이얼로그 (clearRecent)', () {
     testWidgets('전체 삭제 탭 시 확인 다이얼로그가 열린다', (tester) async {
       final repo = MockFoodRepository.withRecent([
-        _recentFood('r-1', '된장찌개'),
-        _recentFood('r-2', '오렌지주스'),
+        _recentFood(1, '된장찌개'),
+        _recentFood(2, '오렌지주스'),
       ]);
       await tester.pumpWidget(
         _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
@@ -156,8 +156,8 @@ void main() {
 
     testWidgets('다이얼로그에서 삭제하기 탭 시 기록이 전부 사라진다', (tester) async {
       final repo = MockFoodRepository.withRecent([
-        _recentFood('r-1', '된장찌개'),
-        _recentFood('r-2', '오렌지주스'),
+        _recentFood(1, '된장찌개'),
+        _recentFood(2, '오렌지주스'),
       ]);
       await tester.pumpWidget(
         _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
@@ -176,8 +176,8 @@ void main() {
 
     testWidgets('다이얼로그에서 취소 탭 시 기록이 그대로 유지된다', (tester) async {
       final repo = MockFoodRepository.withRecent([
-        _recentFood('r-1', '된장찌개'),
-        _recentFood('r-2', '오렌지주스'),
+        _recentFood(1, '된장찌개'),
+        _recentFood(2, '오렌지주스'),
       ]);
       await tester.pumpWidget(
         _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
@@ -252,7 +252,7 @@ void main() {
       expect(find.text('찾는 음식이 없어요'), findsOneWidget);
     });
 
-    testWidgets('결과 셀 탭 → addRecent 호출 후 /verdict 라우트 진입', (tester) async {
+    testWidgets('결과 셀 탭 → /verdict 라우트 진입', (tester) async {
       final repo = MockFoodRepository.withSearchResults([
         _foodSummary('f-1', '두부'),
       ], hasExactMatch: true);
@@ -323,11 +323,10 @@ void main() {
       expect((await repo.search('')).foods, isEmpty);
     });
 
-    test('MockFoodRepository addRecent → recentSearches에 포함됨', () async {
-      final repo = MockFoodRepository.empty();
-      await repo.addRecent('f-1');
+    test('MockFoodRepository withRecent → recentSearches에 포함됨', () async {
+      final repo = MockFoodRepository.withRecent([_recentFood(1, '두부')]);
       final results = await repo.recentSearches();
-      expect(results.map((r) => r.foodExternalId), contains('f-1'));
+      expect(results.map((r) => r.query), contains('두부'));
     });
   });
 }

@@ -9,14 +9,11 @@ part 'recent_food.freezed.dart';
 @freezed
 abstract class RecentFood with _$RecentFood {
   const factory RecentFood({
-    /// 서버측 음식 식별자. POST /foods/recent 호출 시 사용.
-    required String foodExternalId,
+    /// 최근 검색 기록 식별자. 단건 삭제 시 사용.
+    required int id,
 
-    /// 음식 표시 이름.
-    required String name,
-
-    /// 음식 카테고리. 서버가 없으면 null.
-    String? category,
+    /// 사용자가 검색한 원문.
+    required String query,
 
     /// 검색(저장)된 시각.
     required DateTime searchedAt,
