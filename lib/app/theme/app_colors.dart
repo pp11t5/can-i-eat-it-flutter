@@ -93,6 +93,9 @@ abstract final class AppColors {
   /// 바텀 내비 비활성 아이콘·레이블 (Figma nav component 실측 #C5C5C6)
   static const Color navInactive = ColorPrimitives.navInactive;
 
+  /// Foundation gray/60 (navi) — 비활성 chevron 등 네비 아이콘 (#BBBBBB)
+  static const Color navi = ColorPrimitives.gray60;
+
   /// 강조 텍스트 색 (Figma fontColor80 #10111A — 숫자·강조 라벨 등)
   static const Color textStrong = ColorPrimitives.fontColor80;
 
