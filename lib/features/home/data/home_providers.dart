@@ -5,6 +5,7 @@ import 'package:can_i_eat_it/core/network/dio_client.dart';
 import 'package:can_i_eat_it/features/home/data/repositories/home_repository_impl.dart';
 import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
 import 'package:can_i_eat_it/features/home/domain/repositories/home_repository.dart';
+import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
 
 part 'home_providers.g.dart';
 
@@ -41,3 +42,14 @@ Future<int> unrecordedMealCount(Ref ref) =>
 @riverpod
 Future<List<RecentMeal>> recentMeals(Ref ref) =>
     ref.watch(homeRepositoryProvider).recentFoods();
+
+// ---------------------------------------------------------------------------
+// 인기 검색 음식 (홈 제안 칩)
+// ---------------------------------------------------------------------------
+
+/// 전체 사용자의 인기 검색 음식 목록을 조회한다.
+///
+/// [HomeScreen]이 제안 칩 행을 구독한다. 빈 목록·오류에서는 행을 숨긴다.
+@riverpod
+Future<List<FoodSummary>> topSearchedFoods(Ref ref) =>
+    ref.watch(homeRepositoryProvider).topSearchedFoods();

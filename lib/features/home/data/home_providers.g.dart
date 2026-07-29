@@ -69,5 +69,27 @@ final recentMealsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef RecentMealsRef = AutoDisposeFutureProviderRef<List<RecentMeal>>;
+String _$topSearchedFoodsHash() => r'8161ad84ef5209bed55bfaaf7391e0bf848aebcd';
+
+/// 전체 사용자의 인기 검색 음식 목록을 조회한다.
+///
+/// [HomeScreen]이 제안 칩 행을 구독한다. 빈 목록·오류에서는 행을 숨긴다.
+///
+/// Copied from [topSearchedFoods].
+@ProviderFor(topSearchedFoods)
+final topSearchedFoodsProvider =
+    AutoDisposeFutureProvider<List<FoodSummary>>.internal(
+  topSearchedFoods,
+  name: r'topSearchedFoodsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$topSearchedFoodsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef TopSearchedFoodsRef = AutoDisposeFutureProviderRef<List<FoodSummary>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

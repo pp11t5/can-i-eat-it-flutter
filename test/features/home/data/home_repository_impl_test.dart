@@ -98,4 +98,45 @@ void main() {
       expect(result, isEmpty);
     });
   });
+
+  // -------------------------------------------------------------------------
+  group('topSearchedFoods — GET /foods/top-searched', () {
+    test('result[]를 FoodSummary 목록으로 정확히 파싱한다', () async {
+      adapter.onGet(
+        ApiEndpoints.foodsTopSearched,
+        (server) => server.reply(
+          200,
+          _envelope([
+            {
+              'externalId': 'food-1',
+              'name': '닭갈비',
+              'category': 'stirfry_braise',
+            },
+            {
+              'externalId': 'food-2',
+              'name': '아메리카노',
+              'category': null,
+            },
+          ]),
+        ),
+      );
+
+      final result = await repo.topSearchedFoods();
+
+      expect(result, hasLength(2));
+      expect(result[0].externalId, 'food-1');
+      expect(result[0].name, '닭갈비');
+      expect(result[0].category, 'stirfry_braise');
+      expect(result[1].category, isNull);
+    });
+
+    test('빈 목록을 정상 처리한다', () async {
+      adapter.onGet(
+        ApiEndpoints.foodsTopSearched,
+        (server) => server.reply(200, _envelope(<dynamic>[])),
+      );
+
+      expect(await repo.topSearchedFoods(), isEmpty);
+    });
+  });
 }

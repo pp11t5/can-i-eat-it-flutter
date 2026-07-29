@@ -199,6 +199,25 @@ void main() {
 
   // -------------------------------------------------------------------------
   group('FoodCheckScreen — 검색 결과 패널', () {
+    testWidgets('initialQuery가 검색 필드에 반영되고 자동으로 조회된다', (tester) async {
+      final repo = MockFoodRepository.withSearchResults([
+        _foodSummary('f-1', '두부조림'),
+      ], hasExactMatch: true);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [foodRepositoryProvider.overrideWithValue(repo)],
+          child: const MaterialApp(
+            home: FoodCheckScreen(initialQuery: '두부'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final textField = tester.widget<TextField>(find.byType(TextField));
+      expect(textField.controller!.text, '두부');
+      expect(find.text('두부조림'), findsOneWidget);
+    });
+
     testWidgets('검색어 입력 후 Submit → 결과 셀이 렌더된다', (tester) async {
       final repo = MockFoodRepository.withSearchResults([
         _foodSummary('f-1', '두부'),
