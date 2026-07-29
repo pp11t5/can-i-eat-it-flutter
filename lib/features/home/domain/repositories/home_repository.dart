@@ -1,4 +1,5 @@
 import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
+import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
 
 /// 홈 화면 저장소 인터페이스 — read 전용 (W7 minor EP).
 ///
@@ -14,4 +15,9 @@ abstract interface class HomeRepository {
   ///
   /// 대응 API: GET /meal-records/recent-foods (result[]).
   Future<List<RecentMeal>> recentFoods();
+
+  /// 전체 사용자의 인기 검색 음식 최대 3개를 조회한다.
+  ///
+  /// 대응 API: GET /foods/top-searched (result[]).
+  Future<List<FoodSummary>> topSearchedFoods();
 }

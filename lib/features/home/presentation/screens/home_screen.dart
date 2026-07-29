@@ -12,7 +12,6 @@ import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_search_bar.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
-import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
 import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
 
@@ -29,6 +28,10 @@ class HomeScreen extends ConsumerWidget {
     final streakDays =
         ref.watch(mySummaryProvider).valueOrNull?.weeklySummary.streakCount;
     final unrecordedCount = ref.watch(unrecordedMealCountProvider).valueOrNull;
+    final topSearchedFoods =
+        (ref.watch(topSearchedFoodsProvider).valueOrNull ?? const [])
+            .take(3)
+            .toList();
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
@@ -51,40 +54,34 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: 14),
 
               // ── 3. 제안 칩 행 — Figma 1207:6604 단일 행 수평 스크롤 ────────
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    HomeSuggestionChip(
-                      label: '된장찌개',
-                      iconAsset: 'assets/illustrations/food_soup.png',
-                      onTap: () => context.push(
-                        '/verdict',
-                        extra: const VerdictArgs(text: '된장찌개'),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    HomeSuggestionChip(
-                      label: '아메리카노',
-                      iconAsset: 'assets/illustrations/food_drink.png',
-                      onTap: () => context.push(
-                        '/verdict',
-                        extra: const VerdictArgs(text: '아메리카노'),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    HomeSuggestionChip(
-                      label: '김치볶음밥',
-                      iconAsset: 'assets/illustrations/food_rice.png',
-                      onTap: () => context.push(
-                        '/verdict',
-                        extra: const VerdictArgs(text: '김치볶음밥'),
-                      ),
-                    ),
-                  ],
+              // 인기 검색어가 없거나 불러오지 못한 경우 이 행은 노출하지 않는다.
+              if (topSearchedFoods.isNotEmpty) ...[
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (var index = 0;
+                          index < topSearchedFoods.length;
+                          index++) ...[
+                        if (index > 0) const SizedBox(width: 8),
+                        HomeSuggestionChip(
+                          label: topSearchedFoods[index].name,
+                          category: topSearchedFoods[index].category,
+                          onTap: () => context.push(
+                            Uri(
+                              path: '/check',
+                              queryParameters: {
+                                'q': topSearchedFoods[index].name
+                              },
+                            ).toString(),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.contentGap),
+                const SizedBox(height: AppSpacing.contentGap),
+              ],
 
               // ── 4. 2-up 진입 카드 행 — Figma 2122:14040 ───────────────
               IntrinsicHeight(

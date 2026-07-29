@@ -65,6 +65,9 @@ class ApiEndpoints {
   /// `GET /foods/recent`
   static const String foodsRecent = '/foods/recent';
 
+  /// `GET /foods/top-searched`
+  static const String foodsTopSearched = '/foods/top-searched';
+
   /// 최근 검색 항목 삭제. `{id}` 는 [foodsRecentItem] 으로 치환.
   static const String _foodsRecentItemTemplate = '/foods/recent/{id}';
 

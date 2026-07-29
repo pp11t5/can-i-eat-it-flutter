@@ -100,9 +100,13 @@ GoRouter appRouter(Ref ref) {
         name: 'food-check',
         pageBuilder: (context, state) {
           final recordContext = state.extra as MealRecordContext?;
+          final initialQuery = state.uri.queryParameters['q'];
           return MaterialPage(
             fullscreenDialog: true,
-            child: FoodCheckScreen(recordContext: recordContext),
+            child: FoodCheckScreen(
+              recordContext: recordContext,
+              initialQuery: initialQuery,
+            ),
           );
         },
       ),
@@ -201,8 +205,8 @@ GoRouter appRouter(Ref ref) {
         path: '/verdict',
         name: 'verdict',
         pageBuilder: (context, state) {
-          final args = state.extra as VerdictArgs? ??
-              const VerdictArgs(text: '');
+          final args =
+              state.extra as VerdictArgs? ?? const VerdictArgs(text: '');
           return MaterialPage(
             fullscreenDialog: true,
             child: VerdictScreen(args: args),

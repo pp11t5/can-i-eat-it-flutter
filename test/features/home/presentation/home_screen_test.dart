@@ -7,6 +7,7 @@ import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/home/data/repositories/mock_home_repository.dart';
 import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
+import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
 import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
 import 'package:can_i_eat_it/features/mypage/data/repositories/mock_my_page_repository.dart';
 
@@ -46,17 +47,27 @@ GoRouter _testRouter() => GoRouter(
           path: '/food-history',
           builder: (_, __) => const Scaffold(body: Text('food-history-stub')),
         ),
+        GoRoute(
+          path: '/check',
+          builder: (_, state) => Scaffold(
+            body: Text('check:${state.uri.queryParameters['q'] ?? ''}'),
+          ),
+        ),
       ],
     );
 
-Widget _wrapWithRouter() => ProviderScope(
+Widget _wrapWithRouter({bool withData = false}) => ProviderScope(
       overrides: [
         // ignore: scoped_providers_should_specify_dependencies
         myPageRepositoryProvider.overrideWithValue(
-          MockMyPageRepository.empty(),
+          withData
+              ? MockMyPageRepository.seeded()
+              : MockMyPageRepository.empty(),
         ),
         // ignore: scoped_providers_should_specify_dependencies
-        homeRepositoryProvider.overrideWithValue(MockHomeRepository.empty()),
+        homeRepositoryProvider.overrideWithValue(
+          withData ? MockHomeRepository.seeded() : MockHomeRepository.empty(),
+        ),
       ],
       child: MaterialApp.router(routerConfig: _testRouter()),
     );
@@ -104,25 +115,20 @@ void main() {
   });
 
   group('HomeScreen — 제안 칩', () {
-    testWidgets('"된장찌개" 칩이 표시된다', (tester) async {
-      await tester.pumpWidget(_wrap());
+    testWidgets('인기 검색 음식 칩이 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap(withData: true));
       await tester.pumpAndSettle();
 
-      expect(find.text('된장찌개'), findsOneWidget);
-    });
-
-    testWidgets('"아메리카노" 칩이 표시된다', (tester) async {
-      await tester.pumpWidget(_wrap());
-      await tester.pumpAndSettle();
-
+      expect(find.text('닭갈비'), findsOneWidget);
       expect(find.text('아메리카노'), findsOneWidget);
+      expect(find.text('비빔밥'), findsOneWidget);
     });
 
-    testWidgets('"김치볶음밥" 칩이 표시된다', (tester) async {
+    testWidgets('인기 검색 음식이 없으면 칩 행을 숨긴다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('김치볶음밥'), findsOneWidget);
+      expect(find.byType(HomeSuggestionChip), findsNothing);
     });
   });
 
@@ -183,6 +189,16 @@ void main() {
 
       expect(find.text('food-history-stub'), findsOneWidget);
     });
+
+    testWidgets('인기 검색 칩 탭 → 음식명이 입력된 /check로 push', (tester) async {
+      await tester.pumpWidget(_wrapWithRouter(withData: true));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('닭갈비'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('check:닭갈비'), findsOneWidget);
+    });
   });
 
   group('HomeScreen — 최근 식사 섹션', () {
@@ -215,8 +231,7 @@ void main() {
     // pr-review 수정4: parseKst가 무가드로 호출돼 malformed eatenAt 시
     // FormatException 레드스크린이 나던 회귀를 막는다. 시간 표시만 실패하고
     // 타일(음식명 등) 자체는 렌더돼야 한다.
-    testWidgets('eatenAt이 malformed여도 타일은 렌더되고 시간은 "—"로 폴백된다',
-        (tester) async {
+    testWidgets('eatenAt이 malformed여도 타일은 렌더되고 시간은 "—"로 폴백된다', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [

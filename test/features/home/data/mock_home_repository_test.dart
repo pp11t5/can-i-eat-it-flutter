@@ -14,6 +14,11 @@ void main() {
       final result = await repo.recentFoods();
       expect(result, isNotEmpty);
     });
+
+    test('topSearchedFoods는 비어 있지 않다', () async {
+      final repo = MockHomeRepository.seeded();
+      expect(await repo.topSearchedFoods(), isNotEmpty);
+    });
   });
 
   group('MockHomeRepository.empty', () {
@@ -26,6 +31,11 @@ void main() {
       final repo = MockHomeRepository.empty();
       final result = await repo.recentFoods();
       expect(result, isEmpty);
+    });
+
+    test('topSearchedFoods는 빈 목록이다', () async {
+      final repo = MockHomeRepository.empty();
+      expect(await repo.topSearchedFoods(), isEmpty);
     });
   });
 }

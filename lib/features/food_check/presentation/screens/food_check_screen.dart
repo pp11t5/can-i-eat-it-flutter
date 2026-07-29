@@ -30,10 +30,13 @@ import 'package:can_i_eat_it/features/food_check/presentation/widgets/clear_sear
 ///
 /// [recordContext]: 식사 기록 흐름에서 진입 시 전달 (FAB→시간선택→검색). null이면 단순 판정.
 class FoodCheckScreen extends ConsumerStatefulWidget {
-  const FoodCheckScreen({super.key, this.recordContext});
+  const FoodCheckScreen({super.key, this.recordContext, this.initialQuery});
 
   /// 식사 기록 컨텍스트. null이면 단순 판정 흐름.
   final MealRecordContext? recordContext;
+
+  /// 홈 인기 검색어 등 외부 진입 시 자동으로 조회할 초기 검색어.
+  final String? initialQuery;
 
   @override
   ConsumerState<FoodCheckScreen> createState() => _FoodCheckScreenState();
@@ -57,6 +60,20 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
 
   /// 판정 화면 진입 in-flight 가드 (다중 탭 중복 push 방지).
   bool _navigating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final initialQuery = widget.initialQuery?.trim();
+    if (initialQuery == null || initialQuery.isEmpty) return;
+
+    _textController.text = initialQuery;
+    _query = initialQuery;
+    _searchLoading = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _runSearch(initialQuery);
+    });
+  }
 
   @override
   void dispose() {
