@@ -116,7 +116,6 @@ class _AppToastWidgetState extends State<_AppToastWidget>
               style: AppTextStyles.body2Regular.copyWith(
                 color: AppColors.surface,
               ),
-              textAlign: TextAlign.center,
             ),
           ),
         ),

@@ -42,6 +42,19 @@ void main() {
       expect(find.text('빠른 선택'), findsOneWidget);
       expect(find.text('직접 선택'), findsOneWidget);
     });
+
+    testWidgets('날짜 휠은 오늘을 처음 선택한다', (tester) async {
+      final yesterday = nowKst().subtract(const Duration(days: 1));
+
+      await tester.pumpWidget(_wrap(yesterday));
+      await tester.pumpAndSettle();
+
+      final dateWheel = tester.widget<ListWheelScrollView>(
+        find.byType(ListWheelScrollView).first,
+      );
+      final controller = dateWheel.controller! as FixedExtentScrollController;
+      expect(controller.selectedItem, 6);
+    });
   });
 
   group('SymptomTimePickScreen — 칩 선택', () {

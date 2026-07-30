@@ -92,8 +92,7 @@ class SymptomWriteScreen extends ConsumerStatefulWidget {
   final String? initialMealName;
 
   @override
-  ConsumerState<SymptomWriteScreen> createState() =>
-      _SymptomWriteScreenState();
+  ConsumerState<SymptomWriteScreen> createState() => _SymptomWriteScreenState();
 }
 
 class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
@@ -124,9 +123,8 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
       _formState = SymptomWriteFormState(
         occurredAt: nowKst(),
         linkedMealId: widget.initialMealRecordId,
-        linkedMealDisplayName: widget.initialMealRecordId != null
-            ? widget.initialMealName
-            : null,
+        linkedMealDisplayName:
+            widget.initialMealRecordId != null ? widget.initialMealName : null,
       );
     }
     _memoController.text = _formState.memo;
@@ -243,7 +241,7 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
     if (id != null) {
       await showAppToast(
           context, _isEditMode ? '증상 기록을 수정했어요.' : '증상 기록을 저장했어요.');
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) Navigator.of(context).pop(true);
     } else {
       await showAppToast(context, '저장에 실패했어요. 다시 시도해 주세요.');
     }
@@ -257,15 +255,10 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
     final now = nowKst();
     final h = dt.hour.toString().padLeft(2, '0');
     final m = dt.minute.toString().padLeft(2, '0');
-    final isToday = dt.year == now.year &&
-        dt.month == now.month &&
-        dt.day == now.day;
-    final isNow = isToday &&
-        dt.hour == now.hour &&
-        dt.minute == now.minute;
-    final datePart = isToday
-        ? ''
-        : ' · ${dt.month}월 ${dt.day}일';
+    final isToday =
+        dt.year == now.year && dt.month == now.month && dt.day == now.day;
+    final isNow = isToday && dt.hour == now.hour && dt.minute == now.minute;
+    final datePart = isToday ? '' : ' · ${dt.month}월 ${dt.day}일';
     final suffix = isNow ? ' (지금)' : '';
     return '$h:$m$datePart${isToday && !isNow ? ' · ${dt.month}월 ${dt.day}일' : ''}$suffix';
   }
@@ -301,8 +294,8 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
         ),
         title: Text(
           '증상 기록 작성',
-          style: AppTextStyles.body1Medium
-              .copyWith(color: AppColors.textPrimary),
+          style:
+              AppTextStyles.body1Medium.copyWith(color: AppColors.textPrimary),
         ),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1),
@@ -387,7 +380,8 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
                           child: Text(
                             _formState.linkedMealId == null
                                 ? '최근 음식을 선택해 주세요'
-                                : (_formState.linkedMealDisplayName ?? '식사 선택됨'),
+                                : (_formState.linkedMealDisplayName ??
+                                    '식사 선택됨'),
                             style: AppTextStyles.body2Medium.copyWith(
                               color: _formState.linkedMealId == null
                                   ? AppColors.textTertiary
@@ -439,7 +433,8 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
                         borderSide: const BorderSide(
                             color: AppColors.primary, width: 1.5),
                       ),
-                      contentPadding: const EdgeInsets.all(AppSpacing.cardPadding),
+                      contentPadding:
+                          const EdgeInsets.all(AppSpacing.cardPadding),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sectionGap),
@@ -461,10 +456,12 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
               child: FilledButton(
                 onPressed: (_canSave && !isLoading) ? _onSave : null,
                 style: FilledButton.styleFrom(
-                  backgroundColor:
-                      (_canSave && !isLoading) ? AppColors.primary : AppColors.surfaceMuted,
-                  foregroundColor:
-                      (_canSave && !isLoading) ? AppColors.onPrimary : AppColors.textTertiary,
+                  backgroundColor: (_canSave && !isLoading)
+                      ? AppColors.primary
+                      : AppColors.surfaceMuted,
+                  foregroundColor: (_canSave && !isLoading)
+                      ? AppColors.onPrimary
+                      : AppColors.textTertiary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
                   ),
@@ -495,8 +492,7 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: AppTextStyles.body1Bold
-          .copyWith(color: const Color(0xFF222222)),
+      style: AppTextStyles.body1Bold.copyWith(color: const Color(0xFF222222)),
     );
   }
 }

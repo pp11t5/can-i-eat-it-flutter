@@ -43,7 +43,14 @@ class _SymptomTimePickScreenState extends State<SymptomTimePickScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedDateTime = widget.initialDateTime;
+    final today = nowKst();
+    _selectedDateTime = DateTime(
+      today.year,
+      today.month,
+      today.day,
+      widget.initialDateTime.hour,
+      widget.initialDateTime.minute,
+    );
 
     final dates = _dateOptions();
     final targetDate = DateTime(
@@ -79,11 +86,17 @@ class _SymptomTimePickScreenState extends State<SymptomTimePickScreen> {
     super.dispose();
   }
 
-  /// 날짜 옵션 목록 (오늘 포함 최근 7일).
+  /// 날짜 옵션 목록 (최근 7일, 오래된 날짜부터 오늘까지).
+  ///
+  /// ListWheel은 인덱스가 커질수록 아래에 표시되므로, 과거 날짜를
+  /// 위쪽에 배치하기 위해 오름차순으로 반환한다.
   List<DateTime> _dateOptions() {
     final today = nowKst();
     final base = DateTime(today.year, today.month, today.day);
-    return List.generate(7, (i) => base.subtract(Duration(days: i)));
+    return List.generate(
+      7,
+      (i) => base.subtract(Duration(days: 6 - i)),
+    );
   }
 
   /// 날짜 → 휠 표시 레이블.
@@ -182,8 +195,8 @@ class _SymptomTimePickScreenState extends State<SymptomTimePickScreen> {
         ),
         title: Text(
           '시간 설정',
-          style: AppTextStyles.body1Medium
-              .copyWith(color: AppColors.textPrimary),
+          style:
+              AppTextStyles.body1Medium.copyWith(color: AppColors.textPrimary),
         ),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1),
@@ -250,8 +263,7 @@ class _SymptomTimePickScreenState extends State<SymptomTimePickScreen> {
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.onPrimary,
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusCard),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
                   ),
                   textStyle: AppTextStyles.body1Bold,
                 ),
