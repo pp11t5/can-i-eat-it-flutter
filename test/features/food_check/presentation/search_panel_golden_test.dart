@@ -35,9 +35,9 @@ FoodSummary _f(String id, String name, [String? cat]) =>
 void main() {
   testWidgets('검색결과 패널 골든 (Figma 554-5322)', (tester) async {
     final repo = MockFoodRepository.withSearchResults([
-      _f('f-1', '된장찌개', '한식'),
-      _f('f-2', '된장국', '한식'),
-      _f('f-3', '청국장찌개', '한식'),
+      _f('f-1', '된장찌개', 'soup_stew'),
+      _f('f-2', '된장국', 'soup_stew'),
+      _f('f-3', '청국장찌개', 'soup_stew'),
     ]);
     await tester.pumpWidget(_wrap(repo));
     await tester.pumpAndSettle();

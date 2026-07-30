@@ -427,7 +427,7 @@ class _ResultList extends StatelessWidget {
 /// 검색 결과 단일 카드 (Figma 554-5322 결과 항목).
 ///
 /// - 흰 배경, borderCard(#EDEDF5) 1px 테두리, radius 8, 내부 패딩 16
-/// - 좌측 placeholder leading 아이콘 (API에 이모지/아이콘 필드 없음)
+/// - 좌측 음식 카테고리 leading 아이콘 (미지원 카테고리는 regular 폴백)
 /// - 이름 body1Bold/textPrimary
 /// - chevron 없음, category 서브텍스트 없음
 class _ResultCard extends StatelessWidget {
@@ -451,8 +451,7 @@ class _ResultCard extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.cardPadding),
         child: Row(
           children: [
-            // per-food 카테고리는 API 미제공 → regular 폴백 일러스트(Figma food).
-            const CategoryIcon(code: null, size: 32),
+            CategoryIcon(code: food.category, size: 32),
             const SizedBox(width: 12),
             Expanded(
               child: Text(

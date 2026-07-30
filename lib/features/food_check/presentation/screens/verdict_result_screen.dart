@@ -101,18 +101,31 @@ class VerdictResultScreen extends ConsumerWidget {
                       )
                   : null,
             ),
-            const SizedBox(height: AppSpacing.sectionGap),
-
-            // 면책 고지 (모든 verdict 화면 필수 — 제품 요건)
-            const MedicalDisclaimer(),
-            const SizedBox(height: AppSpacing.sectionGap),
-
-            // CTA 2개
-            _CtaSection(
-              onRetry: onRetry,
-              onAddToDiet: onAddToDiet ?? () => _showF3Placeholder(context),
-            ),
           ],
+        ),
+      ),
+      // 면책 고지와 CTA는 스크롤과 분리해 항상 화면 하단에 표시한다.
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.screenPadding,
+            AppSpacing.screenPadding,
+            AppSpacing.screenPadding,
+            AppSpacing.screenPadding,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const MedicalDisclaimer(),
+              const SizedBox(height: AppSpacing.sectionGap),
+              _CtaSection(
+                onRetry: onRetry,
+                onAddToDiet: onAddToDiet ?? () => _showF3Placeholder(context),
+              ),
+            ],
+          ),
         ),
       ),
     );
