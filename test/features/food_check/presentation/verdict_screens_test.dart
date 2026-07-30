@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
+import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_loading_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_result_screen.dart';
@@ -164,6 +165,34 @@ void main() {
       );
       await tester.pump();
 
+      expect(find.text('내 식단에 추가'), findsOneWidget);
+    });
+
+    testWidgets('스크롤해도 면책 고지와 CTA가 화면 하단에 고정된다', (tester) async {
+      final verdict = EatVerdict.caution(foodName: '된장찌개');
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: verdict, onRetry: () {})),
+      );
+      await tester.pumpAndSettle();
+
+      final disclaimerTopBefore =
+          tester.getTopLeft(find.byType(MedicalDisclaimer)).dy;
+      final retryButtonTopBefore = tester.getTopLeft(find.text('다시 검색')).dy;
+
+      await tester.drag(
+        find.byType(SingleChildScrollView),
+        const Offset(0, -300),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.getTopLeft(find.byType(MedicalDisclaimer)).dy,
+        closeTo(disclaimerTopBefore, 0.1),
+      );
+      expect(
+        tester.getTopLeft(find.text('다시 검색')).dy,
+        closeTo(retryButtonTopBefore, 0.1),
+      );
       expect(find.text('내 식단에 추가'), findsOneWidget);
     });
   });
