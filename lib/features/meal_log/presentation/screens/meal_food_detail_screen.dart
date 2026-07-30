@@ -11,6 +11,7 @@ import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
+import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 
@@ -55,6 +56,8 @@ class MealFoodDetailScreen extends ConsumerWidget {
       // 마지막 음식이면 서버가 식사도 삭제 → 타임라인/weekly invalidate로 동기화.
       ref.invalidate(timelineControllerProvider);
       ref.invalidate(monthlyControllerProvider);
+      ref.invalidate(recentMealsProvider);
+      ref.invalidate(unrecordedMealCountProvider);
       // 부모 식사 상세가 떠 있을 수 있으므로 식사상세 family도 무효화.
       ref.invalidate(mealRecordDetailControllerProvider);
       showAppToast(context, '음식을 삭제했어요.');

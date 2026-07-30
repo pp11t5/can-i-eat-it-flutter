@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
 import 'package:can_i_eat_it/features/symptom/data/symptom_providers.dart';
@@ -80,7 +81,7 @@ class SymptomWriteController extends _$SymptomWriteController {
   /// [formState]를 제출한다.
   ///
   /// - mood 미선택 시 예외.
-  /// - 성공 시 타임라인/주간 invalidate.
+  /// - 성공 시 타임라인/주간·홈 미기록 식단 캐시 invalidate.
   /// - 반환값: 성공 시 생성/수정된 symptomId.
   Future<String?> submit(SymptomWriteFormState formState) async {
     if (state is AsyncLoading) return null;
@@ -112,6 +113,7 @@ class SymptomWriteController extends _$SymptomWriteController {
       // 타임라인·주간 캐시 invalidate
       ref.invalidate(timelineControllerProvider);
       ref.invalidate(monthlyControllerProvider);
+      ref.invalidate(unrecordedMealCountProvider);
 
       state = const AsyncData(null);
       return symptomId;

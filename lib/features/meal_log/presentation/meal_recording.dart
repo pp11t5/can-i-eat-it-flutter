@@ -6,6 +6,7 @@ import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/providers/add_to_diet_handler_provider.dart';
+import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 
 /// Riverpod [Provider] 기반 핸들러 — app 레이어 override 전용.
@@ -13,7 +14,8 @@ import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 /// [addToDietHandlerProvider]를 override할 때 이 provider의 값을 사용한다.
 /// WidgetRef 대신 Ref를 사용하기 위해 별도 구현.
 AddToDietHandler makeHandlerFromRef(Ref ref) {
-  return (BuildContext context, EatVerdict verdict, MealRecordContext ctx) async {
+  return (BuildContext context, EatVerdict verdict,
+      MealRecordContext ctx) async {
     final repo = ref.read(mealRepositoryProvider);
 
     try {
@@ -42,7 +44,7 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
         );
       }
 
-      // 타임라인 + weekly invalidate
+      // 식사 데이터를 소비하는 화면의 캐시를 모두 무효화한다.
       final dateKey = DateTime(
         ctx.eatenAt.year,
         ctx.eatenAt.month,
@@ -50,6 +52,8 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
       );
       ref.invalidate(timelineControllerProvider(dateKey));
       ref.invalidate(monthlyControllerProvider);
+      ref.invalidate(recentMealsProvider);
+      ref.invalidate(unrecordedMealCountProvider);
 
       // 모달 스택 pop — /verdict + /check + /meal/record 최대 3단
       if (context.mounted) {
