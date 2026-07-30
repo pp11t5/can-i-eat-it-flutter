@@ -20,6 +20,7 @@ enum AppButtonVariant {
 /// - [variant]: [AppButtonVariant.primary] (기본) 또는 [AppButtonVariant.secondary].
 /// - [isExpanded]: true이면 가로 전체 확장. false이면 내용에 맞는 너비.
 /// - [width]: 명시적 너비. [isExpanded]보다 우선 적용되지 않음(expanded가 우선).
+/// - [isLoading]: true이면 버튼을 비활성화하고 로딩 인디케이터를 표시한다.
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
@@ -28,6 +29,7 @@ class AppButton extends StatelessWidget {
     this.variant = AppButtonVariant.primary,
     this.isExpanded = false,
     this.width,
+    this.isLoading = false,
   });
 
   /// 채워진 주요 버튼 (편의 생성자).
@@ -37,6 +39,7 @@ class AppButton extends StatelessWidget {
     required this.onPressed,
     this.isExpanded = false,
     this.width,
+    this.isLoading = false,
   }) : variant = AppButtonVariant.primary;
 
   /// 외곽선 보조 버튼 (편의 생성자).
@@ -46,6 +49,7 @@ class AppButton extends StatelessWidget {
     required this.onPressed,
     this.isExpanded = false,
     this.width,
+    this.isLoading = false,
   }) : variant = AppButtonVariant.secondary;
 
   final String label;
@@ -53,6 +57,7 @@ class AppButton extends StatelessWidget {
   final AppButtonVariant variant;
   final bool isExpanded;
   final double? width;
+  final bool isLoading;
 
   bool get _isDisabled => onPressed == null;
 
@@ -74,14 +79,12 @@ class AppButton extends StatelessWidget {
 
   Widget _buildPrimary() {
     return FilledButton(
-      onPressed: onPressed,
+      onPressed: isLoading ? null : onPressed,
       style: FilledButton.styleFrom(
-        backgroundColor: _isDisabled
-            ? AppColors.surfaceMuted
-            : AppColors.primary,
-        foregroundColor: _isDisabled
-            ? AppColors.textTertiary
-            : AppColors.onPrimary,
+        backgroundColor:
+            _isDisabled ? AppColors.surfaceMuted : AppColors.primary,
+        foregroundColor:
+            _isDisabled ? AppColors.textTertiary : AppColors.onPrimary,
         padding: const EdgeInsets.symmetric(
           vertical: AppSpacing.cardPadding, // 16
           horizontal: AppSpacing.sectionGap, // 24
@@ -93,16 +96,18 @@ class AppButton extends StatelessWidget {
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
-      child: Text(label),
+      child: _buildChild(AppColors.onPrimary),
     );
   }
 
   Widget _buildSecondary() {
     return OutlinedButton(
-      onPressed: onPressed,
+      onPressed: isLoading ? null : onPressed,
       style: OutlinedButton.styleFrom(
-        backgroundColor: _isDisabled ? AppColors.surfaceMuted : AppColors.surface,
-        foregroundColor: _isDisabled ? AppColors.textTertiary : AppColors.primary,
+        backgroundColor:
+            _isDisabled ? AppColors.surfaceMuted : AppColors.surface,
+        foregroundColor:
+            _isDisabled ? AppColors.textTertiary : AppColors.primary,
         side: BorderSide(
           color: _isDisabled ? AppColors.border : AppColors.primary,
         ),
@@ -117,7 +122,19 @@ class AppButton extends StatelessWidget {
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
-      child: Text(label),
+      child: _buildChild(AppColors.primary),
+    );
+  }
+
+  Widget _buildChild(Color loadingColor) {
+    if (!isLoading) return Text(label);
+    return SizedBox(
+      width: 20,
+      height: 20,
+      child: CircularProgressIndicator(
+        strokeWidth: 2,
+        color: loadingColor,
+      ),
     );
   }
 }

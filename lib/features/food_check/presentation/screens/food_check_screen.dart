@@ -664,6 +664,7 @@ class _RecentSection extends StatelessWidget {
                 separatorBuilder: (_, __) =>
                     const SizedBox(height: AppSpacing.itemGap),
                 itemBuilder: (context, i) => _HistoryRow(
+                  key: ValueKey(items[i].id),
                   item: items[i],
                   onTap: () => onRecentSearchTap(items[i].query),
                   onRemove: () => ref
@@ -679,8 +680,9 @@ class _RecentSection extends StatelessWidget {
   }
 }
 
-class _HistoryRow extends StatelessWidget {
+class _HistoryRow extends StatefulWidget {
   const _HistoryRow({
+    super.key,
     required this.item,
     required this.onTap,
     required this.onRemove,
@@ -688,7 +690,26 @@ class _HistoryRow extends StatelessWidget {
 
   final RecentFood item;
   final VoidCallback onTap;
-  final VoidCallback onRemove;
+  final Future<void> Function() onRemove;
+
+  @override
+  State<_HistoryRow> createState() => _HistoryRowState();
+}
+
+class _HistoryRowState extends State<_HistoryRow> {
+  bool _isRemoving = false;
+
+  Future<void> _remove() async {
+    if (_isRemoving) return;
+    setState(() => _isRemoving = true);
+
+    try {
+      await widget.onRemove();
+    } catch (_) {
+      // 삭제 실패 시 항목을 유지하고 삭제 버튼만 다시 활성화한다.
+      if (mounted) setState(() => _isRemoving = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -699,29 +720,39 @@ class _HistoryRow extends StatelessWidget {
         children: [
           Expanded(
             child: GestureDetector(
-              onTap: onTap,
+              onTap: _isRemoving ? null : widget.onTap,
               behavior: HitTestBehavior.opaque,
               child: Text(
-                item.query,
+                widget.item.query,
                 style: AppTextStyles.body1Medium.copyWith(
                   color: AppColors.textPrimary,
                 ),
               ),
             ),
           ),
-          GestureDetector(
-            onTap: onRemove,
-            behavior: HitTestBehavior.opaque,
-            child: SvgPicture.asset(
-              'assets/figma_extracted/icon_close_small.svg',
+          if (_isRemoving)
+            const SizedBox(
               width: 16,
               height: 16,
-              colorFilter: const ColorFilter.mode(
-                AppColors.textSecondary,
-                BlendMode.srcIn,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.primary,
+              ),
+            )
+          else
+            GestureDetector(
+              onTap: _remove,
+              behavior: HitTestBehavior.opaque,
+              child: SvgPicture.asset(
+                'assets/figma_extracted/icon_close_small.svg',
+                width: 16,
+                height: 16,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.textSecondary,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

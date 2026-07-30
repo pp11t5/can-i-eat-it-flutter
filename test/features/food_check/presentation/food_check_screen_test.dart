@@ -78,6 +78,54 @@ class _PendingSearchRepository extends MockFoodRepository {
       searchCompleter.future;
 }
 
+class _PendingRemoveRepository extends MockFoodRepository {
+  _PendingRemoveRepository({
+    required super.initialRecent,
+    required this.removeCompleter,
+  });
+
+  final Completer<void> removeCompleter;
+
+  @override
+  Future<void> removeRecent(int id) async {
+    await removeCompleter.future;
+    await super.removeRecent(id);
+  }
+}
+
+class _FailingRemoveRepository extends MockFoodRepository {
+  _FailingRemoveRepository({required super.initialRecent});
+
+  @override
+  Future<void> removeRecent(int id) async {
+    throw Exception('delete failed');
+  }
+}
+
+class _PendingClearRepository extends MockFoodRepository {
+  _PendingClearRepository({
+    required super.initialRecent,
+    required this.clearCompleter,
+  });
+
+  final Completer<void> clearCompleter;
+
+  @override
+  Future<void> clearRecent() async {
+    await clearCompleter.future;
+    await super.clearRecent();
+  }
+}
+
+class _FailingClearRepository extends MockFoodRepository {
+  _FailingClearRepository({required super.initialRecent});
+
+  @override
+  Future<void> clearRecent() async {
+    throw Exception('clear failed');
+  }
+}
+
 void main() {
   // -------------------------------------------------------------------------
   group('FoodCheckScreen — 빈 최근검색', () {
@@ -150,6 +198,63 @@ void main() {
 
       expect(find.text('된장찌개'), findsNothing);
       expect(find.text('오렌지주스'), findsOneWidget);
+    });
+
+    testWidgets('행 삭제 중에는 X 대신 로딩 인디케이터를 표시한다', (tester) async {
+      final removeCompleter = Completer<void>();
+      final repo = _PendingRemoveRepository(
+        initialRecent: [_recentFood(1, '된장찌개')],
+        removeCompleter: removeCompleter,
+      );
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      final rowFinder = find.ancestor(
+        of: find.text('된장찌개'),
+        matching: find.byType(Row),
+      );
+      await tester.tap(
+        find.descendant(of: rowFinder.first, matching: find.byType(SvgPicture)),
+      );
+      await tester.pump();
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(
+        find.descendant(of: rowFinder.first, matching: find.byType(SvgPicture)),
+        findsNothing,
+      );
+
+      removeCompleter.complete();
+      await tester.pumpAndSettle();
+
+      expect(find.text('된장찌개'), findsNothing);
+    });
+
+    testWidgets('행 삭제에 실패하면 X 버튼을 다시 표시한다', (tester) async {
+      final repo = _FailingRemoveRepository(
+        initialRecent: [_recentFood(1, '된장찌개')],
+      );
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      final rowFinder = find.ancestor(
+        of: find.text('된장찌개'),
+        matching: find.byType(Row),
+      );
+      await tester.tap(
+        find.descendant(of: rowFinder.first, matching: find.byType(SvgPicture)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('된장찌개'), findsOneWidget);
+      expect(
+        find.descendant(of: rowFinder.first, matching: find.byType(SvgPicture)),
+        findsOneWidget,
+      );
     });
 
     testWidgets('검색어를 탭하면 검색창에 반영하고 즉시 조회한다', (tester) async {
@@ -234,6 +339,59 @@ void main() {
 
       expect(find.text('검색 기록을 삭제하시겠어요?'), findsNothing);
       expect(find.text('아직 검색 기록이 없어요'), findsOneWidget);
+    });
+
+    testWidgets('전체 삭제 중에는 삭제 버튼에 로딩 인디케이터를 표시한다', (tester) async {
+      final clearCompleter = Completer<void>();
+      final repo = _PendingClearRepository(
+        initialRecent: [_recentFood(1, '된장찌개')],
+        clearCompleter: clearCompleter,
+      );
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('전체 삭제'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('삭제하기'));
+      await tester.pump();
+
+      expect(find.text('삭제하기'), findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      final cancel = tester.widget<InkWell>(
+        find.ancestor(of: find.text('취소하기'), matching: find.byType(InkWell)),
+      );
+      expect(cancel.onTap, isNull);
+
+      await tester.tapAt(Offset.zero);
+      await tester.pump();
+      expect(find.text('검색 기록을 삭제하시겠어요?'), findsOneWidget);
+
+      clearCompleter.complete();
+      await tester.pumpAndSettle();
+
+      expect(find.text('검색 기록을 삭제하시겠어요?'), findsNothing);
+      expect(find.text('아직 검색 기록이 없어요'), findsOneWidget);
+    });
+
+    testWidgets('전체 삭제에 실패하면 다이얼로그와 삭제 버튼을 복원한다', (tester) async {
+      final repo = _FailingClearRepository(
+        initialRecent: [_recentFood(1, '된장찌개')],
+      );
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('전체 삭제'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('삭제하기'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('검색 기록을 삭제하시겠어요?'), findsOneWidget);
+      expect(find.text('삭제하기'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
     testWidgets('다이얼로그에서 취소 탭 시 기록이 그대로 유지된다', (tester) async {

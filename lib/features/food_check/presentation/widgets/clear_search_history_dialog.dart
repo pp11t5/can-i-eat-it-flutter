@@ -26,84 +26,104 @@ Future<void> showClearSearchHistoryDialog(
   );
 }
 
-class _ClearSearchHistoryDialog extends StatelessWidget {
+class _ClearSearchHistoryDialog extends StatefulWidget {
   const _ClearSearchHistoryDialog({required this.ref});
 
   final WidgetRef ref;
 
   @override
+  State<_ClearSearchHistoryDialog> createState() =>
+      _ClearSearchHistoryDialogState();
+}
+
+class _ClearSearchHistoryDialogState extends State<_ClearSearchHistoryDialog> {
+  bool _isClearing = false;
+
+  Future<void> _clear() async {
+    if (_isClearing) return;
+    setState(() => _isClearing = true);
+
+    try {
+      await widget.ref.read(recentFoodControllerProvider.notifier).clear();
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    } catch (_) {
+      // 삭제 실패 시 다이얼로그를 유지하고 버튼을 다시 활성화한다.
+      if (mounted) setState(() => _isClearing = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      insetPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.screenPadding,
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              offset: const Offset(0, 4),
-              blurRadius: 8,
-              spreadRadius: 1,
-            ),
-          ],
+    return PopScope(
+      canPop: !_isClearing,
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.screenPadding,
         ),
-        child: Padding(
-          // Figma: padding 24(top/sides) / 16(bottom).
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.sectionGap,
-            AppSpacing.sectionGap,
-            AppSpacing.sectionGap,
-            AppSpacing.cardPadding,
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                offset: const Offset(0, 4),
+                blurRadius: 8,
+                spreadRadius: 1,
+              ),
+            ],
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                '검색 기록을 삭제하시겠어요?',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.body1Bold.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sectionGap),
-              // 삭제하기 — primary expanded.
-              AppButton.primary(
-                label: '삭제하기',
-                isExpanded: true,
-                onPressed: () async {
-                  await ref
-                      .read(recentFoodControllerProvider.notifier)
-                      .clear();
-                  if (!context.mounted) return;
-                  Navigator.of(context).pop();
-                },
-              ),
-              const SizedBox(height: AppSpacing.itemGap),
-              // 취소 — text button.
-              InkWell(
-                onTap: () => Navigator.of(context).pop(),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.cardPadding,
+          child: Padding(
+            // Figma: padding 24(top/sides) / 16(bottom).
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.sectionGap,
+              AppSpacing.sectionGap,
+              AppSpacing.sectionGap,
+              AppSpacing.cardPadding,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  '검색 기록을 삭제하시겠어요?',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.body1Bold.copyWith(
+                    color: AppColors.textPrimary,
                   ),
-                  child: Center(
-                    child: Text(
-                      // Figma 554:5324: 보조 버튼 라벨은 "취소하기".
-                      '취소하기',
-                      style: AppTextStyles.body1Regular.copyWith(
-                        color: AppColors.textSecondary,
+                ),
+                const SizedBox(height: AppSpacing.sectionGap),
+                // 삭제하기 — primary expanded.
+                AppButton.primary(
+                  label: '삭제하기',
+                  isExpanded: true,
+                  isLoading: _isClearing,
+                  onPressed: _clear,
+                ),
+                const SizedBox(height: AppSpacing.itemGap),
+                // 취소 — text button.
+                InkWell(
+                  onTap: _isClearing ? null : () => Navigator.of(context).pop(),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.cardPadding,
+                    ),
+                    child: Center(
+                      child: Text(
+                        // Figma 554:5324: 보조 버튼 라벨은 "취소하기".
+                        '취소하기',
+                        style: AppTextStyles.body1Regular.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
