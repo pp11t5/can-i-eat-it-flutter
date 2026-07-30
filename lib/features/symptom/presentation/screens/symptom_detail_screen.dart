@@ -13,6 +13,7 @@ import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
+import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/providers/symptom_detail_controller.dart';
@@ -91,6 +92,7 @@ class SymptomDetailScreen extends ConsumerWidget {
       if (!context.mounted) return;
       ref.invalidate(timelineControllerProvider);
       ref.invalidate(monthlyControllerProvider);
+      ref.invalidate(unrecordedMealCountProvider);
       showAppToast(context, '증상 기록을 삭제했어요.');
       context.pop();
     } catch (_) {
@@ -105,8 +107,7 @@ class SymptomDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync =
-        ref.watch(symptomDetailControllerProvider(symptomId));
+    final detailAsync = ref.watch(symptomDetailControllerProvider(symptomId));
     final sessionAsync = ref.watch(authControllerProvider);
     final displayName = sessionAsync.valueOrNull?.displayName ?? '회원';
 

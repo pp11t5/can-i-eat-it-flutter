@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
+import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/repositories/meal_repository.dart';
@@ -93,6 +94,7 @@ class _FakeRef implements Ref<Object?> {
   _FakeRef(this._container);
 
   final ProviderContainer _container;
+  final invalidatedProviders = <ProviderOrFamily>[];
 
   @override
   ProviderContainer get container => _container;
@@ -102,7 +104,7 @@ class _FakeRef implements Ref<Object?> {
 
   @override
   void invalidate(ProviderOrFamily provider) {
-    // no-op: 테스트에서 invalidation 부작용을 검증하지 않는다.
+    invalidatedProviders.add(provider);
   }
 
   // ---- 아래는 makeHandlerFromRef에서 호출되지 않는 메서드들 ----
@@ -183,7 +185,7 @@ const _kVerdictByText = EatVerdict(
 // BuildContext는 최소 위젯 트리에서 획득한다.
 // ---------------------------------------------------------------------------
 
-Future<void> _runHandler({
+Future<_FakeRef> _runHandler({
   required WidgetTester tester,
   required _SpyMealRepository spy,
   required EatVerdict verdict,
@@ -195,7 +197,8 @@ Future<void> _runHandler({
   addTearDown(container.dispose);
 
   // 실제 makeHandlerFromRef를 _FakeRef(container 래핑)로 호출한다.
-  final handler = makeHandlerFromRef(_FakeRef(container));
+  final ref = _FakeRef(container);
+  final handler = makeHandlerFromRef(ref);
 
   bool called = false;
   await tester.pumpWidget(
@@ -219,6 +222,7 @@ Future<void> _runHandler({
   // showAppToast 내부의 2.5초 타이머를 소진한다.
   // pumpAndSettle은 pending timer가 있으면 실패하므로 pump로 직접 진행한다.
   await tester.pump(const Duration(seconds: 3));
+  return ref;
 }
 
 // ---------------------------------------------------------------------------
@@ -227,8 +231,19 @@ Future<void> _runHandler({
 
 void main() {
   group('makeHandlerFromRef — by-id 케이스 (foodExternalId != null)', () {
-    testWidgets(
-        'appendFood가 1회 호출되고 foodExternalId·eatenAt·mealRecordId가 전달된다',
+    testWidgets('저장 성공 시 홈 식사 provider를 무효화한다', (tester) async {
+      final ref = await _runHandler(
+        tester: tester,
+        spy: _SpyMealRepository(),
+        verdict: _kVerdictById,
+        ctx: MealRecordContext(eatenAt: _kEatAt),
+      );
+
+      expect(ref.invalidatedProviders, contains(recentMealsProvider));
+      expect(ref.invalidatedProviders, contains(unrecordedMealCountProvider));
+    });
+
+    testWidgets('appendFood가 1회 호출되고 foodExternalId·eatenAt·mealRecordId가 전달된다',
         (tester) async {
       final spy = _SpyMealRepository();
       await _runHandler(

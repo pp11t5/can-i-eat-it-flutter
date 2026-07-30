@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_icon_sizes.dart';
@@ -9,7 +12,7 @@ import 'app_icon.dart';
 
 /// 바텀 내비를 포함한 앱 셸.
 /// StatefulShellRoute의 builder가 반환한다.
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
@@ -21,15 +24,23 @@ class AppShell extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: _BottomNavBar(
         currentIndex: navigationShell.currentIndex,
-        onTap: (index) => navigationShell.goBranch(
-          index,
-          initialLocation: index == navigationShell.currentIndex,
-        ),
+        onTap: (index) {
+          // StatefulShellRoute.indexedStack은 홈 브랜치를 유지하므로, 홈 탭에
+          // 재진입할 때 식사 관련 요약 데이터를 명시적으로 다시 조회한다.
+          if (index == 0) {
+            ref.invalidate(recentMealsProvider);
+            ref.invalidate(unrecordedMealCountProvider);
+          }
+          navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
+          );
+        },
         tabs: _tabs,
       ),
     );
