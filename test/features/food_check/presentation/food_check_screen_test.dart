@@ -53,8 +53,19 @@ RecentFood _recentFood(int id, String query) => RecentFood(
     );
 
 // 샘플 검색결과 항목.
-FoodSummary _foodSummary(String id, String name) =>
-    FoodSummary(externalId: id, name: name);
+FoodSummary _foodSummary(String id, String name, [String? category]) =>
+    FoodSummary(externalId: id, name: name, category: category);
+
+String _resultIconAssetName(WidgetTester tester, String foodName) {
+  final resultCard = find.ancestor(
+    of: find.text(foodName),
+    matching: find.byType(GestureDetector),
+  );
+  final image = tester.widget<Image>(
+    find.descendant(of: resultCard.first, matching: find.byType(Image)),
+  );
+  return (image.image as AssetImage).assetName;
+}
 
 class _FailingSearchRepository extends MockFoodRepository {
   _FailingSearchRepository({super.initialRecent});
@@ -456,6 +467,49 @@ void main() {
       expect(find.text('두부'), findsWidgets);
       expect(find.text('두부조림'), findsOneWidget);
       expect(find.text('찾는 음식이 없어요'), findsNothing);
+    });
+
+    testWidgets('지원 카테고리의 결과 셀은 해당 아이콘을 표시한다', (tester) async {
+      final repo = MockFoodRepository.withSearchResults([
+        _foodSummary('f-1', '된장찌개', 'soup_stew'),
+      ], hasExactMatch: true);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '된장');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+
+      expect(
+        _resultIconAssetName(tester, '된장찌개'),
+        'assets/illustrations/food_icon_soup.png',
+      );
+    });
+
+    testWidgets('없는 카테고리와 미지원 카테고리는 기본 아이콘으로 폴백한다', (tester) async {
+      final repo = MockFoodRepository.withSearchResults([
+        _foodSummary('f-1', '두부'),
+        _foodSummary('f-2', '고등어구이', 'fish'),
+      ], hasExactMatch: true);
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '음식');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+
+      expect(
+        _resultIconAssetName(tester, '두부'),
+        'assets/illustrations/food_icon_regular.png',
+      );
+      expect(
+        _resultIconAssetName(tester, '고등어구이'),
+        'assets/illustrations/food_icon_regular.png',
+      );
     });
 
     testWidgets('빈 결과 → 직접분석 CTA 카드(찾는 음식이 없어요) 렌더', (tester) async {
