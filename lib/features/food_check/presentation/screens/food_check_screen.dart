@@ -118,6 +118,16 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
     _runSearch(trimmed);
   }
 
+  /// 최근 검색어 탭 핸들러 — 검색어를 반영하고 즉시 다시 검색한다.
+  void _onRecentSearchTap(String query) {
+    _debounce?.cancel();
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return;
+
+    _textController.text = trimmed;
+    _runSearch(trimmed);
+  }
+
   Future<void> _runSearch(String q) async {
     if (!mounted) return;
     setState(() {
@@ -209,7 +219,10 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
                       onTap: _onResultTap,
                       onDirectAnalyze: _onDirectAnalyze,
                     )
-                  : _HistoryContent(ref: ref),
+                  : _HistoryContent(
+                      ref: ref,
+                      onRecentSearchTap: _onRecentSearchTap,
+                    ),
             ),
           ],
         ),
@@ -563,9 +576,13 @@ class _SearchErrorState extends StatelessWidget {
 
 /// 최근 검색 기록 영역. [recentFoodControllerProvider] 상태를 watch한다.
 class _HistoryContent extends StatelessWidget {
-  const _HistoryContent({required this.ref});
+  const _HistoryContent({
+    required this.ref,
+    required this.onRecentSearchTap,
+  });
 
   final WidgetRef ref;
+  final ValueChanged<String> onRecentSearchTap;
 
   @override
   Widget build(BuildContext context) {
@@ -578,17 +595,26 @@ class _HistoryContent extends StatelessWidget {
         if (items.isEmpty) {
           return const _EmptyState();
         }
-        return _RecentSection(items: items, ref: ref);
+        return _RecentSection(
+          items: items,
+          ref: ref,
+          onRecentSearchTap: onRecentSearchTap,
+        );
       },
     );
   }
 }
 
 class _RecentSection extends StatelessWidget {
-  const _RecentSection({required this.items, required this.ref});
+  const _RecentSection({
+    required this.items,
+    required this.ref,
+    required this.onRecentSearchTap,
+  });
 
   final List<RecentFood> items;
   final WidgetRef ref;
+  final ValueChanged<String> onRecentSearchTap;
 
   @override
   Widget build(BuildContext context) {
@@ -638,7 +664,9 @@ class _RecentSection extends StatelessWidget {
                 separatorBuilder: (_, __) =>
                     const SizedBox(height: AppSpacing.itemGap),
                 itemBuilder: (context, i) => _HistoryRow(
+                  key: ValueKey(items[i].id),
                   item: items[i],
+                  onTap: () => onRecentSearchTap(items[i].query),
                   onRemove: () => ref
                       .read(recentFoodControllerProvider.notifier)
                       .removeRecent(items[i].id),
@@ -652,11 +680,36 @@ class _RecentSection extends StatelessWidget {
   }
 }
 
-class _HistoryRow extends StatelessWidget {
-  const _HistoryRow({required this.item, required this.onRemove});
+class _HistoryRow extends StatefulWidget {
+  const _HistoryRow({
+    super.key,
+    required this.item,
+    required this.onTap,
+    required this.onRemove,
+  });
 
   final RecentFood item;
-  final VoidCallback onRemove;
+  final VoidCallback onTap;
+  final Future<void> Function() onRemove;
+
+  @override
+  State<_HistoryRow> createState() => _HistoryRowState();
+}
+
+class _HistoryRowState extends State<_HistoryRow> {
+  bool _isRemoving = false;
+
+  Future<void> _remove() async {
+    if (_isRemoving) return;
+    setState(() => _isRemoving = true);
+
+    try {
+      await widget.onRemove();
+    } catch (_) {
+      // 삭제 실패 시 항목을 유지하고 삭제 버튼만 다시 활성화한다.
+      if (mounted) setState(() => _isRemoving = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -666,26 +719,40 @@ class _HistoryRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            child: Text(
-              item.query,
-              style: AppTextStyles.body1Medium.copyWith(
-                color: AppColors.textPrimary,
+            child: GestureDetector(
+              onTap: _isRemoving ? null : widget.onTap,
+              behavior: HitTestBehavior.opaque,
+              child: Text(
+                widget.item.query,
+                style: AppTextStyles.body1Medium.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
           ),
-          GestureDetector(
-            onTap: onRemove,
-            behavior: HitTestBehavior.opaque,
-            child: SvgPicture.asset(
-              'assets/figma_extracted/icon_close_small.svg',
+          if (_isRemoving)
+            const SizedBox(
               width: 16,
               height: 16,
-              colorFilter: const ColorFilter.mode(
-                AppColors.textSecondary,
-                BlendMode.srcIn,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.primary,
+              ),
+            )
+          else
+            GestureDetector(
+              onTap: _remove,
+              behavior: HitTestBehavior.opaque,
+              child: SvgPicture.asset(
+                'assets/figma_extracted/icon_close_small.svg',
+                width: 16,
+                height: 16,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.textSecondary,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
