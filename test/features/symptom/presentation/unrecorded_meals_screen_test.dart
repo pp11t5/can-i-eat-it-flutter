@@ -15,12 +15,17 @@ import 'package:can_i_eat_it/features/symptom/presentation/screens/unrecorded_me
 // ---------------------------------------------------------------------------
 
 class _MockMealRepository implements MealRepository {
-  _MockMealRepository({List<MealCandidatesDay>? data}) : candidateData = data ?? const [];
+  _MockMealRepository({List<MealCandidatesDay>? data})
+      : candidateData = data ?? const [];
 
-  final List<MealCandidatesDay> candidateData;
+  List<MealCandidatesDay> candidateData;
+  int candidateRequestCount = 0;
 
   @override
-  Future<List<MealCandidatesDay>> candidates() async => candidateData;
+  Future<List<MealCandidatesDay>> candidates() async {
+    candidateRequestCount++;
+    return candidateData;
+  }
 
   @override
   Future<List<TimelineItem>> timeline(DateTime date) async => [];
@@ -210,7 +215,8 @@ void main() {
   });
 
   group('UnrecordedMealsScreen — 네비게이션', () {
-    testWidgets('식사 카드 탭 → /symptom/record push, extra는 SymptomWriteArgs(mealRecordId, mealName)',
+    testWidgets(
+        '식사 카드 탭 → /symptom/record push, extra는 SymptomWriteArgs(mealRecordId, mealName)',
         (tester) async {
       Object? capturedExtra;
       GoRouterState? capturedState;
@@ -257,7 +263,8 @@ void main() {
       expect(args.initialMealName, '된장찌개');
     });
 
-    testWidgets('"증상만 기록하기" 탭 → /symptom/record push, extra 없음', (tester) async {
+    testWidgets('"증상만 기록하기" 탭 → /symptom/record push, extra 없음',
+        (tester) async {
       Object? capturedExtra = 'sentinel';
 
       final router = GoRouter(
@@ -295,6 +302,51 @@ void main() {
 
       expect(find.text('symptom-record-stub'), findsOneWidget);
       expect(capturedExtra, isNull);
+    });
+
+    testWidgets('증상 저장 후 복귀하면 식사 후보 목록을 다시 조회한다', (tester) async {
+      final repo = _MockMealRepository(data: _sampleCandidates());
+      final router = GoRouter(
+        initialLocation: '/',
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (_, __) => const UnrecordedMealsScreen(),
+          ),
+          GoRoute(
+            path: '/symptom/record',
+            builder: (context, __) => Scaffold(
+              body: FilledButton(
+                onPressed: () {
+                  repo.candidateData = const [];
+                  context.pop(true);
+                },
+                child: const Text('저장 완료'),
+              ),
+            ),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            // ignore: scoped_providers_should_specify_dependencies
+            mealRepositoryProvider.overrideWithValue(repo),
+          ],
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('된장찌개'), findsOneWidget);
+
+      await tester.tap(find.text('된장찌개'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('저장 완료'));
+      await tester.pumpAndSettle();
+
+      expect(repo.candidateRequestCount, 2);
+      expect(find.text('아직 식단 기록이 없어요'), findsOneWidget);
     });
   });
 }

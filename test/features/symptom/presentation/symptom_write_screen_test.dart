@@ -39,16 +39,14 @@ class _MockSymptomRepository implements SymptomRepository {
   }
 
   @override
-  Future<Symptom> detail(String symptomId) async =>
-      throw UnimplementedError();
+  Future<Symptom> detail(String symptomId) async => throw UnimplementedError();
 
   @override
   Future<void> updateMemo(String symptomId, String? memo) async =>
       throw UnimplementedError();
 
   @override
-  Future<void> delete(String symptomId) async =>
-      throw UnimplementedError();
+  Future<void> delete(String symptomId) async => throw UnimplementedError();
 }
 
 class _MockMealRepository implements MealRepository {
@@ -75,13 +73,15 @@ class _MockMealRepository implements MealRepository {
     required String foodExternalId,
     DateTime? eatenAt,
     String? mealRecordId,
-  }) async => throw UnimplementedError();
+  }) async =>
+      throw UnimplementedError();
   @override
   Future<MealFood> appendFoodByText({
     required String foodTextInput,
     DateTime? eatenAt,
     String? mealRecordId,
-  }) async => throw UnimplementedError();
+  }) async =>
+      throw UnimplementedError();
   @override
   Future<MealRecord> mealDetail(String mealRecordId) async =>
       throw UnimplementedError();
@@ -172,7 +172,18 @@ void main() {
     testWidgets('mood 탭 후 상태 변경 — 에러 없이 완료', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
-      await tester.tap(find.text('보통'));
+      final normalMood = find.ancestor(
+        of: find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is SizedBox &&
+                  widget.width == 40 &&
+                  widget.height == 40,
+            )
+            .at(2),
+        matching: find.byType(GestureDetector),
+      );
+      await tester.tap(normalMood);
       await tester.pumpAndSettle();
       // 탭 후 에러 없이 빌드 완료
       expect(find.text('보통'), findsOneWidget);
@@ -237,6 +248,70 @@ void main() {
       await tester.pumpAndSettle();
       expect(repo.created, isEmpty);
     });
+
+    testWidgets('저장 성공 시 true를 반환하며 화면을 닫는다', (tester) async {
+      final repo = _MockSymptomRepository();
+      bool? result;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            // ignore: scoped_providers_should_specify_dependencies
+            symptomRepositoryProvider.overrideWithValue(repo),
+            // ignore: scoped_providers_should_specify_dependencies
+            mealRepositoryProvider.overrideWithValue(_MockMealRepository()),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: FilledButton(
+                  onPressed: () async {
+                    result = await Navigator.of(context).push<bool>(
+                      MaterialPageRoute(
+                        builder: (_) => const SymptomWriteScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text('열기'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('열기'));
+      await tester.pumpAndSettle();
+
+      final normalMood = find.ancestor(
+        of: find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is SizedBox &&
+                  widget.width == 40 &&
+                  widget.height == 40,
+            )
+            .at(2),
+        matching: find.byType(GestureDetector),
+      );
+      await tester.tap(normalMood);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('저장하기'));
+      final saveButton = tester.widget<FilledButton>(
+        find.ancestor(
+          of: find.text('저장하기'),
+          matching: find.byType(FilledButton),
+        ),
+      );
+      expect(saveButton.onPressed, isNotNull);
+      await tester.tap(find.text('저장하기'));
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 4));
+
+      expect(repo.created, hasLength(1));
+      expect(result, isTrue);
+      expect(find.text('열기'), findsOneWidget);
+    });
   });
 
   group('SymptomWriteScreen — 수정 모드 프리필', () {
@@ -276,10 +351,12 @@ void main() {
 
       // 원인 식사 카드 탭 → meal pick 화면 진입 (스크롤 아래 있어 우선
       // ensureVisible로 뷰포트 안으로 스크롤한 뒤 탭)
-      final mealCardFinder = find.ancestor(
-        of: find.text('된장찌개'),
-        matching: find.byType(GestureDetector),
-      ).first;
+      final mealCardFinder = find
+          .ancestor(
+            of: find.text('된장찌개'),
+            matching: find.byType(GestureDetector),
+          )
+          .first;
       await tester.ensureVisible(mealCardFinder);
       await tester.pumpAndSettle();
       await tester.tap(mealCardFinder);
@@ -304,10 +381,12 @@ void main() {
 
       // 원인 식사 카드 탭 → meal pick 화면 진입 (스크롤 아래 있어 우선
       // ensureVisible로 뷰포트 안으로 스크롤한 뒤 탭)
-      final mealCardFinder = find.ancestor(
-        of: find.text('된장찌개'),
-        matching: find.byType(GestureDetector),
-      ).first;
+      final mealCardFinder = find
+          .ancestor(
+            of: find.text('된장찌개'),
+            matching: find.byType(GestureDetector),
+          )
+          .first;
       await tester.ensureVisible(mealCardFinder);
       await tester.pumpAndSettle();
       await tester.tap(mealCardFinder);

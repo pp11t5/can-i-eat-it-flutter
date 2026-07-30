@@ -79,18 +79,28 @@ class UnrecordedMealsScreen extends ConsumerWidget {
     }
   }
 
-  void _onSymptomOnlyTap(BuildContext context) {
-    context.push('/symptom/record');
+  Future<void> _onSymptomOnlyTap(BuildContext context, WidgetRef ref) async {
+    final didSave = await context.push<bool>('/symptom/record');
+    if (didSave == true) {
+      ref.invalidate(mealCandidatesProvider);
+    }
   }
 
-  void _onMealTap(BuildContext context, MealCandidate meal) {
-    context.push(
+  Future<void> _onMealTap(
+    BuildContext context,
+    WidgetRef ref,
+    MealCandidate meal,
+  ) async {
+    final didSave = await context.push<bool>(
       '/symptom/record',
       extra: SymptomWriteArgs(
         initialMealRecordId: meal.mealRecordId,
         initialMealName: _mealDisplayName(meal),
       ),
     );
+    if (didSave == true) {
+      ref.invalidate(mealCandidatesProvider);
+    }
   }
 
   @override
@@ -142,7 +152,9 @@ class UnrecordedMealsScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.itemGap),
 
                 // "증상만 기록하기" — 항상 최상단 노출.
-                _SymptomOnlyCard(onTap: () => _onSymptomOnlyTap(context)),
+                _SymptomOnlyCard(
+                  onTap: () => _onSymptomOnlyTap(context, ref),
+                ),
                 const SizedBox(height: AppSpacing.sectionGap),
 
                 if (!hasMeals)
@@ -169,7 +181,7 @@ class UnrecordedMealsScreen extends ConsumerWidget {
                                   meal: meal,
                                   displayName: _mealDisplayName(meal),
                                   timeLabel: _formatEatenAt(meal.eatenAt),
-                                  onTap: () => _onMealTap(context, meal),
+                                  onTap: () => _onMealTap(context, ref, meal),
                                 ),
                               )),
                         ],
