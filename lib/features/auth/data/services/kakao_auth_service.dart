@@ -31,18 +31,8 @@ class KakaoAuthResult {
 class KakaoAuthServiceImpl implements KakaoAuthService {
   @override
   Future<KakaoAuthResult> signIn() async {
-    // 카카오 앱/웹 로그인 시도
-    OAuthToken token;
-    if (await isKakaoTalkInstalled()) {
-      try {
-        token = await UserApi.instance.loginWithKakaoTalk();
-      } catch (_) {
-        // 카카오톡 설치돼 있어도 로그인 실패 시 웹으로 폴백
-        token = await UserApi.instance.loginWithKakaoAccount();
-      }
-    } else {
-      token = await UserApi.instance.loginWithKakaoAccount();
-    }
+    // 카카오톡 앱 전환 없이 기본 브라우저의 카카오계정 로그인만 사용한다.
+    final token = await UserApi.instance.loginWithKakaoAccount();
 
     // OIDC idToken 확인
     final idToken = token.idToken;
