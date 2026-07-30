@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -55,10 +57,25 @@ FoodSummary _foodSummary(String id, String name) =>
     FoodSummary(externalId: id, name: name);
 
 class _FailingSearchRepository extends MockFoodRepository {
+  _FailingSearchRepository({super.initialRecent});
+
   @override
   Future<FoodSearchResult> search(String q, {int size = 10}) async {
     throw Exception('network unavailable');
   }
+}
+
+class _PendingSearchRepository extends MockFoodRepository {
+  _PendingSearchRepository({
+    required super.initialRecent,
+    required this.searchCompleter,
+  });
+
+  final Completer<FoodSearchResult> searchCompleter;
+
+  @override
+  Future<FoodSearchResult> search(String q, {int size = 10}) =>
+      searchCompleter.future;
 }
 
 void main() {
@@ -133,6 +150,51 @@ void main() {
 
       expect(find.text('된장찌개'), findsNothing);
       expect(find.text('오렌지주스'), findsOneWidget);
+    });
+
+    testWidgets('검색어를 탭하면 검색창에 반영하고 즉시 조회한다', (tester) async {
+      final searchCompleter = Completer<FoodSearchResult>();
+      final repo = _PendingSearchRepository(
+        initialRecent: [_recentFood(1, '된장찌개')],
+        searchCompleter: searchCompleter,
+      );
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('된장찌개'));
+      await tester.pump();
+
+      final textField = tester.widget<TextField>(find.byType(TextField));
+      expect(textField.controller!.text, '된장찌개');
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      searchCompleter.complete(
+        FoodSearchResult(
+          foods: [_foodSummary('f-1', '된장찌개 결과')],
+          hasExactMatch: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('된장찌개 결과'), findsOneWidget);
+    });
+
+    testWidgets('검색어를 탭한 뒤 검색에 실패하면 기존 오류 상태를 표시한다', (tester) async {
+      final repo = _FailingSearchRepository(
+        initialRecent: [_recentFood(1, '된장찌개')],
+      );
+      await tester.pumpWidget(
+        _wrap([foodRepositoryProvider.overrideWithValue(repo)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('된장찌개'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('검색 중 오류가 발생했어요.'), findsOneWidget);
+      expect(find.text('찾는 음식이 없어요'), findsOneWidget);
     });
   });
 

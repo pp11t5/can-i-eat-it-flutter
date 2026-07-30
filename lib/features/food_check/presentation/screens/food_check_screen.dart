@@ -118,6 +118,16 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
     _runSearch(trimmed);
   }
 
+  /// 최근 검색어 탭 핸들러 — 검색어를 반영하고 즉시 다시 검색한다.
+  void _onRecentSearchTap(String query) {
+    _debounce?.cancel();
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return;
+
+    _textController.text = trimmed;
+    _runSearch(trimmed);
+  }
+
   Future<void> _runSearch(String q) async {
     if (!mounted) return;
     setState(() {
@@ -209,7 +219,10 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
                       onTap: _onResultTap,
                       onDirectAnalyze: _onDirectAnalyze,
                     )
-                  : _HistoryContent(ref: ref),
+                  : _HistoryContent(
+                      ref: ref,
+                      onRecentSearchTap: _onRecentSearchTap,
+                    ),
             ),
           ],
         ),
@@ -563,9 +576,13 @@ class _SearchErrorState extends StatelessWidget {
 
 /// 최근 검색 기록 영역. [recentFoodControllerProvider] 상태를 watch한다.
 class _HistoryContent extends StatelessWidget {
-  const _HistoryContent({required this.ref});
+  const _HistoryContent({
+    required this.ref,
+    required this.onRecentSearchTap,
+  });
 
   final WidgetRef ref;
+  final ValueChanged<String> onRecentSearchTap;
 
   @override
   Widget build(BuildContext context) {
@@ -578,17 +595,26 @@ class _HistoryContent extends StatelessWidget {
         if (items.isEmpty) {
           return const _EmptyState();
         }
-        return _RecentSection(items: items, ref: ref);
+        return _RecentSection(
+          items: items,
+          ref: ref,
+          onRecentSearchTap: onRecentSearchTap,
+        );
       },
     );
   }
 }
 
 class _RecentSection extends StatelessWidget {
-  const _RecentSection({required this.items, required this.ref});
+  const _RecentSection({
+    required this.items,
+    required this.ref,
+    required this.onRecentSearchTap,
+  });
 
   final List<RecentFood> items;
   final WidgetRef ref;
+  final ValueChanged<String> onRecentSearchTap;
 
   @override
   Widget build(BuildContext context) {
@@ -639,6 +665,7 @@ class _RecentSection extends StatelessWidget {
                     const SizedBox(height: AppSpacing.itemGap),
                 itemBuilder: (context, i) => _HistoryRow(
                   item: items[i],
+                  onTap: () => onRecentSearchTap(items[i].query),
                   onRemove: () => ref
                       .read(recentFoodControllerProvider.notifier)
                       .removeRecent(items[i].id),
@@ -653,9 +680,14 @@ class _RecentSection extends StatelessWidget {
 }
 
 class _HistoryRow extends StatelessWidget {
-  const _HistoryRow({required this.item, required this.onRemove});
+  const _HistoryRow({
+    required this.item,
+    required this.onTap,
+    required this.onRemove,
+  });
 
   final RecentFood item;
+  final VoidCallback onTap;
   final VoidCallback onRemove;
 
   @override
@@ -666,10 +698,14 @@ class _HistoryRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            child: Text(
-              item.query,
-              style: AppTextStyles.body1Medium.copyWith(
-                color: AppColors.textPrimary,
+            child: GestureDetector(
+              onTap: onTap,
+              behavior: HitTestBehavior.opaque,
+              child: Text(
+                item.query,
+                style: AppTextStyles.body1Medium.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
           ),
