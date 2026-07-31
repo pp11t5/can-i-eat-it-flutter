@@ -26,8 +26,8 @@ class FigmaCheckbox extends StatelessWidget {
       child: Center(
         child: checked
             ? Container(
-                width: 24,
-                height: 24,
+                width: 20,
+                height: 20,
                 decoration: const BoxDecoration(
                   color: AppColors.primary,
                   shape: BoxShape.circle,
@@ -35,7 +35,7 @@ class FigmaCheckbox extends StatelessWidget {
                 alignment: Alignment.center,
                 child: const AppIcon(
                   AppIcons.check,
-                  size: 15,
+                  size: 10,
                   color: AppColors.surface,
                 ),
               )
