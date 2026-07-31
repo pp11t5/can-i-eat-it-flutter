@@ -40,6 +40,32 @@ void main() {
       final result = parseKst('2026-06-24T08:30:00+09:00');
       expect(result.isUtc, isFalse);
     });
+
+    // 타임라인 BE: LocalDateTime.toString() → 오프셋 없음 (예: "2026-08-01T00:00")
+    // 구구현은 toUtc()+9h 로 00:00 → 09:00 이 되었음.
+    test('오프셋 없는 ISO는 KST wall-clock 컴포넌트 그대로 (00:00 유지)', () {
+      final result = parseKst('2026-08-01T00:00');
+      expect(result.year, 2026);
+      expect(result.month, 8);
+      expect(result.day, 1);
+      expect(result.hour, 0);
+      expect(result.minute, 0);
+      expect(result.isUtc, isFalse);
+    });
+
+    test('오프셋 없는 ISO(초 포함)도 +9h 없이 시·분 보존', () {
+      final result = parseKst('2026-08-01T12:39:00');
+      expect(result.hour, 12);
+      expect(result.minute, 39);
+    });
+
+    test('오프셋 없는 ISO와 +09:00 동일 wall-clock이면 같은 시·분', () {
+      final bare = parseKst('2026-08-01T12:39:00');
+      final offset = parseKst('2026-08-01T12:39:00+09:00');
+      expect(bare.hour, offset.hour);
+      expect(bare.minute, offset.minute);
+      expect(bare.day, offset.day);
+    });
   });
 
   // -------------------------------------------------------------------------
