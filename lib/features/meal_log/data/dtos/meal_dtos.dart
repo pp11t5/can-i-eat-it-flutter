@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
+import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
 
 part 'meal_dtos.freezed.dart';
 part 'meal_dtos.g.dart';
@@ -194,7 +195,15 @@ extension ConnectedSymptomsDtoMapper on ConnectedSymptomsDto {
         symptomId: symptomId,
         symptomState: SymptomStateMapper.fromServer(symptomState),
         afterMealMinutes: afterMealMinutes,
-        representativeSymptoms: representativeSymptoms,
+        // 서버는 snake_case 코드(chest_tightness 등)를 내려준다.
+        // 타임라인 카드 표시용으로 SymptomType 한글 라벨로 변환한다.
+        // 미지 값·이미 한글인 값은 원문을 유지한다.
+        representativeSymptoms: representativeSymptoms
+            .map(
+              (code) =>
+                  SymptomTypeMapper.fromServerNullable(code)?.label ?? code,
+            )
+            .toList(),
         etcCount: etcCount,
       );
 }

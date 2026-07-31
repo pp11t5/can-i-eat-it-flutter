@@ -357,7 +357,7 @@ void main() {
             'symptomId': 'sym-1',
             'symptomState': 'uncomfortable',
             'afterMealMinutes': 90,
-            'representativeSymptoms': ['속쓰림'],
+            'representativeSymptoms': ['chest_tightness'],
             'etcCount': 1,
           },
         });
@@ -366,7 +366,10 @@ void main() {
         expect(single.connectedSymptoms, isNotNull);
         expect(single.connectedSymptoms!.symptomId, 'sym-1');
         expect(single.connectedSymptoms!.symptomState, SymptomState.uncomfortable);
-        expect(single.connectedSymptoms!.representativeSymptoms, ['속쓰림']);
+        expect(
+          single.connectedSymptoms!.representativeSymptoms,
+          ['가슴 답답함'],
+        );
         expect(single.connectedSymptoms!.etcCount, 1);
       });
 
@@ -820,7 +823,7 @@ void main() {
         'symptomId': 'sym-1',
         'symptomState': 'uncomfortable',
         'afterMealMinutes': 90,
-        'representativeSymptoms': ['속쓰림', '더부룩함'],
+        'representativeSymptoms': ['chest_tightness', 'acid_reflux'],
         'etcCount': 2,
       });
       expect(dto.symptomId, 'sym-1');
@@ -830,8 +833,38 @@ void main() {
       expect(entity, isA<ConnectedSymptoms>());
       expect(entity.symptomId, 'sym-1');
       expect(entity.symptomState, SymptomState.uncomfortable);
-      expect(entity.representativeSymptoms, ['속쓰림', '더부룩함']);
+      expect(entity.representativeSymptoms, ['가슴 답답함', '역류']);
       expect(entity.etcCount, 2);
+    });
+
+    test('서버 증상 코드 4종을 SymptomType.label 한글로 변환한다', () {
+      final entity = ConnectedSymptomsDto.fromJson(const {
+        'symptomId': 'sym-codes',
+        'symptomState': 'normal',
+        'afterMealMinutes': 60,
+        'representativeSymptoms': [
+          'throat_foreign_body',
+          'acid_reflux',
+          'cough',
+          'chest_tightness',
+        ],
+      }).toEntity();
+      expect(entity.representativeSymptoms, [
+        '목 이물감',
+        '역류',
+        '기침',
+        '가슴 답답함',
+      ]);
+    });
+
+    test('미지 값·이미 한글인 대표증상은 원문을 유지한다', () {
+      final entity = ConnectedSymptomsDto.fromJson(const {
+        'symptomId': 'sym-legacy',
+        'symptomState': 'uncomfortable',
+        'afterMealMinutes': 90,
+        'representativeSymptoms': ['속쓰림', 'unknown_code'],
+      }).toEntity();
+      expect(entity.representativeSymptoms, ['속쓰림', 'unknown_code']);
     });
 
     test('representativeSymptoms·etcCount 누락 시 빈 목록·0으로 폴백된다', () {
