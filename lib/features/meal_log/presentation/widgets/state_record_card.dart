@@ -16,15 +16,20 @@ class StateRecordCard extends StatelessWidget {
   final StateRecord record;
 
   /// 식후 경과 분 → "식후 N분" 표시 레이블.
+  ///
+  /// 음수 분은 표시상 0으로 클램프한다 (식후 개념 하한).
   static String _timingLabel(int minutes) {
-    if (minutes < 60) return '식후 $minutes분';
-    final h = minutes ~/ 60;
-    final m = minutes % 60;
-    return m == 0 ? '식후 $h시간' : '식후 $h시간 $m분';
+    final m = minutes < 0 ? 0 : minutes;
+    if (m < 60) return '식후 $m분';
+    final h = m ~/ 60;
+    final rem = m % 60;
+    return rem == 0 ? '식후 $h시간' : '식후 $h시간 $rem분';
   }
 
   @override
   Widget build(BuildContext context) {
+    final mood = SymptomStateMapper.fromLabel(record.label);
+    final title = SymptomStateMapper.displayLabel(record.label);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
@@ -34,14 +39,14 @@ class StateRecordCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          MoodFace(state: SymptomStateMapper.fromLabel(record.label), size: 32),
+          MoodFace(state: mood, size: 32),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  record.label,
+                  title,
                   style: AppTextStyles.body2Bold.copyWith(
                     color: AppColors.textPrimary,
                   ),

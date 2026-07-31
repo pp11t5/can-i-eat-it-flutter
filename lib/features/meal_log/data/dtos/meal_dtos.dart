@@ -68,11 +68,14 @@ abstract class StateRecordDto with _$StateRecordDto {
 }
 
 extension StateRecordDtoMapper on StateRecordDto {
+  /// 서버 계약 정규화:
+  /// - [label]: enum code(`severe`) → 한글 표시 라벨(`심함`)
+  /// - [timingMinutes]: 음수(증상 시각이 식사 이전 등) → 0 (식후 분 하한)
   StateRecord toEntity() => StateRecord(
         stateRecordId: stateRecordId,
-        label: label,
+        label: SymptomStateMapper.displayLabel(label),
         date: date,
-        timingMinutes: timingMinutes,
+        timingMinutes: timingMinutes < 0 ? 0 : timingMinutes,
       );
 }
 
@@ -147,14 +150,18 @@ extension MealDetailFoodDtoMapper on MealDetailFoodDto {
 }
 
 /// 식사 상세 DTO (GET /meal-records/{id}).
+///
+/// 서버 계약: [stateRecords] 는 단일 객체 또는 null
+/// (`MealRecordDetailDTO.stateRecords: StateRecordDTO?`).
+/// 도메인 [MealRecord.stateRecords] 는 UI 호환을 위해 0~1건 리스트로 변환한다.
 @freezed
 abstract class MealRecordDetailDto with _$MealRecordDetailDto {
   const factory MealRecordDetailDto({
     required String mealRecordId,
     required String eatenAt,
     @Default(<MealDetailFoodDto>[]) List<MealDetailFoodDto> meals,
-    // stateRecords?: 명시 null까지 방어하기 위해 nullable + toEntity에서 ?? []
-    List<StateRecordDto>? stateRecords,
+    /// 연결된 상태 기록. 없으면 null (서버 단건 계약).
+    StateRecordDto? stateRecords,
   }) = _MealRecordDetailDto;
 
   factory MealRecordDetailDto.fromJson(Map<String, dynamic> json) =>
@@ -167,7 +174,7 @@ extension MealRecordDetailDtoMapper on MealRecordDetailDto {
         eatenAt: eatenAt,
         foods: meals.map((f) => f.toEntity()).toList(),
         stateRecords:
-            (stateRecords ?? const []).map((r) => r.toEntity()).toList(),
+            stateRecords == null ? const [] : [stateRecords!.toEntity()],
       );
 }
 

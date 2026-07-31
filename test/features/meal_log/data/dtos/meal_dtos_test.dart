@@ -49,14 +49,13 @@ const _mealRecordDetailJson = {
       'eatenAt': '2026-06-17T09:05:00+09:00',
     },
   ],
-  'stateRecords': [
-    {
-      'stateRecordId': 'sr1',
-      'label': '속쓰림',
-      'date': '2026-06-17',
-      'timingMinutes': 90,
-    },
-  ],
+  // 서버 계약: 단건 객체 또는 null (배열 아님).
+  'stateRecords': {
+    'stateRecordId': 'sr1',
+    'label': 'severe',
+    'date': '2026-06-17',
+    'timingMinutes': 90,
+  },
 };
 
 void main() {
@@ -133,6 +132,27 @@ void main() {
       expect(entity, isA<StateRecord>());
       expect(entity.stateRecordId, 'sr1');
       expect(entity.timingMinutes, 90);
+    });
+
+    test('서버 enum label(severe)을 한글 표시 라벨로 정규화한다', () {
+      final entity = StateRecordDto.fromJson(const {
+        'stateRecordId': 'sr2',
+        'label': 'severe',
+        'date': '2026-08-01',
+        'timingMinutes': 30,
+      }).toEntity();
+      expect(entity.label, '심함');
+    });
+
+    test('음수 timingMinutes는 0으로 클램프한다', () {
+      final entity = StateRecordDto.fromJson(const {
+        'stateRecordId': 'sr3',
+        'label': 'uncomfortable',
+        'date': '2026-08-01',
+        'timingMinutes': -356,
+      }).toEntity();
+      expect(entity.label, '불편함');
+      expect(entity.timingMinutes, 0);
     });
   });
 
@@ -216,9 +236,12 @@ void main() {
       expect(entity.foods[0].analysis, isNull);
     });
 
-    test('stateRecords 1건을 매핑한다', () {
-      final entity = MealRecordDetailDto.fromJson(_mealRecordDetailJson).toEntity();
+    test('stateRecords 단건 객체를 리스트 1건으로 매핑한다', () {
+      final entity =
+          MealRecordDetailDto.fromJson(_mealRecordDetailJson).toEntity();
       expect(entity.stateRecords.length, 1);
+      expect(entity.stateRecords[0].stateRecordId, 'sr1');
+      expect(entity.stateRecords[0].label, '심함'); // severe → 한글 정규화
       expect(entity.stateRecords[0].timingMinutes, 90);
     });
 

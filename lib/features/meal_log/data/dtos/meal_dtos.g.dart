@@ -118,9 +118,10 @@ _MealRecordDetailDto _$MealRecordDetailDtoFromJson(Map<String, dynamic> json) =>
                   (e) => MealDetailFoodDto.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const <MealDetailFoodDto>[],
-      stateRecords: (json['stateRecords'] as List<dynamic>?)
-          ?.map((e) => StateRecordDto.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      stateRecords: json['stateRecords'] == null
+          ? null
+          : StateRecordDto.fromJson(
+              json['stateRecords'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$MealRecordDetailDtoToJson(

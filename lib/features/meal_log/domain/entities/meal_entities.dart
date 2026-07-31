@@ -112,7 +112,7 @@ abstract class MealRecord with _$MealRecord {
     /// 식사 내 음식 목록 (서버 meals[]). 각 음식의 analysis는 null.
     @Default(<MealFood>[]) List<MealFood> foods,
 
-    /// 연관 상태기록 목록.
+    /// 연관 상태기록 목록 (서버는 단건·null → DTO 매핑 시 0~1건 리스트).
     @Default(<StateRecord>[]) List<StateRecord> stateRecords,
   }) = _MealRecord;
 }

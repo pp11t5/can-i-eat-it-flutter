@@ -15,18 +15,22 @@ enum SymptomState { comfortable, good, normal, uncomfortable, severe }
 
 /// [SymptomState] 서버 변환·표시 확장.
 extension SymptomStateMapper on SymptomState {
-  /// 서버 [v] 문자열을 [SymptomState] 로 변환한다.
-  ///
-  /// 미지값은 [SymptomState.normal] (중립)로 폴백 — 신규 상태 추가 시
-  /// 앱이 죽지 않도록 하는 안전 기본값(grade의 `_ => unknown`과 동일 철학).
-  static SymptomState fromServer(String v) => switch (v) {
+  /// 서버 [v] 문자열을 [SymptomState] 로 변환한다. 미지 코드는 null.
+  static SymptomState? fromServerNullable(String v) => switch (v) {
         'comfortable' => SymptomState.comfortable,
         'good' => SymptomState.good,
         'normal' => SymptomState.normal,
         'uncomfortable' => SymptomState.uncomfortable,
         'severe' => SymptomState.severe,
-        _ => SymptomState.normal,
+        _ => null,
       };
+
+  /// 서버 [v] 문자열을 [SymptomState] 로 변환한다.
+  ///
+  /// 미지값은 [SymptomState.normal] (중립)로 폴백 — 신규 상태 추가 시
+  /// 앱이 죽지 않도록 하는 안전 기본값(grade의 `_ => unknown`과 동일 철학).
+  static SymptomState fromServer(String v) =>
+      fromServerNullable(v) ?? SymptomState.normal;
 
   /// 도메인 [SymptomState] 를 서버 문자열로 변환한다 (W5-2 POST용).
   String toServer() => switch (this) {
@@ -46,12 +50,15 @@ extension SymptomStateMapper on SymptomState {
         SymptomState.severe => '심함',
       };
 
-  /// 서버 표시 문자열([StateRecord.label] 등)을 [SymptomState] 로 근사 매핑한다.
+  /// 서버 코드·표시 문자열을 [SymptomState] 로 매핑한다.
   ///
-  /// 서버가 상태 enum 대신 표시용 라벨('편안해요'·'불편해요' 등)만 주는 경우
-  /// 무드 얼굴 렌더를 위해 사용한다. 미상 값은 [SymptomState.normal] 로 폴백.
+  /// 1) 서버 enum code (`severe` 등) 정확 매칭
+  /// 2) 한글 표시 라벨 근사 (`편안해요`·`불편함` 등)
+  /// 미상 값은 [SymptomState.normal] 로 폴백.
   /// ('불편'은 '편'을 포함하므로 '편안'을 먼저 검사.)
   static SymptomState fromLabel(String label) {
+    final byCode = fromServerNullable(label);
+    if (byCode != null) return byCode;
     if (label.contains('편안')) return SymptomState.comfortable;
     if (label.contains('불편')) return SymptomState.uncomfortable;
     if (label.contains('심')) return SymptomState.severe;
@@ -59,4 +66,10 @@ extension SymptomStateMapper on SymptomState {
     if (label.contains('보통')) return SymptomState.normal;
     return SymptomState.normal;
   }
+
+  /// 서버 raw 라벨을 화면용 한글로 정규화한다.
+  ///
+  /// 알려진 상태 코드면 [label], 그 외(레거시 문자열 등)는 원문 유지.
+  static String displayLabel(String raw) =>
+      fromServerNullable(raw)?.label ?? raw;
 }

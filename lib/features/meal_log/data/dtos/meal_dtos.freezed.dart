@@ -2310,9 +2310,10 @@ class __$MealDetailFoodDtoCopyWithImpl<$Res>
 mixin _$MealRecordDetailDto {
   String get mealRecordId;
   String get eatenAt;
-  List<MealDetailFoodDto>
-      get meals; // stateRecords?: 명시 null까지 방어하기 위해 nullable + toEntity에서 ?? []
-  List<StateRecordDto>? get stateRecords;
+  List<MealDetailFoodDto> get meals;
+
+  /// 연결된 상태 기록. 없으면 null (서버 단건 계약).
+  StateRecordDto? get stateRecords;
 
   /// Create a copy of MealRecordDetailDto
   /// with the given fields replaced by the non-null parameter values.
@@ -2334,18 +2335,14 @@ mixin _$MealRecordDetailDto {
                 other.mealRecordId == mealRecordId) &&
             (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt) &&
             const DeepCollectionEquality().equals(other.meals, meals) &&
-            const DeepCollectionEquality()
-                .equals(other.stateRecords, stateRecords));
+            (identical(other.stateRecords, stateRecords) ||
+                other.stateRecords == stateRecords));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      mealRecordId,
-      eatenAt,
-      const DeepCollectionEquality().hash(meals),
-      const DeepCollectionEquality().hash(stateRecords));
+  int get hashCode => Object.hash(runtimeType, mealRecordId, eatenAt,
+      const DeepCollectionEquality().hash(meals), stateRecords);
 
   @override
   String toString() {
@@ -2363,7 +2360,9 @@ abstract mixin class $MealRecordDetailDtoCopyWith<$Res> {
       {String mealRecordId,
       String eatenAt,
       List<MealDetailFoodDto> meals,
-      List<StateRecordDto>? stateRecords});
+      StateRecordDto? stateRecords});
+
+  $StateRecordDtoCopyWith<$Res>? get stateRecords;
 }
 
 /// @nodoc
@@ -2400,8 +2399,22 @@ class _$MealRecordDetailDtoCopyWithImpl<$Res>
       stateRecords: freezed == stateRecords
           ? _self.stateRecords
           : stateRecords // ignore: cast_nullable_to_non_nullable
-              as List<StateRecordDto>?,
+              as StateRecordDto?,
     ));
+  }
+
+  /// Create a copy of MealRecordDetailDto
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $StateRecordDtoCopyWith<$Res>? get stateRecords {
+    if (_self.stateRecords == null) {
+      return null;
+    }
+
+    return $StateRecordDtoCopyWith<$Res>(_self.stateRecords!, (value) {
+      return _then(_self.copyWith(stateRecords: value));
+    });
   }
 }
 
@@ -2499,7 +2512,7 @@ extension MealRecordDetailDtoPatterns on MealRecordDetailDto {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(String mealRecordId, String eatenAt,
-            List<MealDetailFoodDto> meals, List<StateRecordDto>? stateRecords)?
+            List<MealDetailFoodDto> meals, StateRecordDto? stateRecords)?
         $default, {
     required TResult orElse(),
   }) {
@@ -2529,7 +2542,7 @@ extension MealRecordDetailDtoPatterns on MealRecordDetailDto {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(String mealRecordId, String eatenAt,
-            List<MealDetailFoodDto> meals, List<StateRecordDto>? stateRecords)
+            List<MealDetailFoodDto> meals, StateRecordDto? stateRecords)
         $default,
   ) {
     final _that = this;
@@ -2557,7 +2570,7 @@ extension MealRecordDetailDtoPatterns on MealRecordDetailDto {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(String mealRecordId, String eatenAt,
-            List<MealDetailFoodDto> meals, List<StateRecordDto>? stateRecords)?
+            List<MealDetailFoodDto> meals, StateRecordDto? stateRecords)?
         $default,
   ) {
     final _that = this;
@@ -2578,9 +2591,8 @@ class _MealRecordDetailDto implements MealRecordDetailDto {
       {required this.mealRecordId,
       required this.eatenAt,
       final List<MealDetailFoodDto> meals = const <MealDetailFoodDto>[],
-      final List<StateRecordDto>? stateRecords})
-      : _meals = meals,
-        _stateRecords = stateRecords;
+      this.stateRecords})
+      : _meals = meals;
   factory _MealRecordDetailDto.fromJson(Map<String, dynamic> json) =>
       _$MealRecordDetailDtoFromJson(json);
 
@@ -2597,17 +2609,9 @@ class _MealRecordDetailDto implements MealRecordDetailDto {
     return EqualUnmodifiableListView(_meals);
   }
 
-// stateRecords?: 명시 null까지 방어하기 위해 nullable + toEntity에서 ?? []
-  final List<StateRecordDto>? _stateRecords;
-// stateRecords?: 명시 null까지 방어하기 위해 nullable + toEntity에서 ?? []
+  /// 연결된 상태 기록. 없으면 null (서버 단건 계약).
   @override
-  List<StateRecordDto>? get stateRecords {
-    final value = _stateRecords;
-    if (value == null) return null;
-    if (_stateRecords is EqualUnmodifiableListView) return _stateRecords;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(value);
-  }
+  final StateRecordDto? stateRecords;
 
   /// Create a copy of MealRecordDetailDto
   /// with the given fields replaced by the non-null parameter values.
@@ -2634,18 +2638,14 @@ class _MealRecordDetailDto implements MealRecordDetailDto {
                 other.mealRecordId == mealRecordId) &&
             (identical(other.eatenAt, eatenAt) || other.eatenAt == eatenAt) &&
             const DeepCollectionEquality().equals(other._meals, _meals) &&
-            const DeepCollectionEquality()
-                .equals(other._stateRecords, _stateRecords));
+            (identical(other.stateRecords, stateRecords) ||
+                other.stateRecords == stateRecords));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      mealRecordId,
-      eatenAt,
-      const DeepCollectionEquality().hash(_meals),
-      const DeepCollectionEquality().hash(_stateRecords));
+  int get hashCode => Object.hash(runtimeType, mealRecordId, eatenAt,
+      const DeepCollectionEquality().hash(_meals), stateRecords);
 
   @override
   String toString() {
@@ -2665,7 +2665,10 @@ abstract mixin class _$MealRecordDetailDtoCopyWith<$Res>
       {String mealRecordId,
       String eatenAt,
       List<MealDetailFoodDto> meals,
-      List<StateRecordDto>? stateRecords});
+      StateRecordDto? stateRecords});
+
+  @override
+  $StateRecordDtoCopyWith<$Res>? get stateRecords;
 }
 
 /// @nodoc
@@ -2700,10 +2703,24 @@ class __$MealRecordDetailDtoCopyWithImpl<$Res>
           : meals // ignore: cast_nullable_to_non_nullable
               as List<MealDetailFoodDto>,
       stateRecords: freezed == stateRecords
-          ? _self._stateRecords
+          ? _self.stateRecords
           : stateRecords // ignore: cast_nullable_to_non_nullable
-              as List<StateRecordDto>?,
+              as StateRecordDto?,
     ));
+  }
+
+  /// Create a copy of MealRecordDetailDto
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $StateRecordDtoCopyWith<$Res>? get stateRecords {
+    if (_self.stateRecords == null) {
+      return null;
+    }
+
+    return $StateRecordDtoCopyWith<$Res>(_self.stateRecords!, (value) {
+      return _then(_self.copyWith(stateRecords: value));
+    });
   }
 }
 

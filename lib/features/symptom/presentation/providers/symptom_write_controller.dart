@@ -81,7 +81,7 @@ class SymptomWriteController extends _$SymptomWriteController {
   /// [formState]를 제출한다.
   ///
   /// - mood 미선택 시 예외.
-  /// - 성공 시 타임라인/주간·홈 미기록 식단 캐시 invalidate.
+  /// - 성공 시 타임라인/주간·홈 미기록 식단·식사 상세 캐시 invalidate.
   /// - 반환값: 성공 시 생성/수정된 symptomId.
   Future<String?> submit(SymptomWriteFormState formState) async {
     if (state is AsyncLoading) return null;
@@ -110,10 +110,12 @@ class SymptomWriteController extends _$SymptomWriteController {
         symptomId = existingSymptomId!;
       }
 
-      // 타임라인·주간 캐시 invalidate
+      // 타임라인·주간·홈 미기록 식단·식사 상세 캐시 invalidate
+      // (MealRecordDetailScreen 복귀 시 stateRecords 재조회)
       ref.invalidate(timelineControllerProvider);
       ref.invalidate(monthlyControllerProvider);
       ref.invalidate(unrecordedMealCountProvider);
+      ref.invalidate(mealRecordDetailControllerProvider);
 
       state = const AsyncData(null);
       return symptomId;

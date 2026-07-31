@@ -389,14 +389,12 @@ void main() {
                 'eatenAt': '2026-06-17T09:02:00+09:00',
               },
             ],
-            'stateRecords': [
-              {
-                'stateRecordId': 'sr1',
-                'label': '속쓰림',
-                'date': '2026-06-17',
-                'timingMinutes': 90,
-              },
-            ],
+            'stateRecords': {
+              'stateRecordId': 'sr1',
+              'label': 'severe',
+              'date': '2026-06-17',
+              'timingMinutes': 90,
+            },
           }),
         ),
       );
@@ -473,7 +471,7 @@ void main() {
                 'eatenAt': '2026-06-24T09:00:00+09:00',
               },
             ],
-            'stateRecords': [],
+            'stateRecords': null,
           }),
         ),
       );
