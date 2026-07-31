@@ -11,6 +11,7 @@ import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
+import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
@@ -70,9 +71,11 @@ class MealRecordDetailScreen extends ConsumerWidget {
     if (!context.mounted) return;
 
     try {
-      await ref
-          .read(mealRecordDetailControllerProvider(mealRecordId).notifier)
-          .deleteMeal();
+      await ref.read(globalLoadingControllerProvider.notifier).run(
+            () => ref
+                .read(mealRecordDetailControllerProvider(mealRecordId).notifier)
+                .deleteMeal(),
+          );
       if (!context.mounted) return;
       ref.invalidate(timelineControllerProvider);
       ref.invalidate(monthlyControllerProvider);

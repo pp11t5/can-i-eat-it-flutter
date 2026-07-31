@@ -10,6 +10,7 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
+import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
@@ -49,9 +50,11 @@ class MealFoodDetailScreen extends ConsumerWidget {
     if (!context.mounted) return;
 
     try {
-      await ref
-          .read(mealFoodDetailControllerProvider(mealFoodId).notifier)
-          .deleteFood();
+      await ref.read(globalLoadingControllerProvider.notifier).run(
+            () => ref
+                .read(mealFoodDetailControllerProvider(mealFoodId).notifier)
+                .deleteFood(),
+          );
       if (!context.mounted) return;
       // 마지막 음식이면 서버가 식사도 삭제 → 타임라인/weekly invalidate로 동기화.
       ref.invalidate(timelineControllerProvider);
