@@ -85,6 +85,7 @@ void main() {
 
       // 드래프트에 일부 입력
       final ctrl = container.read(onboardingControllerProvider.notifier);
+      ctrl.setConditions(['GERD']);
       ctrl.toggleSymptom('heartburn_reflux');
       ctrl.setDiagnosed(true);
 

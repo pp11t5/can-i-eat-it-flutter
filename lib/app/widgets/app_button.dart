@@ -77,6 +77,9 @@ class AppButton extends StatelessWidget {
     return button;
   }
 
+  /// 온보딩 선택/CTA 활성 전환과 맞춘 색 보간 duration.
+  static const Duration _stateAnimDuration = Duration(milliseconds: 150);
+
   Widget _buildPrimary() {
     return FilledButton(
       onPressed: isLoading ? null : onPressed,
@@ -85,6 +88,8 @@ class AppButton extends StatelessWidget {
             _isDisabled ? AppColors.surfaceMuted : AppColors.primary,
         foregroundColor:
             _isDisabled ? AppColors.textTertiary : AppColors.onPrimary,
+        disabledBackgroundColor: AppColors.surfaceMuted,
+        disabledForegroundColor: AppColors.textTertiary,
         padding: const EdgeInsets.symmetric(
           vertical: AppSpacing.cardPadding, // 16
           horizontal: AppSpacing.sectionGap, // 24
@@ -95,6 +100,7 @@ class AppButton extends StatelessWidget {
         textStyle: AppTextStyles.body1Bold,
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        animationDuration: _stateAnimDuration,
       ),
       child: _buildChild(AppColors.onPrimary),
     );
@@ -108,6 +114,8 @@ class AppButton extends StatelessWidget {
             _isDisabled ? AppColors.surfaceMuted : AppColors.surface,
         foregroundColor:
             _isDisabled ? AppColors.textTertiary : AppColors.primary,
+        disabledBackgroundColor: AppColors.surfaceMuted,
+        disabledForegroundColor: AppColors.textTertiary,
         side: BorderSide(
           color: _isDisabled ? AppColors.border : AppColors.primary,
         ),
@@ -121,6 +129,7 @@ class AppButton extends StatelessWidget {
         textStyle: AppTextStyles.body1Bold,
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        animationDuration: _stateAnimDuration,
       ),
       child: _buildChild(AppColors.primary),
     );

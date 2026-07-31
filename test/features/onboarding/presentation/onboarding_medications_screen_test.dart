@@ -13,6 +13,7 @@ import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_heal
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_medications_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_shell.dart';
 
 // ---------------------------------------------------------------------------
 // 헬퍼
@@ -21,14 +22,19 @@ import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding
 GoRouter _testRouter() => GoRouter(
       initialLocation: '/onboarding/medications',
       routes: [
-        GoRoute(
-          path: '/onboarding/triggers',
-          builder: (_, __) =>
-              const Scaffold(body: Text('triggers stub')),
-        ),
-        GoRoute(
-          path: '/onboarding/medications',
-          builder: (_, __) => const OnboardingMedicationsScreen(),
+        ShellRoute(
+          builder: (context, state, child) => OnboardingShell(child: child),
+          routes: [
+            GoRoute(
+              path: '/onboarding/triggers',
+              builder: (_, __) =>
+                  const Scaffold(body: Text('triggers stub')),
+            ),
+            GoRoute(
+              path: '/onboarding/medications',
+              builder: (_, __) => const OnboardingMedicationsScreen(),
+            ),
+          ],
         ),
         GoRoute(
           path: '/',

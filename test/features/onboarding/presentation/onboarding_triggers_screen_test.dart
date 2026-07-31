@@ -8,6 +8,7 @@ import 'package:can_i_eat_it/app/widgets/step_progress.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_triggers_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_shell.dart';
 
 // ---------------------------------------------------------------------------
 // 헬퍼
@@ -16,19 +17,24 @@ import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding
 GoRouter _testRouter() => GoRouter(
       initialLocation: '/onboarding/triggers',
       routes: [
-        GoRoute(
-          path: '/onboarding/frequency',
-          builder: (_, __) =>
-              const Scaffold(body: Text('frequency stub')),
-        ),
-        GoRoute(
-          path: '/onboarding/triggers',
-          builder: (_, __) => const OnboardingTriggersScreen(),
-        ),
-        GoRoute(
-          path: '/onboarding/medications',
-          builder: (_, __) =>
-              const Scaffold(body: Text('medications stub')),
+        ShellRoute(
+          builder: (context, state, child) => OnboardingShell(child: child),
+          routes: [
+            GoRoute(
+              path: '/onboarding/frequency',
+              builder: (_, __) =>
+                  const Scaffold(body: Text('frequency stub')),
+            ),
+            GoRoute(
+              path: '/onboarding/triggers',
+              builder: (_, __) => const OnboardingTriggersScreen(),
+            ),
+            GoRoute(
+              path: '/onboarding/medications',
+              builder: (_, __) =>
+                  const Scaffold(body: Text('medications stub')),
+            ),
+          ],
         ),
       ],
     );

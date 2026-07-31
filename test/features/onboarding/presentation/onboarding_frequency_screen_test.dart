@@ -7,6 +7,7 @@ import 'package:can_i_eat_it/app/widgets/step_progress.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_frequency_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_shell.dart';
 
 // ---------------------------------------------------------------------------
 // 헬퍼
@@ -15,19 +16,24 @@ import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding
 GoRouter _testRouter() => GoRouter(
       initialLocation: '/onboarding/frequency',
       routes: [
-        GoRoute(
-          path: '/onboarding/condition',
-          builder: (_, __) =>
-              const Scaffold(body: Text('condition stub')),
-        ),
-        GoRoute(
-          path: '/onboarding/frequency',
-          builder: (_, __) => const OnboardingFrequencyScreen(),
-        ),
-        GoRoute(
-          path: '/onboarding/triggers',
-          builder: (_, __) =>
-              const Scaffold(body: Text('triggers stub')),
+        ShellRoute(
+          builder: (context, state, child) => OnboardingShell(child: child),
+          routes: [
+            GoRoute(
+              path: '/onboarding/condition',
+              builder: (_, __) =>
+                  const Scaffold(body: Text('condition stub')),
+            ),
+            GoRoute(
+              path: '/onboarding/frequency',
+              builder: (_, __) => const OnboardingFrequencyScreen(),
+            ),
+            GoRoute(
+              path: '/onboarding/triggers',
+              builder: (_, __) =>
+                  const Scaffold(body: Text('triggers stub')),
+            ),
+          ],
         ),
       ],
     );

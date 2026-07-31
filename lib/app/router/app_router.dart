@@ -28,6 +28,7 @@ import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_frequency_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_medications_screen.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding_triggers_screen.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_shell.dart';
 import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_detail_screen.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_write_screen.dart';
@@ -75,25 +76,31 @@ GoRouter appRouter(Ref ref) {
         name: 'terms',
         builder: (context, state) => const TermsScreen(),
       ),
-      GoRoute(
-        path: '/onboarding/condition',
-        name: 'onboarding-condition',
-        builder: (context, state) => const OnboardingConditionScreen(),
-      ),
-      GoRoute(
-        path: '/onboarding/frequency',
-        name: 'onboarding-frequency',
-        builder: (context, state) => const OnboardingFrequencyScreen(),
-      ),
-      GoRoute(
-        path: '/onboarding/triggers',
-        name: 'onboarding-triggers',
-        builder: (context, state) => const OnboardingTriggersScreen(),
-      ),
-      GoRoute(
-        path: '/onboarding/medications',
-        name: 'onboarding-medications',
-        builder: (context, state) => const OnboardingMedicationsScreen(),
+      // 온보딩: ShellRoute 로 탑바·StepProgress 고정, 본문만 페이지 전환.
+      ShellRoute(
+        builder: (context, state, child) => OnboardingShell(child: child),
+        routes: [
+          GoRoute(
+            path: '/onboarding/condition',
+            name: 'onboarding-condition',
+            builder: (context, state) => const OnboardingConditionScreen(),
+          ),
+          GoRoute(
+            path: '/onboarding/frequency',
+            name: 'onboarding-frequency',
+            builder: (context, state) => const OnboardingFrequencyScreen(),
+          ),
+          GoRoute(
+            path: '/onboarding/triggers',
+            name: 'onboarding-triggers',
+            builder: (context, state) => const OnboardingTriggersScreen(),
+          ),
+          GoRoute(
+            path: '/onboarding/medications',
+            name: 'onboarding-medications',
+            builder: (context, state) => const OnboardingMedicationsScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: '/check',
