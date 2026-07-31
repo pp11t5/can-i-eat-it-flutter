@@ -87,8 +87,11 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
             // ── 증상 빈도 목록 ────────────────────────────────────────────────
             Expanded(
               child: ListView.separated(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.screenPadding,
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.screenPadding,
+                  0,
+                  AppSpacing.screenPadding,
+                  AppSpacing.screenPadding,
                 ),
                 itemCount: symptomFrequencyOptions.length,
                 separatorBuilder: (_, __) =>
