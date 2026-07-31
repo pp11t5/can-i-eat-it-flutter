@@ -91,7 +91,7 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
                   AppSpacing.screenPadding,
                   0,
                   AppSpacing.screenPadding,
-                  AppSpacing.screenPadding,
+                  24,
                 ),
                 itemCount: symptomFrequencyOptions.length,
                 separatorBuilder: (_, __) =>
