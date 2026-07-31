@@ -84,8 +84,7 @@ void main() {
       expect(find.byType(OptionCard), findsNWidgets(conditionOptions.length));
     });
 
-    testWidgets('GERD 카드는 기본값으로 선택 상태다 (draft starts with [GERD])',
-        (tester) async {
+    testWidgets('진입 시 conditions는 비어 있고 GERD 미선택이다', (tester) async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
@@ -99,7 +98,7 @@ void main() {
 
       expect(
         container.read(onboardingControllerProvider).conditions,
-        contains('GERD'),
+        isEmpty,
       );
     });
 
@@ -131,8 +130,7 @@ void main() {
       );
     });
 
-    testWidgets('GERD 카드 탭 시 single-select — conditions가 [GERD]로 유지된다',
-        (tester) async {
+    testWidgets('GERD 카드 탭 시 conditions가 [GERD]로 설정된다', (tester) async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
@@ -147,6 +145,11 @@ void main() {
       final label = conditionOptions.first.label; // '역류성 식도염'
       final code = conditionOptions.first.code; // 'GERD'
 
+      expect(
+        container.read(onboardingControllerProvider).conditions,
+        isEmpty,
+      );
+
       await tester.tap(find.text(label));
       await tester.pumpAndSettle();
 
@@ -156,11 +159,54 @@ void main() {
       );
     });
 
-    testWidgets('"다음" 버튼 탭 시 /onboarding/frequency로 이동한다', (tester) async {
+    testWidgets('GERD 카드를 다시 탭하면 선택이 해제된다', (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(routerConfig: _testRouter()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final label = conditionOptions.first.label;
+
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(onboardingControllerProvider).conditions,
+        equals(['GERD']),
+      );
+
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(onboardingControllerProvider).conditions,
+        isEmpty,
+      );
+    });
+
+    testWidgets('미선택 시 "다음" 탭해도 frequency로 이동하지 않는다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      // 기본값 conditions=['GERD']이므로 다음 버튼 활성
+      await tester.tap(find.text('다음'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('frequency stub'), findsNothing);
+      expect(find.text('어떤 건강 고민이 있으세요?'), findsOneWidget);
+    });
+
+    testWidgets('GERD 선택 후 "다음" 탭 시 /onboarding/frequency로 이동한다',
+        (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text(conditionOptions.first.label));
+      await tester.pumpAndSettle();
+
       await tester.tap(find.text('다음'));
       await tester.pumpAndSettle();
 

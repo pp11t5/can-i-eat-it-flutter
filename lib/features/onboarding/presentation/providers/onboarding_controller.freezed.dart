@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$OnboardingDraft {
-  /// 질환 코드 목록. 기본값 ['GERD'] — 현재 GERD 단일 질환 지원.
+  /// 질환 코드 목록. 기본 빈 목록 — 사용자가 선택해야 체크·다음 버튼 활성.
   List<String> get conditions;
 
   /// 증상 빈도 코드 목록. 복수 선택.
@@ -356,7 +356,7 @@ extension OnboardingDraftPatterns on OnboardingDraft {
 
 class _OnboardingDraft implements OnboardingDraft {
   const _OnboardingDraft(
-      {final List<String> conditions = const ['GERD'],
+      {final List<String> conditions = const <String>[],
       final List<String> symptomFrequency = const <String>[],
       this.diagnosed = false,
       final List<String> triggerFoods = const <String>[],
@@ -369,10 +369,10 @@ class _OnboardingDraft implements OnboardingDraft {
         _medications = medications,
         _allergies = allergies;
 
-  /// 질환 코드 목록. 기본값 ['GERD'] — 현재 GERD 단일 질환 지원.
+  /// 질환 코드 목록. 기본 빈 목록 — 사용자가 선택해야 체크·다음 버튼 활성.
   final List<String> _conditions;
 
-  /// 질환 코드 목록. 기본값 ['GERD'] — 현재 GERD 단일 질환 지원.
+  /// 질환 코드 목록. 기본 빈 목록 — 사용자가 선택해야 체크·다음 버튼 활성.
   @override
   @JsonKey()
   List<String> get conditions {

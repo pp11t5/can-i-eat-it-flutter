@@ -92,10 +92,8 @@ class OptionCard extends StatelessWidget {
                   Text(
                     label,
                     style: (isCompact
-                            ? AppTextStyles.body2Medium
-                            : (selected && enabled
-                                ? AppTextStyles.body1Bold
-                                : AppTextStyles.body1Medium))
+                        ? AppTextStyles.body2Medium
+                        : AppTextStyles.body1Bold)
                         .copyWith(color: labelColor),
                   ),
                   if (caption != null) ...[

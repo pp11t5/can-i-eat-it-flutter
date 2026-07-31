@@ -125,7 +125,7 @@ class OnboardingConditionScreen extends ConsumerWidget {
                       selected: isSelected,
                       enabled: entry.enabled,
                       onTap: entry.enabled
-                          ? () => notifier.setConditions([entry.code])
+                          ? () => notifier.toggleCondition(entry.code)
                           : null,
                     );
                   },

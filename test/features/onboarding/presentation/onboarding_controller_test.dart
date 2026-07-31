@@ -17,10 +17,10 @@ void main() {
   // group 1: 초기 드래프트
   // -------------------------------------------------------------------------
   group('OnboardingController 초기 드래프트', () {
-    test('빌드 시 conditions 기본값은 [GERD]이다', () {
+    test('빌드 시 conditions 기본값은 빈 리스트이다', () {
       final container = makeContainer();
       final draft = container.read(onboardingControllerProvider);
-      expect(draft.conditions, ['GERD']);
+      expect(draft.conditions, isEmpty);
     });
 
     test('빌드 시 symptomFrequency 기본값은 빈 리스트이다', () {
@@ -256,6 +256,42 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
+  // group 8b: toggleCondition
+  // -------------------------------------------------------------------------
+  group('toggleCondition', () {
+    test('미선택 코드를 토글하면 해당 코드만 선택된다', () {
+      final container = makeContainer();
+      container.read(onboardingControllerProvider.notifier).toggleCondition('GERD');
+      expect(
+        container.read(onboardingControllerProvider).conditions,
+        ['GERD'],
+      );
+    });
+
+    test('이미 선택된 코드를 다시 토글하면 해제된다', () {
+      final container = makeContainer();
+      final notifier = container.read(onboardingControllerProvider.notifier);
+      notifier.toggleCondition('GERD');
+      notifier.toggleCondition('GERD');
+      expect(
+        container.read(onboardingControllerProvider).conditions,
+        isEmpty,
+      );
+    });
+
+    test('다른 코드를 토글하면 단일 선택으로 교체된다', () {
+      final container = makeContainer();
+      final notifier = container.read(onboardingControllerProvider.notifier);
+      notifier.toggleCondition('GERD');
+      notifier.toggleCondition('gastritis');
+      expect(
+        container.read(onboardingControllerProvider).conditions,
+        ['gastritis'],
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // group 9: toHealthProfile 변환
   // -------------------------------------------------------------------------
   group('toHealthProfile 변환', () {
@@ -263,6 +299,7 @@ void main() {
       final container = makeContainer();
       final notifier = container.read(onboardingControllerProvider.notifier);
 
+      notifier.setConditions(['GERD']);
       notifier.toggleSymptom('heartburn_reflux');
       notifier.setDiagnosed(true);
       notifier.toggleTrigger('spicy');
@@ -282,11 +319,11 @@ void main() {
       expect(profile.allergies, ['shellfish']);
     });
 
-    test('기본 드래프트를 toHealthProfile 변환 시 conditions는 [GERD]이다', () {
+    test('기본 드래프트를 toHealthProfile 변환 시 conditions는 빈 리스트이다', () {
       final container = makeContainer();
       final profile =
           container.read(onboardingControllerProvider).toHealthProfile();
-      expect(profile.conditions, ['GERD']);
+      expect(profile.conditions, isEmpty);
       expect(profile.diagnosed, isFalse);
     });
   });

@@ -20,8 +20,8 @@ part 'onboarding_controller.g.dart';
 @freezed
 abstract class OnboardingDraft with _$OnboardingDraft {
   const factory OnboardingDraft({
-    /// 질환 코드 목록. 기본값 ['GERD'] — 현재 GERD 단일 질환 지원.
-    @Default(['GERD']) List<String> conditions,
+    /// 질환 코드 목록. 기본 빈 목록 — 사용자가 선택해야 체크·다음 버튼 활성.
+    @Default(<String>[]) List<String> conditions,
 
     /// 증상 빈도 코드 목록. 복수 선택.
     @Default(<String>[]) List<String> symptomFrequency,
@@ -76,6 +76,18 @@ class OnboardingController extends _$OnboardingController {
   /// 질환 목록을 교체한다.
   void setConditions(List<String> conditions) {
     state = state.copyWith(conditions: List.unmodifiable(conditions));
+  }
+
+  /// 질환 코드를 토글한다 (단일 선택).
+  ///
+  /// - 미선택 코드를 탭 → 해당 코드만 선택 (`[code]`).
+  /// - 이미 선택된 코드를 다시 탭 → 해제 (`[]`).
+  void toggleCondition(String code) {
+    if (state.conditions.contains(code)) {
+      state = state.copyWith(conditions: const <String>[]);
+    } else {
+      state = state.copyWith(conditions: List.unmodifiable([code]));
+    }
   }
 
   // -------------------------------------------------------------------------
