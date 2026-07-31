@@ -82,6 +82,21 @@ const _kSingleWithSymptom = TimelineItem.single(
   ),
 );
 
+/// 증상 유형 "없음"(symptomTypes=[]) — 서버 representativeSymptoms 빈 목록.
+const _kSingleWithEmptySymptomTypes = TimelineItem.single(
+  mealRecordId: 'mr-none-types',
+  mealRecordDateTime: '2026-06-17T08:00:00+09:00',
+  mealFoodName: '두부',
+  grade: VerdictLevel.recommend,
+  connectedSymptoms: ConnectedSymptoms(
+    symptomId: 'sym-none',
+    symptomState: SymptomState.comfortable,
+    afterMealMinutes: 120,
+    representativeSymptoms: [],
+    etcCount: 0,
+  ),
+);
+
 void main() {
   group('MealTimelineList — 변형별 렌더링', () {
     testWidgets('single 타일은 음식명과 grade 라벨을 표시한다', (tester) async {
@@ -212,6 +227,16 @@ void main() {
         _wrap(const MealTimelineList(items: [_kSingleMorning])),
       );
       expect(find.textContaining('식후'), findsNothing);
+    });
+
+    testWidgets(
+        'representativeSymptoms가 비어 있으면 "특별한 불편이 없었어요"를 표시한다',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(const MealTimelineList(items: [_kSingleWithEmptySymptomTypes])),
+      );
+      expect(find.text('특별한 불편이 없었어요'), findsOneWidget);
+      expect(find.textContaining('식후 2시간'), findsOneWidget);
     });
 
     testWidgets('연결증상 칩 탭 시 onTapSymptom이 symptomId와 함께 호출된다',
