@@ -93,6 +93,7 @@ class FailureMapper {
   ///
   /// - 연결 계열(`connectionError`, `connectionTimeout`, `sendTimeout`,
   ///   `receiveTimeout`) → [NetworkFailure] (진짜 오프라인/타임아웃).
+  ///   Dio 영문 raw message(예: Failed host lookup)는 UI에 노출하지 않는다.
   /// - 그 외(`badResponse` 5xx 등 HTTP 응답이 있는 케이스) → [UnexpectedFailure].
   ///
   /// 이렇게 분리해야 5xx를 오프라인으로 오분류하지 않는다 (ADR-0007, H1 수정).
@@ -105,7 +106,7 @@ class FailureMapper {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return NetworkFailure(e.message ?? '네트워크 오류가 발생했어요.');
+        return const NetworkFailure('네트워크 연결을 확인해 주세요.');
       default:
         return UnexpectedFailure(e.message ?? '알 수 없는 오류가 발생했어요.');
     }

@@ -136,6 +136,63 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
+  // fromDioException — Dio 영문 raw message UI 비노출
+  // -------------------------------------------------------------------------
+  group('FailureMapper.fromDioException', () {
+    DioException dioEx(DioExceptionType type, {String? message}) =>
+        DioException(
+          requestOptions: RequestOptions(path: '/test'),
+          type: type,
+          message: message,
+        );
+
+    test('connectionError + Failed host lookup → 한글 NetworkFailure 치환', () {
+      final failure = FailureMapper.fromDioException(
+        dioEx(
+          DioExceptionType.connectionError,
+          message:
+              "The connection errored: Failed host lookup: 'can-i-eat-it.com' "
+              'This indicates an error which most likely cannot be solved by the library.',
+        ),
+      );
+      expect(failure, isA<NetworkFailure>());
+      expect(failure.message, '네트워크 연결을 확인해 주세요.');
+      expect(failure.message, isNot(contains('Failed host lookup')));
+    });
+
+    test('connectionTimeout → Dio 영문 대신 한글 고정 문구', () {
+      final failure = FailureMapper.fromDioException(
+        dioEx(
+          DioExceptionType.connectionTimeout,
+          message: 'The request connection took longer than 0:00:10.000000...',
+        ),
+      );
+      expect(failure, isA<NetworkFailure>());
+      expect(failure.message, '네트워크 연결을 확인해 주세요.');
+    });
+
+    test('sendTimeout / receiveTimeout 도 동일 한글 문구', () {
+      for (final type in [
+        DioExceptionType.sendTimeout,
+        DioExceptionType.receiveTimeout,
+      ]) {
+        final failure = FailureMapper.fromDioException(
+          dioEx(type, message: 'English timeout noise'),
+        );
+        expect(failure, isA<NetworkFailure>());
+        expect(failure.message, '네트워크 연결을 확인해 주세요.');
+      }
+    });
+
+    test('message 가 null 이어도 한글 고정 문구', () {
+      final failure = FailureMapper.fromDioException(
+        dioEx(DioExceptionType.connectionError),
+      );
+      expect(failure.message, '네트워크 연결을 확인해 주세요.');
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // unwrapOrNull — result:null 관용 언랩 (W7)
   // -------------------------------------------------------------------------
   group('unwrapOrNull', () {
