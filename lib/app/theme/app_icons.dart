@@ -101,6 +101,9 @@ abstract final class AppImages {
   static const String characterGreeting = '$_illust/character_greeting.png';
   static const String mealPrompt = '$_illust/emoji_meal_prompt.png';
 
+  /// 타임라인 최초 FAB 가이드 (문구+곡선 화살표). 2.0x/3.0x 배율 폴더 있음.
+  static const String timelineFabGuide = '$_illust/timeline_fab_guide.png';
+
   // --- 무드 얼굴 (증상 상태 5단계, Figma "emoji" 세트 래스터) ---
   // SymptomState comfortable/good/normal/uncomfortable/severe = 레벨 1~5.
   // 렌더는 `MoodFace` 위젯 경유.

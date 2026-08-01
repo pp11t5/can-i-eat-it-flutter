@@ -736,7 +736,7 @@ mixin _$StateRecord {
   /// 기록 날짜 ('YYYY-MM-DD' 문자열 그대로).
   String get date;
 
-  /// 식후 경과 분. "식후 N분" 포맷은 표시 레이어 책임.
+  /// 식사 대비 경과 분. 음수=식전, 0 이상=식후. 포맷은 표시 레이어 책임.
   int get timingMinutes;
 
   /// Create a copy of StateRecord
@@ -1004,7 +1004,7 @@ class _StateRecord implements StateRecord {
   @override
   final String date;
 
-  /// 식후 경과 분. "식후 N분" 포맷은 표시 레이어 책임.
+  /// 식사 대비 경과 분. 음수=식전, 0 이상=식후. 포맷은 표시 레이어 책임.
   @override
   final int timingMinutes;
 
@@ -1564,7 +1564,7 @@ mixin _$MealRecord {
   /// 식사 내 음식 목록 (서버 meals[]). 각 음식의 analysis는 null.
   List<MealFood> get foods;
 
-  /// 연관 상태기록 목록.
+  /// 연관 상태기록 목록 (서버는 단건·null → DTO 매핑 시 0~1건 리스트).
   List<StateRecord> get stateRecords;
 
   /// Create a copy of MealRecord
@@ -1849,10 +1849,10 @@ class _MealRecord implements MealRecord {
     return EqualUnmodifiableListView(_foods);
   }
 
-  /// 연관 상태기록 목록.
+  /// 연관 상태기록 목록 (서버는 단건·null → DTO 매핑 시 0~1건 리스트).
   final List<StateRecord> _stateRecords;
 
-  /// 연관 상태기록 목록.
+  /// 연관 상태기록 목록 (서버는 단건·null → DTO 매핑 시 0~1건 리스트).
   @override
   @JsonKey()
   List<StateRecord> get stateRecords {

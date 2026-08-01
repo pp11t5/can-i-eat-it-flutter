@@ -49,14 +49,13 @@ const _mealRecordDetailJson = {
       'eatenAt': '2026-06-17T09:05:00+09:00',
     },
   ],
-  'stateRecords': [
-    {
-      'stateRecordId': 'sr1',
-      'label': '속쓰림',
-      'date': '2026-06-17',
-      'timingMinutes': 90,
-    },
-  ],
+  // 서버 계약: 단건 객체 또는 null (배열 아님).
+  'stateRecords': {
+    'stateRecordId': 'sr1',
+    'label': 'severe',
+    'date': '2026-06-17',
+    'timingMinutes': 90,
+  },
 };
 
 void main() {
@@ -133,6 +132,27 @@ void main() {
       expect(entity, isA<StateRecord>());
       expect(entity.stateRecordId, 'sr1');
       expect(entity.timingMinutes, 90);
+    });
+
+    test('서버 enum label(severe)을 한글 표시 라벨로 정규화한다', () {
+      final entity = StateRecordDto.fromJson(const {
+        'stateRecordId': 'sr2',
+        'label': 'severe',
+        'date': '2026-08-01',
+        'timingMinutes': 30,
+      }).toEntity();
+      expect(entity.label, '심함');
+    });
+
+    test('음수 timingMinutes는 보존한다 (표시 레이어에서 식사 전 …)', () {
+      final entity = StateRecordDto.fromJson(const {
+        'stateRecordId': 'sr3',
+        'label': 'uncomfortable',
+        'date': '2026-08-01',
+        'timingMinutes': -356,
+      }).toEntity();
+      expect(entity.label, '불편함');
+      expect(entity.timingMinutes, -356);
     });
   });
 
@@ -216,9 +236,12 @@ void main() {
       expect(entity.foods[0].analysis, isNull);
     });
 
-    test('stateRecords 1건을 매핑한다', () {
-      final entity = MealRecordDetailDto.fromJson(_mealRecordDetailJson).toEntity();
+    test('stateRecords 단건 객체를 리스트 1건으로 매핑한다', () {
+      final entity =
+          MealRecordDetailDto.fromJson(_mealRecordDetailJson).toEntity();
       expect(entity.stateRecords.length, 1);
+      expect(entity.stateRecords[0].stateRecordId, 'sr1');
+      expect(entity.stateRecords[0].label, '심함'); // severe → 한글 정규화
       expect(entity.stateRecords[0].timingMinutes, 90);
     });
 
@@ -357,7 +380,7 @@ void main() {
             'symptomId': 'sym-1',
             'symptomState': 'uncomfortable',
             'afterMealMinutes': 90,
-            'representativeSymptoms': ['속쓰림'],
+            'representativeSymptoms': ['chest_tightness'],
             'etcCount': 1,
           },
         });
@@ -366,7 +389,10 @@ void main() {
         expect(single.connectedSymptoms, isNotNull);
         expect(single.connectedSymptoms!.symptomId, 'sym-1');
         expect(single.connectedSymptoms!.symptomState, SymptomState.uncomfortable);
-        expect(single.connectedSymptoms!.representativeSymptoms, ['속쓰림']);
+        expect(
+          single.connectedSymptoms!.representativeSymptoms,
+          ['가슴 답답함'],
+        );
         expect(single.connectedSymptoms!.etcCount, 1);
       });
 
@@ -820,7 +846,7 @@ void main() {
         'symptomId': 'sym-1',
         'symptomState': 'uncomfortable',
         'afterMealMinutes': 90,
-        'representativeSymptoms': ['속쓰림', '더부룩함'],
+        'representativeSymptoms': ['chest_tightness', 'acid_reflux'],
         'etcCount': 2,
       });
       expect(dto.symptomId, 'sym-1');
@@ -830,8 +856,38 @@ void main() {
       expect(entity, isA<ConnectedSymptoms>());
       expect(entity.symptomId, 'sym-1');
       expect(entity.symptomState, SymptomState.uncomfortable);
-      expect(entity.representativeSymptoms, ['속쓰림', '더부룩함']);
+      expect(entity.representativeSymptoms, ['가슴 답답함', '역류']);
       expect(entity.etcCount, 2);
+    });
+
+    test('서버 증상 코드 4종을 SymptomType.label 한글로 변환한다', () {
+      final entity = ConnectedSymptomsDto.fromJson(const {
+        'symptomId': 'sym-codes',
+        'symptomState': 'normal',
+        'afterMealMinutes': 60,
+        'representativeSymptoms': [
+          'throat_foreign_body',
+          'acid_reflux',
+          'cough',
+          'chest_tightness',
+        ],
+      }).toEntity();
+      expect(entity.representativeSymptoms, [
+        '목 이물감',
+        '역류',
+        '기침',
+        '가슴 답답함',
+      ]);
+    });
+
+    test('미지 값·이미 한글인 대표증상은 원문을 유지한다', () {
+      final entity = ConnectedSymptomsDto.fromJson(const {
+        'symptomId': 'sym-legacy',
+        'symptomState': 'uncomfortable',
+        'afterMealMinutes': 90,
+        'representativeSymptoms': ['속쓰림', 'unknown_code'],
+      }).toEntity();
+      expect(entity.representativeSymptoms, ['속쓰림', 'unknown_code']);
     });
 
     test('representativeSymptoms·etcCount 누락 시 빈 목록·0으로 폴백된다', () {

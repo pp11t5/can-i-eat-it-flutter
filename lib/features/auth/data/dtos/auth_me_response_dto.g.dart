@@ -12,6 +12,7 @@ _AuthMeResponseDto _$AuthMeResponseDtoFromJson(Map<String, dynamic> json) =>
       nickname: json['nickname'] as String?,
       email: json['email'] as String?,
       profileImage: json['profileImage'] as String?,
+      createdDate: json['createdDate'] as String?,
     );
 
 Map<String, dynamic> _$AuthMeResponseDtoToJson(_AuthMeResponseDto instance) =>
@@ -20,4 +21,5 @@ Map<String, dynamic> _$AuthMeResponseDtoToJson(_AuthMeResponseDto instance) =>
       'nickname': instance.nickname,
       'email': instance.email,
       'profileImage': instance.profileImage,
+      'createdDate': instance.createdDate,
     };

@@ -6,16 +6,34 @@
 /// - 호출자는 **KST wall-clock**(isUtc=false, 컴포넌트=KST 시각)을 넘긴다.
 /// - 직렬화는 컴포넌트를 그대로 +09:00 오프셋으로 포맷한다. **시간 연산 없음.**
 /// - 서버 API 계약: date 파라미터는 'YYYY-MM-DD', eatenAt은 ISO-8601 +09:00 오프셋.
-/// - [parseKst]: 서버 ISO 문자열(offset 포함)을 UTC instant로 환산 후 +9h로 KST 컴포넌트를 복원.
+/// - [parseKst]:
+///   - 오프셋/`Z` 있음 → UTC instant 환산 후 +9h로 KST 컴포넌트 복원.
+///   - 오프셋 없음 (타임라인 `LocalDateTime.toString()` 등) → 이미 KST wall-clock
+///     이므로 컴포넌트 그대로 사용 (+9h 하지 않음). 00:00 → 09:00 회귀 방지.
 ///   머신 TZ 무관(`.toLocal()` 사용 안 함). 표시·시간대 분기용.
 library;
 
-/// 서버 ISO-8601(+09:00 등 offset 포함) 문자열을 KST wall-clock [DateTime]으로 파싱한다.
+/// ISO 문자열 끝에 명시적 타임존(Z / ±HH:MM / ±HHMM)이 있는지.
+bool _hasExplicitOffset(String iso) {
+  // 예: ...Z, ...+09:00, ...-0500, ...+09:00.000 은 아님 — 오프셋은 맨 끝.
+  return RegExp(r'(Z|[+-]\d{2}:?\d{2})$', caseSensitive: false)
+      .hasMatch(iso.trim());
+}
+
+/// 서버 ISO-8601 문자열을 KST wall-clock [DateTime]으로 파싱한다.
 ///
-/// offset을 적용해 UTC instant를 구한 뒤 +9h로 KST 컴포넌트를 복원한다.
+/// - **오프셋 있음** (`+09:00`, `Z` 등): instant → +9h 로 KST 컴포넌트 복원.
+/// - **오프셋 없음** (타임라인 mealRecordDateTime 등): 서버 KST wall-clock 가정,
+///   시·분 컴포넌트를 그대로 쓴다. (기존 무조건 +9h 는 00:00→09:00 버그)
+///
 /// 반환값은 isUtc=false이며 컴포넌트가 KST 시각과 일치한다.
 /// 머신 TZ에 무관하다(`.toLocal()` 사용 안 함). 표시·시간대 분기용.
 DateTime parseKst(String iso) {
+  if (!_hasExplicitOffset(iso)) {
+    // LocalDateTime.toString() 등 — 숫자 컴포넌트만 KST wall-clock.
+    final p = DateTime.parse(iso);
+    return DateTime(p.year, p.month, p.day, p.hour, p.minute, p.second);
+  }
   final u = DateTime.parse(iso).toUtc();
   final k = u.add(const Duration(hours: 9));
   return DateTime(k.year, k.month, k.day, k.hour, k.minute, k.second);

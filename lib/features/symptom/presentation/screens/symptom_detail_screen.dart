@@ -11,6 +11,7 @@ import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
+import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
@@ -86,9 +87,11 @@ class SymptomDetailScreen extends ConsumerWidget {
     if (!context.mounted) return;
 
     try {
-      await ref
-          .read(symptomDetailControllerProvider(symptomId).notifier)
-          .deleteSymptom();
+      await ref.read(globalLoadingControllerProvider.notifier).run(
+            () => ref
+                .read(symptomDetailControllerProvider(symptomId).notifier)
+                .deleteSymptom(),
+          );
       if (!context.mounted) return;
       ref.invalidate(timelineControllerProvider);
       ref.invalidate(monthlyControllerProvider);
@@ -141,9 +144,24 @@ class SymptomDetailScreen extends ConsumerWidget {
             if (detailAsync.hasValue)
               _BottomCta(
                 onDelete: () => _showDeleteDialog(context, ref),
-                onEdit: () {
+                onEdit: () async {
                   final symptom = detailAsync.value!;
-                  context.push('/symptom/record', extra: symptom);
+                  final saved = await context.push<bool>(
+                    '/symptom/record',
+                    extra: symptom,
+                  );
+                  if (saved != true || !context.mounted) return;
+                  // 전역 로딩 표시 후 상세 재조회 — 변경 사항이 반영될 때까지 차단.
+                  await ref
+                      .read(globalLoadingControllerProvider.notifier)
+                      .run(() async {
+                    ref.invalidate(
+                      symptomDetailControllerProvider(symptomId),
+                    );
+                    await ref.read(
+                      symptomDetailControllerProvider(symptomId).future,
+                    );
+                  });
                 },
               ),
           ],
@@ -225,12 +243,19 @@ class _Body extends StatelessWidget {
     return symptom.symptomTypes.map((t) => t.label).join(', ');
   }
 
-  /// "식후 N분" 또는 "식후 Nh Mm" 라벨.
+  /// 식사 대비 경과 분 라벨. 음수 → "식사 전 …", 그 외 "식후 …".
   String _afterMealLabel(int minutes) {
-    if (minutes < 60) return '식후 $minutes분';
+    if (minutes < 0) {
+      return _formatRelativeMinutes(minutes.abs(), prefix: '식사 전');
+    }
+    return _formatRelativeMinutes(minutes, prefix: '식후');
+  }
+
+  String _formatRelativeMinutes(int minutes, {required String prefix}) {
+    if (minutes < 60) return '$prefix $minutes분';
     final h = minutes ~/ 60;
     final m = minutes % 60;
-    return m == 0 ? '식후 $h시간' : '식후 $h시간 $m분';
+    return m == 0 ? '$prefix $h시간' : '$prefix $h시간 $m분';
   }
 
   /// linkedMeal foods → 표시명.

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
@@ -19,8 +20,8 @@ Finder _iconWithLabel(String label) => find.byWidgetPredicate(
     );
 
 void main() {
-  group('MonthNav — canGoNext', () {
-    testWidgets('canGoNext=true(기본값)면 "다음 달" 챕비 버튼이 렌더된다', (tester) async {
+  group('MonthNav', () {
+    testWidgets('이전·다음·캘린더 버튼이 항상 렌더된다', (tester) async {
       await tester.pumpWidget(
         _wrap(MonthNav(
           label: '2026년 6월',
@@ -33,45 +34,6 @@ void main() {
       expect(_iconWithLabel('이전 달'), findsOneWidget);
       expect(_iconWithLabel('다음 달'), findsOneWidget);
       expect(find.byType(IconButton), findsNWidgets(3)); // 이전/다음/캘린더
-    });
-
-    testWidgets('canGoNext=false면 "다음 달" 챕비 버튼이 렌더되지 않는다(공간도 차지 안 함)',
-        (tester) async {
-      await tester.pumpWidget(
-        _wrap(MonthNav(
-          label: '2026년 7월',
-          onPrevMonth: () {},
-          onNextMonth: () {},
-          onOpenCalendar: () {},
-          canGoNext: false,
-        )),
-      );
-
-      expect(_iconWithLabel('이전 달'), findsOneWidget);
-      expect(_iconWithLabel('다음 달'), findsNothing);
-      // 이전 + 캘린더 2개만 남는다 (다음 달 버튼은 공간도 차지하지 않음).
-      expect(find.byType(IconButton), findsNWidgets(2));
-    });
-
-    testWidgets('canGoNext=false여도 "이전 달"·캘린더 버튼은 그대로 탭 가능하다', (tester) async {
-      var prevTapped = false;
-      var calendarTapped = false;
-      await tester.pumpWidget(
-        _wrap(MonthNav(
-          label: '2026년 7월',
-          onPrevMonth: () => prevTapped = true,
-          onNextMonth: () {},
-          onOpenCalendar: () => calendarTapped = true,
-          canGoNext: false,
-        )),
-      );
-
-      await tester.tap(find.byType(IconButton).first);
-      await tester.tap(find.byType(IconButton).last);
-      await tester.pump();
-
-      expect(prevTapped, isTrue);
-      expect(calendarTapped, isTrue);
     });
 
     testWidgets('label 텍스트가 그대로 렌더된다', (tester) async {
@@ -100,6 +62,53 @@ void main() {
 
       final icon = tester.widget<AppIcon>(_iconWithLabel('다음 달'));
       expect(icon.asset, equals(AppIcons.chevronRight));
+    });
+  });
+
+  group('MonthNav — canGoPrev', () {
+    testWidgets('canGoPrev=false면 이전 달 탭 불가·controlDisabled(gray60) 색',
+        (tester) async {
+      var prevTapped = false;
+      await tester.pumpWidget(
+        _wrap(MonthNav(
+          label: '2026년 7월',
+          onPrevMonth: () => prevTapped = true,
+          onNextMonth: () {},
+          onOpenCalendar: () {},
+          canGoPrev: false,
+        )),
+      );
+
+      final prevIcon = tester.widget<AppIcon>(_iconWithLabel('이전 달'));
+      expect(prevIcon.color, AppColors.controlDisabled);
+
+      final prevBtn =
+          tester.widgetList<IconButton>(find.byType(IconButton)).first;
+      expect(prevBtn.onPressed, isNull);
+
+      await tester.tap(find.byType(IconButton).first);
+      await tester.pump();
+      expect(prevTapped, isFalse);
+    });
+
+    testWidgets('canGoPrev=true면 이전 달 textPrimary 색·탭 가능', (tester) async {
+      var prevTapped = false;
+      await tester.pumpWidget(
+        _wrap(MonthNav(
+          label: '2026년 8월',
+          onPrevMonth: () => prevTapped = true,
+          onNextMonth: () {},
+          onOpenCalendar: () {},
+          canGoPrev: true,
+        )),
+      );
+
+      final prevIcon = tester.widget<AppIcon>(_iconWithLabel('이전 달'));
+      expect(prevIcon.color, AppColors.textPrimary);
+
+      await tester.tap(find.byType(IconButton).first);
+      await tester.pump();
+      expect(prevTapped, isTrue);
     });
   });
 }

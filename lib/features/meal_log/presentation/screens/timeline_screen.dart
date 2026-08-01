@@ -9,13 +9,17 @@ import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
+import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/providers/timeline_fab_guide_provider.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/calendar_popup.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/fab_action_sheet.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/meal_timeline_list.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/widgets/timeline_first_visit_guide.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/week_nav.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/week_strip.dart';
 
@@ -64,18 +68,52 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
     return DateTime(k.year, k.month, k.day);
   }
 
-  /// [month]가 [today]가 속한 월보다 이전이면 true — 다음 달 이동 가능 여부
-  /// (현실 시간 기준 미래 월로는 이동할 수 없음, MonthNav의 `›` 숨김에도 사용).
-  bool _canGoNextFrom(DateTime month, DateTime today) {
-    return DateTime(month.year, month.month)
-        .isBefore(DateTime(today.year, today.month));
+  /// 가입일(날짜만). 없으면 null — 과거 월 하한 없음.
+  ///
+  /// 콜백에서는 [ref.read], 빌드에서는 [ref.watch] 한 세션을 넘긴다.
+  DateTime? _joinDateFromSession(AuthSession? session) {
+    final createdAt = session?.createdAt;
+    if (createdAt == null) return null;
+    return DateTime(createdAt.year, createdAt.month, createdAt.day);
+  }
+
+  DateTime? _joinDate() =>
+      _joinDateFromSession(ref.read(authControllerProvider).valueOrNull);
+
+  /// [month]가 가입월보다 이후이면 true — 이전 달 이동 가능 여부
+  /// (가입일 이전 월로는 이동 불가, MonthNav의 `‹` gray60 비활성에도 사용).
+  bool _canGoPrevFrom(DateTime month, DateTime? joinDate) {
+    if (joinDate == null) return true;
+    final minMonth = DateTime(joinDate.year, joinDate.month, 1);
+    return DateTime(month.year, month.month).isAfter(minMonth);
+  }
+
+  /// 월 이동 시 기본 선택일.
+  ///
+  /// - 그 달에 **오늘**이 있으면 오늘
+  /// - 없으면 **1일** (이전/다음 달 동일)
+  /// - 가입일 이전이면 가입일로 클램프
+  DateTime _selectedForMonth(DateTime monthFirst, {DateTime? join}) {
+    final today = _today();
+    late DateTime selected;
+    if (today.year == monthFirst.year && today.month == monthFirst.month) {
+      selected = today;
+    } else {
+      selected = monthFirst; // 1일
+    }
+    if (join != null) {
+      final d = DateTime(selected.year, selected.month, selected.day);
+      if (d.isBefore(join)) selected = join;
+    }
+    return selected;
   }
 
   void _onPrevMonth() {
+    final join = _joinDate();
+    if (!_canGoPrevFrom(_visibleMonth, join)) return; // 가입월 이전 차단
+
     final newMonth = DateTime(_visibleMonth.year, _visibleMonth.month - 1, 1);
-    // 이전 달로 이동하면 선택일 = 그 달의 말일 (전월 말일은 항상 오늘보다
-    // 과거이므로 항상 유효 — 미래 월 자체는 canGoNext 가드로 막혀 있음).
-    final newSelected = DateTime(newMonth.year, newMonth.month + 1, 0);
+    final newSelected = _selectedForMonth(newMonth, join: join);
     setState(() {
       _visibleMonth = newMonth;
       _selectedDate = newSelected;
@@ -84,14 +122,13 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
   }
 
   void _onNextMonth() {
-    if (!_canGoNextFrom(_visibleMonth, _today())) return; // 미래월 진입 차단
     final newMonth = DateTime(_visibleMonth.year, _visibleMonth.month + 1, 1);
-    // 다음 달로 이동하면 선택일 = 그 달의 1일.
+    final newSelected = _selectedForMonth(newMonth, join: _joinDate());
     setState(() {
       _visibleMonth = newMonth;
-      _selectedDate = newMonth;
+      _selectedDate = newSelected;
     });
-    _reloadTimeline(newMonth);
+    _reloadTimeline(newSelected);
   }
 
   void _onDaySelected(DateTime day) {
@@ -103,11 +140,14 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
   }
 
   Future<void> _openCalendarPopup() async {
+    final minDate = _joinDate();
+
     final picked = await showCalendarPopup(
       context,
       initialMonth: _visibleMonth,
       initialSelectedDate: _selectedDate,
       today: _today(),
+      minDate: minDate,
     );
     if (picked == null || !mounted) return;
     setState(() {
@@ -131,6 +171,12 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
     final timelineAsync =
         ref.watch(timelineControllerProvider(_selectedDate));
     final monthlyAsync = ref.watch(monthlyControllerProvider(_visibleMonth));
+    // 가입일 하한 — auth 세션이 로드되면 MonthNav `‹` 비활성 갱신.
+    final joinDate = _joinDateFromSession(
+      ref.watch(authControllerProvider).valueOrNull,
+    );
+    // false = 미열람(가이드), true = 봄, null = 플래그 로딩 중.
+    final hasSeenGuide = ref.watch(timelineFabGuideProvider).valueOrNull;
 
     return Scaffold(
       // Figma 실측: #FCFCFC (surfaceBackground #F5F5F5 과 구분되는 타임라인 전용 배경)
@@ -157,7 +203,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
                     onPrevMonth: _onPrevMonth,
                     onNextMonth: _onNextMonth,
                     onOpenCalendar: _openCalendarPopup,
-                    canGoNext: _canGoNextFrom(_visibleMonth, _today()),
+                    canGoPrev: _canGoPrevFrom(_visibleMonth, joinDate),
                   ),
                   const SizedBox(height: AppSpacing.itemGap),
                   // 횡스크롤 월 캘린더 — monthly() 연동 도트
@@ -165,6 +211,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
                     visibleMonth: _visibleMonth,
                     selectedDate: _selectedDate,
                     today: _today(),
+                    minDate: joinDate,
                     dotsByDate: _buildDotsByDate(monthlyAsync.valueOrNull),
                     onDaySelected: _onDaySelected,
                   ),
@@ -172,22 +219,35 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
               ),
             ),
             // --- 타임라인 리스트 ---
+            // 미열람(hasSeenGuide == false)이면 API 로딩 스피너 없이 가이드 즉시 표시.
             Expanded(
               child: timelineAsync.when(
-                loading: () => const _TimelineLoadingPlaceholder(),
+                loading: () => hasSeenGuide == false
+                    ? const TimelineFirstVisitGuide()
+                    : const _TimelineLoadingPlaceholder(),
                 error: (err, _) => _TimelineErrorView(
                   onRetry: () => _reloadTimeline(_selectedDate),
                 ),
-                data: (items) => items.isEmpty
-                    ? const _TimelineEmptyView()
-                    : _TimelineItemList(items: items),
+                data: (items) {
+                  if (items.isNotEmpty) {
+                    return _TimelineItemList(items: items);
+                  }
+                  if (hasSeenGuide == false) {
+                    return const TimelineFirstVisitGuide();
+                  }
+                  return const _TimelineEmptyView();
+                },
               ),
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => showFabActionSheet(context),
+        onPressed: () {
+          // 가이드가 떠 있으면 아무 탭( FAB 포함 )에서도 닫는다.
+          ref.read(timelineFabGuideProvider.notifier).dismiss();
+          showFabActionSheet(context);
+        },
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
         shape: const CircleBorder(),
@@ -273,11 +333,10 @@ class _TimelineErrorView extends StatelessWidget {
 // 빈 상태 안내 (Figma 2699:21467 — 해당일 기록 0건)
 // ---------------------------------------------------------------------------
 
-/// 타임라인 빈 상태.
+/// 타임라인 빈 상태 (해당일 기록 0건 · 가이드 이미 본 계정).
 ///
-/// TODO(figma): 최초 진입 안내(node 2694:20716, 손글씨 일러스트)는 "전체 기록
-/// 0건 여부" 같은 별도 신호가 필요해 이번 패스에서는 미분기. 데이터 신호
-/// 확정 후 isFirstVisit 분기를 추가하고 일러스트 에셋을 연결한다.
+/// 최초 진입 FAB 가이드는 [TimelineFirstVisitGuide] —
+/// [timelineFabGuideProvider] 가 false 일 때 empty 분기에서 노출.
 class _TimelineEmptyView extends StatelessWidget {
   const _TimelineEmptyView();
 

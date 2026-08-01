@@ -17,6 +17,7 @@ import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart'
 import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 import 'package:can_i_eat_it/features/auth/domain/repositories/auth_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
+import 'package:can_i_eat_it/features/meal_log/data/sources/timeline_guide_store.dart';
 import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
 
 part 'auth_providers.g.dart';
@@ -177,13 +178,22 @@ class AuthController extends _$AuthController {
     }
   }
 
-  /// 계정 탈퇴: 서버 withdraw + 로컬 세션·프로필 캐시 초기화.
+  /// 계정 탈퇴: 서버 withdraw + 로컬 세션·프로필 캐시·타임라인 가이드 플래그 초기화.
   Future<void> withdraw() async {
+    // 세션 null 되기 전에 userId 확보 — 동일 userId 재가입 시 가이드 재노출.
+    final userId = state.valueOrNull?.userId;
     // FCM 토큰 삭제 — authRepository.withdraw() 전(Bearer 유효 시점).
     // 실패해도 탈퇴 흐름을 막지 않는다(graceful).
     await ref.read(fcmLifecycleProvider).deleteToken();
     await ref.read(authRepositoryProvider).withdraw();
     await ref.read(profileCacheProvider).clear();
+    // 가이드 플래그 삭제 실패해도 탈퇴 완료는 막지 않는다
+    // (테스트 환경 MissingPluginException · 스토리지 오류 등).
+    if (userId != null && userId.isNotEmpty) {
+      try {
+        await ref.read(timelineGuideStoreProvider).clearFabGuideSeen(userId);
+      } catch (_) {}
+    }
     state = const AsyncValue.data(null);
   }
 

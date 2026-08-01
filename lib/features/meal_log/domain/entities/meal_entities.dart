@@ -59,7 +59,7 @@ abstract class StateRecord with _$StateRecord {
     /// 기록 날짜 ('YYYY-MM-DD' 문자열 그대로).
     required String date,
 
-    /// 식후 경과 분. "식후 N분" 포맷은 표시 레이어 책임.
+    /// 식사 대비 경과 분. 음수=식전, 0 이상=식후. 포맷은 표시 레이어 책임.
     required int timingMinutes,
   }) = _StateRecord;
 }
@@ -112,7 +112,7 @@ abstract class MealRecord with _$MealRecord {
     /// 식사 내 음식 목록 (서버 meals[]). 각 음식의 analysis는 null.
     @Default(<MealFood>[]) List<MealFood> foods,
 
-    /// 연관 상태기록 목록.
+    /// 연관 상태기록 목록 (서버는 단건·null → DTO 매핑 시 0~1건 리스트).
     @Default(<StateRecord>[]) List<StateRecord> stateRecords,
   }) = _MealRecord;
 }

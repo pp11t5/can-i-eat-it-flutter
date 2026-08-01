@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
+import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
 
 part 'meal_dtos.freezed.dart';
 part 'meal_dtos.g.dart';
@@ -67,9 +68,12 @@ abstract class StateRecordDto with _$StateRecordDto {
 }
 
 extension StateRecordDtoMapper on StateRecordDto {
+  /// 서버 계약 정규화:
+  /// - [label]: enum code(`severe`) → 한글 표시 라벨(`심함`)
+  /// - [timingMinutes]: 음수 유지 (표시 레이어에서 "식사 전 N시간 M분"으로 포맷)
   StateRecord toEntity() => StateRecord(
         stateRecordId: stateRecordId,
-        label: label,
+        label: SymptomStateMapper.displayLabel(label),
         date: date,
         timingMinutes: timingMinutes,
       );
@@ -146,14 +150,18 @@ extension MealDetailFoodDtoMapper on MealDetailFoodDto {
 }
 
 /// 식사 상세 DTO (GET /meal-records/{id}).
+///
+/// 서버 계약: [stateRecords] 는 단일 객체 또는 null
+/// (`MealRecordDetailDTO.stateRecords: StateRecordDTO?`).
+/// 도메인 [MealRecord.stateRecords] 는 UI 호환을 위해 0~1건 리스트로 변환한다.
 @freezed
 abstract class MealRecordDetailDto with _$MealRecordDetailDto {
   const factory MealRecordDetailDto({
     required String mealRecordId,
     required String eatenAt,
     @Default(<MealDetailFoodDto>[]) List<MealDetailFoodDto> meals,
-    // stateRecords?: 명시 null까지 방어하기 위해 nullable + toEntity에서 ?? []
-    List<StateRecordDto>? stateRecords,
+    /// 연결된 상태 기록. 없으면 null (서버 단건 계약).
+    StateRecordDto? stateRecords,
   }) = _MealRecordDetailDto;
 
   factory MealRecordDetailDto.fromJson(Map<String, dynamic> json) =>
@@ -166,7 +174,7 @@ extension MealRecordDetailDtoMapper on MealRecordDetailDto {
         eatenAt: eatenAt,
         foods: meals.map((f) => f.toEntity()).toList(),
         stateRecords:
-            (stateRecords ?? const []).map((r) => r.toEntity()).toList(),
+            stateRecords == null ? const [] : [stateRecords!.toEntity()],
       );
 }
 
@@ -194,7 +202,15 @@ extension ConnectedSymptomsDtoMapper on ConnectedSymptomsDto {
         symptomId: symptomId,
         symptomState: SymptomStateMapper.fromServer(symptomState),
         afterMealMinutes: afterMealMinutes,
-        representativeSymptoms: representativeSymptoms,
+        // 서버는 snake_case 코드(chest_tightness 등)를 내려준다.
+        // 타임라인 카드 표시용으로 SymptomType 한글 라벨로 변환한다.
+        // 미지 값·이미 한글인 값은 원문을 유지한다.
+        representativeSymptoms: representativeSymptoms
+            .map(
+              (code) =>
+                  SymptomTypeMapper.fromServerNullable(code)?.label ?? code,
+            )
+            .toList(),
         etcCount: etcCount,
       );
 }

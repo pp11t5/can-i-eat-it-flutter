@@ -19,6 +19,9 @@ mixin _$AuthMeResponseDto {
   String? get email;
   String? get profileImage;
 
+  /// 계정 생성일. 서버 `createdDate` — `YYYY-MM-DD` 또는 ISO datetime.
+  String? get createdDate;
+
   /// Create a copy of AuthMeResponseDto
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -40,17 +43,19 @@ mixin _$AuthMeResponseDto {
                 other.nickname == nickname) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.profileImage, profileImage) ||
-                other.profileImage == profileImage));
+                other.profileImage == profileImage) &&
+            (identical(other.createdDate, createdDate) ||
+                other.createdDate == createdDate));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, userId, nickname, email, profileImage);
+  int get hashCode => Object.hash(
+      runtimeType, userId, nickname, email, profileImage, createdDate);
 
   @override
   String toString() {
-    return 'AuthMeResponseDto(userId: $userId, nickname: $nickname, email: $email, profileImage: $profileImage)';
+    return 'AuthMeResponseDto(userId: $userId, nickname: $nickname, email: $email, profileImage: $profileImage, createdDate: $createdDate)';
   }
 }
 
@@ -61,7 +66,11 @@ abstract mixin class $AuthMeResponseDtoCopyWith<$Res> {
       _$AuthMeResponseDtoCopyWithImpl;
   @useResult
   $Res call(
-      {String userId, String? nickname, String? email, String? profileImage});
+      {String userId,
+      String? nickname,
+      String? email,
+      String? profileImage,
+      String? createdDate});
 }
 
 /// @nodoc
@@ -81,6 +90,7 @@ class _$AuthMeResponseDtoCopyWithImpl<$Res>
     Object? nickname = freezed,
     Object? email = freezed,
     Object? profileImage = freezed,
+    Object? createdDate = freezed,
   }) {
     return _then(_self.copyWith(
       userId: null == userId
@@ -98,6 +108,10 @@ class _$AuthMeResponseDtoCopyWithImpl<$Res>
       profileImage: freezed == profileImage
           ? _self.profileImage
           : profileImage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdDate: freezed == createdDate
+          ? _self.createdDate
+          : createdDate // ignore: cast_nullable_to_non_nullable
               as String?,
     ));
   }
@@ -197,15 +211,15 @@ extension AuthMeResponseDtoPatterns on AuthMeResponseDto {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(String userId, String? nickname, String? email,
-            String? profileImage)?
+            String? profileImage, String? createdDate)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _AuthMeResponseDto() when $default != null:
-        return $default(
-            _that.userId, _that.nickname, _that.email, _that.profileImage);
+        return $default(_that.userId, _that.nickname, _that.email,
+            _that.profileImage, _that.createdDate);
       case _:
         return orElse();
     }
@@ -227,14 +241,14 @@ extension AuthMeResponseDtoPatterns on AuthMeResponseDto {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(String userId, String? nickname, String? email,
-            String? profileImage)
+            String? profileImage, String? createdDate)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _AuthMeResponseDto():
-        return $default(
-            _that.userId, _that.nickname, _that.email, _that.profileImage);
+        return $default(_that.userId, _that.nickname, _that.email,
+            _that.profileImage, _that.createdDate);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -255,14 +269,14 @@ extension AuthMeResponseDtoPatterns on AuthMeResponseDto {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(String userId, String? nickname, String? email,
-            String? profileImage)?
+            String? profileImage, String? createdDate)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _AuthMeResponseDto() when $default != null:
-        return $default(
-            _that.userId, _that.nickname, _that.email, _that.profileImage);
+        return $default(_that.userId, _that.nickname, _that.email,
+            _that.profileImage, _that.createdDate);
       case _:
         return null;
     }
@@ -273,7 +287,11 @@ extension AuthMeResponseDtoPatterns on AuthMeResponseDto {
 @JsonSerializable()
 class _AuthMeResponseDto implements AuthMeResponseDto {
   const _AuthMeResponseDto(
-      {required this.userId, this.nickname, this.email, this.profileImage});
+      {required this.userId,
+      this.nickname,
+      this.email,
+      this.profileImage,
+      this.createdDate});
   factory _AuthMeResponseDto.fromJson(Map<String, dynamic> json) =>
       _$AuthMeResponseDtoFromJson(json);
 
@@ -285,6 +303,10 @@ class _AuthMeResponseDto implements AuthMeResponseDto {
   final String? email;
   @override
   final String? profileImage;
+
+  /// 계정 생성일. 서버 `createdDate` — `YYYY-MM-DD` 또는 ISO datetime.
+  @override
+  final String? createdDate;
 
   /// Create a copy of AuthMeResponseDto
   /// with the given fields replaced by the non-null parameter values.
@@ -311,17 +333,19 @@ class _AuthMeResponseDto implements AuthMeResponseDto {
                 other.nickname == nickname) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.profileImage, profileImage) ||
-                other.profileImage == profileImage));
+                other.profileImage == profileImage) &&
+            (identical(other.createdDate, createdDate) ||
+                other.createdDate == createdDate));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, userId, nickname, email, profileImage);
+  int get hashCode => Object.hash(
+      runtimeType, userId, nickname, email, profileImage, createdDate);
 
   @override
   String toString() {
-    return 'AuthMeResponseDto(userId: $userId, nickname: $nickname, email: $email, profileImage: $profileImage)';
+    return 'AuthMeResponseDto(userId: $userId, nickname: $nickname, email: $email, profileImage: $profileImage, createdDate: $createdDate)';
   }
 }
 
@@ -334,7 +358,11 @@ abstract mixin class _$AuthMeResponseDtoCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String userId, String? nickname, String? email, String? profileImage});
+      {String userId,
+      String? nickname,
+      String? email,
+      String? profileImage,
+      String? createdDate});
 }
 
 /// @nodoc
@@ -354,6 +382,7 @@ class __$AuthMeResponseDtoCopyWithImpl<$Res>
     Object? nickname = freezed,
     Object? email = freezed,
     Object? profileImage = freezed,
+    Object? createdDate = freezed,
   }) {
     return _then(_AuthMeResponseDto(
       userId: null == userId
@@ -371,6 +400,10 @@ class __$AuthMeResponseDtoCopyWithImpl<$Res>
       profileImage: freezed == profileImage
           ? _self.profileImage
           : profileImage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdDate: freezed == createdDate
+          ? _self.createdDate
+          : createdDate // ignore: cast_nullable_to_non_nullable
               as String?,
     ));
   }
