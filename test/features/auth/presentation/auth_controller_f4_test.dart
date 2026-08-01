@@ -10,6 +10,7 @@ import '../../../core/push/fcm_test_helpers.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
+import 'package:can_i_eat_it/features/meal_log/data/sources/timeline_guide_store.dart';
 
 // ---------------------------------------------------------------------------
 // Stub AnalyticsService
@@ -31,6 +32,7 @@ class _NoopAnalyticsService implements AnalyticsService {
 ProviderContainer _makeContainer({
   required MockAuthRepository repo,
   InMemoryProfileCache? cache,
+  InMemoryTimelineGuideStore? guideStore,
 }) {
   final container = ProviderContainer(
     overrides: [
@@ -38,7 +40,11 @@ ProviderContainer _makeContainer({
       analyticsServiceProvider.overrideWithValue(_NoopAnalyticsService()),
       // FCM: 네이티브 플러그인 접근 차단 — noop으로 override.
       fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
-      if (cache != null) profileCacheProvider.overrideWithValue(cache),
+      // secure_storage 플러그인 차단 (프로필·타임라인 가이드 공통).
+      profileCacheProvider.overrideWithValue(cache ?? InMemoryProfileCache()),
+      timelineGuideStoreProvider.overrideWithValue(
+        guideStore ?? InMemoryTimelineGuideStore(),
+      ),
     ],
   );
   addTearDown(container.dispose);
@@ -92,6 +98,23 @@ void main() {
       await container.read(authControllerProvider.notifier).withdraw();
 
       expect(await cache.read(), isNull);
+    });
+
+    test('withdraw 후 timeline 가이드 플래그가 cleared 된다', () async {
+      final repo = MockAuthRepository(
+        initialSession: const AuthSession(
+          userId: 'mock-user',
+          provider: AuthProvider.kakao,
+          hasAgreedTerms: true,
+        ),
+      );
+      final guideStore = InMemoryTimelineGuideStore(seenUserIds: {'mock-user'});
+      final container = _makeContainer(repo: repo, guideStore: guideStore);
+      await container.read(authControllerProvider.future);
+
+      expect(await guideStore.hasSeenFabGuide('mock-user'), isTrue);
+      await container.read(authControllerProvider.notifier).withdraw();
+      expect(await guideStore.hasSeenFabGuide('mock-user'), isFalse);
     });
 
     test('logout 후 profileCache 가 cleared 된다', () async {

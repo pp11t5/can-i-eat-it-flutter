@@ -187,8 +187,12 @@ class AuthController extends _$AuthController {
     await ref.read(fcmLifecycleProvider).deleteToken();
     await ref.read(authRepositoryProvider).withdraw();
     await ref.read(profileCacheProvider).clear();
+    // 가이드 플래그 삭제 실패해도 탈퇴 완료는 막지 않는다
+    // (테스트 환경 MissingPluginException · 스토리지 오류 등).
     if (userId != null && userId.isNotEmpty) {
-      await ref.read(timelineGuideStoreProvider).clearFabGuideSeen(userId);
+      try {
+        await ref.read(timelineGuideStoreProvider).clearFabGuideSeen(userId);
+      } catch (_) {}
     }
     state = const AsyncValue.data(null);
   }

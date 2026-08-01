@@ -16,6 +16,7 @@ import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart'
 import 'package:can_i_eat_it/features/auth/domain/repositories/auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
+import 'package:can_i_eat_it/features/meal_log/data/sources/timeline_guide_store.dart';
 
 // ---------------------------------------------------------------------------
 // Spy FcmLifecycle — register/delete 호출 순서 기록
@@ -164,6 +165,10 @@ class _NoopAnalyticsService implements AnalyticsService {
       analyticsServiceProvider.overrideWithValue(_NoopAnalyticsService()),
       fcmLifecycleProvider.overrideWithValue(spyFcm),
       profileCacheProvider.overrideWithValue(InMemoryProfileCache()),
+      // TimelineGuideStore: secure_storage 플러그인 차단 (withdraw 경로).
+      timelineGuideStoreProvider.overrideWithValue(
+        InMemoryTimelineGuideStore(),
+      ),
     ],
   );
   addTearDown(container.dispose);
