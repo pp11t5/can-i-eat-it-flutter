@@ -42,17 +42,17 @@ Widget _wrapWithMock(
 }
 
 class _FakeAuth extends AuthController {
-  _FakeAuth(this.joinDate);
-  final DateTime? joinDate;
+  _FakeAuth(this._joinDate);
+  final DateTime? _joinDate;
 
   @override
   Future<AuthSession?> build() async {
-    if (joinDate == null) return null;
+    if (_joinDate == null) return null;
     return AuthSession(
       userId: 'u1',
       provider: AuthProvider.kakao,
       hasAgreedTerms: true,
-      createdAt: joinDate,
+      createdAt: _joinDate,
     );
   }
 }

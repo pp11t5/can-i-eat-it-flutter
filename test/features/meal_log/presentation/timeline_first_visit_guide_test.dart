@@ -18,13 +18,13 @@ import 'package:can_i_eat_it/features/meal_log/presentation/widgets/timeline_fir
 final _fixedToday = DateTime(2026, 6, 17);
 
 class _FakeAuth extends AuthController {
-  _FakeAuth(this.userId);
-  final String userId;
+  _FakeAuth(this._userId);
+  final String _userId;
 
   @override
   Future<AuthSession?> build() async {
     return AuthSession(
-      userId: userId,
+      userId: _userId,
       provider: AuthProvider.kakao,
       hasAgreedTerms: true,
       createdAt: DateTime(2026, 1, 1),
