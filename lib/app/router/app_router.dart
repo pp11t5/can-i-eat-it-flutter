@@ -19,6 +19,7 @@ import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_record_
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/timeline_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/allergy_med_edit_screen.dart';
+import 'package:can_i_eat_it/features/mypage/presentation/screens/condition_edit_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/name_edit_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/profile_info_screen.dart';
@@ -236,6 +237,11 @@ GoRouter appRouter(Ref ref) {
         name: 'mypage-profile',
         builder: (context, state) => const ProfileInfoScreen(),
         routes: [
+          GoRoute(
+            path: 'condition',
+            name: 'mypage-profile-condition',
+            builder: (context, state) => const ConditionEditScreen(),
+          ),
           GoRoute(
             path: 'allergy-med',
             name: 'mypage-profile-allergy-med',

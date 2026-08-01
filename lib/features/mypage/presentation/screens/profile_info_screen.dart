@@ -225,10 +225,9 @@ class _MyInfoCard extends StatelessWidget {
           ),
           // 행 구분선 — 상·하 24, stroke 1 (Foundation/gray/40)
           const _RowDivider(),
-          // 건강 고민 — 라벨/값 스택 + "수정"
-          // 질환 편집 화면 미구현: 탭 동작 없음(표시만 Figma 정합).
+          // 건강 고민 — 라벨/값 스택 + "수정" → condition
           _EditRow(
-            onTap: null,
+            onTap: () => context.push('/mypage/profile/condition'),
             child: _LabeledValue(
               label: '건강 고민',
               value: _conditionLabel,

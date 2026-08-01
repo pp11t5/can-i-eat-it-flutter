@@ -9,6 +9,7 @@ import 'package:can_i_eat_it/features/health_profile/data/dtos/profile_detail_dt
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/repositories/health_profile_repository.dart';
+import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 
 /// [HealthProfileRepository] 실 구현 (ADR-0007 §3-1 (6-D), W7 프로필/건강정보 서버 마이그레이션).
 ///
@@ -76,11 +77,15 @@ class HealthProfileRepositoryImpl implements HealthProfileRepository {
     }
 
     final base = await _cache.read() ?? const HealthProfile();
+    // GET allergies는 서버 displayName(한글) — 엔티티·PATCH는 code 기준이므로 정규화.
+    final allergies = healthInfo != null
+        ? normalizeAllergyCodes(healthInfo.allergies)
+        : base.allergies;
     final merged = base.copyWith(
       conditions: profileDetail != null
           ? [profileDetail.disease.toConditionCode()]
           : base.conditions,
-      allergies: healthInfo?.allergies ?? base.allergies,
+      allergies: allergies,
       medications: healthInfo?.medications ?? base.medications,
     );
 
@@ -103,7 +108,11 @@ class HealthProfileRepositoryImpl implements HealthProfileRepository {
         response,
         (json) => MedicalInfoDto.fromJson(json as Map<String, dynamic>),
       );
-      return HealthProfile(allergies: dto.allergies, medications: dto.medications);
+      // 서버는 displayName(한글) 목록을 반환한다. 칩 선택·PATCH 는 code 기준.
+      return HealthProfile(
+        allergies: normalizeAllergyCodes(dto.allergies),
+        medications: dto.medications,
+      );
     } on DioException catch (e) {
       throw FailureMapper.fromDioException(e);
     }
@@ -149,9 +158,11 @@ class HealthProfileRepositoryImpl implements HealthProfileRepository {
     required List<String> allergies,
     required List<String> medications,
   }) async {
+    // 방어적 정규화 — 한글 displayName이 섞여 있으면 COMMON400_2(enum 파싱 실패).
+    final allergenCodes = normalizeAllergyCodes(allergies);
     try {
       final dto = MedicalInfoUpdateRequestDto(
-        allergens: allergies,
+        allergens: allergenCodes,
         medications: medications,
       );
       // TODO(be-confirm): PATCH가 allergens/medications 배열을 전량 교체함을
@@ -164,7 +175,7 @@ class HealthProfileRepositoryImpl implements HealthProfileRepository {
       // 캐시에 반영된 이전 프로필이 있으면 allergies/medications만 교체, 없으면 최소 필드만 구성.
       final cached = await _cache.read();
       final next = (cached ?? const HealthProfile()).copyWith(
-        allergies: allergies,
+        allergies: allergenCodes,
         medications: medications,
       );
       await _cache.write(next);

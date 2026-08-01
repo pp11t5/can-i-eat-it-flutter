@@ -78,6 +78,12 @@ abstract interface class AuthRepository {
   /// 현재 인증된 사용자 정보를 반환한다 (`GET /auth/me`).
   Future<AuthSession> getMe();
 
+  /// 서버 닉네임 PATCH 성공 후 로컬 세션 캐시의 표시명만 동기화한다.
+  ///
+  /// [AuthController.updateNickname]이 호출한다. [getMe] in-flight 응답이
+  /// 구 닉네임으로 `_session`을 덮어쓴 뒤에도 최신 표시명을 복구할 때 사용한다.
+  void applyLocalDisplayName(String displayName);
+
   // ---------------------------------------------------------------------------
   // 로그아웃 / 탈퇴
   // ---------------------------------------------------------------------------
