@@ -5,6 +5,13 @@
 - **Decider(s)**: 프로젝트 팀 (기획·서버·앱)
 - **작성 근거**: 실측 `app_router.dart`·`auth_guard.dart`·`fcm_messaging_handler.dart`·`Runner.entitlements`·`AndroidManifest.xml`·`pubspec.yaml`
 
+> **2026-08-01 구현 메모**: 이 ADR의 유니버설/앱링크 범위는 여전히 후속 작업이다. 다만
+> 푸시 탭 경로는 먼저 구현했다. 현재 허용하는 FCM 목적지는 식후 증상 기록
+> (`https://can-i-eat-it.com/app/symptoms/new?mealRecordId={id}`)과 주간 리포트
+> (`https://can-i-eat-it.com/app/weekly-report`), 이연 묶음의 미기록 식사 목록
+> (`https://can-i-eat-it.com/app/unrecorded-meals`)이다. 전자는 식사를 다시
+> 조회·검증한 뒤 증상 기록 폼을 연다.
+
 ---
 
 ## 1. 의사결정 요약
@@ -101,13 +108,15 @@
 | 음식 히스토리(도감) | `/food-history` | `/app/food-history` | — | ✅ | 무인자 |
 | 마이페이지 | `/mypage` | `/app/mypage` | — | ✅ | Shell 브랜치 |
 | 알림 설정 | `/mypage/notification-settings` | `/app/settings/notifications` | — | ⚪ 2차 | "알림 다시 켜기" 안내용 |
-| 미기록 식단 | `/unrecorded-meals` | `/app/unrecorded-meals` | — | ⚪ 2차 | 무인자, "증상 기록 유도" 푸시 후보 |
+| 미기록 식단 | `/unrecorded-meals` | `/app/unrecorded-meals` | — | ✅ | 무인자, 이연 묶음 "증상 기록 유도" FCM 대상 |
+| **식후 증상 기록 작성 (FCM 전용)** | `/symptom/record?mealRecordId={id}` | `/app/symptoms/new?mealRecordId={id}` | query `mealRecordId` | ✅ | 식사를 GET 조회·검증한 뒤 기존 작성 폼에 프리필 |
 
-**1차 최소 세트(푸시 주용도 = 식후 증상·리포트 유도)**: `/app/symptoms/{id}`, `/app/meals/{id}`, `/app/weekly-report`, `/app/home`. (W6/W7 리포트·증상 흐름과 정합)
+**현재 구현된 FCM 세트**: `/app/symptoms/new?mealRecordId={id}`, `/app/weekly-report`, `/app/unrecorded-meals`. 주간 리포트는 현재 주만 열며 `?week=…` query를 받지 않는다. 미기록 식사 목록은 앱이 최신 후보를 직접 조회하므로 식사 ID·묶음 건수 query를 받지 않는다. 기존 1차 확장 후보는 `/app/symptoms/{id}`, `/app/meals/{id}`, `/app/home`이다.
 
 **노출하지 않음(타입 extra 필수 = URL 재현 불가)**:
 - `/verdict` (`VerdictArgs`: text/externalId) — 확장하려면 `/app/verdict?foodId={externalId}&text={name}` + VerdictScreen이 query 파싱하도록 **라우트 수정 필요**. 현재는 `state.extra as VerdictArgs`라 불가. → **확장 후보(별도 티켓)**.
-- `/check`(`MealRecordContext`), `/symptom/record`(`Symptom`/`SymptomWriteArgs`), `/meal/record`(extra `String?`) — **생성 플로우**. 링크로 "기록 작성 화면"을 여는 건 UX·데이터 정합상 부적절 → 비노출 권고.
+- `/check`(`MealRecordContext`), `/meal/record`(extra `String?`) — **생성 플로우**. 링크로 "기록 작성 화면"을 여는 건 UX·데이터 정합상 부적절 → 비노출 권고.
+- `/symptom/record`는 예외적으로 FCM 전용 쿼리 `mealRecordId`를 허용한다. 화면 진입 전 식사를 서버에서 재조회하므로, 삭제·권한 없음·다른 계정의 식사에는 작성 폼을 열지 않는다.
 - `/splash`·`/login`·`/terms`·`/onboarding/*` — pre-auth 전용, 딥링크 대상 아님.
 - `/mypage/profile`·`/…/allergy-med`·`/mypage/withdraw` — 딥 설정, 필요 시 3차.
 
@@ -151,8 +160,22 @@
 ```json
 {
   "notification": { "title": "속쓰림 어떠세요?", "body": "점심 식사 후 증상을 기록해 주세요" },
-  "data": { "link": "https://can-i-eat-it.com/app/symptoms/12345" },
+  "data": { "link": "https://can-i-eat-it.com/app/symptoms/new?mealRecordId=12345" },
   "apns": { "payload": { "aps": { "content-available": 1 } } }
+}
+```
+- 주간 리포트는 `notification`으로 표시하고 `data.link`로만 라우팅한다. 특정 주 query는 아직 지원하지 않는다.
+```json
+{
+  "notification": { "title": "주간 리포트", "body": "이번 주 식사·증상 리포트가 준비됐어요. 불편했던 음식과 신호등 분포를 확인해 보세요." },
+  "data": { "link": "https://can-i-eat-it.com/app/weekly-report" }
+}
+```
+- 이연 묶음은 서버가 묶음 수를 본문에만 표시하고, `data.link`에는 무인자 목록 URL을 넣는다.
+```json
+{
+  "notification": { "title": "증상 기록 알림", "body": "어젯밤 식사 2건의 증상 기록이 남아 있어요. 잊기 전에 확인해 보세요." },
+  "data": { "link": "https://can-i-eat-it.com/app/unrecorded-meals" }
 }
 ```
 - 필드명 **`link`** 고정(대안 `url`·구조화 `{screen,id}` 대비, 전체 URL이 유니버설링크와 통일되어 유리). iOS는 `content-available:1`이 있어야 백그라운드 data 전달이 안정적. **notification+data 하이브리드** 권고(표시는 notification, 라우팅은 data.link).
@@ -165,7 +188,7 @@
 - [ ] **Android manifest**: `MainActivity`에 intent-filter 추가(`android:autoVerify="true"`, `VIEW`+`DEFAULT`+`BROWSABLE`, `scheme=https`, `host=can-i-eat-it.com`, `pathPrefix=/app`). 기존 MAIN/LAUNCHER 유지. `launchMode="singleTop"` 이미 설정됨 → `onNewIntent`로 warm 링크 정상 수신(양호).
 - [ ] **패키지 추가**: **`app_links`**(권고, uni_links 후속·유지보수 활발·cold+warm 스트림). 대안 go_router 네이티브 단독은 푸시 유입과 통일 안 되고 pending 처리 복잡(§2-B 참조).
 - [ ] **go_router 이중 처리 차단**(R4): cold 링크를 go_router가 자동 소비하지 않고 `app_links`+리졸버가 replay하도록 배선(`initialLocation:'/splash'` 유지, 플랫폼 기본 경로 무시 설정).
-- [ ] **FCM seam 연결**: `fcm_messaging_handler.dart` `_handleOpened`(라인 120-124 TODO)를 `DeepLinkResolver.handle(Uri.parse(message.data['link']))`로 교체.
+- [x] **FCM 푸시 탭 연결 (현재 범위)**: `data.link`을 검증하는 `PushLinkResolver`와 세션 대기/replay를 담당하는 `PushNavigationCoordinator`를 연결. 지원 경로는 식후 증상 기록·주간 리포트·이연 묶음 미기록 식사 목록이며, 유니버설링크용 공용 `DeepLinkResolver` 확장은 후속 작업.
 - [ ] iOS `aps-environment` 릴리스 시 `production` 전환(APNs 서버개발자 Firebase 콘솔 조율).
 
 ---
@@ -189,7 +212,7 @@
 - [ ] (서버) AASA·assetlinks·`/app/*` 웹 폴백 페이지 3종 배포 티켓 생성. 지문은 **앱팀 대기**로 블록 표시.
 - [ ] (앱팀) Play Console에서 SHA256 지문(App Signing+upload) 추출해 서버 전달.
 - [ ] (앱팀 구현 티켓, 본 ADR 승인 후) `app_links` 도입 + `DeepLinkResolver` + `pendingDeepLinkProvider` + FCM seam 연결 + 네이티브 entitlement/manifest. **auth_guard.resolveRedirect 순수성 유지 필수**.
-- [ ] (선행 분리 출시) 서버 파일과 무관한 **푸시 탭 in-app 라우팅**(FCM data.link→리졸버)을 먼저 배선해 유니버설링크 배포 전 푸시 딥링크 확보.
+- [x] (선행 분리 출시) 서버 파일과 무관한 **푸시 탭 in-app 라우팅**(FCM `data.link`→리졸버)을 배선했다. 현재 대상은 식후 증상 기록·주간 리포트·이연 묶음 미기록 식사 목록이다.
 
 ---
 

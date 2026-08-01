@@ -33,6 +33,7 @@ import 'package:can_i_eat_it/features/onboarding/presentation/screens/onboarding
 import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_shell.dart';
 import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_detail_screen.dart';
+import 'package:can_i_eat_it/features/symptom/presentation/screens/push_symptom_entry_screen.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_write_screen.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/screens/unrecorded_meals_screen.dart';
 import 'package:can_i_eat_it/features/weekly_report/presentation/screens/weekly_report_screen.dart';
@@ -129,13 +130,18 @@ GoRouter appRouter(Ref ref) {
           final extra = state.extra;
           final existing = extra is Symptom ? extra : null;
           final args = extra is SymptomWriteArgs ? extra : null;
+          final pushMealRecordId = state.uri.queryParameters['mealRecordId'];
           return MaterialPage(
             fullscreenDialog: true,
-            child: SymptomWriteScreen(
-              existingSymptom: existing,
-              initialMealRecordId: args?.initialMealRecordId,
-              initialMealName: args?.initialMealName,
-            ),
+            child: args != null || existing != null
+                ? SymptomWriteScreen(
+                    existingSymptom: existing,
+                    initialMealRecordId: args?.initialMealRecordId,
+                    initialMealName: args?.initialMealName,
+                  )
+                : pushMealRecordId != null && pushMealRecordId.isNotEmpty
+                    ? PushSymptomEntryScreen(mealRecordId: pushMealRecordId)
+                    : const SymptomWriteScreen(),
           );
         },
       ),

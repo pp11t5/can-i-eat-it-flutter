@@ -41,9 +41,8 @@ Future<void> bootstrap(
   // 백그라운드/종료 메시지 핸들러(Firebase init 직후, runApp 전 필수).
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  // Foreground 메시지 수신 초기화 + 알림 탭 오픈 골격.
-  await initForegroundMessaging();
-  await wireOpenedApp();
+  // Foreground 수신·탭 라우팅은 ProviderScope가 생성된 뒤 앱 루트에서 시작한다.
+  // background handler는 위에서 runApp 전 등록해야 한다.
 
   // 카카오 SDK — 네이티브 앱키가 있을 때만 init.
   // dev 등 키 미설정 플레이버는 init 을 생략해 앱이 죽지 않게 한다(소셜 로그인만 비활성).
