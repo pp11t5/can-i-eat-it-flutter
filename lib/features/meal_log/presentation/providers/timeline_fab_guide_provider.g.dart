@@ -13,7 +13,7 @@ String _$timelineFabGuideHash() => r'46bd5beee26977be1f1bfad190ad4ad125b0144f';
 /// - `true`: 가이드 숨김 (본 적 있음 / 세션 없음)
 /// - `false`: empty 시 가이드 노출
 ///
-/// 닫힘 처리: [dismiss] — **FAB 탭 시에만** 호출한다.
+/// 닫힘 처리: [dismiss] — 가이드 영역·empty 영역·FAB 등 **아무 탭**에서 호출.
 ///
 /// Copied from [TimelineFabGuide].
 @ProviderFor(TimelineFabGuide)
