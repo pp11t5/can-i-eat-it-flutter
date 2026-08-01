@@ -35,9 +35,18 @@ class MypageScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final sessionAsync = ref.watch(authControllerProvider);
     final profileAsync = ref.watch(healthProfileControllerProvider);
+    final summaryAsync = ref.watch(mySummaryProvider);
+    final countAsync = ref.watch(dictionaryCountProvider);
 
     final session = sessionAsync.valueOrNull;
     final profile = profileAsync.valueOrNull;
+
+    // 첫 진입(캐시 없음) 시 요약·히스토리·프로필 API 대기 중이면 로딩 표시.
+    // hasValue면 재진입/리프레시이므로 기존 콘텐츠를 유지한다.
+    final isInitialLoading =
+        (profileAsync.isLoading && !profileAsync.hasValue) ||
+        (summaryAsync.isLoading && !summaryAsync.hasValue) ||
+        (countAsync.isLoading && !countAsync.hasValue);
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
@@ -58,39 +67,46 @@ class MypageScreen extends ConsumerWidget {
           bottom: BorderSide(color: AppColors.divider, width: 1),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.screenPadding,
-          vertical: AppSpacing.cardPadding,
-        ),
-        children: [
-          // 프로필 카드
-          _ProfileCard(session: session, profile: profile),
-          const SizedBox(height: AppSpacing.sectionGap),
+      body: isInitialLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primary,
+                strokeWidth: 2.5,
+              ),
+            )
+          : ListView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPadding,
+                vertical: AppSpacing.cardPadding,
+              ),
+              children: [
+                // 프로필 카드
+                _ProfileCard(session: session, profile: profile),
+                const SizedBox(height: AppSpacing.sectionGap),
 
-          // 내 음식 히스토리 카드
-          const _FoodHistoryCard(),
-          const SizedBox(height: AppSpacing.sectionGap),
+                // 내 음식 히스토리 카드
+                const _FoodHistoryCard(),
+                const SizedBox(height: AppSpacing.sectionGap),
 
-          // 주간 기록 카드
-          _WeeklyLogCard(
-            onViewAll: () => context.push('/weekly-report'),
-          ),
-          const SizedBox(height: AppSpacing.sectionGap),
+                // 주간 기록 카드
+                _WeeklyLogCard(
+                  onViewAll: () => context.push('/weekly-report'),
+                ),
+                const SizedBox(height: AppSpacing.sectionGap),
 
-          // 설정 섹션
-          const _SectionLabel(label: '설정'),
-          const SizedBox(height: AppSpacing.cardPadding),
-          _SettingsSection(),
-          const SizedBox(height: AppSpacing.sectionGap),
+                // 설정 섹션
+                const _SectionLabel(label: '설정'),
+                const SizedBox(height: AppSpacing.cardPadding),
+                _SettingsSection(),
+                const SizedBox(height: AppSpacing.sectionGap),
 
-          // 약관 섹션
-          const _SectionLabel(label: '약관'),
-          const SizedBox(height: AppSpacing.cardPadding),
-          _TermsSection(),
-          const SizedBox(height: AppSpacing.sectionGap),
-        ],
-      ),
+                // 약관 섹션
+                const _SectionLabel(label: '약관'),
+                const SizedBox(height: AppSpacing.cardPadding),
+                _TermsSection(),
+                const SizedBox(height: AppSpacing.sectionGap),
+              ],
+            ),
     );
   }
 }
@@ -254,8 +270,15 @@ class _FoodHistoryCard extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.itemGap),
-            // 좋음 무드 배지 (Figma 1718:7884 초록 스마일 — MoodFace 에셋 재사용)
-            Image.asset(AppImages.moodComfortable, width: 24, height: 24),
+            SvgPicture.asset(
+              'assets/figma_extracted/chevron_right.svg',
+              width: 24,
+              height: 24,
+              colorFilter: const ColorFilter.mode(
+                AppColors.textTertiary,
+                BlendMode.srcIn,
+              ),
+            ),
           ],
         ),
       ),
@@ -289,12 +312,26 @@ class _WeeklyLogCard extends ConsumerWidget {
       children: [
         // 헤더 (카드 밖) — Figma 1718:6135
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: AppTextStyles.header2Bold.copyWith(
-                color: AppColors.textPrimary,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyles.header2Bold.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  // Body_2(M) + Foundation/font color/50
+                  Text(
+                    '월요일 아침 10시에 리포트를 발행해요.',
+                    style: AppTextStyles.body2Medium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
             GestureDetector(

@@ -25,23 +25,36 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: _BottomNavBar(
-        currentIndex: navigationShell.currentIndex,
-        onTap: (index) {
-          // StatefulShellRoute.indexedStack은 홈 브랜치를 유지하므로, 홈 탭에
-          // 재진입할 때 식사 관련 요약 데이터를 명시적으로 다시 조회한다.
-          if (index == 0) {
-            ref.invalidate(recentMealsProvider);
-            ref.invalidate(unrecordedMealCountProvider);
-          }
-          navigationShell.goBranch(
-            index,
-            initialLocation: index == navigationShell.currentIndex,
-          );
-        },
-        tabs: _tabs,
+    final currentIndex = navigationShell.currentIndex;
+    // 홈(0)이 아닌 탭 루트에서 시스템 백 → 앱 종료 대신 홈 탭으로 이동.
+    final canPopShell = currentIndex == 0;
+
+    return PopScope(
+      canPop: canPopShell,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (currentIndex != 0) {
+          navigationShell.goBranch(0);
+        }
+      },
+      child: Scaffold(
+        body: navigationShell,
+        bottomNavigationBar: _BottomNavBar(
+          currentIndex: currentIndex,
+          onTap: (index) {
+            // StatefulShellRoute.indexedStack은 홈 브랜치를 유지하므로, 홈 탭에
+            // 재진입할 때 식사 관련 요약 데이터를 명시적으로 다시 조회한다.
+            if (index == 0) {
+              ref.invalidate(recentMealsProvider);
+              ref.invalidate(unrecordedMealCountProvider);
+            }
+            navigationShell.goBranch(
+              index,
+              initialLocation: index == currentIndex,
+            );
+          },
+          tabs: _tabs,
+        ),
       ),
     );
   }
