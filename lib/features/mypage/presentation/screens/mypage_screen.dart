@@ -20,6 +20,7 @@ import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/d
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
 import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
+import 'package:can_i_eat_it/features/mypage/domain/entities/my_page_summary.dart';
 import 'package:can_i_eat_it/features/notification/data/notification_providers.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 
@@ -29,7 +30,7 @@ import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart'
 /// - 타이틀 "마이페이지"(중앙)
 /// - 프로필 카드 → /mypage/profile push
 /// - 내 음식 히스토리 카드 → /food-history push (dictionaryCountProvider 실카운트)
-/// - 주간 기록 카드 (mySummaryProvider 실데이터, W7)
+/// - 주간 리포트 카드 (지난주 요약, 없으면 수집 중 빈 상태)
 /// - 설정 섹션
 /// - 약관 섹션
 /// - 내 계정 섹션 (로그아웃 / 탈퇴하기)
@@ -94,7 +95,7 @@ class MypageScreen extends ConsumerWidget {
                 const _FoodHistoryCard(),
                 const SizedBox(height: AppSpacing.sectionGap), // 24
 
-                // 주간 기록 카드
+                // 주간 리포트 카드 (지난주 요약 · 전체보기 → /weekly-report)
                 _WeeklyLogCard(
                   onViewAll: () => context.push('/weekly-report'),
                 ),
@@ -306,30 +307,39 @@ class _FoodHistoryCard extends ConsumerWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 주간 기록 카드 (Figma 1718:6134 — 헤더 밖 + 내부 회색 StatCard)
+// 주간 리포트 카드 (Figma — 헤더 "주간 리포트" + 지난주 요약 / 수집 중 빈 상태)
 // ---------------------------------------------------------------------------
 
 class _WeeklyLogCard extends ConsumerWidget {
   const _WeeklyLogCard({required this.onViewAll});
   final VoidCallback onViewAll;
 
+  /// 지난주 리포트에 집계할 기록이 있는지.
+  ///
+  /// 서버는 지난주 [WeeklyReport] 행이 없으면 summary를 0으로 폴백한다.
+  /// 가입 직후 첫 주(리포트 미발행)와 동일하게 빈 상태 UI로 처리한다.
+  static bool _hasLastWeekData(WeeklySummary? weekly) {
+    if (weekly == null) return false;
+    final meals = weekly.mealCount;
+    return weekly.mealRecordCount > 0 ||
+        weekly.recentSymptomCount > 0 ||
+        weekly.streakCount > 0 ||
+        meals.recommendCount > 0 ||
+        meals.cautionCount > 0 ||
+        meals.riskCount > 0 ||
+        meals.unknownCount > 0;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 현재 날짜 기반 주 표시 (Figma "5월 둘째 주 기록" — 네이티브 서수).
-    const ordinals = ['첫째', '둘째', '셋째', '넷째', '다섯째'];
-    final now = DateTime.now();
-    final weekOfMonth = ((now.day - 1) ~/ 7) + 1;
-    final ordinal = ordinals[(weekOfMonth - 1).clamp(0, ordinals.length - 1)];
-    final title = '${now.month}월 $ordinal 주 기록';
-
-    // loading/error 시 각 수치 '—' 폴백 (_FoodHistoryCard valueOrNull 패턴과 동일).
     final weekly = ref.watch(mySummaryProvider).valueOrNull?.weeklySummary;
+    final hasData = _hasLastWeekData(weekly);
     final mealCount = weekly?.mealCount;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 헤더 (카드 밖) — Figma 1718:6135
+        // 헤더 (카드 밖) — 타이틀 고정 "주간 리포트". 데이터가 있을 때만 전체보기.
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -338,12 +348,11 @@ class _WeeklyLogCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    '주간 리포트',
                     style: AppTextStyles.header2Bold.copyWith(
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  // Body_2(M) + Foundation/font color/50
                   Text(
                     '월요일 아침 10시에 리포트를 발행해요.',
                     style: AppTextStyles.body2Medium.copyWith(
@@ -353,87 +362,120 @@ class _WeeklyLogCard extends ConsumerWidget {
                 ],
               ),
             ),
-            GestureDetector(
-              onTap: onViewAll,
-              behavior: HitTestBehavior.opaque,
-              child: Row(
-                children: [
-                  Text(
-                    '전체 보기',
-                    style: AppTextStyles.body2Medium.copyWith(
-                      color: AppColors.textStrong,
+            if (hasData)
+              GestureDetector(
+                onTap: onViewAll,
+                behavior: HitTestBehavior.opaque,
+                child: Row(
+                  children: [
+                    Text(
+                      '전체 보기',
+                      style: AppTextStyles.body2Medium.copyWith(
+                        color: AppColors.textStrong,
+                      ),
                     ),
-                  ),
-                  SvgPicture.asset(
-                    AppIcons.chevronRight,
-                    width: 24,
-                    height: 24,
-                    colorFilter: const ColorFilter.mode(
-                      AppColors.textStrong,
-                      BlendMode.srcIn,
+                    SvgPicture.asset(
+                      AppIcons.chevronRight,
+                      width: 24,
+                      height: 24,
+                      colorFilter: const ColorFilter.mode(
+                        AppColors.textStrong,
+                        BlendMode.srcIn,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
           ],
         ),
         const SizedBox(height: AppSpacing.cardPadding),
-        // 통계 내부 카드(StatCard) — Figma 1718:6140
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.sectionGap),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceInset,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusStatCard),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Column(
-            children: [
-              _WeeklyStatRow(
-                label: '식사 기록',
-                value: weekly?.mealRecordCount,
-                unit: '회',
-              ),
-              const SizedBox(height: AppSpacing.cardPadding),
-              _WeeklyStatRow(
-                label: '최근 증상',
-                value: weekly?.recentSymptomCount,
-                unit: '회',
-              ),
-              const SizedBox(height: AppSpacing.cardPadding),
-              _WeeklyStatRow(
-                label: '연속 편안 일수',
-                value: weekly?.streakCount,
-                unit: '일',
-              ),
-              const SizedBox(height: AppSpacing.cardPadding),
-              // 품질 행 — Figma 1718:6156 (✅⚠️❌ 아이콘 + "…음식 N끼")
-              Wrap(
-                spacing: AppSpacing.iconTextGap,
-                runSpacing: AppSpacing.itemGap,
-                children: [
-                  _MealStatChip(
-                    icon: AppIcons.verdictRecommend,
-                    label: '권장음식',
-                    value: mealCount?.recommendCount,
-                  ),
-                  _MealStatChip(
-                    icon: AppIcons.verdictCaution,
-                    label: '주의 음식',
-                    value: mealCount?.cautionCount,
-                  ),
-                  _MealStatChip(
-                    icon: AppIcons.verdictRisk,
-                    label: '위험 음식',
-                    value: mealCount?.riskCount,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+        if (hasData)
+          // 지난주 통계 카드 — Figma StatCard
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(AppSpacing.sectionGap),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceInset,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusStatCard),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(
+              children: [
+                _WeeklyStatRow(
+                  label: '식사 기록',
+                  value: weekly?.mealRecordCount,
+                  unit: '회',
+                ),
+                const SizedBox(height: AppSpacing.cardPadding),
+                _WeeklyStatRow(
+                  label: '최근 증상',
+                  value: weekly?.recentSymptomCount,
+                  unit: '회',
+                ),
+                const SizedBox(height: AppSpacing.cardPadding),
+                _WeeklyStatRow(
+                  label: '연속 편안 일수',
+                  value: weekly?.streakCount,
+                  unit: '일',
+                ),
+                const SizedBox(height: AppSpacing.cardPadding),
+                Wrap(
+                  spacing: AppSpacing.iconTextGap,
+                  runSpacing: AppSpacing.itemGap,
+                  children: [
+                    _MealStatChip(
+                      icon: AppIcons.verdictRecommend,
+                      label: '권장음식',
+                      value: mealCount?.recommendCount,
+                    ),
+                    _MealStatChip(
+                      icon: AppIcons.verdictCaution,
+                      label: '주의 음식',
+                      value: mealCount?.cautionCount,
+                    ),
+                    _MealStatChip(
+                      icon: AppIcons.verdictRisk,
+                      label: '위험 음식',
+                      value: mealCount?.riskCount,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          )
+        else
+          // 수집 중 빈 상태 — Figma: padding 16×24, radius 14, gray/30
+          const _WeeklyReportCollectingCard(),
       ],
+    );
+  }
+}
+
+/// 지난주 리포트가 아직 없을 때(가입 후 첫 주 등) 표시하는 빈 상태 카드.
+class _WeeklyReportCollectingCard extends StatelessWidget {
+  const _WeeklyReportCollectingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sectionGap, // 24
+        vertical: AppSpacing.cardPadding, // 16
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMuted, // foundation gray/30
+        borderRadius: BorderRadius.circular(AppSpacing.radiusStatCard), // 14
+        border: Border.all(color: AppColors.border),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        '내 데이터를 모으고 있어요.',
+        textAlign: TextAlign.center,
+        style: AppTextStyles.body2Medium.copyWith(
+          color: AppColors.textSecondary,
+        ),
+      ),
     );
   }
 }

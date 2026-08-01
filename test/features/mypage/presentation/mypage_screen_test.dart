@@ -189,14 +189,15 @@ void main() {
       expect(find.text('안전 음식 3개, 주의 음식 2개'), findsOneWidget);
     });
 
-    testWidgets('주간 기록 "전체보기" 버튼이 표시된다', (tester) async {
+    testWidgets('주간 리포트 타이틀과 데이터가 있을 때 "전체 보기"가 표시된다', (tester) async {
       await tester.pumpWidget(_buildMypageScreen());
       await tester.pumpAndSettle();
 
+      expect(find.text('주간 리포트'), findsOneWidget);
       expect(find.text('전체 보기'), findsOneWidget);
     });
 
-    testWidgets('주간 기록 카드에 mySummaryProvider 실카운트가 표시된다', (tester) async {
+    testWidgets('주간 리포트 카드에 mySummaryProvider 실카운트가 표시된다', (tester) async {
       await tester.pumpWidget(_buildMypageScreen());
       await tester.pumpAndSettle();
 
@@ -210,13 +211,14 @@ void main() {
       expect(find.text('위험 음식 1끼'), findsOneWidget);
     });
 
-    testWidgets('요약 데이터가 빈 상태면 주간 기록 카드 수치가 0으로 표시된다', (tester) async {
+    testWidgets('지난주 데이터가 없으면 수집 중 빈 상태와 "전체 보기" 미표시', (tester) async {
       await tester.pumpWidget(_buildMypageScreen(withSummary: false));
       await tester.pumpAndSettle();
 
-      expect(find.text('권장음식 0끼'), findsOneWidget);
-      expect(find.text('주의 음식 0끼'), findsOneWidget);
-      expect(find.text('위험 음식 0끼'), findsOneWidget);
+      expect(find.text('주간 리포트'), findsOneWidget);
+      expect(find.text('내 데이터를 모으고 있어요.'), findsOneWidget);
+      expect(find.text('전체 보기'), findsNothing);
+      expect(find.text('권장음식 0끼'), findsNothing);
     });
 
     testWidgets('알림 설정 항목이 표시된다', (tester) async {
