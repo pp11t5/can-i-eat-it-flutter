@@ -33,6 +33,7 @@ class VerdictResultScreen extends ConsumerWidget {
     required this.verdict,
     required this.onRetry,
     this.onAddToDiet,
+    this.onSubstituteTap,
   });
 
   final EatVerdict verdict;
@@ -42,6 +43,9 @@ class VerdictResultScreen extends ConsumerWidget {
 
   /// 내 식단에 추가 콜백. null이면 스낵바 placeholder.
   final VoidCallback? onAddToDiet;
+
+  /// 대체 음식 탭 콜백.
+  final ValueChanged<VerdictSubstitute>? onSubstituteTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -91,6 +95,7 @@ class VerdictResultScreen extends ConsumerWidget {
             // 상세 판정 카드 (AI분석 칩 카드 + 불릿 items + 대체음식 + 기록)
             VerdictDetailCard(
               verdict: verdict,
+              onSubstituteTap: onSubstituteTap,
               onSeeAllRecords: verdict.stateRecords.total > 0
                   ? () => Navigator.of(context).push(
                         MaterialPageRoute(

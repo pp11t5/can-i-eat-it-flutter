@@ -131,7 +131,7 @@ class _RecordCard extends StatelessWidget {
             ),
           ),
           Text(
-            '${record.date} · ${record.timingLabel}',
+            '${record.date} · ${record.timing}',
             style: AppTextStyles.body2Medium.copyWith(
               color: AppColors.textSecondary,
             ),

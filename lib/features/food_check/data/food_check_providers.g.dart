@@ -32,7 +32,7 @@ final foodRepositoryProvider = AutoDisposeProvider<FoodRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FoodRepositoryRef = AutoDisposeProviderRef<FoodRepository>;
-String _$verdictControllerHash() => r'0252b6ae4b9ac259cde9945f41401c1038c26e7e';
+String _$verdictControllerHash() => r'dd6059d29ac581a13f2b4a33ccea755f665fbcc4';
 
 /// 판정 컨트롤러.
 ///
@@ -57,8 +57,8 @@ final verdictControllerProvider = AutoDisposeNotifierProvider<VerdictController,
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
       : _$verdictControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
+  dependencies: const <ProviderOrFamily>[],
+  allTransitiveDependencies: const <ProviderOrFamily>{},
 );
 
 typedef _$VerdictController = AutoDisposeNotifier<AsyncValue<EatVerdict>>;

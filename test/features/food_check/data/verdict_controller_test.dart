@@ -65,7 +65,8 @@ void main() {
       expect(state.value!.level, VerdictLevel.caution);
     });
 
-    test('judgeByText("unknown") → unknown 반환 (AsyncData — 성공 응답, D1)', () async {
+    test('judgeByText("unknown") → unknown 반환 (AsyncData — 성공 응답, D1)',
+        () async {
       final container = _makeContainer(repo: MockFoodRepository.empty());
       addTearDown(container.dispose);
 
@@ -103,6 +104,24 @@ void main() {
       final state = container.read(verdictControllerProvider);
       expect(state.value!.level, VerdictLevel.unknown);
       expect(state.value!.foodName, '');
+    });
+
+    test('중첩 ProviderScope의 판정 결과는 기존 화면 상태를 덮어쓰지 않는다', () async {
+      final root = _makeContainer(repo: MockFoodRepository.empty());
+      final nested = ProviderContainer(
+        parent: root,
+        overrides: [
+          verdictControllerProvider.overrideWith(VerdictController.new),
+        ],
+      );
+      addTearDown(nested.dispose);
+      addTearDown(root.dispose);
+
+      await root.read(verdictControllerProvider.notifier).judgeByText('커피');
+      await nested.read(verdictControllerProvider.notifier).judgeByText('두부');
+
+      expect(root.read(verdictControllerProvider).value!.foodName, '커피');
+      expect(nested.read(verdictControllerProvider).value!.foodName, '두부');
     });
 
     test('저장소 예외 → AsyncError 반환 (분석실패 경로)', () async {

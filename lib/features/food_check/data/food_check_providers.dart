@@ -37,7 +37,7 @@ FoodRepository foodRepository(Ref ref) {
 /// - FOOD400_1/FOOD404_1/통신오류: [AsyncError(Failure)] → 분석실패 에러화면.
 ///
 /// ⚠️ grade=UNKNOWN 은 성공(AsyncData) — 분석실패(AsyncError)와 절대 혼동 금지(D1, R3).
-@riverpod
+@Riverpod(dependencies: [])
 class VerdictController extends _$VerdictController {
   @override
   AsyncValue<EatVerdict> build() => const AsyncValue.data(
