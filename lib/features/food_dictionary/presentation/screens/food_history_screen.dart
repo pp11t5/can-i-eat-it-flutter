@@ -186,7 +186,7 @@ class _HeaderBlock extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// _SegmentToggle — 커스텀 2세그먼트 토글
+// _SegmentToggle — 커스텀 2세그먼트 토글 (슬라이딩 썸)
 // ---------------------------------------------------------------------------
 
 class _SegmentToggle extends StatelessWidget {
@@ -196,6 +196,9 @@ class _SegmentToggle extends StatelessWidget {
     required this.cautionRiskCount,
     required this.onTap,
   });
+
+  static const _slideDuration = Duration(milliseconds: 220);
+  static const _slideCurve = Curves.easeInOut;
 
   final int selectedIndex;
   final int? safeCount;
@@ -210,30 +213,62 @@ class _SegmentToggle extends StatelessWidget {
         color: const Color(0xFFEAEAEA),
         borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _SegmentItem(
-              label: '권장 음식 ${safeCount ?? 0}',
-              selected: selectedIndex == 0,
-              onTap: () => onTap(0),
-            ),
-          ),
-          Expanded(
-            child: _SegmentItem(
-              label: '주의 음식 ${cautionRiskCount ?? 0}',
-              selected: selectedIndex == 1,
-              onTap: () => onTap(1),
-            ),
-          ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final segmentWidth = constraints.maxWidth / 2;
+          return Stack(
+            children: [
+              // 선택 썸 — 좌/우로 슬라이드
+              AnimatedPositioned(
+                duration: _slideDuration,
+                curve: _slideCurve,
+                left: selectedIndex * segmentWidth,
+                top: 0,
+                bottom: 0,
+                width: segmentWidth,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusPill),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: _SegmentLabel(
+                      label: '권장 음식 ${safeCount ?? 0}',
+                      selected: selectedIndex == 0,
+                      onTap: () => onTap(0),
+                    ),
+                  ),
+                  Expanded(
+                    child: _SegmentLabel(
+                      label: '주의 음식 ${cautionRiskCount ?? 0}',
+                      selected: selectedIndex == 1,
+                      onTap: () => onTap(1),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 }
 
-class _SegmentItem extends StatelessWidget {
-  const _SegmentItem({
+class _SegmentLabel extends StatelessWidget {
+  const _SegmentLabel({
     required this.label,
     required this.selected,
     required this.onTap,
@@ -246,31 +281,22 @@ class _SegmentItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.chipPaddingV),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selected ? AppColors.surface : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 4,
-                    offset: const Offset(0, 1),
-                  ),
-                ]
-              : null,
-        ),
-        child: Text(
-          label,
-          style: selected
-              ? AppTextStyles.body1Medium
-                  .copyWith(color: const Color(0xFF000000))
-              : AppTextStyles.body1Medium
-                  .copyWith(color: AppColors.textTertiary),
+      child: Padding(
+        padding:
+            const EdgeInsets.symmetric(vertical: AppSpacing.chipPaddingV),
+        child: Center(
+          child: AnimatedDefaultTextStyle(
+            duration: _SegmentToggle._slideDuration,
+            curve: _SegmentToggle._slideCurve,
+            style: AppTextStyles.body1Medium.copyWith(
+              color: selected
+                  ? const Color(0xFF000000)
+                  : AppColors.textTertiary,
+            ),
+            child: Text(label),
+          ),
         ),
       ),
     );
