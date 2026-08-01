@@ -10,10 +10,14 @@ import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
 import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 
-/// 계정 탈퇴 화면 (Figma 577-10287).
+/// 계정 탈퇴 화면 (Figma 32_계정삭제확인 / 577-10287).
 ///
-/// - 안내 문구 + 삭제 항목 카드.
-/// - 하단 스티키 빨강 버튼 → [AuthController.withdraw] 호출.
+/// 세로 레이아웃 (Figma 주석):
+/// - 앱바 아래 ↔ 본문 / 본문 ↔ 하단 버튼: 상·하 여백 각 242 (남는 높이를 균등 배분)
+/// - 좌우 패딩 24, 안내↔삭제 카드 간격 32
+/// - 하단 버튼은 화면 하단에 고정
+///
+/// - 하단 빨강 버튼 → [AuthController.withdraw] 호출.
 /// - 성공 시 auth redirect 가드가 /login 으로 복귀 처리.
 class WithdrawScreen extends ConsumerStatefulWidget {
   const WithdrawScreen({super.key});
@@ -76,90 +80,109 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
           bottom: BorderSide(color: AppColors.divider, width: 1),
         ),
       ),
+      // Figma 32_계정삭제확인:
+      // [상단 ~242] → [본문 좌우 24 · 안내↔카드 32] → [하단 ~242] → [버튼 하단 고정]
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 표정 + 타이틀
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          AppImages.moodUncomfortable,
-                          width: 24,
-                          height: 24,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            '정말 계정을 삭제하시겠어요?',
-                            style: AppTextStyles.header2Bold.copyWith(
-                              color: AppColors.textPrimary,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      // 본문을 세로 중앙 — 상·하 여백이 Figma 242/242처럼 대칭.
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // 표정 + 타이틀
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                AppImages.moodUncomfortable,
+                                width: 24,
+                                height: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '정말 계정을 삭제하시겠어요?',
+                                  style: AppTextStyles.header2Bold.copyWith(
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          // 안내 문구 (평문)
+                          Text(
+                            '탈퇴하면 식사·증상 기록을 포함한 모든 데이터가 삭제돼요. '
+                            '14일 안에 다시 로그인하면 복구할 수 있지만, 14일이 지나면 '
+                            '모든 기록이 영구 삭제되어 되돌릴 수 없어요.',
+                            style: AppTextStyles.body2Medium.copyWith(
+                              color: AppColors.textSecondary,
+                              height: 1.6,
                             ),
                             textAlign: TextAlign.left,
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    // 안내 문구 (평문)
-                    Text(
-                      '탈퇴하면 식사·증상 기록을 포함한 모든 데이터가 삭제돼요. '
-                      '14일 안에 다시 로그인하면 복구할 수 있지만, 14일이 지나면 '
-                      '모든 기록이 영구 삭제되어 되돌릴 수 없어요.',
-                      style: AppTextStyles.body2Medium.copyWith(
-                        color: AppColors.textSecondary,
-                        height: 1.6,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                    const SizedBox(height: 32),
-                    // 삭제 항목 카드
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusModal),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Text(
-                        '- 식사기록\n- 증상기록\n- 건강 정보\n- 주간 리포트',
-                        style: AppTextStyles.body1Medium.copyWith(
-                          color: AppColors.textPrimary,
-                          height: 1.6,
-                        ),
+                          // 안내 ↔ 삭제 카드 (Figma 32)
+                          const SizedBox(height: 32),
+                          // 삭제 항목 카드 — 가로 최대
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusModal,
+                              ),
+                              border: Border.all(color: AppColors.border),
+                            ),
+                            child: Text(
+                              '- 식사기록\n- 증상기록\n- 건강 정보\n- 주간 리포트',
+                              style: AppTextStyles.body1Medium.copyWith(
+                                color: AppColors.textPrimary,
+                                height: 1.6,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
-            // 하단 스티키 버튼
+            // 하단 버튼 — 가로 최대
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-              child: FilledButton(
-                onPressed: _isLoading ? null : _confirmAndWithdraw,
-                style: FilledButton.styleFrom(
-                  backgroundColor: _isLoading
-                      ? AppColors.surfaceMuted
-                      : AppColors.verdictDanger,
-                  foregroundColor: AppColors.surface,
-                  minimumSize: const Size(double.infinity, 54),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: _isLoading ? null : _confirmAndWithdraw,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: _isLoading
+                        ? AppColors.surfaceMuted
+                        : AppColors.verdictDanger,
+                    foregroundColor: AppColors.surface,
+                    minimumSize: const Size(double.infinity, 54),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    textStyle: AppTextStyles.body1Bold,
                   ),
-                  textStyle: AppTextStyles.body1Bold,
+                  // 진행 중 스피너는 전역 로딩 오버레이가 담당(이중 표시 방지) —
+                  // 이 버튼은 비활성 색상으로만 진행 중임을 표시한다.
+                  child: const Text('데이터 영구 삭제'),
                 ),
-                // 진행 중 스피너는 전역 로딩 오버레이가 담당(이중 표시 방지) —
-                // 이 버튼은 비활성 색상으로만 진행 중임을 표시한다.
-                child: const Text('데이터 영구 삭제'),
               ),
             ),
           ],

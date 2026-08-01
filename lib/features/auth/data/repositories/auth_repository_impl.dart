@@ -234,14 +234,27 @@ class AuthRepositoryImpl implements AuthRepository {
         response,
         (json) => AuthMeResponseDto.fromJson(json as Map<String, dynamic>),
       );
-      final provider = _session?.provider ?? AuthProvider.kakao;
-      _session = dto.toEntity(provider);
+      // 서버 UserMe 는 email/profileImage 를 안 줄 수 있다 — 기존 세션 값 보존.
+      final previous = _session;
+      final provider = previous?.provider ?? AuthProvider.kakao;
+      final fromServer = dto.toEntity(provider);
+      _session = fromServer.copyWith(
+        email: fromServer.email ?? previous?.email,
+        profileImageUrl: fromServer.profileImageUrl ?? previous?.profileImageUrl,
+      );
       return _session!;
     } on DioException catch (e) {
       // 인터셉터가 SessionExpiredFailure 를 e.error 에 실어 전파한다.
       if (e.error is Failure) throw e.error as Failure;
       throw FailureMapper.fromDioException(e);
     }
+  }
+
+  @override
+  void applyLocalDisplayName(String displayName) {
+    final current = _session;
+    if (current == null) return;
+    _session = current.copyWith(displayName: displayName);
   }
 
   @override

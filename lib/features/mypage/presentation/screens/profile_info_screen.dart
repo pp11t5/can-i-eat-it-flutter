@@ -4,23 +4,25 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
-import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
 import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
-import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
-import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 
-/// 프로필 정보 화면 (Figma node 2760-24140).
+/// 프로필 정보 화면 (Figma 프로필 정보 / 내 정보 카드).
 ///
 /// 진입 시 AuthController.getMe() 1회 호출 → 식별정보 갱신.
 /// 실패 시 기존 세션값/빈 표시 (크래시 금지).
+///
+/// 내 정보 카드:
+/// - 닉네임 / 건강 고민 / 알레르기·복용약 — 우측 "수정" (chevron·자물쇠 없음)
+/// - 건강 고민·알레르기: 라벨 위 + 값 아래 스택
+/// - 알레르기·복용약 2개 이상: "{첫 항목} 외 N개"
 class ProfileInfoScreen extends ConsumerStatefulWidget {
   const ProfileInfoScreen({super.key});
 
@@ -97,12 +99,6 @@ class _ProfileInfoScreenState extends ConsumerState<ProfileInfoScreen> {
           const _SectionLabel(label: '내 정보'),
           const SizedBox(height: AppSpacing.itemGap),
           _MyInfoCard(session: session, profile: profile),
-          const SizedBox(height: AppSpacing.contentGap),
-
-          // 내 계정 섹션
-          const _SectionLabel(label: '내 계정'),
-          const SizedBox(height: AppSpacing.itemGap),
-          _AccountCard(),
         ],
       ),
     );
@@ -129,7 +125,7 @@ class _SectionLabel extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 프로필 헤더 — 아바타 + 닉네임만(이메일·연동 서브텍스트 제거, D1)
+// 프로필 헤더 — 아바타 + 닉네임만
 // ---------------------------------------------------------------------------
 
 class _ProfileHeader extends StatelessWidget {
@@ -164,7 +160,7 @@ class _ProfileHeader extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 내 정보 카드 (D1: 닉네임 · 건강 고민 · 알레르기/복용약, 기존 _HealthInfoCard 확장)
+// 내 정보 카드
 // ---------------------------------------------------------------------------
 
 class _MyInfoCard extends StatelessWidget {
@@ -190,206 +186,165 @@ class _MyInfoCard extends StatelessWidget {
         .join(', ');
   }
 
+  /// 알레르기(라벨) + 복용약(원문) 목록.
+  /// 0개 → "없음", 1개 → 해당 이름, 2개 이상 → "{첫 항목} 외 N개".
   String get _allergyMedLabel {
-    final allergies = profile?.allergies ?? [];
-    final medications = profile?.medications ?? [];
-    final total = allergies.length + medications.length;
-    if (total == 0) return '없음';
-    return '$total개';
+    final items = <String>[
+      for (final code in profile?.allergies ?? const <String>[])
+        labelForCode(allergyOptions, code) ?? code,
+      ...?profile?.medications,
+    ];
+    if (items.isEmpty) return '없음';
+    if (items.length == 1) return items.first;
+    return '${items.first} 외 ${items.length - 1}개';
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.sectionGap), // 24
+      // Figma: 카드 내부 패딩 24
+      padding: const EdgeInsets.all(AppSpacing.sectionGap),
       decoration: BoxDecoration(
-        // Figma 실측 fill #FEFEFE(카드 전용값, scaffoldBackground와 우연히 동일 hex).
         color: const Color(0xFFFEFEFE),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusModal), // 16
-        border: Border.all(color: AppColors.border), // #EAEAEA
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 닉네임 행 — 값 + "수정하기" → name-edit 이동 (D1 신규)
-          InkWell(
-            onTap: () => context.push('/mypage/profile/name-edit'),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    session?.displayName ?? '사용자',
-                    style: AppTextStyles.body1Medium.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Text(
-                  '수정하기',
-                  style: AppTextStyles.body2Medium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.itemGap),
-                SvgPicture.asset(
-                  'assets/figma_extracted/chevron_right.svg',
-                  width: 24,
-                  height: 24,
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.textTertiary,
-                    BlendMode.srcIn,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 24, thickness: 1, color: AppColors.border),
-
-          // 건강 고민 행 — 읽기전용(자물쇠), 탭 불가. 선행 아이콘 제거(D1).
-          Row(
-            children: [
-              Text(
-                '건강 고민',
-                style: AppTextStyles.body1Medium.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                _conditionLabel,
-                style: AppTextStyles.body2Medium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.itemGap),
-              const AppIcon(
-                AppIcons.lock,
-                size: AppIconSizes.s24,
-                color: AppColors.textTertiary,
-              ),
-            ],
-          ),
-          const Divider(height: 24, thickness: 1, color: AppColors.border),
-
-          // 알레르기·복용약 행 — 선행 아이콘 제거(D1).
-          InkWell(
-            onTap: () => context.push('/mypage/profile/allergy-med'),
-            child: Row(
-              children: [
-                Text(
-                  '알레르기・복용약',
-                  style: AppTextStyles.body1Medium.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  _allergyMedLabel,
-                  style: AppTextStyles.body2Medium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.itemGap),
-                SvgPicture.asset(
-                  'assets/figma_extracted/chevron_right.svg',
-                  width: 24,
-                  height: 24,
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.textTertiary,
-                    BlendMode.srcIn,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// 내 계정 카드 (D1: padding 24로 통일)
-// ---------------------------------------------------------------------------
-
-class _AccountCard extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 로그아웃
-          InkWell(
-            onTap: () => _onLogout(context, ref),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.sectionGap),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '로그아웃',
-                      style: AppTextStyles.body1Regular.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                ],
+          // 닉네임 — 값 + "수정" → name-edit
+          _EditRow(
+            onTap: () => context.push('/mypage/profile/name-edit'),
+            child: Text(
+              session?.displayName ?? '사용자',
+              style: AppTextStyles.body1Medium.copyWith(
+                color: AppColors.textPrimary,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          const Divider(height: 1, color: AppColors.divider),
-
-          // 탈퇴하기
-          InkWell(
-            onTap: () => context.push('/mypage/withdraw'),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(AppSpacing.radiusModal),
-              bottomRight: Radius.circular(AppSpacing.radiusModal),
+          // 행 구분선 — 상·하 24, stroke 1 (Foundation/gray/40)
+          const _RowDivider(),
+          // 건강 고민 — 라벨/값 스택 + "수정" → condition
+          _EditRow(
+            onTap: () => context.push('/mypage/profile/condition'),
+            child: _LabeledValue(
+              label: '건강 고민',
+              value: _conditionLabel,
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.sectionGap),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '탈퇴하기',
-                      style: AppTextStyles.body1Regular.copyWith(
-                        color: AppColors.danger,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+          ),
+          const _RowDivider(),
+          // 알레르기 · 복용약 — 라벨/값 스택 + "수정" → allergy-med
+          _EditRow(
+            onTap: () => context.push('/mypage/profile/allergy-med'),
+            child: _LabeledValue(
+              label: '알레르기 · 복용약',
+              value: _allergyMedLabel,
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Future<void> _onLogout(BuildContext context, WidgetRef ref) async {
-    final action = await showConfirmModal(
-      context,
-      title: '로그아웃 하시겠어요?',
-      // Figma 577:10285: Primary(green)=취소하기(안전), Secondary=로그아웃하기.
-      primaryLabel: '취소하기',
-      primaryColor: AppColors.primary,
-      secondaryLabel: '로그아웃하기',
+/// 내 정보 카드 행 사이 구분선 — 상·하 여백 24 + 1px stroke.
+class _RowDivider extends StatelessWidget {
+  const _RowDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: AppSpacing.sectionGap), // 24
+      child: Divider(
+        height: 1,
+        thickness: 1,
+        color: AppColors.border, // Foundation/gray/40
+      ),
     );
-
-    // primary(취소) 또는 바깥 닫힘(null)이면 아무 것도 하지 않는다.
-    if (action != ConfirmModalAction.secondary) return;
-    await ref
-        .read(globalLoadingControllerProvider.notifier)
-        .run(() => ref.read(authControllerProvider.notifier).logout());
-    if (!context.mounted) return;
-    context.go('/login');
   }
 }
+
+/// 좌측 [child] + 우측 "수정" 칩 버튼.
+///
+/// Figma: padding 4×12, radius 4, bg Foundation/gray/30.
+/// 화면 이동은 행 전체가 아니라 [onTap]이 있는 **버튼만** 탭할 때 발생한다.
+class _EditRow extends StatelessWidget {
+  const _EditRow({required this.child, this.onTap});
+
+  final Widget child;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(child: child),
+        const SizedBox(width: AppSpacing.cardPadding),
+        _EditButton(onTap: onTap),
+      ],
+    );
+  }
+}
+
+/// "수정" 칩 버튼 — gray30 배경, 4×12 패딩, radius 4.
+class _EditButton extends StatelessWidget {
+  const _EditButton({this.onTap});
+
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = Text(
+      '수정',
+      style: AppTextStyles.body2Medium.copyWith(
+        color: AppColors.textSecondary,
+      ),
+    );
+
+    return Material(
+      color: AppColors.surfaceMuted, // Foundation/gray/30
+      borderRadius: BorderRadius.circular(4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(4),
+        child: Padding(
+          // Figma: padding 4px 12px
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          child: label,
+        ),
+      ),
+    );
+  }
+}
+
+/// 라벨(위) + 값(아래) 스택 — 건강 고민 / 알레르기·복용약.
+class _LabeledValue extends StatelessWidget {
+  const _LabeledValue({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.body1Medium.copyWith(
+            color: AppColors.textPrimary,
+          ),
+        ),
+        Text(
+          value,
+          style: AppTextStyles.body2Medium.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+

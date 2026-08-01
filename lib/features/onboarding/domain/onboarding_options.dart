@@ -115,3 +115,53 @@ String? codeForLabel(List<OptionEntry> catalog, String label) {
   }
   return null;
 }
+
+// ---------------------------------------------------------------------------
+// 알레르기 정규화 (GET displayName → PATCH code)
+// ---------------------------------------------------------------------------
+
+/// 서버 `GET /my-page/health-info` 가 반환하는 한글 displayName 별칭.
+///
+/// 응답 필드는 `allergies: ["우유·유제품", ...]` 형태이고, PATCH 요청은
+/// `allergens: ["milk", ...]` 영어 code 배열이다. 시드/테스트 displayName이
+/// 클라이언트 라벨과 미묘하게 다른 경우(예: "우유" vs "우유·유제품",
+/// "콩·대두" vs "콩(대두)")를 흡수한다.
+const Map<String, String> allergyDisplayNameAliases = {
+  '우유·유제품': 'milk',
+  '우유': 'milk',
+  '계란': 'egg',
+  '밀': 'wheat',
+  '콩·대두': 'soy',
+  '콩(대두)': 'soy',
+  '땅콩': 'peanut',
+  '갑각류': 'crustacean',
+  '견과류': 'tree_nut',
+  '생선·조개류': 'fish_shellfish',
+};
+
+/// raw 값(code 또는 한글 displayName/라벨)을 allergen enum code로 정규화한다.
+///
+/// 인식 불가 값은 null — PATCH 시 COMMON400_2(잘못된 enum) 를 막기 위해 전송에서 제외.
+String? normalizeAllergyCode(String raw) {
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) return null;
+
+  for (final entry in allergyOptions) {
+    if (entry.code == trimmed) return entry.code;
+  }
+
+  final byLabel = codeForLabel(allergyOptions, trimmed);
+  if (byLabel != null) return byLabel;
+
+  return allergyDisplayNameAliases[trimmed];
+}
+
+/// [raw] 목록을 unique allergen code 목록으로 정규화한다. 인식 불가 값은 버린다.
+List<String> normalizeAllergyCodes(Iterable<String> raw) {
+  final out = <String>{};
+  for (final value in raw) {
+    final code = normalizeAllergyCode(value);
+    if (code != null) out.add(code);
+  }
+  return out.toList(growable: false);
+}

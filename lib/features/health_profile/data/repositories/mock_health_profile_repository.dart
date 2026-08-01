@@ -1,3 +1,5 @@
+import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
+
 import '../../domain/entities/health_profile.dart';
 import '../../domain/repositories/health_profile_repository.dart';
 
@@ -78,7 +80,7 @@ class MockHealthProfileRepository implements HealthProfileRepository {
     required List<String> medications,
   }) async {
     final next = (_profile ?? const HealthProfile()).copyWith(
-      allergies: allergies,
+      allergies: normalizeAllergyCodes(allergies),
       medications: medications,
     );
     _lastSubmittedProfile = next;
@@ -101,6 +103,9 @@ class MockHealthProfileRepository implements HealthProfileRepository {
         'MockHealthProfileRepository.fetchMedicalInfoStrict: 프로필 없음(noProfile)',
       );
     }
-    return HealthProfile(allergies: p.allergies, medications: p.medications);
+    return HealthProfile(
+      allergies: normalizeAllergyCodes(p.allergies),
+      medications: p.medications,
+    );
   }
 }

@@ -2,8 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
+import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/repositories/health_profile_repository.dart';
+import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 
 part 'health_profile_providers.g.dart';
 
@@ -66,11 +68,34 @@ class HealthProfileController extends _$HealthProfileController {
     required List<String> allergies,
     required List<String> medications,
   }) async {
+    // 엔티티·칩 선택은 code 기준. 한글 displayName이 섞여 있어도 정규화.
+    final allergenCodes = normalizeAllergyCodes(allergies);
     await ref.read(healthProfileRepositoryProvider).updateHealthInfo(
-          allergies: allergies,
+          allergies: allergenCodes,
           medications: medications,
         );
     final base = state.valueOrNull ?? const HealthProfile();
-    state = AsyncData(base.copyWith(allergies: allergies, medications: medications));
+    // medicalInfoStrict는 autoDispose지만, 재진입 직전 stale 캐시를 피하려고 무효화.
+    ref.invalidate(medicalInfoStrictProvider);
+    state = AsyncData(
+      base.copyWith(
+        allergies: allergenCodes,
+        medications: medications,
+      ),
+    );
+  }
+
+  /// 건강 고민(질환) 목록을 갱신한다.
+  ///
+  /// 서버 disease PATCH API가 아직 없으므로 로컬 상태·[ProfileCache]만 갱신한다.
+  /// 현재 제품은 GERD 고정·UI 비활성 질환만 노출이므로 서버 진실과 어긋날 여지가 작다.
+  /// TODO(be): disease 수정 API 확정 시 repository 경유로 교체.
+  Future<void> updateConditions({
+    required List<String> conditions,
+  }) async {
+    final base = state.valueOrNull ?? const HealthProfile();
+    final next = base.copyWith(conditions: conditions);
+    await ref.read(profileCacheProvider).write(next);
+    state = AsyncData(next);
   }
 }

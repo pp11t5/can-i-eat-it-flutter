@@ -11,6 +11,8 @@ import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
 import 'package:can_i_eat_it/features/meal_log/data/sources/timeline_guide_store.dart';
+import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
+import 'package:can_i_eat_it/features/mypage/data/repositories/mock_my_page_repository.dart';
 
 // ---------------------------------------------------------------------------
 // Stub AnalyticsService
@@ -45,6 +47,8 @@ ProviderContainer _makeContainer({
       timelineGuideStoreProvider.overrideWithValue(
         guideStore ?? InMemoryTimelineGuideStore(),
       ),
+      // updateNickname 이 myPageRepository 를 호출하므로 Mock 으로 주입.
+      myPageRepositoryProvider.overrideWithValue(MockMyPageRepository.seeded()),
     ],
   );
   addTearDown(container.dispose);
@@ -181,4 +185,79 @@ void main() {
       );
     });
   });
+
+  // -------------------------------------------------------------------------
+  // updateNickname — in-flight getMe 가 구 닉네임으로 덮어쓰지 않음
+  // -------------------------------------------------------------------------
+
+  group('AuthController.updateNickname 레이스 가드', () {
+    test('닉네임 변경 후 늦게 도착한 getMe 는 새 displayName 을 덮지 않는다', () async {
+      final repo = _DelayedGetMeAuthRepository(
+        initialSession: const AuthSession(
+          userId: 'mock-user',
+          provider: AuthProvider.kakao,
+          hasAgreedTerms: true,
+          displayName: '이전이름',
+        ),
+      );
+      final container = _makeContainer(repo: repo);
+      // AutoDispose: 리스너 없으면 in-flight 중 notifier 가 재생성되어 generation 가드가 깨진다.
+      final sub = container.listen(authControllerProvider, (_, __) {});
+      addTearDown(sub.close);
+
+      await container.read(authControllerProvider.future);
+      final controller = container.read(authControllerProvider.notifier);
+
+      // 1) getMe 시작 (지연) — 응답 시 여전히 '이전이름'을 돌려줌
+      final getMeFuture = controller.getMe();
+
+      // 2) 그 사이 닉네임 저장 완료
+      await controller.updateNickname('새이름');
+      expect(
+        container.read(authControllerProvider).valueOrNull?.displayName,
+        '새이름',
+      );
+
+      // 3) 지연 getMe 완료 — state 는 새이름 유지
+      await getMeFuture;
+      expect(
+        container.read(authControllerProvider).valueOrNull?.displayName,
+        '새이름',
+      );
+      // repository 로컬 캐시도 복구됨
+      expect(repo.currentDisplayName, '새이름');
+    });
+  });
+}
+
+/// getMe 가 완료되기 전에 updateNickname 이 끼어들 수 있도록 지연을 둔 fake.
+class _DelayedGetMeAuthRepository extends MockAuthRepository {
+  _DelayedGetMeAuthRepository({required AuthSession initialSession})
+      : _displayName = initialSession.displayName,
+        super(initialSession: initialSession);
+
+  String? _displayName;
+
+  @override
+  Future<AuthSession> getMe() async {
+    // 한 프레임 이상 지연해 updateNickname 이 끼어들 틈을 준다.
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    // 서버가 아직 구 닉네임을 돌려주는 상황 재현 — 내부 세션을 의도적으로 덮는다.
+    const stale = AuthSession(
+      userId: 'mock-user',
+      provider: AuthProvider.kakao,
+      hasAgreedTerms: true,
+      displayName: '이전이름',
+    );
+    applyLocalDisplayName('이전이름');
+    return stale;
+  }
+
+  @override
+  void applyLocalDisplayName(String displayName) {
+    super.applyLocalDisplayName(displayName);
+    _displayName = displayName;
+  }
+
+  String? get currentDisplayName => _displayName;
 }

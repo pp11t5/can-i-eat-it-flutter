@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:firebase_messaging/firebase_messaging.dart'
+    show AuthorizationStatus;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,7 +42,9 @@ final openAppSettingsProvider = Provider<Future<void> Function()>(
 /// - 토글 변경 시 낙관적 갱신 + PATCH 호출.
 /// - 기기 OS 알림 권한이 차단(denied)돼 있으면 상단 안내 배너를 띄운다. 이때도 마스터
 ///   토글은 항상 활성 상태를 유지하고, 배너 아래 3개 토글 카드만 비활성화(dim)한다.
-///   포그라운드 복귀 시 권한 상태를 재조회해 배너 표시를 갱신한다.
+/// - 「설정 바로 가기」→ 시스템 설정 후 복귀 시 OS 권한을 재조회한다.
+///   **상태가 바뀐 경우에만** 로딩 인디케이터를 잠깐 보여 준 뒤 UI를 갱신하고,
+///   동일하면 인디케이터 없이 유지한다.
 class NotificationSettingsScreen extends ConsumerStatefulWidget {
   const NotificationSettingsScreen({super.key});
 
@@ -50,6 +56,12 @@ class NotificationSettingsScreen extends ConsumerStatefulWidget {
 class _NotificationSettingsScreenState
     extends ConsumerState<NotificationSettingsScreen>
     with WidgetsBindingObserver {
+  /// 시스템 설정 화면을 연 뒤 복귀 예정인지.
+  bool _awaitingOsSettingsReturn = false;
+
+  /// 권한 상태가 바뀐 뒤 UI 전환용 로딩 인디케이터.
+  bool _showTransitionIndicator = false;
+
   @override
   void initState() {
     super.initState();
@@ -64,9 +76,56 @@ class _NotificationSettingsScreenState
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // 설정 앱에서 알림을 켜고 돌아오면(resumed) 배너 표시를 갱신한다.
-    if (state == AppLifecycleState.resumed) {
+    // 「설정 바로 가기」로 나갔다 돌아온 경우에만 재조회.
+    if (state == AppLifecycleState.resumed &&
+        _awaitingOsSettingsReturn &&
+        mounted) {
+      _awaitingOsSettingsReturn = false;
+      unawaited(_recheckOsPermission());
+    }
+  }
+
+  /// 시스템 알림 설정 화면을 연다. 복귀 시 [didChangeAppLifecycleState]에서 재조회.
+  Future<void> _openOsSettingsAndAwaitReturn() async {
+    _awaitingOsSettingsReturn = true;
+    await ref.read(openAppSettingsProvider)();
+  }
+
+  /// OS 알림 권한을 다시 읽는다.
+  ///
+  /// 1) provider를 건드리지 않고 최신 권한만 조용히 조회
+  /// 2) 이전과 **같으면** 인디케이터·UI 변경 없음
+  /// 3) **달라졌으면** 로딩 인디케이터 → provider 갱신 → 새 UI
+  Future<void> _recheckOsPermission() async {
+    if (!mounted || _showTransitionIndicator) return;
+
+    final previous =
+        ref.read(osNotificationBlockedProvider).valueOrNull ?? false;
+
+    try {
+      // resume 직후 권한 반영이 늦은 기기 대응.
+      await Future<void>.delayed(const Duration(milliseconds: 350));
+      if (!mounted) return;
+
+      // provider refresh 전에 비교해, 미변경 시 watch 리빌드/인디케이터를 피한다.
+      final status =
+          await ref.read(fcmTokenServiceProvider).permissionStatus();
+      final next = status == AuthorizationStatus.denied;
+      if (!mounted) return;
+
+      // 상태 동일 → 아무 것도 하지 않음.
+      if (previous == next) return;
+
+      // 상태 변경 → 인디케이터 표시 후 provider 갱신.
+      setState(() => _showTransitionIndicator = true);
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      if (!mounted) return;
       ref.invalidate(osNotificationBlockedProvider);
+      await ref.read(osNotificationBlockedProvider.future);
+    } catch (_) {
+      // best-effort — 실패해도 기존 UI 유지
+    } finally {
+      if (mounted) setState(() => _showTransitionIndicator = false);
     }
   }
 
@@ -99,15 +158,32 @@ class _NotificationSettingsScreenState
         ),
       ),
       body: settingsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+            strokeWidth: 2.5,
+          ),
+        ),
         error: (e, _) => _ErrorBody(
           message: e.toString(),
           onRetry: () => ref.invalidate(notificationSettingsControllerProvider),
         ),
-        data: (settings) => _SettingsBody(
-          settings: settings,
-          osBlocked: osBlocked,
-        ),
+        data: (settings) {
+          // 권한 상태가 실제로 바뀐 경우에만 전환 인디케이터 표시.
+          if (_showTransitionIndicator) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primary,
+                strokeWidth: 2.5,
+              ),
+            );
+          }
+          return _SettingsBody(
+            settings: settings,
+            osBlocked: osBlocked,
+            onOpenOsSettings: _openOsSettingsAndAwaitReturn,
+          );
+        },
       ),
     );
   }
@@ -150,21 +226,34 @@ class _ErrorBody extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _SettingsBody extends ConsumerWidget {
-  const _SettingsBody({required this.settings, required this.osBlocked});
+  const _SettingsBody({
+    required this.settings,
+    required this.osBlocked,
+    required this.onOpenOsSettings,
+  });
   final NotificationSettings settings;
 
   /// 기기 OS 알림 권한이 denied(차단)됐는지 여부.
   final bool osBlocked;
 
+  /// 「설정 바로 가기」— 시스템 설정 오픈 후 복귀 시 권한 재조회.
+  final Future<void> Function() onOpenOsSettings;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 3개 토글 카드 — OS 알림 차단 시 이 카드만 dim 처리한다(마스터 토글은 항상 활성).
+    // Figma 577-10286 (OS off) / 577-10290 (OS on)
+    // - OS 꺼짐: 안내 배너 + 3토글 카드 dim·비활성
+    // - OS 켜짐: 배너 없음 + 3토글 활성
+    // - 마스터(마케팅) 토글은 항상 활성
+    final togglesEnabled = !osBlocked;
+
     final toggleCard = _SectionCard(
       children: [
         _ToggleRow(
           title: '식후 2시간 알림',
           subtitle: '증상 기록을 위해 보내요.',
           value: settings.postMealEnabled,
+          enabled: togglesEnabled,
           onChanged: (v) => _handleToggle(
             context,
             ref,
@@ -181,6 +270,7 @@ class _SettingsBody extends ConsumerWidget {
           title: '식단 기록 알림',
           subtitle: '식사, 증상 기록을 위해 보내요.',
           value: settings.dailyRecordEnabled,
+          enabled: togglesEnabled,
           onChanged: (v) => _handleToggle(
             context,
             ref,
@@ -197,6 +287,7 @@ class _SettingsBody extends ConsumerWidget {
           title: '주간 리포트',
           subtitle: '매주 일요일 19:00에 알림이 가요.',
           value: settings.weeklyReportEnabled,
+          enabled: togglesEnabled,
           onChanged: (v) => _handleToggle(
             context,
             ref,
@@ -212,16 +303,18 @@ class _SettingsBody extends ConsumerWidget {
         vertical: 24,
       ),
       children: [
-        // 마스터 토글 — OS 차단 여부와 무관하게 항상 활성 상태를 유지한다.
+        // 마스터 토글 — OS 차단 여부와 무관하게 항상 활성.
         _MasterToggleRow(
           value: settings.marketingPushEnabled,
           onChanged: (v) => _handleMarketingToggle(context, ref),
         ),
         const SizedBox(height: AppSpacing.contentGap),
+        // OS 알림 off (Figma 577-10286): 배너 노출
         if (osBlocked) ...[
-          const _OsBlockedBanner(),
+          _OsBlockedBanner(onOpenSettings: onOpenOsSettings),
           const SizedBox(height: AppSpacing.sectionGap),
         ],
+        // OS off → dim, OS on → 정상
         if (osBlocked)
           Opacity(
             opacity: 0.5,
@@ -270,11 +363,13 @@ class _SettingsBody extends ConsumerWidget {
 // OS 알림 차단 안내 배너 (Figma 577-10286)
 // ---------------------------------------------------------------------------
 
-class _OsBlockedBanner extends ConsumerWidget {
-  const _OsBlockedBanner();
+class _OsBlockedBanner extends StatelessWidget {
+  const _OsBlockedBanner({required this.onOpenSettings});
+
+  final Future<void> Function() onOpenSettings;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.sectionGap),
@@ -313,7 +408,7 @@ class _OsBlockedBanner extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () => ref.read(openAppSettingsProvider)(),
+              onPressed: onOpenSettings,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.onPrimary,
@@ -379,6 +474,7 @@ class _MasterToggleRow extends StatelessWidget {
           Switch.adaptive(
             value: value,
             onChanged: onChanged,
+            activeTrackColor: const Color(0xFF34C759),
           ),
         ],
       ),
@@ -421,12 +517,16 @@ class _ToggleRow extends StatelessWidget {
     required this.subtitle,
     required this.value,
     required this.onChanged,
+    this.enabled = true,
   });
 
   final String title;
   final String subtitle;
   final bool value;
   final ValueChanged<bool> onChanged;
+
+  /// false면 스위치 비활성(OS 알림 off 시).
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -458,9 +558,11 @@ class _ToggleRow extends StatelessWidget {
             ),
           ),
           // Figma 577:10290 — iOS 스타일 스위치(흰 thumb, ON=#34C759 track).
+          // enabled=false → onChanged null → 비활성 스타일 (OS off).
           Switch.adaptive(
             value: value,
-            onChanged: onChanged,
+            onChanged: enabled ? onChanged : null,
+            activeTrackColor: const Color(0xFF34C759),
           ),
         ],
       ),

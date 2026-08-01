@@ -15,7 +15,6 @@ import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_heal
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/name_edit_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/profile_info_screen.dart';
-import 'package:can_i_eat_it/features/mypage/presentation/screens/withdraw_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Stubs
@@ -62,49 +61,8 @@ Widget _buildProfileInfoScreen({
   );
 }
 
-/// ProfileInfoScreen은 탈퇴하기 탭 시 context.push('/mypage/withdraw')를 호출한다.
-/// 테스트 라우터에서 이 경로를 그대로 선언해 네비게이션을 검증한다
-/// (allergy_med_navigation_test.dart와 동일 패턴).
-Widget _buildWithWithdrawRouter({AuthSession? session}) {
-  final repo = MockAuthRepository(initialSession: session);
-  final router = GoRouter(
-    initialLocation: '/mypage/profile',
-    routes: [
-      GoRoute(
-        path: '/mypage/profile',
-        builder: (context, state) => const ProfileInfoScreen(),
-      ),
-      GoRoute(
-        path: '/mypage/withdraw',
-        builder: (context, state) => const WithdrawScreen(),
-      ),
-    ],
-  );
-
-  return ProviderScope(
-    overrides: [
-      // ignore: scoped_providers_should_specify_dependencies
-      authRepositoryProvider.overrideWithValue(repo),
-      // ignore: scoped_providers_should_specify_dependencies
-      healthProfileRepositoryProvider.overrideWithValue(
-        MockHealthProfileRepository.completed(),
-      ),
-      // ignore: scoped_providers_should_specify_dependencies
-      analyticsServiceProvider.overrideWithValue(_NoopAnalytics()),
-      // ignore: scoped_providers_should_specify_dependencies
-      profileCacheProvider.overrideWithValue(InMemoryProfileCache()),
-    ],
-    child: MaterialApp.router(
-      theme: AppTheme.light,
-      debugShowCheckedModeBanner: false,
-      routerConfig: router,
-    ),
-  );
-}
-
 /// ProfileInfoScreen "내 정보" 카드의 닉네임 행은 탭 시
 /// context.push('/mypage/profile/name-edit')를 호출한다.
-/// _buildWithWithdrawRouter와 동일 패턴으로 해당 경로를 선언해 검증한다.
 Widget _buildWithNameEditRouter({AuthSession? session}) {
   final repo = MockAuthRepository(initialSession: session);
   final router = GoRouter(
@@ -152,7 +110,7 @@ void main() {
     });
 
     // Figma 2760-24140 신 프로필 디자인: 닉네임은 헤더(Bold 20)와
-    // "내 정보" 카드 첫 행(값+"수정하기") 양쪽에 노출된다(의도된 중복).
+    // "내 정보" 카드 첫 행(값+"수정") 양쪽에 노출된다(의도된 중복).
     testWidgets('session이 null일 때 닉네임이 "사용자"로 표시된다', (tester) async {
       await tester.pumpWidget(_buildProfileInfoScreen(session: null));
       await tester.pumpAndSettle();
@@ -192,7 +150,7 @@ void main() {
       expect(find.text('test@kakao.com'), findsNothing);
     });
 
-    testWidgets('내 정보 카드의 닉네임 "수정하기" 행 탭 시 name-edit 화면으로 push된다', (tester) async {
+    testWidgets('내 정보 카드의 닉네임 "수정" 탭 시 name-edit 화면으로 push된다', (tester) async {
       const session = AuthSession(
         userId: 'test-user',
         provider: AuthProvider.kakao,
@@ -202,7 +160,8 @@ void main() {
       await tester.pumpWidget(_buildWithNameEditRouter(session: session));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('수정하기'));
+      // 닉네임 행이 첫 번째 "수정" 버튼.
+      await tester.tap(find.text('수정').first);
       await tester.pumpAndSettle();
 
       expect(find.byType(NameEditScreen), findsOneWidget);
@@ -215,6 +174,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.text('건강 고민'), findsOneWidget);
       expect(find.text('역류성 식도염'), findsOneWidget);
     });
 
@@ -227,64 +187,39 @@ void main() {
       expect(find.text('미설정'), findsOneWidget);
     });
 
-    testWidgets('알레르기·복용약 행이 표시된다', (tester) async {
+    testWidgets('알레르기 · 복용약 행이 표시되고 2개 이상이면 "첫항목 외 N개" 형식이다',
+        (tester) async {
+      // sampleGerd: allergies=[갑각류], medications=[omeprazole] → "갑각류 외 1개"
+      await tester.pumpWidget(_buildProfileInfoScreen(withProfile: true));
+      await tester.pumpAndSettle();
+
+      expect(find.text('알레르기 · 복용약'), findsOneWidget);
+      expect(find.text('갑각류 외 1개'), findsOneWidget);
+    });
+
+    testWidgets('알레르기·복용약이 없으면 "없음"이 표시된다', (tester) async {
+      await tester.pumpWidget(_buildProfileInfoScreen(withProfile: false));
+      await tester.pumpAndSettle();
+
+      expect(find.text('없음'), findsOneWidget);
+    });
+
+    testWidgets('우측 액션 라벨은 "수정"이며 chevron/자물쇠가 없다', (tester) async {
       await tester.pumpWidget(_buildProfileInfoScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('알레르기・복용약'), findsOneWidget);
+      expect(find.text('수정'), findsNWidgets(3));
+      expect(find.text('수정하기'), findsNothing);
     });
 
-    testWidgets('로그아웃 버튼 탭 시 확인 다이얼로그가 표시된다', (tester) async {
-      const session = AuthSession(
-        userId: 'test-user',
-        provider: AuthProvider.kakao,
-        hasAgreedTerms: true,
-      );
-      await tester.pumpWidget(_buildProfileInfoScreen(session: session));
+    testWidgets('내 계정(로그아웃/탈퇴)은 프로필 정보에 없다', (tester) async {
+      await tester.pumpWidget(_buildProfileInfoScreen());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('로그아웃'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('로그아웃 하시겠어요?'), findsOneWidget);
-    });
-
-    testWidgets('로그아웃 다이얼로그에서 취소하면 닫힌다', (tester) async {
-      const session = AuthSession(
-        userId: 'test-user',
-        provider: AuthProvider.kakao,
-        hasAgreedTerms: true,
-      );
-      await tester.pumpWidget(_buildProfileInfoScreen(session: session));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('로그아웃'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('취소하기'));
-      await tester.pumpAndSettle();
-
-      // 다이얼로그가 닫힘 → "로그아웃 하시겠어요?" 없음
-      expect(find.text('로그아웃 하시겠어요?'), findsNothing);
-    });
-
-    testWidgets('탈퇴하기 버튼 탭 시 팝업 없이 바로 탈퇴 안내 화면으로 이동한다', (tester) async {
-      const session = AuthSession(
-        userId: 'test-user',
-        provider: AuthProvider.kakao,
-        hasAgreedTerms: true,
-      );
-      await tester.pumpWidget(_buildWithWithdrawRouter(session: session));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('탈퇴하기'));
-      await tester.pumpAndSettle();
-
-      // 확인 팝업은 뜨지 않고(탈퇴 안내 화면 하단 버튼으로 확인 단계가 이동됨),
-      // WithdrawScreen으로 곧바로 push된다.
-      expect(find.text('정말 탈퇴하시겠어요?'), findsNothing);
-      expect(find.byType(WithdrawScreen), findsOneWidget);
-      expect(find.text('데이터 영구 삭제'), findsOneWidget);
+      // 마이페이지 최하단으로 이관됨.
+      expect(find.text('내 계정'), findsNothing);
+      expect(find.text('로그아웃'), findsNothing);
+      expect(find.text('탈퇴하기'), findsNothing);
     });
 
     testWidgets('getMe 실패 시 크래시 없이 기존 세션값 표시', (tester) async {

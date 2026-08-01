@@ -42,6 +42,9 @@ class _MockAuthRepository implements AuthRepository {
   Future<AuthSession> getMe() => throw UnimplementedError();
 
   @override
+  void applyLocalDisplayName(String displayName) {}
+
+  @override
   Future<void> recordTermsAgreement(TermsAgreement agreement) =>
       throw UnimplementedError();
 

@@ -154,14 +154,40 @@ class AuthController extends _$AuthController {
     unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
   }
 
+  /// in-flight [getMe] 를 무효화하기 위한 요청 세대.
+  ///
+  /// 프로필 진입 시 [getMe] 가 떠 있는 동안 닉네임을 저장하면, 늦게 도착한
+  /// 구 응답이 새 displayName 을 덮어쓰는 레이스가 난다. [updateNickname] 성공
+  /// 시 세대를 올려 그 이전 요청 결과를 버린다.
+  int _meGeneration = 0;
+
   /// GET /auth/me 를 호출해 계정 식별정보(displayName·email·profileImageUrl)를 갱신한다.
   ///
   /// 성공 시 state 를 갱신된 세션으로 교체한다.
   /// 실패 시 예외를 그대로 rethrow 하여 호출자가 처리하도록 한다.
+  ///
+  /// [updateNickname] 이후 도착한 stale 응답은 state·로컬 캐시를 덮어쓰지 않는다.
   Future<AuthSession> getMe() async {
+    final requestId = ++_meGeneration;
+    final previous = state.valueOrNull;
     final session = await ref.read(authRepositoryProvider).getMe();
-    state = AsyncValue.data(session);
-    return session;
+    if (requestId != _meGeneration) {
+      // 닉네임 변경 등으로 무효화된 stale 응답.
+      // repository._session 은 이미 구 값으로 덮였을 수 있어 현재 state 로 복구.
+      final current = state.valueOrNull;
+      final keepName = current?.displayName;
+      if (keepName != null && keepName.isNotEmpty) {
+        ref.read(authRepositoryProvider).applyLocalDisplayName(keepName);
+      }
+      return current ?? session;
+    }
+    // UserMe 가 email/profileImage 를 생략하면 기존 세션 값 유지.
+    final merged = session.copyWith(
+      email: session.email ?? previous?.email,
+      profileImageUrl: session.profileImageUrl ?? previous?.profileImageUrl,
+    );
+    state = AsyncValue.data(merged);
+    return merged;
   }
 
   /// 닉네임을 변경한다 (D3, `PATCH /my-page/nickname`).
@@ -172,10 +198,14 @@ class AuthController extends _$AuthController {
   /// Failure 타입별로 에러 문구를 분기하도록 한다.
   Future<void> updateNickname(String nickname) async {
     await ref.read(myPageRepositoryProvider).updateNickname(nickname);
+    // in-flight getMe 가 구 닉네임으로 state 를 덮지 못하게 무효화.
+    _meGeneration++;
     final current = state.valueOrNull;
     if (current != null) {
       state = AsyncValue.data(current.copyWith(displayName: nickname));
     }
+    // AuthRepositoryImpl._session 도 같이 맞춰 currentSession() 재빌드 시 유지.
+    ref.read(authRepositoryProvider).applyLocalDisplayName(nickname);
   }
 
   /// 계정 탈퇴: 서버 withdraw + 로컬 세션·프로필 캐시·타임라인 가이드 플래그 초기화.
