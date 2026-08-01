@@ -131,12 +131,11 @@ void main() {
   // 2. 화면 위젯 테스트
   // ---------------------------------------------------------------------------
   group('AllergyMedEditScreen 위젯 테스트', () {
-    testWidgets('앱바에 "알레르기" 타이틀이 표시된다', (tester) async {
+    testWidgets('앱바에 "알레르기 · 복용약" 타이틀이 표시된다', (tester) async {
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
 
-      // "알레르기"는 앱바 타이틀과 섹션 헤더 두 곳에 등장하므로 findsWidgets 사용
-      expect(find.text('알레르기'), findsWidgets);
+      expect(find.text('알레르기 · 복용약'), findsOneWidget);
     });
 
     testWidgets('헤더 "알레르기와 복용 중인 약을 알려주세요"가 표시된다', (tester) async {

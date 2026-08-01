@@ -9,6 +9,9 @@ import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
+import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
+import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/core/config/terms_catalog.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
@@ -17,6 +20,7 @@ import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/d
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
 import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
+import 'package:can_i_eat_it/features/notification/data/notification_providers.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 
 /// 마이페이지 요약 화면 (Figma 1718-7884).
@@ -28,6 +32,7 @@ import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart'
 /// - 주간 기록 카드 (mySummaryProvider 실데이터, W7)
 /// - 설정 섹션
 /// - 약관 섹션
+/// - 내 계정 섹션 (로그아웃 / 탈퇴하기)
 class MypageScreen extends ConsumerWidget {
   const MypageScreen({super.key});
 
@@ -74,37 +79,44 @@ class MypageScreen extends ConsumerWidget {
                 strokeWidth: 2.5,
               ),
             )
+          // 섹션 간 간격 24 (Figma 마이페이지 레이아웃).
           : ListView(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-                vertical: AppSpacing.cardPadding,
+                horizontal: AppSpacing.screenPadding, // 16
+                vertical: AppSpacing.sectionGap, // 24
               ),
               children: [
                 // 프로필 카드
                 _ProfileCard(session: session, profile: profile),
-                const SizedBox(height: AppSpacing.sectionGap),
+                const SizedBox(height: AppSpacing.sectionGap), // 24
 
                 // 내 음식 히스토리 카드
                 const _FoodHistoryCard(),
-                const SizedBox(height: AppSpacing.sectionGap),
+                const SizedBox(height: AppSpacing.sectionGap), // 24
 
                 // 주간 기록 카드
                 _WeeklyLogCard(
                   onViewAll: () => context.push('/weekly-report'),
                 ),
-                const SizedBox(height: AppSpacing.sectionGap),
+                const SizedBox(height: AppSpacing.sectionGap), // 24
 
                 // 설정 섹션
                 const _SectionLabel(label: '설정'),
-                const SizedBox(height: AppSpacing.cardPadding),
+                const SizedBox(height: AppSpacing.itemGap),
                 _SettingsSection(),
-                const SizedBox(height: AppSpacing.sectionGap),
+                const SizedBox(height: AppSpacing.sectionGap), // 24
 
                 // 약관 섹션
                 const _SectionLabel(label: '약관'),
-                const SizedBox(height: AppSpacing.cardPadding),
+                const SizedBox(height: AppSpacing.itemGap),
                 _TermsSection(),
-                const SizedBox(height: AppSpacing.sectionGap),
+                const SizedBox(height: AppSpacing.sectionGap), // 24
+
+                // 내 계정 섹션
+                const _SectionLabel(label: '내 계정'),
+                const SizedBox(height: AppSpacing.itemGap),
+                const _AccountSection(),
+                const SizedBox(height: AppSpacing.sectionGap), // 24
               ],
             ),
     );
@@ -131,7 +143,7 @@ class _SectionLabel extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 프로필 카드
+// 프로필 카드 (Figma: padding 16 · gap 16 · radius 16 · border #EDEDF5)
 // ---------------------------------------------------------------------------
 
 class _ProfileCard extends StatelessWidget {
@@ -155,53 +167,60 @@ class _ProfileCard extends StatelessWidget {
     final displayName = session?.displayName ?? '사용자';
     final imageUrl = session?.profileImageUrl;
 
-    return GestureDetector(
-      onTap: () => context.push('/mypage/profile'),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.sectionGap),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
-          border: Border.all(color: AppColors.borderCard),
-        ),
-        child: Row(
-          children: [
-            // 아바타
-            _Avatar(imageUrl: imageUrl),
-            const SizedBox(width: AppSpacing.cardPadding),
-            // 닉네임 + 서브텍스트
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    displayName,
-                    style: AppTextStyles.body1Bold.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
+    // 카드 전체 탭 아님 — "내 정보 수정"만 프로필 정보로 이동.
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.cardPadding), // 16
+      decoration: BoxDecoration(
+        color: AppColors.surface, // #FFF
+        borderRadius: BorderRadius.circular(AppSpacing.radiusModal), // 16
+        border: Border.all(color: AppColors.borderCard), // #EDEDF5
+      ),
+      child: Row(
+        children: [
+          _Avatar(imageUrl: imageUrl),
+          const SizedBox(width: AppSpacing.cardPadding), // gap 16
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  displayName,
+                  style: AppTextStyles.body1Bold.copyWith(
+                    color: AppColors.textPrimary,
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    _conditionSubtext,
-                    style: AppTextStyles.body2Medium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  _conditionSubtext,
+                  style: AppTextStyles.body2Medium.copyWith(
+                    color: AppColors.textSecondary,
                   ),
-                ],
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.cardPadding), // gap 16
+          // "내 정보 수정" 칩 — Figma: padding 4×12, radius 4, bg gray/30
+          // 이 버튼만 탭 시 /mypage/profile
+          Material(
+            color: AppColors.surfaceMuted, // Foundation/gray/30
+            borderRadius: BorderRadius.circular(4),
+            child: InkWell(
+              onTap: () => context.push('/mypage/profile'),
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                child: Text(
+                  '내 정보 수정',
+                  style: AppTextStyles.body2Medium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ),
             ),
-            // chevron
-            SvgPicture.asset(
-              'assets/figma_extracted/chevron_right.svg',
-              width: 24,
-              height: 24,
-              colorFilter: const ColorFilter.mode(
-                AppColors.textTertiary,
-                BlendMode.srcIn,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -489,7 +508,7 @@ class _MealStatChip extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 설정 섹션
+// 설정 섹션 (Figma: padding 24 · radius 16 · border gray · white)
 // ---------------------------------------------------------------------------
 
 class _SettingsSection extends ConsumerWidget {
@@ -497,53 +516,80 @@ class _SettingsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
-        border: Border.all(color: AppColors.border),
+        color: AppColors.surface, // Foundation white
+        borderRadius: BorderRadius.circular(AppSpacing.radiusModal), // 16
+        border: Border.all(color: AppColors.border), // 1px gray
       ),
-      child: Column(
-        children: [
-          _ListTileRow(
-            iconAsset: AppIcons.bell,
-            label: '알림 설정',
-            onTap: () => context.push('/mypage/notification-settings'),
+      child: InkWell(
+        onTap: () => context.push('/mypage/notification-settings'),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
+        // Figma: padding 24, space-between, align center
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.sectionGap), // 24
+          child: Row(
+            children: [
+              AppIcon(
+                AppIcons.bell,
+                size: AppIconSizes.s24,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(width: AppSpacing.cardPadding), // 아이콘-라벨
+              Expanded(
+                child: Text(
+                  '알림 설정',
+                  style: AppTextStyles.body1Regular.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              SvgPicture.asset(
+                'assets/figma_extracted/chevron_right.svg',
+                width: 24,
+                height: 24,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.textTertiary,
+                  BlendMode.srcIn,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// 약관 섹션
+// 약관 섹션 (Figma: padding 24 · 행 사이 24+24=48 · radius 16)
+// - 서비스 이용 약관 → 약관 상세
+// - 개인정보 수집·이용 동의 → 토글 (동의 상태, 마케팅 동의 API 연동)
 // ---------------------------------------------------------------------------
 
-class _TermsSection extends StatelessWidget {
+class _TermsSection extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 동의 토글 상태 — notification settings 의 marketing 필드를 재사용.
+    // GET /notifications/settings 에 마케팅 필드가 없으면 기본 true.
+    final consentOn = ref
+            .watch(notificationSettingsControllerProvider)
+            .valueOrNull
+            ?.marketingPushEnabled ??
+        true;
+
     return Container(
+      padding: const EdgeInsets.all(AppSpacing.sectionGap), // 24
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _ListTileRow(
-            label: '개인정보 보호 약관',
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const TermsDetailScreen(
-                  title: '개인정보 처리방침',
-                  url: TermsCatalog.privacyUrl,
-                ),
-              ),
-            ),
-          ),
-          const Divider(height: 1, color: AppColors.divider),
-          _ListTileRow(
-            label: '서비스 이용 약관',
-            onTap: () => Navigator.of(context).push(
+          // 서비스 이용 약관 + chevron
+          // rootNavigator: 바텀 탭 셸 위로 올려 탭바가 가리지 않게 한다.
+          InkWell(
+            onTap: () => Navigator.of(context, rootNavigator: true).push(
               MaterialPageRoute(
                 builder: (_) => const TermsDetailScreen(
                   title: '서비스 이용약관',
@@ -551,22 +597,143 @@ class _TermsSection extends StatelessWidget {
                 ),
               ),
             ),
-          ),
-          const Divider(height: 1, color: AppColors.divider),
-          _ListTileRow(
-            label: '마케팅 정보 수신',
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const TermsDetailScreen(
-                  title: '마케팅 정보 수신 동의',
-                  url: TermsCatalog.marketingUrl,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '서비스 이용 약관',
+                    style: AppTextStyles.body1Regular.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
                 ),
+                SvgPicture.asset(
+                  'assets/figma_extracted/chevron_right.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.textTertiary,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // 행 사이 24 + 구분선 + 24 (= 48)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.sectionGap),
+            child: Divider(
+              height: 1,
+              thickness: 1,
+              color: AppColors.divider,
+            ),
+          ),
+          // 개인정보 수집·이용 동의 + Switch
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '개인정보 수집·이용 동의',
+                  style: AppTextStyles.body1Regular.copyWith(
+                    color: AppColors.textPrimary,
+                    decoration: TextDecoration.underline,
+                    decorationColor: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              Switch.adaptive(
+                value: consentOn,
+                activeTrackColor: const Color(0xFF34C759),
+                onChanged: (_) => _onConsentToggle(context, ref),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _onConsentToggle(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref
+          .read(notificationSettingsControllerProvider.notifier)
+          .toggleMarketing();
+    } catch (_) {
+      if (context.mounted) {
+        await showAppToast(context, '동의 설정 변경에 실패했어요.');
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 내 계정 섹션 (로그아웃 / 탈퇴하기)
+// Figma: 카드 padding 24 · 행 사이 24+24=48 · radius 16
+// ---------------------------------------------------------------------------
+
+class _AccountSection extends ConsumerWidget {
+  const _AccountSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.sectionGap), // 24
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InkWell(
+            onTap: () => _onLogout(context, ref),
+            child: Text(
+              '로그아웃',
+              style: AppTextStyles.body1Regular.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          // 행 사이 24 + 구분선 + 24 (= 48)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.sectionGap),
+            child: Divider(
+              height: 1,
+              thickness: 1,
+              color: AppColors.divider,
+            ),
+          ),
+          InkWell(
+            onTap: () => context.push('/mypage/withdraw'),
+            child: Text(
+              '탈퇴하기',
+              style: AppTextStyles.body1Regular.copyWith(
+                color: AppColors.danger,
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _onLogout(BuildContext context, WidgetRef ref) async {
+    final action = await showConfirmModal(
+      context,
+      title: '로그아웃 하시겠어요?',
+      // Figma 577:10285: Primary(green)=취소하기(안전), Secondary=로그아웃하기.
+      primaryLabel: '취소하기',
+      primaryColor: AppColors.primary,
+      secondaryLabel: '로그아웃하기',
+    );
+
+    if (action != ConfirmModalAction.secondary) return;
+    await ref
+        .read(globalLoadingControllerProvider.notifier)
+        .run(() => ref.read(authControllerProvider.notifier).logout());
+    if (!context.mounted) return;
+    context.go('/login');
   }
 }
 

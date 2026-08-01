@@ -165,7 +165,7 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
           },
         ),
         title: Text(
-          '알레르기',
+          '알레르기 · 복용약',
           style: AppTextStyles.body1Bold.copyWith(
             color: AppColors.textPrimary,
           ),
