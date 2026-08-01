@@ -13,16 +13,12 @@ import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dar
 /// - `ListView.separated`(가로 스크롤), itemCount=해당월 일수. `LayoutBuilder`로
 ///   뷰포트 가용폭을 받아 셀 폭 = `(viewportWidth - gap*6) / 7`로 계산 —
 ///   한 화면에 정확히 7칸이 맞고 나머지는 횡스크롤. 칸 간 gap 8.
-/// - 진입/월변경/선택일변경 시 대상일이 뷰포트 "가운데"에 오도록 스크롤
-///   (`offset = index*(cellWidth+gap) - (viewportWidth-cellWidth)/2`,
-///   0~maxScrollExtent로 clamp — 월초/월말에서 자동으로 가장자리 정렬).
-/// - DayCell(기존 스타일 유지): 요일(일=빨강, 그외 secondary, 오늘칸="오늘") /
-///   날짜 숫자(기본 secondary, 미래 `#BBBBBB`) / 도트(최대 3, VerdictLevel 색상).
-///   선택일 = 검정 세로 캡슐(`#222222`) + 흰 텍스트.
+/// - DayCell: 선택일 = 검정 세로 캡슐(`#222222`, radius 16) + 흰 텍스트.
 ///
 /// [visibleMonth]: 현재 표시 중인 월 (연/월만 사용, day 무시).
 /// [selectedDate]: 현재 선택된 날짜.
 /// [today]: 오늘 날짜 (결정적 렌더를 위해 외부 주입 — 테스트·골든에서 고정값 사용).
+/// [minDate]: 가입일 하한. null이면 가입 전 스타일 없음.
 /// [dotsByDate]: 날짜별 도트 색상 목록 (최대 3개씩 표시).
 /// [onDaySelected]: 날짜 탭 콜백.
 class WeekStrip extends StatefulWidget {
@@ -31,6 +27,7 @@ class WeekStrip extends StatefulWidget {
     required this.visibleMonth,
     required this.selectedDate,
     required this.today,
+    this.minDate,
     this.dotsByDate = const {},
     required this.onDaySelected,
   });
@@ -43,6 +40,9 @@ class WeekStrip extends StatefulWidget {
 
   /// 오늘 날짜 (외부 주입 — KST 오늘 또는 테스트 고정값).
   final DateTime today;
+
+  /// 가입일 하한 (날짜만). 이전 날짜 숫자는 gray60.
+  final DateTime? minDate;
 
   /// 날짜별 도트 VerdictLevel 목록.
   ///
@@ -109,18 +109,38 @@ class _WeekStripState extends State<WeekStrip> {
     return 1;
   }
 
-  /// 대상 날짜가 뷰포트 "가운데"에 오도록 스크롤 (월초/월말 등 가운데 정렬이
-  /// 불가능한 경계에서는 clamp가 자동으로 가장자리에 맞춘다).
+  /// 대상 날짜가 뷰포트 "가운데"에 오도록 스크롤.
+  ///
+  /// 월 일수 변경 직후 maxScrollExtent가 한 프레임 늦게 갱신되면 말일(30/31)이
+  /// 잘릴 수 있어, 즉시 1회 + 다음 프레임에 1회 더 맞춘다.
+  /// 월초·월말은 가운데 대신 가장자리(0 / max)로 핀해 끝 칸이 잘리지 않게 한다.
   void _scrollToTarget() {
-    if (!mounted || !_scrollController.hasClients) return;
-    final viewportWidth = _viewportWidth;
-    if (viewportWidth == null) return;
-    final cellWidth = _cellWidthFor(viewportWidth);
-    final index = _targetDay() - 1;
-    final offset =
-        index * (cellWidth + _cellGap) - (viewportWidth - cellWidth) / 2;
-    final maxExtent = _scrollController.position.maxScrollExtent;
-    _scrollController.jumpTo(offset.clamp(0.0, maxExtent));
+    void apply() {
+      if (!mounted || !_scrollController.hasClients) return;
+      final viewportWidth = _viewportWidth;
+      if (viewportWidth == null) return;
+      final cellWidth = _cellWidthFor(viewportWidth);
+      final daysInMonth = DateUtils.getDaysInMonth(
+        widget.visibleMonth.year,
+        widget.visibleMonth.month,
+      );
+      final index = (_targetDay() - 1).clamp(0, daysInMonth - 1);
+      final maxExtent = _scrollController.position.maxScrollExtent;
+      final double offset;
+      // 앞쪽 3일 / 뒤쪽 3일은 가장자리 정렬 — 말일 "30" 잘림 방지.
+      if (index <= 2) {
+        offset = 0;
+      } else if (index >= daysInMonth - 3) {
+        offset = maxExtent;
+      } else {
+        offset =
+            index * (cellWidth + _cellGap) - (viewportWidth - cellWidth) / 2;
+      }
+      _scrollController.jumpTo(offset.clamp(0.0, maxExtent));
+    }
+
+    apply();
+    WidgetsBinding.instance.addPostFrameCallback((_) => apply());
   }
 
   @override
@@ -141,11 +161,11 @@ class _WeekStripState extends State<WeekStrip> {
           ),
         ],
       ),
-      // Figma 실측: padding 세로 16, 가로 0 (ListView가 가로 스크롤 여백을 담당).
+      // Figma 실측: padding 세로 16, 가로 0.
+      // 총 높이(테두리 포함) 116 = border 2 + padding 32 + 리스트 82
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.itemGap * 2),
-      // TODO(figma): 정확한 카드 높이 실측 필요 — 요일라벨+날짜숫자+도트행 기준 임시값.
       child: SizedBox(
-        height: 88,
+        height: 82,
         child: LayoutBuilder(
           builder: (context, constraints) {
             final viewportWidth = constraints.maxWidth;
@@ -171,6 +191,7 @@ class _WeekStripState extends State<WeekStrip> {
                 final isSelected = _isSameDay(day, widget.selectedDate);
                 final isToday = _isSameDay(day, widget.today);
                 final isFuture = _isAfterDay(day, widget.today);
+                final isBeforeJoin = _isBeforeDay(day, widget.minDate);
                 final isSunday = day.weekday == DateTime.sunday;
                 final isSaturday = day.weekday == DateTime.saturday;
                 final dots = widget.dotsByDate[
@@ -187,6 +208,7 @@ class _WeekStripState extends State<WeekStrip> {
                     isSunday: isSunday,
                     isSaturday: isSaturday,
                     isFuture: isFuture,
+                    isBeforeJoin: isBeforeJoin,
                     dots: dots.take(3).toList(),
                     onTap: () => widget.onDaySelected(day),
                   ),
@@ -208,6 +230,14 @@ class _WeekStripState extends State<WeekStrip> {
     final t = DateTime(today.year, today.month, today.day);
     return d.isAfter(t);
   }
+
+  /// day 가 가입일([minDate])보다 과거인지. minDate null 이면 false.
+  static bool _isBeforeDay(DateTime day, DateTime? minDate) {
+    if (minDate == null) return false;
+    final d = DateTime(day.year, day.month, day.day);
+    final m = DateTime(minDate.year, minDate.month, minDate.day);
+    return d.isBefore(m);
+  }
 }
 
 /// 캘린더 개별 날짜 칸 (기존 WeekStrip _DayCell 스타일 유지).
@@ -219,6 +249,7 @@ class _DayCell extends StatelessWidget {
     required this.isSunday,
     required this.isSaturday,
     required this.isFuture,
+    required this.isBeforeJoin,
     required this.dots,
     required this.onTap,
   });
@@ -229,33 +260,37 @@ class _DayCell extends StatelessWidget {
   final bool isSunday;
   final bool isSaturday;
   final bool isFuture;
+  final bool isBeforeJoin;
   final List<VerdictLevel> dots;
   final VoidCallback onTap;
 
   /// 요일 라벨 색상 결정.
   ///
   /// 선택일 라벨은 검정 캡슐 안에 놓이므로 흰색(surface)이 최우선.
-  /// 그 외 우선순위: 미래(회색) < 일요일(빨강) < 토요일(파랑) < 기본(secondary).
-  /// (Figma 2794-26223: 주말만 색상, 평일은 secondary. 미래=비활성 회색.)
+  /// 일요일은 Foundation semantic red (`AppColors.calendarSunday` = #FF383C)
+  /// — 미래 일요일이어도 빨강 유지 (isFuture보다 우선).
+  /// 그 외: 토요일 파랑 / 미래·기본 secondary(fontColor50).
   Color _labelColor() {
     if (isSelected) return AppColors.surface; // 선택 캡슐 안 흰색
-    if (isFuture) return AppColors.textSecondary; // 미래에도 요일 라벨은 회색 유지
-    if (isSunday) return AppColors.calendarSunday; // 일요일 빨강
-    if (isSaturday) return AppColors.calendarSaturday; // 토요일 파랑
+    if (isSunday) return AppColors.calendarSunday; // semanticRed
+    if (isSaturday) return AppColors.calendarSaturday; // semanticBlue
+    if (isFuture) return AppColors.textSecondary; // fontColor50
     return AppColors.textSecondary;
   }
 
   /// 날짜 숫자 색상 결정.
+  ///
+  /// 선택 > 가입일 이전(gray60) > 미래(fontColor50) > 기본(fontColor50).
   Color _numberColor() {
     if (isSelected) return AppColors.surface; // 캡슐 안 흰색
-    if (isFuture) return const Color(0xFFBBBBBB); // Figma 실측: 미래 날짜 숫자
+    if (isBeforeJoin) return AppColors.controlDisabled; // gray60 #BBBBBB
+    if (isFuture) return AppColors.textSecondary; // fontColor50
     return AppColors.textSecondary;
   }
 
   @override
   Widget build(BuildContext context) {
     // 선택일은 요일+숫자+도트를 감싸는 검정 세로 캡슐(흰 텍스트).
-    // 숫자만 감싸는 원형이 아니다.
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -273,7 +308,6 @@ class _DayCell extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 요일 라벨 (또는 "오늘")
             Text(
               dayLabel,
               style: AppTextStyles.caption1Medium.copyWith(
@@ -281,13 +315,11 @@ class _DayCell extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
-            // 날짜 숫자
             Text(
               '$dayNumber',
               style: AppTextStyles.body1Bold.copyWith(color: _numberColor()),
             ),
             const SizedBox(height: AppSpacing.xs),
-            // 도트 (최대 3개)
             _DotRow(dots: dots),
           ],
         ),

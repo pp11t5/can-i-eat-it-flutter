@@ -47,6 +47,9 @@ abstract final class AppColors {
   static const Color textSecondary = ColorPrimitives.fontColor50;
   static const Color textTertiary = ColorPrimitives.fontColor20;
 
+  /// 비활성 컨트롤/아이콘 (Figma gray60 #BBBBBB).
+  static const Color controlDisabled = ColorPrimitives.gray60;
+
   // --- 선·구분선 ---
 
   static const Color border = ColorPrimitives.gray40;

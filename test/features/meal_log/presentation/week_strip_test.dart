@@ -23,6 +23,7 @@ void main() {
     DateTime? month,
     DateTime? selectedDate,
     DateTime? todayOverride,
+    DateTime? minDate,
     Map<DateTime, List<VerdictLevel>> dotsByDate = const {},
     ValueChanged<DateTime>? onDaySelected,
   }) {
@@ -30,6 +31,7 @@ void main() {
       visibleMonth: month ?? visibleMonth,
       selectedDate: selectedDate ?? today,
       today: todayOverride ?? today,
+      minDate: minDate,
       dotsByDate: dotsByDate,
       onDaySelected: onDaySelected ?? (_) {},
     );
@@ -110,15 +112,42 @@ void main() {
         sundayTexts.any((t) => t.style?.color == AppColors.calendarSunday),
         isTrue,
       );
+      // calendarSunday = Foundation semanticRed
+      expect(AppColors.calendarSunday, equals(const Color(0xFFFF383C)));
+    });
+
+    testWidgets('미래 일요일 요일 라벨도 semanticRed(calendarSunday)이다',
+        (tester) async {
+      // today=6/14(일) → 6/21은 미래 일요일
+      final earlyToday = DateTime(2026, 6, 14);
+      await tester.pumpWidget(
+        _wrap(buildStrip(
+          selectedDate: earlyToday,
+          todayOverride: earlyToday,
+        )),
+      );
+      await tester.pump();
+      await tester.scrollUntilVisible(
+        find.text('21'),
+        100.0,
+        scrollable: find.byType(Scrollable),
+      );
+
+      // 21일 칸의 "일" 라벨이 red 인 것 — 뷰포트 내 "일" 중 calendarSunday 존재
+      final sundayLabels = tester.widgetList<Text>(find.text('일'));
+      expect(
+        sundayLabels.any((t) => t.style?.color == AppColors.calendarSunday),
+        isTrue,
+      );
     });
   });
 
   // ---------------------------------------------------------------------------
-  // 미래 날짜 회색
+  // 날짜 숫자 색 (미래 / 가입일 이전)
   // ---------------------------------------------------------------------------
 
-  group('WeekStrip — 미래 날짜 회색', () {
-    testWidgets('미래 날짜 숫자가 #BBBBBB 색으로 렌더된다', (tester) async {
+  group('WeekStrip — 날짜 숫자 색', () {
+    testWidgets('미래 날짜 숫자는 fontColor50(textSecondary)이다', (tester) async {
       // today = 2026-06-14 → 15일은 미래
       final earlyToday = DateTime(2026, 6, 14);
       await tester.pumpWidget(
@@ -132,7 +161,27 @@ void main() {
       final futureNum = tester.widget<Text>(find.text('15'));
       expect(
         futureNum.style?.color,
-        equals(const Color(0xFFBBBBBB)),
+        equals(AppColors.textSecondary),
+      );
+    });
+
+    testWidgets('가입일 이전 날짜 숫자는 gray60(controlDisabled)이다', (tester) async {
+      // today 6/17, 가입일 6/10 → 9일은 가입 전. selected=9로 스크롤 대상에 맞춤.
+      final dayBeforeJoin = DateTime(2026, 6, 9);
+      await tester.pumpWidget(
+        _wrap(buildStrip(
+          selectedDate: dayBeforeJoin,
+          todayOverride: today,
+          minDate: DateTime(2026, 6, 10),
+        )),
+      );
+      await tester.pumpAndSettle();
+
+      // 선택 상태면 흰색이므로 다른 가입 전 날(8) 확인
+      final pastJoinNum = tester.widget<Text>(find.text('8'));
+      expect(
+        pastJoinNum.style?.color,
+        equals(AppColors.controlDisabled),
       );
     });
 
@@ -241,18 +290,15 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('WeekStrip — 셀 폭 7칸 fit', () {
-    testWidgets('셀 폭 = (뷰포트폭 - gap*6) / 7 로 계산되어 7칸이 정확히 들어간다', (tester) async {
+    testWidgets('셀 폭 = (뷰포트폭 - gap*6) / 7 로 계산되어 7칸이 정확히 들어간다',
+        (tester) async {
       await tester.pumpWidget(_wrap(buildStrip()));
       await tester.pump();
 
-      // 실제 가로 스크롤 뷰포트 폭(Scrollable) — WeekStrip 카드 자체 폭에서
-      // Border.all(1) 만큼 좌우로 줄어드므로 카드 폭이 아닌 뷰포트로 측정한다.
       final viewportWidth = tester.getSize(find.byType(Scrollable)).width;
       const gap = 8.0;
       final expectedCellWidth = (viewportWidth - gap * 6) / 7;
 
-      // 기본 선택일(17일) 칸의 실측 폭이 계산식과 일치해야 한다 (17일은
-      // 선택일이라 항상 빌드·가시 상태).
       final selectedCellFinder = find
           .ancestor(
             of: find.text('17'),
@@ -263,8 +309,6 @@ void main() {
 
       expect(cellWidth, closeTo(expectedCellWidth, 0.5));
 
-      // 7칸 + gap 6개 폭 합이 뷰포트 폭과 근사(오차 1px 이내)해야 한다 —
-      // 즉 스크롤 없이 정확히 7개가 화면에 맞는다는 뜻.
       final sevenCellsWidth = expectedCellWidth * 7 + gap * 6;
       expect(sevenCellsWidth, closeTo(viewportWidth, 1.0));
     });
@@ -293,7 +337,6 @@ void main() {
         position.pixels,
         closeTo(expectedOffset.clamp(0.0, position.maxScrollExtent), 0.5),
       );
-      // 좌측 정렬(offset = index*(cellWidth+gap))이 아님을 함께 확인.
       expect(position.pixels, isNot(closeTo(index * (cellWidth + gap), 1.0)));
     });
 

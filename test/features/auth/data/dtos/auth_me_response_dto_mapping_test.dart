@@ -58,6 +58,35 @@ void main() {
     });
   });
 
+  group('AuthMeResponseDto.fromJson — createdDate 가입일', () {
+    test('서버 키 createdDate(YYYY-MM-DD)를 AuthSession.createdAt 날짜로 매핑한다', () {
+      final dto = AuthMeResponseDto.fromJson(const {
+        'userId': '37',
+        'nickname': '넉넉한 고래',
+        'createdDate': '2026-08-01',
+      });
+      expect(dto.createdDate, '2026-08-01');
+      final session = dto.toEntity(AuthProvider.kakao);
+      expect(session.createdAt, DateTime(2026, 8, 1));
+    });
+
+    test('createdDate 누락 시 createdAt 은 null 이다', () {
+      final dto = AuthMeResponseDto.fromJson(const {
+        'userId': '37',
+        'nickname': '테스트',
+      });
+      expect(dto.toEntity(AuthProvider.kakao).createdAt, isNull);
+    });
+
+    test('createdDate ISO datetime 도 날짜만 남긴다', () {
+      final dto = AuthMeResponseDto.fromJson(const {
+        'userId': '1',
+        'createdDate': '2026-07-16T12:34:56',
+      });
+      expect(dto.toEntity(AuthProvider.kakao).createdAt, DateTime(2026, 7, 16));
+    });
+  });
+
   group('AuthSession — 기존 생성처 nullable 필드 기본값', () {
     test('displayName/email/profileImageUrl 미지정 시 모두 null 이다', () {
       const session = AuthSession(

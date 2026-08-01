@@ -22,6 +22,9 @@ mixin _$AuthSession {
   String? get email;
   String? get profileImageUrl;
 
+  /// 가입일 (연·월·일만 의미 있음). 캘린더 하한 등에 사용.
+  DateTime? get createdAt;
+
   /// Create a copy of AuthSession
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -45,16 +48,18 @@ mixin _$AuthSession {
                 other.displayName == displayName) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.profileImageUrl, profileImageUrl) ||
-                other.profileImageUrl == profileImageUrl));
+                other.profileImageUrl == profileImageUrl) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, userId, provider, hasAgreedTerms,
-      accountStatus, displayName, email, profileImageUrl);
+      accountStatus, displayName, email, profileImageUrl, createdAt);
 
   @override
   String toString() {
-    return 'AuthSession(userId: $userId, provider: $provider, hasAgreedTerms: $hasAgreedTerms, accountStatus: $accountStatus, displayName: $displayName, email: $email, profileImageUrl: $profileImageUrl)';
+    return 'AuthSession(userId: $userId, provider: $provider, hasAgreedTerms: $hasAgreedTerms, accountStatus: $accountStatus, displayName: $displayName, email: $email, profileImageUrl: $profileImageUrl, createdAt: $createdAt)';
   }
 }
 
@@ -71,7 +76,8 @@ abstract mixin class $AuthSessionCopyWith<$Res> {
       AccountStatus accountStatus,
       String? displayName,
       String? email,
-      String? profileImageUrl});
+      String? profileImageUrl,
+      DateTime? createdAt});
 }
 
 /// @nodoc
@@ -93,6 +99,7 @@ class _$AuthSessionCopyWithImpl<$Res> implements $AuthSessionCopyWith<$Res> {
     Object? displayName = freezed,
     Object? email = freezed,
     Object? profileImageUrl = freezed,
+    Object? createdAt = freezed,
   }) {
     return _then(_self.copyWith(
       userId: null == userId
@@ -123,6 +130,10 @@ class _$AuthSessionCopyWithImpl<$Res> implements $AuthSessionCopyWith<$Res> {
           ? _self.profileImageUrl
           : profileImageUrl // ignore: cast_nullable_to_non_nullable
               as String?,
+      createdAt: freezed == createdAt
+          ? _self.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ));
   }
 }
@@ -227,7 +238,8 @@ extension AuthSessionPatterns on AuthSession {
             AccountStatus accountStatus,
             String? displayName,
             String? email,
-            String? profileImageUrl)?
+            String? profileImageUrl,
+            DateTime? createdAt)?
         $default, {
     required TResult orElse(),
   }) {
@@ -241,7 +253,8 @@ extension AuthSessionPatterns on AuthSession {
             _that.accountStatus,
             _that.displayName,
             _that.email,
-            _that.profileImageUrl);
+            _that.profileImageUrl,
+            _that.createdAt);
       case _:
         return orElse();
     }
@@ -269,7 +282,8 @@ extension AuthSessionPatterns on AuthSession {
             AccountStatus accountStatus,
             String? displayName,
             String? email,
-            String? profileImageUrl)
+            String? profileImageUrl,
+            DateTime? createdAt)
         $default,
   ) {
     final _that = this;
@@ -282,7 +296,8 @@ extension AuthSessionPatterns on AuthSession {
             _that.accountStatus,
             _that.displayName,
             _that.email,
-            _that.profileImageUrl);
+            _that.profileImageUrl,
+            _that.createdAt);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -309,7 +324,8 @@ extension AuthSessionPatterns on AuthSession {
             AccountStatus accountStatus,
             String? displayName,
             String? email,
-            String? profileImageUrl)?
+            String? profileImageUrl,
+            DateTime? createdAt)?
         $default,
   ) {
     final _that = this;
@@ -322,7 +338,8 @@ extension AuthSessionPatterns on AuthSession {
             _that.accountStatus,
             _that.displayName,
             _that.email,
-            _that.profileImageUrl);
+            _that.profileImageUrl,
+            _that.createdAt);
       case _:
         return null;
     }
@@ -339,7 +356,8 @@ class _AuthSession implements AuthSession {
       this.accountStatus = AccountStatus.active,
       this.displayName,
       this.email,
-      this.profileImageUrl});
+      this.profileImageUrl,
+      this.createdAt});
 
   @override
   final String userId;
@@ -357,6 +375,10 @@ class _AuthSession implements AuthSession {
   final String? email;
   @override
   final String? profileImageUrl;
+
+  /// 가입일 (연·월·일만 의미 있음). 캘린더 하한 등에 사용.
+  @override
+  final DateTime? createdAt;
 
   /// Create a copy of AuthSession
   /// with the given fields replaced by the non-null parameter values.
@@ -382,16 +404,18 @@ class _AuthSession implements AuthSession {
                 other.displayName == displayName) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.profileImageUrl, profileImageUrl) ||
-                other.profileImageUrl == profileImageUrl));
+                other.profileImageUrl == profileImageUrl) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, userId, provider, hasAgreedTerms,
-      accountStatus, displayName, email, profileImageUrl);
+      accountStatus, displayName, email, profileImageUrl, createdAt);
 
   @override
   String toString() {
-    return 'AuthSession(userId: $userId, provider: $provider, hasAgreedTerms: $hasAgreedTerms, accountStatus: $accountStatus, displayName: $displayName, email: $email, profileImageUrl: $profileImageUrl)';
+    return 'AuthSession(userId: $userId, provider: $provider, hasAgreedTerms: $hasAgreedTerms, accountStatus: $accountStatus, displayName: $displayName, email: $email, profileImageUrl: $profileImageUrl, createdAt: $createdAt)';
   }
 }
 
@@ -410,7 +434,8 @@ abstract mixin class _$AuthSessionCopyWith<$Res>
       AccountStatus accountStatus,
       String? displayName,
       String? email,
-      String? profileImageUrl});
+      String? profileImageUrl,
+      DateTime? createdAt});
 }
 
 /// @nodoc
@@ -432,6 +457,7 @@ class __$AuthSessionCopyWithImpl<$Res> implements _$AuthSessionCopyWith<$Res> {
     Object? displayName = freezed,
     Object? email = freezed,
     Object? profileImageUrl = freezed,
+    Object? createdAt = freezed,
   }) {
     return _then(_AuthSession(
       userId: null == userId
@@ -462,6 +488,10 @@ class __$AuthSessionCopyWithImpl<$Res> implements _$AuthSessionCopyWith<$Res> {
           ? _self.profileImageUrl
           : profileImageUrl // ignore: cast_nullable_to_non_nullable
               as String?,
+      createdAt: freezed == createdAt
+          ? _self.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ));
   }
 }
