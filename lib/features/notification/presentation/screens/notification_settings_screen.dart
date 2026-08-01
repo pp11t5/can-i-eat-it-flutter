@@ -120,7 +120,8 @@ class _NotificationSettingsScreenState
       setState(() => _showTransitionIndicator = true);
       await Future<void>.delayed(const Duration(milliseconds: 400));
       if (!mounted) return;
-      await ref.refresh(osNotificationBlockedProvider.future);
+      ref.invalidate(osNotificationBlockedProvider);
+      await ref.read(osNotificationBlockedProvider.future);
     } catch (_) {
       // best-effort — 실패해도 기존 UI 유지
     } finally {

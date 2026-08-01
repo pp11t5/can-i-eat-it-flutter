@@ -570,7 +570,7 @@ class _SettingsSection extends ConsumerWidget {
           padding: const EdgeInsets.all(AppSpacing.sectionGap), // 24
           child: Row(
             children: [
-              AppIcon(
+              const AppIcon(
                 AppIcons.bell,
                 size: AppIconSizes.s24,
                 color: AppColors.textSecondary,
@@ -776,64 +776,5 @@ class _AccountSection extends ConsumerWidget {
         .run(() => ref.read(authControllerProvider.notifier).logout());
     if (!context.mounted) return;
     context.go('/login');
-  }
-}
-
-// ---------------------------------------------------------------------------
-// 공용 ListTile 행
-// ---------------------------------------------------------------------------
-
-class _ListTileRow extends StatelessWidget {
-  const _ListTileRow({
-    required this.label,
-    required this.onTap,
-    this.iconAsset,
-  });
-
-  final String? iconAsset;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.cardPadding,
-          vertical: AppSpacing.cardPadding,
-        ),
-        child: Row(
-          children: [
-            if (iconAsset != null) ...[
-              AppIcon(
-                iconAsset!,
-                size: AppIconSizes.s24,
-                color: AppColors.textSecondary,
-              ),
-              const SizedBox(width: AppSpacing.cardPadding),
-            ],
-            Expanded(
-              child: Text(
-                label,
-                style: AppTextStyles.body1Regular.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-            SvgPicture.asset(
-              'assets/figma_extracted/chevron_right.svg',
-              width: 24,
-              height: 24,
-              colorFilter: const ColorFilter.mode(
-                AppColors.textTertiary,
-                BlendMode.srcIn,
-              ),
-                ),
-          ],
-        ),
-      ),
-    );
   }
 }

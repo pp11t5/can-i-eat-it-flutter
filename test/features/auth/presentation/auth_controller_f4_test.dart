@@ -6,7 +6,6 @@ import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
-import 'package:can_i_eat_it/features/auth/data/repositories/mock_my_page_for_nickname.dart';
 import '../../../core/push/fcm_test_helpers.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
@@ -48,6 +47,8 @@ ProviderContainer _makeContainer({
       timelineGuideStoreProvider.overrideWithValue(
         guideStore ?? InMemoryTimelineGuideStore(),
       ),
+      // updateNickname 이 myPageRepository 를 호출하므로 Mock 으로 주입.
+      myPageRepositoryProvider.overrideWithValue(MockMyPageRepository.seeded()),
     ],
   );
   addTearDown(container.dispose);
@@ -200,9 +201,11 @@ void main() {
         ),
       );
       final container = _makeContainer(repo: repo);
-      // myPageRepository 는 기본 Mock — updateNickname no-op 성공
-      await container.read(authControllerProvider.future);
+      // AutoDispose: 리스너 없으면 in-flight 중 notifier 가 재생성되어 generation 가드가 깨진다.
+      final sub = container.listen(authControllerProvider, (_, __) {});
+      addTearDown(sub.close);
 
+      await container.read(authControllerProvider.future);
       final controller = container.read(authControllerProvider.notifier);
 
       // 1) getMe 시작 (지연) — 응답 시 여전히 '이전이름'을 돌려줌
@@ -229,30 +232,32 @@ void main() {
 
 /// getMe 가 완료되기 전에 updateNickname 이 끼어들 수 있도록 지연을 둔 fake.
 class _DelayedGetMeAuthRepository extends MockAuthRepository {
-  _DelayedGetMeAuthRepository({required super.initialSession});
+  _DelayedGetMeAuthRepository({required AuthSession initialSession})
+      : _displayName = initialSession.displayName,
+        super(initialSession: initialSession);
 
-  final _getMeDelay = Completer<void>();
+  String? _displayName;
 
-  /// 테스트가 getMe 를 풀어줄 때 사용. 생성 직후 자동으로 한 tick 뒤 complete.
   @override
   Future<AuthSession> getMe() async {
     // 한 프레임 이상 지연해 updateNickname 이 끼어들 틈을 준다.
     await Future<void>.delayed(const Duration(milliseconds: 50));
-    // 서버가 아직 구 닉네임을 돌려주는 상황 재현 — 내부 세션을 건드리지 않고
-    // '이전이름' 스냅샷을 반환한 뒤 _session 도 그 값으로 덮는다(실구현과 동일).
-    final stale = const AuthSession(
+    // 서버가 아직 구 닉네임을 돌려주는 상황 재현 — 내부 세션을 의도적으로 덮는다.
+    const stale = AuthSession(
       userId: 'mock-user',
       provider: AuthProvider.kakao,
       hasAgreedTerms: true,
       displayName: '이전이름',
     );
-    // applyLocalDisplayName 복구 검증을 위해 의도적으로 구 값으로 덮음.
     applyLocalDisplayName('이전이름');
     return stale;
   }
 
-  String? get currentDisplayName {
-    // ignore: invalid_use_of_visible_for_testing_member
-    return null;
+  @override
+  void applyLocalDisplayName(String displayName) {
+    super.applyLocalDisplayName(displayName);
+    _displayName = displayName;
   }
+
+  String? get currentDisplayName => _displayName;
 }
