@@ -15,15 +15,20 @@ class StateRecordCard extends StatelessWidget {
 
   final StateRecord record;
 
-  /// 식후 경과 분 → "식후 N분" 표시 레이블.
+  /// 식사 대비 경과 분 → 표시 레이블.
   ///
-  /// 음수 분은 표시상 0으로 클램프한다 (식후 개념 하한).
+  /// 음수(증상 시각이 식사 이전) → "식사 전 N분/시간".
+  /// 0 이상 → "식후 N분/시간".
   static String _timingLabel(int minutes) {
-    final m = minutes < 0 ? 0 : minutes;
-    if (m < 60) return '식후 $m분';
-    final h = m ~/ 60;
-    final rem = m % 60;
-    return rem == 0 ? '식후 $h시간' : '식후 $h시간 $rem분';
+    if (minutes < 0) return _formatRelativeMinutes(minutes.abs(), prefix: '식사 전');
+    return _formatRelativeMinutes(minutes, prefix: '식후');
+  }
+
+  static String _formatRelativeMinutes(int minutes, {required String prefix}) {
+    if (minutes < 60) return '$prefix $minutes분';
+    final h = minutes ~/ 60;
+    final rem = minutes % 60;
+    return rem == 0 ? '$prefix $h시간' : '$prefix $h시간 $rem분';
   }
 
   @override

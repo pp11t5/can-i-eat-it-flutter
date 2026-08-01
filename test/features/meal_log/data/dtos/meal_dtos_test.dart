@@ -144,7 +144,7 @@ void main() {
       expect(entity.label, '심함');
     });
 
-    test('음수 timingMinutes는 0으로 클램프한다', () {
+    test('음수 timingMinutes는 보존한다 (표시 레이어에서 식사 전 …)', () {
       final entity = StateRecordDto.fromJson(const {
         'stateRecordId': 'sr3',
         'label': 'uncomfortable',
@@ -152,7 +152,7 @@ void main() {
         'timingMinutes': -356,
       }).toEntity();
       expect(entity.label, '불편함');
-      expect(entity.timingMinutes, 0);
+      expect(entity.timingMinutes, -356);
     });
   });
 

@@ -70,12 +70,12 @@ abstract class StateRecordDto with _$StateRecordDto {
 extension StateRecordDtoMapper on StateRecordDto {
   /// 서버 계약 정규화:
   /// - [label]: enum code(`severe`) → 한글 표시 라벨(`심함`)
-  /// - [timingMinutes]: 음수(증상 시각이 식사 이전 등) → 0 (식후 분 하한)
+  /// - [timingMinutes]: 음수 유지 (표시 레이어에서 "식사 전 N시간 M분"으로 포맷)
   StateRecord toEntity() => StateRecord(
         stateRecordId: stateRecordId,
         label: SymptomStateMapper.displayLabel(label),
         date: date,
-        timingMinutes: timingMinutes < 0 ? 0 : timingMinutes,
+        timingMinutes: timingMinutes,
       );
 }
 

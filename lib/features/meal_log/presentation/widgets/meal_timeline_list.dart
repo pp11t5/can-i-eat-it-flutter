@@ -238,12 +238,21 @@ Color _verdictColor(VerdictLevel level) => switch (level) {
       VerdictLevel.unknown => AppColors.verdictUnknown,
     };
 
-/// 식후 경과 분 → "식후 N분"(_SymptomCard·_ConnectedSymptomsCard 공유).
+/// 식사 대비 경과 분 → 표시 레이블 (_SymptomCard·_ConnectedSymptomsCard 공유).
+///
+/// 음수 → "식사 전 N분/시간", 0 이상 → "식후 N분/시간".
 String _afterMealLabel(int minutes) {
-  if (minutes < 60) return '식후 $minutes분';
+  if (minutes < 0) {
+    return _formatRelativeMinutes(minutes.abs(), prefix: '식사 전');
+  }
+  return _formatRelativeMinutes(minutes, prefix: '식후');
+}
+
+String _formatRelativeMinutes(int minutes, {required String prefix}) {
+  if (minutes < 60) return '$prefix $minutes분';
   final h = minutes ~/ 60;
   final m = minutes % 60;
-  return m == 0 ? '식후 $h시간' : '식후 $h시간 $m분';
+  return m == 0 ? '$prefix $h시간' : '$prefix $h시간 $m분';
 }
 
 /// "＋ 같이 먹은 음식이 있나요?" 행.

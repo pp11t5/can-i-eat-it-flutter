@@ -59,7 +59,7 @@ abstract class StateRecord with _$StateRecord {
     /// 기록 날짜 ('YYYY-MM-DD' 문자열 그대로).
     required String date,
 
-    /// 식후 경과 분. "식후 N분" 포맷은 표시 레이어 책임.
+    /// 식사 대비 경과 분. 음수=식전, 0 이상=식후. 포맷은 표시 레이어 책임.
     required int timingMinutes,
   }) = _StateRecord;
 }

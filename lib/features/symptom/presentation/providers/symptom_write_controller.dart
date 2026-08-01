@@ -82,6 +82,7 @@ class SymptomWriteController extends _$SymptomWriteController {
   ///
   /// - mood 미선택 시 예외.
   /// - 성공 시 타임라인/주간·홈 미기록 식단·식사 상세 캐시 invalidate.
+  /// - 증상 상세 갱신·로딩은 상세 화면이 pop 이후 전역 로딩과 함께 수행.
   /// - 반환값: 성공 시 생성/수정된 symptomId.
   Future<String?> submit(SymptomWriteFormState formState) async {
     if (state is AsyncLoading) return null;
@@ -111,7 +112,7 @@ class SymptomWriteController extends _$SymptomWriteController {
       }
 
       // 타임라인·주간·홈 미기록 식단·식사 상세 캐시 invalidate
-      // (MealRecordDetailScreen 복귀 시 stateRecords 재조회)
+      // 증상 상세는 상세 화면에서 pop 후 전역 로딩 + invalidate 로 갱신.
       ref.invalidate(timelineControllerProvider);
       ref.invalidate(monthlyControllerProvider);
       ref.invalidate(unrecordedMealCountProvider);
