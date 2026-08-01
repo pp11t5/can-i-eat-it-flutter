@@ -165,7 +165,7 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
           },
         ),
         title: Text(
-          '알레르기',
+          '알레르기 · 복용약',
           style: AppTextStyles.body1Bold.copyWith(
             color: AppColors.textPrimary,
           ),
@@ -242,6 +242,7 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.itemGap),
+                // 온보딩 medications 화면과 동일: TextField 우측 인라인 + 버튼.
                 TextField(
                   controller: _medController,
                   style: AppTextStyles.body1Regular.copyWith(
@@ -255,6 +256,22 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.cardPadding,
                       vertical: AppSpacing.cardPadding,
+                    ),
+                    suffixIcon: Padding(
+                      padding: const EdgeInsets.only(
+                        right: AppSpacing.itemGap,
+                      ),
+                      child: GestureDetector(
+                        onTap: _addMedication,
+                        child: const AppIcon(
+                          AppIcons.plusCircle,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                    suffixIconConstraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(
@@ -270,12 +287,6 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
                     ),
                   ),
                   onSubmitted: (_) => _addMedication(),
-                ),
-                const SizedBox(height: AppSpacing.itemGap),
-                AppButton.secondary(
-                  label: '＋ 복용약 추가',
-                  onPressed: _addMedication,
-                  isExpanded: true,
                 ),
                 // 추가된 약 목록
                 if (_medications.isNotEmpty) ...[

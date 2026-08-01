@@ -452,6 +452,25 @@ void main() {
       expect(result.medications, equals(['omeprazole']));
     });
 
+    test('서버 displayName(한글) allergies를 code로 정규화한다', () async {
+      // GET /health-info 실응답은 displayName 목록 (예: "우유·유제품").
+      // 칩 선택·PATCH allergens 는 enum code 기준.
+      dioAdapter.onGet(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.reply(
+          200,
+          _envelope({
+            'allergies': ['우유·유제품', '땅콩', '콩·대두'],
+            'medications': ['PPI'],
+          }),
+        ),
+      );
+
+      final result = await repo.fetchMedicalInfoStrict();
+      expect(result.allergies, equals(['milk', 'peanut', 'soy']));
+      expect(result.medications, equals(['PPI']));
+    });
+
     test('네트워크 오류 시 캐시 폴백 없이 NetworkFailure를 throw한다', () async {
       // 캐시에 이전 값이 있어도 절대 사용하지 않는다 — stale 데이터로 편집 진입 금지.
       await cache.write(
@@ -511,6 +530,26 @@ void main() {
       final cached = await cache.read();
       expect(cached!.allergies, equals(['milk', 'egg']));
       expect(cached.medications, equals(['omeprazole']));
+    });
+
+    test('한글 displayName이 섞여 있어도 PATCH body는 code로 정규화된다', () async {
+      dioAdapter.onPatch(
+        ApiEndpoints.myPageHealthInfo,
+        (server) => server.reply(200, _envelope(null)),
+        data: {
+          'allergens': ['milk', 'peanut'],
+          'medications': ['제산제'],
+        },
+      );
+
+      await repo.updateHealthInfo(
+        allergies: ['우유', 'peanut', 'unknown-junk'],
+        medications: ['제산제'],
+      );
+
+      final cached = await cache.read();
+      expect(cached!.allergies, equals(['milk', 'peanut']));
+      expect(cached.medications, equals(['제산제']));
     });
 
     test('기존 캐시가 있으면 allergies/medications만 교체하고 나머지는 보존한다', () async {

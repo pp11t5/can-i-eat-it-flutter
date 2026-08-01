@@ -166,4 +166,28 @@ void main() {
       expect(allergyOptions.every((e) => e.code.isNotEmpty), isTrue);
     });
   });
+
+  group('normalizeAllergyCode / normalizeAllergyCodes', () {
+    test('이미 code이면 그대로 반환한다', () {
+      expect(normalizeAllergyCode('milk'), 'milk');
+      expect(normalizeAllergyCode('fish_shellfish'), 'fish_shellfish');
+    });
+
+    test('클라이언트 라벨을 code로 변환한다', () {
+      expect(normalizeAllergyCode('우유·유제품'), 'milk');
+      expect(normalizeAllergyCode('콩(대두)'), 'soy');
+    });
+
+    test('서버 displayName 별칭을 code로 변환한다', () {
+      expect(normalizeAllergyCode('우유'), 'milk');
+      expect(normalizeAllergyCode('콩·대두'), 'soy');
+    });
+
+    test('목록 정규화 시 unique code만 남기고 미인식 값은 버린다', () {
+      expect(
+        normalizeAllergyCodes(['우유', 'milk', '땅콩', '??', '']),
+        equals(['milk', 'peanut']),
+      );
+    });
+  });
 }

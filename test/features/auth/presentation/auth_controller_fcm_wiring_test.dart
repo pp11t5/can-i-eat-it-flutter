@@ -117,6 +117,10 @@ class _SpyAuthRepository implements AuthRepository {
   Future<AuthSession> getMe() => _delegate.getMe();
 
   @override
+  void applyLocalDisplayName(String displayName) =>
+      _delegate.applyLocalDisplayName(displayName);
+
+  @override
   Future<void> logout() async {
     calls.add('auth.logout');
     await _delegate.logout();

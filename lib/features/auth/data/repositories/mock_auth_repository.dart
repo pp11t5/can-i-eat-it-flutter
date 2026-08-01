@@ -47,6 +47,9 @@ class ThrowingAuthRepository implements AuthRepository {
   Future<AuthSession> getMe() async => throw _failure;
 
   @override
+  void applyLocalDisplayName(String displayName) {}
+
+  @override
   Future<void> logout() async {}
 
   @override
@@ -240,6 +243,13 @@ class MockAuthRepository implements AuthRepository {
       throw StateError('getMe: 활성 세션이 없습니다.');
     }
     return _session!;
+  }
+
+  @override
+  void applyLocalDisplayName(String displayName) {
+    final current = _session;
+    if (current == null) return;
+    _session = current.copyWith(displayName: displayName);
   }
 
   @override

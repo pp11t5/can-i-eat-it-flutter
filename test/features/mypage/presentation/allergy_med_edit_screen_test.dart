@@ -131,12 +131,11 @@ void main() {
   // 2. 화면 위젯 테스트
   // ---------------------------------------------------------------------------
   group('AllergyMedEditScreen 위젯 테스트', () {
-    testWidgets('앱바에 "알레르기" 타이틀이 표시된다', (tester) async {
+    testWidgets('앱바에 "알레르기 · 복용약" 타이틀이 표시된다', (tester) async {
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
 
-      // "알레르기"는 앱바 타이틀과 섹션 헤더 두 곳에 등장하므로 findsWidgets 사용
-      expect(find.text('알레르기'), findsWidgets);
+      expect(find.text('알레르기 · 복용약'), findsOneWidget);
     });
 
     testWidgets('헤더 "알레르기와 복용 중인 약을 알려주세요"가 표시된다', (tester) async {
@@ -187,12 +186,17 @@ void main() {
       expect(find.text('우유·유제품'), findsOneWidget);
     });
 
-    testWidgets('복용약 추가 — 텍스트필드 입력 후 버튼 탭 → 목록 표시', (tester) async {
+    testWidgets('복용약 추가 — 텍스트필드 입력 후 + 버튼 탭 → 목록 표시', (tester) async {
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextField), '란소프라졸');
-      await tester.tap(find.text('＋ 복용약 추가'));
+      // 온보딩과 동일: TextField 우측 인라인 + 버튼(plusCircle)
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is AppIcon && w.asset == AppIcons.plusCircle,
+        ),
+      );
       await tester.pump();
 
       expect(find.text('란소프라졸'), findsOneWidget);
@@ -273,9 +277,13 @@ void main() {
       await tester.tap(find.text('우유·유제품'));
       await tester.pump();
 
-      // 복용약 추가
+      // 복용약 추가 — TextField 우측 인라인 + 버튼(plusCircle)
       await tester.enterText(find.byType(TextField), '란소프라졸');
-      await tester.tap(find.text('＋ 복용약 추가'));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is AppIcon && w.asset == AppIcons.plusCircle,
+        ),
+      );
       await tester.pump();
 
       // 저장

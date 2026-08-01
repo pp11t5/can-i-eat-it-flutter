@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
@@ -14,6 +15,9 @@ import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.
 import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
 import 'package:can_i_eat_it/features/mypage/data/repositories/mock_my_page_repository.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
+import 'package:can_i_eat_it/features/mypage/presentation/screens/withdraw_screen.dart';
+import 'package:can_i_eat_it/features/notification/data/notification_providers.dart';
+import 'package:can_i_eat_it/features/notification/data/repositories/mock_notification_repository.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
@@ -64,11 +68,63 @@ Widget _buildMypageScreen({
       ),
       // ignore: scoped_providers_should_specify_dependencies
       myPageRepositoryProvider.overrideWithValue(summaryRepo),
+      // ignore: scoped_providers_should_specify_dependencies
+      notificationRepositoryProvider.overrideWithValue(
+        MockNotificationRepository.defaults(),
+      ),
     ],
     child: MaterialApp(
       theme: AppTheme.light,
       debugShowCheckedModeBanner: false,
       home: const MypageScreen(),
+    ),
+  );
+}
+
+/// 탈퇴하기 탭 시 context.push('/mypage/withdraw') 네비게이션 검증용.
+Widget _buildMypageWithWithdrawRouter({AuthSession? session}) {
+  final repo = MockAuthRepository(initialSession: session);
+  final router = GoRouter(
+    initialLocation: '/mypage',
+    routes: [
+      GoRoute(
+        path: '/mypage',
+        builder: (context, state) => const MypageScreen(),
+      ),
+      GoRoute(
+        path: '/mypage/withdraw',
+        builder: (context, state) => const WithdrawScreen(),
+      ),
+    ],
+  );
+
+  return ProviderScope(
+    overrides: [
+      // ignore: scoped_providers_should_specify_dependencies
+      authRepositoryProvider.overrideWithValue(repo),
+      // ignore: scoped_providers_should_specify_dependencies
+      healthProfileRepositoryProvider.overrideWithValue(
+        MockHealthProfileRepository.completed(),
+      ),
+      // ignore: scoped_providers_should_specify_dependencies
+      analyticsServiceProvider.overrideWithValue(_NoopAnalytics()),
+      // ignore: scoped_providers_should_specify_dependencies
+      profileCacheProvider.overrideWithValue(InMemoryProfileCache()),
+      // ignore: scoped_providers_should_specify_dependencies
+      dictionaryRepositoryProvider.overrideWithValue(
+        MockDictionaryRepository.seeded(),
+      ),
+      // ignore: scoped_providers_should_specify_dependencies
+      myPageRepositoryProvider.overrideWithValue(MockMyPageRepository.seeded()),
+      // ignore: scoped_providers_should_specify_dependencies
+      notificationRepositoryProvider.overrideWithValue(
+        MockNotificationRepository.defaults(),
+      ),
+    ],
+    child: MaterialApp.router(
+      theme: AppTheme.light,
+      debugShowCheckedModeBanner: false,
+      routerConfig: router,
     ),
   );
 }
@@ -133,14 +189,15 @@ void main() {
       expect(find.text('안전 음식 3개, 주의 음식 2개'), findsOneWidget);
     });
 
-    testWidgets('주간 기록 "전체보기" 버튼이 표시된다', (tester) async {
+    testWidgets('주간 리포트 타이틀과 데이터가 있을 때 "전체 보기"가 표시된다', (tester) async {
       await tester.pumpWidget(_buildMypageScreen());
       await tester.pumpAndSettle();
 
+      expect(find.text('주간 리포트'), findsOneWidget);
       expect(find.text('전체 보기'), findsOneWidget);
     });
 
-    testWidgets('주간 기록 카드에 mySummaryProvider 실카운트가 표시된다', (tester) async {
+    testWidgets('주간 리포트 카드에 mySummaryProvider 실카운트가 표시된다', (tester) async {
       await tester.pumpWidget(_buildMypageScreen());
       await tester.pumpAndSettle();
 
@@ -154,13 +211,14 @@ void main() {
       expect(find.text('위험 음식 1끼'), findsOneWidget);
     });
 
-    testWidgets('요약 데이터가 빈 상태면 주간 기록 카드 수치가 0으로 표시된다', (tester) async {
+    testWidgets('지난주 데이터가 없으면 수집 중 빈 상태와 "전체 보기" 미표시', (tester) async {
       await tester.pumpWidget(_buildMypageScreen(withSummary: false));
       await tester.pumpAndSettle();
 
-      expect(find.text('권장음식 0끼'), findsOneWidget);
-      expect(find.text('주의 음식 0끼'), findsOneWidget);
-      expect(find.text('위험 음식 0끼'), findsOneWidget);
+      expect(find.text('주간 리포트'), findsOneWidget);
+      expect(find.text('내 데이터를 모으고 있어요.'), findsOneWidget);
+      expect(find.text('전체 보기'), findsNothing);
+      expect(find.text('권장음식 0끼'), findsNothing);
     });
 
     testWidgets('알림 설정 항목이 표시된다', (tester) async {
@@ -178,22 +236,101 @@ void main() {
       expect(find.text('알림 설정'), findsOneWidget);
     });
 
-    testWidgets('약관 항목 2개가 표시된다', (tester) async {
+    testWidgets('약관 섹션에 서비스 이용 약관·개인정보 수집·이용 동의가 표시된다', (tester) async {
       await tester.pumpWidget(_buildMypageScreen());
       await tester.pumpAndSettle();
 
-      // 설정·약관 섹션은 스크롤 아래에 있으므로 끝까지 스크롤한다.
       await tester.scrollUntilVisible(
-        find.text('개인정보 보호 약관'),
+        find.text('서비스 이용 약관'),
         500,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('개인정보 보호 약관'), findsOneWidget);
       expect(find.text('서비스 이용 약관'), findsOneWidget);
+      expect(find.text('개인정보 수집·이용 동의'), findsOneWidget);
+      // 구 항목 제거
+      expect(find.text('개인정보 보호 약관'), findsNothing);
+      expect(find.text('마케팅 정보 수신'), findsNothing);
     });
 
-    // 로그아웃/탈퇴는 설정 섹션에서 제거됨 (Figma 정합 — 프로필 화면 "내 계정" 카드로 이동).
+    testWidgets('내 계정 섹션(로그아웃/탈퇴하기)이 최하단에 표시된다', (tester) async {
+      await tester.pumpWidget(_buildMypageScreen());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('탈퇴하기'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('내 계정'), findsOneWidget);
+      expect(find.text('로그아웃'), findsOneWidget);
+      expect(find.text('탈퇴하기'), findsOneWidget);
+    });
+
+    testWidgets('로그아웃 버튼 탭 시 확인 다이얼로그가 표시된다', (tester) async {
+      await tester.pumpWidget(_buildMypageScreen());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('로그아웃'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('로그아웃'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('로그아웃 하시겠어요?'), findsOneWidget);
+    });
+
+    testWidgets('로그아웃 다이얼로그에서 취소하면 닫힌다', (tester) async {
+      await tester.pumpWidget(_buildMypageScreen());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('로그아웃'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('로그아웃'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('취소하기'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('로그아웃 하시겠어요?'), findsNothing);
+    });
+
+    testWidgets('탈퇴하기 버튼 탭 시 팝업 없이 탈퇴 안내 화면으로 이동한다', (tester) async {
+      const session = AuthSession(
+        userId: 'test-user',
+        provider: AuthProvider.kakao,
+        hasAgreedTerms: true,
+      );
+      // 마이페이지 하단 섹션까지 스크롤 가능하도록 뷰포트 확보.
+      tester.view.physicalSize = const Size(400, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(_buildMypageWithWithdrawRouter(session: session));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('탈퇴하기'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(find.text('탈퇴하기'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('탈퇴하기'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('정말 탈퇴하시겠어요?'), findsNothing);
+      expect(find.byType(WithdrawScreen), findsOneWidget);
+      expect(find.text('데이터 영구 삭제'), findsOneWidget);
+    });
   });
 }

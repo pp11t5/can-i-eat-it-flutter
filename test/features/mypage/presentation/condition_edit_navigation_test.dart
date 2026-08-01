@@ -12,7 +12,7 @@ import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
-import 'package:can_i_eat_it/features/mypage/presentation/screens/allergy_med_edit_screen.dart';
+import 'package:can_i_eat_it/features/mypage/presentation/screens/condition_edit_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/profile_info_screen.dart';
 
 class _NoopAnalytics implements AnalyticsService {
@@ -24,8 +24,7 @@ class _NoopAnalytics implements AnalyticsService {
       {Map<String, Object?> params = const {}}) async {}
 }
 
-/// ProfileInfoScreen은 context.push('/mypage/profile/allergy-med')를 호출한다.
-/// 테스트 라우터에서 이 경로를 그대로 선언해 네비게이션을 검증한다.
+/// ProfileInfoScreen은 context.push('/mypage/profile/condition')를 호출한다.
 Widget _buildWithRouter() {
   final router = GoRouter(
     initialLocation: '/mypage/profile',
@@ -35,8 +34,8 @@ Widget _buildWithRouter() {
         builder: (context, state) => const ProfileInfoScreen(),
         routes: [
           GoRoute(
-            path: 'allergy-med',
-            builder: (context, state) => const AllergyMedEditScreen(),
+            path: 'condition',
+            builder: (context, state) => const ConditionEditScreen(),
           ),
         ],
       ),
@@ -67,22 +66,21 @@ Widget _buildWithRouter() {
 }
 
 void main() {
-  group('ProfileInfoScreen → AllergyMedEditScreen 네비게이션', () {
-    testWidgets('알레르기·복용약 "수정" 버튼 탭 → AllergyMedEditScreen으로 push됨',
+  group('ProfileInfoScreen → ConditionEditScreen 네비게이션', () {
+    testWidgets('건강 고민 "수정" 버튼 탭 → ConditionEditScreen으로 push됨',
         (tester) async {
       await tester.pumpWidget(_buildWithRouter());
       await tester.pumpAndSettle();
 
-      // ProfileInfoScreen이 표시됨
       expect(find.byType(ProfileInfoScreen), findsOneWidget);
-      expect(find.byType(AllergyMedEditScreen), findsNothing);
+      expect(find.byType(ConditionEditScreen), findsNothing);
 
-      // 라벨 탭이 아니라 마지막 "수정" 버튼(알레르기·복용약)만 탭
-      await tester.tap(find.text('수정').last);
+      // 수정 버튼 3개: 닉네임 / 건강 고민 / 알레르기·복용약 — 건강 고민은 두 번째
+      await tester.tap(find.text('수정').at(1));
       await tester.pumpAndSettle();
 
-      // AllergyMedEditScreen으로 이동
-      expect(find.byType(AllergyMedEditScreen), findsOneWidget);
+      expect(find.byType(ConditionEditScreen), findsOneWidget);
+      expect(find.text('어떤 건강 고민이 있으세요?'), findsOneWidget);
     });
   });
 }
