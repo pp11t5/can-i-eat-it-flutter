@@ -15,9 +15,11 @@ import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dar
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/providers/timeline_fab_guide_provider.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/calendar_popup.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/fab_action_sheet.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/meal_timeline_list.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/widgets/timeline_first_visit_guide.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/week_nav.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/widgets/week_strip.dart';
 
@@ -173,6 +175,8 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
     final joinDate = _joinDateFromSession(
       ref.watch(authControllerProvider).valueOrNull,
     );
+    // false = 미열람(가이드), true = 봄, null = 플래그 로딩 중.
+    final hasSeenGuide = ref.watch(timelineFabGuideProvider).valueOrNull;
 
     return Scaffold(
       // Figma 실측: #FCFCFC (surfaceBackground #F5F5F5 과 구분되는 타임라인 전용 배경)
@@ -215,22 +219,35 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
               ),
             ),
             // --- 타임라인 리스트 ---
+            // 미열람(hasSeenGuide == false)이면 API 로딩 스피너 없이 가이드 즉시 표시.
             Expanded(
               child: timelineAsync.when(
-                loading: () => const _TimelineLoadingPlaceholder(),
+                loading: () => hasSeenGuide == false
+                    ? const TimelineFirstVisitGuide()
+                    : const _TimelineLoadingPlaceholder(),
                 error: (err, _) => _TimelineErrorView(
                   onRetry: () => _reloadTimeline(_selectedDate),
                 ),
-                data: (items) => items.isEmpty
-                    ? const _TimelineEmptyView()
-                    : _TimelineItemList(items: items),
+                data: (items) {
+                  if (items.isNotEmpty) {
+                    return _TimelineItemList(items: items);
+                  }
+                  if (hasSeenGuide == false) {
+                    return const TimelineFirstVisitGuide();
+                  }
+                  return const _TimelineEmptyView();
+                },
               ),
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => showFabActionSheet(context),
+        onPressed: () {
+          // 가이드가 떠 있으면 아무 탭( FAB 포함 )에서도 닫는다.
+          ref.read(timelineFabGuideProvider.notifier).dismiss();
+          showFabActionSheet(context);
+        },
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
         shape: const CircleBorder(),
@@ -316,11 +333,10 @@ class _TimelineErrorView extends StatelessWidget {
 // 빈 상태 안내 (Figma 2699:21467 — 해당일 기록 0건)
 // ---------------------------------------------------------------------------
 
-/// 타임라인 빈 상태.
+/// 타임라인 빈 상태 (해당일 기록 0건 · 가이드 이미 본 계정).
 ///
-/// TODO(figma): 최초 진입 안내(node 2694:20716, 손글씨 일러스트)는 "전체 기록
-/// 0건 여부" 같은 별도 신호가 필요해 이번 패스에서는 미분기. 데이터 신호
-/// 확정 후 isFirstVisit 분기를 추가하고 일러스트 에셋을 연결한다.
+/// 최초 진입 FAB 가이드는 [TimelineFirstVisitGuide] —
+/// [timelineFabGuideProvider] 가 false 일 때 empty 분기에서 노출.
 class _TimelineEmptyView extends StatelessWidget {
   const _TimelineEmptyView();
 
