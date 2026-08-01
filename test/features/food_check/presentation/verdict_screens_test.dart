@@ -202,6 +202,16 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('VerdictResultScreen caution', () {
+    testWidgets('서버가 제공한 증상 기록 시간을 그대로 표시한다', (tester) async {
+      final verdict = EatVerdict.caution(foodName: '된장찌개');
+      await tester.pumpWidget(
+        _wrap(VerdictResultScreen(verdict: verdict, onRetry: () {})),
+      );
+      await tester.pump();
+
+      expect(find.text('2026-06-10 · 식후 30분'), findsOneWidget);
+    });
+
     testWidgets('주의 상태에서 대체 음식을 표시한다', (tester) async {
       final verdict = EatVerdict.caution(foodName: '된장찌개');
       await tester.pumpWidget(

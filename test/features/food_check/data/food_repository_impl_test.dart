@@ -94,10 +94,9 @@ Map<String, dynamic> _idJudgmentJson({
         'total': 2,
         'records': [
           {
-            'stateRecordId': 'state-1',
             'label': '속쓰림',
             'date': '2026-06-10',
-            'timingMinutes': 30,
+            'timing': '식후 67분',
           },
         ],
       },
@@ -422,6 +421,7 @@ void main() {
       expect(result.substitutes.first.name, '디카페인 커피');
       expect(result.stateRecords.total, 2);
       expect(result.stateRecords.records.length, 1);
+      expect(result.stateRecords.records.first.timing, '식후 67분');
     });
 
     test('FOOD404_1 응답 → FoodNotFoundFailure throw', () async {

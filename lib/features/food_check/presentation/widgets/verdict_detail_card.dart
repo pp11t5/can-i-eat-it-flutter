@@ -286,7 +286,7 @@ class _StateRecordCard extends StatelessWidget {
           ),
           // 우측 날짜 · 타이밍 (회색)
           Text(
-            '${record.date} · ${record.timingLabel}',
+            '${record.date} · ${record.timing}',
             style: const TextStyle(
               fontFamily: 'Pretendard',
               fontSize: 14,
@@ -323,7 +323,6 @@ class _SubstitutesSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.itemGap),
-
         for (var i = 0; i < substitutes.length; i++) ...[
           if (i > 0) const SizedBox(height: AppSpacing.itemGap),
           _SubstituteCard(substitute: substitutes[i]),
