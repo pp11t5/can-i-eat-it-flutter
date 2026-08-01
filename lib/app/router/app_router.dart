@@ -9,6 +9,7 @@ import 'package:can_i_eat_it/features/auth/presentation/providers/session_provid
 import 'package:can_i_eat_it/features/auth/presentation/screens/login_screen.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/splash_screen.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/terms_screen.dart';
+import 'package:can_i_eat_it/features/food_check/data/food_check_providers.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/food_check_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_screen.dart';
@@ -215,8 +216,16 @@ GoRouter appRouter(Ref ref) {
           final args =
               state.extra as VerdictArgs? ?? const VerdictArgs(text: '');
           return MaterialPage(
+            key: state.pageKey,
             fullscreenDialog: true,
-            child: VerdictScreen(args: args),
+            // 화면마다 독립 판정 상태를 보유해 대체 음식 가이드가 이전 화면의
+            // 결과를 덮어쓰지 않도록 한다.
+            child: ProviderScope(
+              overrides: [
+                verdictControllerProvider.overrideWith(VerdictController.new),
+              ],
+              child: VerdictScreen(args: args),
+            ),
           );
         },
       ),

@@ -24,12 +24,16 @@ class VerdictDetailCard extends StatelessWidget {
     super.key,
     required this.verdict,
     this.onSeeAllRecords,
+    this.onSubstituteTap,
   });
 
   final EatVerdict verdict;
 
   /// "모두 보기" 탭 콜백. null이면 탭 무동작(F3 placeholder).
   final VoidCallback? onSeeAllRecords;
+
+  /// 대체 음식 탭 콜백. null이면 대체 음식 카드는 표시만 한다.
+  final ValueChanged<VerdictSubstitute>? onSubstituteTap;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +57,10 @@ class VerdictDetailCard extends StatelessWidget {
 
         // 3. 대체 음식 섹션 (빈배열이면 숨김)
         if (verdict.substitutes.isNotEmpty) ...[
-          _SubstitutesSection(substitutes: verdict.substitutes),
+          _SubstitutesSection(
+            substitutes: verdict.substitutes,
+            onTap: onSubstituteTap,
+          ),
         ],
       ],
     );
@@ -307,9 +314,10 @@ class _StateRecordCard extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _SubstitutesSection extends StatelessWidget {
-  const _SubstitutesSection({required this.substitutes});
+  const _SubstitutesSection({required this.substitutes, this.onTap});
 
   final List<VerdictSubstitute> substitutes;
+  final ValueChanged<VerdictSubstitute>? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -325,7 +333,7 @@ class _SubstitutesSection extends StatelessWidget {
         const SizedBox(height: AppSpacing.itemGap),
         for (var i = 0; i < substitutes.length; i++) ...[
           if (i > 0) const SizedBox(height: AppSpacing.itemGap),
-          _SubstituteCard(substitute: substitutes[i]),
+          _SubstituteCard(substitute: substitutes[i], onTap: onTap),
         ],
       ],
     );
@@ -333,38 +341,54 @@ class _SubstitutesSection extends StatelessWidget {
 }
 
 class _SubstituteCard extends StatelessWidget {
-  const _SubstituteCard({required this.substitute});
+  const _SubstituteCard({required this.substitute, this.onTap});
 
   final VerdictSubstitute substitute;
+  final ValueChanged<VerdictSubstitute>? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.cardPadding,
-        vertical: AppSpacing.itemGap + AppSpacing.xs, // 12
-      ),
-      decoration: BoxDecoration(
+    final borderRadius = BorderRadius.circular(AppSpacing.radiusCard);
+    return Semantics(
+      container: true,
+      excludeSemantics: true,
+      button: onTap != null,
+      label: '${substitute.name} 식사 가이드 보기',
+      onTap: onTap == null ? null : () => onTap!(substitute),
+      child: Material(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          // 음식 카테고리 미제공(엔티티에 code 없음) → regular 폴백 일러스트.
-          const CategoryIcon(code: null, size: 32),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              substitute.name,
-              style: AppTextStyles.body2Bold.copyWith(
-                color: AppColors.textPrimary,
-              ),
+        shape: RoundedRectangleBorder(
+          borderRadius: borderRadius,
+          side: const BorderSide(color: AppColors.border),
+        ),
+        child: InkWell(
+          onTap: onTap == null ? null : () => onTap!(substitute),
+          borderRadius: borderRadius,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.cardPadding,
+              vertical: AppSpacing.itemGap + AppSpacing.xs, // 12
+            ),
+            child: Row(
+              children: [
+                // 음식 카테고리 미제공(엔티티에 code 없음) → regular 폴백 일러스트.
+                const CategoryIcon(code: null, size: 32),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    substitute.name,
+                    style: AppTextStyles.body2Bold.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                // 우측 녹색 체크 배지(권장 배지 재사용)
+                const AppIcon(AppIcons.verdictRecommend,
+                    size: AppIconSizes.s24),
+              ],
             ),
           ),
-          // 우측 녹색 체크 배지(권장 배지 재사용)
-          const AppIcon(AppIcons.verdictRecommend, size: AppIconSizes.s24),
-        ],
+        ),
       ),
     );
   }

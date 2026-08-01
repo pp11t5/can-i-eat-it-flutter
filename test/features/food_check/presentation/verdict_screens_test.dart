@@ -223,6 +223,34 @@ void main() {
       expect(find.text('두부국'), findsOneWidget);
     });
 
+    testWidgets('대체 음식 탭 시 선택한 음식을 상위로 전달한다', (tester) async {
+      VerdictSubstitute? selected;
+      final verdict = EatVerdict.caution(foodName: '된장찌개');
+      await tester.pumpWidget(
+        _wrap(
+          VerdictResultScreen(
+            verdict: verdict,
+            onRetry: () {},
+            onSubstituteTap: (substitute) => selected = substitute,
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final substitute = find.text('저염 된장찌개');
+      await tester.ensureVisible(substitute);
+      expect(
+        find.bySemanticsLabel('저염 된장찌개 식사 가이드 보기'),
+        findsOneWidget,
+      );
+
+      await tester.tap(substitute);
+      await tester.pump();
+
+      expect(selected?.foodExternalId, 'sub-1');
+      expect(selected?.name, '저염 된장찌개');
+    });
+
     testWidgets('주의 상태에서 stateRecords 기록이 있으면 "모두 보기" 버튼 노출', (tester) async {
       final verdict = EatVerdict.caution(foodName: '된장찌개');
       // caution 샘플은 total=2

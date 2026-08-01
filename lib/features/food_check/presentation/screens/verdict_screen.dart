@@ -65,6 +65,17 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
     }
   }
 
+  void _handleSubstituteTap(VerdictSubstitute substitute) {
+    context.push(
+      '/verdict',
+      extra: VerdictArgs(
+        externalId: substitute.foodExternalId,
+        text: substitute.name,
+        recordContext: widget.args.recordContext,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final verdictAsync = ref.watch(verdictControllerProvider);
@@ -100,6 +111,7 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
           verdict: verdict,
           onRetry: _handleRetry,
           onAddToDiet: onAddToDiet,
+          onSubstituteTap: _handleSubstituteTap,
         );
       },
     );
