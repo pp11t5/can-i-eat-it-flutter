@@ -6,6 +6,11 @@ import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.da
 /// - 도메인 레이어 — 프레임워크 비종속.
 /// - 실 구현: [HomeRepositoryImpl], 테스트·오프라인: [MockHomeRepository].
 abstract interface class HomeRepository {
+  /// 현재 사용자의 편안한 증상 기록 연속일을 조회한다.
+  ///
+  /// 대응 API: GET /users/me/streak (result.streak).
+  Future<int> myStreak();
+
   /// 미기록 식단 개수를 조회한다.
   ///
   /// 대응 API: GET /meal-records/unrecorded-count (result.count).

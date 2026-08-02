@@ -13,7 +13,6 @@ import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_search_bar.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
-import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
 
 /// W6-0 홈 화면 — Figma 2122:14045("첫화면") / 2122:14040("데이터有") 구조 반영.
 ///
@@ -25,8 +24,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // loading/error 시 '—' 폴백 (_FoodHistoryCard valueOrNull 패턴과 동일).
-    final streakDays =
-        ref.watch(mySummaryProvider).valueOrNull?.weeklySummary.streakCount;
+    final streakDays = ref.watch(myStreakProvider).valueOrNull;
     final unrecordedCount = ref.watch(unrecordedMealCountProvider).valueOrNull;
     final topSearchedFoods =
         (ref.watch(topSearchedFoodsProvider).valueOrNull ?? const [])
@@ -133,7 +131,7 @@ class HomeScreen extends ConsumerWidget {
 class _GreetingBlock extends StatelessWidget {
   const _GreetingBlock({required this.streakDays});
 
-  /// 연속 편안 일수. mySummaryProvider loading/error 시 null → '—' 폴백.
+  /// 연속 편안 일수. myStreakProvider loading/error 시 null → '—' 폴백.
   final int? streakDays;
 
   @override

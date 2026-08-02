@@ -9,10 +9,12 @@ import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dar
 /// - [MockHomeRepository.empty()]: 미기록 0, 최근 식사 없음.
 class MockHomeRepository implements HomeRepository {
   MockHomeRepository({
+    int? streak,
     int? unrecordedCount,
     List<RecentMeal>? recentFoods,
     List<FoodSummary>? topSearchedFoods,
-  })  : _unrecordedCount = unrecordedCount ?? 0,
+  })  : _streak = streak ?? 0,
+        _unrecordedCount = unrecordedCount ?? 0,
         _recentFoods = recentFoods ?? const [],
         _topSearchedFoods = topSearchedFoods ?? const [];
 
@@ -21,14 +23,19 @@ class MockHomeRepository implements HomeRepository {
 
   /// 샘플 데이터.
   factory MockHomeRepository.seeded() => MockHomeRepository(
+        streak: 4,
         unrecordedCount: 2,
         recentFoods: _seededRecentFoods,
         topSearchedFoods: _seededTopSearchedFoods,
       );
 
+  final int _streak;
   final int _unrecordedCount;
   final List<RecentMeal> _recentFoods;
   final List<FoodSummary> _topSearchedFoods;
+
+  @override
+  Future<int> myStreak() async => _streak;
 
   @override
   Future<int> unrecordedMealCount() async => _unrecordedCount;

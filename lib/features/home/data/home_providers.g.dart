@@ -30,6 +30,26 @@ final homeRepositoryProvider = AutoDisposeProvider<HomeRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef HomeRepositoryRef = AutoDisposeProviderRef<HomeRepository>;
+String _$myStreakHash() => r'cca7d2d6d0d7fb42a92902ffab4864c5a39dd3ed';
+
+/// 현재 사용자의 편안한 증상 기록 연속일을 조회한다.
+///
+/// [HomeScreen] 인사말이 구독한다. 오류 시 화면은 `—`로 폴백한다.
+///
+/// Copied from [myStreak].
+@ProviderFor(myStreak)
+final myStreakProvider = AutoDisposeFutureProvider<int>.internal(
+  myStreak,
+  name: r'myStreakProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$myStreakHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef MyStreakRef = AutoDisposeFutureProviderRef<int>;
 String _$unrecordedMealCountHash() =>
     r'923c9eafcd0d063d97f90fca4787015cd1109d45';
 

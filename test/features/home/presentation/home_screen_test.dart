@@ -8,19 +8,10 @@ import 'package:can_i_eat_it/features/home/data/repositories/mock_home_repositor
 import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
-import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
-import 'package:can_i_eat_it/features/mypage/data/repositories/mock_my_page_repository.dart';
 
-/// 테스트용 래퍼. mySummaryProvider(streak)·homeRepositoryProvider(미기록·최근식사)를
-/// 결정적 Mock으로 override한다(W7 — 실제 Dio 호출 방지).
+/// 테스트용 래퍼. homeRepositoryProvider를 결정적 Mock으로 override한다.
 Widget _wrap({bool withData = false}) => ProviderScope(
       overrides: [
-        // ignore: scoped_providers_should_specify_dependencies
-        myPageRepositoryProvider.overrideWithValue(
-          withData
-              ? MockMyPageRepository.seeded()
-              : MockMyPageRepository.empty(),
-        ),
         // ignore: scoped_providers_should_specify_dependencies
         homeRepositoryProvider.overrideWithValue(
           withData ? MockHomeRepository.seeded() : MockHomeRepository.empty(),
@@ -58,12 +49,6 @@ GoRouter _testRouter() => GoRouter(
 
 Widget _wrapWithRouter({bool withData = false}) => ProviderScope(
       overrides: [
-        // ignore: scoped_providers_should_specify_dependencies
-        myPageRepositoryProvider.overrideWithValue(
-          withData
-              ? MockMyPageRepository.seeded()
-              : MockMyPageRepository.empty(),
-        ),
         // ignore: scoped_providers_should_specify_dependencies
         homeRepositoryProvider.overrideWithValue(
           withData ? MockHomeRepository.seeded() : MockHomeRepository.empty(),
@@ -160,11 +145,11 @@ void main() {
   });
 
   group('HomeScreen — 인사말 블록 streak 실데이터', () {
-    testWidgets('mySummaryProvider seeded 값이면 "4일"이 표시된다', (tester) async {
+    testWidgets('myStreakProvider seeded 값이면 "4일"이 표시된다', (tester) async {
       await tester.pumpWidget(_wrap(withData: true));
       await tester.pumpAndSettle();
 
-      // MockMyPageRepository.seeded() — weeklySummary.streakCount:4.
+      // MockHomeRepository.seeded() — streak:4.
       expect(find.textContaining('4일'), findsOneWidget);
     });
   });
@@ -235,9 +220,6 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            // ignore: scoped_providers_should_specify_dependencies
-            myPageRepositoryProvider
-                .overrideWithValue(MockMyPageRepository.empty()),
             // ignore: scoped_providers_should_specify_dependencies
             homeRepositoryProvider.overrideWithValue(
               MockHomeRepository(
