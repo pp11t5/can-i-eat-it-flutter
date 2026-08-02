@@ -254,12 +254,10 @@ class _SymptomEmptyCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  // TODO(design): 전용 disable 얼굴 일러스트가 확정되면 교체.
-                  // 현재는 회색 틴팅한 sad 아이콘(ic_sad.svg)으로 근사.
-                  const AppIcon(
-                    AppIcons.sad,
-                    size: AppIconSizes.s32,
-                    color: AppColors.textTertiary,
+                  Image.asset(
+                    AppImages.symptomEmpty,
+                    width: AppIconSizes.s32,
+                    height: AppIconSizes.s32,
                   ),
                   const SizedBox(width: AppSpacing.itemGap),
                   Text(
@@ -455,17 +453,12 @@ class _BottomCta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      color: AppColors.surface,
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenPadding,
-        AppSpacing.itemGap,
+        0,
         AppSpacing.screenPadding,
         AppSpacing.sectionGap,
-      ),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(
-          top: BorderSide(color: AppColors.divider, width: 0.5),
-        ),
       ),
       child: SizedBox(
         width: double.infinity,

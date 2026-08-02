@@ -100,6 +100,7 @@ abstract final class AppImages {
   static const String fire = '$_illust/icon_fire.png';
   static const String characterGreeting = '$_illust/character_greeting.png';
   static const String mealPrompt = '$_illust/emoji_meal_prompt.png';
+  static const String symptomEmpty = '$_illust/disable_32.png';
 
   /// 타임라인 최초 FAB 가이드 (문구+곡선 화살표). 2.0x/3.0x 배율 폴더 있음.
   static const String timelineFabGuide = '$_illust/timeline_fab_guide.png';

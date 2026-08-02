@@ -33,9 +33,9 @@ class VerdictUnknownScreen extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(
                   AppSpacing.screenPadding, // left 16
-                  AppSpacing.itemGap,       // top 8
+                  AppSpacing.itemGap, // top 8
                   AppSpacing.screenPadding, // right 16
-                  AppSpacing.itemGap,       // bottom 8
+                  AppSpacing.itemGap, // bottom 8
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,7 +244,8 @@ class _TipDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.symmetric(vertical: AppSpacing.sectionGap), // 24 top/bottom
+      padding: EdgeInsets.symmetric(
+          vertical: AppSpacing.sectionGap), // 24 top/bottom
       child: Divider(
         height: 1,
         thickness: 1,
@@ -270,7 +271,7 @@ class _CtaWrap extends StatelessWidget {
         AppSpacing.screenPadding, // left 16
         AppSpacing.screenPadding, // top 16
         AppSpacing.screenPadding, // right 16
-        32,                       // bottom 32
+        32, // bottom 32
       ),
       child: SizedBox(
         height: 54,
