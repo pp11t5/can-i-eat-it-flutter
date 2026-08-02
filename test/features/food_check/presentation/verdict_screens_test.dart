@@ -81,13 +81,13 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('MedicalDisclaimer를 포함한다', (tester) async {
+    testWidgets('면책 고지를 표시하지 않는다', (tester) async {
       await tester.pumpWidget(
         _wrap(VerdictUnknownScreen(onRetry: () {})),
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.info_outline), findsOneWidget);
+      expect(find.byType(MedicalDisclaimer), findsNothing);
     });
 
     testWidgets('오타 교정: "집접"이 아닌 "직접"을 표시한다', (tester) async {
