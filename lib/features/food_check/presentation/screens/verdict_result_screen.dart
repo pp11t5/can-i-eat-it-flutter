@@ -28,6 +28,10 @@ import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_un
 ///
 /// stateRecords "모두 보기": F3 소관 → placeholder (크래시 없이 스낵바).
 class VerdictResultScreen extends ConsumerWidget {
+  // 면책 고지·CTA가 본문 위에 겹치는 높이. 마지막 콘텐츠도 이만큼
+  // 위로 스크롤할 수 있게 해 하단 고정 영역에 가려지지 않도록 한다.
+  static const double _bottomOverlayScrollPadding = 200;
+
   const VerdictResultScreen({
     super.key,
     required this.verdict,
@@ -56,6 +60,9 @@ class VerdictResultScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
+      // 하단 고정 영역은 배경을 칠하지 않는다. 본문을 그 아래까지 확장해
+      // 면책 고지 뒤에 별도의 흰색 바탕이 보이지 않게 한다.
+      extendBody: true,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -83,7 +90,9 @@ class VerdictResultScreen extends ConsumerWidget {
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.screenPadding,
-          vertical: AppSpacing.sectionGap,
+        ).copyWith(
+          top: AppSpacing.sectionGap,
+          bottom: _bottomOverlayScrollPadding,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -109,29 +118,47 @@ class VerdictResultScreen extends ConsumerWidget {
           ],
         ),
       ),
-      // 면책 고지와 CTA는 스크롤과 분리해 항상 화면 하단에 표시한다.
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.screenPadding,
-            AppSpacing.screenPadding,
-            AppSpacing.screenPadding,
-            AppSpacing.screenPadding,
+      // 면책 고지는 본문 위에 투명하게 겹치고, CTA만 버튼 상단부터
+      // 하단까지 흰 배경을 사용한다.
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Padding(
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.screenPadding,
+              AppSpacing.screenPadding,
+              AppSpacing.screenPadding,
+              0,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                MedicalDisclaimer(),
+                SizedBox(height: AppSpacing.sectionGap),
+              ],
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const MedicalDisclaimer(),
-              const SizedBox(height: AppSpacing.sectionGap),
-              _CtaSection(
-                onRetry: onRetry,
-                onAddToDiet: onAddToDiet ?? () => _showF3Placeholder(context),
+          ColoredBox(
+            color: Colors.white,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.screenPadding,
+                  0,
+                  AppSpacing.screenPadding,
+                  AppSpacing.screenPadding,
+                ),
+                child: _CtaSection(
+                  onRetry: onRetry,
+                  onAddToDiet: onAddToDiet ?? () => _showF3Placeholder(context),
+                ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

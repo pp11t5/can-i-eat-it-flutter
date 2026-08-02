@@ -239,6 +239,13 @@ void main() {
 
       final substitute = find.text('저염 된장찌개');
       await tester.ensureVisible(substitute);
+      // 하단 고정 영역은 본문 위에 투명하게 겹쳐진다. 실제 사용자처럼
+      // 대체 음식을 면책 고지 위쪽으로 스크롤한 뒤 탭한다.
+      await tester.drag(
+        find.byType(SingleChildScrollView),
+        const Offset(0, -200),
+      );
+      await tester.pumpAndSettle();
       expect(
         find.bySemanticsLabel('저염 된장찌개 식사 가이드 보기'),
         findsOneWidget,
