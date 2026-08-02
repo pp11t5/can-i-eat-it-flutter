@@ -18,13 +18,21 @@ import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_detai
 // ---------------------------------------------------------------------------
 
 class _MockSymptomRepository implements SymptomRepository {
-  _MockSymptomRepository({required this.symptom});
+  _MockSymptomRepository({
+    required this.symptom,
+    List<Symptom>? detailResponses,
+  }) : _detailResponses = detailResponses ?? [symptom];
 
   final Symptom symptom;
+  final List<Symptom> _detailResponses;
   final List<String> deletedIds = [];
+  int detailCallCount = 0;
 
   @override
-  Future<Symptom> detail(String symptomId) async => symptom;
+  Future<Symptom> detail(String symptomId) async {
+    final index = detailCallCount++;
+    return _detailResponses[index.clamp(0, _detailResponses.length - 1)];
+  }
 
   @override
   Future<void> delete(String symptomId) async {
@@ -141,13 +149,21 @@ const _symptomNoMealNoAnalysis = Symptom(
 GoRouter _testRouter({
   required String symptomId,
   int? afterMealMinutes,
+  bool? symptomRecordResult,
 }) =>
     GoRouter(
       initialLocation: '/symptom/$symptomId',
       routes: [
         GoRoute(
           path: '/symptom/record',
-          builder: (_, __) => const Scaffold(body: Text('write-stub')),
+          builder: (context, _) => Scaffold(
+            body: symptomRecordResult == null
+                ? const Text('write-stub')
+                : TextButton(
+                    onPressed: () => context.pop(symptomRecordResult),
+                    child: const Text('complete-record-stub'),
+                  ),
+          ),
         ),
         GoRoute(
           path: '/symptom/:symptomId',
@@ -166,9 +182,11 @@ Widget _wrap({
   required Symptom symptom,
   required String symptomId,
   int? afterMealMinutes,
+  bool? symptomRecordResult,
+  _MockSymptomRepository? repository,
   List<Override> extraOverrides = const [],
 }) {
-  final repo = _MockSymptomRepository(symptom: symptom);
+  final repo = repository ?? _MockSymptomRepository(symptom: symptom);
   return ProviderScope(
     overrides: [
       // ignore: scoped_providers_should_specify_dependencies
@@ -182,6 +200,7 @@ Widget _wrap({
       routerConfig: _testRouter(
         symptomId: symptomId,
         afterMealMinutes: afterMealMinutes,
+        symptomRecordResult: symptomRecordResult,
       ),
     ),
   );
@@ -302,6 +321,85 @@ void main() {
 
       expect(find.text('AI 맞춤 분석이에요'), findsNothing);
     });
+
+    testWidgets('음식 연결하기 탭 → 증상 기록 작성 화면으로 이동', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          symptom: _symptomNoMealNoAnalysis,
+          symptomId: 'symptom-002',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('음식 연결하기'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('write-stub'), findsOneWidget);
+    });
+
+    testWidgets('음식 연결 저장 성공 후 최신 연결 음식을 다시 표시', (tester) async {
+      const updatedSymptom = Symptom(
+        symptomId: 'symptom-002',
+        symptomState: SymptomState.good,
+        stateTitle: '컨디션이 좋아요',
+        symptomTypes: [],
+        occurredAt: _kOccurredAt,
+        linkedMeal: SymptomLinkedMeal(
+          mealRecordId: 'record-002',
+          foods: [
+            SymptomLinkedFood(
+              mealFoodId: 'food-003',
+              name: '비빔밥',
+              category: '한식',
+            ),
+          ],
+        ),
+        analysisItems: [],
+      );
+      final repo = _MockSymptomRepository(
+        symptom: _symptomNoMealNoAnalysis,
+        detailResponses: [_symptomNoMealNoAnalysis, updatedSymptom],
+      );
+      await tester.pumpWidget(
+        _wrap(
+          symptom: _symptomNoMealNoAnalysis,
+          symptomId: 'symptom-002',
+          symptomRecordResult: true,
+          repository: repo,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('음식 연결하기'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('complete-record-stub'));
+      await tester.pumpAndSettle();
+
+      expect(repo.detailCallCount, 2);
+      expect(find.text('비빔밥'), findsOneWidget);
+      expect(find.text('연결된 음식이 없어요'), findsNothing);
+    });
+
+    testWidgets('음식 연결을 저장하지 않으면 상세를 다시 조회하지 않음', (tester) async {
+      final repo = _MockSymptomRepository(symptom: _symptomNoMealNoAnalysis);
+      await tester.pumpWidget(
+        _wrap(
+          symptom: _symptomNoMealNoAnalysis,
+          symptomId: 'symptom-002',
+          symptomRecordResult: false,
+          repository: repo,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('음식 연결하기'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('complete-record-stub'));
+      await tester.pumpAndSettle();
+
+      expect(repo.detailCallCount, 1);
+      expect(find.text('연결된 음식이 없어요'), findsOneWidget);
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -355,8 +453,7 @@ void main() {
               );
               return capturedRepo;
             }),
-            mealRepositoryProvider
-                .overrideWithValue(_MockMealRepository()),
+            mealRepositoryProvider.overrideWithValue(_MockMealRepository()),
           ],
           child: MaterialApp.router(
             theme: AppTheme.light,
@@ -377,8 +474,7 @@ void main() {
       expect(capturedRepo.deletedIds, contains('symptom-001'));
     });
 
-    testWidgets('취소하기 탭 → repository.delete 미호출 (매핑 반전 회귀 가드)',
-        (tester) async {
+    testWidgets('취소하기 탭 → repository.delete 미호출 (매핑 반전 회귀 가드)', (tester) async {
       late _MockSymptomRepository capturedRepo;
 
       await tester.pumpWidget(
