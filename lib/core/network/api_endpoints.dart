@@ -211,6 +211,9 @@ class ApiEndpoints {
   /// `GET /my-page/summary`
   static const String myPageSummary = '/my-page/summary';
 
+  /// `GET /users/me/streak` — 홈 인사말의 현재 편안한 증상 기록 연속일.
+  static const String myStreak = '/users/me/streak';
+
   /// `GET /my-page/profile`
   static const String myPageProfile = '/my-page/profile';
 

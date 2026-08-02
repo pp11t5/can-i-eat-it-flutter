@@ -39,6 +39,27 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
+  group('myStreak — GET /users/me/streak', () {
+    test('result.streak를 정확히 반환한다', () async {
+      adapter.onGet(
+        ApiEndpoints.myStreak,
+        (server) => server.reply(200, _envelope({'streak': 5})),
+      );
+
+      expect(await repo.myStreak(), 5);
+    });
+
+    test('streak 누락 시 0으로 폴백된다', () async {
+      adapter.onGet(
+        ApiEndpoints.myStreak,
+        (server) => server.reply(200, _envelope(<String, dynamic>{})),
+      );
+
+      expect(await repo.myStreak(), 0);
+    });
+  });
+
+  // -------------------------------------------------------------------------
   group('unrecordedMealCount — GET /meal-records/unrecorded-count', () {
     test('result.count를 정확히 반환한다', () async {
       adapter.onGet(

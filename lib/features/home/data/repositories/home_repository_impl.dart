@@ -16,6 +16,19 @@ class HomeRepositoryImpl implements HomeRepository {
   final Dio _dio;
 
   @override
+  Future<int> myStreak() async {
+    try {
+      final response = await _dio.get<dynamic>(ApiEndpoints.myStreak);
+      return unwrap<int>(
+        response,
+        (j) => (j as Map<String, dynamic>)['streak'] as int? ?? 0,
+      );
+    } on DioException catch (e) {
+      throw FailureMapper.fromDioException(e);
+    }
+  }
+
+  @override
   Future<int> unrecordedMealCount() async {
     try {
       final response = await _dio.get<dynamic>(
