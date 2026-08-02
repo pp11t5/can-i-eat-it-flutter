@@ -51,6 +51,13 @@ class SymptomDetailScreen extends ConsumerWidget {
   /// 타임라인 카드에서 진입 시 afterMealMinutes 를 extra 로 전달. 없으면 null.
   final int? afterMealMinutes;
 
+  Future<void> _refreshDetail(WidgetRef ref) async {
+    await ref.read(globalLoadingControllerProvider.notifier).run(() async {
+      ref.invalidate(symptomDetailControllerProvider(symptomId));
+      await ref.read(symptomDetailControllerProvider(symptomId).future);
+    });
+  }
+
   // -------------------------------------------------------------------------
   // KST 포맷 헬퍼
   // -------------------------------------------------------------------------
@@ -138,6 +145,14 @@ class SymptomDetailScreen extends ConsumerWidget {
                   afterMealMinutes: afterMealMinutes,
                   occurredAtLabel: _formatOccurredAt(symptom.occurredAt),
                   displayName: displayName,
+                  onLinkMeal: () async {
+                    final saved = await context.push<bool>(
+                      '/symptom/record',
+                      extra: symptom,
+                    );
+                    if (saved != true || !context.mounted) return;
+                    await _refreshDetail(ref);
+                  },
                 ),
               ),
             ),
@@ -152,16 +167,7 @@ class SymptomDetailScreen extends ConsumerWidget {
                   );
                   if (saved != true || !context.mounted) return;
                   // 전역 로딩 표시 후 상세 재조회 — 변경 사항이 반영될 때까지 차단.
-                  await ref
-                      .read(globalLoadingControllerProvider.notifier)
-                      .run(() async {
-                    ref.invalidate(
-                      symptomDetailControllerProvider(symptomId),
-                    );
-                    await ref.read(
-                      symptomDetailControllerProvider(symptomId).future,
-                    );
-                  });
+                  await _refreshDetail(ref);
                 },
               ),
           ],
@@ -230,12 +236,14 @@ class _Body extends StatelessWidget {
     required this.afterMealMinutes,
     required this.occurredAtLabel,
     required this.displayName,
+    required this.onLinkMeal,
   });
 
   final Symptom symptom;
   final int? afterMealMinutes;
   final String occurredAtLabel;
   final String displayName;
+  final VoidCallback onLinkMeal;
 
   /// 증상 유형 → 한국어 join. 비어있으면 기본 문구.
   String get _symptomTypesLabel {
@@ -334,9 +342,7 @@ class _Body extends StatelessWidget {
                   : null,
             )
           else
-            _NoMealRow(
-              onLink: () => context.push('/symptom/record', extra: symptom),
-            ),
+            _NoMealRow(onLink: onLinkMeal),
 
           // ---------------------------------------------------------------
           // AI 분석 섹션 (analysis null 또는 빈 목록이면 숨김)
