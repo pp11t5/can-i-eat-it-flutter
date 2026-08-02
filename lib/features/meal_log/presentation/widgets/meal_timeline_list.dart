@@ -41,7 +41,8 @@ class MealTimelineList extends StatelessWidget {
   final void Function(String mealRecordId)? onTapMeal;
 
   /// single/group 타일 "+음식 추가" → 기존 식사에 추가(mealRecordId, mealRecordDateTime).
-  final void Function(String mealRecordId, String mealRecordDateTime)? onAddFood;
+  final void Function(String mealRecordId, String mealRecordDateTime)?
+      onAddFood;
 
   /// 증상 행/연결증상 카드 탭 → 증상 상세(symptomId).
   final void Function(String symptomId)? onTapSymptom;
@@ -57,7 +58,8 @@ class MealTimelineList extends StatelessWidget {
 
   /// 항목별 시간대 hour 추출.
   static int _itemHour(TimelineItem item) => switch (item) {
-        TimelineSingle(:final mealRecordDateTime) => _hourOf(mealRecordDateTime),
+        TimelineSingle(:final mealRecordDateTime) =>
+          _hourOf(mealRecordDateTime),
         TimelineGroup(:final mealRecordDateTime) => _hourOf(mealRecordDateTime),
         TimelineSymptom(:final occurredAt) => _hourOf(occurredAt),
       };
@@ -171,7 +173,8 @@ class _TimelineRow extends StatelessWidget {
           const SizedBox(width: _rowGap),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : 16), // Figma 실측: 아이템 세로 gap
+              padding: EdgeInsets.only(
+                  bottom: isLast ? 0 : 16), // Figma 실측: 아이템 세로 gap
               child: child,
             ),
           ),
@@ -238,7 +241,7 @@ Color _verdictColor(VerdictLevel level) => switch (level) {
       VerdictLevel.unknown => AppColors.verdictUnknown,
     };
 
-/// 식사 대비 경과 분 → 표시 레이블 (_SymptomCard·_ConnectedSymptomsCard 공유).
+/// 식사 대비 경과 분 → 표시 레이블 (_SymptomCard·_ConnectedSymptomsSection 공유).
 ///
 /// 음수 → "식사 전 N분/시간", 0 이상 → "식후 N분/시간".
 String _afterMealLabel(int minutes) {
@@ -287,11 +290,16 @@ class _AddFoodRow extends StatelessWidget {
   }
 }
 
-/// 연결증상 카드 — 대표증상 요약 + "식후 N분", 탭 시 증상 상세 이동.
+/// 식사 카드 하단의 연결증상 섹션 — 대표증상 요약 + "식후 N분".
 ///
-/// Figma: "+같이 먹은 음식" 아래 중첩 회색 카드(요약 볼드 + chevron).
-class _ConnectedSymptomsCard extends StatelessWidget {
-  const _ConnectedSymptomsCard({required this.connectedSymptoms, this.onTap});
+/// 음식 정보와는 구분선으로 나누되, 외곽 테두리는 식사 카드와 공유한다.
+/// 따라서 별도 카드처럼 보이지 않고 이미지 레퍼런스처럼 카드의 하단 영역을
+/// 온전히 차지한다.
+class _ConnectedSymptomsSection extends StatelessWidget {
+  const _ConnectedSymptomsSection({
+    required this.connectedSymptoms,
+    this.onTap,
+  });
 
   final ConnectedSymptoms connectedSymptoms;
   final VoidCallback? onTap;
@@ -318,14 +326,9 @@ class _ConnectedSymptomsCard extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        margin: const EdgeInsets.only(top: AppSpacing.itemGap),
         width: double.infinity,
         padding: const EdgeInsets.all(AppSpacing.cardPadding),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceBackground,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-          border: Border.all(color: AppColors.border, width: 1),
-        ),
+        color: AppColors.surfaceBackground,
         child: Row(
           children: [
             Expanded(
@@ -364,6 +367,58 @@ class _ConnectedSymptomsCard extends StatelessWidget {
   }
 }
 
+/// 식사 정보와 연결증상을 한 외곽 카드로 묶는다.
+///
+/// 연결증상이 있을 때만 하단을 별도 회색 섹션으로 렌더한다. 음식 영역은 기존과
+/// 같은 여백을 유지하고, 증상은 음식 카드 안의 중첩 카드가 아닌 하단 패널이 된다.
+class _MealCardShell extends StatelessWidget {
+  const _MealCardShell({
+    required this.child,
+    this.connectedSymptoms,
+    this.onTapSymptom,
+  });
+
+  final Widget child;
+  final ConnectedSymptoms? connectedSymptoms;
+  final VoidCallback? onTapSymptom;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(color: AppColors.border, width: 1),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.weekStripShadow,
+            blurRadius: 8,
+            offset: Offset(0, 4),
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.cardPadding),
+            child: child,
+          ),
+          if (connectedSymptoms case final symptoms?) ...[
+            const Divider(height: 1, thickness: 1, color: AppColors.border),
+            _ConnectedSymptomsSection(
+              connectedSymptoms: symptoms,
+              onTap: onTapSymptom,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
 // single 타일
 // ---------------------------------------------------------------------------
@@ -385,7 +440,11 @@ class _SingleMealCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _CardShell(
+    return _MealCardShell(
+      connectedSymptoms: item.connectedSymptoms,
+      onTapSymptom: onTapSymptom != null && item.connectedSymptoms != null
+          ? () => onTapSymptom!(item.connectedSymptoms!.symptomId)
+          : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -438,13 +497,6 @@ class _SingleMealCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.itemGap),
           _AddFoodRow(onAddFood: onAddFood),
-          if (item.connectedSymptoms != null)
-            _ConnectedSymptomsCard(
-              connectedSymptoms: item.connectedSymptoms!,
-              onTap: onTapSymptom != null
-                  ? () => onTapSymptom!(item.connectedSymptoms!.symptomId)
-                  : null,
-            ),
         ],
       ),
     );
@@ -474,14 +526,20 @@ class _GroupMealCard extends StatelessWidget {
   String _summary() {
     final names = item.representativeFoods.join(', ');
     if (item.etcCount > 0) {
-      return names.isEmpty ? '외 ${item.etcCount}개' : '$names 외 ${item.etcCount}개';
+      return names.isEmpty
+          ? '외 ${item.etcCount}개'
+          : '$names 외 ${item.etcCount}개';
     }
     return names;
   }
 
   @override
   Widget build(BuildContext context) {
-    return _CardShell(
+    return _MealCardShell(
+      connectedSymptoms: item.connectedSymptoms,
+      onTapSymptom: onTapSymptom != null && item.connectedSymptoms != null
+          ? () => onTapSymptom!(item.connectedSymptoms!.symptomId)
+          : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -527,13 +585,6 @@ class _GroupMealCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.itemGap),
           _AddFoodRow(onAddFood: onAddFood),
-          if (item.connectedSymptoms != null)
-            _ConnectedSymptomsCard(
-              connectedSymptoms: item.connectedSymptoms!,
-              onTap: onTapSymptom != null
-                  ? () => onTapSymptom!(item.connectedSymptoms!.symptomId)
-                  : null,
-            ),
         ],
       ),
     );
