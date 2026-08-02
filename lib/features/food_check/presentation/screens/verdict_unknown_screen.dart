@@ -6,11 +6,10 @@ import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
-import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
 
 /// 확인어려움 화면 (Figma node 554-5327).
 ///
-/// 3가지 검색 팁 카드 + "다시 검색" CTA + MedicalDisclaimer.
+/// 3가지 검색 팁 카드 + "다시 검색" CTA.
 ///
 /// 파라미터:
 /// - [onRetry]: "다시 검색" 버튼 탭 콜백 (내비게이션은 티켓 6 담당).
@@ -33,9 +32,9 @@ class VerdictUnknownScreen extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(
                   AppSpacing.screenPadding, // left 16
-                  AppSpacing.itemGap,       // top 8
+                  AppSpacing.itemGap, // top 8
                   AppSpacing.screenPadding, // right 16
-                  AppSpacing.itemGap,       // bottom 8
+                  AppSpacing.itemGap, // bottom 8
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,9 +52,6 @@ class VerdictUnknownScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.sectionGap),
                     // 팁 카드
                     _TipCard(),
-                    const SizedBox(height: AppSpacing.sectionGap),
-                    // 면책 고지
-                    const MedicalDisclaimer(),
                   ],
                 ),
               ),
@@ -244,7 +240,8 @@ class _TipDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.symmetric(vertical: AppSpacing.sectionGap), // 24 top/bottom
+      padding: EdgeInsets.symmetric(
+          vertical: AppSpacing.sectionGap), // 24 top/bottom
       child: Divider(
         height: 1,
         thickness: 1,
@@ -270,7 +267,7 @@ class _CtaWrap extends StatelessWidget {
         AppSpacing.screenPadding, // left 16
         AppSpacing.screenPadding, // top 16
         AppSpacing.screenPadding, // right 16
-        32,                       // bottom 32
+        32, // bottom 32
       ),
       child: SizedBox(
         height: 54,

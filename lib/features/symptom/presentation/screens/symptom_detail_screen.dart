@@ -636,17 +636,12 @@ class _BottomCta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      color: AppColors.surface,
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenPadding,
         0,
         AppSpacing.screenPadding,
         AppSpacing.contentGap,
-      ),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(
-          top: BorderSide(color: AppColors.divider, width: 0.5),
-        ),
       ),
       child: Row(
         children: [
