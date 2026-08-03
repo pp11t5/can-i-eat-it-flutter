@@ -55,21 +55,23 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
       ref.invalidate(recentMealsProvider);
       ref.invalidate(unrecordedMealCountProvider);
 
-      // 모달 스택 pop — /verdict + /check + /meal/record 최대 3단
+      final message = ctx.mealRecordId != null
+          ? '현재 식사에 음식을 추가했어요.'
+          : '식사를 기록했어요. 식후 2시간 뒤 증상 확인 알림을 보내드릴게요.';
+
+      // 토스트를 먼저 올린 뒤 모달 스택을 비운다(루트 Overlay 유지).
       if (context.mounted) {
-        var popped = 0;
-        while (context.mounted && context.canPop() && popped < 3) {
-          context.pop();
-          popped++;
-        }
+        await showAppToast(context, message);
       }
 
-      // 토스트
+      // /check · /verdict(유사 음식 포함) · /meal/record 등 fullscreen 모달만 전부 pop.
+      // 셸 탭은 유지 → 홈에서 시작했으면 홈, 타임라인에서 시작했으면 타임라인.
+      // (고정 횟수 pop / go('/') 는 검색 잔류·탭 강제 전환 버그)
       if (context.mounted) {
-        final message = ctx.mealRecordId != null
-            ? '현재 식사에 음식을 추가했어요.'
-            : '식사를 기록했어요. 식후 2시간 뒤 증상 확인 알림을 보내드릴게요.';
-        await showAppToast(context, message);
+        final router = GoRouter.of(context);
+        while (router.canPop()) {
+          router.pop();
+        }
       }
     } catch (_) {
       if (context.mounted) {

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
@@ -182,14 +183,19 @@ const _kVerdictByText = EatVerdict(
 // ---------------------------------------------------------------------------
 // 헬퍼: 실제 makeHandlerFromRef를 _FakeRef 경유로 실행.
 //
-// BuildContext는 최소 위젯 트리에서 획득한다.
+// BuildContext는 GoRouter 트리에서 획득한다.
+// 성공 시 모달 스택을 전부 pop 하므로 셸 경로(/ 또는 /timeline)가 남는다.
 // ---------------------------------------------------------------------------
 
-Future<_FakeRef> _runHandler({
+Future<({_FakeRef ref, GoRouter router})> _runHandler({
   required WidgetTester tester,
   required _SpyMealRepository spy,
   required EatVerdict verdict,
   required MealRecordContext ctx,
+  /// 셸 기준 경로 — 홈 `/` 또는 타임라인 `/timeline`.
+  String shellLocation = '/',
+  /// 유사 음식처럼 /check → /verdict → /verdict-sub 스택 위에서 호출할지.
+  bool fromNestedVerdict = false,
 }) async {
   final container = ProviderContainer(
     overrides: [mealRepositoryProvider.overrideWithValue(spy)],
@@ -200,29 +206,70 @@ Future<_FakeRef> _runHandler({
   final ref = _FakeRef(container);
   final handler = makeHandlerFromRef(ref);
 
-  bool called = false;
+  // 중첩 자식 라우트로 스택을 만들어 canPop 이 동작하게 한다.
+  // (실앱은 형제 fullscreen push 스택이지만, pop-until-shell 검증 목적엔 동일)
+  List<RouteBase> modalStack() => [
+        GoRoute(
+          path: 'check',
+          builder: (_, __) => const Scaffold(body: Text('check')),
+          routes: [
+            GoRoute(
+              path: 'verdict',
+              builder: (_, __) => const Scaffold(body: Text('verdict')),
+              routes: [
+                GoRoute(
+                  path: 'sub',
+                  builder: (_, __) =>
+                      const Scaffold(body: Text('verdict-sub')),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ];
+
+  final nestedLocation = shellLocation == '/timeline'
+      ? '/timeline/check/verdict/sub'
+      : '/check/verdict/sub';
+
+  final router = GoRouter(
+    initialLocation: fromNestedVerdict ? nestedLocation : shellLocation,
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (_, __) => const Scaffold(body: Text('home')),
+        routes: modalStack(),
+      ),
+      GoRoute(
+        path: '/timeline',
+        builder: (_, __) => const Scaffold(body: Text('timeline')),
+        routes: modalStack(),
+      ),
+    ],
+  );
+
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: MaterialApp(
-        home: Builder(
-          builder: (innerCtx) {
-            if (!called) {
-              called = true;
-              WidgetsBinding.instance.addPostFrameCallback((_) async {
-                await handler(innerCtx, verdict, ctx);
-              });
-            }
-            return const Scaffold(body: SizedBox.shrink());
-          },
-        ),
-      ),
+      child: MaterialApp.router(routerConfig: router),
     ),
   );
-  // showAppToast 내부의 2.5초 타이머를 소진한다.
-  // pumpAndSettle은 pending timer가 있으면 실패하므로 pump로 직접 진행한다.
+  await tester.pump();
+
+  final shellLabel = shellLocation == '/timeline' ? 'timeline' : 'home';
+  final startFinder =
+      fromNestedVerdict ? find.text('verdict-sub') : find.text(shellLabel);
+  final context = tester.element(startFinder);
+  await handler(context, verdict, ctx);
+
+  // showAppToast: fade 250ms + 표시 2.5s + reverse 250ms.
+  // AnimationController.forward().then → delayed 가 프레임 단위로 이어지므로
+  // 한 번에 큰 duration 이 아니라 단계적으로 소진한다.
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 300));
   await tester.pump(const Duration(seconds: 3));
-  return ref;
+  await tester.pump(const Duration(milliseconds: 300));
+  return (ref: ref, router: router);
 }
 
 // ---------------------------------------------------------------------------
@@ -232,15 +279,50 @@ Future<_FakeRef> _runHandler({
 void main() {
   group('makeHandlerFromRef — by-id 케이스 (foodExternalId != null)', () {
     testWidgets('저장 성공 시 홈 식사 provider를 무효화한다', (tester) async {
-      final ref = await _runHandler(
+      final result = await _runHandler(
         tester: tester,
         spy: _SpyMealRepository(),
         verdict: _kVerdictById,
         ctx: MealRecordContext(eatenAt: _kEatAt),
       );
 
-      expect(ref.invalidatedProviders, contains(recentMealsProvider));
-      expect(ref.invalidatedProviders, contains(unrecordedMealCountProvider));
+      expect(result.ref.invalidatedProviders, contains(recentMealsProvider));
+      expect(
+        result.ref.invalidatedProviders,
+        contains(unrecordedMealCountProvider),
+      );
+    });
+
+    testWidgets('홈에서 중첩 판정 추가 후 홈(/)으로 복귀한다', (tester) async {
+      final result = await _runHandler(
+        tester: tester,
+        spy: _SpyMealRepository(),
+        verdict: _kVerdictById,
+        ctx: MealRecordContext(eatenAt: _kEatAt),
+        shellLocation: '/',
+        fromNestedVerdict: true,
+      );
+
+      expect(result.router.state.uri.path, '/');
+      expect(find.text('home'), findsOneWidget);
+      expect(find.text('verdict-sub'), findsNothing);
+      expect(find.text('check'), findsNothing);
+    });
+
+    testWidgets('타임라인에서 중첩 판정 추가 후 타임라인으로 복귀한다', (tester) async {
+      final result = await _runHandler(
+        tester: tester,
+        spy: _SpyMealRepository(),
+        verdict: _kVerdictById,
+        ctx: MealRecordContext(eatenAt: _kEatAt),
+        shellLocation: '/timeline',
+        fromNestedVerdict: true,
+      );
+
+      expect(result.router.state.uri.path, '/timeline');
+      expect(find.text('timeline'), findsOneWidget);
+      expect(find.text('verdict-sub'), findsNothing);
+      expect(find.text('check'), findsNothing);
     });
 
     testWidgets('appendFood가 1회 호출되고 foodExternalId·eatenAt·mealRecordId가 전달된다',
