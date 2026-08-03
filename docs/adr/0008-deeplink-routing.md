@@ -189,7 +189,9 @@
 - [ ] **패키지 추가**: **`app_links`**(권고, uni_links 후속·유지보수 활발·cold+warm 스트림). 대안 go_router 네이티브 단독은 푸시 유입과 통일 안 되고 pending 처리 복잡(§2-B 참조).
 - [ ] **go_router 이중 처리 차단**(R4): cold 링크를 go_router가 자동 소비하지 않고 `app_links`+리졸버가 replay하도록 배선(`initialLocation:'/splash'` 유지, 플랫폼 기본 경로 무시 설정).
 - [x] **FCM 푸시 탭 연결 (현재 범위)**: `data.link`을 검증하는 `PushLinkResolver`와 세션 대기/replay를 담당하는 `PushNavigationCoordinator`를 연결. 지원 경로는 식후 증상 기록·주간 리포트·이연 묶음 미기록 식사 목록이며, 유니버설링크용 공용 `DeepLinkResolver` 확장은 후속 작업.
-- [ ] iOS `aps-environment` 릴리스 시 `production` 전환(APNs 서버개발자 Firebase 콘솔 조율).
+- [x] iOS `aps-environment`: 단일 entitlement 파일의 `$(APS_ENVIRONMENT)` 값을
+  빌드 설정으로 주입. Debug/Profile은 `development`, Release(prod/dev)는
+  `production`을 사용한다. APNs 인증 키는 Firebase 콘솔에 등록된 동일 키를 사용한다.
 
 ---
 
