@@ -85,13 +85,27 @@ abstract class SymptomReportDto with _$SymptomReportDto {
 extension SymptomReportDtoMapper on SymptomReportDto {
   SymptomReport toEntity() => SymptomReport(
         symptomCount: symptomCount,
-        averageTime: averageTime,
+        // 서버 OffsetTime 직렬화 예: "11:27:33+09:00" → UI는 HH:mm 만 표시.
+        averageTime: formatAverageTimeLabel(averageTime),
         averageLevel: averageLevel,
         throatForeignBodyCount: throatForeignBodyCount,
         acidRefluxCount: acidRefluxCount,
         coughCount: coughCount,
         chestTightnessCount: chestTightnessCount,
       );
+}
+
+/// 서버 `averageTime`(OffsetTime 등) 문자열을 화면 라벨 `HH:mm`으로 정규화한다.
+///
+/// 허용 입력 예: `16:30`, `11:27:33+09:00`, `08:00:00`.
+/// 파싱 불가면 원문을 그대로 반환(완전 누락만 null).
+String? formatAverageTimeLabel(String? raw) {
+  if (raw == null || raw.isEmpty) return null;
+  final match = RegExp(r'^(\d{1,2}):(\d{2})').firstMatch(raw.trim());
+  if (match == null) return raw;
+  final hour = match.group(1)!.padLeft(2, '0');
+  final minute = match.group(2)!;
+  return '$hour:$minute';
 }
 
 // ---------------------------------------------------------------------------
