@@ -1,8 +1,8 @@
 import 'package:can_i_eat_it/core/error/failure.dart';
 
 import '../../domain/entities/auth_session.dart';
+import '../../domain/entities/consent.dart';
 import '../../domain/entities/sign_in_outcome.dart';
-import '../../domain/entities/terms_agreement.dart';
 import '../../domain/repositories/auth_repository.dart';
 
 // ---------------------------------------------------------------------------
@@ -31,7 +31,11 @@ class ThrowingAuthRepository implements AuthRepository {
   Future<SignInOutcome> signInWithApple() async => throw _failure;
 
   @override
-  Future<void> recordTermsAgreement(TermsAgreement agreement) async {}
+  Future<List<ConsentTerm>> fetchConsentTerms() async =>
+      MockAuthRepository.defaultConsentTerms;
+
+  @override
+  Future<void> submitConsent(List<ConsentChoice> choices) async {}
 
   @override
   Future<AuthSession> recoverAccount(
@@ -68,7 +72,7 @@ class ThrowingAuthRepository implements AuthRepository {
 /// [MockHealthProfileRepository.noProfile]/[.completed]로 시나리오를 구성한다.
 class MockAuthRepository implements AuthRepository {
   /// [initialSession]: [currentSession]이 최초 반환할 세션(null = 미인증).
-  /// [kakaoOutcome]: 카카오 로그인 결과. 미지정 시 기본 NeedsTerms(newUser).
+  /// [kakaoOutcome]: 카카오 로그인 결과. 미지정 시 기본 신규 사용자 인증 결과.
   /// [appleOutcome]: Apple 로그인 결과. 미지정 시 [kakaoOutcome] 폴백.
   /// [delay]: 테스트에서 loading 상태 관찰용 — [currentSession] 반환 전 대기 시간.
   ///   기본값 [Duration.zero]이므로 기존 동작/테스트에 영향 없음.
@@ -80,11 +84,21 @@ class MockAuthRepository implements AuthRepository {
     SignInOutcome? appleOutcome,
     Duration delay = Duration.zero,
     int failRecoverTimes = 0,
+    List<ConsentTerm> consentTerms = defaultConsentTerms,
+    Object? consentFetchError,
+    Duration consentFetchDelay = Duration.zero,
+    Object? consentSubmitError,
+    Duration consentSubmitDelay = Duration.zero,
   })  : _session = initialSession,
         _kakaoOutcome = kakaoOutcome,
         _appleOutcome = appleOutcome,
         _delay = delay,
-        _failRecoverTimes = failRecoverTimes;
+        _failRecoverTimes = failRecoverTimes,
+        _consentTerms = consentTerms,
+        _consentFetchError = consentFetchError,
+        _consentFetchDelay = consentFetchDelay,
+        _consentSubmitError = consentSubmitError,
+        _consentSubmitDelay = consentSubmitDelay;
 
   // ---------------------------------------------------------------------------
   // 시나리오 named factory
@@ -94,10 +108,17 @@ class MockAuthRepository implements AuthRepository {
   factory MockAuthRepository.signedOut() =>
       MockAuthRepository(initialSession: null);
 
-  /// 로그인 시 신규 사용자(약관 미동의) → [NeedsTerms].
+  /// 로그인 시 신규 사용자 → 토큰 발급 + 온보딩 미완료 + 약관 pending.
   factory MockAuthRepository.newUser() => MockAuthRepository(
         initialSession: null,
-        kakaoOutcome: const NeedsTerms(requirements: {}),
+        kakaoOutcome: const Authenticated(
+          session: AuthSession(
+            userId: 'mock-new-user',
+            provider: AuthProvider.kakao,
+            hasAgreedTerms: false,
+          ),
+          onboarded: false,
+        ),
       );
 
   /// 로그인 시 기존 사용자(약관 동의됨, active) → [Authenticated].
@@ -113,10 +134,10 @@ class MockAuthRepository implements AuthRepository {
       MockAuthRepository(
         initialSession: null,
         kakaoOutcome: Authenticated(
-          session: const AuthSession(
+          session: AuthSession(
             userId: 'mock-existing',
             provider: AuthProvider.kakao,
-            hasAgreedTerms: true,
+            hasAgreedTerms: onboarded,
             accountStatus: AccountStatus.active,
           ),
           onboarded: onboarded,
@@ -145,7 +166,14 @@ class MockAuthRepository implements AuthRepository {
   /// 디자이너/PO 가 한 빌드에서 양쪽 플로우 모두 확인 가능.
   factory MockAuthRepository.w1Demo() => MockAuthRepository(
         initialSession: null,
-        kakaoOutcome: const NeedsTerms(requirements: {}),
+        kakaoOutcome: const Authenticated(
+          session: AuthSession(
+            userId: 'mock-new-user',
+            provider: AuthProvider.kakao,
+            hasAgreedTerms: false,
+          ),
+          onboarded: false,
+        ),
         appleOutcome: const Recoverable(
           reason: RecoverReason.deletionInProgress,
           provider: AuthProvider.apple,
@@ -162,16 +190,65 @@ class MockAuthRepository implements AuthRepository {
   final SignInOutcome? _appleOutcome;
   final Duration _delay;
   int _failRecoverTimes;
-  TermsAgreement? _lastTermsAgreement;
+  final List<ConsentTerm> _consentTerms;
+  final Object? _consentFetchError;
+  final Duration _consentFetchDelay;
+  final Object? _consentSubmitError;
+  final Duration _consentSubmitDelay;
+  List<ConsentChoice>? _lastConsentChoices;
+  int _submitConsentCallCount = 0;
 
-  /// 마지막으로 기록된 약관 동의 이력. 테스트 검증용.
-  TermsAgreement? get lastTermsAgreement => _lastTermsAgreement;
+  /// 마지막으로 제출된 약관 선택값. 테스트 검증용.
+  List<ConsentChoice>? get lastConsentChoices => _lastConsentChoices;
+  int get submitConsentCallCount => _submitConsentCallCount;
 
   // ---------------------------------------------------------------------------
   // 기본 SignInOutcome (newUser)
   // ---------------------------------------------------------------------------
 
-  static const SignInOutcome _defaultOutcome = NeedsTerms(requirements: {});
+  static const SignInOutcome _defaultOutcome = Authenticated(
+    session: AuthSession(
+      userId: 'mock-new-user',
+      provider: AuthProvider.kakao,
+      hasAgreedTerms: false,
+    ),
+    onboarded: false,
+  );
+
+  static const List<ConsentTerm> defaultConsentTerms = [
+    ConsentTerm(
+      id: 1,
+      code: 'tos',
+      version: '1.0',
+      title: '서비스 이용약관',
+      content: 'https://example.com/tos',
+      isRequired: true,
+    ),
+    ConsentTerm(
+      id: 2,
+      code: 'privacy',
+      version: '1.0',
+      title: '개인정보 수집·이용 동의',
+      content: 'https://example.com/privacy',
+      isRequired: true,
+    ),
+    ConsentTerm(
+      id: 3,
+      code: 'health_sensitive',
+      version: '1.0',
+      title: '민감정보(건강) 수집 동의',
+      content: 'https://example.com/health',
+      isRequired: true,
+    ),
+    ConsentTerm(
+      id: 4,
+      code: 'marketing',
+      version: '1.0',
+      title: '마케팅·푸시 알림 수신',
+      content: 'https://example.com/marketing',
+      isRequired: false,
+    ),
+  ];
 
   // ---------------------------------------------------------------------------
   // AuthRepository 구현
@@ -184,7 +261,8 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
-  bool consumeOfflineRestoreFlag() => false; // Mock 에서는 항상 false (오프라인 시나리오 불필요).
+  bool consumeOfflineRestoreFlag() =>
+      false; // Mock 에서는 항상 false (오프라인 시나리오 불필요).
 
   @override
   Future<SignInOutcome> signInWithKakao() async {
@@ -201,13 +279,29 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> recordTermsAgreement(TermsAgreement agreement) async {
+  Future<List<ConsentTerm>> fetchConsentTerms() async {
+    if (_consentFetchDelay > Duration.zero) {
+      await Future<void>.delayed(_consentFetchDelay);
+    }
+    final error = _consentFetchError;
+    if (error != null) throw error;
+    return List.unmodifiable(_consentTerms);
+  }
+
+  @override
+  Future<void> submitConsent(List<ConsentChoice> choices) async {
     if (_session == null) {
       throw StateError(
-        'recordTermsAgreement: 활성 세션이 없습니다. signIn 후 호출해야 합니다.',
+        'submitConsent: 활성 세션이 없습니다. signIn 후 호출해야 합니다.',
       );
     }
-    _lastTermsAgreement = agreement;
+    _submitConsentCallCount++;
+    if (_consentSubmitDelay > Duration.zero) {
+      await Future<void>.delayed(_consentSubmitDelay);
+    }
+    final error = _consentSubmitError;
+    if (error != null) throw error;
+    _lastConsentChoices = List.unmodifiable(choices);
     _session = _session!.copyWith(hasAgreedTerms: true);
   }
 
@@ -274,21 +368,11 @@ class MockAuthRepository implements AuthRepository {
   /// [SignInOutcome] 을 내부 _session 에 반영한다.
   ///
   /// - [Authenticated]: session 을 그대로 저장 (provider override).
-  /// - [NeedsTerms]: 약관 미동의 신규 세션 합성 (세션 없는 상태가 정상이나
-  ///   recordTermsAgreement 등에서 세션이 필요하므로 임시 세션을 설정).
   /// - [Recoverable]: 세션 없음 (서버에서 토큰 미발급, ADR-0007 §3-1 (6-B)).
   void _applyOutcomeToSession(SignInOutcome outcome, AuthProvider provider) {
     switch (outcome) {
       case Authenticated(:final session):
         _session = session.copyWith(provider: provider);
-      case NeedsTerms():
-        // 약관 미동의는 임시 세션 합성 (recordTermsAgreement 가 세션 필요).
-        _session = AuthSession(
-          userId: 'mock-new-user',
-          provider: provider,
-          hasAgreedTerms: false,
-          accountStatus: AccountStatus.active,
-        );
       case Recoverable():
         // 복구 가능 계정은 토큰 미발급 → 세션 없음 (ADR-0007 §3-1 (6-B)).
         // recoverAccount(provider) 가 새 active 세션을 합성하므로 여기서 합성 불필요.

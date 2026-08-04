@@ -19,11 +19,20 @@ abstract interface class TokenStore {
   /// 저장된 리프레시 토큰을 읽는다. 없으면 null.
   Future<String?> readRefreshToken();
 
+  /// 약관 제출 전 앱이 종료된 사용자의 ID. 없으면 약관 pending 상태가 아니다.
+  Future<String?> readPendingConsentUserId();
+
   /// 액세스·리프레시 토큰을 함께 저장한다.
   Future<void> writeTokens({
     required String access,
     required String refresh,
   });
+
+  /// 현재 사용자가 온보딩 전에 약관을 제출해야 함을 저장한다.
+  Future<void> markConsentPending(String userId);
+
+  /// 약관 제출 완료 또는 완료된 사용자 로그인 시 pending 상태를 삭제한다.
+  Future<void> clearConsentPending();
 
   /// 저장된 모든 토큰을 삭제한다 (로그아웃·세션만료).
   Future<void> clear();
@@ -42,12 +51,17 @@ class FlutterSecureStorageTokenStore implements TokenStore {
 
   static const _keyAccess = 'auth.access_token';
   static const _keyRefresh = 'auth.refresh_token';
+  static const _keyPendingConsentUserId = 'auth.pending_consent_user_id';
 
   @override
   Future<String?> readAccessToken() => _storage.read(key: _keyAccess);
 
   @override
   Future<String?> readRefreshToken() => _storage.read(key: _keyRefresh);
+
+  @override
+  Future<String?> readPendingConsentUserId() =>
+      _storage.read(key: _keyPendingConsentUserId);
 
   @override
   Future<void> writeTokens({
@@ -59,9 +73,18 @@ class FlutterSecureStorageTokenStore implements TokenStore {
   }
 
   @override
+  Future<void> markConsentPending(String userId) =>
+      _storage.write(key: _keyPendingConsentUserId, value: userId);
+
+  @override
+  Future<void> clearConsentPending() =>
+      _storage.delete(key: _keyPendingConsentUserId);
+
+  @override
   Future<void> clear() async {
     await _storage.delete(key: _keyAccess);
     await _storage.delete(key: _keyRefresh);
+    await clearConsentPending();
   }
 }
 
@@ -75,12 +98,16 @@ class FlutterSecureStorageTokenStore implements TokenStore {
 class InMemoryTokenStore implements TokenStore {
   String? _access;
   String? _refresh;
+  String? _pendingConsentUserId;
 
   @override
   Future<String?> readAccessToken() async => _access;
 
   @override
   Future<String?> readRefreshToken() async => _refresh;
+
+  @override
+  Future<String?> readPendingConsentUserId() async => _pendingConsentUserId;
 
   @override
   Future<void> writeTokens({
@@ -92,9 +119,20 @@ class InMemoryTokenStore implements TokenStore {
   }
 
   @override
+  Future<void> markConsentPending(String userId) async {
+    _pendingConsentUserId = userId;
+  }
+
+  @override
+  Future<void> clearConsentPending() async {
+    _pendingConsentUserId = null;
+  }
+
+  @override
   Future<void> clear() async {
     _access = null;
     _refresh = null;
+    _pendingConsentUserId = null;
   }
 }
 

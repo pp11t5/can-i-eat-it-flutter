@@ -5,8 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/consent.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
-import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 import 'package:can_i_eat_it/features/auth/domain/repositories/auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
@@ -45,7 +45,10 @@ class _MockAuthRepository implements AuthRepository {
   void applyLocalDisplayName(String displayName) {}
 
   @override
-  Future<void> recordTermsAgreement(TermsAgreement agreement) =>
+  Future<List<ConsentTerm>> fetchConsentTerms() => throw UnimplementedError();
+
+  @override
+  Future<void> submitConsent(List<ConsentChoice> choices) =>
       throw UnimplementedError();
 
   @override

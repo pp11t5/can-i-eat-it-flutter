@@ -8,8 +8,8 @@ import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/consent.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
-import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 import 'package:can_i_eat_it/features/auth/domain/repositories/auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/login_screen.dart';
@@ -38,7 +38,10 @@ class _ThrowingObjectAuthRepository implements AuthRepository {
   Future<SignInOutcome> signInWithApple() async => throw error;
 
   @override
-  Future<void> recordTermsAgreement(TermsAgreement agreement) async {}
+  Future<List<ConsentTerm>> fetchConsentTerms() async => const [];
+
+  @override
+  Future<void> submitConsent(List<ConsentChoice> choices) async {}
 
   @override
   Future<AuthSession> recoverAccount(
@@ -116,8 +119,7 @@ Widget _wrap(MockAuthRepository repo) => ProviderScope(
 
 void main() {
   group('LoginScreen 플랫폼 분기', () {
-    testWidgets('Android 에서는 카카오 버튼만 보이고 Apple 버튼은 없다',
-        (tester) async {
+    testWidgets('Android 에서는 카카오 버튼만 보이고 Apple 버튼은 없다', (tester) async {
       await tester.pumpWidget(_wrap(MockAuthRepository.signedOut()));
       await tester.pumpAndSettle();
 
@@ -135,8 +137,7 @@ void main() {
   });
 
   group('LoginScreen 로그인 동작 — SignInOutcome 분기', () {
-    testWidgets(
-        'NeedsTerms(newUser) — 카카오 로그인 시 /terms 로 push 된다',
+    testWidgets('Authenticated(onboarded=false) 신규 사용자 — /terms 로 push 된다',
         (tester) async {
       final repo = MockAuthRepository.newUser();
       await tester.pumpWidget(_wrap(repo));
@@ -151,8 +152,7 @@ void main() {
       expect(find.text('home stub'), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-    testWidgets(
-        'Authenticated(onboarded=true) — 카카오 로그인 시 / 로 이동한다',
+    testWidgets('Authenticated(onboarded=true) — 카카오 로그인 시 / 로 이동한다',
         (tester) async {
       final repo = MockAuthRepository.existing(onboarded: true);
       await tester.pumpWidget(_wrap(repo));
@@ -165,8 +165,7 @@ void main() {
       expect(find.text('terms stub'), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-    testWidgets(
-        'Authenticated(onboarded=false) — 카카오 로그인 시 /onboarding/condition 으로 이동한다',
+    testWidgets('Authenticated(onboarded=false) — 카카오 로그인 시 /terms 로 이동한다',
         (tester) async {
       final repo = MockAuthRepository.existing(onboarded: false);
       await tester.pumpWidget(_wrap(repo));
@@ -175,12 +174,12 @@ void main() {
       await tester.tap(find.text('카카오로 로그인'));
       await tester.pumpAndSettle();
 
-      expect(find.text('onboarding stub'), findsOneWidget);
+      expect(find.text('terms stub'), findsOneWidget);
+      expect(find.text('onboarding stub'), findsNothing);
       expect(find.text('home stub'), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-    testWidgets(
-        'Recoverable(deletionGrace) — 카카오 로그인 시 복구 다이얼로그가 뜬다',
+    testWidgets('Recoverable(deletionGrace) — 카카오 로그인 시 복구 다이얼로그가 뜬다',
         (tester) async {
       await tester.pumpWidget(_wrap(MockAuthRepository.deletionGrace()));
       await tester.pumpAndSettle();
@@ -319,8 +318,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300)); // reverse + remove
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-    testWidgets(
-        'signInWithKakao 가 NetworkFailure throw → T2 토스트 노출',
+    testWidgets('signInWithKakao 가 NetworkFailure throw → T2 토스트 노출',
         (tester) async {
       await tester.pumpWidget(
         wrapWithThrowingRepo(const NetworkFailure()),
@@ -344,9 +342,7 @@ void main() {
   });
 
   group('LoginScreen 콜드스타트 오프라인 토스트(T1)', () {
-    testWidgets(
-        'coldStartOffline==true → T1 토스트 메시지가 노출된다',
-        (tester) async {
+    testWidgets('coldStartOffline==true → T1 토스트 메시지가 노출된다', (tester) async {
       await tester.pumpWidget(
         _wrapWithOfflineFlag(
           MockAuthRepository.signedOut(),
@@ -366,12 +362,13 @@ void main() {
       // 남은 타이머를 순서대로 소진: forward 완료 → delay 완료 → reverse 완료 → onDismissed.
       // 총 ~3100ms(등장250 + 표시2500 + 퇴장250 - 이미 흐른 100ms).
       await tester.pump(const Duration(milliseconds: 200)); // forward 완료
-      await tester.pump(const Duration(milliseconds: 2500)); // .then() + delay 완료
-      await tester.pump(const Duration(milliseconds: 300)); // reverse 완료 + entry.remove()
+      await tester
+          .pump(const Duration(milliseconds: 2500)); // .then() + delay 완료
+      await tester.pump(
+          const Duration(milliseconds: 300)); // reverse 완료 + entry.remove()
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-    testWidgets(
-        'coldStartOffline==false → T1 토스트 메시지가 노출되지 않는다',
+    testWidgets('coldStartOffline==false → T1 토스트 메시지가 노출되지 않는다',
         (tester) async {
       await tester.pumpWidget(
         _wrapWithOfflineFlag(

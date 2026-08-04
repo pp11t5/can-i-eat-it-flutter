@@ -38,5 +38,24 @@ void main() {
       expect(await store.readAccessToken(), 'acc2');
       expect(await store.readRefreshToken(), 'ref2');
     });
+
+    test('markConsentPending과 clearConsentPending이 사용자 상태를 보존·해제한다', () async {
+      await store.markConsentPending('user-1');
+      expect(await store.readPendingConsentUserId(), 'user-1');
+
+      await store.clearConsentPending();
+      expect(await store.readPendingConsentUserId(), isNull);
+    });
+
+    test('clear는 토큰과 약관 pending을 함께 삭제한다', () async {
+      await store.writeTokens(access: 'acc', refresh: 'ref');
+      await store.markConsentPending('user-1');
+
+      await store.clear();
+
+      expect(await store.readAccessToken(), isNull);
+      expect(await store.readRefreshToken(), isNull);
+      expect(await store.readPendingConsentUserId(), isNull);
+    });
   });
 }

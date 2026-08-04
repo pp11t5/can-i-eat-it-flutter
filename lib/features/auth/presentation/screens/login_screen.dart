@@ -29,11 +29,8 @@ import 'package:can_i_eat_it/features/auth/presentation/widgets/deletion_grace_d
 ///
 /// ## 로그인 후 분기 (SignInOutcome switch)
 /// - [Authenticated] → onboarded=true: `context.go('/')` (게이트 재평가),
-///   onboarded=false: `context.go('/onboarding/condition')`.
-///   게이트 정합: 세션에 hasAgreedTerms=true 이므로 resolveRedirect 가 needsOnboarding
-///   상태에서 /onboarding/condition 을 허용 → redirect 루프 없음.
-///   실 onboardedStatus() 반영은 티켓 4 (현재는 Authenticated.onboarded 직접 사용).
-/// - [NeedsTerms] → `context.push('/terms')` (imperative push, ADR-0006 보존).
+///   onboarded=false: `context.push('/terms')`.
+///   신규·온보딩 미완료 사용자 모두 로그인할 때마다 최신 약관을 확인한다.
 /// - [Recoverable] → 복구 다이얼로그 (기존 deletion_grace_dialog 재사용).
 ///
 /// ## 콜드스타트 오프라인 토스트 (T1)
@@ -52,6 +49,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   static const double _kCanvasH = 812;
   static const double _kLogoY = 141; // → 17.4% from top
   static const double _kLogoSize = 218;
+
   /// 로고 박스 하단 → 슬로건 상단 간격 (스플래시와 동일, 전역 sectionGap과 분리).
   static const double _kLogoSloganGap = 0;
   static const double _kButtonY = 518; // → 63.8%
@@ -193,14 +191,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   /// 로그인 후 라우팅 — [SignInOutcome] exhaustive switch (ADR-0007 §3-1 (6-A)).
   ///
   /// ## 게이트 정합 (완료 기준 6번)
-  /// [Authenticated.onboarded] 를 라우팅에 직접 반영:
+  /// [Authenticated.onboarded] 를 라우팅에 직접 반영한다.
   /// - onboarded=true → `context.go('/')`: 가드 sessionStatus=ready → '/' 허용.
-  /// - onboarded=false → `context.go('/onboarding/condition')`:
-  ///   세션 hasAgreedTerms=true 이므로 sessionStatusFrom 이 needsOnboarding 을 반환하고
-  ///   resolveRedirect(needsOnboarding, '/onboarding/condition') = null → redirect 없음.
-  ///
-  /// 실 onboardedStatus() 는 티켓 4 (HealthProfileRepository.onboardedStatus() 실연동).
-  /// 현재는 Authenticated.onboarded (서버 GET /onboarding/status 결과) 를 직접 사용.
+  /// - onboarded=false → `context.push('/terms')`: 로그인 화면을 스택 아래 유지해
+  ///   약관 뒤로가기 시 역방향 애니메이션과 가입 취소(signOut)를 보존한다.
   Future<void> _handlePostSignIn(
     BuildContext context,
     SignInOutcome outcome,
@@ -212,12 +206,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         if (onboarded) {
           context.go('/');
         } else {
-          context.go('/onboarding/condition');
+          context.push('/terms');
         }
-
-      case NeedsTerms():
-        // imperative push — iOS pop 애니메이션 보장, 가드 redirect 와 분리 (ADR-0006).
-        context.push('/terms');
 
       case Recoverable(:final provider, :final idToken):
         // 복구 가능 계정 → 기존 deletion_grace_dialog 재사용.

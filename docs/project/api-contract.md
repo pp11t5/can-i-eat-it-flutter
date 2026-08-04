@@ -1,6 +1,6 @@
 # API 계약 — 엔드포인트 목록 · 요청/응답 스키마
 
-> **정본**: ADR-0007 + Swagger 실측(2026-06). 이전 초안 엔드포인트(`/auth/kakao`, `/foods/analyze`, `/users/profile`, base `api.can-i-eat-it.com/v1`)는 모두 교체됨.
+> **정본**: 최신 Swagger 실측(2026-08-05). 이전 초안 엔드포인트(`/auth/kakao`, `/foods/analyze`, `/users/profile`, base `api.can-i-eat-it.com/v1`)와 ADR-0007의 "신규 사용자=로그인 400" 가정은 교체됨.
 > 근거: PRD v1 §담당별 산출(Backend) · ADR-0007 §3-1
 
 ---
@@ -58,18 +58,18 @@
 { "idToken": "<카카오 OIDC idToken>" }
 ```
 
-**응답 분기 (로그인 4분기)**
+**응답 분기**
 
 | HTTP | `code` | 의미 | result |
 |---|---|---|---|
-| 200 | — | 인증 완료 | `{ accessToken, refreshToken, userId, email, role }` |
-| 400 | `AUTH400_1` | 이메일 동의 누락 (약관필요) | — |
-| 400 | `AUTH400_3` | 닉네임 동의 누락 (약관필요) | — |
+| 200 | — | 인증 완료(신규 사용자 포함) | `{ accessToken, refreshToken, userId, email, role }` |
+| 400 | `AUTH400_1` | 소셜 제공자의 이메일 제공 동의 누락 | — |
+| 400 | `AUTH400_3` | 레거시 소셜 프로필 제공 동의 오류 | — |
 | 403 | `AUTH403_5` | 탈퇴 처리중 계정 (복구가능) | — |
 | 403 | `AUTH403_2` | 비활성 계정 (복구가능) | — |
 | 401 | — | idToken 무효 | — |
 
-> 200 성공 시 `hasAgreedTerms=true`·`accountStatus=active` 보장 (미동의·복구대상은 토큰 없이 400/403으로 빠짐).
+> 200 성공 뒤 `GET /onboarding/status`를 조회한다. `onboarded=false`이면 로컬 `consentPending`을 기록하고 약관 화면으로 이동하며, `onboarded=true`이면 홈으로 이동한다. `AUTH400_1`은 앱 약관 미동의 분기가 아니라 로그인 실패 UX로 처리한다.
 >
 > 토큰 응답에 만료 필드(`expiresIn` 등) 없음 — 클라이언트는 만료를 선제 계산하지 않는다.
 
@@ -78,11 +78,8 @@
 ```
 sealed SignInOutcome
   Authenticated(AuthSession session, bool onboarded)   // 200
-  NeedsTerms(Set<TermsRequirement> requirements)        // 400 AUTH400_1·AUTH400_3
   Recoverable(RecoverReason reason)                     // 403 AUTH403_5·AUTH403_2
 ```
-
-> `// ASSUMPTION(be-confirm): 신규=로그인400. 백엔드 확인 후 제거.`
 
 ### POST /auth/refresh
 
@@ -126,11 +123,32 @@ sealed SignInOutcome
 
 | 메서드 | 경로 | 설명 |
 |---|---|---|
+| GET | `/consent/terms` | 서버의 최신 약관 목록 조회 |
 | POST | `/consent` | 약관 동의 일괄 전송 |
 | POST | `/onboarding` | 온보딩 건강 정보 일괄 전송 |
 | GET | `/onboarding/status` | 온보딩 완료 여부 조회 (게이트 소스) |
 
 > 전체 프로필 GET 엔드포인트(`GET /users/profile` 등)는 **서버에 없음** — W3에서 `currentProfile()` Mock 유지. 전체 프로필 표시는 엔드포인트 확정 후 후속 이슈로 추적.
+
+### GET /consent/terms
+
+**응답 `result`**
+
+```json
+[
+  {
+    "id": 1,
+    "code": "tos",
+    "version": "1.0",
+    "title": "서비스 이용약관",
+    "content": "https://example.com/terms/tos",
+    "required": true,
+    "effectiveDate": "2026-07-25"
+  }
+]
+```
+
+제목·필수 여부·버전·상세 URL은 이 응답을 유일한 진실 원천으로 사용한다.
 
 ### POST /consent
 
@@ -138,12 +156,16 @@ sealed SignInOutcome
 
 ```json
 {
-  "tos":             true,
-  "privacy":         true,
-  "healthSensitive": true,
-  "marketing":       false
+  "consents": [
+    { "termId": 1, "agreed": true },
+    { "termId": 2, "agreed": true },
+    { "termId": 3, "agreed": true },
+    { "termId": 4, "agreed": false }
+  ]
 }
 ```
+
+화면에 표시된 모든 약관을 `termId/agreed` 배열로 전송한다. 성공 시 로컬 `consentPending`을 제거한다.
 
 ### POST /onboarding
 

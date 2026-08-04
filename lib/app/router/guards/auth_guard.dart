@@ -20,18 +20,19 @@ String? resolveRedirect({
       return location == '/login' ? null : '/login';
 
     case SessionStatus.needsTerms:
-      // **가드는 절대 /terms 로 redirect 하지 않는다** (모든 location 허용).
-      // 이유: 가드 redirect 는 replace 라 iOS pop 애니메이션 불가능 + pop 직후
-      // 가드 재평가로 인한 /terms 재진입 버그 회피. LoginScreen 이 imperative
-      // context.push('/terms') 로만 진입을 관리한다. pop = signOut(가입취소).
-      return null;
+      // 소셜 로그인 직후에는 LoginScreen이 push로 진입하고, 약관 화면에서 앱이
+      // 종료된 콜드스타트에는 저장된 pending 상태로 /terms를 복원한다.
+      // /login 허용은 pop 애니메이션 뒤 post-frame signOut이 완료될 시간을 준다.
+      return (location == '/terms' || location == '/login') ? null : '/terms';
 
     case SessionStatus.needsOnboarding:
       // /onboarding 하위 + /login 허용. /login 은 온보딩 1페이지 뒤로가기의 이탈 목적지로,
       // 스택 아래 /login 으로 pop(역방향 애니)한 직후 post-frame signOut 이 세션을 해제해
       // unauthenticated 로 정리한다. pop 순간엔 아직 needsOnboarding 이므로 /login 을
       // 허용해 가드가 pop 을 다시 온보딩으로 튕기지 않게 한다(온보딩은 재로그인 시 재개).
-      return (location.startsWith('/onboarding') || location == '/login')
+      return (location.startsWith('/onboarding') ||
+              location == '/login' ||
+              location == '/terms')
           ? null
           : '/onboarding/condition';
 

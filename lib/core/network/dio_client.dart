@@ -47,7 +47,7 @@ String maskTokensForLog(String text) {
 /// 메인 instance 에만 적용:
 /// - 401 → throw (AuthInterceptor.onError 가 refresh 큐잉 처리)
 /// - 400/403 → **정상 Response 로 datasource 에 전달** → `unwrap()` 이 봉투
-///   code 를 읽어 [TermsRequiredFailure]/[RecoverableAccountFailure] 로 매핑.
+///   code 를 읽어 [SocialProfilePermissionFailure]/[RecoverableAccountFailure] 로 매핑.
 /// - 5xx → throw → [NetworkFailure] 폴백.
 ///
 /// refreshDio 의 validateStatus 는 **건드리지 않는다** — refresh 의 401/4xx 는

@@ -1,6 +1,6 @@
 import '../entities/auth_session.dart';
+import '../entities/consent.dart';
 import '../entities/sign_in_outcome.dart';
-import '../entities/terms_agreement.dart';
 
 /// 인증 저장소 인터페이스 (ADR-0007 §3-1 (6-A)).
 ///
@@ -33,7 +33,6 @@ abstract interface class AuthRepository {
   /// 카카오 계정으로 로그인한다.
   ///
   /// 성공 시 [SignInOutcome.Authenticated] (200),
-  /// 약관 미동의 시 [NeedsTerms] (400),
   /// 복구 가능 계정 시 [Recoverable] (403) 를 반환한다.
   Future<SignInOutcome> signInWithKakao();
 
@@ -43,15 +42,14 @@ abstract interface class AuthRepository {
   Future<SignInOutcome> signInWithApple();
 
   // ---------------------------------------------------------------------------
-  // 약관 동의 — 티켓 4 에서 POST /consent 실연동 예정
+  // 약관 동의
   // ---------------------------------------------------------------------------
 
-  /// 약관 동의 이력을 저장하고 세션의 [AuthSession.hasAgreedTerms]를 true로 갱신한다.
-  ///
-  /// 세션이 없는 상태에서 호출하면 [StateError]를 던진다.
-  ///
-  /// TODO(티켓 4): POST /consent 실연동. 현재는 Mock/로컬 갱신.
-  Future<void> recordTermsAgreement(TermsAgreement agreement);
+  /// 서버가 제공하는 code별 최신 약관 목록을 조회한다.
+  Future<List<ConsentTerm>> fetchConsentTerms();
+
+  /// 화면에 표시된 최신 약관의 선택값을 저장한다.
+  Future<void> submitConsent(List<ConsentChoice> choices);
 
   // ---------------------------------------------------------------------------
   // 계정 복구
@@ -62,7 +60,8 @@ abstract interface class AuthRepository {
   /// `POST /auth/{provider}/recover` 를 호출한다.
   /// [provider]: 복구할 소셜 제공자. [Recoverable.provider] 에서 전달받는다.
   /// [idToken]: 로그인 시 획득한 OIDC idToken. 카카오 SDK 재인증 없이 재사용한다.
-  Future<AuthSession> recoverAccount(AuthProvider provider, {required String idToken});
+  Future<AuthSession> recoverAccount(AuthProvider provider,
+      {required String idToken});
 
   // ---------------------------------------------------------------------------
   // 토큰 관리

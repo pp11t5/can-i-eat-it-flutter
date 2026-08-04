@@ -11,10 +11,16 @@ part 'session_providers.g.dart';
 ///
 /// [loading]       → 부팅 시 인증 또는 health_profile 로드 중(화면 깜빡임 차단용).
 /// [unauthenticated] → 미인증(삭제유예 포함, 02a 다이얼로그 보호).
-/// [needsTerms]    → 약관 미동의. 가드는 redirect 안 함(LoginScreen이 imperative push).
+/// [needsTerms]    → 소셜 로그인 후 약관 제출 pending. 콜드스타트는 /terms 복원.
 /// [needsOnboarding] → 약관 동의됐지만 health_profile 없음.
 /// [ready]         → 모든 게이트 통과.
-enum SessionStatus { loading, unauthenticated, needsTerms, needsOnboarding, ready }
+enum SessionStatus {
+  loading,
+  unauthenticated,
+  needsTerms,
+  needsOnboarding,
+  ready
+}
 
 /// [authSession]: null=미인증. [hasProfile]: null=로딩(아직 모름), false=미완료, true=완료.
 ///

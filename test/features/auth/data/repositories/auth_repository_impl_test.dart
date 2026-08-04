@@ -147,6 +147,7 @@ void main() {
       expect(auth.onboarded, isTrue);
       expect(auth.session.userId, 'user-1');
       expect(auth.session.hasAgreedTerms, isTrue);
+      expect(await tokenStore.readPendingConsentUserId(), isNull);
     });
 
     test('200 성공 + onboarding/status → Authenticated(onboarded=false)',
@@ -175,6 +176,8 @@ void main() {
       expect(outcome, isA<Authenticated>());
       final auth = outcome as Authenticated;
       expect(auth.onboarded, isFalse);
+      expect(auth.session.hasAgreedTerms, isFalse);
+      expect(await tokenStore.readPendingConsentUserId(), 'user-2');
     });
 
     test('200 성공 시 tokenStore 에 토큰이 저장된다', () async {
@@ -238,33 +241,31 @@ void main() {
     });
   });
 
-  group('signInWithKakao — HTTP 400 → NeedsTerms', () {
-    test('400 AUTH400_1 → NeedsTerms(email)', () async {
+  group('signInWithKakao — HTTP 400 → 로그인 실패', () {
+    test('400 AUTH400_1 → SocialProfilePermissionFailure', () async {
       dioAdapter.onPost(
         '/auth/kakao/login',
         (server) => server.reply(400, _errorEnvelope('AUTH400_1')),
         data: {'idToken': 'test-id-token'},
       );
 
-      final outcome = await repo.signInWithKakao();
-
-      expect(outcome, isA<NeedsTerms>());
-      final needs = outcome as NeedsTerms;
-      expect(needs.requirements, contains(TermsRequirement.email));
+      await expectLater(
+        repo.signInWithKakao(),
+        throwsA(isA<SocialProfilePermissionFailure>()),
+      );
     });
 
-    test('400 AUTH400_3 → NeedsTerms(nickname)', () async {
+    test('400 AUTH400_3 → SocialProfilePermissionFailure', () async {
       dioAdapter.onPost(
         '/auth/kakao/login',
         (server) => server.reply(400, _errorEnvelope('AUTH400_3')),
         data: {'idToken': 'test-id-token'},
       );
 
-      final outcome = await repo.signInWithKakao();
-
-      expect(outcome, isA<NeedsTerms>());
-      final needs = outcome as NeedsTerms;
-      expect(needs.requirements, contains(TermsRequirement.nickname));
+      await expectLater(
+        repo.signInWithKakao(),
+        throwsA(isA<SocialProfilePermissionFailure>()),
+      );
     });
 
     test('400 시 tokenStore 에 토큰이 저장되지 않는다', () async {
@@ -274,7 +275,10 @@ void main() {
         data: {'idToken': 'test-id-token'},
       );
 
-      await repo.signInWithKakao();
+      await expectLater(
+        repo.signInWithKakao(),
+        throwsA(isA<SocialProfilePermissionFailure>()),
+      );
 
       expect(await tokenStore.readAccessToken(), isNull);
     });
@@ -582,6 +586,25 @@ void main() {
       // 토큰은 보존돼야 한다
       expect(await tokenStore.readAccessToken(), 'live-access');
       expect(await tokenStore.readRefreshToken(), 'live-refresh');
+    });
+
+    test('약관 pending 사용자 재수화 시 hasAgreedTerms=false를 복원한다', () async {
+      await tokenStore.writeTokens(
+          access: 'live-access', refresh: 'live-refresh');
+      await tokenStore.markConsentPending('user-me');
+      dioAdapter.onGet(
+        '/auth/me',
+        (server) => server.reply(
+          200,
+          _envelope({'userId': 'user-me', 'nickname': 'tester'}),
+        ),
+      );
+
+      final session = await repo.currentSession();
+
+      expect(session, isNotNull);
+      expect(session!.hasAgreedTerms, isFalse);
+      expect(await tokenStore.readPendingConsentUserId(), 'user-me');
     });
 
     test('분기4: 토큰 有 + 401 + refresh도 401 → null 반환 & 토큰 clear', () async {

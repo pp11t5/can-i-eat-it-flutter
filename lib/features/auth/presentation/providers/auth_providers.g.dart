@@ -72,6 +72,28 @@ final authRepositoryProvider = AutoDisposeProvider<AuthRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AuthRepositoryRef = AutoDisposeProviderRef<AuthRepository>;
+String _$consentTermsHash() => r'57ca411a68d8bbbd29d08e2fb26da53d91908e3a';
+
+/// 서버 최신 약관을 시안 순서로 정렬해 제공한다.
+///
+/// 필수 항목을 먼저 두고, 알려진 코드는 tos → privacy → health_sensitive →
+/// marketing 순서를 사용한다. 미지 코드는 같은 필수 그룹 안에서 서버 순서를 유지한다.
+///
+/// Copied from [consentTerms].
+@ProviderFor(consentTerms)
+final consentTermsProvider =
+    AutoDisposeFutureProvider<List<ConsentTerm>>.internal(
+  consentTerms,
+  name: r'consentTermsProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$consentTermsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ConsentTermsRef = AutoDisposeFutureProviderRef<List<ConsentTerm>>;
 String _$coldStartOfflineHash() => r'0465748031e5b0c25e7a655f68622e61e6152293';
 
 /// 콜드스타트 시 오프라인 복원 플래그를 소비해 반환하는 provider.
@@ -94,7 +116,7 @@ final coldStartOfflineProvider = AutoDisposeProvider<bool>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ColdStartOfflineRef = AutoDisposeProviderRef<bool>;
-String _$authControllerHash() => r'6fbfe94c5fa51a80401d221804a84ab25f7a0fcf';
+String _$authControllerHash() => r'86828fc7a3a6e970cd9d7188cb6c0a859e9744b0';
 
 /// 인증 상태 컨트롤러 (AsyncNotifier).
 ///

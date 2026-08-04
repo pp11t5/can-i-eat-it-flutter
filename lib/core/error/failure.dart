@@ -25,16 +25,13 @@ sealed class AuthFailure extends Failure {
   const AuthFailure([super.message = '인증 오류가 발생했어요.']);
 }
 
-/// 약관 동의가 필요한 경우 (HTTP 400: AUTH400_1 이메일, AUTH400_3 닉네임).
+/// 소셜 제공자의 이메일 등 필수 프로필 제공 동의가 누락된 경우.
 ///
-/// [requirements] 로 어떤 항목의 약관 동의가 필요한지 전달된다.
-class TermsRequiredFailure extends AuthFailure {
-  const TermsRequiredFailure({
-    required this.requirements,
-    String message = '서비스 이용을 위해 약관 동의가 필요해요.',
-  }) : super(message);
-
-  final Set<TermsRequirement> requirements;
+/// 앱 서비스 약관 화면으로 해결할 수 없는 로그인 단계 오류다.
+class SocialProfilePermissionFailure extends AuthFailure {
+  const SocialProfilePermissionFailure([
+    super.message = '소셜 계정의 필수 정보 제공에 동의해 주세요.',
+  ]);
 }
 
 /// 복구 가능한 계정 상태 (HTTP 403: AUTH403_5 탈퇴처리중, AUTH403_2 비활성).
@@ -63,15 +60,6 @@ class SessionExpiredFailure extends AuthFailure {
 // 열거형
 // ---------------------------------------------------------------------------
 
-/// 약관 동의가 필요한 항목.
-enum TermsRequirement {
-  /// 이메일 수신 동의 (AUTH400_1)
-  email,
-
-  /// 닉네임 설정 (AUTH400_3)
-  nickname,
-}
-
 /// 계정 복구 필요 사유.
 enum RecoverReason {
   /// 탈퇴 처리 중 (AUTH403_5)
@@ -89,16 +77,14 @@ enum RecoverReason {
 ///
 /// grade=UNKNOWN(성공)과 다르다 — 이것은 API가 요청 자체를 거부한 에러.
 class InvalidFoodQueryFailure extends Failure {
-  const InvalidFoodQueryFailure(
-      [super.message = '검색어를 확인해 주세요.']);
+  const InvalidFoodQueryFailure([super.message = '검색어를 확인해 주세요.']);
 }
 
 /// 판정 대상 음식을 찾을 수 없음 (HTTP 404: FOOD404_1).
 ///
 /// 음식 등록 해제 또는 잘못된 externalId. grade=UNKNOWN과 무관.
 class FoodNotFoundFailure extends Failure {
-  const FoodNotFoundFailure(
-      [super.message = '해당 음식을 찾을 수 없어요.']);
+  const FoodNotFoundFailure([super.message = '해당 음식을 찾을 수 없어요.']);
 }
 
 // ---------------------------------------------------------------------------
