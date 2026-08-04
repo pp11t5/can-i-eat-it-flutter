@@ -81,7 +81,7 @@ final onboardedStatusProvider = AutoDisposeFutureProvider<bool>.internal(
 // ignore: unused_element
 typedef OnboardedStatusRef = AutoDisposeFutureProviderRef<bool>;
 String _$healthProfileControllerHash() =>
-    r'5ddf2f1b8f29e5341a30b14f21a97aa3b83844aa';
+    r'c9f3c03d82371210c5c980f538ff1a249ba7c445';
 
 /// 건강 프로필 상태 컨트롤러 (AsyncNotifier).
 ///

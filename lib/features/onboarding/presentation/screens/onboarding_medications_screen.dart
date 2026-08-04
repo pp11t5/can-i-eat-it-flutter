@@ -13,6 +13,7 @@ import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/session_providers.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_step_body.dart';
 
 /// 온보딩 Step 4/4: 알레르기 + 복용약 결합 본문 (Figma 1064:12268).
 ///
@@ -63,7 +64,8 @@ class _OnboardingMedicationsScreenState
     final isLoading = submitState is AsyncLoading;
     final hasError = submitState is AsyncError;
 
-    return GestureDetector(
+    return OnboardingStepBody(
+      child: GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       behavior: HitTestBehavior.translucent,
       child: LayoutBuilder(
@@ -273,6 +275,7 @@ class _OnboardingMedicationsScreenState
             ),
           );
         },
+      ),
       ),
     );
   }

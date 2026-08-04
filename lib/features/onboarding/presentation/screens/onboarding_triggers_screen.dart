@@ -11,6 +11,7 @@ import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_step_body.dart';
 
 /// 온보딩 Step 3/4: 트리거 음식 선택 본문 (Figma 365:1553).
 ///
@@ -48,7 +49,8 @@ class _OnboardingTriggersScreenState
     final draft = ref.watch(onboardingControllerProvider);
     final notifier = ref.read(onboardingControllerProvider.notifier);
 
-    return GestureDetector(
+    return OnboardingStepBody(
+      child: GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       behavior: HitTestBehavior.translucent,
       child: LayoutBuilder(
@@ -193,6 +195,7 @@ class _OnboardingTriggersScreenState
             ),
           );
         },
+      ),
       ),
     );
   }
