@@ -33,7 +33,7 @@ final notificationRepositoryProvider =
 typedef NotificationRepositoryRef
     = AutoDisposeProviderRef<NotificationRepository>;
 String _$notificationSettingsControllerHash() =>
-    r'69f6f7cfe06218bc9c4c1d962e8f8dd08c614a8e';
+    r'73d311b0cba3a3472915fa9df2e5e22ceaf0c167';
 
 /// 알림 설정 상태 컨트롤러.
 ///

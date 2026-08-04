@@ -1,9 +1,14 @@
+import 'dart:async';
+
+import 'package:firebase_messaging/firebase_messaging.dart'
+    show AuthorizationStatus;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
+import 'package:can_i_eat_it/core/push/fcm_token_service.dart';
 import 'package:can_i_eat_it/features/notification/data/notification_providers.dart';
 import 'package:can_i_eat_it/features/notification/data/repositories/mock_notification_repository.dart';
 import 'package:can_i_eat_it/features/notification/domain/entities/notification_settings.dart';
@@ -13,10 +18,36 @@ import 'package:can_i_eat_it/features/notification/presentation/screens/notifica
 // 헬퍼
 // ---------------------------------------------------------------------------
 
+class _MutablePermissionFcmTokenService extends FcmTokenService {
+  _MutablePermissionFcmTokenService(this.status);
+
+  AuthorizationStatus? status;
+  int permissionStatusCalls = 0;
+  Completer<AuthorizationStatus?>? _pendingResponse;
+
+  void delayNextResponse() {
+    _pendingResponse = Completer<AuthorizationStatus?>();
+  }
+
+  void completePendingResponse() {
+    _pendingResponse?.complete(status);
+    _pendingResponse = null;
+  }
+
+  @override
+  Future<AuthorizationStatus?> permissionStatus() {
+    permissionStatusCalls += 1;
+    final pendingResponse = _pendingResponse;
+    if (pendingResponse != null) return pendingResponse.future;
+    return Future.value(status);
+  }
+}
+
 Widget _wrap({
   required bool osBlocked,
   MockNotificationRepository? repo,
   VoidCallback? onOpenAppSettings,
+  FcmTokenService? fcmTokenService,
 }) {
   final repository = repo ??
       MockNotificationRepository(
@@ -33,7 +64,10 @@ Widget _wrap({
       // ignore: scoped_providers_should_specify_dependencies
       notificationRepositoryProvider.overrideWithValue(repository),
       // ignore: scoped_providers_should_specify_dependencies
-      osNotificationBlockedProvider.overrideWith((ref) async => osBlocked),
+      if (fcmTokenService == null)
+        osNotificationBlockedProvider.overrideWith((ref) async => osBlocked),
+      if (fcmTokenService != null)
+        fcmTokenServiceProvider.overrideWithValue(fcmTokenService),
       openAppSettingsProvider.overrideWithValue(() async {
         onOpenAppSettings?.call();
       }),
@@ -51,8 +85,7 @@ Widget _wrap({
 
 void main() {
   group('NotificationSettingsScreen — OS 알림 차단(denied)', () {
-    testWidgets('배너 + "설정 바로 가기" 버튼이 렌더되고, 3토글 카드는 비활성화된다',
-        (tester) async {
+    testWidgets('배너 + "설정 바로 가기" 버튼이 렌더되고, 3토글 카드는 비활성화된다', (tester) async {
       final mock = MockNotificationRepository(
         seed: const NotificationSettings(
           postMealEnabled: false,
@@ -168,6 +201,70 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(mock.toggleCalls, contains(NotificationToggleType.postMeal));
+    });
+
+    testWidgets('앱 복귀 시 화면 재진입 없이 OS 알림 권한을 다시 반영한다', (tester) async {
+      final tokenService =
+          _MutablePermissionFcmTokenService(AuthorizationStatus.authorized);
+      await tester.pumpWidget(
+        _wrap(
+          osBlocked: false,
+          fcmTokenService: tokenService,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('기기 알림이 꺼져있어요'), findsNothing);
+      final initialCalls = tokenService.permissionStatusCalls;
+
+      tokenService.status = AuthorizationStatus.denied;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(tokenService.permissionStatusCalls, initialCalls + 1);
+      expect(find.text('기기 알림이 꺼져있어요'), findsOneWidget);
+      final postMealRow = find.ancestor(
+        of: find.text('식후 2시간 알림'),
+        matching: find.byType(Row),
+      );
+      final postMealSwitch = find.descendant(
+        of: postMealRow.first,
+        matching: find.byType(Switch),
+      );
+      expect(tester.widget<Switch>(postMealSwitch).onChanged, isNull);
+
+      tokenService.status = AuthorizationStatus.authorized;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(find.text('기기 알림이 꺼져있어요'), findsNothing);
+      expect(tester.widget<Switch>(postMealSwitch).onChanged, isNotNull);
+    });
+
+    testWidgets('권한 갱신 중 중복된 resumed 이벤트는 한 번만 처리한다', (tester) async {
+      final tokenService =
+          _MutablePermissionFcmTokenService(AuthorizationStatus.authorized);
+      await tester.pumpWidget(
+        _wrap(
+          osBlocked: false,
+          fcmTokenService: tokenService,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final initialCalls = tokenService.permissionStatusCalls;
+      tokenService.status = AuthorizationStatus.denied;
+      tokenService.delayNextResponse();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+
+      expect(tokenService.permissionStatusCalls, initialCalls + 1);
+
+      tokenService.completePendingResponse();
+      await tester.pumpAndSettle();
+      expect(find.text('기기 알림이 꺼져있어요'), findsOneWidget);
     });
   });
 }

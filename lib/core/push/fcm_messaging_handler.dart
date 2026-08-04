@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -102,7 +103,7 @@ Future<void> _showForegroundNotification(RemoteMessage message) async {
           priority: Priority.high,
         ),
       ),
-      payload: message.data['link'] as String?,
+      payload: jsonEncode(message.data),
     );
   } catch (e) {
     debugPrint('[FCM] foreground notification failed (ignored): $e');
