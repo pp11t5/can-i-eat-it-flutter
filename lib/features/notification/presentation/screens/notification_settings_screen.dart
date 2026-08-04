@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:firebase_messaging/firebase_messaging.dart'
-    show AuthorizationStatus;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,9 +54,6 @@ class NotificationSettingsScreen extends ConsumerStatefulWidget {
 class _NotificationSettingsScreenState
     extends ConsumerState<NotificationSettingsScreen>
     with WidgetsBindingObserver {
-  /// 시스템 설정 화면을 연 뒤 복귀 예정인지.
-  bool _awaitingOsSettingsReturn = false;
-
   /// 권한 상태가 바뀐 뒤 UI 전환용 로딩 인디케이터.
   bool _showTransitionIndicator = false;
 
@@ -76,49 +71,23 @@ class _NotificationSettingsScreenState
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // 「설정 바로 가기」로 나갔다 돌아온 경우에만 재조회.
-    if (state == AppLifecycleState.resumed &&
-        _awaitingOsSettingsReturn &&
-        mounted) {
-      _awaitingOsSettingsReturn = false;
-      unawaited(_recheckOsPermission());
+    // 시스템 설정 진입 경로와 무관하게 앱 복귀 시 OS 권한을 새로 읽는다.
+    if (state == AppLifecycleState.resumed && mounted) {
+      unawaited(_refreshOsNotificationPermission());
     }
   }
 
   /// 시스템 알림 설정 화면을 연다. 복귀 시 [didChangeAppLifecycleState]에서 재조회.
-  Future<void> _openOsSettingsAndAwaitReturn() async {
-    _awaitingOsSettingsReturn = true;
+  Future<void> _openOsSettings() async {
     await ref.read(openAppSettingsProvider)();
   }
 
-  /// OS 알림 권한을 다시 읽는다.
-  ///
-  /// 1) provider를 건드리지 않고 최신 권한만 조용히 조회
-  /// 2) 이전과 **같으면** 인디케이터·UI 변경 없음
-  /// 3) **달라졌으면** 로딩 인디케이터 → provider 갱신 → 새 UI
-  Future<void> _recheckOsPermission() async {
+  /// OS 알림 권한 provider를 무효화하고 최신 상태가 반영될 때까지 기다린다.
+  Future<void> _refreshOsNotificationPermission() async {
     if (!mounted || _showTransitionIndicator) return;
 
-    final previous =
-        ref.read(osNotificationBlockedProvider).valueOrNull ?? false;
-
+    setState(() => _showTransitionIndicator = true);
     try {
-      // resume 직후 권한 반영이 늦은 기기 대응.
-      await Future<void>.delayed(const Duration(milliseconds: 350));
-      if (!mounted) return;
-
-      // provider refresh 전에 비교해, 미변경 시 watch 리빌드/인디케이터를 피한다.
-      final status = await ref.read(fcmTokenServiceProvider).permissionStatus();
-      final next = status == AuthorizationStatus.denied;
-      if (!mounted) return;
-
-      // 상태 동일 → 아무 것도 하지 않음.
-      if (previous == next) return;
-
-      // 상태 변경 → 인디케이터 표시 후 provider 갱신.
-      setState(() => _showTransitionIndicator = true);
-      await Future<void>.delayed(const Duration(milliseconds: 400));
-      if (!mounted) return;
       ref.invalidate(osNotificationBlockedProvider);
       await ref.read(osNotificationBlockedProvider.future);
     } catch (_) {
@@ -180,7 +149,7 @@ class _NotificationSettingsScreenState
           return _SettingsBody(
             settings: settings,
             osBlocked: osBlocked,
-            onOpenOsSettings: _openOsSettingsAndAwaitReturn,
+            onOpenOsSettings: _openOsSettings,
           );
         },
       ),
