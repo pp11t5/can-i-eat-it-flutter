@@ -6,7 +6,6 @@ import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/providers/add_to_diet_handler_provider.dart';
-import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/dictionary_list_controller.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 
@@ -46,7 +45,6 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
       }
 
       // 식사 데이터를 소비하는 화면의 캐시를 모두 무효화한다.
-      // CAUTION/RISK 도감은 식사 저장 시 서버가 upsert한다.
       final dateKey = DateTime(
         ctx.eatenAt.year,
         ctx.eatenAt.month,
@@ -56,7 +54,6 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
       ref.invalidate(monthlyControllerProvider);
       ref.invalidate(recentMealsProvider);
       ref.invalidate(unrecordedMealCountProvider);
-      invalidateDictionaryCaches(ref.invalidate);
 
       final message = ctx.mealRecordId != null
           ? '현재 식사에 음식을 추가했어요.'

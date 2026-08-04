@@ -13,7 +13,6 @@ import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
 import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
-import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/dictionary_list_controller.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
@@ -82,8 +81,6 @@ class MealRecordDetailScreen extends ConsumerWidget {
       ref.invalidate(monthlyControllerProvider);
       ref.invalidate(recentMealsProvider);
       ref.invalidate(unrecordedMealCountProvider);
-      // 식사 삭제 시 서버가 SAFE 도감 정리 + 연결 증상 삭제.
-      invalidateDictionaryCaches(ref.invalidate);
       showAppToast(context, '식사를 삭제했어요.');
       context.pop();
     } catch (_) {

@@ -169,21 +169,3 @@ Future<DictionaryCount> dictionaryCount(Ref ref) async {
   final repo = ref.watch(dictionaryRepositoryProvider);
   return repo.getCount();
 }
-
-// ---------------------------------------------------------------------------
-// 캐시 무효화
-// ---------------------------------------------------------------------------
-
-/// 도감(음식 히스토리) count·목록 캐시를 무효화한다.
-///
-/// 마이 탭이 [dictionaryCountProvider]를 붙잡은 채 유지되므로, 증상·식사
-/// 저장/삭제 후에도 세그먼트 숫자가 stale 0으로 남는 문제를 막으려면
-/// 서버 도감이 바뀌는 성공 경로에서 반드시 호출한다.
-///
-/// [Ref]·[WidgetRef] 모두에서 쓰도록 [ref.invalidate] 를 넘긴다:
-/// `invalidateDictionaryCaches(ref.invalidate)`.
-void invalidateDictionaryCaches(void Function(ProviderOrFamily) invalidate) {
-  invalidate(dictionaryCountProvider);
-  invalidate(safeDictionaryControllerProvider);
-  invalidate(cautionRiskDictionaryControllerProvider);
-}
