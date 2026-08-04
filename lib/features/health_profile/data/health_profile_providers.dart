@@ -57,8 +57,13 @@ class HealthProfileController extends _$HealthProfileController {
   Future<void> submit(HealthProfile profile) async {
     await ref.read(healthProfileRepositoryProvider).submitProfile(profile);
     state = AsyncData(profile);
-    // 게이트 소스 재조회 완료 → sessionStatus가 ready로 전이 가능
-    await ref.refresh(onboardedStatusProvider.future);
+    // 게이트 소스 재조회 완료 → sessionStatus가 ready로 전이 가능.
+    // refresh 반환값을 읽어야 unused_result 린트를 통과한다.
+    final onboarded = await ref.refresh(onboardedStatusProvider.future);
+    assert(
+      onboarded,
+      'onboardedStatus still false after successful submitProfile',
+    );
   }
 
   /// 알레르기·복용약만 갱신한다 (`PATCH /my-page/health-info`, W7 마이그레이션).
