@@ -29,7 +29,7 @@ import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart'
 /// 저장 시 `PATCH /my-page/health-info {allergens[], medications[]}`로 allergies·
 /// medications만 갱신한다(W7 마이그레이션 — 과거 POST /onboarding 전체 재제출 방식 폐기).
 ///
-/// [T9] 토스트: '건강 정보를 저장했어요. 신호등 판정·리포트에 바로 반영돼요.'
+/// 저장 성공 시 토스트 없이 pop. 실패 시 에러 토스트.
 class AllergyMedEditScreen extends ConsumerStatefulWidget {
   const AllergyMedEditScreen({super.key});
 
@@ -128,7 +128,7 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
       unawaited(
         showAppToast(
           context,
-          '건강 정보를 저장했어요. 신호등 판정·리포트에 바로 반영돼요.',
+          '건강 정보를 저장했어요.',
         ),
       );
       context.pop();

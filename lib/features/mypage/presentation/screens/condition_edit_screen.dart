@@ -87,7 +87,7 @@ class _ConditionEditScreenState extends ConsumerState<ConditionEditScreen> {
       unawaited(
         showAppToast(
           context,
-          '건강 정보를 저장했어요. 신호등 판정·리포트에 바로 반영돼요.',
+          '건강 정보를 저장했어요.',
         ),
       );
       context.pop();
