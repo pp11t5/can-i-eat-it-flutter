@@ -240,14 +240,6 @@ class _OnboardingMedicationsScreenState
                             ),
                             const SizedBox(height: AppSpacing.itemGap),
                           ],
-                          if (isLoading) ...[
-                            const Center(
-                              child: CircularProgressIndicator(
-                                color: AppColors.primary,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.itemGap),
-                          ],
                           const MedicalDisclaimer(
                             message: kOnboardingDisclaimerText,
                           ),
@@ -265,6 +257,7 @@ class _OnboardingMedicationsScreenState
                                         )
                                         .submit();
                                   },
+                            isLoading: isLoading,
                             isExpanded: true,
                           ),
                         ],
