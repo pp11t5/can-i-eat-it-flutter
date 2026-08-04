@@ -19,15 +19,19 @@ class AppleAuthResult {
   const AppleAuthResult({
     required this.idToken,
     required this.authorizationCode,
+    required this.nonce,
     required this.email,
     required this.fullName,
   });
 
-  /// Apple identityToken (OIDC JWT) — 서버 `POST /auth/apple/login {idToken}` 로 전송.
+  /// Apple identityToken (OIDC JWT) — 계정 복구 흐름과의 호환을 위해 보관한다.
   final String idToken;
 
-  /// Apple authorizationCode — 서버가 추후 필요 시 확장 용도로 보관(현재 미전송).
-  final String? authorizationCode;
+  /// Apple authorizationCode — 서버 `POST /auth/apple/login`으로 전송한다.
+  final String authorizationCode;
+
+  /// Apple 인증 요청에 전달한 값. 서버가 Authorization Code와 함께 검증한다.
+  final String nonce;
 
   /// 최초 인가 시에만 제공되는 이메일.
   final String? email;
@@ -40,11 +44,13 @@ class AppleAuthResult {
 class AppleAuthServiceImpl implements AppleAuthService {
   @override
   Future<AppleAuthResult> signIn() async {
+    final nonce = generateNonce();
     final credential = await SignInWithApple.getAppleIDCredential(
       scopes: [
         AppleIDAuthorizationScopes.email,
         AppleIDAuthorizationScopes.fullName,
       ],
+      nonce: nonce,
     );
 
     // OIDC identityToken 확인
@@ -60,6 +66,7 @@ class AppleAuthServiceImpl implements AppleAuthService {
     return AppleAuthResult(
       idToken: idToken,
       authorizationCode: credential.authorizationCode,
+      nonce: nonce,
       email: credential.email,
       fullName: fullName.isEmpty ? null : fullName,
     );

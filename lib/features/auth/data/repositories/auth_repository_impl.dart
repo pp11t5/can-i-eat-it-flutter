@@ -240,7 +240,8 @@ class AuthRepositoryImpl implements AuthRepository {
       final fromServer = dto.toEntity(provider);
       _session = fromServer.copyWith(
         email: fromServer.email ?? previous?.email,
-        profileImageUrl: fromServer.profileImageUrl ?? previous?.profileImageUrl,
+        profileImageUrl:
+            fromServer.profileImageUrl ?? previous?.profileImageUrl,
       );
       return _session!;
     } on DioException catch (e) {
@@ -297,7 +298,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   /// 소셜 로그인 공통 흐름.
   ///
-  /// 1. 카카오/애플 SDK 로 idToken 획득
+  /// 1. 제공자 SDK에서 서버 계약에 맞는 자격 증명 획득
   /// 2. `POST /auth/{provider}/login` 호출
   /// 3. 성공(200) → 토큰 저장 + `GET /onboarding/status` → [Authenticated]
   /// 4. [TermsRequiredFailure] catch → [NeedsTerms]
@@ -306,19 +307,25 @@ class AuthRepositoryImpl implements AuthRepository {
     // idToken 을 try 블록 밖에 선언 — RecoverableAccountFailure catch 에서 운반하기 위함.
     String? idToken;
     try {
-      // 1. idToken 획득
+      // 1. 제공자별 서버 로그인 요청 본문 구성
+      late Map<String, dynamic> loginData;
       if (provider == AuthProvider.kakao) {
         final kakaoResult = await _kakaoAuthService.signIn();
         idToken = kakaoResult.idToken;
+        loginData = {'idToken': idToken};
       } else {
         final appleResult = await _appleAuthService.signIn();
         idToken = appleResult.idToken;
+        loginData = {
+          'authorizationCode': appleResult.authorizationCode,
+          'nonce': appleResult.nonce,
+        };
       }
 
       // 2. 서버 로그인
       final loginResponse = await _dio.post<dynamic>(
         ApiEndpoints.authLogin(provider.name),
-        data: {'idToken': idToken},
+        data: loginData,
       );
 
       final loginDto = unwrap<AuthLoginResponseDto>(
@@ -334,7 +341,8 @@ class AuthRepositoryImpl implements AuthRepository {
       _session = loginDto.toEntity(provider);
 
       // 4. GET /onboarding/status — 방금 받은 accessToken 이 AuthInterceptor 에 주입됨
-      final statusResponse = await _dio.get<dynamic>(ApiEndpoints.onboardingStatus);
+      final statusResponse =
+          await _dio.get<dynamic>(ApiEndpoints.onboardingStatus);
       final statusDto = unwrap<OnboardingStatusDto>(
         statusResponse,
         (json) => OnboardingStatusDto.fromJson(json as Map<String, dynamic>),
@@ -345,7 +353,8 @@ class AuthRepositoryImpl implements AuthRepository {
       return NeedsTerms(requirements: f.requirements);
     } on RecoverableAccountFailure catch (f) {
       // idToken 은 카카오 획득 직후 대입됐으므로 null 이 아님.
-      return Recoverable(reason: f.reason, provider: provider, idToken: idToken!);
+      return Recoverable(
+          reason: f.reason, provider: provider, idToken: idToken!);
     } on DioException catch (e) {
       throw FailureMapper.fromDioException(e);
     }

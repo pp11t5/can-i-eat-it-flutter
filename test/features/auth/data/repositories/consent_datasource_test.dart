@@ -31,6 +31,7 @@ class _NoOpAppleAuthService implements AppleAuthService {
   Future<AppleAuthResult> signIn() async => const AppleAuthResult(
         idToken: 'id',
         authorizationCode: 'code',
+        nonce: 'nonce',
         email: 'e@e.com',
         fullName: 'Apple Tester',
       );
@@ -139,7 +140,8 @@ void main() {
             _termJson(id: 1, code: TermsCatalogCodes.tos),
             _termJson(id: 2, code: TermsCatalogCodes.privacy),
             _termJson(id: 3, code: TermsCatalogCodes.healthSensitive),
-            _termJson(id: 4, code: TermsCatalogCodes.marketing, required: false),
+            _termJson(
+                id: 4, code: TermsCatalogCodes.marketing, required: false),
           ]),
         ),
       );
@@ -181,7 +183,8 @@ void main() {
             _termJson(id: 1, code: TermsCatalogCodes.tos),
             _termJson(id: 2, code: TermsCatalogCodes.privacy),
             _termJson(id: 3, code: TermsCatalogCodes.healthSensitive),
-            _termJson(id: 4, code: TermsCatalogCodes.marketing, required: false),
+            _termJson(
+                id: 4, code: TermsCatalogCodes.marketing, required: false),
           ]),
         ),
       );
@@ -311,7 +314,8 @@ void main() {
       );
     });
 
-    test('GET /consent/terms 실패 시 NetworkFailure 를 throw 하고 세션은 갱신되지 않는다(참조 불변)',
+    test(
+        'GET /consent/terms 실패 시 NetworkFailure 를 throw 하고 세션은 갱신되지 않는다(참조 불변)',
         () async {
       await synthesizeSession();
       // recoverAccount 직후 세션(hasAgreedTerms 등)을 스냅샷 — recordTermsAgreement 는
@@ -339,7 +343,8 @@ void main() {
       expect(sessionAfter, equals(sessionBefore));
     });
 
-    test('POST /consent 서버 오류 시 NetworkFailure 를 throw 하고 세션 hasAgreedTerms 는 갱신되지 않는다',
+    test(
+        'POST /consent 서버 오류 시 NetworkFailure 를 throw 하고 세션 hasAgreedTerms 는 갱신되지 않는다',
         () async {
       await synthesizeSession();
 
