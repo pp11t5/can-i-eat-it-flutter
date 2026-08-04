@@ -604,7 +604,7 @@ class _SettingsSection extends ConsumerWidget {
 // ---------------------------------------------------------------------------
 // 약관 섹션 (Figma: padding 24 · 행 사이 24+24=48 · radius 16)
 // - 서비스 이용 약관 → 약관 상세
-// - 개인정보 수집·이용 동의 → 토글 (동의 상태, 마케팅 동의 API 연동)
+// - 개인정보 수집·이용 동의 → 라벨 탭 시 약관 상세 / Switch 는 동의 토글
 // ---------------------------------------------------------------------------
 
 class _TermsSection extends ConsumerWidget {
@@ -670,16 +670,26 @@ class _TermsSection extends ConsumerWidget {
               color: AppColors.divider,
             ),
           ),
-          // 개인정보 수집·이용 동의 + Switch
+          // 개인정보 수집·이용 동의: 밑줄 라벨 → 약관 조회 / Switch → 동의 토글
           Row(
             children: [
               Expanded(
-                child: Text(
-                  '개인정보 수집·이용 동의',
-                  style: AppTextStyles.body1Regular.copyWith(
-                    color: AppColors.textPrimary,
-                    decoration: TextDecoration.underline,
-                    decorationColor: AppColors.textPrimary,
+                child: InkWell(
+                  onTap: () => Navigator.of(context, rootNavigator: true).push(
+                    MaterialPageRoute(
+                      builder: (_) => const TermsDetailScreen(
+                        title: '개인정보 보호 약관',
+                        url: TermsCatalog.privacyUrl,
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    '개인정보 수집·이용 동의',
+                    style: AppTextStyles.body1Regular.copyWith(
+                      color: AppColors.textPrimary,
+                      decoration: TextDecoration.underline,
+                      decorationColor: AppColors.textPrimary,
+                    ),
                   ),
                 ),
               ),
