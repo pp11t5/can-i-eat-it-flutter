@@ -24,6 +24,7 @@ class _StubAppleAuthService implements AppleAuthService {
   Future<AppleAuthResult> signIn() async => AppleAuthResult(
         idToken: idToken,
         authorizationCode: 'test-auth-code',
+        nonce: 'test-nonce',
         email: 'apple-test@example.com',
         fullName: 'Apple Tester',
       );
@@ -104,7 +105,8 @@ void main() {
     dio = Dio(BaseOptions(
       baseUrl: 'https://can-i-eat-it.com/api/v1',
       // 400/403 은 throw 하지 않고 datasource 에 전달 (dio_client.dart 와 동일 정책)
-      validateStatus: (status) => status != null && status != 401 && status < 500,
+      validateStatus: (status) =>
+          status != null && status != 401 && status < 500,
     ));
     dioAdapter = DioAdapter(dio: dio, matcher: const FullHttpRequestMatcher());
     tokenStore = InMemoryTokenStore();
@@ -117,17 +119,20 @@ void main() {
   });
 
   group('signInWithKakao — HTTP 200 → Authenticated', () {
-    test('200 성공 + onboarding/status → Authenticated(onboarded=true)', () async {
+    test('200 성공 + onboarding/status → Authenticated(onboarded=true)',
+        () async {
       dioAdapter
         ..onPost(
           '/auth/kakao/login',
-          (server) => server.reply(200, _envelope({
-            'accessToken': 'access-123',
-            'refreshToken': 'refresh-456',
-            'userId': 'user-1',
-            'email': 'test@example.com',
-            'role': 'USER',
-          })),
+          (server) => server.reply(
+              200,
+              _envelope({
+                'accessToken': 'access-123',
+                'refreshToken': 'refresh-456',
+                'userId': 'user-1',
+                'email': 'test@example.com',
+                'role': 'USER',
+              })),
           data: {'idToken': 'test-id-token'},
         )
         ..onGet(
@@ -144,17 +149,20 @@ void main() {
       expect(auth.session.hasAgreedTerms, isTrue);
     });
 
-    test('200 성공 + onboarding/status → Authenticated(onboarded=false)', () async {
+    test('200 성공 + onboarding/status → Authenticated(onboarded=false)',
+        () async {
       dioAdapter
         ..onPost(
           '/auth/kakao/login',
-          (server) => server.reply(200, _envelope({
-            'accessToken': 'access-123',
-            'refreshToken': 'refresh-456',
-            'userId': 'user-2',
-            'email': 'test@example.com',
-            'role': 'USER',
-          })),
+          (server) => server.reply(
+              200,
+              _envelope({
+                'accessToken': 'access-123',
+                'refreshToken': 'refresh-456',
+                'userId': 'user-2',
+                'email': 'test@example.com',
+                'role': 'USER',
+              })),
           data: {'idToken': 'test-id-token'},
         )
         ..onGet(
@@ -173,13 +181,15 @@ void main() {
       dioAdapter
         ..onPost(
           '/auth/kakao/login',
-          (server) => server.reply(200, _envelope({
-            'accessToken': 'access-abc',
-            'refreshToken': 'refresh-xyz',
-            'userId': 'user-3',
-            'email': 'test@example.com',
-            'role': 'USER',
-          })),
+          (server) => server.reply(
+              200,
+              _envelope({
+                'accessToken': 'access-abc',
+                'refreshToken': 'refresh-xyz',
+                'userId': 'user-3',
+                'email': 'test@example.com',
+                'role': 'USER',
+              })),
           data: {'idToken': 'test-id-token'},
         )
         ..onGet(
@@ -191,6 +201,40 @@ void main() {
 
       expect(await tokenStore.readAccessToken(), 'access-abc');
       expect(await tokenStore.readRefreshToken(), 'refresh-xyz');
+    });
+  });
+
+  group('signInWithApple — HTTP 200 → Authenticated', () {
+    test('Apple 전용 DTO(authorizationCode, nonce)로 로그인한다', () async {
+      dioAdapter
+        ..onPost(
+          '/auth/apple/login',
+          (server) => server.reply(
+              200,
+              _envelope({
+                'accessToken': 'apple-access-123',
+                'refreshToken': 'apple-refresh-456',
+                'userId': 'apple-user-1',
+                'role': 'USER',
+              })),
+          data: {
+            'authorizationCode': 'test-auth-code',
+            'nonce': 'test-nonce',
+          },
+        )
+        ..onGet(
+          '/onboarding/status',
+          (server) => server.reply(200, _envelope({'onboarded': true})),
+        );
+
+      final outcome = await repo.signInWithApple();
+
+      expect(outcome, isA<Authenticated>());
+      final auth = outcome as Authenticated;
+      expect(auth.session.userId, 'apple-user-1');
+      expect(auth.onboarded, isTrue);
+      expect(await tokenStore.readAccessToken(), 'apple-access-123');
+      expect(await tokenStore.readRefreshToken(), 'apple-refresh-456');
     });
   });
 
@@ -304,13 +348,15 @@ void main() {
 
       dioAdapter.onPost(
         '/auth/kakao/recover',
-        (server) => server.reply(200, _envelope({
-          'accessToken': 'rec-access',
-          'refreshToken': 'rec-refresh',
-          'userId': 'rec-user',
-          'email': 'test@example.com',
-          'role': 'USER',
-        })),
+        (server) => server.reply(
+            200,
+            _envelope({
+              'accessToken': 'rec-access',
+              'refreshToken': 'rec-refresh',
+              'userId': 'rec-user',
+              'email': 'test@example.com',
+              'role': 'USER',
+            })),
         data: {'idToken': 'passed-token'},
       );
 
@@ -345,9 +391,11 @@ void main() {
 
       dioAdapter.onDelete(
         ApiEndpoints.authLogout,
-        (server) => server.throws(500, DioException(
-          requestOptions: RequestOptions(path: ApiEndpoints.authLogout),
-        )),
+        (server) => server.throws(
+            500,
+            DioException(
+              requestOptions: RequestOptions(path: ApiEndpoints.authLogout),
+            )),
       );
 
       // 서버 실패해도 예외 없이 완료
@@ -368,22 +416,26 @@ void main() {
     // 이 그룹의 테스트는 수정 전에는 StateError 로 실패해야 하고,
     // recoverAccount(AuthProvider) 재작성 후 통과해야 한다.
 
-    test('recoverAccount 200 → 전달받은 idToken 전송 + 토큰 저장 + active 세션 반환', () async {
+    test('recoverAccount 200 → 전달받은 idToken 전송 + 토큰 저장 + active 세션 반환',
+        () async {
       // 403 경로는 _session=null · 토큰 없음 상태에서 호출됨.
       // 전달된 'test-id-token' 이 POST /auth/kakao/recover 바디에 그대로 전송돼야 한다.
       dioAdapter.onPost(
         '/auth/kakao/recover',
-        (server) => server.reply(200, _envelope({
-          'accessToken': 'recover-access',
-          'refreshToken': 'recover-refresh',
-          'userId': 'user-recovered',
-          'email': 'test@example.com',
-          'role': 'USER',
-        })),
+        (server) => server.reply(
+            200,
+            _envelope({
+              'accessToken': 'recover-access',
+              'refreshToken': 'recover-refresh',
+              'userId': 'user-recovered',
+              'email': 'test@example.com',
+              'role': 'USER',
+            })),
         data: {'idToken': 'test-id-token'},
       );
 
-      final session = await repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token');
+      final session = await repo.recoverAccount(AuthProvider.kakao,
+          idToken: 'test-id-token');
 
       expect(session.userId, 'user-recovered');
       expect(session.accountStatus, AccountStatus.active);
@@ -392,13 +444,15 @@ void main() {
     test('recoverAccount 200 후 tokenStore 에 새 토큰이 저장된다', () async {
       dioAdapter.onPost(
         '/auth/kakao/recover',
-        (server) => server.reply(200, _envelope({
-          'accessToken': 'recover-access-2',
-          'refreshToken': 'recover-refresh-2',
-          'userId': 'user-recovered-2',
-          'email': 'test@example.com',
-          'role': 'USER',
-        })),
+        (server) => server.reply(
+            200,
+            _envelope({
+              'accessToken': 'recover-access-2',
+              'refreshToken': 'recover-refresh-2',
+              'userId': 'user-recovered-2',
+              'email': 'test@example.com',
+              'role': 'USER',
+            })),
         data: {'idToken': 'test-id-token'},
       );
 
@@ -412,13 +466,15 @@ void main() {
       // _session=null 이 전제 — 403 경로에서 토큰 미발급.
       dioAdapter.onPost(
         '/auth/kakao/recover',
-        (server) => server.reply(200, _envelope({
-          'accessToken': 'recover-access-3',
-          'refreshToken': 'recover-refresh-3',
-          'userId': 'user-recovered-3',
-          'email': 'test@example.com',
-          'role': 'USER',
-        })),
+        (server) => server.reply(
+            200,
+            _envelope({
+              'accessToken': 'recover-access-3',
+              'refreshToken': 'recover-refresh-3',
+              'userId': 'user-recovered-3',
+              'email': 'test@example.com',
+              'role': 'USER',
+            })),
         data: {'idToken': 'test-id-token'},
       );
 
@@ -450,9 +506,11 @@ void main() {
 
       dioAdapter.onDelete(
         ApiEndpoints.authWithdraw,
-        (server) => server.throws(500, DioException(
-          requestOptions: RequestOptions(path: ApiEndpoints.authWithdraw),
-        )),
+        (server) => server.throws(
+            500,
+            DioException(
+              requestOptions: RequestOptions(path: ApiEndpoints.authWithdraw),
+            )),
       );
 
       await expectLater(repo.withdraw(), completes);
@@ -472,16 +530,21 @@ void main() {
       expect(result, isNull);
     });
 
-    test('분기2: 토큰 有 + GET /auth/me 200 → 세션 반환, hasAgreedTerms==true, accountStatus==active', () async {
-      await tokenStore.writeTokens(access: 'live-access', refresh: 'live-refresh');
+    test(
+        '분기2: 토큰 有 + GET /auth/me 200 → 세션 반환, hasAgreedTerms==true, accountStatus==active',
+        () async {
+      await tokenStore.writeTokens(
+          access: 'live-access', refresh: 'live-refresh');
 
       dioAdapter.onGet(
         '/auth/me',
-        (server) => server.reply(200, _envelope({
-          'userId': 'user-me',
-          'nickname': 'tester',
-          'email': 'tester@example.com',
-        })),
+        (server) => server.reply(
+            200,
+            _envelope({
+              'userId': 'user-me',
+              'nickname': 'tester',
+              'email': 'tester@example.com',
+            })),
       );
 
       final session = await repo.currentSession();
@@ -492,8 +555,11 @@ void main() {
       expect(session.accountStatus, AccountStatus.active);
     });
 
-    test('분기3: 토큰 有 + 연결오류 DioException → null 반환 & consumeOfflineRestoreFlag()==true & 토큰 보존', () async {
-      await tokenStore.writeTokens(access: 'live-access', refresh: 'live-refresh');
+    test(
+        '분기3: 토큰 有 + 연결오류 DioException → null 반환 & consumeOfflineRestoreFlag()==true & 토큰 보존',
+        () async {
+      await tokenStore.writeTokens(
+          access: 'live-access', refresh: 'live-refresh');
 
       dioAdapter.onGet(
         '/auth/me',
@@ -522,7 +588,8 @@ void main() {
       // AuthInterceptor 없이 직접 SessionExpiredFailure 로 getMe 를 실패시킨다.
       // 실 구현에서 401→인터셉터→refresh 실패→SessionExpiredFailure 가 e.error에 실려온다.
       // 여기서는 DioException.error 에 SessionExpiredFailure 를 직접 주입한다.
-      await tokenStore.writeTokens(access: 'expired-access', refresh: 'expired-refresh');
+      await tokenStore.writeTokens(
+          access: 'expired-access', refresh: 'expired-refresh');
 
       dioAdapter.onGet(
         '/auth/me',
@@ -545,12 +612,15 @@ void main() {
     });
 
     // H1 + O1 회귀 테스트 — 5xx를 오프라인으로 오분류하지 않아야 한다.
-    test('분기5(H1/O1): 토큰 有 + GET /auth/me 500 → null 반환 & offlineFlag=false & 토큰 보존', () async {
+    test(
+        '분기5(H1/O1): 토큰 有 + GET /auth/me 500 → null 반환 & offlineFlag=false & 토큰 보존',
+        () async {
       // 서버 5xx는 일시적 서버 오류이므로:
       //   - currentSession() == null (세션 미복원)
       //   - consumeOfflineRestoreFlag() == false (오프라인 플래그 미설정)
       //   - 토큰은 보존 (강제 로그아웃 안 함)
-      await tokenStore.writeTokens(access: 'live-access-500', refresh: 'live-refresh-500');
+      await tokenStore.writeTokens(
+          access: 'live-access-500', refresh: 'live-refresh-500');
 
       dioAdapter.onGet(
         '/auth/me',
@@ -583,7 +653,9 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('recoverAccount — DioException→Failure 매핑 (M1)', () {
-    test('recoverAccount 중 연결오류 DioException → NetworkFailure throw (raw DioException 아님)', () async {
+    test(
+        'recoverAccount 중 연결오류 DioException → NetworkFailure throw (raw DioException 아님)',
+        () async {
       dioAdapter.onPost(
         '/auth/kakao/recover',
         (server) => server.throws(
