@@ -41,6 +41,7 @@ class _OnboardingMedicationsScreenState
     if (text.isEmpty) return;
     ref.read(onboardingControllerProvider.notifier).addMedication(text);
     _medController.clear();
+    FocusManager.instance.primaryFocus?.unfocus();
   }
 
   @override

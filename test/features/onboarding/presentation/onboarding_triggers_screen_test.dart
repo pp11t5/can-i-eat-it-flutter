@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/app/widgets/step_progress.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
@@ -172,7 +174,7 @@ void main() {
       expect(find.text('해당하는 음식이 없나요?'), findsOneWidget);
     });
 
-    testWidgets('기타 TextField에 입력 시 customTriggers가 설정된다', (tester) async {
+    testWidgets('+ 버튼으로 기타 음식 추가 시 customTriggers에 들어간다', (tester) async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
@@ -193,15 +195,30 @@ void main() {
       await tester.enterText(find.byType(TextField), '냉면');
       await tester.pumpAndSettle();
 
+      // 입력만으로는 아직 추가되지 않는다 (+ 또는 submit 필요).
       expect(
         container.read(onboardingControllerProvider).customTriggers,
-        equals('냉면'),
+        isEmpty,
       );
+
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      expect(
+        container.read(onboardingControllerProvider).customTriggers,
+        equals(['냉면']),
+      );
+      expect(find.text('냉면'), findsOneWidget);
     });
 
-    testWidgets('기타 TextField를 비우면 customTriggers가 null이 된다', (tester) async {
+    testWidgets('기타 칩 삭제 시 customTriggers에서 제거된다', (tester) async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
+
+      // 카탈로그 칩 라벨과 겹치지 않는 직접 입력 값 사용
+      container
+          .read(onboardingControllerProvider.notifier)
+          .setCustomTriggers(['냉면']);
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
@@ -211,33 +228,35 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      final removeIcon = find.byWidgetPredicate(
+        (w) => w is AppIcon && w.asset == AppIcons.closeSmall,
+      );
       await tester.scrollUntilVisible(
-        find.byType(TextField),
+        removeIcon,
         100,
         scrollable: find.byType(Scrollable).first,
       );
+      expect(find.text('냉면'), findsOneWidget);
 
-      await tester.enterText(find.byType(TextField), '냉면');
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(TextField), '');
+      await tester.tap(removeIcon, warnIfMissed: false);
       await tester.pumpAndSettle();
 
       expect(
         container.read(onboardingControllerProvider).customTriggers,
-        isNull,
+        isEmpty,
       );
+      expect(find.text('냉면'), findsNothing);
     });
 
     testWidgets(
-        'draft에 customTriggers가 있으면 TextField에 해당 값이 복원된다 (H1)',
+        'draft에 customTriggers가 있으면 칩으로 복원된다',
         (tester) async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       container
           .read(onboardingControllerProvider.notifier)
-          .setCustomTriggers('탄산음료');
+          .setCustomTriggers(['오렌지주스', '라면']);
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
@@ -248,22 +267,13 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.scrollUntilVisible(
-        find.byType(TextField),
+        find.text('오렌지주스'),
         100,
         scrollable: find.byType(Scrollable).first,
       );
 
-      final editableText = tester.widget<EditableText>(
-        find.descendant(
-          of: find.byType(TextField),
-          matching: find.byType(EditableText),
-        ),
-      );
-      expect(
-        editableText.controller.text,
-        equals('탄산음료'),
-        reason: 'initState에서 draft.customTriggers를 _customController에 복원해야 한다',
-      );
+      expect(find.text('오렌지주스'), findsOneWidget);
+      expect(find.text('라면'), findsOneWidget);
     });
 
     testWidgets('"건너뛰기" 버튼이 렌더되지 않는다 (Figma에서 제거됨)', (tester) async {

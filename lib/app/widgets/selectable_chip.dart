@@ -23,7 +23,12 @@ class SelectableChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        // 칩 탭은 자식 GestureDetector가 제스처를 가져가 부모 unfocus 래퍼가
+        // 동작하지 않으므로, 여기서 입력란/키보드를 직접 해제한다.
+        FocusManager.instance.primaryFocus?.unfocus();
+        onTap();
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(

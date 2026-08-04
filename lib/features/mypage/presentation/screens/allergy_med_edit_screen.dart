@@ -90,12 +90,14 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
     if (text.isEmpty) return;
     if (_medications.contains(text)) {
       _medController.clear();
+      FocusManager.instance.primaryFocus?.unfocus();
       return;
     }
     setState(() {
       _medications = [..._medications, text];
     });
     _medController.clear();
+    FocusManager.instance.primaryFocus?.unfocus();
   }
 
   void _removeMedication(String med) {
@@ -191,138 +193,146 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
   /// 폼 본문 — 조회 성공 시에만 렌더된다(저장 버튼도 이 안에만 존재 — 조회 실패 시
   /// 저장 자체가 불가능하도록 화면에서 사라진다).
   Widget _buildForm(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.screenPadding,
-              vertical: AppSpacing.sectionGap,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 헤더
-                Text(
-                  '알레르기와 복용 중인 약을 알려주세요',
-                  style: AppTextStyles.header1Bold.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sectionGap),
-
-                // 알레르기 섹션
-                Text(
-                  '알레르기',
-                  style: AppTextStyles.body1Bold.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.itemGap),
-                Wrap(
-                  spacing: AppSpacing.itemGap,
-                  runSpacing: AppSpacing.itemGap,
-                  children: allergyOptions.map((entry) {
-                    final isSelected =
-                        _selectedAllergies.contains(entry.code);
-                    return SelectableChip(
-                      label: entry.label,
-                      selected: isSelected,
-                      onTap: () => _toggleAllergy(entry.code),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: AppSpacing.sectionGap),
-
-                // 복용약 섹션
-                Text(
-                  '복용 중인 약',
-                  style: AppTextStyles.body1Bold.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.itemGap),
-                // 온보딩 medications 화면과 동일: TextField 우측 인라인 + 버튼.
-                TextField(
-                  controller: _medController,
-                  style: AppTextStyles.body1Regular.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'PPI, 제산제',
-                    hintStyle: AppTextStyles.body1Regular.copyWith(
-                      color: AppColors.textTertiary,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.cardPadding,
-                      vertical: AppSpacing.cardPadding,
-                    ),
-                    suffixIcon: Padding(
-                      padding: const EdgeInsets.only(
-                        right: AppSpacing.itemGap,
-                      ),
-                      child: GestureDetector(
-                        onTap: _addMedication,
-                        child: const AppIcon(
-                          AppIcons.plusCircle,
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                    suffixIconConstraints: const BoxConstraints(
-                      minWidth: 40,
-                      minHeight: 40,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusCard,
-                      ),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusCard,
-                      ),
-                      borderSide: const BorderSide(color: AppColors.primary),
+    // 온보딩 medications 화면과 동일: 빈 영역 탭 시 입력란/키보드 unfocus.
+    // 칩 탭 unfocus는 SelectableChip 내부에서 처리한다.
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      behavior: HitTestBehavior.translucent,
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              keyboardDismissBehavior:
+                  ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPadding,
+                vertical: AppSpacing.sectionGap,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 헤더
+                  Text(
+                    '알레르기와 복용 중인 약을 알려주세요',
+                    style: AppTextStyles.header1Bold.copyWith(
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                  onSubmitted: (_) => _addMedication(),
-                ),
-                // 추가된 약 목록
-                if (_medications.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.sectionGap),
+
+                  // 알레르기 섹션
+                  Text(
+                    '알레르기',
+                    style: AppTextStyles.body1Bold.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.itemGap),
                   Wrap(
                     spacing: AppSpacing.itemGap,
                     runSpacing: AppSpacing.itemGap,
-                    children: _medications.map((med) {
-                      return _MedicationChip(
-                        label: med,
-                        onRemove: () => _removeMedication(med),
+                    children: allergyOptions.map((entry) {
+                      final isSelected =
+                          _selectedAllergies.contains(entry.code);
+                      return SelectableChip(
+                        label: entry.label,
+                        selected: isSelected,
+                        onTap: () => _toggleAllergy(entry.code),
                       );
                     }).toList(),
                   ),
+                  const SizedBox(height: AppSpacing.sectionGap),
+
+                  // 복용약 섹션
+                  Text(
+                    '복용 중인 약',
+                    style: AppTextStyles.body1Bold.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.itemGap),
+                  // 온보딩 medications 화면과 동일: TextField 우측 인라인 + 버튼.
+                  TextField(
+                    controller: _medController,
+                    style: AppTextStyles.body1Regular.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'PPI, 제산제',
+                      hintStyle: AppTextStyles.body1Regular.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.cardPadding,
+                        vertical: AppSpacing.cardPadding,
+                      ),
+                      suffixIcon: Padding(
+                        padding: const EdgeInsets.only(
+                          right: AppSpacing.itemGap,
+                        ),
+                        child: GestureDetector(
+                          onTap: _addMedication,
+                          child: const AppIcon(
+                            AppIcons.plusCircle,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                      suffixIconConstraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusCard,
+                        ),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusCard,
+                        ),
+                        borderSide: const BorderSide(color: AppColors.primary),
+                      ),
+                    ),
+                    onSubmitted: (_) => _addMedication(),
+                  ),
+                  // 추가된 약 목록
+                  if (_medications.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.sectionGap),
+                    Wrap(
+                      spacing: AppSpacing.itemGap,
+                      runSpacing: AppSpacing.itemGap,
+                      children: _medications.map((med) {
+                        return _MedicationChip(
+                          label: med,
+                          onRemove: () => _removeMedication(med),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                  const SizedBox(height: AppSpacing.sectionGap),
                 ],
-                const SizedBox(height: AppSpacing.sectionGap),
-              ],
+              ),
             ),
           ),
-        ),
 
-        // 저장하기 버튼
-        Padding(
-          padding: EdgeInsets.fromLTRB(
-            AppSpacing.screenPadding,
-            AppSpacing.itemGap,
-            AppSpacing.screenPadding,
-            AppSpacing.sectionGap + MediaQuery.of(context).padding.bottom,
+          // 저장하기 버튼
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.screenPadding,
+              AppSpacing.itemGap,
+              AppSpacing.screenPadding,
+              AppSpacing.sectionGap + MediaQuery.of(context).padding.bottom,
+            ),
+            child: AppButton.primary(
+              label: '저장하기',
+              onPressed: _isSaving ? null : _onSave,
+              isExpanded: true,
+            ),
           ),
-          child: AppButton.primary(
-            label: '저장하기',
-            onPressed: _isSaving ? null : _onSave,
-            isExpanded: true,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
