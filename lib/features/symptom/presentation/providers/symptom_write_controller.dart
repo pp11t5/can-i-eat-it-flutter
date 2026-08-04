@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/dictionary_list_controller.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
@@ -81,7 +82,7 @@ class SymptomWriteController extends _$SymptomWriteController {
   /// [formState]를 제출한다.
   ///
   /// - mood 미선택 시 예외.
-  /// - 성공 시 타임라인/주간·홈 미기록 식단·식사 상세 캐시 invalidate.
+  /// - 성공 시 타임라인/주간·홈 미기록 식단·식사 상세·도감 캐시 invalidate.
   /// - 증상 상세 갱신·로딩은 상세 화면이 pop 이후 전역 로딩과 함께 수행.
   /// - 반환값: 성공 시 생성/수정된 symptomId.
   Future<String?> submit(SymptomWriteFormState formState) async {
@@ -111,12 +112,14 @@ class SymptomWriteController extends _$SymptomWriteController {
         symptomId = existingSymptomId!;
       }
 
-      // 타임라인·주간·홈 미기록 식단·식사 상세 캐시 invalidate
+      // 타임라인·주간·홈 미기록 식단·식사 상세·도감 캐시 invalidate
       // 증상 상세는 상세 화면에서 pop 후 전역 로딩 + invalidate 로 갱신.
+      // SAFE 도감은 comfortable/good + meal 연결 시 서버가 upsert한다.
       ref.invalidate(timelineControllerProvider);
       ref.invalidate(monthlyControllerProvider);
       ref.invalidate(unrecordedMealCountProvider);
       ref.invalidate(mealRecordDetailControllerProvider);
+      invalidateDictionaryCaches(ref.invalidate);
 
       state = const AsyncData(null);
       return symptomId;

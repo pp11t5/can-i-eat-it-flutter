@@ -12,6 +12,7 @@ import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
+import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/dictionary_list_controller.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
@@ -63,6 +64,7 @@ class MealFoodDetailScreen extends ConsumerWidget {
       ref.invalidate(unrecordedMealCountProvider);
       // 부모 식사 상세가 떠 있을 수 있으므로 식사상세 family도 무효화.
       ref.invalidate(mealRecordDetailControllerProvider);
+      invalidateDictionaryCaches(ref.invalidate);
       showAppToast(context, '음식을 삭제했어요.');
       context.pop();
     } catch (_) {
