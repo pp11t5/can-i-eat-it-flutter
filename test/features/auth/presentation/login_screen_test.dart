@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
+import 'package:can_i_eat_it/features/auth/domain/repositories/auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/login_screen.dart';
 
@@ -13,6 +18,53 @@ import '../../../core/push/fcm_test_helpers.dart';
 
 /// LoginScreen 이 sign-in 후 SignInOutcome switch 로 분기하는 것을 검증한다.
 /// GoRouter 컨텍스트가 필요해 최소 라우트만 등록한다.
+
+/// 지정 [Object] 를 throw 하는 stub — 카카오 취소 예외 등 Failure 외 타입 검증용.
+class _ThrowingObjectAuthRepository implements AuthRepository {
+  _ThrowingObjectAuthRepository(this.error);
+
+  final Object error;
+
+  @override
+  Future<AuthSession?> currentSession() async => null;
+
+  @override
+  bool consumeOfflineRestoreFlag() => false;
+
+  @override
+  Future<SignInOutcome> signInWithKakao() async => throw error;
+
+  @override
+  Future<SignInOutcome> signInWithApple() async => throw error;
+
+  @override
+  Future<void> recordTermsAgreement(TermsAgreement agreement) async {}
+
+  @override
+  Future<AuthSession> recoverAccount(
+    AuthProvider provider, {
+    required String idToken,
+  }) async =>
+      throw error;
+
+  @override
+  Future<void> refresh() async {}
+
+  @override
+  Future<AuthSession> getMe() async => throw error;
+
+  @override
+  void applyLocalDisplayName(String displayName) {}
+
+  @override
+  Future<void> logout() async {}
+
+  @override
+  Future<void> withdraw() async {}
+
+  @override
+  Future<void> signOut() async {}
+}
 
 // ---------------------------------------------------------------------------
 // T1 토스트 테스트용 helper: coldStartOfflineProvider 값을 제어하는 mock
@@ -180,6 +232,45 @@ void main() {
       await tester.pump(const Duration(seconds: 5));
       await tester.pumpAndSettle();
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  });
+
+  group('LoginScreen 소셜 로그인 취소', () {
+    testWidgets(
+      'Kakao 사용자 취소(ClientErrorCause.cancelled) — 실패 토스트 없이 로그인 화면 유지',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              // ignore: scoped_providers_should_specify_dependencies
+              authRepositoryProvider.overrideWithValue(
+                _ThrowingObjectAuthRepository(
+                  KakaoClientException(
+                    ClientErrorCause.cancelled,
+                    'User Cancelled',
+                  ),
+                ),
+              ),
+              // ignore: scoped_providers_should_specify_dependencies
+              fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
+            ],
+            child: MaterialApp.router(routerConfig: _testRouter()),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('카카오로 로그인'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(
+          find.text('로그인에 실패했어요. 잠시 후 다시 시도해 주세요.'),
+          findsNothing,
+        );
+        expect(find.text('카카오로 로그인'), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
   });
 
   group('LoginScreen 로그인 실패 T2 토스트 (Bug A 회귀)', () {
