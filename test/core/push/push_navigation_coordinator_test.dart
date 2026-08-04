@@ -3,12 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:can_i_eat_it/core/push/push_navigation_coordinator.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/session_providers.dart';
 
-const _firstLink =
-    'https://can-i-eat-it.com/app/symptoms/new?mealRecordId=meal-123';
-const _latestLink =
-    'https://can-i-eat-it.com/app/symptoms/new?mealRecordId=meal-456';
-const _weeklyReportLink = 'https://can-i-eat-it.com/app/weekly-report';
-const _unrecordedMealsLink = 'https://can-i-eat-it.com/app/unrecorded-meals';
+const _firstPostMealData = {'type': 'post_meal', 'targetId': 'meal-123'};
+const _latestPostMealData = {'type': 'post_meal', 'targetId': 'meal-456'};
+const _weeklyReportData = {'type': 'weekly_report'};
+const _unrecordedMealsData = {'type': 'post_meal_delayed_bulk'};
 
 void main() {
   group('PushNavigationCoordinator', () {
@@ -20,7 +18,7 @@ void main() {
         onGo: (_) {},
       );
 
-      coordinator.handleData({'link': _firstLink});
+      coordinator.handleData(_firstPostMealData);
 
       expect(pushed, ['/symptom/record?mealRecordId=meal-123']);
     });
@@ -33,7 +31,7 @@ void main() {
         onGo: (_) {},
       );
 
-      coordinator.handleData({'link': _weeklyReportLink});
+      coordinator.handleData(_weeklyReportData);
 
       expect(pushed, ['/weekly-report']);
     });
@@ -46,7 +44,7 @@ void main() {
         onGo: (_) {},
       );
 
-      coordinator.handleData({'link': _unrecordedMealsLink});
+      coordinator.handleData(_unrecordedMealsData);
 
       expect(pushed, ['/unrecorded-meals']);
     });
@@ -60,7 +58,9 @@ void main() {
         onGo: replaced.add,
       );
 
-      coordinator.handleLocalPayload(_firstLink);
+      coordinator.handleLocalPayload(
+        '{"type":"post_meal","targetId":"meal-123"}',
+      );
       coordinator.onSessionStatusChanged(SessionStatus.ready);
       coordinator.onSessionStatusChanged(SessionStatus.ready);
 
@@ -77,7 +77,7 @@ void main() {
         onGo: replaced.add,
       );
 
-      coordinator.handleLocalPayload(_weeklyReportLink);
+      coordinator.handleLocalPayload('{"type":"weekly_report"}');
       coordinator.onSessionStatusChanged(SessionStatus.ready);
       coordinator.onSessionStatusChanged(SessionStatus.ready);
 
@@ -94,7 +94,7 @@ void main() {
         onGo: replaced.add,
       );
 
-      coordinator.handleLocalPayload(_unrecordedMealsLink);
+      coordinator.handleLocalPayload('{"type":"post_meal_delayed_bulk"}');
       coordinator.onSessionStatusChanged(SessionStatus.ready);
       coordinator.onSessionStatusChanged(SessionStatus.ready);
 
@@ -110,8 +110,8 @@ void main() {
         onGo: (_) {},
       );
 
-      coordinator.handleData({'link': _firstLink});
-      coordinator.handleData({'link': _latestLink});
+      coordinator.handleData(_firstPostMealData);
+      coordinator.handleData(_latestPostMealData);
       coordinator.onSessionStatusChanged(SessionStatus.needsOnboarding);
       coordinator.onSessionStatusChanged(SessionStatus.ready);
 
@@ -127,7 +127,7 @@ void main() {
         onGo: replaced.add,
       );
 
-      coordinator.handleData({'link': 'https://example.com/not-supported'});
+      coordinator.handleData({'type': 'unsupported'});
 
       expect(pushed, isEmpty);
       expect(replaced, isEmpty);

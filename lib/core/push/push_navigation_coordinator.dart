@@ -4,7 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'package:can_i_eat_it/features/auth/presentation/providers/session_providers.dart';
 
-import 'push_link_resolver.dart';
+import 'push_payload_resolver.dart';
 
 /// 푸시 탭을 인증/온보딩 게이트와 함께 처리한다.
 ///
@@ -31,12 +31,12 @@ class PushNavigationCoordinator {
 
   /// Android foreground local notification의 payload를 처리한다.
   void handleLocalPayload(String? payload) {
-    _handleDestination(PushLinkResolver.parse(payload));
+    _handleDestination(PushPayloadResolver.fromLocalPayload(payload));
   }
 
   /// FCM `data` payload를 처리한다.
   void handleData(Map<String, dynamic> data) {
-    _handleDestination(PushLinkResolver.fromData(data));
+    _handleDestination(PushPayloadResolver.fromData(data));
   }
 
   /// 세션 상태가 바뀌면 보관된 최신 푸시 목적지를 재생한다.
@@ -55,7 +55,7 @@ class PushNavigationCoordinator {
 
   void _handleDestination(PushDestination? destination) {
     if (destination == null) {
-      debugPrint('[FCM] ignored unsupported push link');
+      debugPrint('[FCM] ignored unsupported push payload');
       return;
     }
 
