@@ -22,7 +22,7 @@ import 'package:can_i_eat_it/features/auth/presentation/widgets/deletion_grace_d
 /// 캔버스 375×812 기준:
 /// - 배경: #F7FFFB (loginBg), opacity 15% 배경 사진(위/아래 flip — 흰색이 상단)
 /// - 로고 PNG: y:141, 218×218 비율 스케일
-/// - 슬로건: 로고 바로 아래 [AppSpacing.sectionGap](24) — 로고와 묶은 Column
+/// - 슬로건: 로고 바로 아래 [_kLogoSloganGap](0) — 로고와 묶은 Column
 ///   (절대 y 분리 시 로고는 가로 스케일·슬로건은 세로 스케일이라 간격이 깨지던 문제 수정)
 /// - 버튼 컨테이너: y:518, 좌우 16, gap 16
 /// 화면 비율로 환산해 LayoutBuilder + Positioned 로 매핑.
@@ -52,8 +52,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   static const double _kCanvasH = 812;
   static const double _kLogoY = 141; // → 17.4% from top
   static const double _kLogoSize = 218;
-  /// 로고 박스 하단 → 슬로건 상단 간격 (스플래시와 동일 sectionGap=24).
-  static const double _kLogoSloganGap = AppSpacing.sectionGap;
+  /// 로고 박스 하단 → 슬로건 상단 간격 (스플래시와 동일, 전역 sectionGap과 분리).
+  static const double _kLogoSloganGap = 0;
   static const double _kButtonY = 518; // → 63.8%
 
   @override
