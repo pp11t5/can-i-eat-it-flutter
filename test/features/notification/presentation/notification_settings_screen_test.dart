@@ -9,6 +9,34 @@ import 'package:can_i_eat_it/features/notification/domain/entities/notification_
 import 'package:can_i_eat_it/features/notification/domain/repositories/notification_repository.dart';
 import 'package:can_i_eat_it/features/notification/presentation/screens/notification_settings_screen.dart';
 
+class _FailingBatchNotificationRepository implements NotificationRepository {
+  _FailingBatchNotificationRepository({
+    required this.initial,
+    required this.recovered,
+  });
+
+  final NotificationSettings initial;
+  final NotificationSettings recovered;
+  int fetchCalls = 0;
+
+  @override
+  Future<NotificationSettings> fetch() async {
+    fetchCalls += 1;
+    return fetchCalls == 1 ? initial : recovered;
+  }
+
+  @override
+  Future<void> toggle(NotificationToggleType type) async {
+    throw StateError('toggle failed');
+  }
+
+  @override
+  Future<void> toggleMarketingConsent(bool enabled) async {}
+
+  @override
+  Future<void> updateDailyTime(DailyNotificationTime time) async {}
+}
+
 // ---------------------------------------------------------------------------
 // 헬퍼
 // ---------------------------------------------------------------------------
@@ -72,6 +100,31 @@ void main() {
   });
 
   group('NotificationSettingsScreen — 토글 상호작용', () {
+    test('마케팅 푸시가 OFF면 하위 알림 변경 요청을 보내지 않는다', () async {
+      final mock = MockNotificationRepository(
+        seed: const NotificationSettings(
+          postMealEnabled: true,
+          dailyRecordEnabled: false,
+          weeklyReportEnabled: false,
+          dailyTime: DailyNotificationTime.morning8,
+          marketingPushEnabled: false,
+        ),
+      );
+      final container = ProviderContainer(
+        overrides: [
+          notificationRepositoryProvider.overrideWithValue(mock),
+        ],
+      );
+      addTearDown(container.dispose);
+      await container.read(notificationSettingsControllerProvider.future);
+
+      await container
+          .read(notificationSettingsControllerProvider.notifier)
+          .toggle(NotificationToggleType.postMeal);
+
+      expect(mock.toggleCalls, isEmpty);
+    });
+
     testWidgets('마스터 토글 탭 시 toggleMarketingConsent(false) 호출된다 (A2: 별도 경로)',
         (tester) async {
       final mock = MockNotificationRepository(
@@ -96,6 +149,109 @@ void main() {
       // 별도 경로(toggleMarketingConsent)를 호출한다 (A2).
       expect(mock.toggleCalls, isEmpty);
       expect(mock.marketingToggleCalls, contains(false));
+    });
+
+    testWidgets('마스터 OFF 시 켜진 하위 알림을 모두 OFF로 전환하고 비활성화한다', (tester) async {
+      final mock = MockNotificationRepository(
+        seed: const NotificationSettings(
+          postMealEnabled: true,
+          dailyRecordEnabled: true,
+          weeklyReportEnabled: true,
+          dailyTime: DailyNotificationTime.morning8,
+          marketingPushEnabled: true,
+        ),
+      );
+      await tester.pumpWidget(_wrap(repo: mock));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(Switch).first);
+      await tester.pumpAndSettle();
+
+      expect(mock.marketingToggleCalls, [false]);
+      expect(
+        mock.toggleCalls,
+        containsAllInOrder([
+          NotificationToggleType.postMeal,
+          NotificationToggleType.dailyRecord,
+          NotificationToggleType.weeklyReport,
+        ]),
+      );
+
+      final switches = tester.widgetList<Switch>(find.byType(Switch)).toList();
+      expect(switches.map((switch_) => switch_.value), everyElement(isFalse));
+      expect(switches.skip(1).map((switch_) => switch_.onChanged),
+          everyElement(isNull));
+    });
+
+    testWidgets('마스터를 다시 ON으로 켜도 하위 알림은 OFF로 유지한다', (tester) async {
+      final mock = MockNotificationRepository(
+        seed: const NotificationSettings(
+          postMealEnabled: true,
+          dailyRecordEnabled: false,
+          weeklyReportEnabled: true,
+          dailyTime: DailyNotificationTime.morning8,
+          marketingPushEnabled: true,
+        ),
+      );
+      await tester.pumpWidget(_wrap(repo: mock));
+      await tester.pumpAndSettle();
+
+      final masterSwitch = find.byType(Switch).first;
+      await tester.tap(masterSwitch);
+      await tester.pumpAndSettle();
+      await tester.tap(masterSwitch);
+      await tester.pumpAndSettle();
+
+      expect(mock.marketingToggleCalls, [false, true]);
+      expect(
+        mock.toggleCalls,
+        containsAllInOrder([
+          NotificationToggleType.postMeal,
+          NotificationToggleType.weeklyReport,
+        ]),
+      );
+      expect(mock.toggleCalls, hasLength(2));
+
+      final switches = tester.widgetList<Switch>(find.byType(Switch)).toList();
+      expect(switches.first.value, isTrue);
+      expect(switches.skip(1).map((switch_) => switch_.value),
+          everyElement(isFalse));
+      expect(switches.skip(1).map((switch_) => switch_.onChanged),
+          everyElement(isNotNull));
+    });
+
+    testWidgets('일괄 변경 실패 시 서버 설정을 다시 조회해 상태를 복구한다', (tester) async {
+      const recovered = NotificationSettings(
+        postMealEnabled: true,
+        dailyRecordEnabled: false,
+        weeklyReportEnabled: true,
+        dailyTime: DailyNotificationTime.morning8,
+        marketingPushEnabled: true,
+      );
+      final repository = _FailingBatchNotificationRepository(
+        initial: const NotificationSettings(
+          postMealEnabled: true,
+          dailyRecordEnabled: true,
+          weeklyReportEnabled: true,
+          dailyTime: DailyNotificationTime.morning8,
+          marketingPushEnabled: true,
+        ),
+        recovered: recovered,
+      );
+      await tester.pumpWidget(_wrap(repo: repository));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(Switch).first);
+      await tester.pumpAndSettle();
+
+      expect(repository.fetchCalls, 2);
+      final switches = tester.widgetList<Switch>(find.byType(Switch)).toList();
+      expect(switches.first.value, isTrue);
+      expect(switches[1].value, isTrue);
+      expect(switches[2].value, isFalse);
+      expect(switches[3].value, isTrue);
+      expect(find.text('알림 설정 변경에 실패했어요.'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 3));
     });
 
     testWidgets('식후 알림 토글 탭 시 toggle(postMeal) 호출된다', (tester) async {

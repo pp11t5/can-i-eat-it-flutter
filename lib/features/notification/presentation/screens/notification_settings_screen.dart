@@ -108,8 +108,7 @@ class _NotificationSettingsScreenState
       if (!mounted) return;
 
       // provider refresh 전에 비교해, 미변경 시 watch 리빌드/인디케이터를 피한다.
-      final status =
-          await ref.read(fcmTokenServiceProvider).permissionStatus();
+      final status = await ref.read(fcmTokenServiceProvider).permissionStatus();
       final next = status == AuthorizationStatus.denied;
       if (!mounted) return;
 
@@ -245,7 +244,7 @@ class _SettingsBody extends ConsumerWidget {
     // - OS 꺼짐: 안내 배너 + 3토글 카드 dim·비활성
     // - OS 켜짐: 배너 없음 + 3토글 활성
     // - 마스터(마케팅) 토글은 항상 활성
-    final togglesEnabled = !osBlocked;
+    final togglesEnabled = !osBlocked && settings.marketingPushEnabled;
 
     final toggleCard = _SectionCard(
       children: [
