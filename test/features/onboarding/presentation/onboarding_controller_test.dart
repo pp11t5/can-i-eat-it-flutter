@@ -137,28 +137,61 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  // group 5: setCustomTriggers
+  // group 5: customTriggers (add / remove / set)
   // -------------------------------------------------------------------------
-  group('setCustomTriggers', () {
-    test('값을 설정하면 customTriggers에 저장된다', () {
+  group('customTriggers', () {
+    test('addCustomTrigger로 직접 입력 트리거가 추가된다', () {
       final container = makeContainer();
       container
           .read(onboardingControllerProvider.notifier)
-          .setCustomTriggers('탄산음료');
+          .addCustomTrigger('탄산음료');
       expect(
         container.read(onboardingControllerProvider).customTriggers,
-        '탄산음료',
+        ['탄산음료'],
       );
     });
 
-    test('null로 설정하면 customTriggers가 null이 된다', () {
+    test('이미 존재하는 트리거를 addCustomTrigger 호출해도 중복 추가되지 않는다', () {
       final container = makeContainer();
       final notifier = container.read(onboardingControllerProvider.notifier);
-      notifier.setCustomTriggers('탄산음료');
-      notifier.setCustomTriggers(null);
+      notifier.addCustomTrigger('탄산음료');
+      notifier.addCustomTrigger('탄산음료');
+      expect(
+        container.read(onboardingControllerProvider).customTriggers.length,
+        1,
+      );
+    });
+
+    test('removeCustomTrigger로 트리거가 제거된다', () {
+      final container = makeContainer();
+      final notifier = container.read(onboardingControllerProvider.notifier);
+      notifier.addCustomTrigger('탄산음료');
+      notifier.removeCustomTrigger('탄산음료');
       expect(
         container.read(onboardingControllerProvider).customTriggers,
-        isNull,
+        isEmpty,
+      );
+    });
+
+    test('setCustomTriggers로 목록을 교체한다', () {
+      final container = makeContainer();
+      container
+          .read(onboardingControllerProvider.notifier)
+          .setCustomTriggers(['오렌지주스', '라면']);
+      expect(
+        container.read(onboardingControllerProvider).customTriggers,
+        ['오렌지주스', '라면'],
+      );
+    });
+
+    test('공백만 있는 값은 addCustomTrigger에서 무시된다', () {
+      final container = makeContainer();
+      container
+          .read(onboardingControllerProvider.notifier)
+          .addCustomTrigger('   ');
+      expect(
+        container.read(onboardingControllerProvider).customTriggers,
+        isEmpty,
       );
     });
   });
@@ -303,7 +336,8 @@ void main() {
       notifier.toggleSymptom('heartburn_reflux');
       notifier.setDiagnosed(true);
       notifier.toggleTrigger('spicy');
-      notifier.setCustomTriggers('탄산음료');
+      notifier.addCustomTrigger('탄산음료');
+      notifier.addCustomTrigger('라면');
       notifier.addMedication('omeprazole');
       notifier.toggleAllergy('shellfish');
 
@@ -314,7 +348,8 @@ void main() {
       expect(profile.symptomFrequency, ['heartburn_reflux']);
       expect(profile.diagnosed, isTrue);
       expect(profile.triggerFoods, ['spicy']);
-      expect(profile.customTriggers, '탄산음료');
+      // 목록 → 서버 customTriggerText 단일 문자열 (', ' 조인)
+      expect(profile.customTriggers, '탄산음료, 라면');
       expect(profile.medications, ['omeprazole']);
       expect(profile.allergies, ['shellfish']);
     });

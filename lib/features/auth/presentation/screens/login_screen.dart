@@ -17,13 +17,14 @@ import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart'
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/widgets/deletion_grace_dialog.dart';
 
-/// 로그인 화면 (02_로그인) — Figma node 365:1552 기준 절대 위치 충실.
+/// 로그인 화면 (02_로그인) — Figma node 365:1552 기준 레이아웃.
 ///
-/// 캔버스 375×812 기준 절대 좌표:
+/// 캔버스 375×812 기준:
 /// - 배경: #F7FFFB (loginBg), opacity 15% 배경 사진(위/아래 flip — 흰색이 상단)
-/// - 로고 PNG: x:76, y:141, 218×218
-/// - 슬로건: y:343, Pretendard Bold 16, color brandAccent #02995B
-/// - 버튼 컨테이너: x:16, y:518, 342 wide, gap 16
+/// - 로고 PNG: y:141, 218×218 비율 스케일
+/// - 슬로건: 로고 바로 아래 [_kLogoSloganGap](0) — 로고와 묶은 Column
+///   (절대 y 분리 시 로고는 가로 스케일·슬로건은 세로 스케일이라 간격이 깨지던 문제 수정)
+/// - 버튼 컨테이너: y:518, 좌우 16, gap 16
 /// 화면 비율로 환산해 LayoutBuilder + Positioned 로 매핑.
 ///
 /// ## 로그인 후 분기 (SignInOutcome switch)
@@ -51,7 +52,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   static const double _kCanvasH = 812;
   static const double _kLogoY = 141; // → 17.4% from top
   static const double _kLogoSize = 218;
-  static const double _kSloganY = 343; // → 42.2%
+  /// 로고 박스 하단 → 슬로건 상단 간격 (스플래시와 동일, 전역 sectionGap과 분리).
+  static const double _kLogoSloganGap = 0;
   static const double _kButtonY = 518; // → 63.8%
 
   @override
@@ -97,28 +99,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
               ),
-              // 로고 — y 141/812 (17.4%) 중앙 정렬, 크기 218 기준 비례.
+              // 로고 + 슬로건 — y 141/812 에서 세로로 묶고 명시 간격.
+              // (로고 가로 스케일 / 슬로건 절대 y 분리 시 기기 비율에 따라 간격 붕괴)
               Positioned(
                 top: h * _kLogoY / _kCanvasH,
                 left: 0,
                 right: 0,
-                child: Center(
-                  child: SizedBox(
-                    width: logoSize,
-                    height: logoSize,
-                    child: Image.asset(
-                      'assets/figma_extracted/login_logo_illust.png',
-                      fit: BoxFit.contain,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: logoSize,
+                      height: logoSize,
+                      child: Image.asset(
+                        'assets/figma_extracted/login_logo_illust.png',
+                        fit: BoxFit.contain,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: _kLogoSloganGap),
+                    const _Slogan(),
+                  ],
                 ),
-              ),
-              // 슬로건 — y 343/812 (42.2%).
-              Positioned(
-                top: h * _kSloganY / _kCanvasH,
-                left: 0,
-                right: 0,
-                child: const Center(child: _Slogan()),
               ),
               // 버튼 컨테이너 — y 518/812 (63.8%), 좌우 16.
               Positioned(

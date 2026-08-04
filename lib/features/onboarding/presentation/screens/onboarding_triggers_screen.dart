@@ -3,17 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_button.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_step_body.dart';
 
 /// 온보딩 Step 3/4: 트리거 음식 선택 본문 (Figma 365:1553).
 ///
 /// 탑바·[StepProgress]는 [OnboardingShell]이 고정 렌더한다.
-/// 제목·칩·기타 입력·CTA를 한 스크롤로 묶어 키보드 시 입력란과 버튼이
+/// 제목·칩·기타 입력(+ 추가)·CTA를 한 스크롤로 묶어 키보드 시 입력란과 버튼이
 /// 붙지 않도록 한다 (medications 화면과 동일 패턴).
 class OnboardingTriggersScreen extends ConsumerStatefulWidget {
   const OnboardingTriggersScreen({super.key});
@@ -28,17 +31,17 @@ class _OnboardingTriggersScreenState
   final _customController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    // 뒤로 돌아왔을 때 드래프트에 저장된 기타 입력을 복원한다.
-    _customController.text =
-        ref.read(onboardingControllerProvider).customTriggers ?? '';
-  }
-
-  @override
   void dispose() {
     _customController.dispose();
     super.dispose();
+  }
+
+  void _addCustomTrigger() {
+    final text = _customController.text.trim();
+    if (text.isEmpty) return;
+    ref.read(onboardingControllerProvider.notifier).addCustomTrigger(text);
+    _customController.clear();
+    FocusManager.instance.primaryFocus?.unfocus();
   }
 
   @override
@@ -46,7 +49,8 @@ class _OnboardingTriggersScreenState
     final draft = ref.watch(onboardingControllerProvider);
     final notifier = ref.read(onboardingControllerProvider.notifier);
 
-    return GestureDetector(
+    return OnboardingStepBody(
+      child: GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       behavior: HitTestBehavior.translucent,
       child: LayoutBuilder(
@@ -103,6 +107,7 @@ class _OnboardingTriggersScreenState
                             ),
                           ),
                           const SizedBox(height: 16),
+                          // 복용약 입력과 동일: TextField 우측 인라인 + 버튼.
                           TextField(
                             controller: _customController,
                             style: AppTextStyles.body1Regular.copyWith(
@@ -116,6 +121,22 @@ class _OnboardingTriggersScreenState
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: AppSpacing.cardPadding,
                                 vertical: AppSpacing.cardPadding,
+                              ),
+                              suffixIcon: Padding(
+                                padding: const EdgeInsets.only(
+                                  right: AppSpacing.itemGap,
+                                ),
+                                child: GestureDetector(
+                                  onTap: _addCustomTrigger,
+                                  child: const AppIcon(
+                                    AppIcons.plusCircle,
+                                    size: 24,
+                                  ),
+                                ),
+                              ),
+                              suffixIconConstraints: const BoxConstraints(
+                                minWidth: 40,
+                                minHeight: 40,
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(
@@ -132,13 +153,22 @@ class _OnboardingTriggersScreenState
                                     const BorderSide(color: AppColors.primary),
                               ),
                             ),
-                            onChanged: (value) {
-                              final trimmed = value.trim();
-                              notifier.setCustomTriggers(
-                                trimmed.isEmpty ? null : trimmed,
-                              );
-                            },
+                            onSubmitted: (_) => _addCustomTrigger(),
                           ),
+                          if (draft.customTriggers.isNotEmpty) ...[
+                            const SizedBox(height: AppSpacing.sectionGap),
+                            Wrap(
+                              spacing: AppSpacing.itemGap,
+                              runSpacing: AppSpacing.itemGap,
+                              children: draft.customTriggers.map((item) {
+                                return _CustomTriggerChip(
+                                  label: item,
+                                  onRemove: () =>
+                                      notifier.removeCustomTrigger(item),
+                                );
+                              }).toList(),
+                            ),
+                          ],
                           const SizedBox(height: AppSpacing.sectionGap),
                         ],
                       ),
@@ -165,6 +195,52 @@ class _OnboardingTriggersScreenState
             ),
           );
         },
+      ),
+      ),
+    );
+  }
+}
+
+class _CustomTriggerChip extends StatelessWidget {
+  const _CustomTriggerChip({
+    required this.label,
+    required this.onRemove,
+  });
+
+  final String label;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.chipPaddingH,
+        vertical: AppSpacing.chipPaddingV,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceSelected,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+        border: Border.all(color: AppColors.primary),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: AppTextStyles.body2Medium.copyWith(
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          GestureDetector(
+            onTap: onRemove,
+            child: const AppIcon(
+              AppIcons.closeSmall,
+              size: 16,
+              color: AppColors.primary,
+            ),
+          ),
+        ],
       ),
     );
   }

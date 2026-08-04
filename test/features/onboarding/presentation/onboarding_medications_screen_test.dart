@@ -8,6 +8,9 @@ import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/app/widgets/step_progress.dart';
+import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
+import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
@@ -43,8 +46,21 @@ GoRouter _testRouter() => GoRouter(
       ],
     );
 
-/// submit 성공 시나리오: MockHealthProfileRepository.noProfile() 주입
+/// submit 성공 시나리오: 이미 로그인·약관 동의 + 프로필 없음.
+///
+/// 홈 이동은 [sessionStatus]가 ready가 된 뒤에만 일어나므로 auth·profile 둘 다 필요.
 List<Override> _submitOverrides() => [
+      // ignore: scoped_providers_should_specify_dependencies
+      authRepositoryProvider.overrideWithValue(
+        MockAuthRepository(
+          initialSession: const AuthSession(
+            userId: 'mock-onboarding',
+            provider: AuthProvider.kakao,
+            hasAgreedTerms: true,
+            accountStatus: AccountStatus.active,
+          ),
+        ),
+      ),
       // ignore: scoped_providers_should_specify_dependencies
       healthProfileRepositoryProvider
           .overrideWithValue(MockHealthProfileRepository.noProfile()),
@@ -328,16 +344,16 @@ void main() {
       expect(find.textContaining('이 앱은 건강 관리를 돕는'), findsOneWidget);
     });
 
-    testWidgets('"완료" 버튼 탭 시 onboardingSubmitProvider.submit()이 호출된다',
+    testWidgets(
+        '"완료" 성공 후 sessionStatus=ready 가 되면 홈(/)으로 이동한다',
         (tester) async {
       await tester.pumpWidget(_wrap(overrides: _submitOverrides()));
       await tester.pumpAndSettle();
 
-      // 완료 버튼을 탭하면 submit이 실행된다 (mock repo이므로 에러 없이 성공)
+      // 완료 탭 → submit → onboardedStatus 재조회 → ready → go('/')
       await tester.tap(find.text('완료'));
       await tester.pumpAndSettle();
 
-      // 성공 후 홈(/)으로 이동함을 확인
       expect(find.text('home stub'), findsOneWidget);
     });
 

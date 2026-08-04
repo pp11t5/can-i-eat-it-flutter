@@ -32,8 +32,11 @@ abstract class OnboardingDraft with _$OnboardingDraft {
     /// 트리거 음식 코드 목록. 복수 선택.
     @Default(<String>[]) List<String> triggerFoods,
 
-    /// 사용자 직접 입력 트리거.
-    String? customTriggers,
+    /// 사용자 직접 입력 트리거 목록 (+ 버튼으로 추가).
+    ///
+    /// 제출 시 [toHealthProfile]에서 `', '`로 조인해 [HealthProfile.customTriggers]
+    /// (서버 `customTriggerText` 단일 문자열)로 보낸다.
+    @Default(<String>[]) List<String> customTriggers,
 
     /// 복용약 목록.
     @Default(<String>[]) List<String> medications,
@@ -45,12 +48,16 @@ abstract class OnboardingDraft with _$OnboardingDraft {
 
 extension OnboardingDraftX on OnboardingDraft {
   /// 드래프트를 [HealthProfile] 엔티티로 변환한다.
+  ///
+  /// [customTriggers] 목록은 서버 `customTriggerText` 스키마에 맞춰
+  /// 빈 목록이면 null, 아니면 `', '` 조인 문자열로 보낸다.
   HealthProfile toHealthProfile() => HealthProfile(
         conditions: conditions,
         symptomFrequency: symptomFrequency,
         diagnosed: diagnosed,
         triggerFoods: triggerFoods,
-        customTriggers: customTriggers,
+        customTriggers:
+            customTriggers.isEmpty ? null : customTriggers.join(', '),
         medications: medications,
         allergies: allergies,
       );
@@ -125,9 +132,28 @@ class OnboardingController extends _$OnboardingController {
     state = state.copyWith(triggerFoods: List.unmodifiable(updated));
   }
 
-  /// 사용자 직접 입력 트리거를 설정한다.
-  void setCustomTriggers(String? value) {
-    state = state.copyWith(customTriggers: value);
+  /// 사용자 직접 입력 트리거를 추가한다. 이미 존재하면 무시한다.
+  void addCustomTrigger(String trigger) {
+    final trimmed = trigger.trim();
+    if (trimmed.isEmpty) return;
+    if (state.customTriggers.contains(trimmed)) return;
+    state = state.copyWith(
+      customTriggers: List.unmodifiable([...state.customTriggers, trimmed]),
+    );
+  }
+
+  /// 사용자 직접 입력 트리거를 제거한다.
+  void removeCustomTrigger(String trigger) {
+    state = state.copyWith(
+      customTriggers: List.unmodifiable(
+        state.customTriggers.where((t) => t != trigger).toList(),
+      ),
+    );
+  }
+
+  /// 사용자 직접 입력 트리거 목록을 교체한다.
+  void setCustomTriggers(List<String> triggers) {
+    state = state.copyWith(customTriggers: List.unmodifiable(triggers));
   }
 
   // -------------------------------------------------------------------------

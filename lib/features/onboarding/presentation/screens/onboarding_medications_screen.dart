@@ -10,14 +10,17 @@ import 'package:can_i_eat_it/app/widgets/app_button.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
+import 'package:can_i_eat_it/features/auth/presentation/providers/session_providers.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_step_body.dart';
 
 /// 온보딩 Step 4/4: 알레르기 + 복용약 결합 본문 (Figma 1064:12268).
 ///
 /// 완료 버튼이 onboardingSubmitProvider.submit()을 호출하고
-/// 성공 시 홈(/)으로 이동한다. 건너뛰기 없음.
-/// 탑바·[StepProgress]는 [OnboardingShell]이 고정 렌더한다.
+/// [sessionStatus]가 [SessionStatus.ready]가 된 뒤에만 홈(/)으로 이동한다.
+/// (submit 직후 즉시 go 하면 needsOnboarding 가드가 condition 화면으로 튕김)
+/// 건너뛰기 없음. 탑바·[StepProgress]는 [OnboardingShell]이 고정 렌더한다.
 class OnboardingMedicationsScreen extends ConsumerStatefulWidget {
   const OnboardingMedicationsScreen({super.key});
 
@@ -41,13 +44,16 @@ class _OnboardingMedicationsScreenState
     if (text.isEmpty) return;
     ref.read(onboardingControllerProvider.notifier).addMedication(text);
     _medController.clear();
+    FocusManager.instance.primaryFocus?.unfocus();
   }
 
   @override
   Widget build(BuildContext context) {
-    // 제출 성공 시 홈으로 이동
-    ref.listen<AsyncValue<void>>(onboardingSubmitProvider, (previous, next) {
-      if (previous is AsyncLoading && next is AsyncData) {
+    // submit 직후 go('/') 금지 — onboardedStatus 재조회 전 needsOnboarding이면
+    // 가드가 /onboarding/condition 으로 튕겨 첫 화면이 깜빡인다.
+    // sessionStatus가 ready로 전이된 뒤에만 홈으로 이동한다.
+    ref.listen<SessionStatus>(sessionStatusProvider, (previous, next) {
+      if (next == SessionStatus.ready && previous != SessionStatus.ready) {
         if (context.mounted) context.go('/');
       }
     });
@@ -58,7 +64,8 @@ class _OnboardingMedicationsScreenState
     final isLoading = submitState is AsyncLoading;
     final hasError = submitState is AsyncError;
 
-    return GestureDetector(
+    return OnboardingStepBody(
+      child: GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       behavior: HitTestBehavior.translucent,
       child: LayoutBuilder(
@@ -239,14 +246,6 @@ class _OnboardingMedicationsScreenState
                             ),
                             const SizedBox(height: AppSpacing.itemGap),
                           ],
-                          if (isLoading) ...[
-                            const Center(
-                              child: CircularProgressIndicator(
-                                color: AppColors.primary,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.itemGap),
-                          ],
                           const MedicalDisclaimer(
                             message: kOnboardingDisclaimerText,
                           ),
@@ -264,6 +263,7 @@ class _OnboardingMedicationsScreenState
                                         )
                                         .submit();
                                   },
+                            isLoading: isLoading,
                             isExpanded: true,
                           ),
                         ],
@@ -275,6 +275,7 @@ class _OnboardingMedicationsScreenState
             ),
           );
         },
+      ),
       ),
     );
   }

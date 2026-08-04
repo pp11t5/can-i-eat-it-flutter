@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
-import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 
 /// 브랜드 스플래시 (Figma node #554:5326) — 세션 판별 대기 중 노출.
@@ -10,6 +9,9 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 /// (실제 로딩 인디케이션은 네이티브 런치스크린이 대신 담당).
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
+
+  /// 로고 → 슬로건 간격 (로그인 화면과 동일, 전역 sectionGap과 분리).
+  static const double _kLogoSloganGap = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,7 @@ class SplashScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Image.asset('assets/splash/splash_logo.png', width: 200),
-              const SizedBox(height: AppSpacing.sectionGap),
+              const SizedBox(height: _kLogoSloganGap),
               Text(
                 '먹기 전에 물어보고\n먹은 후에 기록하세요',
                 textAlign: TextAlign.center,
