@@ -97,6 +97,9 @@ class AuthController extends _$AuthController {
   ///
   /// [Authenticated] 또는 [NeedsTerms] 시 [FunnelEvent.signUp] 퍼널 이벤트를 발화한다 (US-SYS-2).
   /// [Recoverable](복구 필요)은 가입 퍼널 진입으로 보지 않아 발화하지 않는다.
+  ///
+  /// [Authenticated] 시 [getMe]로 displayName 등 식별정보를 채운 뒤 반환한다
+  /// (로그인 DTO에는 nickname이 없어 마이페이지가 '사용자'로 뜨던 문제 방지).
   Future<SignInOutcome> signInWithKakao() async {
     final outcome = await ref.read(authRepositoryProvider).signInWithKakao();
     _applyOutcomeToState(outcome, AuthProvider.kakao);
@@ -104,6 +107,7 @@ class AuthController extends _$AuthController {
       // FCM 토큰 등록 — fire-and-forget(로그인 UX 블로킹 제거).
       // 실패해도 로그인 흐름을 막지 않는다(graceful).
       unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
+      await _hydrateSessionAfterAuth();
     }
     if (outcome is! Recoverable) {
       await ref
@@ -117,6 +121,9 @@ class AuthController extends _$AuthController {
   ///
   /// [Authenticated] 또는 [NeedsTerms] 시 [FunnelEvent.signUp] 퍼널 이벤트를 발화한다 (US-SYS-2).
   /// [Recoverable](복구 필요)은 가입 퍼널 진입으로 보지 않아 발화하지 않는다.
+  ///
+  /// [Authenticated] 시 [getMe]로 displayName 등 식별정보를 채운 뒤 반환한다
+  /// (로그인 DTO에는 nickname이 없어 마이페이지가 '사용자'로 뜨던 문제 방지).
   Future<SignInOutcome> signInWithApple() async {
     final outcome = await ref.read(authRepositoryProvider).signInWithApple();
     _applyOutcomeToState(outcome, AuthProvider.apple);
@@ -124,6 +131,7 @@ class AuthController extends _$AuthController {
       // FCM 토큰 등록 — fire-and-forget(로그인 UX 블로킹 제거).
       // 실패해도 로그인 흐름을 막지 않는다(graceful).
       unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
+      await _hydrateSessionAfterAuth();
     }
     if (outcome is! Recoverable) {
       await ref
@@ -131,6 +139,19 @@ class AuthController extends _$AuthController {
           .logFunnel(FunnelEvent.signUp, params: {'provider': 'apple'});
     }
     return outcome;
+  }
+
+  /// 로그인 직후 [getMe]로 세션 식별정보를 채운다.
+  ///
+  /// 로그인 응답에는 nickname/email/profileImage가 없고, 마이페이지 등은
+  /// [AuthSession.displayName]을 쓰므로 라우팅 전에 채워야 한다.
+  /// getMe 실패해도 로그인은 유지한다(토큰·게이트 세션은 이미 적용됨).
+  Future<void> _hydrateSessionAfterAuth() async {
+    try {
+      await getMe();
+    } catch (_) {
+      // 네트워크 등 — displayName 은 이후 프로필/콜드스타트 getMe 로 보완 가능.
+    }
   }
 
   /// 약관 동의를 기록하고 세션 상태를 갱신한다.

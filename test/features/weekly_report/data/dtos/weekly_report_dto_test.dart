@@ -104,6 +104,42 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
+  // SymptomReportDto — averageTime 포맷
+  // -------------------------------------------------------------------------
+  group('SymptomReportDto.averageTime', () {
+    test('OffsetTime 직렬화 문자열을 HH:mm으로 정규화한다', () {
+      final entity = SymptomReportDto.fromJson(const {
+        'symptomCount': 8,
+        'averageTime': '11:27:33+09:00',
+        'averageLevel': 2,
+      }).toEntity();
+      expect(entity.averageTime, '11:27');
+    });
+
+    test('이미 HH:mm이면 그대로 유지한다', () {
+      final entity = SymptomReportDto.fromJson(const {
+        'averageTime': '16:30',
+      }).toEntity();
+      expect(entity.averageTime, '16:30');
+    });
+
+    test('null이면 null을 유지한다', () {
+      final entity = SymptomReportDto.fromJson(const {
+        'symptomCount': 0,
+      }).toEntity();
+      expect(entity.averageTime, isNull);
+    });
+  });
+
+  group('formatAverageTimeLabel', () {
+    test('시·분 접두를 추출한다', () {
+      expect(formatAverageTimeLabel('11:27:33+09:00'), '11:27');
+      expect(formatAverageTimeLabel('8:05:00'), '08:05');
+      expect(formatAverageTimeLabel('16:30'), '16:30');
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // WeeklyReportDto — GET /my-page/reports result
   // -------------------------------------------------------------------------
   group('WeeklyReportDto', () {

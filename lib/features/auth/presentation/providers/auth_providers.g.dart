@@ -94,7 +94,7 @@ final coldStartOfflineProvider = AutoDisposeProvider<bool>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ColdStartOfflineRef = AutoDisposeProviderRef<bool>;
-String _$authControllerHash() => r'855db4921024654ee0f7f12bb0d43d0a0cf634c0';
+String _$authControllerHash() => r'6fbfe94c5fa51a80401d221804a84ab25f7a0fcf';
 
 /// 인증 상태 컨트롤러 (AsyncNotifier).
 ///
