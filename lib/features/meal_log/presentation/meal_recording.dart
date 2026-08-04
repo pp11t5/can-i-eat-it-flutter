@@ -60,7 +60,7 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
 
       final message = ctx.mealRecordId != null
           ? '현재 식사에 음식을 추가했어요.'
-          : '식사를 기록했어요. 식후 2시간 뒤 증상 확인 알림을 보내드릴게요.';
+          : '식사를 기록했어요. 식후 2시간 뒤 증상 기록 알림을 보내드릴게요.';
 
       // 토스트를 먼저 올린 뒤 모달 스택을 비운다(루트 Overlay 유지).
       if (context.mounted) {
