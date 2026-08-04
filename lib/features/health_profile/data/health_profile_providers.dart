@@ -51,13 +51,14 @@ class HealthProfileController extends _$HealthProfileController {
 
   /// 온보딩 완료 시 프로필을 저장하고 상태를 갱신한다 (온보딩 게이트 플립).
   ///
-  /// [submitProfile] 성공 후 [onboardedStatusProvider]를 무효화해
-  /// sessionStatus가 재평가되도록 한다.
+  /// [submitProfile] 성공 후 [onboardedStatusProvider]를 **재조회 완료까지** 기다린다.
+  /// invalidate만 하면 이전 `false`가 남은 채 `go('/')`가 나가
+  /// `needsOnboarding` 가드가 `/onboarding/condition`으로 튕기는 깜빡임이 난다.
   Future<void> submit(HealthProfile profile) async {
     await ref.read(healthProfileRepositoryProvider).submitProfile(profile);
     state = AsyncData(profile);
-    // onboardedStatus 캐시 무효화 → sessionStatus 재평가 트리거
-    ref.invalidate(onboardedStatusProvider);
+    // 게이트 소스 재조회 완료 → sessionStatus가 ready로 전이 가능
+    await ref.refresh(onboardedStatusProvider.future);
   }
 
   /// 알레르기·복용약만 갱신한다 (`PATCH /my-page/health-info`, W7 마이그레이션).
