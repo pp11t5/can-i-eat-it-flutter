@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/router/app_router.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
@@ -96,6 +97,39 @@ void main() {
           find.byType(HomeScreen),
           findsOneWidget,
           reason: '프로필 완료 기존 사용자는 홈(/)으로 가야 한다',
+        );
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+
+    testWidgets(
+      '약관 제출 전환이 아닌 needsOnboarding 사용자의 /terms 직접 진입은 차단된다',
+      (tester) async {
+        final authRepo = MockAuthRepository(
+          initialSession: const AuthSession(
+            userId: 'onboarding-user',
+            provider: AuthProvider.kakao,
+            hasAgreedTerms: true,
+          ),
+        );
+        final profileRepo = MockHealthProfileRepository.noProfile();
+
+        await tester.pumpWidget(
+          buildApp(authRepo: authRepo, profileRepo: profileRepo),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(OnboardingConditionScreen), findsOneWidget);
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(OnboardingConditionScreen)),
+        );
+        container.read(appRouterProvider).go('/terms');
+        await tester.pumpAndSettle();
+
+        expect(find.byType(OnboardingConditionScreen), findsOneWidget);
+        expect(
+          find.text('서비스 이용을 위해\n약관에 동의해 주세요'),
+          findsNothing,
         );
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),

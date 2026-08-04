@@ -116,7 +116,29 @@ final coldStartOfflineProvider = AutoDisposeProvider<bool>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ColdStartOfflineRef = AutoDisposeProviderRef<bool>;
-String _$authControllerHash() => r'86828fc7a3a6e970cd9d7188cb6c0a859e9744b0';
+String _$consentNavigationTransitionHash() =>
+    r'37211e3b39db8b7cf95c693134ebd5f141dd26d7';
+
+/// 약관 제출 성공 후 `/terms`에서 온보딩으로 교체 이동하는 짧은 전환 상태.
+///
+/// 이 상태가 true인 동안에만 `needsOnboarding`의 `/terms` 체류를 가드가
+/// 허용한다. 직접 딥링크는 항상 온보딩 첫 화면으로 보낸다.
+///
+/// Copied from [ConsentNavigationTransition].
+@ProviderFor(ConsentNavigationTransition)
+final consentNavigationTransitionProvider =
+    NotifierProvider<ConsentNavigationTransition, bool>.internal(
+  ConsentNavigationTransition.new,
+  name: r'consentNavigationTransitionProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$consentNavigationTransitionHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$ConsentNavigationTransition = Notifier<bool>;
+String _$authControllerHash() => r'5671649cc2aaf7baafc8c3f3d5979da00c6894bf';
 
 /// 인증 상태 컨트롤러 (AsyncNotifier).
 ///

@@ -44,7 +44,7 @@ class _ThrowingObjectAuthRepository implements AuthRepository {
   Future<void> submitConsent(List<ConsentChoice> choices) async {}
 
   @override
-  Future<AuthSession> recoverAccount(
+  Future<Authenticated> recoverAccount(
     AuthProvider provider, {
     required String idToken,
   }) async =>
@@ -226,10 +226,27 @@ void main() {
 
       // 복구 성공 → 모달이 닫힌다.
       expect(find.text('탈퇴를 진행 중인 계정이에요'), findsNothing);
+      // 온보딩 미완료 복구 계정은 로그인 화면 위 약관 화면으로 진입한다.
+      expect(find.text('terms stub'), findsOneWidget);
 
       // 스낵바 타이머 소진 (pending Timer 잔존 방지).
       await tester.pump(const Duration(seconds: 5));
       await tester.pumpAndSettle();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets('복구 완료 계정은 홈으로 이동한다', (tester) async {
+      await tester.pumpWidget(
+        _wrap(MockAuthRepository.deletionGrace(recoverOnboarded: true)),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('카카오로 로그인'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('계정 복구하고 계속하기'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('home stub'), findsOneWidget);
+      expect(find.text('terms stub'), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
   });
 

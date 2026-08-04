@@ -38,7 +38,7 @@ class ThrowingAuthRepository implements AuthRepository {
   Future<void> submitConsent(List<ConsentChoice> choices) async {}
 
   @override
-  Future<AuthSession> recoverAccount(
+  Future<Authenticated> recoverAccount(
     AuthProvider provider, {
     required String idToken,
   }) async =>
@@ -84,6 +84,7 @@ class MockAuthRepository implements AuthRepository {
     SignInOutcome? appleOutcome,
     Duration delay = Duration.zero,
     int failRecoverTimes = 0,
+    bool recoverOnboarded = false,
     List<ConsentTerm> consentTerms = defaultConsentTerms,
     Object? consentFetchError,
     Duration consentFetchDelay = Duration.zero,
@@ -94,6 +95,7 @@ class MockAuthRepository implements AuthRepository {
         _appleOutcome = appleOutcome,
         _delay = delay,
         _failRecoverTimes = failRecoverTimes,
+        _recoverOnboarded = recoverOnboarded,
         _consentTerms = consentTerms,
         _consentFetchError = consentFetchError,
         _consentFetchDelay = consentFetchDelay,
@@ -149,7 +151,10 @@ class MockAuthRepository implements AuthRepository {
   ///
   /// [failRecoverTimes]: recoverAccount 재시도 테스트용 — 지정 횟수만큼 실패
   /// 후 성공한다. 기본 0(즉시 성공).
-  factory MockAuthRepository.deletionGrace({int failRecoverTimes = 0}) =>
+  factory MockAuthRepository.deletionGrace({
+    int failRecoverTimes = 0,
+    bool recoverOnboarded = false,
+  }) =>
       MockAuthRepository(
         initialSession: null,
         kakaoOutcome: const Recoverable(
@@ -158,6 +163,7 @@ class MockAuthRepository implements AuthRepository {
           idToken: 'mock-id-token',
         ),
         failRecoverTimes: failRecoverTimes,
+        recoverOnboarded: recoverOnboarded,
       );
 
   /// W1 데모용 시나리오.
@@ -190,6 +196,7 @@ class MockAuthRepository implements AuthRepository {
   final SignInOutcome? _appleOutcome;
   final Duration _delay;
   int _failRecoverTimes;
+  final bool _recoverOnboarded;
   final List<ConsentTerm> _consentTerms;
   final Object? _consentFetchError;
   final Duration _consentFetchDelay;
@@ -306,7 +313,7 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AuthSession> recoverAccount(
+  Future<Authenticated> recoverAccount(
     AuthProvider provider, {
     required String idToken,
   }) async {
@@ -320,10 +327,13 @@ class MockAuthRepository implements AuthRepository {
     _session = AuthSession(
       userId: 'mock-recovered',
       provider: provider,
-      hasAgreedTerms: true,
+      hasAgreedTerms: _recoverOnboarded,
       accountStatus: AccountStatus.active,
     );
-    return _session!;
+    return Authenticated(
+      session: _session!,
+      onboarded: _recoverOnboarded,
+    );
   }
 
   @override

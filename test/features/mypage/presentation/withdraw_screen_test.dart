@@ -55,7 +55,7 @@ class _MockAuthRepository implements AuthRepository {
   Future<void> refresh() => throw UnimplementedError();
 
   @override
-  Future<AuthSession> recoverAccount(
+  Future<Authenticated> recoverAccount(
     AuthProvider provider, {
     required String idToken,
   }) =>

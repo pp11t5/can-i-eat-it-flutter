@@ -95,7 +95,9 @@ void main() {
         AuthProvider.kakao,
         idToken: 'test-id-token',
       );
-      expect(recovered.accountStatus, AccountStatus.active);
+      expect(recovered.session.accountStatus, AccountStatus.active);
+      expect(recovered.onboarded, isFalse);
+      expect(recovered.session.hasAgreedTerms, isFalse);
     });
   });
 

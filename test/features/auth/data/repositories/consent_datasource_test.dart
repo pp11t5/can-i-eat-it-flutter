@@ -94,6 +94,10 @@ void main() {
       ),
       data: {'idToken': 'test-id-token'},
     );
+    adapter.onGet(
+      ApiEndpoints.onboardingStatus,
+      (server) => server.reply(200, _ok({'onboarded': false})),
+    );
     await repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token');
   }
 

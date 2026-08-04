@@ -62,6 +62,37 @@ class TermsScreen extends ConsumerStatefulWidget {
 class _TermsScreenState extends ConsumerState<TermsScreen> {
   final Set<int> _agreedTermIds = {};
   bool _isSubmitting = false;
+  bool _isConsentTransitionActive = false;
+  late final ConsentNavigationTransition _consentNavigationTransition;
+
+  @override
+  void initState() {
+    super.initState();
+    _consentNavigationTransition =
+        ref.read(consentNavigationTransitionProvider.notifier);
+  }
+
+  void _beginConsentTransition() {
+    if (_isConsentTransitionActive) return;
+    _isConsentTransitionActive = true;
+    _consentNavigationTransition.begin();
+  }
+
+  void _endConsentTransition() {
+    if (!_isConsentTransitionActive) return;
+    _isConsentTransitionActive = false;
+    _consentNavigationTransition.end();
+  }
+
+  /// 교체 이동이 라우터에 반영된 다음 프레임에 전환 허용을 해제한다.
+  ///
+  /// dispose 중 provider 상태를 바꾸면 Riverpod이 빌드 중 변경으로 막으므로,
+  /// 화면 수명주기 밖에서 해제한다.
+  void _scheduleConsentTransitionEnd() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _endConsentTransition();
+    });
+  }
 
   void _scheduleSignOut() {
     final controller = ref.read(authControllerProvider.notifier);
@@ -108,6 +139,7 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
   Future<void> _onNext(List<ConsentTerm> terms) async {
     if (_isSubmitting || !_allRequiredAgreed(terms)) return;
     setState(() => _isSubmitting = true);
+    _beginConsentTransition();
     final choices = terms
         .map(
           (term) => ConsentChoice(
@@ -121,9 +153,14 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
             () =>
                 ref.read(authControllerProvider.notifier).agreeToTerms(choices),
           );
-      if (!mounted) return;
+      if (!mounted) {
+        _endConsentTransition();
+        return;
+      }
       context.pushReplacement('/onboarding/condition');
+      _scheduleConsentTransitionEnd();
     } catch (error) {
+      _endConsentTransition();
       if (!mounted) return;
       final message =
           error is Failure ? error.message : '약관 동의를 저장하지 못했어요. 다시 시도해 주세요.';

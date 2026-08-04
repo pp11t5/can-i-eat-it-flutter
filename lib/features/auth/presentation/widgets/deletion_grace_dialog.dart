@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
@@ -52,10 +53,16 @@ Future<bool> _onRecover(
   required String idToken,
 }) async {
   try {
-    await ref
+    final outcome = await ref
         .read(authControllerProvider.notifier)
         .recoverAccount(provider, idToken: idToken);
-    // 복구 성공: gate 가 sessionStatus 전이를 감지해 자동 라우팅 — 별도 navigation 불필요.
+    if (!context.mounted) return false;
+    if (outcome.onboarded) {
+      context.go('/');
+    } else {
+      // 로그인 화면을 스택 아래에 유지해 약관 뒤로가기를 가입 취소(signOut)로 처리한다.
+      context.push('/terms');
+    }
     return true;
   } catch (e) {
     if (!context.mounted) return false;

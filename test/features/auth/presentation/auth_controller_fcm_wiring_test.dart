@@ -109,7 +109,7 @@ class _SpyAuthRepository implements AuthRepository {
       _delegate.submitConsent(choices);
 
   @override
-  Future<AuthSession> recoverAccount(
+  Future<Authenticated> recoverAccount(
     AuthProvider provider, {
     required String idToken,
   }) =>

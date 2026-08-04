@@ -151,7 +151,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<AuthSession> recoverAccount(
+  Future<Authenticated> recoverAccount(
     AuthProvider provider, {
     required String idToken,
   }) async {
@@ -167,14 +167,7 @@ class AuthRepositoryImpl implements AuthRepository {
         (json) => AuthLoginResponseDto.fromJson(json as Map<String, dynamic>),
       );
 
-      await _tokenStore.writeTokens(
-        access: dto.accessToken,
-        refresh: dto.refreshToken,
-      );
-
-      _session = dto.toEntity(provider);
-      await _tokenStore.clearConsentPending();
-      return _session!;
+      return await _completeAuthenticatedSession(dto, provider);
     } on DioException catch (e) {
       // _signIn/getMe/submitConsent 와 동일 계약 유지 (M1 수정).
       throw FailureMapper.fromDioException(e);
@@ -315,14 +308,33 @@ class AuthRepositoryImpl implements AuthRepository {
         (json) => AuthLoginResponseDto.fromJson(json as Map<String, dynamic>),
       );
 
-      // 3. 토큰 저장
+      return await _completeAuthenticatedSession(loginDto, provider);
+    } on RecoverableAccountFailure catch (f) {
+      // idToken 은 카카오 획득 직후 대입됐으므로 null 이 아님.
+      return Recoverable(
+          reason: f.reason, provider: provider, idToken: idToken!);
+    } on DioException catch (e) {
+      throw FailureMapper.fromDioException(e);
+    }
+  }
+
+  /// 로그인/복구 공통 세션 확정 단계.
+  ///
+  /// 토큰을 저장한 뒤에는 `/onboarding/status`와 pending 저장까지 모두 성공해야
+  /// 인증 세션이 유효하다. 중간 실패 시 토큰 일부만 남아 다음 실행에 약관 게이트를
+  /// 우회하지 않도록 로컬 인증 상태를 best-effort로 롤백한다.
+  Future<Authenticated> _completeAuthenticatedSession(
+    AuthLoginResponseDto loginDto,
+    AuthProvider provider,
+  ) async {
+    try {
       await _tokenStore.writeTokens(
         access: loginDto.accessToken,
         refresh: loginDto.refreshToken,
       );
       _session = loginDto.toEntity(provider);
 
-      // 4. GET /onboarding/status — 방금 받은 accessToken 이 AuthInterceptor 에 주입됨
+      // 방금 저장한 accessToken은 AuthInterceptor가 주입한다.
       final statusResponse =
           await _dio.get<dynamic>(ApiEndpoints.onboardingStatus);
       final statusDto = unwrap<OnboardingStatusDto>(
@@ -339,12 +351,22 @@ class AuthRepositoryImpl implements AuthRepository {
       }
 
       return Authenticated(session: _session!, onboarded: statusDto.onboarded);
-    } on RecoverableAccountFailure catch (f) {
-      // idToken 은 카카오 획득 직후 대입됐으므로 null 이 아님.
-      return Recoverable(
-          reason: f.reason, provider: provider, idToken: idToken!);
-    } on DioException catch (e) {
-      throw FailureMapper.fromDioException(e);
+    } catch (error, stackTrace) {
+      await _rollbackProvisionalAuthentication();
+      Error.throwWithStackTrace(error, stackTrace);
+    }
+  }
+
+  /// 세션 확정 실패 후 토큰·pending·메모리 캐시를 정리한다.
+  ///
+  /// secure storage 자체의 실패가 원래 네트워크/파싱 오류를 가리지 않도록 clear는
+  /// best-effort로 처리한다. [TokenStore.clear]는 pending도 함께 삭제한다.
+  Future<void> _rollbackProvisionalAuthentication() async {
+    _session = null;
+    try {
+      await _tokenStore.clear();
+    } catch (_) {
+      // 원래 인증 실패를 보존한다. 다음 인증 시도에서 다시 정리될 수 있다.
     }
   }
 }

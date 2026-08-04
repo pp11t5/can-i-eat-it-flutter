@@ -96,10 +96,19 @@ void main() {
       expect(result, isNull);
     });
 
-    test('약관 제출 직후 명시적 replacement 전까지 /terms 를 허용한다', () {
+    test('전환 상태 없이 /terms 직접 진입은 온보딩 첫 화면으로 보낸다', () {
       final result = resolveRedirect(
         status: SessionStatus.needsOnboarding,
         location: '/terms',
+      );
+      expect(result, '/onboarding/condition');
+    });
+
+    test('약관 제출 직후 전환 중일 때만 /terms 를 허용한다', () {
+      final result = resolveRedirect(
+        status: SessionStatus.needsOnboarding,
+        location: '/terms',
+        allowTermsDuringConsentTransition: true,
       );
       expect(result, isNull);
     });

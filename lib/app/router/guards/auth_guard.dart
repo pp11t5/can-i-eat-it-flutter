@@ -9,6 +9,7 @@ import 'package:can_i_eat_it/features/auth/presentation/providers/session_provid
 String? resolveRedirect({
   required SessionStatus status,
   required String location,
+  bool allowTermsDuringConsentTransition = false,
 }) {
   switch (status) {
     case SessionStatus.loading:
@@ -32,7 +33,7 @@ String? resolveRedirect({
       // 허용해 가드가 pop 을 다시 온보딩으로 튕기지 않게 한다(온보딩은 재로그인 시 재개).
       return (location.startsWith('/onboarding') ||
               location == '/login' ||
-              location == '/terms')
+              (location == '/terms' && allowTermsDuringConsentTransition))
           ? null
           : '/onboarding/condition';
 

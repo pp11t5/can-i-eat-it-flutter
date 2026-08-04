@@ -94,6 +94,20 @@ Future<List<ConsentTerm>> consentTerms(Ref ref) async {
   return indexed.map((entry) => entry.$2).toList(growable: false);
 }
 
+/// 약관 제출 성공 후 `/terms`에서 온보딩으로 교체 이동하는 짧은 전환 상태.
+///
+/// 이 상태가 true인 동안에만 `needsOnboarding`의 `/terms` 체류를 가드가
+/// 허용한다. 직접 딥링크는 항상 온보딩 첫 화면으로 보낸다.
+@Riverpod(keepAlive: true)
+class ConsentNavigationTransition extends _$ConsentNavigationTransition {
+  @override
+  bool build() => false;
+
+  void begin() => state = true;
+
+  void end() => state = false;
+}
+
 // ---------------------------------------------------------------------------
 // coldStartOfflineProvider
 // ---------------------------------------------------------------------------
@@ -200,14 +214,15 @@ class AuthController extends _$AuthController {
   /// [provider]: [Recoverable.provider] 에서 전달받는다.
   /// [idToken]: [Recoverable.idToken] 에서 전달받는다. 카카오 SDK 재인증 없이 재사용.
   /// 실패 시 예외를 그대로 rethrow 하여 호출자(dialog)가 UI 에러를 표시하도록 한다.
-  Future<void> recoverAccount(AuthProvider provider,
+  Future<Authenticated> recoverAccount(AuthProvider provider,
       {required String idToken}) async {
     final repo = ref.read(authRepositoryProvider);
-    final session = await repo.recoverAccount(provider, idToken: idToken);
-    state = AsyncValue.data(session);
+    final outcome = await repo.recoverAccount(provider, idToken: idToken);
+    state = AsyncValue.data(outcome.session);
     // 복구 성공 후 세션이 생겼으므로 FCM 토큰 등록 — fire-and-forget.
     // 실패해도 복구 흐름을 막지 않는다(graceful).
     unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
+    return outcome;
   }
 
   /// in-flight [getMe] 를 무효화하기 위한 요청 세대.
