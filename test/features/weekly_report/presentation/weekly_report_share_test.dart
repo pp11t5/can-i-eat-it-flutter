@@ -20,15 +20,18 @@ class _SpyReportSharer implements ReportSharer {
   int callCount = 0;
   Uint8List? lastPngBytes;
   String? lastText;
+  Rect? lastSharePositionOrigin;
 
   @override
   Future<void> shareReportImage(
     Uint8List pngBytes, {
     required String text,
+    Rect? sharePositionOrigin,
   }) async {
     callCount++;
     lastPngBytes = pngBytes;
     lastText = text;
+    lastSharePositionOrigin = sharePositionOrigin;
   }
 }
 
@@ -83,6 +86,9 @@ void main() {
         '이번 주 식단 기록 리포트예요. 진료 시 의료진과 공유해 참고용으로 활용해 보세요. '
         '(의학적 진단·처방이 아닌 개인 기록 요약입니다.)',
       );
+      // iOS popover 앵커 — 다운로드 버튼 bounds가 전달된다.
+      expect(sharer.lastSharePositionOrigin, isNotNull);
+      expect(sharer.lastSharePositionOrigin!.isEmpty, isFalse);
     });
   });
 

@@ -91,33 +91,68 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
   /// 공유 PNG 캡처 대상([_Body] 내부 RepaintBoundary).
   final GlobalKey _shareKey = GlobalKey();
 
-  /// [_shareKey]가 가리키는 RepaintBoundary를 PNG 바이트로 캡처한다.
-  ///
-  /// 아직 레이아웃되지 않았거나 boundary를 찾지 못하면 null 반환.
-  Future<Uint8List?> _captureReportPng() async {
-    final boundary =
-        _shareKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-    if (boundary == null) return null;
-
-    final image = await boundary.toImage(pixelRatio: 3.0);
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    return byteData?.buffer.asUint8List();
+  /// 탭한 위젯의 전역 bounds — iOS sharePositionOrigin 용.
+  static Rect? _originFrom(BuildContext context) {
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return null;
+    return box.localToGlobal(Offset.zero) & box.size;
   }
 
-  /// 다운로드 버튼 탭 핸들러 — 캡처 후 [ReportSharer]로 위임한다.
-  Future<void> _handleDownload() async {
+  /// [_shareKey]가 가리키는 RepaintBoundary를 PNG 바이트로 캡처한다.
+  ///
+  /// 레이아웃 미완료·toImage 실패 시 null. 예외는 삼키고 로그만 남긴다.
+  Future<Uint8List?> _captureReportPng() async {
+    try {
+      // paint/layout 한 프레임 양보 후 캡처 (iOS Impeller 등 레이스 완화).
+      await WidgetsBinding.instance.endOfFrame;
+
+      final boundary = _shareKey.currentContext?.findRenderObject()
+          as RenderRepaintBoundary?;
+      if (boundary == null) {
+        debugPrint('[WeeklyReport] capture: RepaintBoundary not found');
+        return null;
+      }
+
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final bytes = byteData?.buffer.asUint8List();
+      if (bytes == null || bytes.isEmpty) {
+        debugPrint('[WeeklyReport] capture: empty PNG bytes');
+        return null;
+      }
+      return bytes;
+    } catch (e, st) {
+      debugPrint('[WeeklyReport] capture failed: $e\n$st');
+      return null;
+    }
+  }
+
+  /// 다운로드 버튼 탭 — 캡처 후 [ReportSharer]로 위임한다.
+  ///
+  /// [shareOriginContext]: 공유 버튼 context (iOS popover 앵커).
+  /// origin은 async 전에 읽어 두어 BuildContext 사용 경고를 피한다.
+  Future<void> _handleDownload(BuildContext shareOriginContext) async {
+    final origin = _originFrom(shareOriginContext);
+
     final pngBytes = await _captureReportPng();
     if (pngBytes == null) {
-      if (mounted) await showAppToast(context, '공유 이미지를 만들지 못했어요');
+      if (mounted) {
+        await showAppToast(context, '공유 이미지를 만들지 못했어요');
+      }
       return;
     }
 
     try {
-      await ref
-          .read(reportSharerProvider)
-          .shareReportImage(pngBytes, text: _kShareText);
-    } catch (_) {
-      if (mounted) await showAppToast(context, '공유 이미지를 만들지 못했어요');
+      await ref.read(reportSharerProvider).shareReportImage(
+            pngBytes,
+            text: _kShareText,
+            sharePositionOrigin: origin,
+          );
+    } catch (e, st) {
+      debugPrint('[WeeklyReport] share failed: $e\n$st');
+      if (mounted) {
+        await showAppToast(context, '공유 시트를 열지 못했어요');
+      }
     }
   }
 
@@ -154,14 +189,19 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
           style: AppTextStyles.body1Bold.copyWith(color: AppColors.textPrimary),
         ),
         actions: [
-          IconButton(
-            icon: const AppIcon(
-              AppIcons.download,
-              size: AppIconSizes.s24,
-              color: AppColors.textPrimary,
+          // Builder: IconButton 자신의 bounds를 sharePositionOrigin으로 쓴다.
+          Builder(
+            builder: (buttonContext) => IconButton(
+              icon: const AppIcon(
+                AppIcons.download,
+                size: AppIconSizes.s24,
+                color: AppColors.textPrimary,
+              ),
+              // 데이터 로드 상태에서만 활성 — 로딩/에러 시 캡처 대상이 없다.
+              onPressed: report == null
+                  ? null
+                  : () => _handleDownload(buttonContext),
             ),
-            // 데이터 로드 상태에서만 활성 — 로딩/에러 시 캡처 대상이 없다.
-            onPressed: report == null ? null : _handleDownload,
           ),
         ],
         shape: const Border(
