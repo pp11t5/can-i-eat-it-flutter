@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,7 +25,14 @@ class PushSymptomEntryScreen extends ConsumerWidget {
 
     return mealAsync.when(
       loading: () => const _PushEntryLoading(),
-      error: (_, __) => const _PushEntryUnavailable(),
+      error: (error, _) {
+        // 흔한 원인: FCM targetId가 internal PK(숫자)이고 API는 external UUID를 기대.
+        debugPrint(
+          '[FCM] push symptom entry meal lookup failed '
+          'mealRecordId=$mealRecordId error=$error',
+        );
+        return const _PushEntryUnavailable();
+      },
       data: (meal) => SymptomWriteScreen(
         initialMealRecordId: meal.mealRecordId,
         initialMealName: _mealDisplayName(meal),
