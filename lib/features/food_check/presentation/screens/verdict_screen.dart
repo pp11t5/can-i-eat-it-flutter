@@ -40,7 +40,10 @@ class VerdictScreen extends ConsumerStatefulWidget {
   final VerdictArgs args;
 
   /// 로딩 화면 최소 표시 시간 (캐릭터 GIF 노출 보장).
-  static const Duration minLoadingDuration = Duration(seconds: 5);
+  ///
+  /// 테스트에서 [Duration.zero] 로 줄여 즉시 결과 화면을 볼 수 있다.
+  @visibleForTesting
+  static Duration minLoadingDuration = const Duration(seconds: 5);
 
   @override
   ConsumerState<VerdictScreen> createState() => _VerdictScreenState();

@@ -10,6 +10,7 @@ import 'package:can_i_eat_it/features/food_check/data/food_check_providers.dart'
 import 'package:can_i_eat_it/features/food_check/data/repositories/mock_food_repository.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
+import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_screen.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
@@ -49,6 +50,13 @@ void main() {
       );
 
   testWidgets('대체 음식 가이드에서 뒤로가면 원래 가이드가 복원된다', (tester) async {
+    // 로딩 최소 5초 대기는 이 네비게이션 시나리오와 무관 — 즉시 결과로 진행.
+    final originalMinLoading = VerdictScreen.minLoadingDuration;
+    VerdictScreen.minLoadingDuration = Duration.zero;
+    addTearDown(() {
+      VerdictScreen.minLoadingDuration = originalMinLoading;
+    });
+
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
 
