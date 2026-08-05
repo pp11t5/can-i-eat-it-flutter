@@ -108,7 +108,7 @@ class MypageScreen extends ConsumerWidget {
                 // 약관 섹션
                 const _SectionLabel(label: '약관'),
                 const SizedBox(height: AppSpacing.itemGap),
-                _TermsSection(),
+                const _TermsSection(),
                 const SizedBox(height: AppSpacing.sectionGap), // 24
 
                 // 내 계정 섹션
