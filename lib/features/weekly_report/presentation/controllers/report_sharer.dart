@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' show Rect;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
@@ -18,7 +19,13 @@ part 'report_sharer.g.dart';
 /// 테스트는 [reportSharerProvider]를 스파이/페이크로 override해 실제
 /// 플랫폼 채널(공유시트) 호출 없이 흐름만 검증한다.
 abstract class ReportSharer {
-  Future<void> shareReportImage(Uint8List pngBytes, {required String text});
+  /// [sharePositionOrigin]: iOS(특히 iPad·최근 iOS) UIActivityViewController
+  /// popover 앵커. 미전달 시 iOS가 PlatformException을 던질 수 있다.
+  Future<void> shareReportImage(
+    Uint8List pngBytes, {
+    required String text,
+    Rect? sharePositionOrigin,
+  });
 }
 
 /// [ReportSharer] 기본 구현.
@@ -33,10 +40,15 @@ abstract class ReportSharer {
 class SharePlusReportSharer implements ReportSharer {
   const SharePlusReportSharer();
 
+  /// origin을 못 구한 경우 iOS 검증을 통과시키기 위한 최소 non-empty rect.
+  /// (view bounds 좌상단 1×1 — CGRectContainsRect 통과용)
+  static const Rect _fallbackOrigin = Rect.fromLTWH(0, 0, 1, 1);
+
   @override
   Future<void> shareReportImage(
     Uint8List pngBytes, {
     required String text,
+    Rect? sharePositionOrigin,
   }) async {
     final dir = await getTemporaryDirectory();
     final file = File(
@@ -44,8 +56,16 @@ class SharePlusReportSharer implements ReportSharer {
     );
     await file.writeAsBytes(pngBytes, flush: true);
 
+    final origin = sharePositionOrigin == null || sharePositionOrigin.isEmpty
+        ? _fallbackOrigin
+        : sharePositionOrigin;
+
     // ignore: deprecated_member_use
-    await Share.shareXFiles([XFile(file.path)], text: text);
+    await Share.shareXFiles(
+      [XFile(file.path, mimeType: 'image/png')],
+      text: text,
+      sharePositionOrigin: origin,
+    );
   }
 }
 
