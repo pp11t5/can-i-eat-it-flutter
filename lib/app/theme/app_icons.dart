@@ -94,11 +94,15 @@ abstract final class AppImages {
   static const String loginBg = '$_figma/login_bg_image.png';
   static const String loginLogo = '$_figma/login_logo_illust.png';
   static const String splashLogo = '$_splash/splash_logo.png';
+  /// 스플래시 브랜드 합성 (워드마크 + 전신 캐릭터, Figma 368×464).
+  static const String splashBrand = '$_splash/splash_brand.png';
 
   // --- 일러스트 (직접 참조) ---
   static const String pencil = '$_illust/icon_pencil.png';
   static const String fire = '$_illust/icon_fire.png';
   static const String characterGreeting = '$_illust/character_greeting.png';
+  /// 판정 로딩 캐릭터 GIF (생각하는 포즈, Figma Loading_Dido).
+  static const String characterSearching = '$_illust/character_searching.gif';
   static const String mealPrompt = '$_illust/emoji_meal_prompt.png';
   static const String symptomEmpty = '$_illust/disable_32.png';
 

@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
@@ -27,7 +28,9 @@ Future<void> bootstrap(
   FlavorConfig config, {
   List<Override> extraOverrides = const [],
 }) async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  // 첫 Flutter 프레임 직후 자동 제거를 막고, SplashScreen 프리캐시 후 remove.
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   FlavorConfig.current = config;
 
   // Firebase 초기화 — GoogleService-Info.plist / google-services.json 자동 사용.
