@@ -128,6 +128,7 @@ void main() {
       final buttons = tester.widgetList<IconButton>(find.byType(IconButton));
       expect(buttons.length, greaterThanOrEqualTo(2));
       expect(buttons.first.onPressed, isNull);
+      // today=2026-08-01 이라 7월에서 다음 달은 가능
       expect(buttons.elementAt(1).onPressed, isNotNull);
       // gray60 #BBBBBB
       expect(AppColors.controlDisabled, const Color(0xFFBBBBBB));
@@ -142,6 +143,35 @@ void main() {
 
       final buttons = tester.widgetList<IconButton>(find.byType(IconButton));
       expect(buttons.first.onPressed, isNotNull);
+    });
+  });
+
+  group('CalendarPopup — 오늘 월 상한', () {
+    testWidgets('오늘 월에서 다음 달 chevron onPressed는 null이다', (tester) async {
+      // today = 2026-08-01 → 8월이 상한
+      await openPopup(
+        tester,
+        min: minDate,
+        initialMonth: DateTime(2026, 8, 1),
+        initialSelected: DateTime(2026, 8, 1),
+      );
+
+      final buttons = tester.widgetList<IconButton>(find.byType(IconButton));
+      expect(buttons.length, greaterThanOrEqualTo(2));
+      // 이전(7월) 가능, 다음(9월) 불가
+      expect(buttons.first.onPressed, isNotNull);
+      expect(buttons.elementAt(1).onPressed, isNull);
+    });
+
+    testWidgets('오늘 이전 월에서는 다음 달 이동 가능하다', (tester) async {
+      await openPopup(
+        tester,
+        min: minDate,
+        initialMonth: DateTime(2026, 7, 1),
+      );
+
+      final buttons = tester.widgetList<IconButton>(find.byType(IconButton));
+      expect(buttons.elementAt(1).onPressed, isNotNull);
     });
   });
 }

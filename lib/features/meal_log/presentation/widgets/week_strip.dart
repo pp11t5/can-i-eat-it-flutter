@@ -18,7 +18,8 @@ import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dar
 /// [visibleMonth]: 현재 표시 중인 월 (연/월만 사용, day 무시).
 /// [selectedDate]: 현재 선택된 날짜.
 /// [today]: 오늘 날짜 (결정적 렌더를 위해 외부 주입 — 테스트·골든에서 고정값 사용).
-/// [minDate]: 가입일 하한. null이면 가입 전 스타일 없음.
+/// [minDate]: 가입일 하한. null이면 가입 전 스타일·탭 제한 없음.
+///   가입일 이전 날짜는 gray60 표시 + 탭 불가(캘린더 팝업과 동일).
 /// [dotsByDate]: 날짜별 도트 색상 목록 (최대 3개씩 표시).
 /// [onDaySelected]: 날짜 탭 콜백.
 class WeekStrip extends StatefulWidget {
@@ -41,7 +42,7 @@ class WeekStrip extends StatefulWidget {
   /// 오늘 날짜 (외부 주입 — KST 오늘 또는 테스트 고정값).
   final DateTime today;
 
-  /// 가입일 하한 (날짜만). 이전 날짜 숫자는 gray60.
+  /// 가입일 하한 (날짜만). 이전 날짜 숫자는 gray60 + 탭 불가.
   final DateTime? minDate;
 
   /// 날짜별 도트 VerdictLevel 목록.
@@ -210,7 +211,10 @@ class _WeekStripState extends State<WeekStrip> {
                     isFuture: isFuture,
                     isBeforeJoin: isBeforeJoin,
                     dots: dots.take(3).toList(),
-                    onTap: () => widget.onDaySelected(day),
+                    // 가입일 이전(gray60)은 선택 불가 — 캘린더 팝업과 동일.
+                    onTap: isBeforeJoin
+                        ? null
+                        : () => widget.onDaySelected(day),
                   ),
                 );
               },
@@ -262,7 +266,8 @@ class _DayCell extends StatelessWidget {
   final bool isFuture;
   final bool isBeforeJoin;
   final List<VerdictLevel> dots;
-  final VoidCallback onTap;
+  /// null 이면 탭 불가 (가입일 이전).
+  final VoidCallback? onTap;
 
   /// 요일 라벨 색상 결정.
   ///

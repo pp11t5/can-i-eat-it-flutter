@@ -111,4 +111,52 @@ void main() {
       expect(prevTapped, isTrue);
     });
   });
+
+  group('MonthNav — canGoNext', () {
+    testWidgets('canGoNext=false면 다음 달 탭 불가·controlDisabled(gray60) 색',
+        (tester) async {
+      var nextTapped = false;
+      await tester.pumpWidget(
+        _wrap(MonthNav(
+          label: '2026년 8월',
+          onPrevMonth: () {},
+          onNextMonth: () => nextTapped = true,
+          onOpenCalendar: () {},
+          canGoNext: false,
+        )),
+      );
+
+      final nextIcon = tester.widget<AppIcon>(_iconWithLabel('다음 달'));
+      expect(nextIcon.color, AppColors.controlDisabled);
+
+      // IconButton 순서: 이전, 다음, 캘린더
+      final nextBtn =
+          tester.widgetList<IconButton>(find.byType(IconButton)).elementAt(1);
+      expect(nextBtn.onPressed, isNull);
+
+      await tester.tap(find.byType(IconButton).at(1));
+      await tester.pump();
+      expect(nextTapped, isFalse);
+    });
+
+    testWidgets('canGoNext=true면 다음 달 textPrimary 색·탭 가능', (tester) async {
+      var nextTapped = false;
+      await tester.pumpWidget(
+        _wrap(MonthNav(
+          label: '2026년 7월',
+          onPrevMonth: () {},
+          onNextMonth: () => nextTapped = true,
+          onOpenCalendar: () {},
+          canGoNext: true,
+        )),
+      );
+
+      final nextIcon = tester.widget<AppIcon>(_iconWithLabel('다음 달'));
+      expect(nextIcon.color, AppColors.textPrimary);
+
+      await tester.tap(find.byType(IconButton).at(1));
+      await tester.pump();
+      expect(nextTapped, isTrue);
+    });
+  });
 }

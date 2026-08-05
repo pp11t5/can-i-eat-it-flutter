@@ -13,6 +13,7 @@ import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 /// - 좌측 밀착 클러스터(gap 4): ‹ YYYY년 M월 › (chevron 이 라벨에 밀착) — ±1개월 이동.
 /// - 우측 정렬: 캘린더 아이콘(32) — 탭 시 캘린더 팝업([showCalendarPopup]) 오픈.
 /// - [canGoPrev]가 false면 가입월 하한 — `‹` 은 보이되 탭 불가·[AppColors.controlDisabled](gray60).
+/// - [canGoNext]가 false면 현재월(오늘 월) 상한 — `›` 은 보이되 탭 불가·gray60.
 class MonthNav extends StatelessWidget {
   const MonthNav({
     super.key,
@@ -21,6 +22,7 @@ class MonthNav extends StatelessWidget {
     required this.onNextMonth,
     required this.onOpenCalendar,
     this.canGoPrev = true,
+    this.canGoNext = true,
   });
 
   /// 'YYYY년 M월' 형태의 문자열.
@@ -37,6 +39,9 @@ class MonthNav extends StatelessWidget {
 
   /// 이전 달로 이동 가능한지 여부 — false면 `‹` 비활성(gray60).
   final bool canGoPrev;
+
+  /// 다음 달로 이동 가능한지 여부 — false면 `›` 비활성(gray60). 현재월 상한.
+  final bool canGoNext;
 
   @override
   Widget build(BuildContext context) {
@@ -65,11 +70,13 @@ class MonthNav extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         IconButton(
-          onPressed: onNextMonth,
-          icon: const AppIcon(
+          onPressed: canGoNext ? onNextMonth : null,
+          icon: AppIcon(
             AppIcons.chevronRight,
             size: AppIconSizes.s32,
-            color: AppColors.textPrimary,
+            color: canGoNext
+                ? AppColors.textPrimary
+                : AppColors.controlDisabled,
             semanticsLabel: '다음 달',
           ),
           padding: EdgeInsets.zero,

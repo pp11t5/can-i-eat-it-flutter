@@ -238,6 +238,44 @@ void main() {
       expect(tappedDate!.day, equals(15));
       expect(tappedDate!.month, equals(6));
     });
+
+    testWidgets('가입일 이전(gray60) 날짜 탭 시 onDaySelected가 호출되지 않는다',
+        (tester) async {
+      DateTime? tappedDate;
+      // 가입일 6/10 → 8일은 가입 전. selected=9로 스크롤 대상에 맞춤.
+      await tester.pumpWidget(
+        _wrap(buildStrip(
+          selectedDate: DateTime(2026, 6, 9),
+          minDate: DateTime(2026, 6, 10),
+          onDaySelected: (d) => tappedDate = d,
+        )),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('8'));
+      await tester.pump();
+
+      expect(tappedDate, isNull);
+    });
+
+    testWidgets('가입일 당일 탭 시 onDaySelected가 호출된다', (tester) async {
+      DateTime? tappedDate;
+      final joinDay = DateTime(2026, 6, 10);
+      await tester.pumpWidget(
+        _wrap(buildStrip(
+          selectedDate: joinDay,
+          minDate: joinDay,
+          onDaySelected: (d) => tappedDate = d,
+        )),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('10'));
+      await tester.pump();
+
+      expect(tappedDate, isNotNull);
+      expect(tappedDate!.day, equals(10));
+    });
   });
 
   // ---------------------------------------------------------------------------
