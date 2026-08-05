@@ -20,7 +20,11 @@ Widget _subject() {
     ),
   );
   return ProviderScope(
-    overrides: [authRepositoryProvider.overrideWithValue(repository)],
+    overrides: [
+      // 테스트 전용 repository 교체 — 앱의 scoped provider가 아니다.
+      // ignore: scoped_providers_should_specify_dependencies
+      authRepositoryProvider.overrideWithValue(repository),
+    ],
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,

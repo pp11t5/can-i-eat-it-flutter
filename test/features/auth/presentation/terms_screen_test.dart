@@ -50,7 +50,11 @@ GoRouter _testRouter(TermsScreen screen) => GoRouter(
 Widget _wrap(MockAuthRepository repo,
         {TermsScreen screen = const TermsScreen()}) =>
     ProviderScope(
-      overrides: [authRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        // 테스트 전용 repository 교체 — 앱의 scoped provider가 아니다.
+        // ignore: scoped_providers_should_specify_dependencies
+        authRepositoryProvider.overrideWithValue(repo),
+      ],
       child: MaterialApp.router(
         theme: AppTheme.light,
         routerConfig: _testRouter(screen),
