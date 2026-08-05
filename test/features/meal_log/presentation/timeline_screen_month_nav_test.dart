@@ -11,9 +11,9 @@ import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/repositories/mock_meal_repository.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/timeline_screen.dart';
 
-/// 타임라인 화면의 월 이동(선택일 규칙, 가입월 이전 이동 금지) 테스트.
+/// 타임라인 화면의 월 이동(선택일 규칙, 가입월 하한, 오늘 월 상한) 테스트.
 ///
-/// 고정 오늘: 2026-06-17 (수).
+/// 고정 오늘: 2026-06-17 (수). 오늘 이후 월로는 이동 불가.
 
 final _fixedToday = DateTime(2026, 6, 17);
 
@@ -94,28 +94,34 @@ void main() {
     });
 
     testWidgets('다음 달(오늘 없는 달) 이동 시 선택일 = 1일', (tester) async {
-      // today 6/17 → 7월에는 오늘 없음 → 1일
+      // today 6/17. 오늘 이후 월 불가 → 5월로 간 뒤 6월(오늘 달)이 아닌
+      // 경로: 5월에서 이전→4월(오늘 없음) 후 다음→5월(오늘 없음) → 1일
       await tester.pumpWidget(
         _wrapWithMock(TimelineScreen(todayOverride: _fixedToday)),
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(_iconWithLabel('다음 달'));
+      await tester.tap(_iconWithLabel('이전 달')); // 5월
+      await tester.pumpAndSettle();
+      await tester.tap(_iconWithLabel('이전 달')); // 4월
+      await tester.pumpAndSettle();
+      expect(find.text('2026년 4월'), findsOneWidget);
+
+      await tester.tap(_iconWithLabel('다음 달')); // 5월
       await tester.pumpAndSettle();
 
-      expect(find.text('2026년 7월'), findsOneWidget);
+      expect(find.text('2026년 5월'), findsOneWidget);
       expect(_selectedDayNumber(tester), equals('1'));
     });
 
     testWidgets('다음 달에 오늘이 있으면 선택일 = 오늘', (tester) async {
-      // today 7/20, 시작 6월 → 다음 달 7월 → 20일
+      // today 7/20, 진입 7월. 이전→6월 후 다시 다음→7월 → 20일
       final todayInJuly = DateTime(2026, 7, 20);
       await tester.pumpWidget(
         _wrapWithMock(TimelineScreen(todayOverride: todayInJuly)),
       );
       await tester.pumpAndSettle();
 
-      // 진입 시 visibleMonth=7월(오늘 달). 이전→6월 후 다시 7월로 이동.
       await tester.tap(_iconWithLabel('이전 달'));
       await tester.pumpAndSettle();
       expect(find.text('2026년 6월'), findsOneWidget);
@@ -128,18 +134,19 @@ void main() {
     });
 
     testWidgets('이전 달에 오늘이 있으면 선택일 = 오늘', (tester) async {
-      // today 6/17, 7월에서 시작해 이전 달 6월 → 17일
+      // today 6/17. 이전→5월 후 다음→6월(오늘 달) → 17일
+      // (오늘 이후 월 이동 불가로 7월 경유 불가 — 과거 월에서 복귀로 검증)
       final todayInJune = DateTime(2026, 6, 17);
       await tester.pumpWidget(
         _wrapWithMock(TimelineScreen(todayOverride: todayInJune)),
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(_iconWithLabel('다음 달'));
-      await tester.pumpAndSettle();
-      expect(find.text('2026년 7월'), findsOneWidget);
-
       await tester.tap(_iconWithLabel('이전 달'));
+      await tester.pumpAndSettle();
+      expect(find.text('2026년 5월'), findsOneWidget);
+
+      await tester.tap(_iconWithLabel('다음 달'));
       await tester.pumpAndSettle();
 
       expect(find.text('2026년 6월'), findsOneWidget);
@@ -184,6 +191,41 @@ void main() {
       await tester.tap(_iconWithLabel('이전 달'));
       await tester.pumpAndSettle();
       expect(find.text('2026년 5월'), findsOneWidget);
+    });
+  });
+
+  group('TimelineScreen — 오늘 월 이후 이동 금지', () {
+    testWidgets('오늘 월이면 다음 달 버튼이 비활성·gray60이다', (tester) async {
+      await tester.pumpWidget(
+        _wrapWithMock(TimelineScreen(todayOverride: _fixedToday)),
+      );
+      await tester.pumpAndSettle();
+
+      final nextIcon = tester.widget<AppIcon>(_iconWithLabel('다음 달'));
+      expect(nextIcon.color, AppColors.controlDisabled);
+
+      await tester.tap(_iconWithLabel('다음 달'));
+      await tester.pumpAndSettle();
+      expect(find.text('2026년 6월'), findsOneWidget);
+      expect(find.text('2026년 7월'), findsNothing);
+    });
+
+    testWidgets('오늘 이전 월에서는 다음 달로 이동 가능하다', (tester) async {
+      await tester.pumpWidget(
+        _wrapWithMock(TimelineScreen(todayOverride: _fixedToday)),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(_iconWithLabel('이전 달'));
+      await tester.pumpAndSettle();
+      expect(find.text('2026년 5월'), findsOneWidget);
+
+      final nextIcon = tester.widget<AppIcon>(_iconWithLabel('다음 달'));
+      expect(nextIcon.color, AppColors.textPrimary);
+
+      await tester.tap(_iconWithLabel('다음 달'));
+      await tester.pumpAndSettle();
+      expect(find.text('2026년 6월'), findsOneWidget);
     });
   });
 }
