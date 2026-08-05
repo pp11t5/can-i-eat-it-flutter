@@ -356,9 +356,11 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
                                 .copyWith(color: AppColors.textPrimary),
                           ),
                         ),
-                        // Figma: 시간 카드 우측 정적 장식(무드 얼굴 에셋). 시계 아님.
-                        Image.asset(AppImages.moodComfortable,
-                            width: 24, height: 24),
+                        // 기존 ic_arrow_right (기본 24).
+                        const AppIcon(
+                          AppIcons.arrowRight,
+                          color: AppColors.textSecondary,
+                        ),
                       ],
                     ),
                   ),
@@ -389,9 +391,11 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
                             ),
                           ),
                         ),
-                        // Figma: 식사 카드 우측 정적 장식(무드 얼굴 에셋). 링크 아님.
-                        Image.asset(AppImages.moodComfortable,
-                            width: 24, height: 24),
+                        // 기존 ic_arrow_right (기본 24).
+                        const AppIcon(
+                          AppIcons.arrowRight,
+                          color: AppColors.textSecondary,
+                        ),
                       ],
                     ),
                   ),
