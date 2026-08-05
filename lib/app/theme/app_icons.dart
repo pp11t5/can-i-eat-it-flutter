@@ -94,6 +94,8 @@ abstract final class AppImages {
   static const String loginBg = '$_figma/login_bg_image.png';
   static const String loginLogo = '$_figma/login_logo_illust.png';
   static const String splashLogo = '$_splash/splash_logo.png';
+  /// 스플래시 브랜드 합성 (워드마크 + 전신 캐릭터, Figma 368×464).
+  static const String splashBrand = '$_splash/splash_brand.png';
 
   // --- 일러스트 (직접 참조) ---
   static const String pencil = '$_illust/icon_pencil.png';
