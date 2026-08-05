@@ -1,11 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/core/push/fcm_messaging_handler.dart';
 import 'package:can_i_eat_it/core/push/push_navigation_coordinator.dart';
+import 'package:can_i_eat_it/core/push/push_route_navigator.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/session_providers.dart';
 
 import 'app_router.dart';
@@ -16,49 +15,36 @@ import 'app_router.dart';
 /// 이 provider에 접근하지 않고, 다음 앱 시작의 `getInitialMessage`가 탭을 전달한다.
 final pushNavigationCoordinatorProvider =
     Provider<PushNavigationCoordinator>((ref) {
-  final router = ref.watch(appRouterProvider);
+  // GoRouter를 살려 두고, 콜백 시점마다 최신 인스턴스를 읽는다.
+  ref.watch(appRouterProvider);
+
   final coordinator = PushNavigationCoordinator(
     initialStatus: ref.read(sessionStatusProvider),
-    onPush: (location) => _pushDestination(router, location),
-    onGo: router.go,
+    onPush: (location) {
+      final router = ref.read(appRouterProvider);
+      unawaited(navigateFromPush(router: router, location: location));
+    },
+    onGo: (location) {
+      ref.read(appRouterProvider).go(location);
+    },
   );
 
-  ref.listen<SessionStatus>(sessionStatusProvider, (_, next) {
-    coordinator.onSessionStatusChanged(next);
-  });
+  // fireImmediately: 생성 직후 이미 ready면 pending 재생 경로와 상태를 맞춘다.
+  // (listen 기본값은 이후 변경만 통지 → cold start 레이스 때 _status 고정 위험 완화)
+  ref.listen<SessionStatus>(
+    sessionStatusProvider,
+    (_, next) => coordinator.onSessionStatusChanged(next),
+    fireImmediately: true,
+  );
 
   unawaited(_startPushMessaging(coordinator));
   return coordinator;
 });
 
-/// 푸시 목적지는 기존 화면 위에 쌓아 닫기/뒤로가기가 원래 화면으로 돌아가게 한다.
-///
-/// 앱을 푸시 탭으로 막 시작했거나 인증 게이트를 막 통과한 경우에는 현재 경로가
-/// splash/login/onboarding일 수 있다. 이때는 먼저 홈을 기준 스택으로 만든 뒤 다음
-/// 프레임에서 push해, 닫기 시 pre-auth 화면이나 빈 스택으로 돌아가지 않게 한다.
-void _pushDestination(GoRouter router, String location) {
-  final currentLocation = router.routerDelegate.currentConfiguration.uri.path;
-  if (_needsHomeBaseline(currentLocation)) {
-    router.go('/');
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(router.push<void>(location));
-    });
-    return;
-  }
-
-  unawaited(router.push<void>(location));
-}
-
-bool _needsHomeBaseline(String location) {
-  return location == '/splash' ||
-      location == '/login' ||
-      location == '/terms' ||
-      location.startsWith('/onboarding');
-}
-
+/// cold start 탭을 먼저 잡고, 그다음 포그라운드/로컬 알림을 켠다.
 Future<void> _startPushMessaging(PushNavigationCoordinator coordinator) async {
+  await wireOpenedApp(coordinator.handleRemoteMessage);
   await initForegroundMessaging(
     onLocalNotificationTap: coordinator.handleLocalPayload,
   );
-  await wireOpenedApp(coordinator.handleRemoteMessage);
 }
