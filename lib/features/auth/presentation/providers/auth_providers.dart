@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
+import 'package:can_i_eat_it/core/config/terms_catalog.dart';
 import 'package:can_i_eat_it/core/network/auth_interceptor.dart';
 import 'package:can_i_eat_it/core/network/dio_client.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
@@ -13,8 +14,8 @@ import 'package:can_i_eat_it/features/auth/data/repositories/auth_repository_imp
 import 'package:can_i_eat_it/features/auth/data/services/apple_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/data/services/kakao_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/consent.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
-import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 import 'package:can_i_eat_it/features/auth/domain/repositories/auth_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
 import 'package:can_i_eat_it/features/meal_log/data/sources/timeline_guide_store.dart';
@@ -61,6 +62,53 @@ AuthRepository authRepository(Ref ref) => AuthRepositoryImpl(
     );
 
 // ---------------------------------------------------------------------------
+// 최신 약관 목록
+// ---------------------------------------------------------------------------
+
+/// 서버 최신 약관을 시안 순서로 정렬해 제공한다.
+///
+/// 필수 항목을 먼저 두고, 알려진 코드는 tos → privacy → health_sensitive →
+/// marketing 순서를 사용한다. 미지 코드는 같은 필수 그룹 안에서 서버 순서를 유지한다.
+@riverpod
+Future<List<ConsentTerm>> consentTerms(Ref ref) async {
+  final terms = await ref.watch(authRepositoryProvider).fetchConsentTerms();
+  final indexed = terms.indexed.toList(growable: false);
+  const rank = {
+    TermsCatalogCodes.tos: 0,
+    TermsCatalogCodes.privacy: 1,
+    TermsCatalogCodes.healthSensitive: 2,
+    TermsCatalogCodes.marketing: 3,
+  };
+  indexed.sort((a, b) {
+    final requiredCompare =
+        (b.$2.isRequired ? 1 : 0).compareTo(a.$2.isRequired ? 1 : 0);
+    if (requiredCompare != 0) return requiredCompare;
+    final aRank = rank[a.$2.code];
+    final bRank = rank[b.$2.code];
+    if (aRank != null || bRank != null) {
+      final knownCompare = (aRank ?? 999).compareTo(bRank ?? 999);
+      if (knownCompare != 0) return knownCompare;
+    }
+    return a.$1.compareTo(b.$1);
+  });
+  return indexed.map((entry) => entry.$2).toList(growable: false);
+}
+
+/// 약관 제출 성공 후 `/terms`에서 온보딩으로 교체 이동하는 짧은 전환 상태.
+///
+/// 이 상태가 true인 동안에만 `needsOnboarding`의 `/terms` 체류를 가드가
+/// 허용한다. 직접 딥링크는 항상 온보딩 첫 화면으로 보낸다.
+@Riverpod(keepAlive: true)
+class ConsentNavigationTransition extends _$ConsentNavigationTransition {
+  @override
+  bool build() => false;
+
+  void begin() => state = true;
+
+  void end() => state = false;
+}
+
+// ---------------------------------------------------------------------------
 // coldStartOfflineProvider
 // ---------------------------------------------------------------------------
 
@@ -95,14 +143,14 @@ class AuthController extends _$AuthController {
 
   /// 카카오 계정으로 로그인하고 [SignInOutcome]을 반환한다.
   ///
-  /// [Authenticated] 또는 [NeedsTerms] 시 [FunnelEvent.signUp] 퍼널 이벤트를 발화한다 (US-SYS-2).
+  /// [Authenticated] 시 [FunnelEvent.signUp] 퍼널 이벤트를 발화한다 (US-SYS-2).
   /// [Recoverable](복구 필요)은 가입 퍼널 진입으로 보지 않아 발화하지 않는다.
   ///
   /// [Authenticated] 시 [getMe]로 displayName 등 식별정보를 채운 뒤 반환한다
   /// (로그인 DTO에는 nickname이 없어 마이페이지가 '사용자'로 뜨던 문제 방지).
   Future<SignInOutcome> signInWithKakao() async {
     final outcome = await ref.read(authRepositoryProvider).signInWithKakao();
-    _applyOutcomeToState(outcome, AuthProvider.kakao);
+    _applyOutcomeToState(outcome);
     if (outcome is Authenticated) {
       // FCM 토큰 등록 — fire-and-forget(로그인 UX 블로킹 제거).
       // 실패해도 로그인 흐름을 막지 않는다(graceful).
@@ -119,14 +167,14 @@ class AuthController extends _$AuthController {
 
   /// Apple 계정으로 로그인하고 [SignInOutcome]을 반환한다.
   ///
-  /// [Authenticated] 또는 [NeedsTerms] 시 [FunnelEvent.signUp] 퍼널 이벤트를 발화한다 (US-SYS-2).
+  /// [Authenticated] 시 [FunnelEvent.signUp] 퍼널 이벤트를 발화한다 (US-SYS-2).
   /// [Recoverable](복구 필요)은 가입 퍼널 진입으로 보지 않아 발화하지 않는다.
   ///
   /// [Authenticated] 시 [getMe]로 displayName 등 식별정보를 채운 뒤 반환한다
   /// (로그인 DTO에는 nickname이 없어 마이페이지가 '사용자'로 뜨던 문제 방지).
   Future<SignInOutcome> signInWithApple() async {
     final outcome = await ref.read(authRepositoryProvider).signInWithApple();
-    _applyOutcomeToState(outcome, AuthProvider.apple);
+    _applyOutcomeToState(outcome);
     if (outcome is Authenticated) {
       // FCM 토큰 등록 — fire-and-forget(로그인 UX 블로킹 제거).
       // 실패해도 로그인 흐름을 막지 않는다(graceful).
@@ -155,9 +203,9 @@ class AuthController extends _$AuthController {
   }
 
   /// 약관 동의를 기록하고 세션 상태를 갱신한다.
-  Future<void> agreeToTerms(TermsAgreement agreement) async {
+  Future<void> agreeToTerms(List<ConsentChoice> choices) async {
     final repo = ref.read(authRepositoryProvider);
-    await repo.recordTermsAgreement(agreement);
+    await repo.submitConsent(choices);
     state = AsyncValue.data(await repo.currentSession());
   }
 
@@ -166,13 +214,15 @@ class AuthController extends _$AuthController {
   /// [provider]: [Recoverable.provider] 에서 전달받는다.
   /// [idToken]: [Recoverable.idToken] 에서 전달받는다. 카카오 SDK 재인증 없이 재사용.
   /// 실패 시 예외를 그대로 rethrow 하여 호출자(dialog)가 UI 에러를 표시하도록 한다.
-  Future<void> recoverAccount(AuthProvider provider, {required String idToken}) async {
+  Future<Authenticated> recoverAccount(AuthProvider provider,
+      {required String idToken}) async {
     final repo = ref.read(authRepositoryProvider);
-    final session = await repo.recoverAccount(provider, idToken: idToken);
-    state = AsyncValue.data(session);
+    final outcome = await repo.recoverAccount(provider, idToken: idToken);
+    state = AsyncValue.data(outcome.session);
     // 복구 성공 후 세션이 생겼으므로 FCM 토큰 등록 — fire-and-forget.
     // 실패해도 복구 흐름을 막지 않는다(graceful).
     unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
+    return outcome;
   }
 
   /// in-flight [getMe] 를 무효화하기 위한 요청 세대.
@@ -274,20 +324,10 @@ class AuthController extends _$AuthController {
   // ---------------------------------------------------------------------------
 
   /// [SignInOutcome] 에 따라 컨트롤러 상태를 갱신한다.
-  void _applyOutcomeToState(SignInOutcome outcome, AuthProvider provider) {
+  void _applyOutcomeToState(SignInOutcome outcome) {
     switch (outcome) {
       case Authenticated(:final session):
         state = AsyncValue.data(session);
-      case NeedsTerms():
-        // 약관 미동의 — sessionStatusFrom 이 needsTerms 로 평가하도록
-        // hasAgreedTerms=false 인 임시 세션을 설정한다.
-        state = AsyncValue.data(
-          AuthSession(
-            userId: 'pending-terms',
-            provider: provider,
-            hasAgreedTerms: false,
-          ),
-        );
       case Recoverable():
         // 복구 가능 계정 — 토큰 미발급, 세션 없음 유지.
         state = const AsyncValue.data(null);

@@ -118,6 +118,13 @@ void main() {
     );
   });
 
+  void mockOnboardingStatus(bool onboarded) {
+    dioAdapter.onGet(
+      ApiEndpoints.onboardingStatus,
+      (server) => server.reply(200, _envelope({'onboarded': onboarded})),
+    );
+  }
+
   group('signInWithKakao — HTTP 200 → Authenticated', () {
     test('200 성공 + onboarding/status → Authenticated(onboarded=true)',
         () async {
@@ -147,6 +154,7 @@ void main() {
       expect(auth.onboarded, isTrue);
       expect(auth.session.userId, 'user-1');
       expect(auth.session.hasAgreedTerms, isTrue);
+      expect(await tokenStore.readPendingConsentUserId(), isNull);
     });
 
     test('200 성공 + onboarding/status → Authenticated(onboarded=false)',
@@ -175,6 +183,8 @@ void main() {
       expect(outcome, isA<Authenticated>());
       final auth = outcome as Authenticated;
       expect(auth.onboarded, isFalse);
+      expect(auth.session.hasAgreedTerms, isFalse);
+      expect(await tokenStore.readPendingConsentUserId(), 'user-2');
     });
 
     test('200 성공 시 tokenStore 에 토큰이 저장된다', () async {
@@ -238,33 +248,100 @@ void main() {
     });
   });
 
-  group('signInWithKakao — HTTP 400 → NeedsTerms', () {
-    test('400 AUTH400_1 → NeedsTerms(email)', () async {
+  group('세션 확정 실패 롤백', () {
+    void stubSuccessfulLogin() {
+      dioAdapter.onPost(
+        '/auth/kakao/login',
+        (server) => server.reply(
+          200,
+          _envelope({
+            'accessToken': 'provisional-access',
+            'refreshToken': 'provisional-refresh',
+            'userId': 'provisional-user',
+            'role': 'USER',
+          }),
+        ),
+        data: {'idToken': 'test-id-token'},
+      );
+    }
+
+    Future<void> expectRollback() async {
+      await tokenStore.markConsentPending('stale-pending-user');
+      await expectLater(repo.signInWithKakao(), throwsA(isA<Object>()));
+      expect(await tokenStore.readAccessToken(), isNull);
+      expect(await tokenStore.readRefreshToken(), isNull);
+      expect(await tokenStore.readPendingConsentUserId(), isNull);
+      expect(await repo.currentSession(), isNull);
+    }
+
+    test('onboarding/status 연결 실패 시 토큰·pending·세션을 롤백한다', () async {
+      stubSuccessfulLogin();
+      dioAdapter.onGet(
+        ApiEndpoints.onboardingStatus,
+        (server) => server.throws(
+          0,
+          DioException(
+            requestOptions: RequestOptions(path: ApiEndpoints.onboardingStatus),
+            type: DioExceptionType.connectionError,
+          ),
+        ),
+      );
+
+      await expectRollback();
+    });
+
+    test('onboarding/status 서버 실패 시 토큰·pending·세션을 롤백한다', () async {
+      stubSuccessfulLogin();
+      dioAdapter.onGet(
+        ApiEndpoints.onboardingStatus,
+        (server) => server.throws(
+          500,
+          DioException(
+            requestOptions: RequestOptions(path: ApiEndpoints.onboardingStatus),
+            type: DioExceptionType.badResponse,
+          ),
+        ),
+      );
+
+      await expectRollback();
+    });
+
+    test('onboarding/status 파싱 실패 시 토큰·pending·세션을 롤백한다', () async {
+      stubSuccessfulLogin();
+      dioAdapter.onGet(
+        ApiEndpoints.onboardingStatus,
+        (server) => server.reply(200, _envelope({'onboarded': 'invalid'})),
+      );
+
+      await expectRollback();
+    });
+  });
+
+  group('signInWithKakao — HTTP 400 → 로그인 실패', () {
+    test('400 AUTH400_1 → SocialProfilePermissionFailure', () async {
       dioAdapter.onPost(
         '/auth/kakao/login',
         (server) => server.reply(400, _errorEnvelope('AUTH400_1')),
         data: {'idToken': 'test-id-token'},
       );
 
-      final outcome = await repo.signInWithKakao();
-
-      expect(outcome, isA<NeedsTerms>());
-      final needs = outcome as NeedsTerms;
-      expect(needs.requirements, contains(TermsRequirement.email));
+      await expectLater(
+        repo.signInWithKakao(),
+        throwsA(isA<SocialProfilePermissionFailure>()),
+      );
     });
 
-    test('400 AUTH400_3 → NeedsTerms(nickname)', () async {
+    test('400 AUTH400_3 → SocialProfilePermissionFailure', () async {
       dioAdapter.onPost(
         '/auth/kakao/login',
         (server) => server.reply(400, _errorEnvelope('AUTH400_3')),
         data: {'idToken': 'test-id-token'},
       );
 
-      final outcome = await repo.signInWithKakao();
-
-      expect(outcome, isA<NeedsTerms>());
-      final needs = outcome as NeedsTerms;
-      expect(needs.requirements, contains(TermsRequirement.nickname));
+      await expectLater(
+        repo.signInWithKakao(),
+        throwsA(isA<SocialProfilePermissionFailure>()),
+      );
     });
 
     test('400 시 tokenStore 에 토큰이 저장되지 않는다', () async {
@@ -274,7 +351,10 @@ void main() {
         data: {'idToken': 'test-id-token'},
       );
 
-      await repo.signInWithKakao();
+      await expectLater(
+        repo.signInWithKakao(),
+        throwsA(isA<SocialProfilePermissionFailure>()),
+      );
 
       expect(await tokenStore.readAccessToken(), isNull);
     });
@@ -359,6 +439,7 @@ void main() {
             })),
         data: {'idToken': 'passed-token'},
       );
+      mockOnboardingStatus(true);
 
       // signIn 을 거치지 않고 직접 recoverAccount 를 호출한다.
       await repoWithCounting.recoverAccount(
@@ -416,8 +497,7 @@ void main() {
     // 이 그룹의 테스트는 수정 전에는 StateError 로 실패해야 하고,
     // recoverAccount(AuthProvider) 재작성 후 통과해야 한다.
 
-    test('recoverAccount 200 → 전달받은 idToken 전송 + 토큰 저장 + active 세션 반환',
-        () async {
+    test('recoverAccount 200 → 전달받은 idToken 전송 + 온보딩 상태가 반영된 결과 반환', () async {
       // 403 경로는 _session=null · 토큰 없음 상태에서 호출됨.
       // 전달된 'test-id-token' 이 POST /auth/kakao/recover 바디에 그대로 전송돼야 한다.
       dioAdapter.onPost(
@@ -433,12 +513,16 @@ void main() {
             })),
         data: {'idToken': 'test-id-token'},
       );
+      mockOnboardingStatus(false);
 
-      final session = await repo.recoverAccount(AuthProvider.kakao,
+      final outcome = await repo.recoverAccount(AuthProvider.kakao,
           idToken: 'test-id-token');
 
-      expect(session.userId, 'user-recovered');
-      expect(session.accountStatus, AccountStatus.active);
+      expect(outcome.session.userId, 'user-recovered');
+      expect(outcome.session.accountStatus, AccountStatus.active);
+      expect(outcome.onboarded, isFalse);
+      expect(outcome.session.hasAgreedTerms, isFalse);
+      expect(await tokenStore.readPendingConsentUserId(), 'user-recovered');
     });
 
     test('recoverAccount 200 후 tokenStore 에 새 토큰이 저장된다', () async {
@@ -455,6 +539,7 @@ void main() {
             })),
         data: {'idToken': 'test-id-token'},
       );
+      mockOnboardingStatus(true);
 
       await repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token');
 
@@ -477,12 +562,51 @@ void main() {
             })),
         data: {'idToken': 'test-id-token'},
       );
+      mockOnboardingStatus(true);
 
       // StateError 없이 완료돼야 한다.
       await expectLater(
         repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token'),
         completes,
       );
+    });
+
+    test('recoverAccount 상태 조회 실패 시 새 토큰과 pending을 롤백한다', () async {
+      dioAdapter
+        ..onPost(
+          '/auth/kakao/recover',
+          (server) => server.reply(
+            200,
+            _envelope({
+              'accessToken': 'recover-access-fail',
+              'refreshToken': 'recover-refresh-fail',
+              'userId': 'recover-fail',
+              'role': 'USER',
+            }),
+          ),
+          data: {'idToken': 'test-id-token'},
+        )
+        ..onGet(
+          ApiEndpoints.onboardingStatus,
+          (server) => server.throws(
+            0,
+            DioException(
+              requestOptions:
+                  RequestOptions(path: ApiEndpoints.onboardingStatus),
+              type: DioExceptionType.connectionError,
+            ),
+          ),
+        );
+      await tokenStore.markConsentPending('stale-pending-user');
+
+      await expectLater(
+        repo.recoverAccount(AuthProvider.kakao, idToken: 'test-id-token'),
+        throwsA(isA<NetworkFailure>()),
+      );
+      expect(await tokenStore.readAccessToken(), isNull);
+      expect(await tokenStore.readRefreshToken(), isNull);
+      expect(await tokenStore.readPendingConsentUserId(), isNull);
+      expect(await repo.currentSession(), isNull);
     });
   });
 
@@ -582,6 +706,25 @@ void main() {
       // 토큰은 보존돼야 한다
       expect(await tokenStore.readAccessToken(), 'live-access');
       expect(await tokenStore.readRefreshToken(), 'live-refresh');
+    });
+
+    test('약관 pending 사용자 재수화 시 hasAgreedTerms=false를 복원한다', () async {
+      await tokenStore.writeTokens(
+          access: 'live-access', refresh: 'live-refresh');
+      await tokenStore.markConsentPending('user-me');
+      dioAdapter.onGet(
+        '/auth/me',
+        (server) => server.reply(
+          200,
+          _envelope({'userId': 'user-me', 'nickname': 'tester'}),
+        ),
+      );
+
+      final session = await repo.currentSession();
+
+      expect(session, isNotNull);
+      expect(session!.hasAgreedTerms, isFalse);
+      expect(await tokenStore.readPendingConsentUserId(), 'user-me');
     });
 
     test('분기4: 토큰 有 + 401 + refresh도 401 → null 반환 & 토큰 clear', () async {

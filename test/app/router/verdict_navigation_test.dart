@@ -34,7 +34,7 @@ void main() {
         overrides: [
           // ignore: scoped_providers_should_specify_dependencies
           authRepositoryProvider
-              .overrideWithValue(MockAuthRepository.existing()),
+              .overrideWithValue(MockAuthRepository.existing(onboarded: true)),
           // ignore: scoped_providers_should_specify_dependencies
           healthProfileRepositoryProvider
               .overrideWithValue(MockHealthProfileRepository.completed()),

@@ -69,7 +69,7 @@ void main() {
       expect(status, SessionStatus.unauthenticated);
     });
 
-    test('기존 사용자(약관 동의) + health_profile 없음 → needsOnboarding', () async {
+    test('온보딩 미완료 사용자가 다시 로그인하면 → needsTerms', () async {
       final container = makeContainer(
         authRepo: MockAuthRepository.existing(),
         profileRepo: MockHealthProfileRepository.noProfile(),
@@ -78,16 +78,13 @@ void main() {
       // existing()은 initialSession=null이므로 signIn 후 상태 확인.
       await container.read(authControllerProvider.future);
       await container.read(authControllerProvider.notifier).signInWithKakao();
-      // sessionStatus는 onboardedStatusProvider를 watch하므로 그 완료를 기다린다.
-      await container.read(onboardedStatusProvider.future);
-
       final status = container.read(sessionStatusProvider);
-      expect(status, SessionStatus.needsOnboarding);
+      expect(status, SessionStatus.needsTerms);
     });
 
     test('기존 사용자(약관 동의) + health_profile 완료 → ready', () async {
       final container = makeContainer(
-        authRepo: MockAuthRepository.existing(),
+        authRepo: MockAuthRepository.existing(onboarded: true),
         profileRepo: MockHealthProfileRepository.completed(),
       );
 
@@ -124,7 +121,7 @@ void main() {
       // watch되기 시작하고, 그 future가 50ms 뒤에 완료된다.
       // sessionStatus short-circuit이 그동안 loading을 반환한다.
       final container = makeContainer(
-        authRepo: MockAuthRepository.existing(),
+        authRepo: MockAuthRepository.existing(onboarded: true),
         profileRepo: MockHealthProfileRepository.completed(
           delay: const Duration(milliseconds: 50),
         ),
@@ -260,7 +257,7 @@ void main() {
         overrides: [
           // ignore: scoped_providers_should_specify_dependencies
           authRepositoryProvider.overrideWithValue(
-            MockAuthRepository.existing(),
+            MockAuthRepository.existing(onboarded: true),
           ),
           // ignore: scoped_providers_should_specify_dependencies
           healthProfileRepositoryProvider.overrideWithValue(
@@ -285,7 +282,8 @@ void main() {
       expect(
         status,
         SessionStatus.needsOnboarding,
-        reason: 'onboardedStatus 로드 에러는 needsOnboarding으로 안전하게 폴백해야 한다(ADR-0006 §4)',
+        reason:
+            'onboardedStatus 로드 에러는 needsOnboarding으로 안전하게 폴백해야 한다(ADR-0006 §4)',
       );
     });
   });

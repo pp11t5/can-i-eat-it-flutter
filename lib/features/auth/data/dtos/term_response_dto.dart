@@ -2,6 +2,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'package:can_i_eat_it/features/auth/domain/entities/consent.dart';
+
 part 'term_response_dto.freezed.dart';
 part 'term_response_dto.g.dart';
 
@@ -28,4 +30,17 @@ abstract class TermResponseDto with _$TermResponseDto {
 
   factory TermResponseDto.fromJson(Map<String, dynamic> json) =>
       _$TermResponseDtoFromJson(json);
+}
+
+extension TermResponseDtoX on TermResponseDto {
+  ConsentTerm toEntity() => ConsentTerm(
+        id: id,
+        code: code,
+        version: version,
+        title: title,
+        content: content,
+        isRequired: isRequired,
+        effectiveDate:
+            effectiveDate == null ? null : DateTime.tryParse(effectiveDate!),
+      );
 }

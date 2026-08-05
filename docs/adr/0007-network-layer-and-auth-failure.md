@@ -4,6 +4,12 @@
 - **Date**: 2026-06-09
 - **Decider(s)**: 프로젝트 팀
 
+> **2026-08-05 계약 정정:** 최신 Swagger에서 로그인 200이 신규 사용자도 포함하고,
+> `AUTH400_1`은 소셜 이메일 제공 동의 오류로 확인됐다. 따라서 이 문서의
+> `NeedsTerms`/`TermsRequiredFailure` 및 "신규 사용자=로그인 400" 결정은 폐기한다.
+> 앱 약관 게이트는 로그인 200 뒤 `/onboarding/status`, `GET /consent/terms`,
+> 인증된 `POST /consent` 계약과 로컬 `consentPending` 복원 상태로 처리한다.
+
 ## 1. 의사결정 요약
 
 W3 실서버(`https://can-i-eat-it.com` + `/api/v1`, 공통 봉투 `{isSuccess, code, message, traceId, result}`) 연동을 위해 통신계층을 확정한다. (1) **retrofit을 보류하고 수기 dio**로 datasource를 작성한다(스파이크상 호환은 되나, 공통 봉투 언랩·인증 에러 분기·401 큐잉이 retrofit의 선언형 모델과 충돌). (2) 봉투를 단일 지점에서 언랩하고 `code` 기반으로 **인증 의미를 가진 Failure 서브타입**(약관필요·복구가능·토큰무효·세션만료)으로 끌어올린다. (3) 토큰은 **secure storage 인터페이스 추상화**로 보관한다. (4) 401에는 **단일 refresh 큐잉**을 적용한다. (5) DTO는 freezed+json_serializable로 `data/dtos/`에 두고 봉투와 분리한다. (6) 로그인 4분기는 실서버에서 HTTP 200/400/403 출처이고 400/403은 토큰 미발급이므로, `signIn`이 **`SignInOutcome` sealed 결과를 한 번의 await로 반환**하도록 바꿔 현재의 세션-프로퍼티 분기를 대체한다. 단, **게이트(`sessionStatusFrom`/`resolveRedirect`) 순수 함수 모델은 그대로 보존**한다(ADR-0006 불변). 판정(`/foods/analyze`)·전체 프로필 GET은 서버에 없으므로 W3에서 Mock을 유지한다.

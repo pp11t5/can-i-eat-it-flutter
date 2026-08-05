@@ -11,8 +11,8 @@ import 'package:can_i_eat_it/core/push/fcm_repository.dart';
 import 'package:can_i_eat_it/core/push/fcm_token_service.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/consent.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
-import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 import 'package:can_i_eat_it/features/auth/domain/repositories/auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
@@ -25,7 +25,8 @@ import 'package:can_i_eat_it/features/meal_log/data/sources/timeline_guide_store
 /// noop FcmRepository (서버 호출 없음)
 class _NoopFcmRepository implements FcmRepository {
   @override
-  Future<void> register({required String token, required String platform}) async {}
+  Future<void> register(
+      {required String token, required String platform}) async {}
   @override
   Future<void> delete() async {}
 }
@@ -100,11 +101,15 @@ class _SpyAuthRepository implements AuthRepository {
   Future<SignInOutcome> signInWithApple() => _delegate.signInWithApple();
 
   @override
-  Future<void> recordTermsAgreement(TermsAgreement agreement) =>
-      _delegate.recordTermsAgreement(agreement);
+  Future<List<ConsentTerm>> fetchConsentTerms() =>
+      _delegate.fetchConsentTerms();
 
   @override
-  Future<AuthSession> recoverAccount(
+  Future<void> submitConsent(List<ConsentChoice> choices) =>
+      _delegate.submitConsent(choices);
+
+  @override
+  Future<Authenticated> recoverAccount(
     AuthProvider provider, {
     required String idToken,
   }) =>
@@ -188,16 +193,13 @@ void main() {
   // ① Authenticated 로그인 → registerCurrentToken 1회 호출
   // -------------------------------------------------------------------------
   group('AuthController FCM 배선 — 로그인 register 트리거', () {
-    test(
-        'signInWithKakao: Authenticated 결과 → registerCurrentToken 정확히 1회',
+    test('signInWithKakao: Authenticated 결과 → registerCurrentToken 정확히 1회',
         () async {
-      final (:container, fcmSpy: fcmSpy, calls: _) =
-          makeSpyContainer(mockRepo: MockAuthRepository.existing());
+      final (:container, fcmSpy: fcmSpy, calls: _) = makeSpyContainer(
+          mockRepo: MockAuthRepository.existing(onboarded: true));
 
       await container.read(authControllerProvider.future);
-      await container
-          .read(authControllerProvider.notifier)
-          .signInWithKakao();
+      await container.read(authControllerProvider.notifier).signInWithKakao();
 
       // unawaited이므로 microtask flush 대기
       await Future<void>.delayed(Duration.zero);
@@ -206,16 +208,13 @@ void main() {
           reason: 'Authenticated 로그인 시 register 1회');
     });
 
-    test(
-        'signInWithApple: Authenticated 결과 → registerCurrentToken 정확히 1회',
+    test('signInWithApple: Authenticated 결과 → registerCurrentToken 정확히 1회',
         () async {
-      final (:container, fcmSpy: fcmSpy, calls: _) =
-          makeSpyContainer(mockRepo: MockAuthRepository.existing());
+      final (:container, fcmSpy: fcmSpy, calls: _) = makeSpyContainer(
+          mockRepo: MockAuthRepository.existing(onboarded: true));
 
       await container.read(authControllerProvider.future);
-      await container
-          .read(authControllerProvider.notifier)
-          .signInWithApple();
+      await container.read(authControllerProvider.notifier).signInWithApple();
 
       await Future<void>.delayed(Duration.zero);
 
@@ -223,17 +222,13 @@ void main() {
           reason: 'Authenticated 로그인(Apple) 시 register 1회');
     });
 
-    test(
-        'recoverAccount: 복구 성공 → registerCurrentToken 정확히 1회',
-        () async {
+    test('recoverAccount: 복구 성공 → registerCurrentToken 정확히 1회', () async {
       final (:container, fcmSpy: fcmSpy, calls: _) =
           makeSpyContainer(mockRepo: MockAuthRepository.deletionGrace());
 
       await container.read(authControllerProvider.future);
       // Recoverable 결과로 signIn 먼저 (세션 없음 상태 설정)
-      await container
-          .read(authControllerProvider.notifier)
-          .signInWithKakao();
+      await container.read(authControllerProvider.notifier).signInWithKakao();
       final registerBefore = fcmSpy.registerCount;
 
       await container
@@ -249,22 +244,20 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  // ② NeedsTerms / Recoverable → registerCurrentToken 0회
+  // ② Authenticated pending도 토큰 보유 → register, Recoverable은 미호출
   // -------------------------------------------------------------------------
-  group('AuthController FCM 배선 — 비Authenticated 결과는 register 미호출', () {
-    test('signInWithKakao: NeedsTerms 결과 → register 0회', () async {
+  group('AuthController FCM 배선 — 로그인 결과별 register', () {
+    test('signInWithKakao: 약관 pending Authenticated도 register 1회', () async {
       final (:container, fcmSpy: fcmSpy, calls: _) =
           makeSpyContainer(mockRepo: MockAuthRepository.newUser());
 
       await container.read(authControllerProvider.future);
-      await container
-          .read(authControllerProvider.notifier)
-          .signInWithKakao();
+      await container.read(authControllerProvider.notifier).signInWithKakao();
 
       await Future<void>.delayed(Duration.zero);
 
-      expect(fcmSpy.registerCount, 0,
-          reason: 'NeedsTerms는 Authenticated 아님 → register 미호출');
+      expect(fcmSpy.registerCount, 1,
+          reason: '최신 계약은 신규 사용자도 토큰이 발급되므로 register 호출');
     });
 
     test('signInWithKakao: Recoverable 결과 → register 0회', () async {
@@ -272,9 +265,7 @@ void main() {
           makeSpyContainer(mockRepo: MockAuthRepository.deletionGrace());
 
       await container.read(authControllerProvider.future);
-      await container
-          .read(authControllerProvider.notifier)
-          .signInWithKakao();
+      await container.read(authControllerProvider.notifier).signInWithKakao();
 
       await Future<void>.delayed(Duration.zero);
 
@@ -309,7 +300,8 @@ void main() {
       );
     });
 
-    test('withdraw: deleteToken 1회 + authRepository.withdraw() 보다 먼저', () async {
+    test('withdraw: deleteToken 1회 + authRepository.withdraw() 보다 먼저',
+        () async {
       final mockRepo = MockAuthRepository(
         initialSession: const AuthSession(
           userId: 'mock-user',

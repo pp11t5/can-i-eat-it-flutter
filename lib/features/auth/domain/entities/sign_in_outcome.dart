@@ -5,7 +5,6 @@ import 'auth_session.dart';
 ///
 /// 서버 HTTP 상태와 1:1 대응:
 /// - 200 → [Authenticated]
-/// - 400 (약관 미동의) → [NeedsTerms]
 /// - 403 (복구 가능) → [Recoverable]
 ///
 /// [login_screen._handlePostSignIn] 에서 exhaustive switch 로 분기한다.
@@ -22,15 +21,6 @@ final class Authenticated extends SignInOutcome {
 
   final AuthSession session;
   final bool onboarded;
-}
-
-/// 약관 동의 필요 (HTTP 400).
-///
-/// [requirements]: 어떤 항목의 동의가 필요한지.
-final class NeedsTerms extends SignInOutcome {
-  const NeedsTerms({required this.requirements});
-
-  final Set<TermsRequirement> requirements;
 }
 
 /// 복구 가능한 계정 (HTTP 403).

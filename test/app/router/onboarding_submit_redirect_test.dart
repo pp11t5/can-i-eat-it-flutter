@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/router/app_router.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
@@ -59,7 +60,13 @@ void main() {
     testWidgets(
       'submit() 호출 후 sessionStatus가 ready로 전이되고 HomeScreen으로 이동한다',
       (tester) async {
-        final authRepo = MockAuthRepository.existing();
+        final authRepo = MockAuthRepository(
+          initialSession: const AuthSession(
+            userId: 'post-consent-user',
+            provider: AuthProvider.kakao,
+            hasAgreedTerms: true,
+          ),
+        );
         final profileRepo = MockHealthProfileRepository.noProfile();
 
         await tester.pumpWidget(
@@ -67,21 +74,14 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // 1단계: 미인증 → LoginScreen 확인.
-        expect(find.text('카카오로 로그인'), findsOneWidget);
-
-        // 2단계: 카카오 버튼 탭 → signInWithKakao() → context.go('/') →
-        //        guard 재평가 → needsOnboarding → /onboarding/condition.
-        await tester.tap(find.text('카카오로 로그인'));
-        await tester.pumpAndSettle();
-
+        // 약관 제출 완료 세션 + 프로필 없음 → 온보딩으로 복원.
         expect(
           find.byType(OnboardingConditionScreen),
           findsOneWidget,
           reason: '프로필 없는 기존 사용자는 OnboardingConditionScreen으로 가야 한다',
         );
 
-        // 3단계: submit() 호출.
+        // submit() 호출.
         // ProviderScope.containerOf로 실제 컨테이너에서 notifier에 접근한다.
         // OnboardingConditionScreen이 현재 빌드 트리에 존재하므로 이를 anchor로 사용.
         final container = ProviderScope.containerOf(
@@ -90,11 +90,12 @@ void main() {
         await container.read(onboardingSubmitProvider.notifier).submit();
         await tester.pumpAndSettle();
 
-        // 4단계: gate가 flip됐고 router가 HomeScreen으로 redirect했음을 확인.
+        // gate가 flip됐고 router가 HomeScreen으로 redirect했음을 확인.
         expect(
           find.byType(HomeScreen),
           findsOneWidget,
-          reason: 'submit 성공 후 sessionStatus=ready → guard가 HomeScreen(/)으로 redirect해야 한다',
+          reason:
+              'submit 성공 후 sessionStatus=ready → guard가 HomeScreen(/)으로 redirect해야 한다',
         );
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),

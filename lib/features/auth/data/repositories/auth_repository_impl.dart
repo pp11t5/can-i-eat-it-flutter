@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 
-import 'package:can_i_eat_it/core/config/terms_catalog.dart';
 import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/core/network/api_endpoints.dart';
 import 'package:can_i_eat_it/core/network/failure_mapper.dart';
@@ -13,8 +12,8 @@ import 'package:can_i_eat_it/features/auth/data/dtos/term_response_dto.dart';
 import 'package:can_i_eat_it/features/auth/data/services/apple_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/data/services/kakao_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/consent.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
-import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 import 'package:can_i_eat_it/features/auth/domain/repositories/auth_repository.dart';
 
 /// [AuthRepository] 실 구현 (ADR-0007 §3-1 (6-A)).
@@ -91,91 +90,68 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> recordTermsAgreement(TermsAgreement agreement) async {
-    if (_session == null) {
-      throw StateError(
-        'recordTermsAgreement: 활성 세션이 없습니다. signIn 후 호출해야 합니다.',
-      );
-    }
-
-    // 1) GET /consent/terms — termId 조인용 약관 목록. 하드코딩 절대 금지(규제성).
-    //    폴백 없이 실패 시 재시도 유도(원인과 무관하게 동일 메시지로 통일).
-    final List<TermResponseDto> terms;
+  Future<List<ConsentTerm>> fetchConsentTerms() async {
     try {
       final response = await _dio.get<dynamic>(ApiEndpoints.consentTerms);
       final items = unwrap<List<dynamic>>(
         response,
         (json) => json as List<dynamic>,
       );
-      terms = items
-          .map((e) => TermResponseDto.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final terms = items
+          .map((item) => TermResponseDto.fromJson(item as Map<String, dynamic>))
+          .map((dto) => dto.toEntity())
+          .toList(growable: false);
+      if (terms.isEmpty) {
+        throw const NetworkFailure('현재 동의할 약관이 없어요. 다시 시도해 주세요.');
+      }
+      return terms;
+    } on Failure {
+      rethrow;
+    } on DioException catch (e) {
+      throw FailureMapper.fromDioException(e);
     } catch (_) {
-      throw const NetworkFailure('약관 정보를 불러오지 못했어요. 다시 시도해 주세요');
+      throw const NetworkFailure('약관 정보를 불러오지 못했어요. 다시 시도해 주세요.');
+    }
+  }
+
+  @override
+  Future<void> submitConsent(List<ConsentChoice> choices) async {
+    if (_session == null) {
+      throw StateError(
+        'submitConsent: 활성 세션이 없습니다. signIn 후 호출해야 합니다.',
+      );
+    }
+    if (choices.isEmpty) {
+      throw const NetworkFailure('제출할 약관 정보가 없어요. 다시 시도해 주세요.');
     }
 
-    // 2) 서버 term.code → 로컬 슬롯 매핑 + requiredButNotAgreed 로컬 검증.
-    //    required=true 인데 (a) agreed=false 이거나 (b) UI 미표시(미인식) code 면
-    //    무성 400 대신 여기서 명시적으로 실패시킨다.
-    final consents = <ConsentItemDto>[];
-    for (final term in terms) {
-      final agreed = _resolveLocalAgreement(term.code, agreement);
-      if (agreed == null) {
-        // 로컬 UI가 표시하지 않는(미인식) code.
-        if (term.isRequired) {
-          // 서버 필수 약관 code 를 로컬이 인식하지 못함(앱-서버 약관 드리프트).
-          // 실제 사용자 미동의(아래 :132)와 구분되는 메시지 — 코드 매핑 오류를
-          // 사용자 미동의로 오귀속하지 않도록 함(PR #179 리뷰 H1).
-          throw const NetworkFailure(
-            '약관 정보를 처리할 수 없어요. 앱을 최신 버전으로 업데이트해 주세요.',
-          );
-        }
-        // 선택 항목이면 대응 로컬 슬롯이 없으므로 consents에서 생략.
-        continue;
-      }
-      if (term.isRequired && !agreed) {
-        throw const NetworkFailure('필수 약관에 모두 동의해야 계속할 수 있어요.');
-      }
-      consents.add(ConsentItemDto(termId: term.id, agreed: agreed));
-    }
-    // 서버가 아직 약관을 시드하지 않은 경우(현재 dev: GET /consent/terms → [])
-    // consents 는 빈 배열이 된다 — 전방호환 정상 동작(서버 시드 시 자동 반영).
-
-    // 3) POST /consent
-    final dto = ConsentRequestDto(consents: consents);
+    final dto = ConsentRequestDto(
+      consents: choices
+          .map(
+            (choice) => ConsentItemDto(
+              termId: choice.termId,
+              agreed: choice.agreed,
+            ),
+          )
+          .toList(growable: false),
+    );
     try {
       final response = await _dio.post<dynamic>(
         ApiEndpoints.consent,
-        data: dto.toJson(),
+        data: {
+          'consents': dto.consents.map((item) => item.toJson()).toList(),
+        },
       );
       unwrapVoid(response);
     } on DioException catch (e) {
       throw FailureMapper.fromDioException(e);
     }
+    await _tokenStore.clearConsentPending();
     _session = _session!.copyWith(hasAgreedTerms: true);
   }
 
-  /// 서버 약관 [code] → 로컬 [TermsAgreement] 슬롯 매핑.
-  ///
-  /// 반환값 `null`은 미인식 code(로컬 UI가 표시하지 않는 약관 항목)를 뜻하며
-  /// 호출부가 [TermResponseDto.isRequired] 여부에 따라 처리한다.
-  bool? _resolveLocalAgreement(String code, TermsAgreement agreement) {
-    switch (code) {
-      case TermsCatalogCodes.tos:
-        return agreement.termsOfService;
-      case TermsCatalogCodes.privacy:
-        return agreement.privacy;
-      case TermsCatalogCodes.healthSensitive:
-        return agreement.sensitiveInfo;
-      case TermsCatalogCodes.marketing:
-        return agreement.marketing;
-      default:
-        return null;
-    }
-  }
-
   @override
-  Future<AuthSession> recoverAccount(
+  Future<Authenticated> recoverAccount(
     AuthProvider provider, {
     required String idToken,
   }) async {
@@ -191,15 +167,9 @@ class AuthRepositoryImpl implements AuthRepository {
         (json) => AuthLoginResponseDto.fromJson(json as Map<String, dynamic>),
       );
 
-      await _tokenStore.writeTokens(
-        access: dto.accessToken,
-        refresh: dto.refreshToken,
-      );
-
-      _session = dto.toEntity(provider);
-      return _session!;
+      return await _completeAuthenticatedSession(dto, provider);
     } on DioException catch (e) {
-      // _signIn/getMe/recordTermsAgreement 와 동일 계약 유지 (M1 수정).
+      // _signIn/getMe/submitConsent 와 동일 계약 유지 (M1 수정).
       throw FailureMapper.fromDioException(e);
     }
   }
@@ -238,10 +208,15 @@ class AuthRepositoryImpl implements AuthRepository {
       final previous = _session;
       final provider = previous?.provider ?? AuthProvider.kakao;
       final fromServer = dto.toEntity(provider);
+      final pendingUserId = await _tokenStore.readPendingConsentUserId();
+      if (pendingUserId != null && pendingUserId != fromServer.userId) {
+        await _tokenStore.clearConsentPending();
+      }
       _session = fromServer.copyWith(
         email: fromServer.email ?? previous?.email,
         profileImageUrl:
             fromServer.profileImageUrl ?? previous?.profileImageUrl,
+        hasAgreedTerms: pendingUserId != fromServer.userId,
       );
       return _session!;
     } on DioException catch (e) {
@@ -301,7 +276,7 @@ class AuthRepositoryImpl implements AuthRepository {
   /// 1. 제공자 SDK에서 서버 계약에 맞는 자격 증명 획득
   /// 2. `POST /auth/{provider}/login` 호출
   /// 3. 성공(200) → 토큰 저장 + `GET /onboarding/status` → [Authenticated]
-  /// 4. [TermsRequiredFailure] catch → [NeedsTerms]
+  /// 4. 온보딩 미완료면 로컬 consent pending 저장
   /// 5. [RecoverableAccountFailure] catch → [Recoverable]
   Future<SignInOutcome> _signIn(AuthProvider provider) async {
     // idToken 을 try 블록 밖에 선언 — RecoverableAccountFailure catch 에서 운반하기 위함.
@@ -333,14 +308,33 @@ class AuthRepositoryImpl implements AuthRepository {
         (json) => AuthLoginResponseDto.fromJson(json as Map<String, dynamic>),
       );
 
-      // 3. 토큰 저장
+      return await _completeAuthenticatedSession(loginDto, provider);
+    } on RecoverableAccountFailure catch (f) {
+      // idToken 은 카카오 획득 직후 대입됐으므로 null 이 아님.
+      return Recoverable(
+          reason: f.reason, provider: provider, idToken: idToken!);
+    } on DioException catch (e) {
+      throw FailureMapper.fromDioException(e);
+    }
+  }
+
+  /// 로그인/복구 공통 세션 확정 단계.
+  ///
+  /// 토큰을 저장한 뒤에는 `/onboarding/status`와 pending 저장까지 모두 성공해야
+  /// 인증 세션이 유효하다. 중간 실패 시 토큰 일부만 남아 다음 실행에 약관 게이트를
+  /// 우회하지 않도록 로컬 인증 상태를 best-effort로 롤백한다.
+  Future<Authenticated> _completeAuthenticatedSession(
+    AuthLoginResponseDto loginDto,
+    AuthProvider provider,
+  ) async {
+    try {
       await _tokenStore.writeTokens(
         access: loginDto.accessToken,
         refresh: loginDto.refreshToken,
       );
       _session = loginDto.toEntity(provider);
 
-      // 4. GET /onboarding/status — 방금 받은 accessToken 이 AuthInterceptor 에 주입됨
+      // 방금 저장한 accessToken은 AuthInterceptor가 주입한다.
       final statusResponse =
           await _dio.get<dynamic>(ApiEndpoints.onboardingStatus);
       final statusDto = unwrap<OnboardingStatusDto>(
@@ -348,15 +342,31 @@ class AuthRepositoryImpl implements AuthRepository {
         (json) => OnboardingStatusDto.fromJson(json as Map<String, dynamic>),
       );
 
+      if (statusDto.onboarded) {
+        await _tokenStore.clearConsentPending();
+        _session = _session!.copyWith(hasAgreedTerms: true);
+      } else {
+        await _tokenStore.markConsentPending(_session!.userId);
+        _session = _session!.copyWith(hasAgreedTerms: false);
+      }
+
       return Authenticated(session: _session!, onboarded: statusDto.onboarded);
-    } on TermsRequiredFailure catch (f) {
-      return NeedsTerms(requirements: f.requirements);
-    } on RecoverableAccountFailure catch (f) {
-      // idToken 은 카카오 획득 직후 대입됐으므로 null 이 아님.
-      return Recoverable(
-          reason: f.reason, provider: provider, idToken: idToken!);
-    } on DioException catch (e) {
-      throw FailureMapper.fromDioException(e);
+    } catch (error, stackTrace) {
+      await _rollbackProvisionalAuthentication();
+      Error.throwWithStackTrace(error, stackTrace);
+    }
+  }
+
+  /// 세션 확정 실패 후 토큰·pending·메모리 캐시를 정리한다.
+  ///
+  /// secure storage 자체의 실패가 원래 네트워크/파싱 오류를 가리지 않도록 clear는
+  /// best-effort로 처리한다. [TokenStore.clear]는 pending도 함께 삭제한다.
+  Future<void> _rollbackProvisionalAuthentication() async {
+    _session = null;
+    try {
+      await _tokenStore.clear();
+    } catch (_) {
+      // 원래 인증 실패를 보존한다. 다음 인증 시도에서 다시 정리될 수 있다.
     }
   }
 }

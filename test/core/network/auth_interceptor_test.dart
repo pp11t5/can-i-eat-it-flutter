@@ -185,8 +185,7 @@ void main() {
 
       expect(results.length, 3);
       for (final r in results) {
-        expect(r.statusCode, 200,
-            reason: '모든 retry 가 200 을 반환해야 한다');
+        expect(r.statusCode, 200, reason: '모든 retry 가 200 을 반환해야 한다');
       }
 
       // 핵심 검증: 어댑터 레벨에서 refresh 가 정확히 1회
@@ -195,7 +194,8 @@ void main() {
               '(현재: ${countingAdapter.callCount}회)');
     });
 
-    test('refresh token rotation: 토큰 비교 가드로 두 번째 401은 refresh 없이 새 토큰으로 retry 됨',
+    test(
+        'refresh token rotation: 토큰 비교 가드로 두 번째 401은 refresh 없이 새 토큰으로 retry 됨',
         () async {
       // 시나리오: "요청 시점에는 old-access 헤더, onError 진입 시 store = new-access".
       // 구현: store 를 new-access 로 설정하되 overrideInterceptor 로
@@ -217,8 +217,8 @@ void main() {
       // refresh 가 호출되면 401 실패 (가드로 막혀 실제로는 호출되지 않아야 함)
       refreshDioAdapter.onPost(
         ApiEndpoints.authRefresh,
-        (server) =>
-            server.reply(401, _failureEnvelope('AUTH401', 'should-not-be-called')),
+        (server) => server.reply(
+            401, _failureEnvelope('AUTH401', 'should-not-be-called')),
       );
       // retry 1회 (new-access 로 성공)
       refreshDioAdapter.onGet(
@@ -267,7 +267,8 @@ void main() {
   });
 
   // ── (c) refresh 실패 → SessionExpiredFailure + clear + onSessionExpired ──
-  group('(c) refresh 실패 → SessionExpiredFailure + clear + onSessionExpired', () {
+  group('(c) refresh 실패 → SessionExpiredFailure + clear + onSessionExpired',
+      () {
     test('refresh 실패 시 TokenStore clear + onSessionExpired 호출된다', () async {
       final store = InMemoryTokenStore();
       await store.writeTokens(access: 'old-access', refresh: 'bad-refresh');
@@ -318,18 +319,14 @@ void main() {
 
   // ── (d) FailureMapper code 별 매핑 ───────────────────────────────────────
   group('(d) 봉투 code 별 Failure 매핑 (FailureMapper)', () {
-    test('AUTH400_1 → TermsRequiredFailure(email)', () {
+    test('AUTH400_1 → SocialProfilePermissionFailure', () {
       final f = FailureMapper.fromCode('AUTH400_1');
-      expect(f, isA<TermsRequiredFailure>());
-      expect(
-          (f as TermsRequiredFailure).requirements, {TermsRequirement.email});
+      expect(f, isA<SocialProfilePermissionFailure>());
     });
 
-    test('AUTH400_3 → TermsRequiredFailure(nickname)', () {
+    test('AUTH400_3 → SocialProfilePermissionFailure', () {
       final f = FailureMapper.fromCode('AUTH400_3');
-      expect(f, isA<TermsRequiredFailure>());
-      expect(
-          (f as TermsRequiredFailure).requirements, {TermsRequirement.nickname});
+      expect(f, isA<SocialProfilePermissionFailure>());
     });
 
     test('AUTH403_2 → RecoverableAccountFailure(inactive)', () {
@@ -361,7 +358,7 @@ void main() {
   // validateStatus 를 통해 Response 를 받고 unwrap() 이 Failure 를 생성함"을
   // 검증한다.
   group('(e) 실 HTTP 4xx → validateStatus → unwrap → Failure 자동 경로', () {
-    test('HTTP 400 + AUTH400_1 봉투 → TermsRequiredFailure (validateStatus 경로)', () async {
+    test('HTTP 400 + AUTH400_1 봉투 → SocialProfilePermissionFailure', () async {
       // validateStatus: 400 을 정상 Response 로 받는 dio
       final dio = _mainDioWithValidateStatus();
       final adapter = DioAdapter(dio: dio, matcher: _urlMatcher);
@@ -378,14 +375,15 @@ void main() {
       final response = await dio.get<dynamic>('/login');
       expect(response.statusCode, 400);
 
-      // unwrap 이 TermsRequiredFailure 를 throw
+      // 앱 약관 화면이 아니라 소셜 제공자 권한 오류를 throw
       expect(
         () => unwrap<String>(response, (j) => j as String),
-        throwsA(isA<TermsRequiredFailure>()),
+        throwsA(isA<SocialProfilePermissionFailure>()),
       );
     });
 
-    test('HTTP 403 + AUTH403_5 봉투 → RecoverableAccountFailure (validateStatus 경로)',
+    test(
+        'HTTP 403 + AUTH403_5 봉투 → RecoverableAccountFailure (validateStatus 경로)',
         () async {
       final dio = _mainDioWithValidateStatus();
       final adapter = DioAdapter(dio: dio, matcher: _urlMatcher);
@@ -407,7 +405,8 @@ void main() {
       );
     });
 
-    test('HTTP 403 + AUTH403_2 봉투 → RecoverableAccountFailure(inactive)', () async {
+    test('HTTP 403 + AUTH403_2 봉투 → RecoverableAccountFailure(inactive)',
+        () async {
       final dio = _mainDioWithValidateStatus();
       final adapter = DioAdapter(dio: dio, matcher: _urlMatcher);
 
@@ -463,7 +462,8 @@ void main() {
       expect(response.statusCode, 200);
     });
 
-    test('HTTP 400 + AUTH400_3 봉투 → TermsRequiredFailure(nickname) (validateStatus 경로)',
+    test(
+        'HTTP 400 + AUTH400_3 봉투 → SocialProfilePermissionFailure (validateStatus 경로)',
         () async {
       final dio = _mainDioWithValidateStatus();
       final adapter = DioAdapter(dio: dio, matcher: _urlMatcher);
@@ -480,8 +480,7 @@ void main() {
       expect(response.statusCode, 400);
       expect(
         () => unwrap<String>(response, (j) => j as String),
-        throwsA(predicate<TermsRequiredFailure>(
-            (f) => f.requirements.contains(TermsRequirement.nickname))),
+        throwsA(isA<SocialProfilePermissionFailure>()),
       );
     });
   });
@@ -513,7 +512,7 @@ void main() {
       final response = await dio.get<dynamic>('/ep');
       expect(
         () => unwrap<String>(response, (j) => j as String),
-        throwsA(isA<TermsRequiredFailure>()),
+        throwsA(isA<SocialProfilePermissionFailure>()),
       );
     });
   });

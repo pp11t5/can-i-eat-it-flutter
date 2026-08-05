@@ -65,22 +65,14 @@ void main() {
   // 기존 AUTH / FOOD 코드 매핑 회귀
   // -------------------------------------------------------------------------
   group('FailureMapper.fromCode — AUTH / FOOD 코드 회귀', () {
-    test('AUTH400_1 → TermsRequiredFailure(email)', () {
+    test('AUTH400_1 → SocialProfilePermissionFailure', () {
       final failure = FailureMapper.fromCode('AUTH400_1');
-      expect(failure, isA<TermsRequiredFailure>());
-      expect(
-        (failure as TermsRequiredFailure).requirements,
-        contains(TermsRequirement.email),
-      );
+      expect(failure, isA<SocialProfilePermissionFailure>());
     });
 
-    test('AUTH400_3 → TermsRequiredFailure(nickname)', () {
+    test('AUTH400_3 → SocialProfilePermissionFailure (구 서버 호환)', () {
       final failure = FailureMapper.fromCode('AUTH400_3');
-      expect(failure, isA<TermsRequiredFailure>());
-      expect(
-        (failure as TermsRequiredFailure).requirements,
-        contains(TermsRequirement.nickname),
-      );
+      expect(failure, isA<SocialProfilePermissionFailure>());
     });
 
     test('AUTH403_2 → RecoverableAccountFailure(inactive)', () {

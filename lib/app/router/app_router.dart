@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:can_i_eat_it/app/router/guards/auth_guard.dart';
 import 'package:can_i_eat_it/app/widgets/app_shell.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/session_providers.dart';
+import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/login_screen.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/splash_screen.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/terms_screen.dart';
@@ -52,6 +53,9 @@ GoRouter appRouter(Ref ref) {
   ref.listen<SessionStatus>(sessionStatusProvider, (prev, next) {
     if (prev != next) notifier.value++;
   });
+  ref.listen<bool>(consentNavigationTransitionProvider, (prev, next) {
+    if (prev != next) notifier.value++;
+  });
 
   // provider가 dispose될 때 notifier도 함께 해제한다.
   ref.onDispose(notifier.dispose);
@@ -61,7 +65,12 @@ GoRouter appRouter(Ref ref) {
     refreshListenable: notifier,
     redirect: (context, state) {
       final status = ref.read(sessionStatusProvider);
-      return resolveRedirect(status: status, location: state.matchedLocation);
+      return resolveRedirect(
+        status: status,
+        location: state.matchedLocation,
+        allowTermsDuringConsentTransition:
+            ref.read(consentNavigationTransitionProvider),
+      );
     },
     routes: [
       GoRoute(

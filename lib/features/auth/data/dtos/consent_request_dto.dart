@@ -20,11 +20,7 @@ abstract class ConsentItemDto with _$ConsentItemDto {
 
 /// `POST /consent` 요청 바디 DTO (약관 신 계약 마이그레이션).
 ///
-/// 구 계약(`{tos,privacy,healthSensitive,marketing}` 4-bool)에서
-/// `{consents:[{termId,agreed}]}` 형태로 전환됐다. 로컬 [TermsAgreement] 엔티티
-/// (구 4-bool 슬롯)를 서버 termId 기반 배열로 매핑하는 책임은
-/// `AuthRepositoryImpl.recordTermsAgreement` 가 진다(termId 조인이 필요하므로
-/// `GET /consent/terms` 응답 없이는 이 DTO를 순수 함수로 만들 수 없음).
+/// 화면에 표시된 최신 약관의 termId와 선택값을 그대로 배열로 전달한다.
 @freezed
 abstract class ConsentRequestDto with _$ConsentRequestDto {
   const factory ConsentRequestDto({

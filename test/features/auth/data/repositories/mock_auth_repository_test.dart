@@ -1,25 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:can_i_eat_it/core/config/terms_catalog.dart';
-import 'package:can_i_eat_it/core/error/failure.dart';
+
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/consent.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
-import 'package:can_i_eat_it/features/auth/domain/entities/terms_agreement.dart';
 
 void main() {
-  // ---------------------------------------------------------------------------
-  // 헬퍼: 테스트용 필수 3개 동의 TermsAgreement
-  // ---------------------------------------------------------------------------
-  TermsAgreement requiredAgreed({bool marketing = false}) => TermsAgreement(
-        version: TermsCatalog.currentVersion,
-        agreedAt: DateTime(2026, 1, 1),
-        termsOfService: true,
-        privacy: true,
-        sensitiveInfo: true,
-        marketing: marketing,
-      );
+  const choices = [
+    ConsentChoice(termId: 1, agreed: true),
+    ConsentChoice(termId: 2, agreed: true),
+    ConsentChoice(termId: 3, agreed: true),
+    ConsentChoice(termId: 4, agreed: false),
+  ];
 
-  // ---------------------------------------------------------------------------
   group('미인증', () {
     test('로그인 안 한 상태에서 currentSession 은 null 이다', () async {
       final repo = MockAuthRepository.signedOut();
@@ -27,178 +20,98 @@ void main() {
     });
   });
 
-  // ---------------------------------------------------------------------------
-  group('신규 가입(약관 미동의) — NeedsTerms', () {
-    test('카카오 로그인 시 NeedsTerms 를 반환한다', () async {
-      final repo = MockAuthRepository.newUser();
-      final outcome = await repo.signInWithKakao();
-      expect(outcome, isA<NeedsTerms>());
+  group('신규 가입 — Authenticated + 약관 pending', () {
+    test('카카오와 Apple 모두 onboarded=false Authenticated 를 반환한다', () async {
+      final kakao = await MockAuthRepository.newUser().signInWithKakao();
+      final apple = await MockAuthRepository.newUser().signInWithApple();
+
+      expect(kakao, isA<Authenticated>());
+      expect((kakao as Authenticated).onboarded, isFalse);
+      expect(apple, isA<Authenticated>());
+      expect((apple as Authenticated).onboarded, isFalse);
     });
 
-    test('애플 로그인 시 NeedsTerms 를 반환한다', () async {
-      final repo = MockAuthRepository.newUser();
-      final outcome = await repo.signInWithApple();
-      expect(outcome, isA<NeedsTerms>());
-    });
-
-    test('카카오 로그인 후 currentSession 은 hasAgreedTerms=false 인 임시 세션이다', () async {
+    test('로그인 후 세션은 hasAgreedTerms=false 이고 provider를 보존한다', () async {
       final repo = MockAuthRepository.newUser();
       await repo.signInWithKakao();
       final current = await repo.currentSession();
+
       expect(current, isNotNull);
       expect(current!.hasAgreedTerms, isFalse);
       expect(current.provider, AuthProvider.kakao);
     });
   });
 
-  // ---------------------------------------------------------------------------
-  group('기존 가입(약관 동의됨) — Authenticated', () {
-    test('existing() 카카오 로그인 시 Authenticated 를 반환한다', () async {
-      final repo = MockAuthRepository.existing();
-      final outcome = await repo.signInWithKakao();
-      expect(outcome, isA<Authenticated>());
+  group('기존 가입', () {
+    test('온보딩 완료 사용자는 동의 완료 세션으로 인증된다', () async {
+      final repo = MockAuthRepository.existing(onboarded: true);
+      final outcome = await repo.signInWithKakao() as Authenticated;
+
+      expect(outcome.onboarded, isTrue);
+      expect(outcome.session.hasAgreedTerms, isTrue);
+      expect(outcome.session.accountStatus, AccountStatus.active);
     });
 
-    test('existing() Authenticated 의 session 은 약관 동의됨, active 상태다', () async {
-      final repo = MockAuthRepository.existing();
-      final outcome = await repo.signInWithKakao();
-      final auth = outcome as Authenticated;
-      expect(auth.session.hasAgreedTerms, isTrue);
-      expect(auth.session.accountStatus, AccountStatus.active);
-    });
+    test('온보딩 미완료 사용자는 다시 약관 pending 세션으로 인증된다', () async {
+      final outcome = await MockAuthRepository.existing(onboarded: false)
+          .signInWithKakao() as Authenticated;
 
-    test('existing() Authenticated 의 session.provider 가 kakao 다', () async {
-      final repo = MockAuthRepository.existing();
-      final outcome = await repo.signInWithKakao();
-      final auth = outcome as Authenticated;
-      expect(auth.session.provider, AuthProvider.kakao);
+      expect(outcome.onboarded, isFalse);
+      expect(outcome.session.hasAgreedTerms, isFalse);
     });
   });
 
-  // ---------------------------------------------------------------------------
-  group('약관 동의 이력', () {
-    test('recordTermsAgreement 후 세션 hasAgreedTerms 가 true 가 된다', () async {
+  group('동적 약관', () {
+    test('서버 약관 목록을 반환한다', () async {
       final repo = MockAuthRepository.newUser();
-      await repo.signInWithKakao();
-      await repo.recordTermsAgreement(requiredAgreed());
-      final session = await repo.currentSession();
-      expect(session!.hasAgreedTerms, isTrue);
+      expect(await repo.fetchConsentTerms(), hasLength(4));
     });
 
-    test('동의 이력(lastTermsAgreement)이 기록된다', () async {
+    test('submitConsent 후 선택값을 기록하고 세션 동의를 완료한다', () async {
       final repo = MockAuthRepository.newUser();
       await repo.signInWithKakao();
-      final agreement = requiredAgreed();
-      await repo.recordTermsAgreement(agreement);
-      expect(repo.lastTermsAgreement, equals(agreement));
+      await repo.submitConsent(choices);
+
+      expect(repo.lastConsentChoices, choices);
+      expect((await repo.currentSession())!.hasAgreedTerms, isTrue);
     });
 
-    test('세션 없이 recordTermsAgreement 호출 시 StateError 를 던진다', () async {
+    test('세션 없이 submitConsent 호출 시 StateError 를 던진다', () async {
       final repo = MockAuthRepository.signedOut();
-      expect(
-        () => repo.recordTermsAgreement(requiredAgreed()),
+      await expectLater(
+        repo.submitConsent(choices),
         throwsA(isA<StateError>()),
       );
     });
   });
 
-  // ---------------------------------------------------------------------------
-  group('삭제 유예 복구(02a) — Recoverable', () {
-    test('deletionGrace() 로그인 시 Recoverable 를 반환한다', () async {
+  group('삭제 유예 복구', () {
+    test('복구 가능한 로그인 결과와 active 복구 세션을 반환한다', () async {
       final repo = MockAuthRepository.deletionGrace();
       final outcome = await repo.signInWithKakao();
       expect(outcome, isA<Recoverable>());
-    });
 
-    test('deletionGrace() Recoverable.reason 이 deletionInProgress 다', () async {
-      final repo = MockAuthRepository.deletionGrace();
-      final outcome = await repo.signInWithKakao();
-      final rec = outcome as Recoverable;
-      expect(rec.reason, RecoverReason.deletionInProgress);
-    });
-
-    test('recoverAccount 후 accountStatus 가 active 가 된다', () async {
-      final repo = MockAuthRepository.deletionGrace();
-      await repo.signInWithKakao();
-      // 403 경로는 _session=null 이므로 provider 와 idToken 을 직접 전달
       final recovered = await repo.recoverAccount(
         AuthProvider.kakao,
         idToken: 'test-id-token',
       );
-      expect(recovered.accountStatus, AccountStatus.active);
+      expect(recovered.session.accountStatus, AccountStatus.active);
+      expect(recovered.onboarded, isFalse);
+      expect(recovered.session.hasAgreedTerms, isFalse);
     });
   });
 
-  // ---------------------------------------------------------------------------
   group('signOut / logout', () {
-    test('signOut 후 currentSession 은 null 이다', () async {
-      final repo = MockAuthRepository.existing();
-      await repo.signInWithKakao();
-      await repo.signOut();
-      expect(await repo.currentSession(), isNull);
-    });
+    test('signOut 과 logout 후 currentSession 은 null 이다', () async {
+      final signOutRepo = MockAuthRepository.existing(onboarded: true);
+      await signOutRepo.signInWithKakao();
+      await signOutRepo.signOut();
+      expect(await signOutRepo.currentSession(), isNull);
 
-    test('logout 후 currentSession 은 null 이다', () async {
-      final repo = MockAuthRepository.existing();
-      await repo.signInWithKakao();
-      await repo.logout();
-      expect(await repo.currentSession(), isNull);
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  group('TermsAgreement.allRequiredAgreed', () {
-    test('필수 3개가 모두 true 면 allRequiredAgreed 가 true 다', () {
-      final agreement = requiredAgreed(marketing: false);
-      expect(agreement.allRequiredAgreed, isTrue);
-    });
-
-    test('marketing 이 false 여도 필수 3개가 true 면 allRequiredAgreed 가 true 다', () {
-      final agreement = TermsAgreement(
-        version: TermsCatalog.currentVersion,
-        agreedAt: DateTime(2026, 1, 1),
-        termsOfService: true,
-        privacy: true,
-        sensitiveInfo: true,
-        marketing: false,
-      );
-      expect(agreement.allRequiredAgreed, isTrue);
-    });
-
-    test('필수 중 하나라도 false 면 allRequiredAgreed 가 false 다 — termsOfService', () {
-      final agreement = TermsAgreement(
-        version: TermsCatalog.currentVersion,
-        agreedAt: DateTime(2026, 1, 1),
-        termsOfService: false,
-        privacy: true,
-        sensitiveInfo: true,
-        marketing: true,
-      );
-      expect(agreement.allRequiredAgreed, isFalse);
-    });
-
-    test('필수 중 하나라도 false 면 allRequiredAgreed 가 false 다 — privacy', () {
-      final agreement = TermsAgreement(
-        version: TermsCatalog.currentVersion,
-        agreedAt: DateTime(2026, 1, 1),
-        termsOfService: true,
-        privacy: false,
-        sensitiveInfo: true,
-        marketing: true,
-      );
-      expect(agreement.allRequiredAgreed, isFalse);
-    });
-
-    test('필수 중 하나라도 false 면 allRequiredAgreed 가 false 다 — sensitiveInfo', () {
-      final agreement = TermsAgreement(
-        version: TermsCatalog.currentVersion,
-        agreedAt: DateTime(2026, 1, 1),
-        termsOfService: true,
-        privacy: true,
-        sensitiveInfo: false,
-        marketing: true,
-      );
-      expect(agreement.allRequiredAgreed, isFalse);
+      final logoutRepo = MockAuthRepository.existing(onboarded: true);
+      await logoutRepo.signInWithKakao();
+      await logoutRepo.logout();
+      expect(await logoutRepo.currentSession(), isNull);
     });
   });
 }
