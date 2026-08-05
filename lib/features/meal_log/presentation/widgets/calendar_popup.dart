@@ -17,6 +17,7 @@ import 'package:can_i_eat_it/features/meal_log/presentation/widgets/week_nav.dar
 /// [minDate]: 선택 가능 하한(가입일). null 이면 하한 없음.
 ///   - 가입일 이전 셀: 회색 박스 + 탭 불가
 ///   - 가입월보다 이전으로 `<` 월이동 불가 (chevron = [AppColors.controlDisabled])
+///   - 오늘 월보다 이후로 `>` 월이동 불가 (chevron gray60)
 ///
 /// 반환값: "확인" 탭 시 선택된 날짜, "취소"·바깥탭 시 null.
 /// 호출부는 null 이 아니면 선택일 반영 + 타임라인 재조회를 수행한다.
@@ -78,6 +79,11 @@ class _CalendarPopupState extends State<_CalendarPopup> {
         _month = minMonth;
       }
     }
+    // 오늘 월보다 이후 월로 열리면 오늘 월로 클램프.
+    final maxMonth = DateTime(widget.today.year, widget.today.month, 1);
+    if (_month.isAfter(maxMonth)) {
+      _month = maxMonth;
+    }
   }
 
   DateTime _clampToMin(DateTime day) {
@@ -94,12 +100,19 @@ class _CalendarPopupState extends State<_CalendarPopup> {
     return _month.isAfter(minMonth);
   }
 
+  /// 오늘 월보다 이전이면 true — 다음 달 이동 가능.
+  bool get _canGoNext {
+    final maxMonth = DateTime(widget.today.year, widget.today.month, 1);
+    return _month.isBefore(maxMonth);
+  }
+
   void _prevMonth() {
     if (!_canGoPrev) return;
     setState(() => _month = DateTime(_month.year, _month.month - 1, 1));
   }
 
   void _nextMonth() {
+    if (!_canGoNext) return;
     setState(() => _month = DateTime(_month.year, _month.month + 1, 1));
   }
 
@@ -130,7 +143,7 @@ class _CalendarPopupState extends State<_CalendarPopup> {
             _CalendarHeader(
               label: monthNavLabel(_month),
               onPrev: _canGoPrev ? _prevMonth : null,
-              onNext: _nextMonth,
+              onNext: _canGoNext ? _nextMonth : null,
             ),
             const SizedBox(height: AppSpacing.itemGap * 2), // gap 16
             Expanded(
@@ -169,11 +182,14 @@ class _CalendarHeader extends StatelessWidget {
 
   /// null 이면 이전 달 이동 불가 — chevron 색 [AppColors.controlDisabled].
   final VoidCallback? onPrev;
-  final VoidCallback onNext;
+
+  /// null 이면 다음 달 이동 불가 — chevron 색 [AppColors.controlDisabled].
+  final VoidCallback? onNext;
 
   @override
   Widget build(BuildContext context) {
     final prevEnabled = onPrev != null;
+    final nextEnabled = onNext != null;
     return Row(
       children: [
         Expanded(
@@ -201,10 +217,12 @@ class _CalendarHeader extends StatelessWidget {
         const SizedBox(width: 8),
         IconButton(
           onPressed: onNext,
-          icon: const AppIcon(
+          icon: AppIcon(
             AppIcons.chevronRight,
             size: AppIconSizes.s32,
-            color: AppColors.textPrimary,
+            color: nextEnabled
+                ? AppColors.textPrimary
+                : AppColors.controlDisabled,
             semanticsLabel: '다음 달',
           ),
           padding: EdgeInsets.zero,

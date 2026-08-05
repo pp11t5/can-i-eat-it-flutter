@@ -88,6 +88,14 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
     return DateTime(month.year, month.month).isAfter(minMonth);
   }
 
+  /// [month]가 오늘 월보다 이전이면 true — 다음 달 이동 가능 여부
+  /// (오늘 이후 월로는 이동 불가, MonthNav의 `›` gray60 비활성에도 사용).
+  bool _canGoNextFrom(DateTime month, DateTime today) {
+    final current = DateTime(month.year, month.month);
+    final maxMonth = DateTime(today.year, today.month);
+    return current.isBefore(maxMonth);
+  }
+
   /// 월 이동 시 기본 선택일.
   ///
   /// - 그 달에 **오늘**이 있으면 오늘
@@ -122,6 +130,9 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
   }
 
   void _onNextMonth() {
+    final today = _today();
+    if (!_canGoNextFrom(_visibleMonth, today)) return; // 오늘 월 이후 차단
+
     final newMonth = DateTime(_visibleMonth.year, _visibleMonth.month + 1, 1);
     final newSelected = _selectedForMonth(newMonth, join: _joinDate());
     setState(() {
@@ -204,6 +215,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
                     onNextMonth: _onNextMonth,
                     onOpenCalendar: _openCalendarPopup,
                     canGoPrev: _canGoPrevFrom(_visibleMonth, joinDate),
+                    canGoNext: _canGoNextFrom(_visibleMonth, _today()),
                   ),
                   const SizedBox(height: AppSpacing.itemGap),
                   // 횡스크롤 월 캘린더 — monthly() 연동 도트
