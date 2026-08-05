@@ -16,6 +16,12 @@ final FlutterLocalNotificationsPlugin _localNotis =
 StreamSubscription<RemoteMessage>? _foregroundMessageSubscription;
 StreamSubscription<RemoteMessage>? _openedAppSubscription;
 
+/// [wireOpenedApp]이 재호출돼도 warm 탭이 최신 콜백으로 가도록 보관.
+void Function(RemoteMessage message)? _onOpenedHandler;
+
+/// Android 로컬 알림(포그라운드 표시분) 탭 콜백 — cold start launch details용.
+void Function(String? payload)? _onLocalNotificationTap;
+
 const _channel = AndroidNotificationChannel(
   'default_high_importance',
   '일반 알림',
@@ -49,9 +55,14 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 /// Android는 foreground message를 로컬 알림으로 표시하고, 탭 payload를
 /// [onLocalNotificationTap]으로 전달한다. iOS는 Firebase의 foreground
 /// presentation을 사용하므로 로컬 알림을 중복 표시하지 않는다.
+///
+/// **호출 순서**: cold start FCM 탭은 [wireOpenedApp]이 먼저 소비해야 한다.
+/// 이 함수는 그 다음에 호출한다(로컬 알림 플러그인이 launch intent에 관여할
+/// 여지를 줄이기 위함).
 Future<void> initForegroundMessaging({
   required void Function(String? payload) onLocalNotificationTap,
 }) async {
+  _onLocalNotificationTap = onLocalNotificationTap;
   try {
     await _localNotis
         .resolvePlatformSpecificImplementation<
@@ -64,9 +75,18 @@ Future<void> initForegroundMessaging({
         iOS: DarwinInitializationSettings(),
       ),
       onDidReceiveNotificationResponse: (response) {
-        onLocalNotificationTap(response.payload);
+        _onLocalNotificationTap?.call(response.payload);
       },
     );
+
+    // 포그라운드에서 띄운 로컬 알림을 앱 종료 후 탭한 cold start.
+    // FCM getInitialMessage와 별개 경로라 launch details를 함께 본다.
+    final launchDetails = await _localNotis.getNotificationAppLaunchDetails();
+    if (launchDetails?.didNotificationLaunchApp == true) {
+      final payload = launchDetails!.notificationResponse?.payload;
+      debugPrint('[FCM] local notif launched app payload=$payload');
+      _onLocalNotificationTap?.call(payload);
+    }
 
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
@@ -118,14 +138,30 @@ Future<void> _showForegroundNotification(RemoteMessage message) async {
 ///
 /// - terminated 상태: [FirebaseMessaging.instance.getInitialMessage]
 /// - background → foreground 복귀: [FirebaseMessaging.onMessageOpenedApp]
+///
+/// [onOpened]는 재등록 시 최신 핸들러로 교체된다(구독 자체는 1회).
+/// **cold start에서는 [initForegroundMessaging]보다 먼저 호출**할 것.
 Future<void> wireOpenedApp(
     void Function(RemoteMessage message) onOpened) async {
+  _onOpenedHandler = onOpened;
   try {
     final initial = await FirebaseMessaging.instance.getInitialMessage();
-    if (initial != null) onOpened(initial);
+    if (initial != null) {
+      debugPrint(
+        '[FCM] initial message id=${initial.messageId} data=${initial.data}',
+      );
+      _onOpenedHandler?.call(initial);
+    } else {
+      debugPrint('[FCM] no initial message (not a cold-start notif launch)');
+    }
 
     _openedAppSubscription ??=
-        FirebaseMessaging.onMessageOpenedApp.listen(onOpened);
+        FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      debugPrint(
+        '[FCM] onMessageOpenedApp id=${message.messageId} data=${message.data}',
+      );
+      _onOpenedHandler?.call(message);
+    });
   } catch (e) {
     debugPrint('[FCM] wireOpenedApp failed (ignored): $e');
   }
