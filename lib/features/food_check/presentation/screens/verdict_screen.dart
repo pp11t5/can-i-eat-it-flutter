@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -25,6 +27,9 @@ import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_un
 /// - [VerdictLevel.unknown] (성공) → [VerdictUnknownScreen]
 /// - 그 외 (recommend/caution/risk) → [VerdictResultScreen]
 ///
+/// 로딩 화면은 캐릭터 GIF가 한 바퀴 이상 보이도록
+/// [minLoadingDuration] 동안 최소 유지한다(API가 더 빨라도 대기).
+///
 /// ⚠️ grade=UNKNOWN은 AsyncData(성공) — AsyncError(분석실패)와 구별(D1, R3).
 ///
 /// 진입 경로: `/verdict` (present fullscreenDialog).
@@ -34,14 +39,25 @@ class VerdictScreen extends ConsumerStatefulWidget {
 
   final VerdictArgs args;
 
+  /// 로딩 화면 최소 표시 시간 (캐릭터 GIF 노출 보장).
+  static const Duration minLoadingDuration = Duration(seconds: 5);
+
   @override
   ConsumerState<VerdictScreen> createState() => _VerdictScreenState();
 }
 
 class _VerdictScreenState extends ConsumerState<VerdictScreen> {
+  /// 최소 로딩 시간이 지났는지. false면 API 완료/에러여도 로딩 유지.
+  bool _minDurationElapsed = false;
+  Timer? _minDurationTimer;
+
   @override
   void initState() {
     super.initState();
+    _minDurationTimer = Timer(VerdictScreen.minLoadingDuration, () {
+      if (!mounted) return;
+      setState(() => _minDurationElapsed = true);
+    });
     // 화면 진입 시 즉시 분석 시작.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final controller = ref.read(verdictControllerProvider.notifier);
@@ -54,6 +70,12 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
         controller.judgeByText(widget.args.text);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _minDurationTimer?.cancel();
+    super.dispose();
   }
 
   void _handleRetry() {
@@ -82,13 +104,20 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen> {
 
     return verdictAsync.when(
       loading: () => const VerdictLoadingScreen(),
-      error: (error, _) => _ErrorScreen(
-        message: error is Failure ? error.message : '분석 중 오류가 발생했어요.',
-        onRetry: _handleRetry,
-      ),
+      error: (error, _) {
+        // API가 빨라도 GIF 최소 노출 시간까지 로딩 유지.
+        if (!_minDurationElapsed) return const VerdictLoadingScreen();
+        return _ErrorScreen(
+          message: error is Failure ? error.message : '분석 중 오류가 발생했어요.',
+          onRetry: _handleRetry,
+        );
+      },
       data: (verdict) {
         if (verdict.level == VerdictLevel.unknown && verdict.foodName.isEmpty) {
           // 초기 idle 상태 — 로딩으로 표시.
+          return const VerdictLoadingScreen();
+        }
+        if (!_minDurationElapsed) {
           return const VerdictLoadingScreen();
         }
         if (verdict.level == VerdictLevel.unknown) {

@@ -101,6 +101,8 @@ abstract final class AppImages {
   static const String pencil = '$_illust/icon_pencil.png';
   static const String fire = '$_illust/icon_fire.png';
   static const String characterGreeting = '$_illust/character_greeting.png';
+  /// 판정 로딩 캐릭터 GIF (생각하는 포즈, Figma Loading_Dido).
+  static const String characterSearching = '$_illust/character_searching.gif';
   static const String mealPrompt = '$_illust/emoji_meal_prompt.png';
   static const String symptomEmpty = '$_illust/disable_32.png';
 

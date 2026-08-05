@@ -39,7 +39,9 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
 
       await tester.pumpWidget(
-        _wrapFullScreen(const VerdictLoadingScreen(nickname: '철수')),
+        _wrapFullScreen(
+          const VerdictLoadingScreen(nickname: '철수', messageIndex: 0),
+        ),
       );
       await tester.pump();
 
