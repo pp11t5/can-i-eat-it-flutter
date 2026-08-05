@@ -9,7 +9,6 @@ import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
-import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
 import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/core/config/terms_catalog.dart';
@@ -21,7 +20,6 @@ import 'package:can_i_eat_it/features/health_profile/data/health_profile_provide
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
 import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
 import 'package:can_i_eat_it/features/mypage/domain/entities/my_page_summary.dart';
-import 'package:can_i_eat_it/features/notification/data/notification_providers.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 
 /// 마이페이지 요약 화면 (Figma 1718-7884).
@@ -603,21 +601,14 @@ class _SettingsSection extends ConsumerWidget {
 
 // ---------------------------------------------------------------------------
 // 약관 섹션 (Figma: padding 24 · 행 사이 24+24=48 · radius 16)
-// - 서비스 이용 약관 → 약관 상세
-// - 개인정보 수집·이용 동의 → 라벨 탭 시 약관 상세 / Switch 는 동의 토글
+// - 서비스 이용 약관 / 개인정보 수집·이용 동의 → 동일 행 스타일(chevron), URL만 다름
 // ---------------------------------------------------------------------------
 
-class _TermsSection extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // 동의 토글 상태 — notification settings 의 marketing 필드를 재사용.
-    // GET /notifications/settings 에 마케팅 필드가 없으면 기본 true.
-    final consentOn = ref
-            .watch(notificationSettingsControllerProvider)
-            .valueOrNull
-            ?.marketingPushEnabled ??
-        true;
+class _TermsSection extends StatelessWidget {
+  const _TermsSection();
 
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.sectionGap), // 24
       decoration: BoxDecoration(
@@ -628,9 +619,9 @@ class _TermsSection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 서비스 이용 약관 + chevron
           // rootNavigator: 바텀 탭 셸 위로 올려 탭바가 가리지 않게 한다.
-          InkWell(
+          _TermsRow(
+            label: '서비스 이용 약관',
             onTap: () => Navigator.of(context, rootNavigator: true).push(
               MaterialPageRoute(
                 builder: (_) => const TermsDetailScreen(
@@ -638,27 +629,6 @@ class _TermsSection extends ConsumerWidget {
                   url: TermsCatalog.tosUrl,
                 ),
               ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    '서비스 이용 약관',
-                    style: AppTextStyles.body1Regular.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                SvgPicture.asset(
-                  'assets/figma_extracted/chevron_right.svg',
-                  width: 24,
-                  height: 24,
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.textTertiary,
-                    BlendMode.srcIn,
-                  ),
-                ),
-              ],
             ),
           ),
           // 행 사이 24 + 구분선 + 24 (= 48)
@@ -670,51 +640,56 @@ class _TermsSection extends ConsumerWidget {
               color: AppColors.divider,
             ),
           ),
-          // 개인정보 수집·이용 동의: 밑줄 라벨 → 약관 조회 / Switch → 동의 토글
-          Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: () => Navigator.of(context, rootNavigator: true).push(
-                    MaterialPageRoute(
-                      builder: (_) => const TermsDetailScreen(
-                        title: '개인정보 보호 약관',
-                        url: TermsCatalog.privacyUrl,
-                      ),
-                    ),
-                  ),
-                  child: Text(
-                    '개인정보 수집·이용 동의',
-                    style: AppTextStyles.body1Regular.copyWith(
-                      color: AppColors.textPrimary,
-                      decoration: TextDecoration.underline,
-                      decorationColor: AppColors.textPrimary,
-                    ),
-                  ),
+          _TermsRow(
+            label: '개인정보 수집·이용 동의',
+            onTap: () => Navigator.of(context, rootNavigator: true).push(
+              MaterialPageRoute(
+                builder: (_) => const TermsDetailScreen(
+                  title: '개인정보 보호 약관',
+                  url: TermsCatalog.privacyUrl,
                 ),
               ),
-              Switch.adaptive(
-                value: consentOn,
-                activeTrackColor: const Color(0xFF34C759),
-                onChanged: (_) => _onConsentToggle(context, ref),
-              ),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  Future<void> _onConsentToggle(BuildContext context, WidgetRef ref) async {
-    try {
-      await ref
-          .read(notificationSettingsControllerProvider.notifier)
-          .toggleMarketing();
-    } catch (_) {
-      if (context.mounted) {
-        await showAppToast(context, '동의 설정 변경에 실패했어요.');
-      }
-    }
+/// 약관 행 — 라벨 + 우측 chevron (탭 시 약관 상세).
+class _TermsRow extends StatelessWidget {
+  const _TermsRow({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: AppTextStyles.body1Regular.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          SvgPicture.asset(
+            'assets/figma_extracted/chevron_right.svg',
+            width: 24,
+            height: 24,
+            colorFilter: const ColorFilter.mode(
+              AppColors.textTertiary,
+              BlendMode.srcIn,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
