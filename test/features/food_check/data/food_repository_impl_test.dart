@@ -61,6 +61,7 @@ Map<String, dynamic> _textJudgmentJson({
   String foodName = '두부',
   String grade = 'RECOMMEND',
   String personalTitle = '두부, 안심하고 드세요',
+  String? categoryCode = 'tofu',
 }) =>
     {
       'foodName': foodName,
@@ -71,6 +72,8 @@ Map<String, dynamic> _textJudgmentJson({
         {'emphasis': '알레르기/복용약 분석', 'body': '알레르기 충돌 없어요.'},
       ],
       'stateRecords': {'total': 0, 'records': <dynamic>[]},
+      'substitutes': <dynamic>[],
+      'categoryCode': categoryCode,
     };
 
 /// by-id 응답 JSON 샘플.
@@ -361,6 +364,7 @@ void main() {
       expect(result.items.length, 2);
       expect(result.substitutes, isEmpty); // by-text 규약
       expect(result.foodExternalId, isNull); // by-text 규약
+      expect(result.category, 'tofu');
     });
 
     test('grade=UNKNOWN → VerdictLevel.unknown (성공 응답, AsyncData 경로)',

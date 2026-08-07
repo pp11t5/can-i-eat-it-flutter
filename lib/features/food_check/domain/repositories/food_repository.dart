@@ -16,7 +16,9 @@ abstract interface class FoodRepository {
   // 판정 (W3-3 — 서버 judgment 2엔드포인트 충실 정합)
   // ---------------------------------------------------------------------------
 
-  /// 자유 텍스트 음식명을 판정한다 (substitutes 없음, category 없음).
+  /// 자유 텍스트 음식명을 판정한다.
+  ///
+  /// 서버는 nullable categoryCode와 빈 substitutes 목록을 함께 반환한다.
   ///
   /// 대응 API: GET /foods/judgment?name=<text>
   /// 직접 분석 진입(매칭 없음·raw text) 경로에서 사용.

@@ -199,12 +199,12 @@ sealed SignInOutcome
 
 | 메서드 | 경로 | 설명 |
 |---|---|---|
-| GET | `/foods/judgment?foodTextInput=` | 텍스트 직접 입력 판정 |
+| GET | `/foods/judgment?name=` | 텍스트 직접 입력 판정 |
 | GET | `/foods/{foodExternalId}/judgment` | 검색 결과 ID 기반 판정 |
 
 ### GET /foods/judgment (by-text)
 
-**쿼리**: `foodTextInput` (필수 — 판정할 음식 텍스트)
+**쿼리**: `name` (필수 — 판정할 음식 이름)
 
 **응답** (200): `result` 객체
 
@@ -220,12 +220,15 @@ sealed SignInOutcome
   "stateRecords": {
     "total":   0,
     "records": []
-  }
+  },
+  "substitutes": [],
+  "categoryCode": "tofu"
 }
 ```
 
-- `foodExternalId`·`category`·`substitutes` 없음 (by-text 규약).
-- 클라이언트는 `substitutes`를 항상 빈배열로 처리한다.
+- `foodExternalId`는 없음 (by-text 규약).
+- `categoryCode`는 LLM 분류 결과이며 nullable. 클라이언트는 `EatVerdict.category`로 매핑한다.
+- `substitutes`는 응답에 포함되며 현재 서버 규약상 항상 빈배열이다.
 
 **에러**:
 

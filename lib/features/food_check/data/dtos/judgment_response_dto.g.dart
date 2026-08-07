@@ -107,6 +107,10 @@ _TextJudgmentResponseDto _$TextJudgmentResponseDtoFromJson(
           ? null
           : StateRecordsDto.fromJson(
               json['stateRecords'] as Map<String, dynamic>),
+      categoryCode: json['categoryCode'] as String?,
+      substitutes: (json['substitutes'] as List<dynamic>)
+          .map((e) => SubstituteDto.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$TextJudgmentResponseDtoToJson(
@@ -117,4 +121,6 @@ Map<String, dynamic> _$TextJudgmentResponseDtoToJson(
       'personalTitle': instance.personalTitle,
       'items': instance.items,
       'stateRecords': instance.stateRecords,
+      'categoryCode': instance.categoryCode,
+      'substitutes': instance.substitutes,
     };

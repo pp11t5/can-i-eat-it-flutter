@@ -1316,7 +1316,7 @@ mixin _$JudgmentResponseDto {
   String get grade; // RECOMMEND|CAUTION|RISK|UNKNOWN
   String get personalTitle;
   List<JudgmentItemDto> get items;
-  StateRecordsDto? get stateRecords; // nullable: 누락/null 방어 (S1)
+  StateRecordsDto? get stateRecords;
   List<SubstituteDto> get substitutes;
 
   /// Create a copy of JudgmentResponseDto
@@ -1709,9 +1709,7 @@ class _JudgmentResponseDto implements JudgmentResponseDto {
 
   @override
   final StateRecordsDto? stateRecords;
-// nullable: 누락/null 방어 (S1)
   final List<SubstituteDto> _substitutes;
-// nullable: 누락/null 방어 (S1)
   @override
   @JsonKey()
   List<SubstituteDto> get substitutes {
@@ -1878,6 +1876,8 @@ mixin _$TextJudgmentResponseDto {
   String get personalTitle;
   List<JudgmentItemDto> get items;
   StateRecordsDto? get stateRecords;
+  String? get categoryCode;
+  List<SubstituteDto> get substitutes;
 
   /// Create a copy of TextJudgmentResponseDto
   /// with the given fields replaced by the non-null parameter values.
@@ -1902,17 +1902,28 @@ mixin _$TextJudgmentResponseDto {
                 other.personalTitle == personalTitle) &&
             const DeepCollectionEquality().equals(other.items, items) &&
             (identical(other.stateRecords, stateRecords) ||
-                other.stateRecords == stateRecords));
+                other.stateRecords == stateRecords) &&
+            (identical(other.categoryCode, categoryCode) ||
+                other.categoryCode == categoryCode) &&
+            const DeepCollectionEquality()
+                .equals(other.substitutes, substitutes));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, foodName, grade, personalTitle,
-      const DeepCollectionEquality().hash(items), stateRecords);
+  int get hashCode => Object.hash(
+      runtimeType,
+      foodName,
+      grade,
+      personalTitle,
+      const DeepCollectionEquality().hash(items),
+      stateRecords,
+      categoryCode,
+      const DeepCollectionEquality().hash(substitutes));
 
   @override
   String toString() {
-    return 'TextJudgmentResponseDto(foodName: $foodName, grade: $grade, personalTitle: $personalTitle, items: $items, stateRecords: $stateRecords)';
+    return 'TextJudgmentResponseDto(foodName: $foodName, grade: $grade, personalTitle: $personalTitle, items: $items, stateRecords: $stateRecords, categoryCode: $categoryCode, substitutes: $substitutes)';
   }
 }
 
@@ -1927,7 +1938,9 @@ abstract mixin class $TextJudgmentResponseDtoCopyWith<$Res> {
       String grade,
       String personalTitle,
       List<JudgmentItemDto> items,
-      StateRecordsDto? stateRecords});
+      StateRecordsDto? stateRecords,
+      String? categoryCode,
+      List<SubstituteDto> substitutes});
 
   $StateRecordsDtoCopyWith<$Res>? get stateRecords;
 }
@@ -1950,6 +1963,8 @@ class _$TextJudgmentResponseDtoCopyWithImpl<$Res>
     Object? personalTitle = null,
     Object? items = null,
     Object? stateRecords = freezed,
+    Object? categoryCode = freezed,
+    Object? substitutes = null,
   }) {
     return _then(_self.copyWith(
       foodName: null == foodName
@@ -1972,6 +1987,14 @@ class _$TextJudgmentResponseDtoCopyWithImpl<$Res>
           ? _self.stateRecords
           : stateRecords // ignore: cast_nullable_to_non_nullable
               as StateRecordsDto?,
+      categoryCode: freezed == categoryCode
+          ? _self.categoryCode
+          : categoryCode // ignore: cast_nullable_to_non_nullable
+              as String?,
+      substitutes: null == substitutes
+          ? _self.substitutes
+          : substitutes // ignore: cast_nullable_to_non_nullable
+              as List<SubstituteDto>,
     ));
   }
 
@@ -2083,16 +2106,28 @@ extension TextJudgmentResponseDtoPatterns on TextJudgmentResponseDto {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String foodName, String grade, String personalTitle,
-            List<JudgmentItemDto> items, StateRecordsDto? stateRecords)?
+    TResult Function(
+            String foodName,
+            String grade,
+            String personalTitle,
+            List<JudgmentItemDto> items,
+            StateRecordsDto? stateRecords,
+            String? categoryCode,
+            List<SubstituteDto> substitutes)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _TextJudgmentResponseDto() when $default != null:
-        return $default(_that.foodName, _that.grade, _that.personalTitle,
-            _that.items, _that.stateRecords);
+        return $default(
+            _that.foodName,
+            _that.grade,
+            _that.personalTitle,
+            _that.items,
+            _that.stateRecords,
+            _that.categoryCode,
+            _that.substitutes);
       case _:
         return orElse();
     }
@@ -2113,15 +2148,27 @@ extension TextJudgmentResponseDtoPatterns on TextJudgmentResponseDto {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String foodName, String grade, String personalTitle,
-            List<JudgmentItemDto> items, StateRecordsDto? stateRecords)
+    TResult Function(
+            String foodName,
+            String grade,
+            String personalTitle,
+            List<JudgmentItemDto> items,
+            StateRecordsDto? stateRecords,
+            String? categoryCode,
+            List<SubstituteDto> substitutes)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _TextJudgmentResponseDto():
-        return $default(_that.foodName, _that.grade, _that.personalTitle,
-            _that.items, _that.stateRecords);
+        return $default(
+            _that.foodName,
+            _that.grade,
+            _that.personalTitle,
+            _that.items,
+            _that.stateRecords,
+            _that.categoryCode,
+            _that.substitutes);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -2141,15 +2188,27 @@ extension TextJudgmentResponseDtoPatterns on TextJudgmentResponseDto {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String foodName, String grade, String personalTitle,
-            List<JudgmentItemDto> items, StateRecordsDto? stateRecords)?
+    TResult? Function(
+            String foodName,
+            String grade,
+            String personalTitle,
+            List<JudgmentItemDto> items,
+            StateRecordsDto? stateRecords,
+            String? categoryCode,
+            List<SubstituteDto> substitutes)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _TextJudgmentResponseDto() when $default != null:
-        return $default(_that.foodName, _that.grade, _that.personalTitle,
-            _that.items, _that.stateRecords);
+        return $default(
+            _that.foodName,
+            _that.grade,
+            _that.personalTitle,
+            _that.items,
+            _that.stateRecords,
+            _that.categoryCode,
+            _that.substitutes);
       case _:
         return null;
     }
@@ -2164,8 +2223,11 @@ class _TextJudgmentResponseDto implements TextJudgmentResponseDto {
       required this.grade,
       required this.personalTitle,
       final List<JudgmentItemDto> items = const <JudgmentItemDto>[],
-      this.stateRecords})
-      : _items = items;
+      this.stateRecords,
+      this.categoryCode,
+      required final List<SubstituteDto> substitutes})
+      : _items = items,
+        _substitutes = substitutes;
   factory _TextJudgmentResponseDto.fromJson(Map<String, dynamic> json) =>
       _$TextJudgmentResponseDtoFromJson(json);
 
@@ -2186,6 +2248,15 @@ class _TextJudgmentResponseDto implements TextJudgmentResponseDto {
 
   @override
   final StateRecordsDto? stateRecords;
+  @override
+  final String? categoryCode;
+  final List<SubstituteDto> _substitutes;
+  @override
+  List<SubstituteDto> get substitutes {
+    if (_substitutes is EqualUnmodifiableListView) return _substitutes;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_substitutes);
+  }
 
   /// Create a copy of TextJudgmentResponseDto
   /// with the given fields replaced by the non-null parameter values.
@@ -2215,17 +2286,28 @@ class _TextJudgmentResponseDto implements TextJudgmentResponseDto {
                 other.personalTitle == personalTitle) &&
             const DeepCollectionEquality().equals(other._items, _items) &&
             (identical(other.stateRecords, stateRecords) ||
-                other.stateRecords == stateRecords));
+                other.stateRecords == stateRecords) &&
+            (identical(other.categoryCode, categoryCode) ||
+                other.categoryCode == categoryCode) &&
+            const DeepCollectionEquality()
+                .equals(other._substitutes, _substitutes));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, foodName, grade, personalTitle,
-      const DeepCollectionEquality().hash(_items), stateRecords);
+  int get hashCode => Object.hash(
+      runtimeType,
+      foodName,
+      grade,
+      personalTitle,
+      const DeepCollectionEquality().hash(_items),
+      stateRecords,
+      categoryCode,
+      const DeepCollectionEquality().hash(_substitutes));
 
   @override
   String toString() {
-    return 'TextJudgmentResponseDto(foodName: $foodName, grade: $grade, personalTitle: $personalTitle, items: $items, stateRecords: $stateRecords)';
+    return 'TextJudgmentResponseDto(foodName: $foodName, grade: $grade, personalTitle: $personalTitle, items: $items, stateRecords: $stateRecords, categoryCode: $categoryCode, substitutes: $substitutes)';
   }
 }
 
@@ -2242,7 +2324,9 @@ abstract mixin class _$TextJudgmentResponseDtoCopyWith<$Res>
       String grade,
       String personalTitle,
       List<JudgmentItemDto> items,
-      StateRecordsDto? stateRecords});
+      StateRecordsDto? stateRecords,
+      String? categoryCode,
+      List<SubstituteDto> substitutes});
 
   @override
   $StateRecordsDtoCopyWith<$Res>? get stateRecords;
@@ -2266,6 +2350,8 @@ class __$TextJudgmentResponseDtoCopyWithImpl<$Res>
     Object? personalTitle = null,
     Object? items = null,
     Object? stateRecords = freezed,
+    Object? categoryCode = freezed,
+    Object? substitutes = null,
   }) {
     return _then(_TextJudgmentResponseDto(
       foodName: null == foodName
@@ -2288,6 +2374,14 @@ class __$TextJudgmentResponseDtoCopyWithImpl<$Res>
           ? _self.stateRecords
           : stateRecords // ignore: cast_nullable_to_non_nullable
               as StateRecordsDto?,
+      categoryCode: freezed == categoryCode
+          ? _self.categoryCode
+          : categoryCode // ignore: cast_nullable_to_non_nullable
+              as String?,
+      substitutes: null == substitutes
+          ? _self._substitutes
+          : substitutes // ignore: cast_nullable_to_non_nullable
+              as List<SubstituteDto>,
     ));
   }
 

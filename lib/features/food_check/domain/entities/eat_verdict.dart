@@ -93,7 +93,7 @@ abstract class VerdictStateRecords with _$VerdictStateRecords {
 
 /// 대체 음식 (substitutes 대응).
 ///
-/// RECOMMEND·UNKNOWN·by-text 에서는 빈배열.
+/// RECOMMEND·UNKNOWN과 현재 by-text 응답에서는 빈배열.
 @freezed
 abstract class VerdictSubstitute with _$VerdictSubstitute {
   const factory VerdictSubstitute({
@@ -113,7 +113,7 @@ abstract class VerdictSubstitute with _$VerdictSubstitute {
 /// 화면 구조:
 /// - HeroSection: [personalTitle] + 신호등 배지 ([level])
 /// - PersonalAnalysis: [items] 2개 (트리거/증상, 알레르기/복용약)
-/// - Substitutes: [substitutes] (RECOMMEND·UNKNOWN·by-text 에서 빈배열)
+/// - Substitutes: [substitutes] (RECOMMEND·UNKNOWN과 현재 by-text 응답에서 빈배열)
 /// - StateRecords: [stateRecords] (기록 없으면 total=0)
 ///
 /// [unknown] 상태는 분석실패가 아닌 **성공 응답** (AsyncData) → VerdictUnknownScreen.
@@ -137,13 +137,13 @@ abstract class EatVerdict with _$EatVerdict {
     /// 연관 섭취 기록 요약. 기록 없으면 VerdictStateRecords(total:0).
     @Default(VerdictStateRecords()) VerdictStateRecords stateRecords,
 
-    /// 대체 음식. RECOMMEND·UNKNOWN·by-text 에서 빈배열.
+    /// 대체 음식. RECOMMEND·UNKNOWN과 현재 by-text 응답에서 빈배열.
     @Default(<VerdictSubstitute>[]) List<VerdictSubstitute> substitutes,
 
     /// 서버 음식 식별자. by-text 판정이면 null.
     String? foodExternalId,
 
-    /// 음식 분류. by-text 판정이면 null.
+    /// 음식 분류 code. by-text의 LLM 분류 결과를 포함하며 null일 수 있다.
     String? category,
   }) = _EatVerdict;
 

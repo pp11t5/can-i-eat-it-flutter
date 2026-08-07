@@ -29,7 +29,7 @@ class FoodRepositoryImpl implements FoodRepository {
   /// 자유 텍스트 음식명을 판정한다.
   ///
   /// GET /foods/judgment?name=<text>
-  /// substitutes 없음, category 없음 (by-text 규약).
+  /// nullable categoryCode와 빈 substitutes 목록을 포함한 by-text 응답을 매핑한다.
   /// FOOD400_1 → [InvalidFoodQueryFailure], 통신오류 → [NetworkFailure].
   @override
   Future<EatVerdict> judgeByText(String foodTextInput) async {
