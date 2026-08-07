@@ -26,6 +26,19 @@
 - `lib/main_prod.dart` / `lib/main_dev.dart` — 플레이버 진입점.
 - `lib/main.dart` — 플레이버 미지정 `flutter run` 편의용 → prod 위임 shim.
 
+## API 호스트
+
+`FlavorConfig`가 API prefix를 포함한 base URL을 플레이버별로 제공하며, `Dio`와 토큰 갱신용
+`refreshDio`가 같은 값을 사용한다.
+
+| 플레이버 | 기본 API base URL |
+|---|---|
+| dev | `https://staging.can-i-eat-it.com/api/v1` |
+| prod | `https://prod.can-i-eat-it.com/api/v1` |
+
+긴급 점검처럼 일시적인 대상 변경이 필요할 때만 `--dart-define=API_BASE_URL=https://…/api/v1`로
+기본값을 override한다. 이 값은 빌드 시점 상수이므로, 변경 후에는 해당 플레이버를 다시 빌드해야 한다.
+
 ## 빌드 커맨드
 
 ```bash
@@ -73,7 +86,6 @@ flutter run --flavor dev -t lib/main_dev.dart \
 ## 남은 작업 (TODO)
 
 - [ ] iOS 네이티브 플레이버(스킴 `prod`/`dev` + xcconfig 빌드 컨피그 + 번들ID/표시명/AppIcon/Kakao scheme/GoogleService-Info 분리) — Xcode 필요.
-- [ ] dev 서버 도메인 확정 → `FlavorConfig.dev.apiBaseUrl` 기본값 교체(현재 `https://dev.can-i-eat-it.com/api/v1` placeholder).
 - [ ] dev 카카오 앱 생성 → dev 네이티브 앱키·URL scheme.
 - [ ] dev Firebase 앱 생성 → `android/app/src/dev/google-services.json`, iOS dev `GoogleService-Info.plist`.
 - [ ] 아이콘 적용(`flutter_launcher_icons`) — iOS 플레이버 타겟 준비 후.

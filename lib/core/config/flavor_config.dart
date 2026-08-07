@@ -45,14 +45,11 @@ class FlavorConfig {
   static FlavorConfig current = prod;
 
   /// 운영(prod) — 운영 서버.
-  ///
-  /// TODO(flavor): 현재 운영 서버 도메인은 dev 와 동일하다(운영 백엔드 추후 제공).
-  ///   운영 서버 확정 시 [apiBaseUrl] 기본값을 교체한다.
   static const FlavorConfig prod = FlavorConfig(
     flavor: Flavor.prod,
     apiBaseUrl: String.fromEnvironment(
       'API_BASE_URL',
-      defaultValue: 'https://can-i-eat-it.com/api/v1',
+      defaultValue: 'https://prod.can-i-eat-it.com/api/v1',
     ),
     appDisplayName: '먹어도돼?',
     kakaoNativeAppKey: String.fromEnvironment('KAKAO_NATIVE_APP_KEY'),
@@ -60,7 +57,7 @@ class FlavorConfig {
 
   /// 개발(dev) — 개발 서버.
   ///
-  /// 현재 라이브 서버(`can-i-eat-it.com`)가 dev 서버다(운영 서버 추후 제공).
+  /// staging 서버를 사용한다.
   /// dev 카카오 앱·Firebase dev 앱 설정 완료 — native 플레이버(iOS 스킴 dev /
   /// Android dev flavor)가 dev GoogleService-Info·Kakao scheme 을 소유한다.
   /// 카카오 키는 dev 빌드 시 `--dart-define=KAKAO_NATIVE_APP_KEY=<dev키>` 로 주입.
@@ -68,7 +65,7 @@ class FlavorConfig {
     flavor: Flavor.dev,
     apiBaseUrl: String.fromEnvironment(
       'API_BASE_URL',
-      defaultValue: 'https://can-i-eat-it.com/api/v1',
+      defaultValue: 'https://staging.can-i-eat-it.com/api/v1',
     ),
     appDisplayName: '먹어도돼? Dev',
     kakaoNativeAppKey: String.fromEnvironment('KAKAO_NATIVE_APP_KEY'),

@@ -128,7 +128,7 @@ flutter build apk --flavor prod -t lib/main_prod.dart \
 
 - `lib/main.dart`는 플레이버 미지정 `flutter run` 편의용 shim으로, 내부적으로 `main_prod.dart`에 위임한다(운영 서버 대상 실행이 됨에 유의).
 - dev 카카오 네이티브 앱키(`cd24aa08a740a475401f84390c8219df`)와 prod 앱키(`2d007771e0083b600999053b9b1d4e83`)는 클라이언트 식별자이며 `docs/build-flavors.md`에 이미 커밋되어 있다.
-- dev 서버 = 현재 라이브 서버(`can-i-eat-it.com`)와 동일하다(운영 서버는 추후 별도 제공 예정, `lib/core/config/flavor_config.dart`의 TODO 참조). `API_BASE_URL`은 `--dart-define`으로 override 가능(기본값은 dev/prod 모두 `https://can-i-eat-it.com/api/v1`).
+- dev 서버는 `https://staging.can-i-eat-it.com/api/v1`, prod 서버는 `https://prod.can-i-eat-it.com/api/v1`를 사용한다. `API_BASE_URL`은 `--dart-define`으로 일시적으로 override할 수 있다.
 - `FlavorConfig.kakaoNativeAppKey`가 빈 문자열이면(`--dart-define` 누락 시) `bootstrap.dart`가 카카오 SDK init을 건너뛴다 — 앱은 뜨지만 카카오 로그인만 비활성.
 
 ---
