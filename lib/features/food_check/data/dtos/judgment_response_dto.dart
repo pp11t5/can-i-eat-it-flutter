@@ -81,7 +81,7 @@ abstract class JudgmentResponseDto with _$JudgmentResponseDto {
     required String grade, // RECOMMEND|CAUTION|RISK|UNKNOWN
     required String personalTitle,
     @Default(<JudgmentItemDto>[]) List<JudgmentItemDto> items,
-    StateRecordsDto? stateRecords, // nullable: 누락/null 방어 (S1)
+    StateRecordsDto? stateRecords,
     @Default(<SubstituteDto>[]) List<SubstituteDto> substitutes,
   }) = _JudgmentResponseDto;
 
@@ -95,7 +95,8 @@ abstract class JudgmentResponseDto with _$JudgmentResponseDto {
 
 /// 자유 텍스트 판정 응답 DTO (by-text).
 ///
-/// foodExternalId·category 없음, substitutes 항상 빈배열(서버 보장).
+/// foodExternalId는 없고, LLM 분류 결과 [categoryCode]를 nullable로 제공한다.
+/// [substitutes]는 현재 서버 규약상 항상 빈배열이지만 응답에 포함된다.
 ///
 /// [stateRecords] 는 nullable — 서버 누락/null 방어 (S1).
 /// toEntity() 에서 null이면 빈 VerdictStateRecords로 폴백.
@@ -106,7 +107,9 @@ abstract class TextJudgmentResponseDto with _$TextJudgmentResponseDto {
     required String grade,
     required String personalTitle,
     @Default(<JudgmentItemDto>[]) List<JudgmentItemDto> items,
-    StateRecordsDto? stateRecords, // nullable: 누락/null 방어 (S1)
+    StateRecordsDto? stateRecords,
+    String? categoryCode,
+    required List<SubstituteDto> substitutes,
   }) = _TextJudgmentResponseDto;
 
   factory TextJudgmentResponseDto.fromJson(Map<String, dynamic> j) =>
@@ -156,13 +159,13 @@ extension JudgmentResponseDtoMapper on JudgmentResponseDto {
 
 /// [TextJudgmentResponseDto] → [EatVerdict] 매핑 (by-text).
 ///
-/// by-text 규약: substitutes 항상 빈배열, foodExternalId·category null.
+/// by-text 규약: foodExternalId는 없고, categoryCode는 nullable이다.
 extension TextJudgmentResponseDtoMapper on TextJudgmentResponseDto {
   EatVerdict toEntity() => EatVerdict(
         level: VerdictLevelGrade.fromGrade(grade),
         foodName: foodName,
         foodExternalId: null,
-        category: null,
+        category: categoryCode,
         personalTitle: personalTitle,
         items: items
             .map((e) => VerdictItem(emphasis: e.emphasis, body: e.body))
@@ -182,6 +185,13 @@ extension TextJudgmentResponseDtoMapper on TextJudgmentResponseDto {
                     )
                     .toList(),
               ),
-        substitutes: const [], // by-text 규약: 서버가 항상 빈배열
+        substitutes: substitutes
+            .map(
+              (s) => VerdictSubstitute(
+                foodExternalId: s.foodExternalId,
+                name: s.name,
+              ),
+            )
+            .toList(),
       );
 }

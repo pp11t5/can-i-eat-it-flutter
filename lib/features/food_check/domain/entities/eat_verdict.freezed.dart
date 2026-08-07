@@ -1269,13 +1269,13 @@ mixin _$EatVerdict {
   /// 연관 섭취 기록 요약. 기록 없으면 VerdictStateRecords(total:0).
   VerdictStateRecords get stateRecords;
 
-  /// 대체 음식. RECOMMEND·UNKNOWN·by-text 에서 빈배열.
+  /// 대체 음식. RECOMMEND·UNKNOWN과 현재 by-text 응답에서 빈배열.
   List<VerdictSubstitute> get substitutes;
 
   /// 서버 음식 식별자. by-text 판정이면 null.
   String? get foodExternalId;
 
-  /// 음식 분류. by-text 판정이면 null.
+  /// 음식 분류 code. by-text의 LLM 분류 결과를 포함하며 null일 수 있다.
   String? get category;
 
   /// Create a copy of EatVerdict
@@ -1666,10 +1666,10 @@ class _EatVerdict implements EatVerdict {
   @JsonKey()
   final VerdictStateRecords stateRecords;
 
-  /// 대체 음식. RECOMMEND·UNKNOWN·by-text 에서 빈배열.
+  /// 대체 음식. RECOMMEND·UNKNOWN과 현재 by-text 응답에서 빈배열.
   final List<VerdictSubstitute> _substitutes;
 
-  /// 대체 음식. RECOMMEND·UNKNOWN·by-text 에서 빈배열.
+  /// 대체 음식. RECOMMEND·UNKNOWN과 현재 by-text 응답에서 빈배열.
   @override
   @JsonKey()
   List<VerdictSubstitute> get substitutes {
@@ -1682,7 +1682,7 @@ class _EatVerdict implements EatVerdict {
   @override
   final String? foodExternalId;
 
-  /// 음식 분류. by-text 판정이면 null.
+  /// 음식 분류 code. by-text의 LLM 분류 결과를 포함하며 null일 수 있다.
   @override
   final String? category;
 

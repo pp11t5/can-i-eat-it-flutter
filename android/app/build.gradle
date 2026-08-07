@@ -6,6 +6,16 @@ plugins {
     id "com.google.gms.google-services"
 }
 
+// Release 서명 정보는 로컬/CI의 android/key.properties에서만 읽는다.
+// key.properties와 keystore 파일은 android/.gitignore에 의해 커밋되지 않는다.
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withInputStream { stream ->
+        keystoreProperties.load(stream)
+    }
+}
+
 android {
     namespace = "com.canieatthis.can_i_eat_this"
     compileSdk = flutter.compileSdkVersion
@@ -24,7 +34,8 @@ android {
 
     defaultConfig {
         applicationId = "com.canieatthis.can_i_eat_this"
-        minSdk = 23
+        // flutter_local_notifications 22.x requires API 24 or newer.
+        minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -49,11 +60,21 @@ android {
         }
     }
 
+    signingConfigs {
+        release {
+            keyAlias = keystoreProperties["keyAlias"]
+            keyPassword = keystoreProperties["keyPassword"]
+            storePassword = keystoreProperties["storePassword"]
+            // storeFile은 key.properties의 상대 경로를 Android 루트 기준으로 해석한다.
+            storeFile = keystoreProperties["storeFile"]
+                ? rootProject.file(keystoreProperties["storeFile"])
+                : null
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            signingConfig = signingConfigs.release
         }
     }
 }

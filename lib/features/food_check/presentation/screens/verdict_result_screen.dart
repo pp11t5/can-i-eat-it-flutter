@@ -211,7 +211,7 @@ class _HeroSection extends StatelessWidget {
       children: [
         // 원형 컨테이너 — Figma: 중립 회색(#FAFAFA) + 연회색 테두리(#DBDBE5),
         // 등급색과 무관하게 항상 동일. 안에 음식 카테고리 일러스트.
-        // (by-id 판정: food-type 코드 아이콘 / by-text 판정: category=null → regular 폴백)
+        // by-id·by-text 모두 서버 category code를 사용하며 null이면 regular로 폴백한다.
         Container(
           width: 100,
           height: 100,

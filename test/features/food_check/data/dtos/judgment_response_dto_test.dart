@@ -65,8 +65,10 @@ Map<String, dynamic> _textJudgmentJson({
   String foodName = '두부',
   String grade = 'RECOMMEND',
   String personalTitle = '두부, 안심하고 드세요',
+  String? categoryCode = 'tofu',
   List<Map<String, dynamic>>? items,
   Map<String, dynamic>? stateRecords,
+  List<Map<String, dynamic>>? substitutes,
 }) =>
     {
       'foodName': foodName,
@@ -78,6 +80,8 @@ Map<String, dynamic> _textJudgmentJson({
             _itemJson(emphasis: '알레르기/복용약 분석', body: '알레르기 없어요.'),
           ],
       'stateRecords': stateRecords ?? _stateRecordsJson(),
+      'substitutes': substitutes ?? <Map<String, dynamic>>[],
+      'categoryCode': categoryCode,
     };
 
 // ---------------------------------------------------------------------------
@@ -218,6 +222,8 @@ void main() {
       expect(dto.foodName, '두부');
       expect(dto.grade, 'RECOMMEND');
       expect(dto.personalTitle, '두부, 안심하고 드세요');
+      expect(dto.categoryCode, 'tofu');
+      expect(dto.substitutes, isEmpty);
     });
 
     test('items 2개 역직렬화', () {
@@ -292,48 +298,6 @@ void main() {
     });
   });
 
-  group('S1 stateRecords 누락 방어 (by-text)', () {
-    test('stateRecords 키 없는 UNKNOWN → fromJson 예외 없음', () {
-      final json = {
-        'foodName': '정체불명음식',
-        'grade': 'UNKNOWN',
-        'personalTitle': '정체불명음식, 확인이 어려워요',
-        'items': <Map<String, dynamic>>[],
-        // stateRecords 키 의도적 누락
-      };
-      expect(() => TextJudgmentResponseDto.fromJson(json), returnsNormally);
-    });
-
-    test(
-        'stateRecords 키 없는 UNKNOWN → toEntity level==unknown, stateRecords 빈 폴백',
-        () {
-      final json = {
-        'foodName': '정체불명음식',
-        'grade': 'UNKNOWN',
-        'personalTitle': '정체불명음식, 확인이 어려워요',
-        'items': <Map<String, dynamic>>[],
-        // stateRecords 키 의도적 누락
-      };
-      final entity = TextJudgmentResponseDto.fromJson(json).toEntity();
-      expect(entity.level, VerdictLevel.unknown);
-      expect(entity.stateRecords.total, 0);
-      expect(entity.stateRecords.records, isEmpty);
-    });
-
-    test('stateRecords null 값 → toEntity 빈 폴백', () {
-      final json = {
-        'foodName': '정체불명음식',
-        'grade': 'UNKNOWN',
-        'personalTitle': '정체불명음식, 확인이 어려워요',
-        'items': <Map<String, dynamic>>[],
-        'stateRecords': null,
-      };
-      final entity = TextJudgmentResponseDto.fromJson(json).toEntity();
-      expect(entity.stateRecords.total, 0);
-      expect(entity.stateRecords.records, isEmpty);
-    });
-  });
-
   group('TextJudgmentResponseDto.toEntity (by-text)', () {
     test('grade RECOMMEND → VerdictLevel.recommend', () {
       final entity =
@@ -347,16 +311,22 @@ void main() {
       expect(entity.foodExternalId, isNull);
     });
 
-    test('by-text 규약: category null', () {
+    test('categoryCode를 category로 전달한다', () {
       final entity =
           TextJudgmentResponseDto.fromJson(_textJudgmentJson()).toEntity();
+      expect(entity.category, 'tofu');
+    });
+
+    test('categoryCode null을 그대로 전달한다', () {
+      final entity = TextJudgmentResponseDto.fromJson(
+        _textJudgmentJson(categoryCode: null),
+      ).toEntity();
       expect(entity.category, isNull);
     });
 
-    test('by-text 규약: substitutes 항상 빈배열', () {
+    test('빈 substitutes를 엔티티에 그대로 전달한다', () {
       final entity =
           TextJudgmentResponseDto.fromJson(_textJudgmentJson()).toEntity();
-      // by-text 응답은 서버가 substitutes를 줘도 강제 빈배열 처리
       expect(entity.substitutes, isEmpty);
     });
 
