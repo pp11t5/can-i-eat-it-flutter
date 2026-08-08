@@ -17,7 +17,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.canieatthis.can_i_eat_this"
+    namespace = "com.canieatthis.can_i_eat_this1"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -33,7 +33,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.canieatthis.can_i_eat_this"
+        applicationId = "com.canieatthis.can_i_eat_this1"
         // flutter_local_notifications 22.x requires API 24 or newer.
         minSdk = 24
         targetSdk = flutter.targetSdkVersion
@@ -53,7 +53,8 @@ android {
         dev {
             dimension = "env"
             // 운영과 별도 설치되도록 패키지 suffix 분리.
-            applicationIdSuffix = ".dev"
+            // 기존 dev Firebase 앱 패키지와의 호환을 위해 명시한다.
+            applicationId = "com.canieatthis.can_i_eat_this.dev"
             resValue "string", "app_name", "먹어도돼? Dev"
             // dev 카카오 테스트앱 네이티브 앱키 기반 스킴.
             manifestPlaceholders["kakaoScheme"] = "kakaocd24aa08a740a475401f84390c8219df"
