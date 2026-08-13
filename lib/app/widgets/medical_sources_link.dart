@@ -10,8 +10,8 @@ import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 
 /// 음식 판정에 사용한 의료 근거 안내로 이동하는 공통 링크.
 ///
-/// 목적지 화면과 라우트(`/mypage/medical-sources`)는 의료 근거 콘텐츠 작업에서
-/// 제공한다. 이 위젯은 그 경로로의 이동만 담당한다.
+/// 목적지 화면은 `/mypage/medical-sources`.
+/// 이 위젯은 그 경로로의 이동만 담당한다.
 class MedicalSourcesLink extends StatelessWidget {
   const MedicalSourcesLink({super.key});
 

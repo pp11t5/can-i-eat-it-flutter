@@ -22,6 +22,7 @@ import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/timeline_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/allergy_med_edit_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/condition_edit_screen.dart';
+import 'package:can_i_eat_it/features/mypage/presentation/screens/medical_sources_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/name_edit_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/profile_info_screen.dart';
@@ -287,6 +288,11 @@ GoRouter appRouter(Ref ref) {
         path: '/mypage/withdraw',
         name: 'mypage-withdraw',
         builder: (context, state) => const WithdrawScreen(),
+      ),
+      GoRoute(
+        path: '/mypage/medical-sources',
+        name: 'mypage-medical-sources',
+        builder: (context, state) => const MedicalSourcesScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
