@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/repositories/mock_meal_repository.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_food_detail_screen.dart';
@@ -64,6 +65,8 @@ void main() {
         _wrap(const MealFoodDetailScreen(mealFoodId: 'food-001')),
       );
       await tester.pumpAndSettle();
+
+      expect(find.byType(MedicalSourcesLink), findsOneWidget);
 
       await expectLater(
         find.byType(MealFoodDetailScreen),

@@ -43,6 +43,7 @@ abstract final class AppIcons {
   static const String download = '$_figma/ic_download.svg';
   static const String check = '$_figma/ic_check.svg';
   static const String arrowRight = '$_figma/ic_arrow_right.svg';
+  static const String medicalSources = '$_figma/ic_medical_sources.svg';
 
   // --- 시맨틱 상태 (고정색 SVG, 원본색 유지) ---
   static const String error = '$_figma/ic_error.svg'; // #FF383C
@@ -94,6 +95,7 @@ abstract final class AppImages {
   static const String loginBg = '$_figma/login_bg_image.png';
   static const String loginLogo = '$_figma/login_logo_illust.png';
   static const String splashLogo = '$_splash/splash_logo.png';
+
   /// 스플래시 브랜드 합성 (워드마크 + 전신 캐릭터, Figma 368×464).
   static const String splashBrand = '$_splash/splash_brand.png';
 
@@ -101,6 +103,7 @@ abstract final class AppImages {
   static const String pencil = '$_illust/icon_pencil.png';
   static const String fire = '$_illust/icon_fire.png';
   static const String characterGreeting = '$_illust/character_greeting.png';
+
   /// 판정 로딩 캐릭터 GIF (생각하는 포즈, Figma Loading_Dido).
   static const String characterSearching = '$_illust/character_searching.gif';
   static const String mealPrompt = '$_illust/emoji_meal_prompt.png';

@@ -15,6 +15,7 @@ import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
 import 'package:can_i_eat_it/features/weekly_report/data/weekly_report_providers.dart';
 import 'package:can_i_eat_it/features/weekly_report/domain/entities/weekly_report.dart';
 import 'package:can_i_eat_it/features/weekly_report/presentation/controllers/report_sharer.dart';
@@ -82,9 +83,11 @@ const _kShareText = '이번 주 식단 기록 리포트예요. 진료 시 의료
 class WeeklyReportScreen extends ConsumerStatefulWidget {
   const WeeklyReportScreen({super.key});
 
+  /// 공유 이미지에 포함되는 콘텐츠의 테스트 식별자.
+  static const shareContentKey = ValueKey('weekly-report-share-content');
+
   @override
-  ConsumerState<WeeklyReportScreen> createState() =>
-      _WeeklyReportScreenState();
+  ConsumerState<WeeklyReportScreen> createState() => _WeeklyReportScreenState();
 }
 
 class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
@@ -198,9 +201,8 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
                 color: AppColors.textPrimary,
               ),
               // 데이터 로드 상태에서만 활성 — 로딩/에러 시 캡처 대상이 없다.
-              onPressed: report == null
-                  ? null
-                  : () => _handleDownload(buttonContext),
+              onPressed:
+                  report == null ? null : () => _handleDownload(buttonContext),
             ),
           ),
         ],
@@ -254,6 +256,13 @@ class _Body extends StatelessWidget {
   static String _formatDateRange(String start, String end) =>
       '${_formatDate(start)} ~ ${_formatDate(end)}';
 
+  bool get _hasMeals =>
+      report.mealCount.recommendCount +
+          report.mealCount.cautionCount +
+          report.mealCount.riskCount +
+          report.mealCount.unknownCount >
+      0;
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -264,53 +273,65 @@ class _Body extends StatelessWidget {
       ),
       // W6-7: PNG 공유 캡처 대상 (AppBar 제외, 기간/주차 라벨 + 카드1 + 카드2).
       // 배경색을 명시해 투명 배경으로 캡처되는 것을 방지한다.
-      child: RepaintBoundary(
-        key: shareKey,
-        child: Container(
-          color: AppColors.surface,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // -------------------------------------------------------------
-              // 기간 + 주차 라벨
-              // -------------------------------------------------------------
-              Text(
-                _formatDateRange(report.startDate, report.endDate),
-                style: AppTextStyles.caption1Medium.copyWith(
-                  color: AppColors.textSecondary,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          KeyedSubtree(
+            key: WeeklyReportScreen.shareContentKey,
+            child: RepaintBoundary(
+              key: shareKey,
+              child: Container(
+                color: AppColors.surface,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // -------------------------------------------------------------
+                    // 기간 + 주차 라벨
+                    // -------------------------------------------------------------
+                    Text(
+                      _formatDateRange(report.startDate, report.endDate),
+                      style: AppTextStyles.caption1Medium.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      report.weekLabel,
+                      style: AppTextStyles.header2Bold.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    // Figma — 헤더 → 카드 간격 32.
+                    const SizedBox(height: AppSpacing.contentGap),
+
+                    // -------------------------------------------------------------
+                    // 카드1 — 속 편한 음식 현황
+                    // -------------------------------------------------------------
+                    _ComfortableStateCard(
+                      comfortableState: report.comfortableState,
+                    ),
+                    const SizedBox(height: AppSpacing.sectionGap),
+
+                    // -------------------------------------------------------------
+                    // 카드2 — 내 식단 분포 (도넛)
+                    // -------------------------------------------------------------
+                    _MealDistributionCard(mealCount: report.mealCount),
+                    const SizedBox(height: AppSpacing.sectionGap),
+
+                    // -------------------------------------------------------------
+                    // 카드3 — 기록된 증상 (Figma node 2523:14131)
+                    // -------------------------------------------------------------
+                    _SymptomRecordCard(symptomReport: report.symptomReport),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                report.weekLabel,
-                style: AppTextStyles.header2Bold.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              // Figma — 헤더 → 카드 간격 32.
-              const SizedBox(height: AppSpacing.contentGap),
-
-              // -------------------------------------------------------------
-              // 카드1 — 속 편한 음식 현황
-              // -------------------------------------------------------------
-              _ComfortableStateCard(
-                comfortableState: report.comfortableState,
-              ),
-              const SizedBox(height: AppSpacing.sectionGap),
-
-              // -------------------------------------------------------------
-              // 카드2 — 내 식단 분포 (도넛)
-              // -------------------------------------------------------------
-              _MealDistributionCard(mealCount: report.mealCount),
-              const SizedBox(height: AppSpacing.sectionGap),
-
-              // -------------------------------------------------------------
-              // 카드3 — 기록된 증상 (Figma node 2523:14131)
-              // -------------------------------------------------------------
-              _SymptomRecordCard(symptomReport: report.symptomReport),
-            ],
+            ),
           ),
-        ),
+          if (_hasMeals) ...[
+            const SizedBox(height: AppSpacing.sectionGap),
+            const MedicalSourcesLink(),
+          ],
+        ],
       ),
     );
   }

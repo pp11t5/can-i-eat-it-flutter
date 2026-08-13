@@ -6,6 +6,7 @@ import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
 import 'package:can_i_eat_it/features/food_dictionary/domain/entities/dictionary_food.dart';
 import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/dictionary_list_controller.dart';
 import 'package:can_i_eat_it/features/food_dictionary/presentation/widgets/verdict_outline_badge.dart';
@@ -229,8 +230,7 @@ class _SegmentToggle extends StatelessWidget {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: AppColors.surface,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusPill),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.06),
@@ -284,16 +284,14 @@ class _SegmentLabel extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Padding(
-        padding:
-            const EdgeInsets.symmetric(vertical: AppSpacing.chipPaddingV),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.chipPaddingV),
         child: Center(
           child: AnimatedDefaultTextStyle(
             duration: _SegmentToggle._slideDuration,
             curve: _SegmentToggle._slideCurve,
             style: AppTextStyles.body1Medium.copyWith(
-              color: selected
-                  ? const Color(0xFF000000)
-                  : AppColors.textTertiary,
+              color:
+                  selected ? const Color(0xFF000000) : AppColors.textTertiary,
             ),
             child: Text(label),
           ),
@@ -342,15 +340,18 @@ class _DictionaryList extends StatelessWidget {
             top: AppSpacing.itemGap,
             bottom: 16,
           ),
-          itemCount: dictState.items.length + (dictState.hasNext ? 1 : 0),
+          itemCount: dictState.items.length + (dictState.hasNext ? 1 : 0) + 1,
           separatorBuilder: (_, __) =>
               const SizedBox(height: AppSpacing.itemGap),
           itemBuilder: (context, index) {
-            if (index >= dictState.items.length) {
+            if (index == dictState.items.length && dictState.hasNext) {
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.itemGap),
                 child: Center(child: CircularProgressIndicator()),
               );
+            }
+            if (index == dictState.items.length + (dictState.hasNext ? 1 : 0)) {
+              return const MedicalSourcesLink();
             }
             return _DictionaryCard(item: dictState.items[index]);
           },

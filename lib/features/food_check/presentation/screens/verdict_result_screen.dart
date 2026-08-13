@@ -9,6 +9,7 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/widgets/verdict_detail_card.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_all_records_screen.dart';
@@ -115,6 +116,10 @@ class VerdictResultScreen extends ConsumerWidget {
                       )
                   : null,
             ),
+            const SizedBox(height: AppSpacing.sectionGap),
+            const MedicalSourcesLink(),
+            // 하단 고정 면책 고지와 CTA가 맞닿아 보이지 않도록 여백을 둔다.
+            const SizedBox(height: AppSpacing.sectionGap),
           ],
         ),
       ),
@@ -199,7 +204,7 @@ class _HeroSection extends StatelessWidget {
     return switch (verdict.level) {
       VerdictLevel.recommend => '좋은 선택이에요!',
       VerdictLevel.caution => '속이 편안할 수 있도록 천천히 드세요!',
-      VerdictLevel.risk => '속이 많이 불편해질 수 있어요!',
+      VerdictLevel.risk => '오늘은 피하시는 게 편할 수 있어요',
       VerdictLevel.unknown => '확인이 어려워요',
     };
   }

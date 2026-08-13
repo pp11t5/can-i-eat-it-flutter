@@ -39,12 +39,12 @@ void main() {
       expect(find.text('주의'), findsOneWidget);
     });
 
-    testWidgets('risk → "위험" 텍스트를 렌더한다', (tester) async {
+    testWidgets('risk → "피하는 게 좋아요" 텍스트를 렌더한다', (tester) async {
       await tester.pumpWidget(
         _wrap(const VerdictOutlineBadge(level: VerdictLevel.risk)),
       );
 
-      expect(find.text('위험'), findsOneWidget);
+      expect(find.text('피하는 게 좋아요'), findsOneWidget);
     });
 
     testWidgets('unknown → "확인어려움" 텍스트를 렌더한다', (tester) async {

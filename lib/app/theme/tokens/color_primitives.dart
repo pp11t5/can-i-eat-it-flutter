@@ -18,6 +18,11 @@ abstract final class ColorPrimitives {
   static const Color green200 = Color(0xFF02995B);
   static const Color green300 = Color(0xFF027344);
 
+  // --- Blue 스케일 ---
+
+  /// 링크·근거 안내 강조 (Figma 의료 근거 CTA 실측 #1683FF)
+  static const Color blue100 = Color(0xFF1683FF);
+
   // --- Semantic ---
 
   /// 위험(danger)
