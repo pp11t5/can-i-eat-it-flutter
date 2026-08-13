@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
 import 'package:can_i_eat_it/features/weekly_report/data/repositories/mock_weekly_report_repository.dart';
 import 'package:can_i_eat_it/features/weekly_report/data/weekly_report_providers.dart';
 import 'package:can_i_eat_it/features/weekly_report/domain/entities/weekly_report.dart';
@@ -80,10 +81,10 @@ void main() {
 
       expect(find.text('주간 리포트'), findsOneWidget);
       expect(find.text('이번 주'), findsOneWidget); // seeded().weekLabel
+      expect(find.byType(MedicalSourcesLink), findsOneWidget);
     });
 
-    testWidgets(
-        '카드1 제목 "속 편한 음식을 먹은 현황이에요" + 연속 일수/권장 음식/전체 비율 값을 렌더한다',
+    testWidgets('카드1 제목 "속 편한 음식을 먹은 현황이에요" + 연속 일수/권장 음식/전체 비율 값을 렌더한다',
         (tester) async {
       await tester.pumpWidget(_wrap(MockWeeklyReportRepository.seeded()));
       await tester.pumpAndSettle();
@@ -97,8 +98,7 @@ void main() {
   });
 
   group('WeeklyReportScreen — 카드2(내 식단 분포, 도넛)', () {
-    testWidgets(
-        '카드2 제목 "내 식단 분포" + PieChart + 범례(권장/주의/위험 N끼) + 중앙 총끼수를 렌더한다',
+    testWidgets('카드2 제목 "내 식단 분포" + PieChart + 범례(권장/주의/위험 N끼) + 중앙 총끼수를 렌더한다',
         (tester) async {
       await tester.pumpWidget(_wrap(MockWeeklyReportRepository.seeded()));
       await tester.pumpAndSettle();
@@ -121,8 +121,7 @@ void main() {
   });
 
   group('WeeklyReportScreen — 카드2 unknownCount 4분할 (W7)', () {
-    testWidgets('unknownCount>0이면 "확인 어려움 N끼" 범례 + 총끼수에 포함된다',
-        (tester) async {
+    testWidgets('unknownCount>0이면 "확인 어려움 N끼" 범례 + 총끼수에 포함된다', (tester) async {
       await tester.pumpWidget(
         _wrap(_FixedWeeklyReportRepository(_kReportWithUnknown)),
       );
@@ -149,6 +148,7 @@ void main() {
 
       expect(find.text('기록이 없어요'), findsOneWidget);
       expect(find.byType(PieChart), findsNothing);
+      expect(find.byType(MedicalSourcesLink), findsNothing);
     });
   });
 

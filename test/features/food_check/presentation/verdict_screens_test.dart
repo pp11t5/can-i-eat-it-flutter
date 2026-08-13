@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
 import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_loading_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_result_screen.dart';
@@ -84,6 +85,7 @@ void main() {
       expect(find.text('영문이 아닌 한글로 검색해보세요'), findsOneWidget);
       expect(find.text('등록되지 않은 음식은 직접 추가해보세요'), findsOneWidget);
       expect(find.text('다시 검색'), findsOneWidget);
+      expect(find.byType(MedicalSourcesLink), findsOneWidget);
     });
 
     testWidgets('"다시 검색" 버튼 탭 시 onRetry 콜백 호출', (tester) async {
@@ -164,6 +166,7 @@ void main() {
 
       // Figma 재정합: personalTitle 대신 등급별 헤드라인 문구 표시
       expect(find.text('좋은 선택이에요!'), findsOneWidget);
+      expect(find.byType(MedicalSourcesLink), findsOneWidget);
     });
 
     testWidgets('CTA "다시 검색" 버튼이 존재한다', (tester) async {

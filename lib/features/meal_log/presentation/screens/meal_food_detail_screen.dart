@@ -11,6 +11,7 @@ import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/app/widgets/global_loading.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/dictionary_list_controller.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
@@ -164,6 +165,8 @@ class _Body extends StatelessWidget {
             const SizedBox(height: AppSpacing.sectionGap),
             _AnalysisSectionView(section: allergy),
           ],
+          const SizedBox(height: AppSpacing.sectionGap),
+          const MedicalSourcesLink(),
         ],
       ),
     );

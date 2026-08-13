@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
 import 'package:can_i_eat_it/features/food_dictionary/data/food_dictionary_providers.dart';
 import 'package:can_i_eat_it/features/food_dictionary/data/repositories/mock_dictionary_repository.dart';
 import 'package:can_i_eat_it/features/food_dictionary/domain/entities/dictionary_food.dart';
@@ -79,12 +80,12 @@ void main() {
       expect(find.text('흰쌀밥'), findsOneWidget);
       expect(find.text('바나나'), findsOneWidget);
       expect(find.text('권장'), findsNWidgets(3));
+      expect(find.byType(MedicalSourcesLink).hitTestable(), findsOneWidget);
     });
   });
 
   group('FoodHistoryScreen — 주의 탭 전환', () {
-    testWidgets('"주의 음식" 세그먼트 탭 → 탭 전환되어 주의/위험 배지 목록이 표시된다',
-        (tester) async {
+    testWidgets('"주의 음식" 세그먼트 탭 → 탭 전환되어 주의/위험 배지 목록이 표시된다', (tester) async {
       await tester.pumpWidget(_wrap(MockDictionaryRepository.seeded()));
       await tester.pumpAndSettle();
 
@@ -95,6 +96,7 @@ void main() {
       expect(find.text('커피'), findsOneWidget);
       expect(find.text('주의'), findsOneWidget);
       expect(find.text('위험'), findsOneWidget);
+      expect(find.byType(MedicalSourcesLink).hitTestable(), findsOneWidget);
     });
 
     testWidgets('주의 탭 전환 후 권장 탭 카드는 화면에 상호작용 불가 상태가 된다(IndexedStack)',
@@ -117,6 +119,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('아직 권장 음식이 없어요'), findsOneWidget);
+      expect(find.byType(MedicalSourcesLink).hitTestable(), findsNothing);
     });
 
     testWidgets('empty 저장소 주의 탭 → "아직 주의·위험 음식이 없어요" 렌더', (tester) async {
@@ -127,6 +130,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('아직 주의·위험 음식이 없어요'), findsOneWidget);
+      expect(find.byType(MedicalSourcesLink).hitTestable(), findsNothing);
     });
   });
 
