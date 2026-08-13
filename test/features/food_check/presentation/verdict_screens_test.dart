@@ -315,8 +315,8 @@ void main() {
       );
       await tester.pump();
 
-      // Figma 재정합: 위험 등급 헤드라인 문구
-      expect(find.text('속이 많이 불편해질 수 있어요!'), findsOneWidget);
+      // App Store 1.4.1 대응: 위험 단정을 피한 확정 헤드라인 문구
+      expect(find.text('오늘은 피하시는 게 편할 수 있어요'), findsOneWidget);
     });
 
     testWidgets('위험 상태에서 CTA 2개("다시 검색" + "내 식단에 추가") 모두 존재', (tester) async {

@@ -204,7 +204,7 @@ class _HeroSection extends StatelessWidget {
     return switch (verdict.level) {
       VerdictLevel.recommend => '좋은 선택이에요!',
       VerdictLevel.caution => '속이 편안할 수 있도록 천천히 드세요!',
-      VerdictLevel.risk => '속이 많이 불편해질 수 있어요!',
+      VerdictLevel.risk => '오늘은 피하시는 게 편할 수 있어요',
       VerdictLevel.unknown => '확인이 어려워요',
     };
   }
