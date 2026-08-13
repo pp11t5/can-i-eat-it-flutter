@@ -14,6 +14,8 @@ import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_heal
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
 import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
 import 'package:can_i_eat_it/features/mypage/data/repositories/mock_my_page_repository.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
+import 'package:can_i_eat_it/features/mypage/presentation/screens/medical_sources_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/mypage_screen.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/withdraw_screen.dart';
 import 'package:can_i_eat_it/features/notification/data/notification_providers.dart';
@@ -249,6 +251,7 @@ void main() {
 
       expect(find.text('서비스 이용 약관'), findsOneWidget);
       expect(find.text('개인정보 수집·이용 동의'), findsOneWidget);
+      expect(find.text('의학 정보 출처'), findsOneWidget);
       // 구 항목 제거
       expect(find.text('개인정보 보호 약관'), findsNothing);
       expect(find.text('마케팅 정보 수신'), findsNothing);
@@ -332,5 +335,75 @@ void main() {
       expect(find.byType(WithdrawScreen), findsOneWidget);
       expect(find.text('데이터 영구 삭제'), findsOneWidget);
     });
+
+    testWidgets('의학 정보 출처 탭 시 출처 안내 화면으로 이동한다', (tester) async {
+      tester.view.physicalSize = const Size(400, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(_buildMypageWithMedicalSourcesRouter());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('의학 정보 출처'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(find.text('의학 정보 출처'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('의학 정보 출처'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MedicalSourcesScreen), findsOneWidget);
+    });
   });
+}
+
+/// 의학 정보 출처 탭 시 `/mypage/medical-sources` 네비게이션 검증용.
+Widget _buildMypageWithMedicalSourcesRouter() {
+  final repo = MockAuthRepository();
+  final router = GoRouter(
+    initialLocation: '/mypage',
+    routes: [
+      GoRoute(
+        path: '/mypage',
+        builder: (context, state) => const MypageScreen(),
+      ),
+      GoRoute(
+        path: MedicalSourcesLink.routePath,
+        builder: (context, state) => const MedicalSourcesScreen(),
+      ),
+    ],
+  );
+
+  return ProviderScope(
+    overrides: [
+      // ignore: scoped_providers_should_specify_dependencies
+      authRepositoryProvider.overrideWithValue(repo),
+      // ignore: scoped_providers_should_specify_dependencies
+      healthProfileRepositoryProvider.overrideWithValue(
+        MockHealthProfileRepository.completed(),
+      ),
+      // ignore: scoped_providers_should_specify_dependencies
+      analyticsServiceProvider.overrideWithValue(_NoopAnalytics()),
+      // ignore: scoped_providers_should_specify_dependencies
+      profileCacheProvider.overrideWithValue(InMemoryProfileCache()),
+      // ignore: scoped_providers_should_specify_dependencies
+      dictionaryRepositoryProvider.overrideWithValue(
+        MockDictionaryRepository.seeded(),
+      ),
+      // ignore: scoped_providers_should_specify_dependencies
+      myPageRepositoryProvider.overrideWithValue(MockMyPageRepository.seeded()),
+      // ignore: scoped_providers_should_specify_dependencies
+      notificationRepositoryProvider.overrideWithValue(
+        MockNotificationRepository.defaults(),
+      ),
+    ],
+    child: MaterialApp.router(
+      theme: AppTheme.light,
+      debugShowCheckedModeBanner: false,
+      routerConfig: router,
+    ),
+  );
 }
