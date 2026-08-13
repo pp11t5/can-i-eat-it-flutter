@@ -95,7 +95,7 @@ void main() {
       expect(find.text('된장찌개'), findsOneWidget);
       expect(find.text('커피'), findsOneWidget);
       expect(find.text('주의'), findsOneWidget);
-      expect(find.text('위험'), findsOneWidget);
+      expect(find.text('피하는 게 좋아요'), findsOneWidget);
       expect(find.byType(MedicalSourcesLink).hitTestable(), findsOneWidget);
     });
 
