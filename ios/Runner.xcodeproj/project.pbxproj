@@ -563,8 +563,8 @@
 				GOOGLE_SERVICE_FLAVOR = prod;
 				INFOPLIST_FILE = Runner/Info.plist;
 				KAKAO_URL_SCHEME = kakao2d007771e0083b600999053b9b1d4e83;
-				GID_CLIENT_ID = "";
-				GOOGLE_REVERSED_CLIENT_ID = "";
+				GID_CLIENT_ID = "717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3.apps.googleusercontent.com";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -954,8 +954,8 @@
 				GOOGLE_SERVICE_FLAVOR = prod;
 				INFOPLIST_FILE = Runner/Info.plist;
 				KAKAO_URL_SCHEME = kakao2d007771e0083b600999053b9b1d4e83;
-				GID_CLIENT_ID = "";
-				GOOGLE_REVERSED_CLIENT_ID = "";
+				GID_CLIENT_ID = "717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3.apps.googleusercontent.com";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -989,8 +989,8 @@
 				GOOGLE_SERVICE_FLAVOR = prod;
 				INFOPLIST_FILE = Runner/Info.plist;
 				KAKAO_URL_SCHEME = kakao2d007771e0083b600999053b9b1d4e83;
-				GID_CLIENT_ID = "";
-				GOOGLE_REVERSED_CLIENT_ID = "";
+				GID_CLIENT_ID = "717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3.apps.googleusercontent.com";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
