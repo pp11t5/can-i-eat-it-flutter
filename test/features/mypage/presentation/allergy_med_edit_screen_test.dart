@@ -141,7 +141,10 @@ void main() {
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('알레르기와 복용 중인 약을 알려주세요'), findsOneWidget);
+      expect(
+        find.text('알레르기와 복용 중인 약을\n알려주세요'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('allergyOptions 8종 칩이 모두 표시된다', (tester) async {

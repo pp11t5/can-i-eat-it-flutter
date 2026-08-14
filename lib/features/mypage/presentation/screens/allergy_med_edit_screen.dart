@@ -176,7 +176,7 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '알레르기와 복용 중인 약을\n 알려주세요',
+                  '알레르기와 복용 중인 약을\n알려주세요',
                   style: AppTextStyles.header1Bold.copyWith(
                     color: AppColors.textPrimary,
                   ),
