@@ -110,24 +110,29 @@ dart run build_runner build --delete-conflicting-outputs
 
 ### 실행/빌드 커맨드
 
-카카오 네이티브 앱키를 `--dart-define`으로 주입한다(리터럴은 소스에 커밋하지 않음, `FlavorConfig.kakaoNativeAppKey`).
+카카오 네이티브 앱키와 Google Web 클라이언트 ID를 `--dart-define`으로 주입한다
+(`FlavorConfig.kakaoNativeAppKey`, `FlavorConfig.googleServerClientId`).
 
 ```bash
 # 개발(dev) 실행
 flutter run --flavor dev -t lib/main_dev.dart \
-  --dart-define=KAKAO_NATIVE_APP_KEY=cd24aa08a740a475401f84390c8219df
+  --dart-define=KAKAO_NATIVE_APP_KEY=cd24aa08a740a475401f84390c8219df \
+  --dart-define=GOOGLE_SERVER_CLIENT_ID=717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com
 
 # 운영(prod) 빌드 — iOS
 flutter build ios --flavor prod -t lib/main_prod.dart \
-  --dart-define=KAKAO_NATIVE_APP_KEY=2d007771e0083b600999053b9b1d4e83
+  --dart-define=KAKAO_NATIVE_APP_KEY=2d007771e0083b600999053b9b1d4e83 \
+  --dart-define=GOOGLE_SERVER_CLIENT_ID=717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com
 
 # 운영(prod) 빌드 — Android
 flutter build apk --flavor prod -t lib/main_prod.dart \
-  --dart-define=KAKAO_NATIVE_APP_KEY=2d007771e0083b600999053b9b1d4e83
+  --dart-define=KAKAO_NATIVE_APP_KEY=2d007771e0083b600999053b9b1d4e83 \
+  --dart-define=GOOGLE_SERVER_CLIENT_ID=717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com
 ```
 
 - `lib/main.dart`는 플레이버 미지정 `flutter run` 편의용 shim으로, 내부적으로 `main_prod.dart`에 위임한다(운영 서버 대상 실행이 됨에 유의).
 - dev 카카오 네이티브 앱키(`cd24aa08a740a475401f84390c8219df`)와 prod 앱키(`2d007771e0083b600999053b9b1d4e83`)는 클라이언트 식별자이며 `docs/build-flavors.md`에 이미 커밋되어 있다.
+- Google `GOOGLE_SERVER_CLIENT_ID`는 OAuth **웹 애플리케이션** 클라이언트 ID다(Android/iOS 클라이언트 ID가 아님). 카카오 키와 같이 클라이언트 식별자라 문서에 커밋한다. dev/prod 공통 값이다.
 - dev 서버는 `https://staging.can-i-eat-it.com/api/v1`, prod 서버는 `https://prod.can-i-eat-it.com/api/v1`를 사용한다. `API_BASE_URL`은 `--dart-define`으로 일시적으로 override할 수 있다.
 - `FlavorConfig.kakaoNativeAppKey`가 빈 문자열이면(`--dart-define` 누락 시) `bootstrap.dart`가 카카오 SDK init을 건너뛴다 — 앱은 뜨지만 카카오 로그인만 비활성.
 
@@ -225,6 +230,7 @@ dart run build_runner build --delete-conflicting-outputs
 | 파일/값 | 커밋 여부 | 비고 |
 |---|---|---|
 | 카카오 네이티브 앱키(dev/prod) | **커밋됨** | 클라이언트 식별자(앱 인식용), 시크릿 아님. `docs/build-flavors.md`에 이미 기재. |
+| Google Web 클라이언트 ID (`GOOGLE_SERVER_CLIENT_ID`) | **커밋됨** | OAuth 웹 애플리케이션 클라이언트 ID. 시크릿 아님. Android/iOS 클라이언트 ID와 다름. |
 | `android/app/src/{prod,dev}/google-services.json`, `ios/config/{prod,dev}/GoogleService-Info.plist` | **커밋됨** | `.gitignore`에서 제외되지 않으며 저장소에 실제로 커밋되어 있다(`docs/build-flavors.md`도 "커밋됨"으로 명시). Firebase 클라이언트 설정 파일로, 앱 식별자 성격이라 커밋되는 것이 이 저장소의 현재 관례다. |
 | `.env` (`FIGMA_API_KEY` 등) | **비커밋** | `.gitignore`에 명시. `.env.example`을 복사해 로컬에서만 채운다. |
 | Apple/APNs `.p8` 키 | **이 저장소에 없음** | 서버(백엔드) 개발자가 별도 관리. 클라이언트 레포에 추가하지 않는다. |
