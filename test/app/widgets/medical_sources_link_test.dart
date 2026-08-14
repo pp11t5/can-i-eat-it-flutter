@@ -46,4 +46,28 @@ void main() {
     expect(find.text('의료 근거 화면'), findsOneWidget);
     semantics.dispose();
   });
+
+  testWidgets('guideline 변형은 한 줄 문구만 보이고 지정 URL 콜백을 호출한다', (tester) async {
+    var opened = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: MedicalSourcesLink.guideline(
+            sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/34807007/',
+            onOpen: () => opened = true,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('ACG 2022 가이드라인을 바탕으로 한 정보예요'), findsOneWidget);
+    expect(find.text('근거 확인'), findsNothing);
+    expect(find.text('왜 이런 결과가 나왔나요?'), findsNothing);
+
+    await tester.tap(find.byType(MedicalSourcesLink));
+    await tester.pump();
+
+    expect(opened, isTrue);
+  });
 }

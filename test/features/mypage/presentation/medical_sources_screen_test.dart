@@ -28,6 +28,34 @@ void main() {
       MedicalSourcesCatalog.foodCompositionUrl,
       'https://various.foodsafetykorea.go.kr/nutrient/',
     );
+    expect(
+      MedicalSourcesCatalog.sections
+          .expand((s) => s.items)
+          .where((i) => i.url == MedicalSourcesCatalog.acg2022Url)
+          .every((i) => i.webTitle == MedicalSourcesCatalog.acg2022PageTitle),
+      isTrue,
+    );
+    expect(
+      MedicalSourcesCatalog.sections
+          .expand((s) => s.items)
+          .firstWhere((i) => i.url == MedicalSourcesCatalog.allergenLabelingUrl)
+          .webTitle,
+      MedicalSourcesCatalog.allergenPageTitle,
+    );
+    expect(
+      MedicalSourcesCatalog.sections
+          .expand((s) => s.items)
+          .firstWhere((i) => i.url == MedicalSourcesCatalog.gerdPortalUrl)
+          .webTitle,
+      MedicalSourcesCatalog.gerdPageTitle,
+    );
+    expect(
+      MedicalSourcesCatalog.sections
+          .expand((s) => s.items)
+          .firstWhere((i) => i.url == MedicalSourcesCatalog.foodCompositionUrl)
+          .webTitle,
+      MedicalSourcesCatalog.foodCompositionPageTitle,
+    );
   });
 
   Widget subject({void Function(MedicalSourceItem item)? onOpenSource}) {
