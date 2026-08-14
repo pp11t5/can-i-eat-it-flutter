@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
+import 'package:can_i_eat_it/features/mypage/domain/medical_sources_catalog.dart';
 import 'package:can_i_eat_it/app/widgets/step_progress.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
@@ -24,8 +26,7 @@ GoRouter _testRouter() => GoRouter(
           routes: [
             GoRoute(
               path: '/onboarding/frequency',
-              builder: (_, __) =>
-                  const Scaffold(body: Text('frequency stub')),
+              builder: (_, __) => const Scaffold(body: Text('frequency stub')),
             ),
             GoRoute(
               path: '/onboarding/triggers',
@@ -37,6 +38,10 @@ GoRouter _testRouter() => GoRouter(
                   const Scaffold(body: Text('medications stub')),
             ),
           ],
+        ),
+        GoRoute(
+          path: MedicalSourcesLink.routePath,
+          builder: (_, __) => const Scaffold(body: Text('의료 근거 화면')),
         ),
       ],
     );
@@ -56,8 +61,7 @@ void main() {
       expect(find.textContaining('불편함이 유발되는'), findsOneWidget);
     });
 
-    testWidgets('서브타이틀 "평소 먹고 나면 속이 불편했던 음식을 선택해 주세요"가 렌더된다',
-        (tester) async {
+    testWidgets('서브타이틀 "평소 먹고 나면 속이 불편했던 음식을 선택해 주세요"가 렌더된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
@@ -248,9 +252,7 @@ void main() {
       expect(find.text('냉면'), findsNothing);
     });
 
-    testWidgets(
-        'draft에 customTriggers가 있으면 칩으로 복원된다',
-        (tester) async {
+    testWidgets('draft에 customTriggers가 있으면 칩으로 복원된다', (tester) async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
@@ -281,6 +283,24 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('건너뛰기'), findsNothing);
+    });
+
+    testWidgets('ACG 가이드라인 안내가 다음 버튼 위에 표시된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MedicalSourcesLink), findsOneWidget);
+      expect(find.text('ACG 2022 가이드라인을 바탕으로 한 정보예요'), findsOneWidget);
+    });
+
+    testWidgets('ACG 안내는 PubMed URL을 연다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      final link = tester.widget<MedicalSourcesLink>(
+        find.byType(MedicalSourcesLink),
+      );
+      expect(link.sourceUrl, MedicalSourcesCatalog.acg2022Url);
     });
 
     testWidgets('"다음" 버튼 탭 시 /onboarding/medications로 이동한다', (tester) async {
