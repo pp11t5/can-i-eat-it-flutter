@@ -7,6 +7,7 @@ import 'package:can_i_eat_it/core/network/api_endpoints.dart';
 import 'package:can_i_eat_it/core/security/token_store.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:can_i_eat_it/features/auth/data/services/apple_auth_service.dart';
+import 'package:can_i_eat_it/features/auth/data/services/google_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/data/services/kakao_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
@@ -45,6 +46,18 @@ class _StubKakaoAuthService implements KakaoAuthService {
         email: 'test@example.com',
         nickname: 'testuser',
       );
+
+  @override
+  Future<void> signOut() async {}
+}
+
+class _StubGoogleAuthService implements GoogleAuthService {
+  _StubGoogleAuthService({required this.idToken});
+
+  final String idToken;
+
+  @override
+  Future<GoogleAuthResult> signIn() async => GoogleAuthResult(idToken: idToken);
 
   @override
   Future<void> signOut() async {}
@@ -115,6 +128,7 @@ void main() {
       tokenStore: tokenStore,
       kakaoAuthService: _StubKakaoAuthService(idToken: 'test-id-token'),
       appleAuthService: _StubAppleAuthService(idToken: 'test-id-token'),
+      googleAuthService: _StubGoogleAuthService(idToken: 'test-id-token'),
     );
   });
 
@@ -245,6 +259,57 @@ void main() {
       expect(auth.onboarded, isTrue);
       expect(await tokenStore.readAccessToken(), 'apple-access-123');
       expect(await tokenStore.readRefreshToken(), 'apple-refresh-456');
+    });
+  });
+
+  group('signInWithGoogle — HTTP 200 → Authenticated', () {
+    test('200 성공 + onboarding/status → Authenticated(onboarded=true)',
+        () async {
+      dioAdapter
+        ..onPost(
+          '/auth/google/login',
+          (server) => server.reply(
+              200,
+              _envelope({
+                'accessToken': 'google-access-123',
+                'refreshToken': 'google-refresh-456',
+                'userId': 'google-user-1',
+                'role': 'USER',
+              })),
+          data: {'idToken': 'test-id-token'},
+        )
+        ..onGet(
+          '/onboarding/status',
+          (server) => server.reply(200, _envelope({'onboarded': true})),
+        );
+
+      final outcome = await repo.signInWithGoogle();
+
+      expect(outcome, isA<Authenticated>());
+      final auth = outcome as Authenticated;
+      expect(auth.session.userId, 'google-user-1');
+      expect(auth.session.provider, AuthProvider.google);
+      expect(auth.onboarded, isTrue);
+      expect(await tokenStore.readAccessToken(), 'google-access-123');
+      expect(await tokenStore.readRefreshToken(), 'google-refresh-456');
+    });
+  });
+
+  group('signInWithGoogle — HTTP 403 → Recoverable', () {
+    test('403 + RecoverableAccountFailure → Recoverable(provider=google)',
+        () async {
+      dioAdapter.onPost(
+        '/auth/google/login',
+        (server) => server.reply(403, _errorEnvelope('AUTH403_5')),
+        data: {'idToken': 'test-id-token'},
+      );
+
+      final outcome = await repo.signInWithGoogle();
+
+      expect(outcome, isA<Recoverable>());
+      final recoverable = outcome as Recoverable;
+      expect(recoverable.provider, AuthProvider.google);
+      expect(recoverable.idToken, 'test-id-token');
     });
   });
 
@@ -424,6 +489,7 @@ void main() {
         tokenStore: tokenStore,
         kakaoAuthService: countingKakao,
         appleAuthService: _StubAppleAuthService(idToken: 'test-id-token'),
+        googleAuthService: _StubGoogleAuthService(idToken: 'test-id-token'),
       );
 
       dioAdapter.onPost(

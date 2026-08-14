@@ -12,6 +12,7 @@ import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/core/security/token_store.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:can_i_eat_it/features/auth/data/services/apple_auth_service.dart';
+import 'package:can_i_eat_it/features/auth/data/services/google_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/data/services/kakao_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/consent.dart';
@@ -46,12 +47,23 @@ KakaoAuthService kakaoAuthService(Ref ref) => KakaoAuthServiceImpl();
 AppleAuthService appleAuthService(Ref ref) => AppleAuthServiceImpl();
 
 // ---------------------------------------------------------------------------
+// GoogleAuthService provider
+// ---------------------------------------------------------------------------
+
+/// [GoogleAuthService] 공급자.
+///
+/// 테스트에서는 `ProviderScope(overrides: [googleAuthServiceProvider.overrideWithValue(...)])` 로
+/// stub 을 주입한다.
+@riverpod
+GoogleAuthService googleAuthService(Ref ref) => GoogleAuthServiceImpl();
+
+// ---------------------------------------------------------------------------
 // AuthRepository provider
 // ---------------------------------------------------------------------------
 
 /// [AuthRepository] 공급자.
 ///
-/// 기본값: 실 [AuthRepositoryImpl] (카카오/애플 SDK + 서버 JWT).
+/// 기본값: 실 [AuthRepositoryImpl] (카카오/애플/구글 SDK + 서버 JWT).
 /// 테스트 / 오프라인 환경에서는 [MockAuthRepository] 를 override 로 주입한다.
 @riverpod
 AuthRepository authRepository(Ref ref) => AuthRepositoryImpl(
@@ -59,6 +71,7 @@ AuthRepository authRepository(Ref ref) => AuthRepositoryImpl(
       tokenStore: ref.watch(tokenStoreProvider),
       kakaoAuthService: ref.watch(kakaoAuthServiceProvider),
       appleAuthService: ref.watch(appleAuthServiceProvider),
+      googleAuthService: ref.watch(googleAuthServiceProvider),
     );
 
 // ---------------------------------------------------------------------------
@@ -185,6 +198,22 @@ class AuthController extends _$AuthController {
       await ref
           .read(analyticsServiceProvider)
           .logFunnel(FunnelEvent.signUp, params: {'provider': 'apple'});
+    }
+    return outcome;
+  }
+
+  /// Google 계정으로 로그인하고 [SignInOutcome]을 반환한다.
+  Future<SignInOutcome> signInWithGoogle() async {
+    final outcome = await ref.read(authRepositoryProvider).signInWithGoogle();
+    _applyOutcomeToState(outcome);
+    if (outcome is Authenticated) {
+      unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
+      await _hydrateSessionAfterAuth();
+    }
+    if (outcome is! Recoverable) {
+      await ref
+          .read(analyticsServiceProvider)
+          .logFunnel(FunnelEvent.signUp, params: {'provider': 'google'});
     }
     return outcome;
   }

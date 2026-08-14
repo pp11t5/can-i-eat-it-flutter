@@ -101,6 +101,9 @@ class _SpyAuthRepository implements AuthRepository {
   Future<SignInOutcome> signInWithApple() => _delegate.signInWithApple();
 
   @override
+  Future<SignInOutcome> signInWithGoogle() => _delegate.signInWithGoogle();
+
+  @override
   Future<List<ConsentTerm>> fetchConsentTerms() =>
       _delegate.fetchConsentTerms();
 
@@ -220,6 +223,20 @@ void main() {
 
       expect(fcmSpy.registerCount, 1,
           reason: 'Authenticated 로그인(Apple) 시 register 1회');
+    });
+
+    test('signInWithGoogle: Authenticated 결과 → registerCurrentToken 정확히 1회',
+        () async {
+      final (:container, fcmSpy: fcmSpy, calls: _) = makeSpyContainer(
+          mockRepo: MockAuthRepository.existing(onboarded: true));
+
+      await container.read(authControllerProvider.future);
+      await container.read(authControllerProvider.notifier).signInWithGoogle();
+
+      await Future<void>.delayed(Duration.zero);
+
+      expect(fcmSpy.registerCount, 1,
+          reason: 'Authenticated 로그인(Google) 시 register 1회');
     });
 
     test('recoverAccount: 복구 성공 → registerCurrentToken 정확히 1회', () async {

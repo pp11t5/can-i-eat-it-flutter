@@ -7,6 +7,7 @@ import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
+import 'package:can_i_eat_it/features/auth/data/services/google_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/consent.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
@@ -36,6 +37,9 @@ class _ThrowingObjectAuthRepository implements AuthRepository {
 
   @override
   Future<SignInOutcome> signInWithApple() async => throw error;
+
+  @override
+  Future<SignInOutcome> signInWithGoogle() async => throw error;
 
   @override
   Future<List<ConsentTerm>> fetchConsentTerms() async => const [];
@@ -119,20 +123,22 @@ Widget _wrap(MockAuthRepository repo) => ProviderScope(
 
 void main() {
   group('LoginScreen 플랫폼 분기', () {
-    testWidgets('Android 에서는 카카오 버튼만 보이고 Apple 버튼은 없다', (tester) async {
+    testWidgets('Android 에서는 카카오·구글 버튼이 보이고 Apple 버튼은 없다', (tester) async {
       await tester.pumpWidget(_wrap(MockAuthRepository.signedOut()));
       await tester.pumpAndSettle();
 
       expect(find.text('카카오로 로그인'), findsOneWidget);
+      expect(find.text('Google로 로그인'), findsOneWidget);
       expect(find.text('Apple로 로그인'), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-    testWidgets('iOS 에서는 카카오와 Apple 버튼이 모두 보인다', (tester) async {
+    testWidgets('iOS 에서는 카카오·Apple·구글 버튼이 모두 보인다', (tester) async {
       await tester.pumpWidget(_wrap(MockAuthRepository.signedOut()));
       await tester.pumpAndSettle();
 
       expect(find.text('카카오로 로그인'), findsOneWidget);
       expect(find.text('Apple로 로그인'), findsOneWidget);
+      expect(find.text('Google로 로그인'), findsOneWidget);
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
   });
 
@@ -150,6 +156,19 @@ void main() {
       expect(find.text('terms stub'), findsOneWidget);
       // home 이나 onboarding 으로 이동하지 않는다.
       expect(find.text('home stub'), findsNothing);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets('Authenticated(onboarded=true) — 구글 로그인 시 / 로 이동한다',
+        (tester) async {
+      final repo = MockAuthRepository.existing(onboarded: true);
+      await tester.pumpWidget(_wrap(repo));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Google로 로그인'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('home stub'), findsOneWidget);
+      expect(find.text('terms stub'), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
     testWidgets('Authenticated(onboarded=true) — 카카오 로그인 시 / 로 이동한다',
@@ -284,6 +303,40 @@ void main() {
         );
         expect(find.text('카카오로 로그인'), findsOneWidget);
         expect(find.byType(CircularProgressIndicator), findsNothing);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+
+    testWidgets(
+      'Google 사용자 취소 — 실패 토스트 없이 로그인 화면 유지',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              // ignore: scoped_providers_should_specify_dependencies
+              authRepositoryProvider.overrideWithValue(
+                _ThrowingObjectAuthRepository(
+                  const GoogleSignInCancelledException(),
+                ),
+              ),
+              // ignore: scoped_providers_should_specify_dependencies
+              fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
+            ],
+            child: MaterialApp.router(routerConfig: _testRouter()),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Google로 로그인'), findsOneWidget);
+        await tester.tap(find.text('Google로 로그인'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(
+          find.text('로그인에 실패했어요. 잠시 후 다시 시도해 주세요.'),
+          findsNothing,
+        );
+        expect(find.text('Google로 로그인'), findsOneWidget);
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),
     );

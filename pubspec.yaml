@@ -47,6 +47,7 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   kakao_flutter_sdk_user: ^1.9.7
   sign_in_with_apple: ^8.1.0
+  google_sign_in: ^6.3.0
 
   # Firebase (FCM 푸시)
   firebase_core: ^4.11.0

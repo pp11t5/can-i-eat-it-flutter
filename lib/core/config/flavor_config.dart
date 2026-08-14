@@ -11,6 +11,7 @@ class FlavorConfig {
     required this.apiBaseUrl,
     required this.appDisplayName,
     required this.kakaoNativeAppKey,
+    required this.googleServerClientId,
     this.connectTimeout = const Duration(seconds: 10),
     this.receiveTimeout = Duration.zero,
   });
@@ -26,6 +27,11 @@ class FlavorConfig {
   /// 카카오 네이티브 앱키. **빈 문자열이면 Kakao SDK init 을 생략**한다(dev 미설정 대비).
   /// 키 리터럴은 커밋하지 않고 `--dart-define=KAKAO_NATIVE_APP_KEY` 로 주입한다.
   final String kakaoNativeAppKey;
+
+  /// Google Sign-In serverClientId (OAuth Web 클라이언트 ID).
+  /// 빈 문자열이면 구글 로그인이 idToken 을 발급하지 못한다.
+  /// `--dart-define=GOOGLE_SERVER_CLIENT_ID` 로 주입한다.
+  final String googleServerClientId;
 
   /// 연결 수립 타임아웃(진짜 오프라인/서버 도달불가 감지). 응답 본문 대기와 무관.
   final Duration connectTimeout;
@@ -53,6 +59,7 @@ class FlavorConfig {
     ),
     appDisplayName: '먹어도돼?',
     kakaoNativeAppKey: String.fromEnvironment('KAKAO_NATIVE_APP_KEY'),
+    googleServerClientId: String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID'),
   );
 
   /// 개발(dev) — 개발 서버.
@@ -69,5 +76,6 @@ class FlavorConfig {
     ),
     appDisplayName: '먹어도돼? Dev',
     kakaoNativeAppKey: String.fromEnvironment('KAKAO_NATIVE_APP_KEY'),
+    googleServerClientId: String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID'),
   );
 }
