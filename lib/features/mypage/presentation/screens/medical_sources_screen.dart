@@ -96,7 +96,7 @@ class MedicalSourcesScreen extends StatelessWidget {
     }
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => TermsDetailScreen(title: item.title, url: url),
+        builder: (_) => TermsDetailScreen(title: item.webTitle, url: url),
       ),
     );
   }

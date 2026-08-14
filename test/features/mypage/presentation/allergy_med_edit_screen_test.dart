@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
-import 'package:can_i_eat_it/app/widgets/app_icon.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_health_profile_repository.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
@@ -159,12 +158,21 @@ void main() {
       expect(find.text('생선·조개류'), findsOneWidget);
     });
 
-    testWidgets('초기값 — 프로필 medications로 복용약 리스트 초기화된다', (tester) async {
-      // sampleGerd: medications: ['omeprazole']
+    testWidgets('복용약 입력란은 렌더되지 않는다', (tester) async {
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('omeprazole'), findsOneWidget);
+      expect(find.text('복용 중인 약'), findsNothing);
+      expect(find.byType(TextField), findsNothing);
+      expect(find.text('omeprazole'), findsNothing);
+    });
+
+    testWidgets('ACG 가이드라인 안내가 표시된다', (tester) async {
+      await tester.pumpWidget(_buildScreen());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MedicalSourcesLink), findsOneWidget);
+      expect(find.text('ACG 2022 가이드라인을 바탕으로 한 정보예요'), findsOneWidget);
     });
 
     testWidgets('알레르기 칩 탭 → 토글 (미선택 → 선택 → 미선택)', (tester) async {
@@ -186,40 +194,6 @@ void main() {
       expect(find.text('우유·유제품'), findsOneWidget);
     });
 
-    testWidgets('복용약 추가 — 텍스트필드 입력 후 + 버튼 탭 → 목록 표시', (tester) async {
-      await tester.pumpWidget(_buildScreen());
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(TextField), '란소프라졸');
-      // 온보딩과 동일: TextField 우측 인라인 + 버튼(plusCircle)
-      await tester.tap(
-        find.byWidgetPredicate(
-          (w) => w is AppIcon && w.asset == AppIcons.plusCircle,
-        ),
-      );
-      await tester.pump();
-
-      expect(find.text('란소프라졸'), findsOneWidget);
-    });
-
-    testWidgets('복용약 제거 — × 탭 → 목록에서 제거됨', (tester) async {
-      // sampleGerd: medications: ['omeprazole'] 초기값 있음
-      await tester.pumpWidget(_buildScreen());
-      await tester.pumpAndSettle();
-
-      // omeprazole 옆 × 아이콘 탭
-      await tester.tap(
-        find
-            .byWidgetPredicate(
-              (w) => w is AppIcon && w.asset == AppIcons.closeSmall,
-            )
-            .first,
-      );
-      await tester.pump();
-
-      expect(find.text('omeprazole'), findsNothing);
-    });
-
     testWidgets('저장하기 버튼이 표시된다', (tester) async {
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
@@ -227,7 +201,8 @@ void main() {
       expect(find.text('저장하기'), findsOneWidget);
     });
 
-    testWidgets('저장하기 탭 → HealthProfileController.updateHealthInfo 호출됨', (tester) async {
+    testWidgets('저장하기 탭 → HealthProfileController.updateHealthInfo 호출됨',
+        (tester) async {
       final repo = _CaptureMockRepo(
         initialProfile: const HealthProfile(
           conditions: ['GERD'],
@@ -252,9 +227,9 @@ void main() {
       expect(repo.lastSubmittedProfile, isNotNull);
 
       // toast 생명주기 전체 소진 (등장 250ms + 표시 2500ms + 퇴장 250ms + 여유)
-      await tester.pump(const Duration(milliseconds: 300));  // forward anim
+      await tester.pump(const Duration(milliseconds: 300)); // forward anim
       await tester.pump(const Duration(milliseconds: 2600)); // show duration
-      await tester.pump(const Duration(milliseconds: 300));  // reverse anim
+      await tester.pump(const Duration(milliseconds: 300)); // reverse anim
     });
 
     testWidgets('저장 시 allergies·medications만 변경되고 나머지 필드 보존됨', (tester) async {
@@ -277,15 +252,6 @@ void main() {
       await tester.tap(find.text('우유·유제품'));
       await tester.pump();
 
-      // 복용약 추가 — TextField 우측 인라인 + 버튼(plusCircle)
-      await tester.enterText(find.byType(TextField), '란소프라졸');
-      await tester.tap(
-        find.byWidgetPredicate(
-          (w) => w is AppIcon && w.asset == AppIcons.plusCircle,
-        ),
-      );
-      await tester.pump();
-
       // 저장
       await tester.tap(find.text('저장하기'));
       // pump만 사용 — showAppToast의 2.5s 타이머가 pumpAndSettle을 블록함
@@ -300,10 +266,10 @@ void main() {
       expect(submitted.diagnosed, equals(base.diagnosed));
       expect(submitted.triggerFoods, equals(base.triggerFoods));
       expect(submitted.customTriggers, equals(base.customTriggers));
+      expect(submitted.medications, equals(base.medications));
 
       // 변경 검증
       expect(submitted.allergies, contains('milk'));
-      expect(submitted.medications, contains('란소프라졸'));
 
       // toast 생명주기 전체 소진
       await tester.pump(const Duration(milliseconds: 300));
@@ -317,8 +283,7 @@ void main() {
   //    (의료안전, pr-review ②-1: stale 데이터 위에서 편집·PATCH 금지)
   // ---------------------------------------------------------------------------
   group('medicalInfoStrictProvider 조회 실패 — 에러+재시도', () {
-    testWidgets('조회 실패 시 폼 대신 에러+재시도 UI가 표시되고 저장 버튼이 없다',
-        (tester) async {
+    testWidgets('조회 실패 시 폼 대신 에러+재시도 UI가 표시되고 저장 버튼이 없다', (tester) async {
       // noProfile: fetchMedicalInfoStrict가 StateError를 throw(캐시 폴백 없음).
       final repo = MockHealthProfileRepository.noProfile();
 
@@ -360,9 +325,9 @@ void main() {
       await tester.tap(find.text('다시 시도'));
       await tester.pumpAndSettle();
 
-      // 재시도 성공 → 폼 표시(sampleGerd의 medications 초기값도 확인)
+      // 재시도 성공 → 폼 표시
       expect(find.text('저장하기'), findsOneWidget);
-      expect(find.text('omeprazole'), findsOneWidget);
+      expect(find.text('ACG 2022 가이드라인을 바탕으로 한 정보예요'), findsOneWidget);
       expect(repo.fetchAttempts, 2);
     });
   });

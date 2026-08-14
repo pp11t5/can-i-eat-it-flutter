@@ -8,7 +8,9 @@ import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_button.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
+import 'package:can_i_eat_it/features/mypage/domain/medical_sources_catalog.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_step_body.dart';
@@ -51,151 +53,159 @@ class _OnboardingTriggersScreenState
 
     return OnboardingStepBody(
       child: GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      behavior: HitTestBehavior.translucent,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: IntrinsicHeight(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.screenPadding,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: AppSpacing.sectionGap),
-                          Text(
-                            '불편함이 유발되는\n음식이 있나요?',
-                            style: AppTextStyles.header1Bold.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            '평소 먹고 나면 속이 불편했던 음식을 선택해 주세요',
-                            style: AppTextStyles.body1Medium.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.contentGap),
-                          Wrap(
-                            spacing: AppSpacing.itemGap,
-                            runSpacing: AppSpacing.itemGap,
-                            children: triggerFoodOptions.map((entry) {
-                              final isSelected =
-                                  draft.triggerFoods.contains(entry.code);
-                              return SelectableChip(
-                                label: entry.label,
-                                selected: isSelected,
-                                onTap: () =>
-                                    notifier.toggleTrigger(entry.code),
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(height: AppSpacing.contentGap),
-                          Text(
-                            '해당하는 음식이 없나요?',
-                            style: AppTextStyles.body1Bold.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          // 복용약 입력과 동일: TextField 우측 인라인 + 버튼.
-                          TextField(
-                            controller: _customController,
-                            style: AppTextStyles.body1Regular.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: '오렌지주스, 라면',
-                              hintStyle: AppTextStyles.body1Regular.copyWith(
-                                color: AppColors.textTertiary,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.cardPadding,
-                                vertical: AppSpacing.cardPadding,
-                              ),
-                              suffixIcon: Padding(
-                                padding: const EdgeInsets.only(
-                                  right: AppSpacing.itemGap,
-                                ),
-                                child: GestureDetector(
-                                  onTap: _addCustomTrigger,
-                                  child: const AppIcon(
-                                    AppIcons.plusCircle,
-                                    size: 24,
-                                  ),
-                                ),
-                              ),
-                              suffixIconConstraints: const BoxConstraints(
-                                minWidth: 40,
-                                minHeight: 40,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusCard,
-                                ),
-                                borderSide:
-                                    const BorderSide(color: AppColors.border),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusCard,
-                                ),
-                                borderSide:
-                                    const BorderSide(color: AppColors.primary),
-                              ),
-                            ),
-                            onSubmitted: (_) => _addCustomTrigger(),
-                          ),
-                          if (draft.customTriggers.isNotEmpty) ...[
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        behavior: HitTestBehavior.translucent,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.screenPadding,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             const SizedBox(height: AppSpacing.sectionGap),
+                            Text(
+                              '불편함이 유발되는\n음식이 있나요?',
+                              style: AppTextStyles.header1Bold.copyWith(
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              '평소 먹고 나면 속이 불편했던 음식을 선택해 주세요',
+                              style: AppTextStyles.body1Medium.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.contentGap),
                             Wrap(
                               spacing: AppSpacing.itemGap,
                               runSpacing: AppSpacing.itemGap,
-                              children: draft.customTriggers.map((item) {
-                                return _CustomTriggerChip(
-                                  label: item,
-                                  onRemove: () =>
-                                      notifier.removeCustomTrigger(item),
+                              children: triggerFoodOptions.map((entry) {
+                                final isSelected =
+                                    draft.triggerFoods.contains(entry.code);
+                                return SelectableChip(
+                                  label: entry.label,
+                                  selected: isSelected,
+                                  onTap: () =>
+                                      notifier.toggleTrigger(entry.code),
                                 );
                               }).toList(),
                             ),
+                            const SizedBox(height: AppSpacing.contentGap),
+                            Text(
+                              '해당하는 음식이 없나요?',
+                              style: AppTextStyles.body1Bold.copyWith(
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            // 복용약 입력과 동일: TextField 우측 인라인 + 버튼.
+                            TextField(
+                              controller: _customController,
+                              style: AppTextStyles.body1Regular.copyWith(
+                                color: AppColors.textPrimary,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: '오렌지주스, 라면',
+                                hintStyle: AppTextStyles.body1Regular.copyWith(
+                                  color: AppColors.textTertiary,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.cardPadding,
+                                  vertical: AppSpacing.cardPadding,
+                                ),
+                                suffixIcon: Padding(
+                                  padding: const EdgeInsets.only(
+                                    right: AppSpacing.itemGap,
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: _addCustomTrigger,
+                                    child: const AppIcon(
+                                      AppIcons.plusCircle,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                                suffixIconConstraints: const BoxConstraints(
+                                  minWidth: 40,
+                                  minHeight: 40,
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusCard,
+                                  ),
+                                  borderSide:
+                                      const BorderSide(color: AppColors.border),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusCard,
+                                  ),
+                                  borderSide: const BorderSide(
+                                      color: AppColors.primary),
+                                ),
+                              ),
+                              onSubmitted: (_) => _addCustomTrigger(),
+                            ),
+                            if (draft.customTriggers.isNotEmpty) ...[
+                              const SizedBox(height: AppSpacing.sectionGap),
+                              Wrap(
+                                spacing: AppSpacing.itemGap,
+                                runSpacing: AppSpacing.itemGap,
+                                children: draft.customTriggers.map((item) {
+                                  return _CustomTriggerChip(
+                                    label: item,
+                                    onRemove: () =>
+                                        notifier.removeCustomTrigger(item),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                            const SizedBox(height: AppSpacing.sectionGap),
                           ],
-                          const SizedBox(height: AppSpacing.sectionGap),
-                        ],
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                    // CTA (Figma p3: top16/bottom32) — 스크롤 안, 입력과 간격 유지
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: AppSpacing.screenPadding,
-                        right: AppSpacing.screenPadding,
-                        top: 16,
-                        bottom: 32,
+                      const Spacer(),
+                      // CTA (Figma p3: top16/bottom32) — 스크롤 안, 입력과 간격 유지
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: AppSpacing.screenPadding,
+                          right: AppSpacing.screenPadding,
+                          top: 16,
+                          bottom: 32,
+                        ),
+                        child: Column(
+                          children: [
+                            const MedicalSourcesLink.guideline(
+                              sourceUrl: MedicalSourcesCatalog.acg2022Url,
+                            ),
+                            const SizedBox(height: AppSpacing.cardPadding),
+                            AppButton.primary(
+                              label: '다음',
+                              onPressed: () =>
+                                  context.push('/onboarding/medications'),
+                              isExpanded: true,
+                            ),
+                          ],
+                        ),
                       ),
-                      child: AppButton.primary(
-                        label: '다음',
-                        onPressed: () =>
-                            context.push('/onboarding/medications'),
-                        isExpanded: true,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+        ),
       ),
     );
   }
