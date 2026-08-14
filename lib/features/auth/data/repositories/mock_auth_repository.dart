@@ -31,6 +31,9 @@ class ThrowingAuthRepository implements AuthRepository {
   Future<SignInOutcome> signInWithApple() async => throw _failure;
 
   @override
+  Future<SignInOutcome> signInWithGoogle() async => throw _failure;
+
+  @override
   Future<List<ConsentTerm>> fetchConsentTerms() async =>
       MockAuthRepository.defaultConsentTerms;
 
@@ -74,6 +77,7 @@ class MockAuthRepository implements AuthRepository {
   /// [initialSession]: [currentSession]이 최초 반환할 세션(null = 미인증).
   /// [kakaoOutcome]: 카카오 로그인 결과. 미지정 시 기본 신규 사용자 인증 결과.
   /// [appleOutcome]: Apple 로그인 결과. 미지정 시 [kakaoOutcome] 폴백.
+  /// [googleOutcome]: Google 로그인 결과. 미지정 시 [kakaoOutcome] 폴백.
   /// [delay]: 테스트에서 loading 상태 관찰용 — [currentSession] 반환 전 대기 시간.
   ///   기본값 [Duration.zero]이므로 기존 동작/테스트에 영향 없음.
   /// [failRecoverTimes]: [recoverAccount] 호출이 실패해야 하는 횟수(재시도
@@ -82,6 +86,7 @@ class MockAuthRepository implements AuthRepository {
     AuthSession? initialSession,
     SignInOutcome? kakaoOutcome,
     SignInOutcome? appleOutcome,
+    SignInOutcome? googleOutcome,
     Duration delay = Duration.zero,
     int failRecoverTimes = 0,
     bool recoverOnboarded = false,
@@ -93,6 +98,7 @@ class MockAuthRepository implements AuthRepository {
   })  : _session = initialSession,
         _kakaoOutcome = kakaoOutcome,
         _appleOutcome = appleOutcome,
+        _googleOutcome = googleOutcome,
         _delay = delay,
         _failRecoverTimes = failRecoverTimes,
         _recoverOnboarded = recoverOnboarded,
@@ -194,6 +200,7 @@ class MockAuthRepository implements AuthRepository {
   AuthSession? _session;
   final SignInOutcome? _kakaoOutcome;
   final SignInOutcome? _appleOutcome;
+  final SignInOutcome? _googleOutcome;
   final Duration _delay;
   int _failRecoverTimes;
   final bool _recoverOnboarded;
@@ -282,6 +289,13 @@ class MockAuthRepository implements AuthRepository {
   Future<SignInOutcome> signInWithApple() async {
     final outcome = _appleOutcome ?? _kakaoOutcome ?? _defaultOutcome;
     _applyOutcomeToSession(outcome, AuthProvider.apple);
+    return outcome;
+  }
+
+  @override
+  Future<SignInOutcome> signInWithGoogle() async {
+    final outcome = _googleOutcome ?? _kakaoOutcome ?? _defaultOutcome;
+    _applyOutcomeToSession(outcome, AuthProvider.google);
     return outcome;
   }
 

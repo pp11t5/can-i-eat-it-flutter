@@ -13,6 +13,7 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/core/error/failure.dart';
+import 'package:can_i_eat_it/features/auth/data/services/google_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/widgets/deletion_grace_dialog.dart';
@@ -128,6 +129,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   isLoading: isLoading,
                   onKakaoPressed: () => _handleKakaoPressed(context),
                   onApplePressed: () => _handleApplePressed(context),
+                  onGooglePressed: () => _handleGooglePressed(context),
                 ),
               ),
             ],
@@ -166,6 +168,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _handleGooglePressed(BuildContext context) async {
+    try {
+      final outcome =
+          await ref.read(authControllerProvider.notifier).signInWithGoogle();
+      if (!context.mounted) return;
+      await _handlePostSignIn(context, outcome);
+    } catch (e) {
+      if (!context.mounted) return;
+      if (_isUserCancelledSocialAuth(e)) return;
+      _showSignInErrorToast(context);
+    }
+  }
+
   /// 사용자가 OAuth UI 를 닫거나 취소한 경우 — 실패 토스트 없이 로그인 화면 유지.
   bool _isUserCancelledSocialAuth(Object error) {
     if (error is KakaoClientException &&
@@ -174,6 +189,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
     if (error is SignInWithAppleAuthorizationException &&
         error.code == AuthorizationErrorCode.canceled) {
+      return true;
+    }
+    if (error is GoogleSignInCancelledException) {
       return true;
     }
     return false;
@@ -250,11 +268,13 @@ class _ButtonSection extends StatelessWidget {
     required this.isLoading,
     required this.onKakaoPressed,
     required this.onApplePressed,
+    required this.onGooglePressed,
   });
 
   final bool isLoading;
   final VoidCallback onKakaoPressed;
   final VoidCallback onApplePressed;
+  final VoidCallback onGooglePressed;
 
   @override
   Widget build(BuildContext context) {
@@ -272,6 +292,11 @@ class _ButtonSection extends StatelessWidget {
             onPressed: isLoading ? null : onApplePressed,
           ),
         ],
+        const SizedBox(height: AppSpacing.itemGap),
+        _GoogleButton(
+          isLoading: isLoading,
+          onPressed: isLoading ? null : onGooglePressed,
+        ),
         if (isLoading) ...[
           const SizedBox(height: AppSpacing.cardPadding),
           const CircularProgressIndicator(color: AppColors.primary),
@@ -372,6 +397,61 @@ class _AppleButton extends StatelessWidget {
                   'Apple로 로그인',
                   style: AppTextStyles.body1Medium.copyWith(
                     color: AppColors.surface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Google 버튼 (흰 배경 + 공식 G + 테두리)
+// ---------------------------------------------------------------------------
+
+class _GoogleButton extends StatelessWidget {
+  const _GoogleButton({
+    required this.isLoading,
+    required this.onPressed,
+  });
+
+  final bool isLoading;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: Material(
+        color: isLoading ? AppColors.surfaceMuted : AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          side: const BorderSide(color: AppColors.border),
+        ),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: AppSpacing.cardPadding - 2,
+              horizontal: 14,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  'assets/figma_extracted/google_logo.svg',
+                  width: 18,
+                  height: 18,
+                ),
+                const SizedBox(width: AppSpacing.itemGap),
+                Text(
+                  'Google로 로그인',
+                  style: AppTextStyles.body1Medium.copyWith(
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
