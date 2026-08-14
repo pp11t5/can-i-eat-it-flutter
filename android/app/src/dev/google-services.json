@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:717895572091:android:3b610f21785869c03360de",
+        "mobilesdk_app_id": "1:717895572091:android:a367bcbe00c2048e3360de",
         "android_client_info": {
-          "package_name": "com.canieatthis.can_i_eat_this.dev"
+          "package_name": "com.canieatthis.can_i_eat_this"
         }
       },
       "oauth_client": [],
@@ -20,7 +20,78 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.canieatthis.canIEatThis.dev"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:717895572091:android:3b610f21785869c03360de",
+        "android_client_info": {
+          "package_name": "com.canieatthis.can_i_eat_this.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "717895572091-20qqre5uf26pb0f2bl4srmdei0b964n1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.canieatthis.can_i_eat_this.dev",
+            "certificate_hash": "e63909a0f346b3a169833b3a65dbcf38a656bb32"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCj_3PPP-6oVjxLve8eiSFNbdo9jj4FU3o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.canieatthis.canIEatThis.dev"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:717895572091:android:418d7af69277a19b3360de",
+        "android_client_info": {
+          "package_name": "com.canieatthis.can_i_eat_this1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCj_3PPP-6oVjxLve8eiSFNbdo9jj4FU3o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.canieatthis.canIEatThis.dev"
+              }
+            }
+          ]
         }
       }
     }
