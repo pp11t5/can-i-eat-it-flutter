@@ -22,7 +22,7 @@ extension VerdictLevelLabel on VerdictLevel {
   String get label => switch (this) {
         VerdictLevel.recommend => '권장',
         VerdictLevel.caution => '주의',
-        VerdictLevel.risk => '위험',
+        VerdictLevel.risk => '피하는 게 좋아요',
         VerdictLevel.unknown => '확인어려움',
       };
 }

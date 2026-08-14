@@ -28,6 +28,9 @@ abstract final class AppColors {
   static const Color primary = ColorPrimitives.green100;
   static const Color onPrimary = ColorPrimitives.white;
 
+  /// 앱 내 이동 링크·근거 안내 강조색.
+  static const Color link = ColorPrimitives.blue100;
+
   // --- Surface ---
 
   static const Color surface = ColorPrimitives.white;
@@ -88,7 +91,8 @@ abstract final class AppColors {
   static const Color cardUnselectedBg = ColorPrimitives.cardUnselectedBg;
 
   /// 비선택 OptionCard 테두리 (#DBDBE5)
-  static const Color cardUnselectedBorder = ColorPrimitives.cardUnselectedBorder;
+  static const Color cardUnselectedBorder =
+      ColorPrimitives.cardUnselectedBorder;
 
   /// 비활성 카드 라벨 색 (#D6D6D6)
   static const Color disabledLabel = ColorPrimitives.disabledLabel;

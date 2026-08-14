@@ -127,4 +127,13 @@ abstract final class AppTextStyles {
     height: 1.7,
     letterSpacing: 0.36,
   );
+
+  /// Caption_2(R) — 11/400, height 1.5 (Figma 3544:24117 서지 각주).
+  static const TextStyle caption2Regular = TextStyle(
+    fontFamily: TypographyPrimitives.fontFamily,
+    fontSize: TypographyPrimitives.size11,
+    fontWeight: TypographyPrimitives.regular,
+    height: 1.5,
+    letterSpacing: 0,
+  );
 }

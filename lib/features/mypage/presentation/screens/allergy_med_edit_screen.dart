@@ -4,17 +4,16 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
-import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
-import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_button.dart';
-import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/global_loading.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
+import 'package:can_i_eat_it/features/mypage/domain/medical_sources_catalog.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 
 /// 알레르기·복용약 편집 화면 (Figma 577-10291).
@@ -44,19 +43,11 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
   bool _initialized = false;
   bool _isSaving = false;
 
-  final _medController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
     _selectedAllergies = {};
     _medications = [];
-  }
-
-  @override
-  void dispose() {
-    _medController.dispose();
-    super.dispose();
   }
 
   /// 서버 조회([medicalInfoStrictProvider])가 성공하면 최초 1회 로컬 상태를 초기화한다.
@@ -85,31 +76,11 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
     });
   }
 
-  void _addMedication() {
-    final text = _medController.text.trim();
-    if (text.isEmpty) return;
-    if (_medications.contains(text)) {
-      _medController.clear();
-      FocusManager.instance.primaryFocus?.unfocus();
-      return;
-    }
-    setState(() {
-      _medications = [..._medications, text];
-    });
-    _medController.clear();
-    FocusManager.instance.primaryFocus?.unfocus();
-  }
-
-  void _removeMedication(String med) {
-    setState(() {
-      _medications = _medications.where((m) => m != med).toList();
-    });
-  }
-
   Future<void> _onSave() async {
     if (_isSaving) return;
 
-    final profileController = ref.read(healthProfileControllerProvider.notifier);
+    final profileController =
+        ref.read(healthProfileControllerProvider.notifier);
 
     setState(() => _isSaving = true);
 
@@ -193,146 +164,67 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
   /// 폼 본문 — 조회 성공 시에만 렌더된다(저장 버튼도 이 안에만 존재 — 조회 실패 시
   /// 저장 자체가 불가능하도록 화면에서 사라진다).
   Widget _buildForm(BuildContext context) {
-    // 온보딩 medications 화면과 동일: 빈 영역 탭 시 입력란/키보드 unfocus.
-    // 칩 탭 unfocus는 SelectableChip 내부에서 처리한다.
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      behavior: HitTestBehavior.translucent,
-      child: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              keyboardDismissBehavior:
-                  ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-                vertical: AppSpacing.sectionGap,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 헤더
-                  Text(
-                    '알레르기와 복용 중인 약을 알려주세요',
-                    style: AppTextStyles.header1Bold.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenPadding,
+              vertical: AppSpacing.sectionGap,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '알레르기와 복용 중인 약을\n알려주세요',
+                  style: AppTextStyles.header1Bold.copyWith(
+                    color: AppColors.textPrimary,
                   ),
-                  const SizedBox(height: AppSpacing.sectionGap),
-
-                  // 알레르기 섹션
-                  Text(
-                    '알레르기',
-                    style: AppTextStyles.body1Bold.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
+                ),
+                const SizedBox(height: 76),
+                Text(
+                  '알레르기',
+                  style: AppTextStyles.body1Bold.copyWith(
+                    color: AppColors.textPrimary,
                   ),
-                  const SizedBox(height: AppSpacing.itemGap),
-                  Wrap(
-                    spacing: AppSpacing.itemGap,
-                    runSpacing: AppSpacing.itemGap,
-                    children: allergyOptions.map((entry) {
-                      final isSelected =
-                          _selectedAllergies.contains(entry.code);
-                      return SelectableChip(
-                        label: entry.label,
-                        selected: isSelected,
-                        onTap: () => _toggleAllergy(entry.code),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: AppSpacing.sectionGap),
-
-                  // 복용약 섹션
-                  Text(
-                    '복용 중인 약',
-                    style: AppTextStyles.body1Bold.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.itemGap),
-                  // 온보딩 medications 화면과 동일: TextField 우측 인라인 + 버튼.
-                  TextField(
-                    controller: _medController,
-                    style: AppTextStyles.body1Regular.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'PPI, 제산제',
-                      hintStyle: AppTextStyles.body1Regular.copyWith(
-                        color: AppColors.textTertiary,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.cardPadding,
-                        vertical: AppSpacing.cardPadding,
-                      ),
-                      suffixIcon: Padding(
-                        padding: const EdgeInsets.only(
-                          right: AppSpacing.itemGap,
-                        ),
-                        child: GestureDetector(
-                          onTap: _addMedication,
-                          child: const AppIcon(
-                            AppIcons.plusCircle,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                      suffixIconConstraints: const BoxConstraints(
-                        minWidth: 40,
-                        minHeight: 40,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusCard,
-                        ),
-                        borderSide: const BorderSide(color: AppColors.border),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusCard,
-                        ),
-                        borderSide: const BorderSide(color: AppColors.primary),
-                      ),
-                    ),
-                    onSubmitted: (_) => _addMedication(),
-                  ),
-                  // 추가된 약 목록
-                  if (_medications.isNotEmpty) ...[
-                    const SizedBox(height: AppSpacing.sectionGap),
-                    Wrap(
-                      spacing: AppSpacing.itemGap,
-                      runSpacing: AppSpacing.itemGap,
-                      children: _medications.map((med) {
-                        return _MedicationChip(
-                          label: med,
-                          onRemove: () => _removeMedication(med),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                  const SizedBox(height: AppSpacing.sectionGap),
-                ],
-              ),
+                ),
+                const SizedBox(height: AppSpacing.itemGap),
+                Wrap(
+                  spacing: AppSpacing.itemGap,
+                  runSpacing: AppSpacing.itemGap,
+                  children: allergyOptions.map((entry) {
+                    final isSelected = _selectedAllergies.contains(entry.code);
+                    return SelectableChip(
+                      label: entry.label,
+                      selected: isSelected,
+                      onTap: () => _toggleAllergy(entry.code),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: AppSpacing.sectionGap),
+                const MedicalSourcesLink.guideline(
+                  sourceUrl: MedicalSourcesCatalog.acg2022Url,
+                ),
+              ],
             ),
           ),
+        ),
 
-          // 저장하기 버튼
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.screenPadding,
-              AppSpacing.itemGap,
-              AppSpacing.screenPadding,
-              AppSpacing.sectionGap + MediaQuery.of(context).padding.bottom,
-            ),
-            child: AppButton.primary(
-              label: '저장하기',
-              onPressed: _isSaving ? null : _onSave,
-              isExpanded: true,
-            ),
+        // 저장하기 버튼
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.screenPadding,
+            AppSpacing.itemGap,
+            AppSpacing.screenPadding,
+            AppSpacing.sectionGap + MediaQuery.of(context).padding.bottom,
           ),
-        ],
-      ),
+          child: AppButton.primary(
+            label: '저장하기',
+            onPressed: _isSaving ? null : _onSave,
+            isExpanded: true,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -372,55 +264,6 @@ class _MedicalInfoErrorBody extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// 복용약 칩 (삭제 버튼 포함)
-// ---------------------------------------------------------------------------
-
-class _MedicationChip extends StatelessWidget {
-  const _MedicationChip({
-    required this.label,
-    required this.onRemove,
-  });
-
-  final String label;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.chipPaddingH,
-        vertical: AppSpacing.chipPaddingV,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceSelected,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-        border: Border.all(color: AppColors.primary),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: AppTextStyles.body2Medium.copyWith(
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          GestureDetector(
-            onTap: onRemove,
-            child: const AppIcon(
-              AppIcons.closeSmall,
-              size: AppIconSizes.s16,
-              color: AppColors.primary,
-            ),
-          ),
-        ],
       ),
     );
   }

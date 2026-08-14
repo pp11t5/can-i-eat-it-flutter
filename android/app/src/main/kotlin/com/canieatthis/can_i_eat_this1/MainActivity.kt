@@ -1,4 +1,4 @@
-package com.canieatthis.can_i_eat_this
+package com.canieatthis.can_i_eat_this1
 
 import android.content.Intent
 import android.net.Uri

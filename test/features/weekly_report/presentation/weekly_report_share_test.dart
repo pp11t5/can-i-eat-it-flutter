@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
 import 'package:can_i_eat_it/features/weekly_report/data/repositories/mock_weekly_report_repository.dart';
 import 'package:can_i_eat_it/features/weekly_report/data/weekly_report_providers.dart';
 import 'package:can_i_eat_it/features/weekly_report/presentation/controllers/report_sharer.dart';
@@ -102,6 +103,14 @@ void main() {
 
       expect(
         find.text('개인 식단 기록 요약이며 의학적 진단·처방이 아니에요 · 먹어도 돼?'),
+        findsNothing,
+      );
+      expect(find.byType(MedicalSourcesLink), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(WeeklyReportScreen.shareContentKey),
+          matching: find.byType(MedicalSourcesLink),
+        ),
         findsNothing,
       );
     });

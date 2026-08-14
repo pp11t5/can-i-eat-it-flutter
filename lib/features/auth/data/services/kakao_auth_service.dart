@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 /// 카카오 SDK 얇은 래퍼 (ADR-0007 §3-1 (6-A)).
@@ -31,29 +32,65 @@ class KakaoAuthResult {
 class KakaoAuthServiceImpl implements KakaoAuthService {
   @override
   Future<KakaoAuthResult> signIn() async {
-    // 카카오톡 앱 전환 없이 기본 브라우저의 카카오계정 로그인만 사용한다.
-    final token = await UserApi.instance.loginWithKakaoAccount();
+    var stage = '브라우저 로그인 시작';
+    try {
+      _debugLog(stage);
 
-    // OIDC idToken 확인
-    final idToken = token.idToken;
-    if (idToken == null) {
-      throw StateError('kakao idToken 이 null 입니다. OIDC 스코프를 확인하세요.');
+      // 카카오톡 앱 전환 없이 기본 브라우저의 카카오계정 로그인만 사용한다.
+      final token = await UserApi.instance.loginWithKakaoAccount();
+
+      stage = 'SDK 토큰 수신';
+      _debugLog('$stage (idToken=${token.idToken != null ? '있음' : '없음'})');
+
+      // OIDC idToken 확인
+      final idToken = token.idToken;
+      if (idToken == null) {
+        _debugLog('$stage 실패: OIDC idToken이 없습니다.');
+        throw StateError('kakao idToken 이 null 입니다. OIDC 스코프를 확인하세요.');
+      }
+
+      stage = '사용자 정보 조회';
+      _debugLog(stage);
+      final user = await UserApi.instance.me();
+      final email = user.kakaoAccount?.email;
+      final nickname = user.kakaoAccount?.profile?.nickname;
+      _debugLog(
+        '$stage 완료 (email=${email != null ? '있음' : '없음'}, '
+        'nickname=${nickname != null ? '있음' : '없음'})',
+      );
+
+      return KakaoAuthResult(
+        idToken: idToken,
+        email: email,
+        nickname: nickname,
+      );
+    } catch (error, stackTrace) {
+      _debugLog(
+        '$stage 실패: ${error.runtimeType}: ${_redactSensitiveValues(error.toString())}',
+      );
+      if (kDebugMode) debugPrintStack(stackTrace: stackTrace);
+      rethrow;
     }
-
-    // 사용자 정보 조회 (email, nickname 스코프)
-    final user = await UserApi.instance.me();
-    final email = user.kakaoAccount?.email;
-    final nickname = user.kakaoAccount?.profile?.nickname;
-
-    return KakaoAuthResult(
-      idToken: idToken,
-      email: email,
-      nickname: nickname,
-    );
   }
 
   @override
   Future<void> signOut() async {
     await UserApi.instance.logout();
   }
+}
+
+/// 카카오 로그인 진단 로그. debug 빌드에서만 출력하며 토큰·인가 코드는 남기지 않는다.
+void _debugLog(String message) {
+  if (kDebugMode) debugPrint('[KakaoAuth] $message');
+}
+
+String _redactSensitiveValues(String value) {
+  return value.replaceAllMapped(
+    RegExp(
+      r'\b(access[_-]?token|refresh[_-]?token|id[_-]?token|'
+      r'authorization[_-]?code|code)\b([=:]\s*|%3D)[^,\s&}]+',
+      caseSensitive: false,
+    ),
+    (match) => '${match.group(1)}=***',
+  );
 }

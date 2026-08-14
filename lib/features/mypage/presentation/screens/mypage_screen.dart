@@ -11,6 +11,7 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
 import 'package:can_i_eat_it/app/widgets/global_loading.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
 import 'package:can_i_eat_it/core/config/terms_catalog.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
@@ -30,7 +31,7 @@ import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart'
 /// - 내 음식 히스토리 카드 → /food-history push (dictionaryCountProvider 실카운트)
 /// - 주간 리포트 카드 (지난주 요약, 없으면 수집 중 빈 상태)
 /// - 설정 섹션
-/// - 약관 섹션
+/// - 약관 섹션 (이용약관 / 개인정보 / 의학 정보 출처)
 /// - 내 계정 섹션 (로그아웃 / 탈퇴하기)
 class MypageScreen extends ConsumerWidget {
   const MypageScreen({super.key});
@@ -49,8 +50,8 @@ class MypageScreen extends ConsumerWidget {
     // hasValue면 재진입/리프레시이므로 기존 콘텐츠를 유지한다.
     final isInitialLoading =
         (profileAsync.isLoading && !profileAsync.hasValue) ||
-        (summaryAsync.isLoading && !summaryAsync.hasValue) ||
-        (countAsync.isLoading && !countAsync.hasValue);
+            (summaryAsync.isLoading && !summaryAsync.hasValue) ||
+            (countAsync.isLoading && !countAsync.hasValue);
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
@@ -209,7 +210,8 @@ class _ProfileCard extends StatelessWidget {
               onTap: () => context.push('/mypage/profile'),
               borderRadius: BorderRadius.circular(4),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 child: Text(
                   '내 정보 수정',
                   style: AppTextStyles.body2Medium.copyWith(
@@ -601,7 +603,7 @@ class _SettingsSection extends ConsumerWidget {
 
 // ---------------------------------------------------------------------------
 // 약관 섹션 (Figma: padding 24 · 행 사이 24+24=48 · radius 16)
-// - 서비스 이용 약관 / 개인정보 수집·이용 동의 → 동일 행 스타일(chevron), URL만 다름
+// - 서비스 이용 약관 / 개인정보 수집·이용 동의 / 의학 정보 출처
 // ---------------------------------------------------------------------------
 
 class _TermsSection extends StatelessWidget {
@@ -651,13 +653,25 @@ class _TermsSection extends StatelessWidget {
               ),
             ),
           ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.sectionGap),
+            child: Divider(
+              height: 1,
+              thickness: 1,
+              color: AppColors.divider,
+            ),
+          ),
+          _TermsRow(
+            label: '의학 정보 출처',
+            onTap: () => context.push(MedicalSourcesLink.routePath),
+          ),
         ],
       ),
     );
   }
 }
 
-/// 약관 행 — 라벨 + 우측 chevron (탭 시 약관 상세).
+/// 약관 행 — 라벨 + 우측 chevron.
 class _TermsRow extends StatelessWidget {
   const _TermsRow({required this.label, required this.onTap});
 

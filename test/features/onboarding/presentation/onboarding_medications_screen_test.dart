@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:can_i_eat_it/app/theme/app_icons.dart';
-import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/app/widgets/step_progress.dart';
@@ -30,8 +28,7 @@ GoRouter _testRouter() => GoRouter(
           routes: [
             GoRoute(
               path: '/onboarding/triggers',
-              builder: (_, __) =>
-                  const Scaffold(body: Text('triggers stub')),
+              builder: (_, __) => const Scaffold(body: Text('triggers stub')),
             ),
             GoRoute(
               path: '/onboarding/medications',
@@ -194,127 +191,12 @@ void main() {
       );
     });
 
-    testWidgets('복용약 섹션 헤더 "복용 중인 약"이 렌더된다', (tester) async {
+    testWidgets('복용약 입력란은 렌더되지 않는다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('복용 중인 약'), findsOneWidget);
-    });
-
-    testWidgets('TextField에 텍스트 입력 후 "＋ 복용약 추가" 탭 시 draft.medications에 추가된다',
-        (tester) async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp.router(routerConfig: _testRouter()),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      // 복용약 TextField는 스크롤 영역 안에 있으므로 보이도록 스크롤한다.
-      await tester.scrollUntilVisible(
-        find.byType(TextField).first,
-        100,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.enterText(find.byType(TextField).first, '오메프라졸');
-      // Figma 정합: 별도 버튼 → TextField 우측 인라인 + 버튼(plusCircle).
-      await tester.tap(
-        find.byWidgetPredicate(
-          (w) => w is AppIcon && w.asset == AppIcons.plusCircle,
-        ),
-        warnIfMissed: false,
-      );
-      await tester.pumpAndSettle();
-
-      expect(
-        container.read(onboardingControllerProvider).medications,
-        contains('오메프라졸'),
-      );
-    });
-
-    testWidgets('추가된 약 이름이 화면에 렌더된다', (tester) async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp.router(routerConfig: _testRouter()),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      await tester.scrollUntilVisible(
-        find.byType(TextField).first,
-        100,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.enterText(find.byType(TextField).first, '란소프라졸');
-      // Figma 정합: 별도 버튼 → TextField 우측 인라인 + 버튼(plusCircle).
-      await tester.tap(
-        find.byWidgetPredicate(
-          (w) => w is AppIcon && w.asset == AppIcons.plusCircle,
-        ),
-        warnIfMissed: false,
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('란소프라졸'), findsOneWidget);
-    });
-
-    testWidgets('Chip X 버튼(Icons.close) 탭 시 draft.medications에서 제거된다',
-        (tester) async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp.router(routerConfig: _testRouter()),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      await tester.scrollUntilVisible(
-        find.byType(TextField).first,
-        100,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.enterText(find.byType(TextField).first, '오메프라졸');
-      // Figma 정합: 별도 버튼 → TextField 우측 인라인 + 버튼(plusCircle).
-      await tester.tap(
-        find.byWidgetPredicate(
-          (w) => w is AppIcon && w.asset == AppIcons.plusCircle,
-        ),
-        warnIfMissed: false,
-      );
-      await tester.pumpAndSettle();
-
-      expect(
-        container.read(onboardingControllerProvider).medications,
-        contains('오메프라졸'),
-      );
-
-      // 약 칩이 스크롤 영역 아래에 생성되므로 보이도록 스크롤한다.
-      final removeIcon = find.byWidgetPredicate(
-        (w) => w is AppIcon && w.asset == AppIcons.closeSmall,
-      );
-      await tester.scrollUntilVisible(
-        removeIcon,
-        100,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.tap(removeIcon, warnIfMissed: false);
-      await tester.pumpAndSettle();
-
-      expect(
-        container.read(onboardingControllerProvider).medications,
-        isNot(contains('오메프라졸')),
-      );
+      expect(find.text('복용 중인 약'), findsNothing);
+      expect(find.byType(TextField), findsNothing);
     });
 
     testWidgets('MedicalDisclaimer 위젯이 렌더된다', (tester) async {
@@ -330,22 +212,21 @@ void main() {
       expect(find.byType(MedicalDisclaimer), findsOneWidget);
     });
 
-    testWidgets('MedicalDisclaimer에 kOnboardingDisclaimerText가 포함된다',
+    testWidgets('MedicalDisclaimer에 kResultDisclaimerText가 포함된다',
         (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
       await tester.scrollUntilVisible(
-        find.textContaining('이 앱은 건강 관리를 돕는'),
+        find.text(kResultDisclaimerText),
         100,
         scrollable: find.byType(Scrollable).first,
       );
 
-      expect(find.textContaining('이 앱은 건강 관리를 돕는'), findsOneWidget);
+      expect(find.text(kResultDisclaimerText), findsOneWidget);
     });
 
-    testWidgets(
-        '"완료" 성공 후 sessionStatus=ready 가 되면 홈(/)으로 이동한다',
+    testWidgets('"완료" 성공 후 sessionStatus=ready 가 되면 홈(/)으로 이동한다',
         (tester) async {
       await tester.pumpWidget(_wrap(overrides: _submitOverrides()));
       await tester.pumpAndSettle();

@@ -58,3 +58,5 @@ app.*.map.json
 
 # Playwright MCP 브라우저 아티팩트(스냅샷/스크린샷) — 전이적, 커밋 안 함
 .playwright-mcp/
+
+graphify-out

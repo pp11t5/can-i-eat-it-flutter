@@ -113,6 +113,14 @@ void main() {
       expect(result, isNull);
     });
 
+    test('온보딩 미완료 상태에서 의학 정보 출처 화면은 리다이렉트하지 않는다', () {
+      final result = resolveRedirect(
+        status: SessionStatus.needsOnboarding,
+        location: '/mypage/medical-sources',
+      );
+      expect(result, isNull);
+    });
+
     test('온보딩 미완료 상태에서 /login 은 리다이렉트하지 않는다 (1페이지 뒤로가기 이탈 허용)', () {
       // 1페이지 뒤로가기가 스택 아래 /login 으로 pop 할 때, pop 직후 post-frame
       // signOut 전까지 needsOnboarding 이므로 /login 을 허용해 pop 을 보존한다.

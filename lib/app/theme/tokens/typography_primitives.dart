@@ -10,6 +10,8 @@ abstract final class TypographyPrimitives {
   static const String fontFamily = 'Pretendard';
 
   // --- 사이즈 ---
+  /// Figma 3544:24117 서지 각주 실측.
+  static const double size11 = 11;
   static const double size12 = 12;
   static const double size14 = 14;
   static const double size16 = 16;

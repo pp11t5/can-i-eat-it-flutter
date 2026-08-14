@@ -3,6 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 
 void main() {
+  group('VerdictLevelLabel — 화면 표시 라벨', () {
+    test('risk → "피하는 게 좋아요"', () {
+      expect(VerdictLevel.risk.label, '피하는 게 좋아요');
+    });
+  });
+
   // -------------------------------------------------------------------------
   // VerdictLevelGrade.fromGrade — 서버 문자열 → 도메인
   // -------------------------------------------------------------------------
@@ -75,8 +81,7 @@ void main() {
   group('Round-trip: fromGrade(toServerGrade()) == 원본', () {
     for (final level in VerdictLevel.values) {
       test('${level.name} 왕복', () {
-        final roundTripped =
-            VerdictLevelGrade.fromGrade(level.toServerGrade());
+        final roundTripped = VerdictLevelGrade.fromGrade(level.toServerGrade());
         expect(roundTripped, level);
       });
     }

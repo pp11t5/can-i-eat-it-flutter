@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
 import 'package:can_i_eat_it/app/widgets/medical_disclaimer.dart';
+import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_loading_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_result_screen.dart';
@@ -84,6 +85,7 @@ void main() {
       expect(find.text('영문이 아닌 한글로 검색해보세요'), findsOneWidget);
       expect(find.text('등록되지 않은 음식은 직접 추가해보세요'), findsOneWidget);
       expect(find.text('다시 검색'), findsOneWidget);
+      expect(find.byType(MedicalSourcesLink), findsOneWidget);
     });
 
     testWidgets('"다시 검색" 버튼 탭 시 onRetry 콜백 호출', (tester) async {
@@ -164,6 +166,7 @@ void main() {
 
       // Figma 재정합: personalTitle 대신 등급별 헤드라인 문구 표시
       expect(find.text('좋은 선택이에요!'), findsOneWidget);
+      expect(find.byType(MedicalSourcesLink), findsOneWidget);
     });
 
     testWidgets('CTA "다시 검색" 버튼이 존재한다', (tester) async {
@@ -312,8 +315,8 @@ void main() {
       );
       await tester.pump();
 
-      // Figma 재정합: 위험 등급 헤드라인 문구
-      expect(find.text('속이 많이 불편해질 수 있어요!'), findsOneWidget);
+      // App Store 1.4.1 대응: 위험 단정을 피한 확정 헤드라인 문구
+      expect(find.text('오늘은 피하시는 게 편할 수 있어요'), findsOneWidget);
     });
 
     testWidgets('위험 상태에서 CTA 2개("다시 검색" + "내 식단에 추가") 모두 존재', (tester) async {
