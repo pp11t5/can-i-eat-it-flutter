@@ -119,6 +119,11 @@ flutter run --flavor dev -t lib/main_dev.dart \
   --dart-define=KAKAO_NATIVE_APP_KEY=cd24aa08a740a475401f84390c8219df \
   --dart-define=GOOGLE_SERVER_CLIENT_ID=717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com
 
+# 운영(prod) 실행
+flutter run --flavor prod -t lib/main_prod.dart \
+  --dart-define=KAKAO_NATIVE_APP_KEY=2d007771e0083b600999053b9b1d4e83 \
+  --dart-define=GOOGLE_SERVER_CLIENT_ID=717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com
+
 # 운영(prod) 빌드 — iOS
 flutter build ios --config-only \
   --flavor=prod \
