@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter Dev",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main_dev.dart",
+      "toolArgs": [
+        "--flavor",
+        "dev",
+        "--dart-define=KAKAO_NATIVE_APP_KEY=cd24aa08a740a475401f84390c8219df",
+        "--dart-define=GOOGLE_SERVER_CLIENT_ID=717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com"
+      ]
+    },
+    {
+      "name": "Flutter Prod",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main_prod.dart",
+      "toolArgs": [
+        "--flavor",
+        "prod",
+        "--dart-define=KAKAO_NATIVE_APP_KEY=2d007771e0083b600999053b9b1d4e83",
+        "--dart-define=GOOGLE_SERVER_CLIENT_ID=717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com"
+      ]
+    }
+  ]
+}
