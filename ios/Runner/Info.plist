@@ -53,6 +53,14 @@
 		</array>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
+		<key>SymptomAPIBaseURL</key>
+		<string>$(SYMPTOM_API_BASE_URL)</string>
+		<key>SymptomAppGroupID</key>
+		<string>$(SYMPTOM_APP_GROUP_ID)</string>
+		<key>SymptomBackgroundSessionID</key>
+		<string>$(SYMPTOM_BACKGROUND_SESSION_ID)</string>
+		<key>SymptomKeychainAccessGroup</key>
+		<string>$(SYMPTOM_KEYCHAIN_ACCESS_GROUP)</string>
 		<key>UIApplicationSceneManifest</key>
 		<dict>
 			<key>UIApplicationSupportsMultipleScenes</key>

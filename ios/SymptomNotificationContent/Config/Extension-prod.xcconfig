@@ -1,0 +1,5 @@
+#include "../../Flutter/NotificationResponse-prod.xcconfig"
+#include "../../Flutter/Generated.xcconfig"
+SWIFT_VERSION = 5.0
+IPHONEOS_DEPLOYMENT_TARGET = 15.0
+CODE_SIGN_ENTITLEMENTS = SymptomNotificationContent/SymptomNotificationContent.entitlements

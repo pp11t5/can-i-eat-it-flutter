@@ -52,10 +52,13 @@
 | 서버 테이블 | Flutter 엔티티 | 주요 필드 |
 |---|---|---|
 | `meals` | `Meal` | meal_id, user_id, photo_url, foods[], eaten_at |
-| `symptoms` | `Symptom` | symptom_id, meal_id, severity(0~5), types[], memo, occurred_at, recorded_at |
+| `symptoms` | `Symptom` | symptom_id, meal_record_id?, symptom_state(5단계 enum), symptom_types[], memo?, occurred_at |
 
-severity 매핑: 편안(0) / 괜찮(1) / 보통(2) / 불편(3) / 심함(4~5)
-types: `heartburn` / `acid_reflux` / `cough` / `throat_lump` / `chest_tightness`
+`symptom_state`: `comfortable` / `good` / `normal` / `uncomfortable` / `severe`
+
+`symptom_types`: `throat_foreign_body` / `acid_reflux` / `cough` / `chest_tightness`; 명시적 “없음”은 빈 배열 `[]`
+
+클라이언트 생성 요청에는 `recorded_at`/`recordedAt`이 없으며 `occurredAt`만 사용한다.
 
 ### 리포트
 

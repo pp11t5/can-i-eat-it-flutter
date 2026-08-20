@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import UserNotifications
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -7,6 +8,8 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    registerSymptomCheckinCategory()
+    _ = try? SymptomNativeUploader.makeIfNeeded()
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
@@ -26,6 +29,34 @@ import UIKit
       } else {
         result(FlutterMethodNotImplemented)
       }
+    }
+    SymptomOutboxMethodChannel.register(binaryMessenger: engineBridge.applicationRegistrar.messenger())
+  }
+
+  override func application(
+    _ application: UIApplication,
+    handleEventsForBackgroundURLSession identifier: String,
+    completionHandler: @escaping () -> Void
+  ) {
+    guard let uploader = try? SymptomNativeUploader.makeIfNeeded(),
+          uploader.session.configuration.identifier == identifier else {
+      completionHandler()
+      return
+    }
+    uploader.setBackgroundCompletionHandler(completionHandler)
+  }
+
+  private func registerSymptomCheckinCategory() {
+    let open = UNNotificationAction(
+      identifier: "SYMPTOM_OPEN_APP_ACTION", title: "앱에서 자세히", options: [.foreground]
+    )
+    let checkin = UNNotificationCategory(
+      identifier: "SYMPTOM_CHECKIN_V1", actions: [open], intentIdentifiers: [], options: [.customDismissAction]
+    )
+    UNUserNotificationCenter.current().getNotificationCategories { categories in
+      var updated = categories.filter { $0.identifier != checkin.identifier }
+      updated.insert(checkin)
+      UNUserNotificationCenter.current().setNotificationCategories(updated)
     }
   }
 }

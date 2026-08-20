@@ -2,6 +2,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../symptom_outbox/symptom_outbox_bridge.dart';
+
 part 'token_store.g.dart';
 
 // ---------------------------------------------------------------------------
@@ -88,6 +90,53 @@ class FlutterSecureStorageTokenStore implements TokenStore {
   }
 }
 
+/// Primary 토큰 저장소를 정본으로 유지하면서 iOS Extension용 access token만
+/// best-effort로 동기화한다. refresh token은 절대 공유하지 않는다.
+class MirroringTokenStore implements TokenStore {
+  MirroringTokenStore(this._primary, this._bridge);
+
+  final TokenStore _primary;
+  final SymptomOutboxBridge _bridge;
+
+  @override
+  Future<String?> readAccessToken() => _primary.readAccessToken();
+
+  @override
+  Future<String?> readRefreshToken() => _primary.readRefreshToken();
+
+  @override
+  Future<String?> readPendingConsentUserId() =>
+      _primary.readPendingConsentUserId();
+
+  @override
+  Future<void> writeTokens(
+      {required String access, required String refresh}) async {
+    await _primary.writeTokens(access: access, refresh: refresh);
+    try {
+      await _bridge.updateSharedAccessToken(access);
+    } catch (_) {
+      // token 정본 저장 성공을 native mirror 오류로 rollback하지 않는다.
+    }
+  }
+
+  @override
+  Future<void> markConsentPending(String userId) =>
+      _primary.markConsentPending(userId);
+
+  @override
+  Future<void> clearConsentPending() => _primary.clearConsentPending();
+
+  @override
+  Future<void> clear() async {
+    await _primary.clear();
+    try {
+      await _bridge.clearSharedSession();
+    } catch (_) {
+      // logout/session-expiry의 full purge는 AuthController가 별도로 재시도한다.
+    }
+  }
+}
+
 // ---------------------------------------------------------------------------
 // 인메모리 Fake (테스트용)
 // ---------------------------------------------------------------------------
@@ -144,4 +193,7 @@ class InMemoryTokenStore implements TokenStore {
 ///
 /// 테스트에서는 `ProviderContainer(overrides: [tokenStoreProvider.overrideWithValue(...)])` 로 교체한다.
 @riverpod
-TokenStore tokenStore(Ref ref) => FlutterSecureStorageTokenStore();
+TokenStore tokenStore(Ref ref) => MirroringTokenStore(
+      FlutterSecureStorageTokenStore(),
+      ref.watch(symptomOutboxBridgeProvider),
+    );
