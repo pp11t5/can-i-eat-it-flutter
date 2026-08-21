@@ -44,13 +44,16 @@
 ```bash
 # 운영(prod)
 flutter build ios --flavor prod -t lib/main_prod.dart \
-  --dart-define=KAKAO_NATIVE_APP_KEY=2d007771e0083b600999053b9b1d4e83
+  --dart-define=KAKAO_NATIVE_APP_KEY=2d007771e0083b600999053b9b1d4e83 \
+  --dart-define=GOOGLE_SERVER_CLIENT_ID=717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com
 flutter build apk --flavor prod -t lib/main_prod.dart \
-  --dart-define=KAKAO_NATIVE_APP_KEY=2d007771e0083b600999053b9b1d4e83
+  --dart-define=KAKAO_NATIVE_APP_KEY=2d007771e0083b600999053b9b1d4e83 \
+  --dart-define=GOOGLE_SERVER_CLIENT_ID=717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com
 
 # 개발(dev)
 flutter run --flavor dev -t lib/main_dev.dart \
-  --dart-define=KAKAO_NATIVE_APP_KEY=cd24aa08a740a475401f84390c8219df
+  --dart-define=KAKAO_NATIVE_APP_KEY=cd24aa08a740a475401f84390c8219df \
+  --dart-define=GOOGLE_SERVER_CLIENT_ID=717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com
 ```
 
 카카오 네이티브 앱키의 **SDK init 값**은 리터럴을 커밋하지 않고 빌드 시 주입한다
@@ -63,6 +66,7 @@ flutter run --flavor dev -t lib/main_dev.dart \
 | | 운영(prod) | 개발(dev) |
 |---|---|---|
 | 카카오 네이티브 앱키 | `2d007771e0083b600999053b9b1d4e83` | `cd24aa08a740a475401f84390c8219df` |
+| Google Web 클라이언트 ID (`GOOGLE_SERVER_CLIENT_ID`) | `717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com` | 동일 |
 
 ## Firebase (네이티브 설정, 커밋됨)
 

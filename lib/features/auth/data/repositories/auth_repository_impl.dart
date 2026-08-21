@@ -10,6 +10,7 @@ import 'package:can_i_eat_it/features/auth/data/dtos/consent_request_dto.dart';
 import 'package:can_i_eat_it/features/auth/data/dtos/onboarding_status_dto.dart';
 import 'package:can_i_eat_it/features/auth/data/dtos/term_response_dto.dart';
 import 'package:can_i_eat_it/features/auth/data/services/apple_auth_service.dart';
+import 'package:can_i_eat_it/features/auth/data/services/google_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/data/services/kakao_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/consent.dart';
@@ -18,7 +19,7 @@ import 'package:can_i_eat_it/features/auth/domain/repositories/auth_repository.d
 
 /// [AuthRepository] 실 구현 (ADR-0007 §3-1 (6-A)).
 ///
-/// 카카오/애플 OIDC idToken → `POST /auth/{provider}/login` → JWT 토큰 저장.
+/// 카카오/애플/구글 OIDC 자격 증명 → `POST /auth/{provider}/login` → JWT 토큰 저장.
 /// 성공 시 `GET /onboarding/status` 를 이어 호출해 [Authenticated.onboarded] 를 채운다.
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
@@ -26,15 +27,18 @@ class AuthRepositoryImpl implements AuthRepository {
     required TokenStore tokenStore,
     required KakaoAuthService kakaoAuthService,
     required AppleAuthService appleAuthService,
+    required GoogleAuthService googleAuthService,
   })  : _dio = dio,
         _tokenStore = tokenStore,
         _kakaoAuthService = kakaoAuthService,
-        _appleAuthService = appleAuthService;
+        _appleAuthService = appleAuthService,
+        _googleAuthService = googleAuthService;
 
   final Dio _dio;
   final TokenStore _tokenStore;
   final KakaoAuthService _kakaoAuthService;
   final AppleAuthService _appleAuthService;
+  final GoogleAuthService _googleAuthService;
 
   /// 현재 로컬 세션 (토큰 기반 in-memory 캐시).
   AuthSession? _session;
@@ -87,6 +91,11 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<SignInOutcome> signInWithApple() async {
     return _signIn(AuthProvider.apple);
+  }
+
+  @override
+  Future<SignInOutcome> signInWithGoogle() async {
+    return _signIn(AuthProvider.google);
   }
 
   @override
@@ -244,8 +253,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (_) {
       // 서버 로그아웃 실패해도 로컬은 반드시 클리어
     } finally {
-      await _tokenStore.clear();
-      _session = null;
+      await _clearLocalSession();
     }
   }
 
@@ -256,13 +264,17 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (_) {
       // 서버 탈퇴 실패해도 로컬은 반드시 클리어
     } finally {
-      await _tokenStore.clear();
-      _session = null;
+      await _clearLocalSession();
     }
   }
 
   @override
   Future<void> signOut() async {
+    await _clearLocalSession();
+  }
+
+  Future<void> _clearLocalSession() async {
+    await _googleAuthService.signOut();
     await _tokenStore.clear();
     _session = null;
   }
@@ -284,17 +296,22 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       // 1. 제공자별 서버 로그인 요청 본문 구성
       late Map<String, dynamic> loginData;
-      if (provider == AuthProvider.kakao) {
-        final kakaoResult = await _kakaoAuthService.signIn();
-        idToken = kakaoResult.idToken;
-        loginData = {'idToken': idToken};
-      } else {
-        final appleResult = await _appleAuthService.signIn();
-        idToken = appleResult.idToken;
-        loginData = {
-          'authorizationCode': appleResult.authorizationCode,
-          'nonce': appleResult.nonce,
-        };
+      switch (provider) {
+        case AuthProvider.kakao:
+          final kakaoResult = await _kakaoAuthService.signIn();
+          idToken = kakaoResult.idToken;
+          loginData = {'idToken': idToken};
+        case AuthProvider.google:
+          final googleResult = await _googleAuthService.signIn();
+          idToken = googleResult.idToken;
+          loginData = {'idToken': idToken};
+        case AuthProvider.apple:
+          final appleResult = await _appleAuthService.signIn();
+          idToken = appleResult.idToken;
+          loginData = {
+            'authorizationCode': appleResult.authorizationCode,
+            'nonce': appleResult.nonce,
+          };
       }
 
       // 2. 서버 로그인

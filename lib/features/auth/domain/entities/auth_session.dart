@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'auth_session.freezed.dart';
 
 /// 소셜 로그인 제공자.
-enum AuthProvider { kakao, apple }
+enum AuthProvider { kakao, apple, google }
 
 /// 계정 상태.
 ///

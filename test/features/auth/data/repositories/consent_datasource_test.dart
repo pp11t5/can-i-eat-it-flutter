@@ -7,6 +7,7 @@ import 'package:can_i_eat_it/core/network/api_endpoints.dart';
 import 'package:can_i_eat_it/core/security/token_store.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:can_i_eat_it/features/auth/data/services/apple_auth_service.dart';
+import 'package:can_i_eat_it/features/auth/data/services/google_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/data/services/kakao_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/consent.dart';
@@ -29,6 +30,15 @@ class _NoOpAppleAuthService implements AppleAuthService {
         email: 'e@e.com',
         fullName: 'Apple Tester',
       );
+}
+
+class _NoOpGoogleAuthService implements GoogleAuthService {
+  @override
+  Future<GoogleAuthResult> signIn() async =>
+      const GoogleAuthResult(idToken: 'id');
+
+  @override
+  Future<void> signOut() async {}
 }
 
 Map<String, dynamic> _ok(Object? result) => {
@@ -77,6 +87,7 @@ void main() {
       tokenStore: tokenStore,
       kakaoAuthService: _NoOpKakaoAuthService(),
       appleAuthService: _NoOpAppleAuthService(),
+      googleAuthService: _NoOpGoogleAuthService(),
     );
   });
 

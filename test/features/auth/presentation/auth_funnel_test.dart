@@ -149,4 +149,50 @@ void main() {
       expect(signUpCount, 1);
     });
   });
+
+  group('signInWithGoogle 퍼널 배선', () {
+    test('signInWithGoogle 성공 시 sign_up 이벤트가 발화된다', () async {
+      final spy = SpyAnalyticsService();
+      final container = makeContainer(
+        repo: MockAuthRepository.newUser(),
+        spy: spy,
+      );
+
+      await container.read(authControllerProvider.notifier).signInWithGoogle();
+
+      expect(
+        spy.calls.any((c) => c.name == FunnelEvent.signUp.eventName),
+        isTrue,
+      );
+    });
+
+    test('signInWithGoogle 성공 시 provider 파라미터가 google 다', () async {
+      final spy = SpyAnalyticsService();
+      final container = makeContainer(
+        repo: MockAuthRepository.newUser(),
+        spy: spy,
+      );
+
+      await container.read(authControllerProvider.notifier).signInWithGoogle();
+
+      final signUpCall = spy.calls.firstWhere(
+        (c) => c.name == FunnelEvent.signUp.eventName,
+      );
+      expect(signUpCall.params['provider'], 'google');
+    });
+
+    test('signInWithGoogle 호출 시 sign_up 이벤트가 정확히 1회 발화된다', () async {
+      final spy = SpyAnalyticsService();
+      final container = makeContainer(
+        repo: MockAuthRepository.newUser(),
+        spy: spy,
+      );
+
+      await container.read(authControllerProvider.notifier).signInWithGoogle();
+
+      final signUpCount =
+          spy.calls.where((c) => c.name == FunnelEvent.signUp.eventName).length;
+      expect(signUpCount, 1);
+    });
+  });
 }

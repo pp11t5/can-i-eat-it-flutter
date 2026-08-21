@@ -41,6 +41,12 @@ abstract interface class AuthRepository {
   /// 베타는 카카오 단독(ADR-0003 §7). Apple Mock 경로는 유지.
   Future<SignInOutcome> signInWithApple();
 
+  /// Google 계정으로 로그인한다.
+  ///
+  /// 성공 시 [SignInOutcome.Authenticated] (200),
+  /// 복구 가능 계정 시 [Recoverable] (403) 를 반환한다.
+  Future<SignInOutcome> signInWithGoogle();
+
   // ---------------------------------------------------------------------------
   // 약관 동의
   // ---------------------------------------------------------------------------

@@ -12,7 +12,12 @@
           "package_name": "com.canieatthis.can_i_eat_this"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCj_3PPP-6oVjxLve8eiSFNbdo9jj4FU3o"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.canieatthis.canIEatThis.dev"
+              }
+            }
+          ]
         }
       }
     },
@@ -31,7 +48,28 @@
           "package_name": "com.canieatthis.can_i_eat_this.dev"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "717895572091-20qqre5uf26pb0f2bl4srmdei0b964n1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.canieatthis.can_i_eat_this.dev",
+            "certificate_hash": "e63909a0f346b3a169833b3a65dbcf38a656bb32"
+          }
+        },
+        {
+          "client_id": "717895572091-26fsddufnsc17716m7u1qh1o0mj4090t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.canieatthis.can_i_eat_this.dev",
+            "certificate_hash": "fb591ad4172481e0a44fbfb4cc5376e0aa841f6b"
+          }
+        },
+        {
+          "client_id": "717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCj_3PPP-6oVjxLve8eiSFNbdo9jj4FU3o"
@@ -39,7 +77,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.canieatthis.canIEatThis.dev"
+              }
+            }
+          ]
         }
       }
     },
@@ -50,7 +100,12 @@
           "package_name": "com.canieatthis.can_i_eat_this1"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCj_3PPP-6oVjxLve8eiSFNbdo9jj4FU3o"
@@ -58,7 +113,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.canieatthis.canIEatThis.dev"
+              }
+            }
+          ]
         }
       }
     }
