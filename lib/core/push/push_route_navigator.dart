@@ -48,6 +48,16 @@ Future<void> navigateFromPush({
   // session ready + refreshListenable redirect가 같은 틱에 겹칠 수 있어 한 프레임 양보.
   await wait();
 
+  // 위젯 딥링크가 GoRouter 에러 페이지에 있으면 push가 무시된다. go로 교체한다.
+  if (router.routerDelegate.currentConfiguration.error != null) {
+    try {
+      router.go(location);
+    } catch (e, st) {
+      debugPrint('[FCM] push nav: go from error page failed: $e\n$st');
+    }
+    return;
+  }
+
   var path = currentRouterPath(router);
   if (needsHomeBaseline(path)) {
     debugPrint('[FCM] push nav: baseline from $path → / then $location');
