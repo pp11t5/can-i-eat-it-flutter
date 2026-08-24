@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:can_i_eat_it/app/router/guards/auth_guard.dart';
+import 'package:can_i_eat_it/app/router/guards/app_redirect.dart';
 import 'package:can_i_eat_it/app/widgets/app_shell.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/session_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
@@ -63,12 +63,14 @@ GoRouter appRouter(Ref ref) {
 
   return GoRouter(
     initialLocation: '/splash',
+    overridePlatformDefaultLocation: true,
     refreshListenable: notifier,
     redirect: (context, state) {
       final status = ref.read(sessionStatusProvider);
-      return resolveRedirect(
+      return resolveAppRedirect(
         status: status,
-        location: state.matchedLocation,
+        uri: state.uri,
+        matchedLocation: state.matchedLocation,
         allowTermsDuringConsentTransition:
             ref.read(consentNavigationTransitionProvider),
       );

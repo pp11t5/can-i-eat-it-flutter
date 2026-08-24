@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:can_i_eat_it/features/home_widget/data/home_widget_providers.dart';
+
 import 'router/app_router.dart';
 import 'router/push_navigation_provider.dart';
 import 'theme/app_theme.dart';
@@ -15,6 +17,7 @@ class App extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
     // ProviderScope/GoRouter가 준비된 뒤 FCM 탭 수신을 연결한다.
     ref.watch(pushNavigationCoordinatorProvider);
+    ref.watch(homeWidgetCoordinatorProvider);
     return MaterialApp.router(
       title: '먹어도 돼?',
       theme: AppTheme.light,
