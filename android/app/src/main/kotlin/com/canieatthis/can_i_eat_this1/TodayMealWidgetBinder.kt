@@ -62,20 +62,13 @@ internal object TodayMealWidgetBinder {
         // 작은 위젯은 상태와 무관하게 음식 기록하기만 보여 준다.
         val cta = if (showStory) snapshotCta else mealCta
         views.setTextViewText(R.id.widget_cta_label, cta)
-        views.setTextViewText(R.id.widget_cta_label_regular, cta)
         val history = showStory && when (prefs.getString("kind", "")) {
             "allRecordedComfortable", "allRecordedUncomfortable" -> true
             else -> false
         }
         views.setTextViewText(R.id.widget_cta_icon, if (history) ">" else "+")
-        views.setViewVisibility(
-            R.id.widget_cta_label,
-            if (history) View.GONE else View.VISIBLE,
-        )
-        views.setViewVisibility(
-            R.id.widget_cta_label_regular,
-            if (history) View.VISIBLE else View.GONE,
-        )
+        views.setViewVisibility(R.id.widget_cta_label, View.VISIBLE)
+        views.setViewVisibility(R.id.widget_cta_label_regular, View.GONE)
         if (showStory) {
             val d = context.resources.displayMetrics.density
             fun dp(v: Int) = (v * d).toInt()

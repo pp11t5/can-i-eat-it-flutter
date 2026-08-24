@@ -177,13 +177,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:fontFamily="sans-serif"
             android:includeFontPadding="false"
             android:maxLines="1"
             android:text="@string/home_widget_cta_meal"
             android:textColor="@color/widget_cta_text"
             android:textSize="14sp"
-            android:textStyle="normal"
+            android:textStyle="bold"
             android:visibility="gone" />
 
         <TextView
