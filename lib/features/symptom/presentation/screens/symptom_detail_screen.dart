@@ -16,6 +16,7 @@ import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/dictionary_list_controller.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
+import 'package:can_i_eat_it/features/home_widget/data/home_widget_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/providers/symptom_detail_controller.dart';
@@ -106,6 +107,7 @@ class SymptomDetailScreen extends ConsumerWidget {
       ref.invalidate(unrecordedMealCountProvider);
       // SAFE 도감 제거는 서버 delete 경로에서 수행.
       invalidateDictionaryCaches(ref.invalidate);
+      scheduleHomeWidgetSync(ref.read(homeWidgetControllerProvider));
       showAppToast(context, '증상 기록을 삭제했어요.');
       context.pop();
     } catch (_) {

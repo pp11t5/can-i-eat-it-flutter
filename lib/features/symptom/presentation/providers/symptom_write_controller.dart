@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/dictionary_list_controller.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
+import 'package:can_i_eat_it/features/home_widget/data/home_widget_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
 import 'package:can_i_eat_it/features/symptom/data/symptom_providers.dart';
@@ -120,6 +121,7 @@ class SymptomWriteController extends _$SymptomWriteController {
       ref.invalidate(unrecordedMealCountProvider);
       ref.invalidate(mealRecordDetailControllerProvider);
       invalidateDictionaryCaches(ref.invalidate);
+      scheduleHomeWidgetSync(ref.read(homeWidgetControllerProvider));
 
       state = const AsyncData(null);
       return symptomId;
