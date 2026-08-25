@@ -10,8 +10,7 @@ class _SpyBridge implements SymptomOutboxBridge {
   Future<void> acknowledge(
       {required String clientRecordId, required String claimToken}) async {}
   @override
-  Future<List<PendingSymptomRecord>> claimPending(
-          {required String subjectId, int limit = 10}) async =>
+  Future<List<PendingSymptomRecord>> claimPending({int limit = 10}) async =>
       const [];
   @override
   Future<void> clearSharedSession() async => calls.add('clear');

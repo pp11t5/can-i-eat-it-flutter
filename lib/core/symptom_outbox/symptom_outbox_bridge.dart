@@ -9,10 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Android와 테스트에서는 [UnsupportedSymptomOutboxBridge]가 사용되어, 플랫폼
 /// 분기와 MethodChannel 예외가 증상 저장 흐름으로 새지 않게 한다.
 abstract interface class SymptomOutboxBridge {
-  Future<List<PendingSymptomRecord>> claimPending({
-    required String subjectId,
-    int limit = 10,
-  });
+  Future<List<PendingSymptomRecord>> claimPending({int limit = 10});
 
   Future<void> acknowledge({
     required String clientRecordId,
@@ -81,8 +78,7 @@ class UnsupportedSymptomOutboxBridge implements SymptomOutboxBridge {
   Future<void> acknowledge(
       {required String clientRecordId, required String claimToken}) async {}
   @override
-  Future<List<PendingSymptomRecord>> claimPending(
-          {required String subjectId, int limit = 10}) async =>
+  Future<List<PendingSymptomRecord>> claimPending({int limit = 10}) async =>
       const [];
   @override
   Future<void> clearSharedSession() async {}
@@ -116,12 +112,11 @@ class MethodChannelSymptomOutboxBridge implements SymptomOutboxBridge {
 
   @override
   Future<List<PendingSymptomRecord>> claimPending({
-    required String subjectId,
     int limit = 10,
   }) async {
     final result = await _channel.invokeListMethod<Object?>(
       'claimPending',
-      {'subjectId': subjectId, 'limit': limit},
+      {'limit': limit},
     );
     return (result ?? const [])
         .map((value) => PendingSymptomRecord.fromMap(

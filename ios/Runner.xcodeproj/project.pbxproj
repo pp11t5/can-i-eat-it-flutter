@@ -26,6 +26,13 @@
 		A10000000000000000000009 /* SharedAccessTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000013 /* SharedAccessTokenStore.swift */; };
 		A1000000000000000000000A /* SymptomOutboxStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000014 /* SymptomOutboxStore.swift */; };
 		A1000000000000000000000B /* SymptomNativeUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000015 /* SymptomNativeUploader.swift */; };
+		A1000000000000000000001C /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000001D /* MainInterface.storyboard */; };
+		A10000000000000000000084 /* SymptomHeaderIconDev@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000080 /* SymptomHeaderIconDev@2x.png */; };
+		A10000000000000000000085 /* SymptomHeaderIconDev@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000081 /* SymptomHeaderIconDev@3x.png */; };
+		A10000000000000000000086 /* SymptomHeaderIconProd@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000082 /* SymptomHeaderIconProd@2x.png */; };
+		A10000000000000000000087 /* SymptomHeaderIconProd@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000083 /* SymptomHeaderIconProd@3x.png */; };
+		A10000000000000000000070 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10000000000000000000072 /* UserNotifications.framework */; };
+		A10000000000000000000071 /* UserNotificationsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10000000000000000000073 /* UserNotificationsUI.framework */; };
 		A5B66CFE8F36A35358C945FE /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE6DFD94F243049A15886C5F /* Pods_RunnerTests.framework */; };
 		DF91CB99AD3EE7904AA2502E /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E003B43A1530AC2DEEF6FC26 /* Pods_Runner.framework */; };
 /* End PBXBuildFile section */
@@ -116,6 +123,13 @@
 		A10000000000000000000019 /* SymptomNotificationContent.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SymptomNotificationContent.entitlements; sourceTree = "<group>"; };
 		A1000000000000000000001A /* Extension-dev.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Extension-dev.xcconfig"; sourceTree = "<group>"; };
 		A1000000000000000000001B /* Extension-prod.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Extension-prod.xcconfig"; sourceTree = "<group>"; };
+		A1000000000000000000001E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		A10000000000000000000080 /* SymptomHeaderIconDev@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SymptomHeaderIconDev@2x.png"; sourceTree = "<group>"; };
+		A10000000000000000000081 /* SymptomHeaderIconDev@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SymptomHeaderIconDev@3x.png"; sourceTree = "<group>"; };
+		A10000000000000000000082 /* SymptomHeaderIconProd@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SymptomHeaderIconProd@2x.png"; sourceTree = "<group>"; };
+		A10000000000000000000083 /* SymptomHeaderIconProd@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SymptomHeaderIconProd@3x.png"; sourceTree = "<group>"; };
+		A10000000000000000000072 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
+		A10000000000000000000073 /* UserNotificationsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotificationsUI.framework; path = System/Library/Frameworks/UserNotificationsUI.framework; sourceTree = SDKROOT; };
 		A83C397E2381911163FBECB1 /* Profile-prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Profile-prod.xcconfig"; path = "Flutter/Profile-prod.xcconfig"; sourceTree = "<group>"; };
 		AA475F0DBB62505CA6A3D54A /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		AE6DFD94F243049A15886C5F /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -143,6 +157,15 @@
 			files = (
 				78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */,
 				DF91CB99AD3EE7904AA2502E /* Pods_Runner.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000000074 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000070 /* UserNotifications.framework in Frameworks */,
+				A10000000000000000000071 /* UserNotificationsUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -187,6 +210,8 @@
 			children = (
 				E003B43A1530AC2DEEF6FC26 /* Pods_Runner.framework */,
 				AE6DFD94F243049A15886C5F /* Pods_RunnerTests.framework */,
+				A10000000000000000000072 /* UserNotifications.framework */,
+				A10000000000000000000073 /* UserNotificationsUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -265,6 +290,11 @@
 			isa = PBXGroup;
 			children = (
 				A10000000000000000000017 /* NotificationViewController.swift */,
+				A1000000000000000000001D /* MainInterface.storyboard */,
+				A10000000000000000000080 /* SymptomHeaderIconDev@2x.png */,
+				A10000000000000000000081 /* SymptomHeaderIconDev@3x.png */,
+				A10000000000000000000082 /* SymptomHeaderIconProd@2x.png */,
+				A10000000000000000000083 /* SymptomHeaderIconProd@3x.png */,
 				A10000000000000000000018 /* Info.plist */,
 				A10000000000000000000019 /* SymptomNotificationContent.entitlements */,
 				A10000000000000000000033 /* Config */,
@@ -337,6 +367,7 @@
 			buildConfigurationList = A10000000000000000000050 /* Build configuration list for PBXNativeTarget "SymptomNotificationContent" */;
 			buildPhases = (
 				A10000000000000000000051 /* Sources */,
+				A10000000000000000000074 /* Frameworks */,
 				A10000000000000000000052 /* Resources */,
 			);
 			buildRules = (
@@ -417,6 +448,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1000000000000000000001C /* MainInterface.storyboard in Resources */,
+				A10000000000000000000084 /* SymptomHeaderIconDev@2x.png in Resources */,
+				A10000000000000000000085 /* SymptomHeaderIconDev@3x.png in Resources */,
+				A10000000000000000000086 /* SymptomHeaderIconProd@2x.png in Resources */,
+				A10000000000000000000087 /* SymptomHeaderIconProd@3x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -601,6 +637,17 @@
 			targetProxy = 38DB9CC73036C41600108D3B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		A1000000000000000000001D /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A1000000000000000000001E /* Base */,
+			);
+			name = MainInterface.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin PBXVariantGroup section */
 		97C146FA1CF9000F007C117D /* Main.storyboard */ = {

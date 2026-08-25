@@ -22,11 +22,11 @@ class SymptomOutboxRetryCoordinator {
   final Dio _dio;
   bool _draining = false;
 
-  Future<void> drain(String subjectId) async {
+  Future<void> drain() async {
     if (_draining) return;
     _draining = true;
     try {
-      final records = await _bridge.claimPending(subjectId: subjectId);
+      final records = await _bridge.claimPending();
       for (final record in records) {
         try {
           final response = await _dio.post<dynamic>(
@@ -93,9 +93,7 @@ final symptomOutboxReadyListenerProvider = Provider<void>((ref) {
     if (next != SessionStatus.ready || previous == SessionStatus.ready) return;
     final session = ref.read(authControllerProvider).valueOrNull;
     if (session != null) {
-      unawaited(ref
-          .read(symptomOutboxRetryCoordinatorProvider)
-          .drain(session.userId));
+      unawaited(ref.read(symptomOutboxRetryCoordinatorProvider).drain());
     }
   }, fireImmediately: true);
 });

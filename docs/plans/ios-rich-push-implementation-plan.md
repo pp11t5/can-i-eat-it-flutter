@@ -21,7 +21,7 @@
 
 ```mermaid
 flowchart TD
-    A["APNs: SYMPTOM_CHECKIN_V1"] --> B["Notification Content Extension"]
+    A["APNs: post_meal 또는 post_meal_delayed_single"] --> B["Notification Content Extension"]
     B --> C["앱과 동일한 5단계 + 증상 복수 선택"]
     C -->|"기록 완료"| D["PendingSymptomRecord 생성"]
     D --> E["App Group Outbox 원자 저장"]
@@ -138,7 +138,7 @@ flowchart TD
 
 ### 5.1 표시 조건
 
-- APNs payload의 `aps.category`가 `SYMPTOM_CHECKIN_V1`일 때 Content Extension을 사용한다.
+- APNs payload의 `aps.category`가 `post_meal` 또는 `post_meal_delayed_single`일 때 같은 Content Extension UI를 사용한다. `aps.category`와 `data.type`은 같은 값이어야 한다.
 - 전체 커스텀 UI는 사용자가 알림을 길게 누르거나 펼친 상태에서만 보인다.
 - Content Extension 로딩에 실패하면 시스템 기본 알림과 등록된 action이 남아야 한다.
 - 잠금화면의 알림 미리보기 설정을 존중한다.
@@ -229,9 +229,8 @@ ios/
 {
   "schemaVersion": 1,
   "clientRecordId": "9A489D3E-5CB5-4F53-B6BB-ED8A2BB385E2",
-  "notificationEventId": "server-event-uuid",
   "notificationRequestId": "UNNotificationRequest.identifier",
-  "subjectId": "opaque-account-subject",
+  "ownerSubjectId": "opaque-account-subject 또는 null",
   "mealRecordId": "external-meal-record-uuid",
   "symptomState": "normal",
   "symptomTypes": ["acid_reflux"],
@@ -250,7 +249,7 @@ ios/
 
 - `clientRecordId`는 최초 저장 때 한 번 생성하고 모든 재시도에서 유지한다.
 - `clientRecordId`는 로컬 pending 식별자일 뿐 서버 중복 방지 key로 전송하지 않는다.
-- `subjectId`는 계정 혼선을 막기 위한 opaque 값이며 이메일·닉네임을 넣지 않는다.
+- `ownerSubjectId`는 payload가 아닌 현재 공유 Keychain 세션에서 얻는 내부 값이다. Keychain을 읽지 못하면 `null`로 저장하고, 다음 ready/resume의 현재 계정이 재전송할 수 있다.
 - `symptomState`, `symptomTypes`, `occurredAt`, `mealRecordId`는 기존 앱의 `SymptomDraft` 요청 계약과 동일하게 유지한다.
 - pending에는 만료 시각을 두지 않으며 시간 또는 건수 기준으로 자동 삭제하지 않는다.
 - 제목, 음식명, 알림 본문 등 업로드에 불필요한 정보는 Outbox에 저장하지 않는다.
@@ -394,16 +393,13 @@ V1에는 snooze endpoint, action ID, Outbox record, 로컬 알림 또는 서버 
     "body": "13:24 점심 후 6시간 · 된장찌개 · 잡곡밥"
   },
   "data": {
-    "schemaVersion": "1",
     "type": "post_meal",
-    "targetId": "meal-record-uuid",
-    "notificationEventId": "event-uuid",
-    "subjectId": "opaque-subject"
+    "targetId": "meal-record-uuid"
   },
   "apns": {
     "payload": {
       "aps": {
-        "category": "SYMPTOM_CHECKIN_V1",
+        "category": "post_meal",
         "thread-id": "post-meal-checkin"
       }
     }
@@ -509,7 +505,7 @@ abstract interface class SymptomOutboxBridge {
 ### 11.3 앱 재전송 절차
 
 1. `SessionStatus.ready`인 경우에만 pending을 조회한다.
-2. record의 `subjectId`가 현재 인증 주체와 일치하는지 확인한다. 불일치는 전송하지 않고 quarantine 또는 계정 정책에 따라 purge한다.
+2. 현재 공유 Keychain 사용자와 일치하는 `ownerSubjectId` record 및 소유자 없는 record를 claim한다. 소유자 없는 record는 현재 사용자로 재전송한다.
 3. 기존 Dio client로 현재 앱과 동일한 body를 `/symptoms`에 전송한다. `Idempotency-Key`는 포함하지 않는다.
 4. 401이면 기존 `AuthInterceptor`가 앱 전용 refresh token으로 access token을 갱신하고 요청을 한 번 재시도한다.
 5. 갱신된 access token은 앱 전용 저장소와 공유 Keychain item에 함께 미러링한다.
@@ -580,7 +576,7 @@ dev:  $(AppIdentifierPrefix)com.canieatthis.canIEatThis.dev.extension-auth
 <key>NSExtensionPointIdentifier</key>
 <string>com.apple.usernotifications.content-extension</string>
 <key>UNNotificationExtensionCategory</key>
-<string>SYMPTOM_CHECKIN_V1</string>
+<array><string>post_meal</string><string>post_meal_delayed_single</string></array>
 <key>UNNotificationExtensionDefaultContentHidden</key>
 <true/>
 <key>UNNotificationExtensionUserInteractionEnabled</key>
@@ -797,7 +793,7 @@ CI에는 App Group entitlement, extension bundle embedding, dev/prod API URL 교
 4. prod 25%
 5. prod 100%
 
-서버 remote flag가 `SYMPTOM_CHECKIN_V1` category 발송을 제어한다. kill switch 시 일반 notification으로 되돌려 기존 `앱에서 자세히` 흐름만 제공한다.
+서버 remote flag가 `post_meal`/`post_meal_delayed_single` category 발송을 제어한다. kill switch 시 일반 notification으로 되돌려 기존 `앱에서 자세히` 흐름만 제공한다.
 
 ### 수집 지표
 
@@ -923,7 +919,7 @@ git merge-base --is-ancestor f0ba2fa6800b0a4d1a4e81aff065ee763a7bb2f5 HEAD
 
 V1에서는 제공된 시안의 `나중에 알림` 버튼을 표시하지 않고 `SYMPTOM_SNOOZE_ACTION`도 등록하지 않는다. snooze endpoint, Outbox record, 지연·반복·취소 정책, 로컬 알림 및 서버 APNs 재발송 스케줄러는 모두 구현 대상에서 제외한다.
 
-후속 버전에서 snooze를 도입할 때는 기존 `SYMPTOM_CHECKIN_V1` 계약을 암묵적으로 확장하지 않는다. 별도의 제품 정책, OpenAPI, push category/version, 오프라인 재시도·중복·취소 정책과 APNs E2E 완료 기준을 먼저 승인한다.
+후속 버전에서 snooze를 도입할 때는 기존 식후 category 계약을 암묵적으로 확장하지 않는다. 별도의 제품 정책, OpenAPI, push category/version, 오프라인 재시도·중복·취소 정책과 APNs E2E 완료 기준을 먼저 승인한다.
 
 ### 19.5 dev/prod App Group과 Extension App ID — 외부 수동 게이트 완료
 

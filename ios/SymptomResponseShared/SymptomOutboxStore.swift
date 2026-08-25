@@ -8,24 +8,17 @@ enum SymptomOutboxError: Error {
 }
 
 struct SymptomPushPayload {
-  let schemaVersion: Int
   let type: String
   let mealRecordId: String
-  let notificationEventId: String
-  let subjectId: String
 
-  init?(userInfo: [AnyHashable: Any]) {
-    guard let schema = Self.string(userInfo["schemaVersion"]), Int(schema) == 1,
-          let type = Self.string(userInfo["type"]),
+  init?(userInfo: [AnyHashable: Any], category: String) {
+    guard let type = Self.string(userInfo["type"]),
           type == "post_meal" || type == "post_meal_delayed_single",
-          let mealRecordId = Self.string(userInfo["targetId"]), UUID(uuidString: mealRecordId) != nil,
-          let notificationEventId = Self.string(userInfo["notificationEventId"]),
-          let subjectId = Self.string(userInfo["subjectId"]), !subjectId.isEmpty else { return nil }
-    self.schemaVersion = 1
+          category == type,
+          let mealRecordId = Self.string(userInfo["targetId"])?.trimmingCharacters(in: .whitespacesAndNewlines),
+          !mealRecordId.isEmpty else { return nil }
     self.type = type
     self.mealRecordId = mealRecordId
-    self.notificationEventId = notificationEventId
-    self.subjectId = subjectId
   }
 
   private static func string(_ value: Any?) -> String? {
@@ -46,8 +39,7 @@ enum PendingSymptomState: String, Codable { case pending, nativeUploading, flutt
 
 struct PendingSymptomManifest: Codable {
   let clientRecordId: UUID
-  let subjectId: String
-  let notificationEventId: String
+  let ownerSubjectId: String?
   var state: PendingSymptomState
   var claim: OutboxClaim?
   var attemptCount: Int
@@ -92,14 +84,14 @@ final class SymptomOutboxStore {
     try FileManager.default.createDirectory(at: resolvedRoot, withIntermediateDirectories: true)
   }
 
-  func enqueue(payload: SymptomPushPayload, request: SymptomRequestBody) throws -> UUID {
+  func enqueue(request: SymptomRequestBody, ownerSubjectId: String?) throws -> UUID {
     try locked {
       if FileManager.default.fileExists(atPath: cleanupMarker.path) { throw SymptomOutboxError.cleanupRequired }
       let id = UUID()
       let directory = root.appendingPathComponent(id.uuidString, isDirectory: true)
       try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
       let manifest = PendingSymptomManifest(
-        clientRecordId: id, subjectId: payload.subjectId, notificationEventId: payload.notificationEventId,
+        clientRecordId: id, ownerSubjectId: ownerSubjectId,
         state: .pending, claim: nil, attemptCount: 0, lastErrorClass: nil, createdAt: Date()
       )
       try write(request, to: directory.appendingPathComponent("request.json"))
@@ -159,11 +151,12 @@ final class SymptomOutboxStore {
     }
   }
 
-  func claimPendingForFlutter(subjectId: String, limit: Int = 10) throws -> [ClaimedSymptomRecord] {
+  func claimPendingForFlutter(currentSubjectId: String?, limit: Int = 10) throws -> [ClaimedSymptomRecord] {
     try locked {
       let now = Date()
       return try records().compactMap { id in
-        guard var manifest = try? readManifest(id), manifest.subjectId == subjectId else { return nil }
+        guard var manifest = try? readManifest(id),
+              manifest.ownerSubjectId == nil || manifest.ownerSubjectId == currentSubjectId else { return nil }
         let canClaim = manifest.state == .pending || (manifest.state == .flutterClaimed && (manifest.claim?.expiresAt ?? .distantFuture) <= now)
         guard canClaim else { return nil }
         manifest.state = .flutterClaimed

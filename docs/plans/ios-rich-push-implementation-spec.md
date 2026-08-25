@@ -19,7 +19,7 @@
 
 ### 2.1 V1 포함
 
-- `SYMPTOM_CHECKIN_V1` Notification Content Extension
+- `post_meal` 및 `post_meal_delayed_single` Notification Content Extension
 - 앱과 동일한 5단계 증상 상태
 - 앱과 동일한 증상 4종 및 명시적 `없음`
 - 알림 안의 `기록 완료`
@@ -279,16 +279,13 @@ Runner와 Extension의 같은 flavor가 다음 값을 공유한다.
     "body": "13:24 점심 후 6시간 · 된장찌개 · 잡곡밥"
   },
   "data": {
-    "schemaVersion": "1",
     "type": "post_meal",
-    "targetId": "c4e90e6a-2b3c-4d5e-8f90-1a2b3c4d5e6f",
-    "notificationEventId": "server-event-uuid",
-    "subjectId": "server-user-id"
+    "targetId": "c4e90e6a-2b3c-4d5e-8f90-1a2b3c4d5e6f"
   },
   "apns": {
     "payload": {
       "aps": {
-        "category": "SYMPTOM_CHECKIN_V1",
+        "category": "post_meal",
         "thread-id": "post-meal-checkin"
       }
     }
@@ -296,17 +293,14 @@ Runner와 Extension의 같은 flavor가 다음 값을 공유한다.
 }
 ```
 
-위 JSON은 FCM HTTP v1 발송 형식이다. 실제 Content Extension의 `UNNotificationContent.userInfo`에서는 FCM `data` 필드가 top-level key로 전달되므로 decoder는 `userInfo["schemaVersion"]`, `userInfo["type"]`, `userInfo["targetId"]`, `userInfo["notificationEventId"]`, `userInfo["subjectId"]`를 읽는다. `userInfo["data"]` 중첩 객체를 기대하지 않는다. 화면 제목과 본문은 `notification.request.content.title/body`에서 읽는다.
+위 JSON은 FCM HTTP v1 발송 형식이다. 실제 Content Extension의 `UNNotificationContent.userInfo`에서는 FCM `data` 필드가 top-level key로 전달되므로 decoder는 `userInfo["type"]`, `userInfo["targetId"]`를 읽는다. `userInfo["data"]` 중첩 객체를 기대하지 않는다. `aps.category`와 `data.type`은 같아야 하며 둘 다 `post_meal` 또는 `post_meal_delayed_single`이어야 한다. 화면 제목과 본문은 `notification.request.content.title/body`에서 읽는다.
 
 검증 규칙:
 
 | 필드 | 규칙 | 실패 시 |
 |---|---|---|
-| `schemaVersion` | 문자열 `"1"` | 입력 UI 비활성화, `앱에서 자세히`만 제공 |
 | `type` | `post_meal` 또는 `post_meal_delayed_single` | 동일 |
 | `targetId` | trim 후 비어 있지 않은 문자열 | 동일 |
-| `subjectId` | trim 후 비어 있지 않은 문자열 | enqueue 금지, `앱에서 자세히`만 제공 |
-| `notificationEventId` | 선택 문자열 | 없으면 진단 필드를 `null`로 저장 |
 
 `targetId`를 `mealRecordId`로 그대로 사용한다. UUID 형식 검사는 클라이언트에서 강제하지 않는다. 서버가 외부 ID 형식을 변경해도 비어 있지 않은 문자열이면 전달한다.
 
@@ -320,15 +314,12 @@ let openApp = UNNotificationAction(
   title: "앱에서 자세히",
   options: [.foreground]
 )
-let category = UNNotificationCategory(
-  identifier: "SYMPTOM_CHECKIN_V1",
-  actions: [openApp],
-  intentIdentifiers: [],
-  options: []
-)
+let categories = ["post_meal", "post_meal_delayed_single"].map {
+  UNNotificationCategory(identifier: $0, actions: [openApp], intentIdentifiers: [], options: [])
+}
 ```
 
-`setNotificationCategories`는 기존 category 전체를 교체하므로 현재 등록 목록을 조회해 `SYMPTOM_CHECKIN_V1`만 upsert한 뒤 합쳐서 설정한다. 다른 Flutter plugin 또는 향후 category를 제거하지 않는다.
+`setNotificationCategories`는 기존 category 전체를 교체하므로 현재 등록 목록을 조회해 두 category만 upsert한 뒤 합쳐서 설정한다. 다른 Flutter plugin 또는 향후 category를 제거하지 않는다.
 
 `SYMPTOM_SNOOZE_ACTION`은 등록하지 않는다. `NotificationViewController.didReceive(_:completionHandler:)`에서 `SYMPTOM_OPEN_APP_ACTION`을 받으면 `.dismissAndForwardAction`을 반환해 containing app으로 전달한다. Runner는 기존 Firebase `getInitialMessage`/`onMessageOpenedApp` 경로에서 `post_meal` payload를 처리한다. V1에 별도 native→Flutter navigation channel을 만들지 않으며, 이 경로가 실기기에서 실패하면 release를 차단하고 계약을 다시 검토한다.
 
@@ -397,8 +388,7 @@ Slider index mapping은 다음과 같다.
   "schemaVersion": 1,
   "clientRecordId": "9A489D3E-5CB5-4F53-B6BB-ED8A2BB385E2",
   "notificationRequestId": "UNNotificationRequest.identifier",
-  "notificationEventId": "server-event-uuid",
-  "subjectId": "server-user-id",
+  "ownerSubjectId": "shared-session-user-id 또는 null",
   "state": "pending",
   "claim": null,
   "attemptCount": 0,
@@ -489,7 +479,7 @@ protocol AppGroupOutboxStoring {
   ) throws -> EnqueueResult
 
   func claimPendingForFlutter(
-    subjectId: String,
+    currentSubjectId: String?,
     limit: Int,
     leaseDuration: TimeInterval,
     excluding activeNativeRecordIds: Set<UUID>
@@ -565,7 +555,7 @@ protocol AppGroupOutboxStoring {
 
 Runner는 claim 전에 Extension background session을 재생성하고 `getAllTasks`로 active `taskDescription` 집합을 얻는다. 그 다음 store가 다음 조건을 만족하는 record만 claim한다.
 
-- `subjectId`가 현재 `AuthSession.userId`와 동일
+- `ownerSubjectId`가 현재 공유 Keychain 사용자와 동일하거나 `null`
 - state가 `pending`
 - 또는 `flutterClaimed` lease가 만료됨
 - active native task 집합에 없음
@@ -634,7 +624,7 @@ protocol SharedAccessTokenStoring {
 }
 ```
 
-Extension은 payload `subjectId`와 shared session `subjectId`가 같을 때만 직접 업로드한다. Keychain 잠금으로 session을 일시적으로 읽지 못한 경우에는 enqueue만 허용하고, session이 확정적으로 없거나 subject가 다르면 enqueue도 금지한다.
+Extension은 payload에 `subjectId`를 요구하지 않는다. 공유 Keychain session을 읽을 수 있으면 그 사용자 ID를 내부 `ownerSubjectId`로 저장하고 직접 업로드한다. Keychain을 읽지 못하면 `ownerSubjectId = null`로 enqueue만 허용하며 native upload는 하지 않는다. 소유자 없는 record는 다음 ready/resume의 현재 사용자로 재전송될 수 있다.
 
 Extension은 Keychain 조회 결과를 다음처럼 구분한다.
 
@@ -709,9 +699,9 @@ if (token != null) {
 
 기존 `_auth_retried == true` 요청이 다시 401을 받는 분기도 단순 `handler.next`로 끝내지 않는다. primary/shared token clear와 async `onSessionExpired`를 실행한 뒤 `SessionExpiredFailure`로 reject한다. 따라서 Flutter pending upload의 “refresh 후 두 번째 401”도 같은 purge 경로를 탄다.
 
-`purgeAndCancelForLogout`은 시작할 때 lock 안에서 `cleanup-required`를 만들고 이후 모든 enqueue/claim/upload를 차단한다. 해당 flavor background session의 task 조회·cancel, Outbox purge, shared Keychain clear, `SYMPTOM_CHECKIN_V1` delivered notification 제거가 끝난 뒤에만 marker를 제거한다. 중간에 앱이 종료되면 다음 bridge 초기화가 cleanup을 재개한다. Extension이 marker를 발견하면 기록 버튼을 비활성화하고 `앱에서 자세히`만 제공한다. task cancel callback이 purge 뒤 도착해 record를 찾지 못하는 경우는 정상 no-op이다.
+`purgeAndCancelForLogout`은 시작할 때 lock 안에서 `cleanup-required`를 만들고 이후 모든 enqueue/claim/upload를 차단한다. 해당 flavor background session의 task 조회·cancel, Outbox purge, shared Keychain clear, `post_meal`/`post_meal_delayed_single` delivered notification 제거가 끝난 뒤에만 marker를 제거한다. 중간에 앱이 종료되면 다음 bridge 초기화가 cleanup을 재개한다. Extension이 marker를 발견하면 기록 버튼을 비활성화하고 `앱에서 자세히`만 제공한다. task cancel callback이 purge 뒤 도착해 record를 찾지 못하는 경우는 정상 no-op이다.
 
-delivered notification은 `UNUserNotificationCenter.getDeliveredNotifications` 결과에서 `request.content.categoryIdentifier == "SYMPTOM_CHECKIN_V1"`인 request identifier만 제거한다. 다른 종류의 알림은 삭제하지 않는다.
+delivered notification은 `UNUserNotificationCenter.getDeliveredNotifications` 결과에서 category가 `post_meal` 또는 `post_meal_delayed_single`인 request identifier만 제거한다. 다른 종류의 알림은 삭제하지 않는다.
 
 AuthController는 native purge 오류를 기록 데이터 없이 보고하고 서버 logout/withdraw와 primary token clear를 계속한다. marker가 남아 있으므로 cleanup이 끝나기 전에는 다음 로그인 session sync가 `cleanupRequired`로 실패하고 native upload도 시작되지 않는다.
 
@@ -780,7 +770,7 @@ configuration.isDiscretionary = false
 
 | method | arguments | result |
 |---|---|---|
-| `claimPending` | `{subjectId, limit}` | record map 배열 |
+| `claimPending` | `{limit}` | record map 배열 |
 | `acknowledge` | `{clientRecordId, claimToken}` | `null` |
 | `release` | `{clientRecordId, claimToken, errorClass?}` | `null` |
 | `quarantine` | `{clientRecordId, claimToken, reasonCode, httpStatus?, serverCode?}` | `null` |
@@ -917,7 +907,7 @@ final class PendingUploadPermanent extends PendingUploadResult {
 if sessionStatus != ready: return
 session = authController state
 shared session best-effort sync
-records = bridge.claimPending(subjectId: session.userId, limit: 10)
+records = bridge.claimPending(limit: 10)
 for record in records:
   result = uploadService.upload(record)
   success   -> acknowledge(claim token) -> cache invalidation
@@ -1035,7 +1025,7 @@ completion handler는 모든 분기에서 정확히 한 번 호출한다.
 
 | 테스트 | 핵심 assertion |
 |---|---|
-| payload v1 decode | targetId→mealRecordId, subject 필수, event optional |
+| payload decode | type/category 일치, targetId→mealRecordId |
 | enum fixture | Swift raw value가 Dart fixture와 일치 |
 | date formatter | 머신 timezone과 무관하게 `+09:00`, 초 단위 |
 | enqueue | 두 파일 생성 후 pending atomic rename |
@@ -1145,7 +1135,7 @@ codesign -d --entitlements :- <Runner.app/PlugIns/SymptomNotificationContent.app
 - [ ] dev/prod native xcconfig 연결
 - [ ] Runner/Extension Info.plist config 연결
 - [ ] Runner/Extension App Group·Keychain entitlement 연결
-- [ ] `SYMPTOM_CHECKIN_V1`과 open-app action 등록
+- [ ] 두 식후 category와 open-app action 등록
 - [ ] 두 flavor simulator build 통과
 
 ### Slice 2 — Shared storage/auth

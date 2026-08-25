@@ -50,12 +50,12 @@ import UserNotifications
     let open = UNNotificationAction(
       identifier: "SYMPTOM_OPEN_APP_ACTION", title: "앱에서 자세히", options: [.foreground]
     )
-    let checkin = UNNotificationCategory(
-      identifier: "SYMPTOM_CHECKIN_V1", actions: [open], intentIdentifiers: [], options: [.customDismissAction]
-    )
+    let checkinCategories = ["post_meal", "post_meal_delayed_single"].map {
+      UNNotificationCategory(identifier: $0, actions: [open], intentIdentifiers: [], options: [.customDismissAction])
+    }
     UNUserNotificationCenter.current().getNotificationCategories { categories in
-      var updated = categories.filter { $0.identifier != checkin.identifier }
-      updated.insert(checkin)
+      var updated = categories.filter { !["post_meal", "post_meal_delayed_single"].contains($0.identifier) }
+      updated.formUnion(checkinCategories)
       UNUserNotificationCenter.current().setNotificationCategories(updated)
     }
   }

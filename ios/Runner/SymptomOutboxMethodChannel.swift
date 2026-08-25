@@ -13,10 +13,15 @@ final class SymptomOutboxMethodChannel {
         let arguments = call.arguments as? [String: Any] ?? [:]
         switch call.method {
         case "claimPending":
-          guard let subjectId = arguments["subjectId"] as? String else { throw SymptomOutboxError.invalidPayload }
           let limit = min(arguments["limit"] as? Int ?? 10, 10)
+          let currentSubjectId: String?
+          if case .session(let session) = keychain.readResult() {
+            currentSubjectId = session.subjectId
+          } else {
+            currentSubjectId = nil
+          }
           try uploader.reconcileBeforeFlutterClaim()
-          let records = try store.claimPendingForFlutter(subjectId: subjectId, limit: limit).compactMap { record -> [String: Any]? in
+          let records = try store.claimPendingForFlutter(currentSubjectId: currentSubjectId, limit: limit).compactMap { record -> [String: Any]? in
             guard let claim = record.manifest.claim else { return nil }
             return [
               "clientRecordId": record.manifest.clientRecordId.uuidString,
@@ -64,7 +69,8 @@ final class SymptomOutboxMethodChannel {
 
   private static func removeDeliveredCheckins() {
     UNUserNotificationCenter.current().getDeliveredNotifications { notifications in
-      let ids = notifications.filter { $0.request.content.categoryIdentifier == "SYMPTOM_CHECKIN_V1" }.map { $0.request.identifier }
+      let checkinCategories: Set<String> = ["post_meal", "post_meal_delayed_single"]
+      let ids = notifications.filter { checkinCategories.contains($0.request.content.categoryIdentifier) }.map { $0.request.identifier }
       UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ids)
     }
   }

@@ -36,7 +36,8 @@ final class SymptomNativeUploader: NSObject, URLSessionTaskDelegate {
     let claimed = try store.claimForNative(clientRecordId: clientRecordId)
     guard let claim = claimed.manifest.claim else { throw SymptomOutboxError.claimMismatch }
     guard case .session(let sharedSession) = tokenStore.readResult(),
-          sharedSession.subjectId == claimed.manifest.subjectId else {
+          let ownerSubjectId = claimed.manifest.ownerSubjectId,
+          sharedSession.subjectId == ownerSubjectId else {
       try store.finishNative(clientRecordId: clientRecordId, claimToken: claim.token, success: false, errorClass: "missing_or_mismatched_session")
       return
     }

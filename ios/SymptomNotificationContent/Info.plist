@@ -16,17 +16,28 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>SymptomHeaderIconName</key>
+	<string>$(SYMPTOM_HEADER_ICON_NAME)</string>
+	<key>SymptomHeaderAppName</key>
+	<string>$(SYMPTOM_HEADER_APP_NAME)</string>
 	<key>NSExtension</key>
 	<dict>
+		<key>NSExtensionMainStoryboard</key>
+		<string>MainInterface</string>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.usernotifications.content-extension</string>
-		<key>NSExtensionPrincipalClass</key>
-		<string>$(PRODUCT_MODULE_NAME).NotificationViewController</string>
 		<key>NSExtensionAttributes</key>
 		<dict>
 			<key>UNNotificationExtensionCategory</key>
-			<array><string>SYMPTOM_CHECKIN_V1</string></array>
+			<array>
+				<string>post_meal</string>
+				<string>post_meal_delayed_single</string>
+			</array>
+		<key>UNNotificationExtensionInitialContentSizeRatio</key>
+		<real>1.36</real>
 			<key>UNNotificationExtensionDefaultContentHidden</key>
+			<true/>
+			<key>UNNotificationExtensionUserInteractionEnabled</key>
 			<true/>
 		</dict>
 	</dict>

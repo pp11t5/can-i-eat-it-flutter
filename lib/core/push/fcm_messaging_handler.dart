@@ -16,6 +16,22 @@ final FlutterLocalNotificationsPlugin _localNotis =
 StreamSubscription<RemoteMessage>? _foregroundMessageSubscription;
 StreamSubscription<RemoteMessage>? _openedAppSubscription;
 
+/// Debug 빌드에서만 수신 계약을 진단한다. 식사 ID와 알림 본문은 원문을 남기지 않는다.
+void _logReceivedMessage(String event, RemoteMessage message) {
+  if (!kDebugMode) return;
+  final targetId = message.data['targetId'];
+  final targetPrefix = targetId is String && targetId.isNotEmpty
+      ? targetId.substring(0, targetId.length.clamp(0, 8))
+      : '-';
+  final keys = message.data.keys.toList()..sort();
+  debugPrint(
+    '[FCM] $event id=${message.messageId ?? '-'} '
+    'notification=${message.notification != null} '
+    'keys=$keys type=${message.data['type'] ?? '-'} '
+    'targetIdPrefix=$targetPrefix',
+  );
+}
+
 /// [wireOpenedApp]이 재호출돼도 warm 탭이 최신 콜백으로 가도록 보관.
 void Function(RemoteMessage message)? _onOpenedHandler;
 
@@ -40,7 +56,7 @@ const _channel = AndroidNotificationChannel(
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
     await Firebase.initializeApp();
-    debugPrint('[FCM] bg message: ${message.messageId}');
+    _logReceivedMessage('background', message);
   } catch (e) {
     debugPrint('[FCM] bg handler failed: $e');
   }
@@ -95,9 +111,11 @@ Future<void> initForegroundMessaging({
       sound: true,
     );
 
-    _foregroundMessageSubscription ??= FirebaseMessaging.onMessage.listen(
-      (message) => unawaited(_showForegroundNotification(message)),
-    );
+    _foregroundMessageSubscription ??=
+        FirebaseMessaging.onMessage.listen((message) {
+      _logReceivedMessage('foreground', message);
+      unawaited(_showForegroundNotification(message));
+    });
   } catch (e) {
     debugPrint('[FCM] initForegroundMessaging failed (ignored): $e');
   }
@@ -110,7 +128,6 @@ Future<void> _showForegroundNotification(RemoteMessage message) async {
   }
 
   try {
-    debugPrint('[FCM] fg message: ${message.messageId}');
     await _localNotis.show(
       id: message.messageId?.hashCode ?? notification.hashCode,
       title: notification.title,
@@ -147,9 +164,7 @@ Future<void> wireOpenedApp(
   try {
     final initial = await FirebaseMessaging.instance.getInitialMessage();
     if (initial != null) {
-      debugPrint(
-        '[FCM] initial message id=${initial.messageId} data=${initial.data}',
-      );
+      _logReceivedMessage('initial', initial);
       _onOpenedHandler?.call(initial);
     } else {
       debugPrint('[FCM] no initial message (not a cold-start notif launch)');
@@ -157,9 +172,7 @@ Future<void> wireOpenedApp(
 
     _openedAppSubscription ??=
         FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      debugPrint(
-        '[FCM] onMessageOpenedApp id=${message.messageId} data=${message.data}',
-      );
+      _logReceivedMessage('opened', message);
       _onOpenedHandler?.call(message);
     });
   } catch (e) {

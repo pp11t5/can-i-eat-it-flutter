@@ -37,7 +37,7 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     final session = ref.read(authControllerProvider).valueOrNull;
     if (session != null) {
       unawaited(
-        ref.read(symptomOutboxRetryCoordinatorProvider).drain(session.userId),
+        ref.read(symptomOutboxRetryCoordinatorProvider).drain(),
       );
     }
   }

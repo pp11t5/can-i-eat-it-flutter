@@ -3,3 +3,5 @@
 SWIFT_VERSION = 5.0
 IPHONEOS_DEPLOYMENT_TARGET = 15.0
 CODE_SIGN_ENTITLEMENTS = SymptomNotificationContent/SymptomNotificationContent.entitlements
+SYMPTOM_HEADER_ICON_NAME = SymptomHeaderIconProd
+SYMPTOM_HEADER_APP_NAME = 먹어도돼?
