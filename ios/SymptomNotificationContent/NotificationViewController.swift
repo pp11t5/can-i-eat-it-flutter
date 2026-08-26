@@ -29,6 +29,7 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
   private var selectedState = "normal"
   private var selectedTypes = Set<String>()
   private var canSave = false
+  private var deliveredNotificationIdentifier: String?
   private var awaitingNativeRecordID: UUID?
   private var responseTimeoutWorkItem: DispatchWorkItem?
   private var dismissWorkItem: DispatchWorkItem?
@@ -70,6 +71,7 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
   }
 
   func didReceive(_ notification: UNNotification) {
+    deliveredNotificationIdentifier = notification.request.identifier
     payload = SymptomPushPayload(
       userInfo: notification.request.content.userInfo,
       category: notification.request.content.categoryIdentifier
@@ -395,6 +397,7 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
         "extension outbox enqueued record=\(SymptomNativeUploadLog.recordPrefix(id)) "
           + "ownerPresent=\(ownerSubjectId != nil)"
       )
+      removeDeliveredNotificationAfterEnqueue()
       if case .session(let session) = SharedAccessTokenStore(config: config).readResult(),
          let ownerSubjectId, session.subjectId == ownerSubjectId {
         SymptomNativeUploadLog.debug("extension native upload eligible record=\(SymptomNativeUploadLog.recordPrefix(id))")
@@ -508,6 +511,17 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
       deadline: .now() + Metric.fallbackDisplayDuration,
       execute: dismiss
     )
+  }
+
+  /// Outbox에 원자적으로 보관된 뒤에는 같은 알림을 다시 제출할 수 없게 현재 request만 제거한다.
+  /// enqueue 실패 시에는 호출하지 않아 사용자가 알림에서 다시 시도할 수 있다.
+  private func removeDeliveredNotificationAfterEnqueue() {
+    guard let identifier = deliveredNotificationIdentifier, !identifier.isEmpty else {
+      SymptomNativeUploadLog.debug("extension delivered notification removal skipped identifierMissing=true")
+      return
+    }
+    UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
+    SymptomNativeUploadLog.debug("extension delivered notification removed after enqueue")
   }
 
   private func disableSave(_ message: String) {

@@ -154,7 +154,7 @@ flowchart TD
 - `기록 완료`는 강도 값이 유효하고 증상/없음 중 하나를 명시 선택한 뒤 활성화
 - 연속 탭 방지를 위해 첫 탭 즉시 버튼 비활성화
 - 저장 실패 시 알림을 닫지 않고 짧은 오류 표시
-- Outbox 저장 후 native upload의 서버 응답을 최대 3초 기다린다. `2xx`와 응답 envelope의 `isSuccess: true`이면 즉시 닫고, 세션 부재·지연·재시도 가능 실패는 `기기에 저장했어요. 앱을 열면 자동 전송합니다.`를 약 1초 표시한 뒤 닫는다. 영구 `4xx` 실패는 `기록을 확인할 수 없어요. 앱에서 다시 시도해 주세요.`를 같은 방식으로 표시한다.
+- Outbox 저장이 성공하면 현재 알림의 request identifier를 delivered notification 목록에서 즉시 제거한다. native upload의 서버 응답은 최대 3초 기다린다. `2xx`와 응답 envelope의 `isSuccess: true`이면 즉시 닫고, 세션 부재·지연·재시도 가능 실패는 `기기에 저장했어요. 앱을 열면 자동 전송합니다.`를 약 1초 표시한 뒤 닫는다. 영구 `4xx` 실패는 `기록을 확인할 수 없어요. 앱에서 다시 시도해 주세요.`를 같은 방식으로 표시한다. Outbox 저장 실패 시에는 알림을 유지한다.
 
 버튼 문구 `기록 완료`는 오프라인에서도 “기기에 안전하게 접수 완료”를 뜻한다. 네트워크 저장 성공만을 뜻하도록 해석해야 한다면 문구를 `기록 접수`로 바꾸는 제품 결정이 필요하다.
 
@@ -638,7 +638,7 @@ Storyboard 기반이면 `NSExtensionMainStoryboard`도 설정한다. Extension p
 5. `[None]` Dynamic Type, VoiceOver, 잠금화면 시각 QA
 6. `[None]` Content Extension fallback action 검증
 
-완료 조건: `기록 완료` 탭 후 Outbox를 먼저 저장하고, native upload가 `2xx + isSuccess: true`를 반환하면 즉시 닫힌다. 3초 안에 결과를 확정하지 못하면 pending을 보존하고 안내 후 닫힌다.
+완료 조건: `기록 완료` 탭 후 Outbox를 먼저 저장하고, 저장에 성공하면 해당 delivered notification만 제거한다. native upload가 `2xx + isSuccess: true`를 반환하면 즉시 닫힌다. 3초 안에 결과를 확정하지 못하면 pending을 보존하고 안내 후 닫힌다.
 
 ### Phase 5 — Flutter lifecycle retry
 

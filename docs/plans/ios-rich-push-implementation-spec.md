@@ -41,7 +41,7 @@
 
 ### 2.3 절대 불변 조건
 
-1. Outbox 저장 성공 전에는 알림을 성공으로 닫지 않는다.
+1. Outbox 저장 성공 전에는 알림을 성공으로 닫거나 delivered notification 목록에서 제거하지 않는다.
 2. 서버 2xx와 성공 envelope를 모두 확인하기 전에는 record를 삭제하지 않는다.
 3. Extension은 refresh token을 읽거나 저장하지 않는다.
 4. 토큰은 App Group 파일과 로그에 저장하지 않는다.
@@ -700,7 +700,7 @@ if (token != null) {
 
 `purgeAndCancelForLogout`은 시작할 때 lock 안에서 `cleanup-required`를 만들고 이후 모든 enqueue/claim/upload를 차단한다. 해당 flavor background session의 task 조회·cancel, Outbox purge, shared Keychain clear, `post_meal`/`post_meal_delayed_single` delivered notification 제거가 끝난 뒤에만 marker를 제거한다. 중간에 앱이 종료되면 다음 bridge 초기화가 cleanup을 재개한다. Extension이 marker를 발견하면 기록 버튼을 비활성화하고 `앱에서 자세히`만 제공한다. task cancel callback이 purge 뒤 도착해 record를 찾지 못하는 경우는 정상 no-op이다.
 
-delivered notification은 `UNUserNotificationCenter.getDeliveredNotifications` 결과에서 category가 `post_meal` 또는 `post_meal_delayed_single`인 request identifier만 제거한다. 다른 종류의 알림은 삭제하지 않는다.
+로그아웃·탈퇴·offline signOut·session expiry에서는 `UNUserNotificationCenter.getDeliveredNotifications` 결과에서 category가 `post_meal` 또는 `post_meal_delayed_single`인 request identifier만 제거한다. 다른 종류의 알림은 삭제하지 않는다. 반면 Extension의 `기록 완료`는 Outbox enqueue 성공 직후 현재 `UNNotification.request.identifier` 하나만 제거한다. native upload 성공·실패·timeout과 무관하게 pending이 안전하게 보관되었으면 알림은 재응답할 수 없어야 하며, enqueue 실패 때만 알림을 유지한다.
 
 AuthController는 native purge 오류를 기록 데이터 없이 보고하고 서버 logout/withdraw와 primary token clear를 계속한다. marker가 남아 있으므로 cleanup이 끝나기 전에는 다음 로그인 session sync가 `cleanupRequired`로 실패하고 native upload도 시작되지 않는다.
 
@@ -1063,8 +1063,8 @@ completion handler는 모든 분기에서 정확히 한 번 호출한다.
 
 ### 14.3 실기기 시나리오
 
-1. dev 로그인 후 정상 알림 → 확장 → 기록 → 서버 생성 → Outbox 제거
-2. airplane mode에서 기록 → 알림 닫힘 → 앱 resume 전 pending 유지 → 네트워크 복구 후 전송
+1. dev 로그인 후 정상 알림 → 확장 → 기록 → 해당 delivered 알림 제거 → 서버 생성 → Outbox 제거
+2. airplane mode에서 기록 → 해당 delivered 알림 제거·확장 닫힘 → 앱 resume 전 pending 유지 → 네트워크 복구 후 전송
 3. Extension 전송 중 프로세스 종료 → Runner background callback → ack
 4. 서버 성공 직후 ack 전 종료 → 재전송 중복 가능성과 record 보존 확인
 5. access token 만료 → Extension 401 보존 → 앱 resume refresh → 성공
