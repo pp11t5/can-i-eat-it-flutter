@@ -60,6 +60,22 @@
 
 클라이언트 생성 요청에는 `recorded_at`/`recordedAt`이 없으며 `occurredAt`만 사용한다.
 
+### iOS 로컬 증상 Outbox
+
+iOS Notification Content Extension은 네트워크 전송 전에 App Group의 `symptom-outbox/<clientRecordId>/`에 request와 manifest를 원자적으로 저장한다. Flutter는 이 파일을 직접 읽거나 쓰지 않고 MethodChannel을 통해 Swift store에 요청한다.
+
+| 로컬 객체 | 필드/상태 | 용도 |
+|---|---|---|
+| `SymptomRequestBody` | `symptomState`, `symptomTypes`, `occurredAt`, `mealRecordId` | `/api/v1/symptoms`에 재사용하는 요청 body |
+| `PendingSymptomManifest` | `clientRecordId`, `ownerSubjectId?`, `state`, `claim?`, `attemptCount`, `lastErrorClass?`, `createdAt` | 재전송 및 진단 메타데이터 |
+| `OutboxClaim` | `owner`, `token`, `claimedAt`, `expiresAt?`, `taskIdentifier?` | native/Flutter 동시 전송 방지 |
+
+`state`는 `pending`, `nativeUploading`, `flutterClaimed`, `quarantine`을 사용한다. Flutter claim lease는 5분이고, native task가 10분 이상 확인되지 않으면 pending으로 회수한다. pending은 시간 만료로 삭제하지 않으며, 로그아웃·탈퇴·offline sign-out·최종 세션 만료 때만 전량 purge한다.
+
+`ownerSubjectId`는 payload가 아니라 공유 Keychain의 로그인 사용자 ID에서 정한다. owner가 없는 record는 다음 앱 ready/resume에서 현재 로그인 사용자로 재전송될 수 있다.
+
+자세한 payload, 인증, 운영 절차는 [iOS 리치 푸시 운영 계약](./ios-rich-push.md)을 따른다.
+
 ### 리포트
 
 | 서버 테이블 | Flutter 엔티티 | 주요 필드 |

@@ -594,6 +594,29 @@ sealed SignInOutcome
 
 ---
 
+### iOS 식후 증상 리치 푸시 (FCM/APNs)
+
+`post_meal`, `post_meal_delayed_single`은 iOS Notification Content Extension과 Flutter 푸시 탭 라우팅이 함께 지원하는 type이다. 이 항목은 서버가 FCM을 전송할 때 지켜야 하는 계약이다.
+
+| 위치 | 필드 | 필수 | 규칙 |
+|---|---|---:|---|
+| `data` | `type` | O | 문자열. `post_meal` 또는 `post_meal_delayed_single` |
+| `data` | `targetId` | O | 비어 있지 않은 식사 기록 ID. `/symptoms`의 `mealRecordId`로 그대로 전송 |
+| `data` | `title`, `body`, `mealOccurredAt`, `hoursElapsed`, `foodNames` | X | Extension 카드의 제목·식사 문맥 표시용. 없어도 기록 기능은 동작 |
+| `apns.payload.aps` | `alert` | O | alert push와 기본 알림 fallback을 위한 제목·본문 |
+| `apns.payload.aps` | `category` | O | `data.type`과 같은 지원 type |
+| `apns.headers` | `apns-push-type` | O | `alert` |
+| `apns.headers` | `apns-priority` | O | `10` |
+
+- FCM `data` 값은 모두 문자열이다.
+- `schemaVersion`, `notificationEventId`, `subjectId`는 사용하지 않는다.
+- data-only 또는 `aps.category`와 `data.type`이 다른 메시지는 리치 푸시 기록 대상으로 처리되지 않는다.
+- Extension은 자체 UI를 렌더링한다. `aps.alert`은 리치 UI 입력값이 아니라 기본 알림 및 Extension 실패 fallback이다.
+
+전체 흐름과 재전송·인증 종료 정책은 [iOS 리치 푸시 운영 계약](./ios-rich-push.md)을 따른다.
+
+---
+
 ## F4. 주간 리포트 · 마이페이지
 
 > **미확정/후속 (Swagger 미확인)**: 아래 엔드포인트는 현재 서버에서 확인되지 않았다. 계약 초안을 보존하되, 실 구현 전 Swagger 재확인 필수.
