@@ -212,7 +212,11 @@ GoRouter appRouter(Ref ref) {
           final mealRecordId = state.extra as String?;
           return MaterialPage(
             fullscreenDialog: true,
-            child: MealRecordScreen(mealRecordId: mealRecordId),
+            child: MealRecordScreen(
+              mealRecordId: mealRecordId,
+              joinDate:
+                  ref.read(authControllerProvider).valueOrNull?.createdAt,
+            ),
           );
         },
       ),
