@@ -47,6 +47,7 @@ class RichPushActionReceiver : BroadcastReceiver() {
                     ?.getCharSequence(RichPushNotificationBuilder.REMOTE_INPUT_MEMO)
                     ?.toString()
                     ?.trim()
+                    ?.takeIf { it.isNotEmpty() }
                 val draft = RichPushDraftStore.load(context, mealId)
                 if (draft != null && !remoteMemo.isNullOrBlank()) {
                     RichPushDraftStore.save(context, draft.copy(memo = remoteMemo))

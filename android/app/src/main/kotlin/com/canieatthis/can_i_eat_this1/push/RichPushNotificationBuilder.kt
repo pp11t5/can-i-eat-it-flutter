@@ -33,12 +33,18 @@ internal object RichPushNotificationBuilder {
             data["gcm.n.title"],
             data["gcm.notification.title"],
         ) ?: "지금 속은 어때요?"
-        val body = firstNonBlank(
+        val fallbackBody = firstNonBlank(
             data["body"],
             data["gcm.n.body"],
             data["gcm.notification.body"],
             data["mealName"],
-        ).orEmpty()
+        )
+        val body = RichPushMapping.subtitleFromPayload(
+            mealOccurredAt = data["mealOccurredAt"],
+            hoursElapsed = data["hoursElapsed"],
+            foodNames = data["foodNames"],
+            fallbackBody = fallbackBody,
+        )
         val existing = RichPushDraftStore.load(context, mealId)
         val draft = existing?.copy(type = type, title = title, body = body)
             ?: RichPushDraft(
@@ -71,7 +77,7 @@ internal object RichPushNotificationBuilder {
                 .setCustomContentView(collapsed)
                 .setCustomBigContentView(expanded)
                 .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-                .setAutoCancel(false)
+                .setAutoCancel(true)
                 .addAction(dismissAction(context, draft.mealRecordId))
                 .addAction(detailAction(context, draft))
                 .addAction(completeAction(context, draft.mealRecordId)),
@@ -91,7 +97,7 @@ internal object RichPushNotificationBuilder {
 
     private fun baseBuilder(context: Context, draft: RichPushDraft): NotificationCompat.Builder {
         return NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_stat_notify)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(draft.title)
             .setContentText(draft.body)
             .setContentIntent(detailPending(context, draft))
@@ -105,7 +111,7 @@ internal object RichPushNotificationBuilder {
     private fun buildCollapsedViews(context: Context, draft: RichPushDraft): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.notification_rich_post_meal_collapsed)
         views.setTextViewText(R.id.rich_push_collapsed_title, draft.title)
-        views.setTextViewText(R.id.rich_push_collapsed_body, draft.body)
+        bindOptionalText(views, R.id.rich_push_collapsed_body, draft.body)
         return views
     }
 
@@ -121,6 +127,14 @@ internal object RichPushNotificationBuilder {
     private fun firstNonBlank(vararg values: String?): String? =
         values.firstOrNull { !it.isNullOrBlank() }
 
+    private fun bindOptionalText(views: RemoteViews, viewId: Int, text: String) {
+        views.setTextViewText(viewId, text)
+        views.setViewVisibility(
+            viewId,
+            if (text.isBlank()) android.view.View.GONE else android.view.View.VISIBLE,
+        )
+    }
+
     fun cancel(context: Context, mealRecordId: String) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.cancel(notificationId(mealRecordId))
@@ -130,11 +144,13 @@ internal object RichPushNotificationBuilder {
 
     private fun buildExpandedViews(context: Context, draft: RichPushDraft): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.notification_rich_post_meal)
-        views.setTextViewText(R.id.rich_push_header, "먹어도돼? · 식후 기록")
         views.setTextViewText(R.id.rich_push_title, draft.title)
-        views.setTextViewText(R.id.rich_push_body, draft.body)
-        val memoLabel = if (draft.memo.isBlank()) "메모 추가…" else draft.memo
-        views.setTextViewText(R.id.rich_push_memo, memoLabel)
+        bindOptionalText(views, R.id.rich_push_body, draft.body)
+        views.setTextViewText(
+            R.id.rich_push_intensity_caption,
+            RichPushMapping.intensityCaption(draft.intensityIndex),
+        )
+        views.setTextColor(R.id.rich_push_intensity_caption, 0xFF6B5CFF.toInt())
 
         val intensityIds = intArrayOf(
             R.id.intensity_0,
@@ -143,13 +159,30 @@ internal object RichPushNotificationBuilder {
             R.id.intensity_3,
             R.id.intensity_4,
         )
+        val thumbIds = intArrayOf(
+            R.id.intensity_thumb_0,
+            R.id.intensity_thumb_1,
+            R.id.intensity_thumb_2,
+            R.id.intensity_thumb_3,
+            R.id.intensity_thumb_4,
+        )
+        val numIds = intArrayOf(
+            R.id.intensity_num_0,
+            R.id.intensity_num_1,
+            R.id.intensity_num_2,
+            R.id.intensity_num_3,
+            R.id.intensity_num_4,
+        )
+        val selectedIndex = draft.intensityIndex.coerceIn(0, intensityIds.lastIndex)
+        views.setProgressBar(R.id.intensity_progress, 10, selectedIndex * 2 + 1, false)
         for (i in intensityIds.indices) {
-            val selected = i == draft.intensityIndex
-            views.setTextViewText(intensityIds[i], RichPushMapping.intensityLabels[i])
-            views.setInt(
-                intensityIds[i],
-                "setBackgroundResource",
-                if (selected) R.drawable.bg_intensity_on else R.drawable.bg_intensity_off,
+            views.setViewVisibility(
+                thumbIds[i],
+                if (i == selectedIndex) android.view.View.VISIBLE else android.view.View.GONE,
+            )
+            views.setTextColor(
+                numIds[i],
+                if (i == selectedIndex) 0xFF6B5CFF.toInt() else 0xFFA6A6B3.toInt(),
             )
             views.setOnClickPendingIntent(
                 intensityIds[i],
@@ -226,7 +259,7 @@ internal object RichPushNotificationBuilder {
     }
 
     private fun detailPending(context: Context, draft: RichPushDraft): PendingIntent {
-        val intent = RichPushLaunchHolder.detailIntent(context, draft.type, draft.mealRecordId)
+        val intent = RichPushLaunchHolder.detailIntent(context, draft)
         val flags = PendingIntent.FLAG_UPDATE_CURRENT or immutableFlag()
         return PendingIntent.getActivity(
             context,

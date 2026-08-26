@@ -143,6 +143,14 @@ GoRouter appRouter(Ref ref) {
           final existing = extra is Symptom ? extra : null;
           final args = extra is SymptomWriteArgs ? extra : null;
           final pushMealRecordId = state.uri.queryParameters['mealRecordId'];
+          final intensityIndex = int.tryParse(
+            state.uri.queryParameters['intensityIndex'] ?? '',
+          );
+          final typeCodes = (state.uri.queryParameters['symptomTypes'] ?? '')
+              .split(',')
+              .map((part) => part.trim())
+              .where((part) => part.isNotEmpty)
+              .toList();
           return MaterialPage(
             fullscreenDialog: true,
             child: args != null || existing != null
@@ -150,9 +158,15 @@ GoRouter appRouter(Ref ref) {
                     existingSymptom: existing,
                     initialMealRecordId: args?.initialMealRecordId,
                     initialMealName: args?.initialMealName,
+                    initialMood: args?.initialMood,
+                    initialSymptomTypes: args?.initialSymptomTypes,
                   )
                 : pushMealRecordId != null && pushMealRecordId.isNotEmpty
-                    ? PushSymptomEntryScreen(mealRecordId: pushMealRecordId)
+                    ? PushSymptomEntryScreen(
+                        mealRecordId: pushMealRecordId,
+                        initialIntensityIndex: intensityIndex,
+                        initialSymptomTypeCodes: typeCodes,
+                      )
                     : const SymptomWriteScreen(),
           );
         },

@@ -17,6 +17,60 @@ internal object RichPushMapping {
 
     val intensityLabels = arrayOf("편안", "양호", "보통", "불편", "심각")
 
+    fun intensityCaption(index: Int): String {
+        val i = index.coerceIn(0, intensityLabels.lastIndex)
+        return "${intensityLabels[i]} (강도 ${i + 1} / 5)"
+    }
+
+    /**
+     * Figma: `13:24 점심 후 6시간 경과 · 된장찌개·잡곡밥`
+     * 끼니 슬롯(아침/점심/저녁/야식)은 payload에 없어서 시각으로만 추정한다.
+     */
+    fun subtitleFromPayload(
+        mealOccurredAt: String?,
+        hoursElapsed: String?,
+        foodNames: String?,
+        fallbackBody: String?,
+    ): String {
+        val time = mealOccurredAt?.trim().orEmpty()
+        val hours = hoursElapsed?.trim()?.toIntOrNull()
+        val foods = foodNames
+            ?.split(',')
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            ?.joinToString("·")
+            .orEmpty()
+        val slot = mealSlotLabel(time)
+        val context = mealContextLabel(time, slot, hours)
+        return when {
+            context.isNotEmpty() && foods.isNotEmpty() -> "$context · $foods"
+            context.isNotEmpty() -> context
+            foods.isNotEmpty() -> foods
+            else -> fallbackBody?.trim().orEmpty()
+        }
+    }
+
+    private fun mealSlotLabel(hhmm: String): String {
+        val hour = hhmm.substringBefore(':').toIntOrNull() ?: return ""
+        if (hour !in 0..23) return ""
+        return when (hour) {
+            in 5..10 -> "아침"
+            in 11..16 -> "점심"
+            in 17..21 -> "저녁"
+            else -> "야식"
+        }
+    }
+
+    private fun mealContextLabel(time: String, slot: String, hours: Int?): String {
+        val prefix = listOf(time, slot).filter { it.isNotEmpty() }.joinToString(" ")
+        return when {
+            hours == null -> prefix
+            hours <= 0 -> listOf(prefix, "직후").filter { it.isNotEmpty() }.joinToString(" ")
+            prefix.isEmpty() -> "${hours}시간 경과"
+            else -> "$prefix 후 ${hours}시간 경과"
+        }
+    }
+
     data class Chip(val key: String, val label: String)
 
     val chips = listOf(
