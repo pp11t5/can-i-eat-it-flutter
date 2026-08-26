@@ -27,8 +27,7 @@ class PushNavigationCoordinator {
   /// FCM notification 탭 이벤트를 처리한다.
   void handleRemoteMessage(RemoteMessage message) {
     debugPrint(
-      '[FCM] handleRemoteMessage id=${message.messageId} data=${message.data}',
-    );
+        '[FCM] handleRemoteMessage id=${message.messageId} ${_describeData(message.data)}');
     handleData(message.data);
   }
 
@@ -66,7 +65,7 @@ class PushNavigationCoordinator {
     if (destination == null) {
       debugPrint(
         '[FCM] ignored unsupported push payload'
-        '${rawData != null ? ': $rawData' : ''}',
+        '${rawData != null ? ': ${_describeData(rawData)}' : ''}',
       );
       return;
     }
@@ -84,6 +83,15 @@ class PushNavigationCoordinator {
     if (_status == SessionStatus.unauthenticated) {
       _onGo('/login');
     }
+  }
+
+  String _describeData(Map<String, dynamic> data) {
+    final targetId = data['targetId'];
+    final targetPrefix = targetId is String && targetId.isNotEmpty
+        ? targetId.substring(0, targetId.length.clamp(0, 8))
+        : '-';
+    final keys = data.keys.toList()..sort();
+    return 'keys=$keys type=${data['type'] ?? '-'} targetIdPrefix=$targetPrefix';
   }
 
   void _navigate(PushDestination destination) {

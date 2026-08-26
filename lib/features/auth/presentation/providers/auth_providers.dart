@@ -10,6 +10,7 @@ import 'package:can_i_eat_it/core/network/auth_interceptor.dart';
 import 'package:can_i_eat_it/core/network/dio_client.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/core/security/token_store.dart';
+import 'package:can_i_eat_it/core/symptom_outbox/symptom_outbox_bridge.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:can_i_eat_it/features/auth/data/services/apple_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/data/services/google_auth_service.dart';
@@ -151,7 +152,9 @@ class AuthController extends _$AuthController {
   @override
   Future<AuthSession?> build() async {
     _wireSessionExpiredSeam();
-    return ref.watch(authRepositoryProvider).currentSession();
+    final session = await ref.watch(authRepositoryProvider).currentSession();
+    if (session != null) await _syncSharedSession(session);
+    return session;
   }
 
   /// 카카오 계정으로 로그인하고 [SignInOutcome]을 반환한다.
@@ -165,6 +168,7 @@ class AuthController extends _$AuthController {
     final outcome = await ref.read(authRepositoryProvider).signInWithKakao();
     _applyOutcomeToState(outcome);
     if (outcome is Authenticated) {
+      await _syncSharedSession(outcome.session);
       // FCM 토큰 등록 — fire-and-forget(로그인 UX 블로킹 제거).
       // 실패해도 로그인 흐름을 막지 않는다(graceful).
       unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
@@ -189,6 +193,7 @@ class AuthController extends _$AuthController {
     final outcome = await ref.read(authRepositoryProvider).signInWithApple();
     _applyOutcomeToState(outcome);
     if (outcome is Authenticated) {
+      await _syncSharedSession(outcome.session);
       // FCM 토큰 등록 — fire-and-forget(로그인 UX 블로킹 제거).
       // 실패해도 로그인 흐름을 막지 않는다(graceful).
       unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
@@ -207,6 +212,7 @@ class AuthController extends _$AuthController {
     final outcome = await ref.read(authRepositoryProvider).signInWithGoogle();
     _applyOutcomeToState(outcome);
     if (outcome is Authenticated) {
+      await _syncSharedSession(outcome.session);
       unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
       await _hydrateSessionAfterAuth();
     }
@@ -248,6 +254,7 @@ class AuthController extends _$AuthController {
     final repo = ref.read(authRepositoryProvider);
     final outcome = await repo.recoverAccount(provider, idToken: idToken);
     state = AsyncValue.data(outcome.session);
+    await _syncSharedSession(outcome.session);
     // 복구 성공 후 세션이 생겼으므로 FCM 토큰 등록 — fire-and-forget.
     // 실패해도 복구 흐름을 막지 않는다(graceful).
     unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
@@ -315,6 +322,7 @@ class AuthController extends _$AuthController {
     // FCM 토큰 삭제 — authRepository.withdraw() 전(Bearer 유효 시점).
     // 실패해도 탈퇴 흐름을 막지 않는다(graceful).
     await ref.read(fcmLifecycleProvider).deleteToken();
+    await _purgeSymptomOutbox();
     await ref.read(authRepositoryProvider).withdraw();
     await ref.read(profileCacheProvider).clear();
     // 가이드 플래그 삭제 실패해도 탈퇴 완료는 막지 않는다
@@ -332,6 +340,7 @@ class AuthController extends _$AuthController {
     // FCM 토큰 삭제 — authRepository.logout() 전(Bearer 유효 시점).
     // 실패해도 로그아웃 흐름을 막지 않는다(graceful).
     await ref.read(fcmLifecycleProvider).deleteToken();
+    await _purgeSymptomOutbox();
     await ref.read(authRepositoryProvider).logout();
     await ref.read(profileCacheProvider).clear();
     state = const AsyncValue.data(null);
@@ -343,6 +352,7 @@ class AuthController extends _$AuthController {
   Future<void> signOut() async {
     // 오프라인: 서버 DELETE 불가, 구독만 정리.
     ref.read(fcmLifecycleProvider).cancelRefreshSubscription();
+    await _purgeSymptomOutbox();
     await ref.read(authRepositoryProvider).signOut();
     await ref.read(profileCacheProvider).clear();
     state = const AsyncValue.data(null);
@@ -382,5 +392,27 @@ class AuthController extends _$AuthController {
   /// 세션을 null 로 전이시켜 sessionStatusProvider 가 unauthenticated 를 반환하도록 한다.
   void _onSessionExpired() {
     state = const AsyncValue.data(null);
+    unawaited(_purgeSymptomOutbox());
+  }
+
+  /// 로그인/복구/부트스트랩 후 access token과 주체를 Extension에 제공한다.
+  /// 실패는 다음 ready/resume에서 보완하며 인증 성공 자체를 rollback하지 않는다.
+  Future<void> _syncSharedSession(AuthSession session) async {
+    try {
+      final token = await ref.read(tokenStoreProvider).readAccessToken();
+      if (token == null) return;
+      await ref.read(symptomOutboxBridgeProvider).syncSharedSession(
+            accessToken: token,
+            subjectId: session.userId,
+          );
+    } catch (_) {}
+  }
+
+  Future<void> _purgeSymptomOutbox() async {
+    try {
+      await ref.read(symptomOutboxBridgeProvider).purgeAndCancelForLogout();
+    } catch (_) {
+      // native cleanup marker가 다음 app/extension lifecycle에서 이어서 처리한다.
+    }
   }
 }

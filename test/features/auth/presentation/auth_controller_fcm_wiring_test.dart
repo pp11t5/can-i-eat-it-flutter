@@ -9,6 +9,8 @@ import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/core/push/fcm_repository.dart';
 import 'package:can_i_eat_it/core/push/fcm_token_service.dart';
+import 'package:can_i_eat_it/core/security/token_store.dart';
+import 'package:can_i_eat_it/core/symptom_outbox/symptom_outbox_bridge.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/consent.dart';
@@ -73,6 +75,39 @@ class SpyFcmLifecycle extends FcmLifecycle {
   void cancelRefreshSubscription() {
     // signOut 경로 — 서버 호출 없음, 순서 기록 불필요.
   }
+}
+
+class _SpySymptomOutboxBridge implements SymptomOutboxBridge {
+  final List<(String accessToken, String subjectId)> synced = [];
+
+  @override
+  Future<void> acknowledge(
+      {required String clientRecordId, required String claimToken}) async {}
+  @override
+  Future<List<PendingSymptomRecord>> claimPending({int limit = 10}) async =>
+      const [];
+  @override
+  Future<void> clearSharedSession() async {}
+  @override
+  Future<void> purgeAndCancelForLogout() async {}
+  @override
+  Future<void> quarantine(
+      {required String clientRecordId,
+      required String claimToken,
+      required String reasonCode,
+      int? httpStatus,
+      String? serverCode}) async {}
+  @override
+  Future<void> release(
+      {required String clientRecordId,
+      required String claimToken,
+      String? errorClass}) async {}
+  @override
+  Future<void> syncSharedSession(
+          {required String accessToken, required String subjectId}) async =>
+      synced.add((accessToken, subjectId));
+  @override
+  Future<void> updateSharedAccessToken(String accessToken) async {}
 }
 
 /// Spy AuthRepository — logout/withdraw 호출 시 순서 로그에 기록한다.
@@ -167,7 +202,11 @@ class _NoopAnalyticsService implements AnalyticsService {
   ProviderContainer container,
   SpyFcmLifecycle fcmSpy,
   List<String> calls,
-}) makeSpyContainer({required MockAuthRepository mockRepo}) {
+}) makeSpyContainer({
+  required MockAuthRepository mockRepo,
+  TokenStore? tokenStore,
+  SymptomOutboxBridge? symptomOutboxBridge,
+}) {
   final spyFcm = SpyFcmLifecycle();
   final spyAuth = _SpyAuthRepository(calls: spyFcm.calls, delegate: mockRepo);
 
@@ -176,6 +215,9 @@ class _NoopAnalyticsService implements AnalyticsService {
       authRepositoryProvider.overrideWithValue(spyAuth),
       analyticsServiceProvider.overrideWithValue(_NoopAnalyticsService()),
       fcmLifecycleProvider.overrideWithValue(spyFcm),
+      if (tokenStore != null) tokenStoreProvider.overrideWithValue(tokenStore),
+      if (symptomOutboxBridge != null)
+        symptomOutboxBridgeProvider.overrideWithValue(symptomOutboxBridge),
       profileCacheProvider.overrideWithValue(InMemoryProfileCache()),
       // TimelineGuideStore: secure_storage 플러그인 차단 (withdraw 경로).
       timelineGuideStoreProvider.overrideWithValue(
@@ -196,6 +238,23 @@ void main() {
   // ① Authenticated 로그인 → registerCurrentToken 1회 호출
   // -------------------------------------------------------------------------
   group('AuthController FCM 배선 — 로그인 register 트리거', () {
+    test('Google 로그인은 access token과 userId를 공유 Keychain bridge로 동기화한다',
+        () async {
+      final bridge = _SpySymptomOutboxBridge();
+      final tokens = InMemoryTokenStore();
+      await tokens.writeTokens(access: 'access-google', refresh: 'refresh');
+      final (:container, fcmSpy: _, calls: _) = makeSpyContainer(
+        mockRepo: MockAuthRepository.existing(onboarded: true),
+        tokenStore: tokens,
+        symptomOutboxBridge: bridge,
+      );
+
+      await container.read(authControllerProvider.future);
+      await container.read(authControllerProvider.notifier).signInWithGoogle();
+
+      expect(bridge.synced.last, ('access-google', 'mock-existing'));
+    });
+
     test('signInWithKakao: Authenticated 결과 → registerCurrentToken 정확히 1회',
         () async {
       final (:container, fcmSpy: fcmSpy, calls: _) = makeSpyContainer(

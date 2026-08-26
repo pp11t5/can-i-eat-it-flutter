@@ -30,19 +30,19 @@ void main() {
   test('오늘 single 판정을 권장/주의/위험으로 센다', () async {
     final meals = MockMealRepository(
       initialTimeline: [
-        TimelineItem.single(
+        const TimelineItem.single(
           mealRecordId: 'm1',
           mealRecordDateTime: '2026-08-24T08:00:00+09:00',
           mealFoodName: '샐러드',
           grade: VerdictLevel.recommend,
         ),
-        TimelineItem.single(
+        const TimelineItem.single(
           mealRecordId: 'm2',
           mealRecordDateTime: '2026-08-24T12:00:00+09:00',
           mealFoodName: '비빔밥',
           grade: VerdictLevel.caution,
         ),
-        TimelineItem.single(
+        const TimelineItem.single(
           mealRecordId: 'm3',
           mealRecordDateTime: '2026-08-24T19:00:00+09:00',
           mealFoodName: '라면',
@@ -62,7 +62,7 @@ void main() {
   test('미기록 후보가 있으면 가장 최근 식사로 증상 유도를 만든다', () async {
     final meals = MockMealRepository(
       initialTimeline: [
-        TimelineItem.single(
+        const TimelineItem.single(
           mealRecordId: 'm1',
           mealRecordDateTime: '2026-08-24T12:00:00+09:00',
           mealFoodName: '비빔밥',
@@ -70,9 +70,9 @@ void main() {
         ),
       ],
       initialCandidates: [
-        MealCandidatesDay(
+        const MealCandidatesDay(
           date: '2026-08-24',
-          meals: const [
+          meals: [
             MealCandidate(
               mealRecordId: 'm1',
               representativeFoodName: '비빔밥',
@@ -94,12 +94,12 @@ void main() {
     final home = MockHomeRepository(streak: 12);
     final meals = MockMealRepository(
       initialTimeline: [
-        TimelineItem.single(
+        const TimelineItem.single(
           mealRecordId: 'm1',
           mealRecordDateTime: '2026-08-24T12:00:00+09:00',
           mealFoodName: '라면',
           grade: VerdictLevel.risk,
-          connectedSymptoms: const ConnectedSymptoms(
+          connectedSymptoms: ConnectedSymptoms(
             symptomId: 's1',
             symptomState: SymptomState.uncomfortable,
             afterMealMinutes: 120,

@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/core/push/push_payload_resolver.dart';
@@ -16,8 +15,10 @@ void main() {
         PushPayloadResolver.isAndroidRichPushType('post_meal_delayed_bulk'),
         isFalse,
       );
-      expect(PushPayloadResolver.isAndroidRichPushType('daily_record'), isFalse);
-      expect(PushPayloadResolver.isAndroidRichPushType('weekly_report'), isFalse);
+      expect(
+          PushPayloadResolver.isAndroidRichPushType('daily_record'), isFalse);
+      expect(
+          PushPayloadResolver.isAndroidRichPushType('weekly_report'), isFalse);
       expect(PushPayloadResolver.isAndroidRichPushType(null), isFalse);
     });
   });
