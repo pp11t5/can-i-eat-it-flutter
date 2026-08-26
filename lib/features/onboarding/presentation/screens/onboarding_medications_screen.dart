@@ -15,7 +15,7 @@ import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart'
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_step_body.dart';
 
-/// 온보딩 Step 4/4: 알레르기 선택 본문. 복용약 입력은 마이페이지에서만.
+/// 온보딩 Step 4/4: 알레르기 선택 본문.
 ///
 /// 완료 버튼이 onboardingSubmitProvider.submit()을 호출하고
 /// [sessionStatus]가 [SessionStatus.ready]가 된 뒤에만 홈(/)으로 이동한다.
@@ -62,7 +62,7 @@ class OnboardingMedicationsScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '알레르기와 복용 중인 약을\n알려주세요',
+                              '알레르기가 있나요?',
                               style: AppTextStyles.header1Bold.copyWith(
                                 color: AppColors.textPrimary,
                               ),

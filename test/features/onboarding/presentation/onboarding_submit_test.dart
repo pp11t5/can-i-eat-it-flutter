@@ -26,7 +26,8 @@ class SpyAnalyticsService implements AnalyticsService {
   }
 
   @override
-  Future<void> logEvent(String name, {Map<String, Object?> params = const {}}) async {
+  Future<void> logEvent(String name,
+      {Map<String, Object?> params = const {}}) async {
     calls.add((name: name, params: params));
   }
 }
@@ -47,7 +48,6 @@ class ThrowingHealthProfileRepository implements HealthProfileRepository {
   @override
   Future<void> updateHealthInfo({
     required List<String> allergies,
-    required List<String> medications,
   }) async {}
 
   @override
@@ -108,7 +108,8 @@ void main() {
       await container.read(onboardingSubmitProvider.notifier).submit();
 
       expect(
-        spy.calls.any((c) => c.name == FunnelEvent.onboardingCompleted.eventName),
+        spy.calls
+            .any((c) => c.name == FunnelEvent.onboardingCompleted.eventName),
         isTrue,
       );
     });
@@ -183,7 +184,8 @@ void main() {
       await container.read(onboardingSubmitProvider.notifier).submit();
 
       expect(
-        spy.calls.any((c) => c.name == FunnelEvent.onboardingCompleted.eventName),
+        spy.calls
+            .any((c) => c.name == FunnelEvent.onboardingCompleted.eventName),
         isFalse,
       );
     });

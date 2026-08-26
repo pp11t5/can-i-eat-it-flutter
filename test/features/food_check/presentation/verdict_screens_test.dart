@@ -368,7 +368,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('트리거/증상 분석'), findsOneWidget);
-      expect(find.text('알레르기/복용약 분석'), findsOneWidget);
+      expect(find.text('알레르기 분석'), findsOneWidget);
     });
 
     testWidgets('stateRecords total==0이면 기록 섹션 숨김', (tester) async {

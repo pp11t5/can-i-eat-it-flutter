@@ -30,7 +30,6 @@ class _ThrowingHealthProfileRepository implements HealthProfileRepository {
   @override
   Future<void> updateHealthInfo({
     required List<String> allergies,
-    required List<String> medications,
   }) async {}
 
   @override

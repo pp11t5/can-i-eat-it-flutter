@@ -14,11 +14,14 @@ part 'health_profile_dto.g.dart';
 abstract class HealthProfileDto with _$HealthProfileDto {
   const factory HealthProfileDto({
     @Default(<String>[]) List<String> conditions,
-    @Default(<String>[]) @JsonKey(name: 'symptom_frequency') List<String> symptomFrequency,
+    @Default(<String>[])
+    @JsonKey(name: 'symptom_frequency')
+    List<String> symptomFrequency,
     @Default(false) bool diagnosed,
-    @Default(<String>[]) @JsonKey(name: 'trigger_foods') List<String> triggerFoods,
+    @Default(<String>[])
+    @JsonKey(name: 'trigger_foods')
+    List<String> triggerFoods,
     @JsonKey(name: 'custom_triggers') String? customTriggers,
-    @Default(<String>[]) List<String> medications,
     @Default(<String>[]) List<String> allergies,
   }) = _HealthProfileDto;
 
@@ -38,7 +41,6 @@ abstract class HealthProfileDto with _$HealthProfileDto {
         diagnosed: diagnosed,
         triggerFoods: triggerFoods,
         customTriggers: customTriggers,
-        medications: medications,
         allergies: allergies,
       );
 
@@ -49,7 +51,6 @@ abstract class HealthProfileDto with _$HealthProfileDto {
         diagnosed: entity.diagnosed,
         triggerFoods: entity.triggerFoods,
         customTriggers: entity.customTriggers,
-        medications: entity.medications,
         allergies: entity.allergies,
       );
 }

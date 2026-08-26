@@ -187,17 +187,16 @@ void main() {
       expect(find.text('미설정'), findsOneWidget);
     });
 
-    testWidgets('알레르기 · 복용약 행이 표시되고 2개 이상이면 "첫항목 외 N개" 형식이다',
-        (tester) async {
-      // sampleGerd: allergies=[갑각류], medications=[omeprazole] → "갑각류 외 1개"
+    testWidgets('알레르기 행이 표시된다', (tester) async {
+      // sampleGerd: allergies=[갑각류]
       await tester.pumpWidget(_buildProfileInfoScreen(withProfile: true));
       await tester.pumpAndSettle();
 
-      expect(find.text('알레르기 · 복용약'), findsOneWidget);
-      expect(find.text('갑각류 외 1개'), findsOneWidget);
+      expect(find.text('알레르기'), findsOneWidget);
+      expect(find.text('갑각류'), findsOneWidget);
     });
 
-    testWidgets('알레르기·복용약이 없으면 "없음"이 표시된다', (tester) async {
+    testWidgets('알레르기가 없으면 "없음"이 표시된다', (tester) async {
       await tester.pumpWidget(_buildProfileInfoScreen(withProfile: false));
       await tester.pumpAndSettle();
 

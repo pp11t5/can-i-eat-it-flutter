@@ -37,7 +37,7 @@ class HealthProfileRepositoryImpl implements HealthProfileRepository {
   /// 폐기하지 않음). 두 응답 모두 `result:null`이면 온보딩 미완료로 간주해 null을 반환한다.
   ///
   /// 캐시 병합은 기존 캐시(symptomFrequency/triggerFoods/customTriggers/diagnosed 등)를
-  /// 베이스로 conditions/allergies/medications만 교체한다 — 신규 3필드 엔티티로 캐시를
+  /// 베이스로 conditions/allergies만 교체한다 — 신규 필드 엔티티로 캐시를
   /// 통째로 덮어써 다른 필드를 소실시키지 않는다.
   ///
   /// [DioException]·[FormatException] 등 조회/파싱 오류는 throw 하지 않고 [ProfileCache]
@@ -86,7 +86,6 @@ class HealthProfileRepositoryImpl implements HealthProfileRepository {
           ? [profileDetail.disease.toConditionCode()]
           : base.conditions,
       allergies: allergies,
-      medications: healthInfo?.medications ?? base.medications,
     );
 
     // 다음 오프라인 폴백을 위해 최신 값을 캐시에 반영.
@@ -94,12 +93,12 @@ class HealthProfileRepositoryImpl implements HealthProfileRepository {
     return merged;
   }
 
-  /// 편집 화면 전용 — 캐시 폴백 없이 서버 최신 allergies/medications를 조회한다.
+  /// 편집 화면 전용 — 캐시 폴백 없이 서버 최신 allergies를 조회한다.
   ///
   /// [currentProfile]과 달리 실패를 그대로 throw한다(unwrap 사용, unwrapOrNull 금지) —
   /// 편집 화면이 stale 캐시를 진실로 오인해 PATCH로 알레르기 정보를 덮어써 소실시키는
   /// 것을 방지한다(pr-review 의료안전 ②-1). conditions 등 다른 필드는 기본값으로 채운다
-  /// (이 메서드는 allergies/medications 전용).
+  /// (이 메서드는 allergies 전용).
   @override
   Future<HealthProfile> fetchMedicalInfoStrict() async {
     try {
@@ -111,7 +110,6 @@ class HealthProfileRepositoryImpl implements HealthProfileRepository {
       // 서버는 displayName(한글) 목록을 반환한다. 칩 선택·PATCH 는 code 기준.
       return HealthProfile(
         allergies: normalizeAllergyCodes(dto.allergies),
-        medications: dto.medications,
       );
     } on DioException catch (e) {
       throw FailureMapper.fromDioException(e);
@@ -151,32 +149,28 @@ class HealthProfileRepositoryImpl implements HealthProfileRepository {
 
   /// 서버 PATCH 성공 후에만 캐시를 갱신한다 (낙관적 갱신 금지, [submitProfile]과 동일 원칙).
   ///
-  /// [submitProfile]과 달리 allergens/medications 두 필드만 전송한다
-  /// (allergy_med_edit_screen의 전체 프로필 재제출 워크어라운드 대체, W7).
+  /// [submitProfile]과 달리 allergens만 전송한다.
   @override
   Future<void> updateHealthInfo({
     required List<String> allergies,
-    required List<String> medications,
   }) async {
     // 방어적 정규화 — 한글 displayName이 섞여 있으면 COMMON400_2(enum 파싱 실패).
     final allergenCodes = normalizeAllergyCodes(allergies);
     try {
       final dto = MedicalInfoUpdateRequestDto(
         allergens: allergenCodes,
-        medications: medications,
       );
-      // TODO(be-confirm): PATCH가 allergens/medications 배열을 전량 교체함을
+      // TODO(be-confirm): PATCH가 allergens 배열을 전량 교체함을
       // 서버 계약으로 확인(부분 병합 semantics일 경우 이 클라이언트 가정이 깨짐).
       final response = await _dio.patch<dynamic>(
         ApiEndpoints.myPageHealthInfo,
         data: dto.toJson(),
       );
       unwrapVoid(response);
-      // 캐시에 반영된 이전 프로필이 있으면 allergies/medications만 교체, 없으면 최소 필드만 구성.
+      // 캐시에 반영된 이전 프로필이 있으면 allergies만 교체, 없으면 최소 필드만 구성.
       final cached = await _cache.read();
       final next = (cached ?? const HealthProfile()).copyWith(
         allergies: allergenCodes,
-        medications: medications,
       );
       await _cache.write(next);
     } on DioException catch (e) {

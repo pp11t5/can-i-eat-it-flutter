@@ -4,7 +4,7 @@ part 'health_profile.freezed.dart';
 
 /// 사용자 건강 프로필 엔티티.
 ///
-/// 질환·증상빈도·트리거·복용약·알레르기를 담는다.
+/// 질환·증상빈도·트리거·알레르기를 담는다.
 /// onboarding / mypage / food_check 피처가 이 엔티티를 사용한다.
 @freezed
 abstract class HealthProfile with _$HealthProfile {
@@ -24,9 +24,6 @@ abstract class HealthProfile with _$HealthProfile {
     /// 사용자 직접 입력 트리거. 예: '탄산음료'.
     String? customTriggers,
 
-    /// 복용약 목록. 예: ['omeprazole'].
-    @Default(<String>[]) List<String> medications,
-
     /// 알레르기 목록. 예: ['crustacean']. allergyOptions 카탈로그 코드 기준.
     @Default(<String>[]) List<String> allergies,
   }) = _HealthProfile;
@@ -37,14 +34,13 @@ abstract class HealthProfile with _$HealthProfile {
 
   /// 온보딩 완료 데모·Mock·골든 테스트용 대표 샘플.
   ///
-  /// GERD 진단 완료, 주요 트리거·복용약·알레르기 포함.
+  /// GERD 진단 완료, 주요 트리거·알레르기 포함.
   factory HealthProfile.sampleGerd() => const HealthProfile(
         conditions: ['GERD'],
         symptomFrequency: ['heartburn_reflux', 'post_meal_cough'],
         diagnosed: true,
         triggerFoods: ['spicy', 'caffeine'],
         customTriggers: '탄산음료',
-        medications: ['omeprazole'],
         allergies: ['crustacean'],
       );
 }

@@ -34,7 +34,7 @@ typedef HealthProfileRepositoryRef
     = AutoDisposeProviderRef<HealthProfileRepository>;
 String _$medicalInfoStrictHash() => r'94e7c3ba02ec4f7dc2985547cdf4e786b9846027';
 
-/// 알레르기·복용약 편집 화면 전용 — 캐시 폴백 없이 서버 최신 상태를 조회한다.
+/// 알레르기 편집 화면 전용 — 캐시 폴백 없이 서버 최신 상태를 조회한다.
 ///
 /// [HealthProfileController]([currentProfile] 기반)와 달리 실패 시 에러를 그대로
 /// 전파한다 — stale 데이터 위에서 편집·PATCH하는 것을 막기 위함(의료안전, pr-review ②-1).
@@ -81,7 +81,7 @@ final onboardedStatusProvider = AutoDisposeFutureProvider<bool>.internal(
 // ignore: unused_element
 typedef OnboardedStatusRef = AutoDisposeFutureProviderRef<bool>;
 String _$healthProfileControllerHash() =>
-    r'6a33bc45677410f2803c61a8d3d180009ff54467';
+    r'd8329f9535c701b1f442da298c5a2a3ef00dca61';
 
 /// 건강 프로필 상태 컨트롤러 (AsyncNotifier).
 ///

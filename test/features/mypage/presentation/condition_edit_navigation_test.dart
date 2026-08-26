@@ -75,7 +75,7 @@ void main() {
       expect(find.byType(ProfileInfoScreen), findsOneWidget);
       expect(find.byType(ConditionEditScreen), findsNothing);
 
-      // 수정 버튼 3개: 닉네임 / 건강 고민 / 알레르기·복용약 — 건강 고민은 두 번째
+      // 수정 버튼 3개: 닉네임 / 건강 고민 / 알레르기 — 건강 고민은 두 번째
       await tester.tap(find.text('수정').at(1));
       await tester.pumpAndSettle();
 

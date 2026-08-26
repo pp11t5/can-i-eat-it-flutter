@@ -1263,7 +1263,7 @@ mixin _$EatVerdict {
   String get personalTitle;
 
   /// 분석 항목 2종.
-  /// [0] = 트리거/증상 분석, [1] = 알레르기/복용약 분석.
+  /// [0] = 트리거/증상 분석, [1] = 알레르기 분석.
   List<VerdictItem> get items;
 
   /// 연관 섭취 기록 요약. 기록 없으면 VerdictStateRecords(total:0).
@@ -1648,11 +1648,11 @@ class _EatVerdict implements EatVerdict {
   final String personalTitle;
 
   /// 분석 항목 2종.
-  /// [0] = 트리거/증상 분석, [1] = 알레르기/복용약 분석.
+  /// [0] = 트리거/증상 분석, [1] = 알레르기 분석.
   final List<VerdictItem> _items;
 
   /// 분석 항목 2종.
-  /// [0] = 트리거/증상 분석, [1] = 알레르기/복용약 분석.
+  /// [0] = 트리거/증상 분석, [1] = 알레르기 분석.
   @override
   @JsonKey()
   List<VerdictItem> get items {

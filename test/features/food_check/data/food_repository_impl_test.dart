@@ -69,7 +69,10 @@ Map<String, dynamic> _textJudgmentJson({
       'personalTitle': personalTitle,
       'items': [
         {'emphasis': '트리거/증상 분석', 'body': '역류 트리거에 해당하지 않아요.'},
-        {'emphasis': '알레르기/복용약 분석', 'body': '알레르기 충돌 없어요.'},
+        {
+          'emphasis': '알레르기 분석',
+          'body': '입력한 음식 정보에서 확인된 알레르겐이 없어요.',
+        },
       ],
       'stateRecords': {'total': 0, 'records': <dynamic>[]},
       'substitutes': <dynamic>[],
@@ -90,8 +93,14 @@ Map<String, dynamic> _idJudgmentJson({
       'grade': grade,
       'personalTitle': personalTitle,
       'items': [
-        {'emphasis': '트리거/증상 분석', 'body': '카페인이 위산 분비를 촉진해요.'},
-        {'emphasis': '알레르기/복용약 분석', 'body': '복용약 충돌 없어요.'},
+        {
+          'emphasis': '트리거/증상 분석',
+          'body': '카페인이 들어 있어요. 사람마다 불편함이 다를 수 있어요.',
+        },
+        {
+          'emphasis': '알레르기 분석',
+          'body': '입력한 음식 정보에서 확인된 알레르겐이 없어요.',
+        },
       ],
       'stateRecords': {
         'total': 2,

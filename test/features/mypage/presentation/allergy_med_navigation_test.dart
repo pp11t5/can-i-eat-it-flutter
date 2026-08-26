@@ -68,7 +68,7 @@ Widget _buildWithRouter() {
 
 void main() {
   group('ProfileInfoScreen → AllergyMedEditScreen 네비게이션', () {
-    testWidgets('알레르기·복용약 "수정" 버튼 탭 → AllergyMedEditScreen으로 push됨',
+    testWidgets('알레르기 "수정" 버튼 탭 → AllergyMedEditScreen으로 push됨',
         (tester) async {
       await tester.pumpWidget(_buildWithRouter());
       await tester.pumpAndSettle();
@@ -77,7 +77,7 @@ void main() {
       expect(find.byType(ProfileInfoScreen), findsOneWidget);
       expect(find.byType(AllergyMedEditScreen), findsNothing);
 
-      // 라벨 탭이 아니라 마지막 "수정" 버튼(알레르기·복용약)만 탭
+      // 라벨 탭이 아니라 마지막 "수정" 버튼(알레르기)만 탭
       await tester.tap(find.text('수정').last);
       await tester.pumpAndSettle();
 

@@ -12,7 +12,6 @@ part 'medical_info_dto.g.dart';
 abstract class MedicalInfoDto with _$MedicalInfoDto {
   const factory MedicalInfoDto({
     @Default(<String>[]) List<String> allergies,
-    @Default(<String>[]) List<String> medications,
   }) = _MedicalInfoDto;
 
   factory MedicalInfoDto.fromJson(Map<String, dynamic> json) =>
@@ -31,7 +30,6 @@ abstract class MedicalInfoDto with _$MedicalInfoDto {
 abstract class MedicalInfoUpdateRequestDto with _$MedicalInfoUpdateRequestDto {
   const factory MedicalInfoUpdateRequestDto({
     @Default(<String>[]) List<String> allergens,
-    @Default(<String>[]) List<String> medications,
   }) = _MedicalInfoUpdateRequestDto;
 
   factory MedicalInfoUpdateRequestDto.fromJson(Map<String, dynamic> json) =>

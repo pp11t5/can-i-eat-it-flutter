@@ -54,8 +54,14 @@ Map<String, dynamic> _idJudgmentJson({
       'personalTitle': personalTitle,
       'items': items ??
           [
-            _itemJson(emphasis: '트리거/증상 분석', body: '카페인이 위산 분비를 촉진해요.'),
-            _itemJson(emphasis: '알레르기/복용약 분석', body: '복용약 충돌 없어요.'),
+            _itemJson(
+              emphasis: '트리거/증상 분석',
+              body: '카페인이 들어 있어요. 사람마다 불편함이 다를 수 있어요.',
+            ),
+            _itemJson(
+              emphasis: '알레르기 분석',
+              body: '입력한 음식 정보에서 확인된 알레르겐이 없어요.',
+            ),
           ],
       'stateRecords': stateRecords ?? _stateRecordsJson(),
       'substitutes': substitutes ?? [_substituteJson()],
@@ -77,7 +83,10 @@ Map<String, dynamic> _textJudgmentJson({
       'items': items ??
           [
             _itemJson(emphasis: '트리거/증상 분석', body: '역류 트리거 없어요.'),
-            _itemJson(emphasis: '알레르기/복용약 분석', body: '알레르기 없어요.'),
+            _itemJson(
+              emphasis: '알레르기 분석',
+              body: '입력한 음식 정보에서 확인된 알레르겐이 없어요.',
+            ),
           ],
       'stateRecords': stateRecords ?? _stateRecordsJson(),
       'substitutes': substitutes ?? <Map<String, dynamic>>[],
@@ -104,7 +113,7 @@ void main() {
       final dto = JudgmentResponseDto.fromJson(_idJudgmentJson());
       expect(dto.items.length, 2);
       expect(dto.items[0].emphasis, '트리거/증상 분석');
-      expect(dto.items[1].emphasis, '알레르기/복용약 분석');
+      expect(dto.items[1].emphasis, '알레르기 분석');
     });
 
     test('stateRecords 역직렬화', () {
@@ -188,7 +197,7 @@ void main() {
       final entity = JudgmentResponseDto.fromJson(_idJudgmentJson()).toEntity();
       expect(entity.items.length, 2);
       expect(entity.items[0].emphasis, '트리거/증상 분석');
-      expect(entity.items[1].emphasis, '알레르기/복용약 분석');
+      expect(entity.items[1].emphasis, '알레르기 분석');
     });
 
     test('stateRecords total·records 매핑', () {
