@@ -12,6 +12,7 @@ import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
+import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
 import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/providers/symptom_write_controller.dart';
@@ -210,8 +211,10 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
   Future<void> _onTimeTap() async {
     final result = await Navigator.of(context).push<DateTime>(
       MaterialPageRoute(
-        builder: (_) =>
-            SymptomTimePickScreen(initialDateTime: _formState.occurredAt),
+        builder: (_) => SymptomTimePickScreen(
+          initialDateTime: _formState.occurredAt,
+          joinDate: ref.read(authControllerProvider).valueOrNull?.createdAt,
+        ),
       ),
     );
     if (result != null) {
