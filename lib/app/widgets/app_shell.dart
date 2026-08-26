@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
+import 'package:can_i_eat_it/features/home_widget/data/home_widget_providers.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_icon_sizes.dart';
@@ -47,6 +48,7 @@ class AppShell extends ConsumerWidget {
             if (index == 0) {
               ref.invalidate(recentMealsProvider);
               ref.invalidate(unrecordedMealCountProvider);
+              scheduleHomeWidgetSync(ref.read(homeWidgetControllerProvider));
             }
             navigationShell.goBranch(
               index,

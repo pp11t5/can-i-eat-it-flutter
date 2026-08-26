@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../symptom_outbox/symptom_outbox_bridge.dart';
+import 'native_auth_token_bridge.dart';
 
 part 'token_store.g.dart';
 
@@ -45,21 +47,51 @@ abstract interface class TokenStore {
 // ---------------------------------------------------------------------------
 
 /// [flutter_secure_storage] 기반 프로덕션 구현.
+///
+/// Android는 [androidBridge]가 있으면 EncryptedSharedPreferences를 단일 원천으로
+/// 쓰고, 기존 FSS 값은 최초 읽기 때 1회 이전한다. 약관 pending은 FSS에 남긴다.
 class FlutterSecureStorageTokenStore implements TokenStore {
-  FlutterSecureStorageTokenStore({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+  FlutterSecureStorageTokenStore({
+    FlutterSecureStorage? storage,
+    this.androidBridge,
+  }) : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;
+
+  /// Android 네이티브 토큰 저장소. null이면 FSS만 사용(iOS·테스트).
+  final NativeAuthTokenBridge? androidBridge;
 
   static const _keyAccess = 'auth.access_token';
   static const _keyRefresh = 'auth.refresh_token';
   static const _keyPendingConsentUserId = 'auth.pending_consent_user_id';
 
   @override
-  Future<String?> readAccessToken() => _storage.read(key: _keyAccess);
+  Future<String?> readAccessToken() async {
+    final android = androidBridge;
+    if (android != null) {
+      try {
+        await _migrateLegacyTokens(android);
+        return await android.readAccessToken();
+      } catch (e) {
+        debugPrint('[AuthToken] android readAccess failed: $e');
+      }
+    }
+    return _storage.read(key: _keyAccess);
+  }
 
   @override
-  Future<String?> readRefreshToken() => _storage.read(key: _keyRefresh);
+  Future<String?> readRefreshToken() async {
+    final android = androidBridge;
+    if (android != null) {
+      try {
+        await _migrateLegacyTokens(android);
+        return await android.readRefreshToken();
+      } catch (e) {
+        debugPrint('[AuthToken] android readRefresh failed: $e');
+      }
+    }
+    return _storage.read(key: _keyRefresh);
+  }
 
   @override
   Future<String?> readPendingConsentUserId() =>
@@ -70,6 +102,21 @@ class FlutterSecureStorageTokenStore implements TokenStore {
     required String access,
     required String refresh,
   }) async {
+    final android = androidBridge;
+    if (android != null) {
+      try {
+        await android.writeTokens(access: access, refresh: refresh);
+        try {
+          await _storage.delete(key: _keyAccess);
+          await _storage.delete(key: _keyRefresh);
+        } catch (_) {
+          // 레거시 FSS가 없어도 네이티브 기록이 성공이면 충분하다.
+        }
+        return;
+      } catch (e) {
+        debugPrint('[AuthToken] android write failed, FSS fallback: $e');
+      }
+    }
     await _storage.write(key: _keyAccess, value: access);
     await _storage.write(key: _keyRefresh, value: refresh);
   }
@@ -84,10 +131,57 @@ class FlutterSecureStorageTokenStore implements TokenStore {
 
   @override
   Future<void> clear() async {
+    final android = androidBridge;
+    if (android != null) {
+      try {
+        await android.clearTokens();
+      } catch (e) {
+        debugPrint('[AuthToken] android clear failed: $e');
+      }
+    }
     await _storage.delete(key: _keyAccess);
     await _storage.delete(key: _keyRefresh);
     await clearConsentPending();
   }
+
+  Future<void> _migrateLegacyTokens(NativeAuthTokenBridge android) async {
+    try {
+      await migrateLegacyTokensIfNeeded(
+        android: android,
+        readLegacyAccess: () => _storage.read(key: _keyAccess),
+        readLegacyRefresh: () => _storage.read(key: _keyRefresh),
+        deleteLegacyTokens: () async {
+          await _storage.delete(key: _keyAccess);
+          await _storage.delete(key: _keyRefresh);
+        },
+      );
+    } catch (e) {
+      debugPrint('[AuthToken] migrate skipped: $e');
+    }
+  }
+}
+
+/// FSS에만 있던 세션을 Android 네이티브 저장소로 1회 복사한다.
+///
+/// 네이티브에 이미 access가 있으면 no-op.
+@visibleForTesting
+Future<void> migrateLegacyTokensIfNeeded({
+  required NativeAuthTokenBridge android,
+  required Future<String?> Function() readLegacyAccess,
+  required Future<String?> Function() readLegacyRefresh,
+  required Future<void> Function() deleteLegacyTokens,
+}) async {
+  final existing = await android.readAccessToken();
+  if (existing != null && existing.isNotEmpty) return;
+
+  final access = await readLegacyAccess();
+  final refresh = await readLegacyRefresh();
+  if (access == null || access.isEmpty || refresh == null || refresh.isEmpty) {
+    return;
+  }
+
+  await android.writeTokens(access: access, refresh: refresh);
+  await deleteLegacyTokens();
 }
 
 /// Primary 토큰 저장소를 정본으로 유지하면서 iOS Extension용 access token만
@@ -194,6 +288,10 @@ class InMemoryTokenStore implements TokenStore {
 /// 테스트에서는 `ProviderContainer(overrides: [tokenStoreProvider.overrideWithValue(...)])` 로 교체한다.
 @riverpod
 TokenStore tokenStore(Ref ref) => MirroringTokenStore(
-      FlutterSecureStorageTokenStore(),
+      FlutterSecureStorageTokenStore(
+        androidBridge: defaultTargetPlatform == TargetPlatform.android
+            ? const MethodChannelAuthTokenBridge()
+            : null,
+      ),
       ref.watch(symptomOutboxBridgeProvider),
     );

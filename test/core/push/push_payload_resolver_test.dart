@@ -14,6 +14,31 @@ void main() {
       expect(destination!.location, '/symptom/record?mealRecordId=meal-123');
     });
 
+    test('리치 푸시 강도·칩을 증상 작성 쿼리로 넘긴다', () {
+      final destination = PushPayloadResolver.fromData({
+        'type': 'post_meal',
+        'targetId': 'meal-123',
+        'intensityIndex': '1',
+        'symptomTypes': 'cough,acid_reflux',
+      });
+
+      expect(destination, isA<RecordSymptomPushDestination>());
+      final record = destination! as RecordSymptomPushDestination;
+      expect(record.intensityIndex, 1);
+      expect(record.symptomTypes, ['cough', 'acid_reflux']);
+      expect(
+        record.location,
+        Uri(
+          path: '/symptom/record',
+          queryParameters: {
+            'mealRecordId': 'meal-123',
+            'intensityIndex': '1',
+            'symptomTypes': 'cough,acid_reflux',
+          },
+        ).toString(),
+      );
+    });
+
     test('post_meal_delayed_single은 targetId로 증상 입력 목적지를 만든다', () {
       final destination = PushPayloadResolver.fromData({
         'type': 'post_meal_delayed_single',
@@ -96,6 +121,18 @@ void main() {
     test('잘못된 로컬 알림 payload는 무시한다', () {
       expect(PushPayloadResolver.fromLocalPayload('{invalid'), isNull);
       expect(PushPayloadResolver.fromLocalPayload('[]'), isNull);
+    });
+
+    test('isAndroidRichPushType은 식후 단건만 true다', () {
+      expect(PushPayloadResolver.isAndroidRichPushType('post_meal'), isTrue);
+      expect(
+        PushPayloadResolver.isAndroidRichPushType('post_meal_delayed_single'),
+        isTrue,
+      );
+      expect(
+        PushPayloadResolver.isAndroidRichPushType('weekly_report'),
+        isFalse,
+      );
     });
   });
 }

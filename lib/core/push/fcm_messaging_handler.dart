@@ -6,6 +6,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import 'push_payload_resolver.dart';
+
 // ---------------------------------------------------------------------------
 // 로컬 노티 플러그인 인스턴스 (패키지 전역 — UI isolate에서 1회 초기화)
 // ---------------------------------------------------------------------------
@@ -122,6 +124,11 @@ Future<void> initForegroundMessaging({
 }
 
 Future<void> _showForegroundNotification(RemoteMessage message) async {
+  if (PushPayloadResolver.isAndroidRichPushType(message.data['type'])) {
+    // 네이티브 리시버가 커스텀 1장만 띄운다. 로컬 알림을 추가하면 2장이 된다.
+    return;
+  }
+
   final notification = message.notification;
   if (notification == null || defaultTargetPlatform == TargetPlatform.iOS) {
     return;

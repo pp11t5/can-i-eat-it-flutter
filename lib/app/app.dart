@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:can_i_eat_it/features/home_widget/data/home_widget_providers.dart';
+
 import 'router/app_router.dart';
 import 'router/push_navigation_provider.dart';
 import '../core/symptom_outbox/symptom_outbox_retry_coordinator.dart';
@@ -47,6 +49,7 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     final router = ref.watch(appRouterProvider);
     // ProviderScope/GoRouter가 준비된 뒤 FCM 탭 수신을 연결한다.
     ref.watch(pushNavigationCoordinatorProvider);
+    ref.watch(homeWidgetCoordinatorProvider);
     ref.watch(symptomOutboxReadyListenerProvider);
     return MaterialApp.router(
       title: '먹어도 돼?',

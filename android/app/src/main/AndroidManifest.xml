@@ -1,4 +1,6 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- FCM: Android 13+ 알림 권한 (POST_NOTIFICATIONS) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
@@ -22,11 +24,45 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <!-- 위젯 커스텀 스킴은 MethodChannel로만 다룬다. GoRouter가
+                 canieatit://widget/... 를 경로로 받아 Page Not Found가 되지 않게 한다. -->
+            <meta-data
+              android:name="flutter_deeplinking_enabled"
+              android:value="false" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="canieatit" android:host="widget"/>
+            </intent-filter>
         </activity>
+        <receiver
+            android:name=".TodayMealWidgetProvider"
+            android:exported="true"
+            android:enabled="true"
+            android:label="@string/home_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/today_meal_widget_info"/>
+        </receiver>
+        <receiver
+            android:name=".TodayMealWidgetSmallProvider"
+            android:exported="true"
+            android:enabled="true"
+            android:label="@string/home_widget_small_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/today_meal_widget_small_info"/>
+        </receiver>
         <!-- Kakao 로그인 리다이렉트 처리. scheme(kakao<네이티브키>)은 플레이버별
              manifestPlaceholders(kakaoScheme)로 주입된다(prod/dev 분리). -->
         <activity
@@ -49,6 +85,20 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="default_high_importance" />
+        <receiver
+            android:name="io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingReceiver"
+            tools:node="remove" />
+        <receiver
+            android:name=".push.RichPushMessagingReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter android:priority="100">
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".push.RichPushActionReceiver"
+            android:exported="false" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
