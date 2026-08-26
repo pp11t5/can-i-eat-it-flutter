@@ -38,9 +38,7 @@ class SymptomOutboxRetryCoordinator {
               'mealRecordId': record.mealRecordId,
             },
           );
-          if (response.statusCode != null &&
-              response.statusCode! >= 200 &&
-              response.statusCode! < 300) {
+          if (_isSuccessfulEnvelope(response)) {
             await _bridge.acknowledge(
               clientRecordId: record.clientRecordId,
               claimToken: record.claimToken,
@@ -49,7 +47,9 @@ class SymptomOutboxRetryCoordinator {
             await _bridge.release(
               clientRecordId: record.clientRecordId,
               claimToken: record.claimToken,
-              errorClass: 'unexpected_status',
+              errorClass: _is2xx(response.statusCode)
+                  ? 'unsuccessful_envelope'
+                  : 'unexpected_status',
             );
           }
         } on DioException catch (error) {
@@ -78,6 +78,14 @@ class SymptomOutboxRetryCoordinator {
       _draining = false;
     }
   }
+
+  static bool _isSuccessfulEnvelope(Response<dynamic> response) =>
+      _is2xx(response.statusCode) &&
+      response.data is Map &&
+      (response.data as Map)['isSuccess'] == true;
+
+  static bool _is2xx(int? statusCode) =>
+      statusCode != null && statusCode >= 200 && statusCode < 300;
 }
 
 final symptomOutboxRetryCoordinatorProvider =

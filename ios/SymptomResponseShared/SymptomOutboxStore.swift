@@ -134,8 +134,7 @@ final class SymptomOutboxStore {
     }
   }
 
-  /// Runner가 background session task 목록을 읽은 뒤 호출한다. callback 유실로
-  /// task 없는 native claim이 남아도 10분 뒤 Flutter fallback으로 회수한다.
+  /// iOS가 Runner에 background session 이벤트를 넘긴 상태에서 실제 task 목록과 대조한다.
   func reconcileNativeTasks(_ taskDescriptions: Set<String>, now: Date = Date()) throws {
     try locked {
       for id in try records() {
@@ -149,6 +148,14 @@ final class SymptomOutboxStore {
         try writeManifest(manifest)
       }
     }
+  }
+
+  /// Runner의 일반 ready/resume 경로는 Extension 소유 background URLSession을 열지 않는다.
+  /// 완료 callback이 유실된 native claim은 10분 뒤 Flutter fallback으로 회수한다.
+  /// 이 시점에도 살아 있는 native task가 있다면 서버 idempotency 부재로 중복 전송될 수 있는
+  /// 기존 수용 리스크가 적용된다.
+  func recoverExpiredNativeClaimsForFlutterFallback(now: Date = Date()) throws {
+    try reconcileNativeTasks([], now: now)
   }
 
   func claimPendingForFlutter(currentSubjectId: String?, limit: Int = 10) throws -> [ClaimedSymptomRecord] {

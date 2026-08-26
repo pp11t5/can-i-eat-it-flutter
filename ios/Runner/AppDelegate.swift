@@ -9,7 +9,6 @@ import UserNotifications
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     registerSymptomCheckinCategory()
-    _ = try? SymptomNativeUploader.makeIfNeeded()
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
@@ -39,10 +38,11 @@ import UserNotifications
     completionHandler: @escaping () -> Void
   ) {
     guard let uploader = try? SymptomNativeUploader.makeIfNeeded(),
-          uploader.session.configuration.identifier == identifier else {
+          uploader.backgroundSessionID == identifier else {
       completionHandler()
       return
     }
+    SymptomNativeUploadLog.debug("Runner received background session handoff sessionID=\(identifier)")
     uploader.setBackgroundCompletionHandler(completionHandler)
   }
 

@@ -6,7 +6,6 @@ final class SymptomOutboxMethodChannel {
     let channel = FlutterMethodChannel(name: "canieatit/symptom_outbox", binaryMessenger: binaryMessenger)
     channel.setMethodCallHandler { call, result in
       do {
-        let uploader = try SymptomNativeUploader.makeIfNeeded()
         let config = try NativeNotificationConfig.load()
         let store = try SymptomOutboxStore(config: config)
         let keychain = SharedAccessTokenStore(config: config)
@@ -20,7 +19,10 @@ final class SymptomOutboxMethodChannel {
           } else {
             currentSubjectId = nil
           }
-          try uploader.reconcileBeforeFlutterClaim()
+          // Extension이 소유한 background URLSession에 Runner가 평상시 재연결하면
+          // NSURLErrorBackgroundSessionInUseByAnotherProcess(-996)가 발생한다.
+          // 따라서 ready/resume에서는 App Group 파일만 확인한다.
+          try store.recoverExpiredNativeClaimsForFlutterFallback()
           let records = try store.claimPendingForFlutter(currentSubjectId: currentSubjectId, limit: limit).compactMap { record -> [String: Any]? in
             guard let claim = record.manifest.claim else { return nil }
             return [
@@ -51,7 +53,7 @@ final class SymptomOutboxMethodChannel {
         case "clearSharedSession":
           try keychain.clear(); result(nil)
         case "purgeAndCancelForLogout":
-          try uploader.cancelAndPurge(); removeDeliveredCheckins(); result(nil)
+          try SymptomNativeUploader.makeIfNeeded().cancelAndPurge(); removeDeliveredCheckins(); result(nil)
         default: result(FlutterMethodNotImplemented)
         }
       } catch SymptomOutboxError.claimMismatch {

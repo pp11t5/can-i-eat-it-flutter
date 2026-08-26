@@ -553,7 +553,7 @@ protocol AppGroupOutboxStoring {
 
 ### 8.5 Flutter claim
 
-Runner는 claim 전에 Extension background session을 재생성하고 `getAllTasks`로 active `taskDescription` 집합을 얻는다. 그 다음 store가 다음 조건을 만족하는 record만 claim한다.
+Runner의 일반 ready/resume claim은 Extension background session을 재생성하거나 `getAllTasks`를 호출하지 않는다. Extension이 같은 session identifier를 소유한 동안 Runner가 연결하면 `NSURLErrorBackgroundSessionInUseByAnotherProcess(-996)`로 native upload가 실패하기 때문이다. 이 경로에서는 App Group Outbox 파일만 읽고 다음 조건을 만족하는 record를 claim한다.
 
 - `ownerSubjectId`가 현재 공유 Keychain 사용자와 동일하거나 `null`
 - state가 `pending`
@@ -565,15 +565,14 @@ Runner는 claim 전에 Extension background session을 재생성하고 `getAllTa
 
 ### 8.6 native reconciliation
 
-앱 launch/resume과 background callback에서 실제 URLSession task와 manifest를 대조한다.
+iOS가 `application(_:handleEventsForBackgroundURLSession:completionHandler:)`를 호출해 session 이벤트를 Runner에 넘긴 경우에만 Runner가 해당 session을 재연결한다. 일반 앱 launch/resume에서는 session을 열지 않는다. callback 유실로 남은 native claim은 Outbox 파일의 `claimedAt`만 기준으로 10분 뒤 Flutter fallback으로 복구한다.
 
-- 일치하는 active task가 있으면 `nativeUploading` 유지
-- manifest는 nativeUploading인데 task가 없고 `claimedAt` 후 10분 미만이면 callback 유예로 유지
-- task가 없고 10분 이상이면 `pending`으로 복구
-- active task는 있지만 manifest가 없으면 task cancel
-- taskDescription이 UUID가 아니면 우리 task가 아니므로 변경하지 않음
+Runner가 background 이벤트 처리를 마치면 `finishTasksAndInvalidate()`로 session 소유권을 반환하고 uploader singleton을 해제한다. 로그아웃·탈퇴·세션 만료의 `cancelAndPurge`도 task cancel 후 `invalidateAndCancel()`의 invalidation callback을 최대 3초 기다린 다음 singleton을 해제한다. 따라서 로그아웃 후 재로그인한 같은 Runner 프로세스가 Extension session identifier를 계속 점유하지 않는다.
 
-Flutter claim은 reconciliation 완료 후에만 실행한다.
+- manifest는 nativeUploading이고 `claimedAt` 후 10분 미만이면 callback 유예로 유지
+- 10분 이상이면 task 조회 없이 `pending`으로 복구한다. 이때 실제 task가 늦게 살아 있으면 서버 idempotency 부재로 중복 전송될 수 있으며, 기존 수용 리스크로 관리한다.
+
+Flutter claim은 위의 파일 기반 stale-claim 복구 후에만 실행한다.
 
 ### 8.7 terminal 처리
 
@@ -995,9 +994,9 @@ Root vertical stack
 1. 첫 탭 즉시 button과 입력 control을 비활성화한다.
 2. tap 시각으로 `occurredAt`을 만든다.
 3. Outbox enqueue를 수행한다.
-4. enqueue 성공 또는 동일 notification의 기존 pending이면 native upload를 best-effort 예약한다.
-5. 예약 성공 여부와 무관하게 Outbox가 있으면 `dismissNotificationContentExtension()`으로 닫는다.
-6. enqueue 실패면 control을 다시 활성화하고 `기록을 저장하지 못했어요. 다시 시도해 주세요.`를 표시한다.
+4. 공유 세션이 일치하면 native upload를 시작하고, record별 완료 callback을 최대 3초 기다린다.
+5. `2xx`와 `isSuccess: true` 응답이면 즉시 `dismissNotificationContentExtension()`으로 닫는다. 세션 부재·시작 실패·재시도 가능 오류·timeout이면 pending을 보존하고 `기기에 저장했어요. 앱을 열면 자동 전송합니다.`를 약 1초 표시한 뒤 닫는다. 영구 `4xx` 오류면 `기록을 확인할 수 없어요. 앱에서 다시 시도해 주세요.`를 같은 방식으로 표시한다. timeout 후 observer는 제거하며 background task는 취소하지 않는다.
+6. enqueue 실패면 control을 다시 활성화하고 `기록을 보관하지 못했어요. 앱에서 다시 시도해 주세요.`를 표시한다.
 
 offline과 Keychain 잠금·일시 오류는 enqueue 실패가 아니다. record를 보존하고 앱 resume fallback을 기다린다. Keychain item이 확정적으로 없거나 subject가 다른 경우에는 enqueue하지 않고 `앱에서 자세히`를 안내한다.
 

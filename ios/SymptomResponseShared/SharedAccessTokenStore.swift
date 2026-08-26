@@ -28,10 +28,20 @@ final class SharedAccessTokenStore {
     query[kSecMatchLimit as String] = kSecMatchLimitOne
     var result: CFTypeRef?
     let status = SecItemCopyMatching(query as CFDictionary, &result)
-    if status == errSecItemNotFound { return .notFound }
-    if status == errSecInteractionNotAllowed { return .unavailableWhileLocked }
+    if status == errSecItemNotFound {
+      SymptomNativeUploadLog.debug("keychain read result=notFound")
+      return .notFound
+    }
+    if status == errSecInteractionNotAllowed {
+      SymptomNativeUploadLog.debug("keychain read result=locked")
+      return .unavailableWhileLocked
+    }
     guard status == errSecSuccess, let data = result as? Data,
-          let session = try? JSONDecoder.symptom.decode(SharedAuthSession.self, from: data) else { return .error }
+          let session = try? JSONDecoder.symptom.decode(SharedAuthSession.self, from: data) else {
+      SymptomNativeUploadLog.debug("keychain read result=error status=\(status)")
+      return .error
+    }
+    SymptomNativeUploadLog.debug("keychain read result=session")
     return .session(session)
   }
 
@@ -47,10 +57,15 @@ final class SharedAccessTokenStore {
       add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
       add[kSecAttrSynchronizable as String] = false
       let addStatus = SecItemAdd(add as CFDictionary, nil)
-      guard addStatus == errSecSuccess else { throw NSError(domain: "SymptomKeychain", code: Int(addStatus)) }
+      guard addStatus == errSecSuccess else {
+        SymptomNativeUploadLog.debug("keychain sync add failed status=\(addStatus)")
+        throw NSError(domain: "SymptomKeychain", code: Int(addStatus))
+      }
     } else if status != errSecSuccess {
+      SymptomNativeUploadLog.debug("keychain sync update failed status=\(status)")
       throw NSError(domain: "SymptomKeychain", code: Int(status))
     }
+    SymptomNativeUploadLog.debug("keychain sync succeeded")
   }
 
   func updateAccessTokenIfSessionExists(_ accessToken: String) throws {

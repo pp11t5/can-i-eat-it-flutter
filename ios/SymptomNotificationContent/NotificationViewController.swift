@@ -8,6 +8,10 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
     static let verticalInset: CGFloat = 16
     static let stackSpacing: CGFloat = 10
     static let chipSpacing: CGFloat = 6
+    static let chipHeight: CGFloat = 32
+    static let sliderThumbDiameter: CGFloat = 24
+    static let responseWaitTimeout: TimeInterval = 3
+    static let fallbackDisplayDuration: TimeInterval = 1
   }
 
   private enum Palette {
@@ -17,6 +21,7 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
     static let track = UIColor(red: 75 / 255, green: 75 / 255, blue: 90 / 255, alpha: 1)
     static let chipBackground = UIColor(red: 61 / 255, green: 61 / 255, blue: 74 / 255, alpha: 1)
     static let chipBorder = UIColor(red: 102 / 255, green: 102 / 255, blue: 119 / 255, alpha: 1)
+    static let selectedChipBackground = UIColor(red: 105 / 255, green: 85 / 255, blue: 1, alpha: 0.38)
   }
 
   private var payload: SymptomPushPayload?
@@ -24,6 +29,9 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
   private var selectedState = "normal"
   private var selectedTypes = Set<String>()
   private var canSave = false
+  private var awaitingNativeRecordID: UUID?
+  private var responseTimeoutWorkItem: DispatchWorkItem?
+  private var dismissWorkItem: DispatchWorkItem?
 
   private let notificationHeader = UIStackView()
   private let headerIconView = UIImageView()
@@ -34,7 +42,7 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
   private let separator = UIView()
   private let strengthTitleLabel = UILabel()
   private let stateLabel = UILabel()
-  private let slider = UISlider()
+  private let slider = SymptomIntensitySlider()
   private let sliderTicks = UIStackView()
   private let typesStack = UIStackView()
   private let saveButton = UIButton(type: .system)
@@ -51,6 +59,14 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
     preferredContentSize = CGSize(width: 0, height: 484)
     view.backgroundColor = Palette.card
     buildUI()
+  }
+
+  deinit {
+    responseTimeoutWorkItem?.cancel()
+    dismissWorkItem?.cancel()
+    if let awaitingNativeRecordID {
+      SymptomNativeUploader.shared?.removeResponseObserver(for: awaitingNativeRecordID)
+    }
   }
 
   func didReceive(_ notification: UNNotification) {
@@ -150,13 +166,30 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
     slider.value = 2
     slider.minimumTrackTintColor = Palette.purple
     slider.maximumTrackTintColor = Palette.track
-    slider.thumbTintColor = Palette.purple
+    slider.setThumbImage(
+      SymptomIntensitySlider.thumbImage(
+        diameter: Metric.sliderThumbDiameter,
+        outerColor: Palette.purple,
+        innerColor: .white
+      ),
+      for: .normal
+    )
+    slider.setThumbImage(
+      SymptomIntensitySlider.thumbImage(
+        diameter: Metric.sliderThumbDiameter,
+        outerColor: Palette.purple,
+        innerColor: .white
+      ),
+      for: .highlighted
+    )
     slider.isContinuous = true
     slider.addTarget(self, action: #selector(stateChanged), for: .valueChanged)
     stack.addArrangedSubview(slider)
 
     sliderTicks.axis = .horizontal
     sliderTicks.distribution = .fillEqually
+    sliderTicks.isLayoutMarginsRelativeArrangement = true
+    sliderTicks.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 10)
     for number in 1...states.count {
       let tick = UILabel()
       tick.text = "\(number)"
@@ -165,10 +198,10 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
       tick.textAlignment = number == 1 ? .left : (number == states.count ? .right : .center)
       sliderTicks.addArrangedSubview(tick)
     }
-    stack.setCustomSpacing(2, after: slider)
+    stack.setCustomSpacing(4, after: slider)
     stack.addArrangedSubview(sliderTicks)
 
-    stateLabel.font = .systemFont(ofSize: 14, weight: .bold)
+    stateLabel.font = .systemFont(ofSize: 14, weight: .semibold)
     stateLabel.textColor = Palette.purple
     stateLabel.textAlignment = .center
     stack.addArrangedSubview(stateLabel)
@@ -194,7 +227,7 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
       typeButtons.append(button)
     }
     stack.addArrangedSubview(typesStack)
-    NSLayoutConstraint.activate([typesStack.heightAnchor.constraint(equalToConstant: 34)])
+    NSLayoutConstraint.activate([typesStack.heightAnchor.constraint(equalToConstant: Metric.chipHeight)])
     updateTypeSelectionStyles()
 
     var saveConfiguration = UIButton.Configuration.filled()
@@ -277,7 +310,7 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
   private func typeButton(title: String, code: String) -> UIButton {
     let button = UIButton(type: .system)
     button.accessibilityIdentifier = code
-    button.titleLabel?.font = .systemFont(ofSize: 11, weight: .semibold)
+    button.titleLabel?.font = .systemFont(ofSize: 10, weight: .semibold)
     button.titleLabel?.lineBreakMode = .byTruncatingTail
     button.addTarget(self, action: #selector(typeTapped(_:)), for: .touchUpInside)
     applyTypeStyle(to: button, title: title, selected: code == "none")
@@ -287,15 +320,15 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
   private func applyTypeStyle(to button: UIButton, title: String, selected: Bool) {
     var configuration = UIButton.Configuration.plain()
     configuration.title = title
-    configuration.baseForegroundColor = selected ? Palette.purple : .white
-    configuration.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5)
-    configuration.background.backgroundColor = selected ? Palette.purple.withAlphaComponent(0.18) : Palette.chipBackground
+    configuration.baseForegroundColor = .white
+    configuration.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 3, bottom: 0, trailing: 3)
+    configuration.background.backgroundColor = selected ? Palette.selectedChipBackground : Palette.chipBackground
     configuration.background.strokeColor = selected ? Palette.purple : Palette.chipBorder
     configuration.background.strokeWidth = 1
-    configuration.background.cornerRadius = 17
+    configuration.background.cornerRadius = Metric.chipHeight / 2
     configuration.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { attributes in
       var attributes = attributes
-      attributes.font = .systemFont(ofSize: 11, weight: .semibold)
+      attributes.font = .systemFont(ofSize: 10, weight: .semibold)
       return attributes
     }
     button.configuration = configuration
@@ -335,8 +368,20 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
   }
 
   @objc private func saveTapped() {
-    guard canSave, let payload, let config = try? NativeNotificationConfig.load() else { return }
-    saveButton.isEnabled = false
+    guard canSave, let payload else {
+      SymptomNativeUploadLog.debug("extension save ignored canSave=\(canSave) payloadPresent=\(self.payload != nil)")
+      return
+    }
+    let config: NativeNotificationConfig
+    do {
+      config = try NativeNotificationConfig.load()
+    } catch {
+      SymptomNativeUploadLog.debug(
+        "extension save blocked configuration=\(SymptomNativeUploadLog.errorDescription(error))"
+      )
+      return
+    }
+    setSavingUI(true)
     let request = SymptomRequestBody(
       symptomState: selectedState,
       symptomTypes: Array(selectedTypes).sorted(),
@@ -346,16 +391,123 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
     do {
       let store = try SymptomOutboxStore(config: config)
       let id = try store.enqueue(request: request, ownerSubjectId: ownerSubjectId)
+      SymptomNativeUploadLog.debug(
+        "extension outbox enqueued record=\(SymptomNativeUploadLog.recordPrefix(id)) "
+          + "ownerPresent=\(ownerSubjectId != nil)"
+      )
       if case .session(let session) = SharedAccessTokenStore(config: config).readResult(),
          let ownerSubjectId, session.subjectId == ownerSubjectId {
-        try? SymptomNativeUploader.makeIfNeeded().upload(clientRecordId: id)
+        SymptomNativeUploadLog.debug("extension native upload eligible record=\(SymptomNativeUploadLog.recordPrefix(id))")
+        startNativeUploadWait(clientRecordId: id)
+      } else {
+        SymptomNativeUploadLog.debug("extension native upload skipped record=\(SymptomNativeUploadLog.recordPrefix(id))")
+        showThenDismiss("기기에 저장했어요. 앱을 열면 자동 전송합니다.")
       }
-      extensionContext?.dismissNotificationContentExtension()
     } catch {
-      saveButton.isEnabled = true
+      SymptomNativeUploadLog.debug(
+        "extension outbox enqueue failed error=\(SymptomNativeUploadLog.errorDescription(error))"
+      )
+      setSavingUI(false)
       statusLabel.text = "기록을 보관하지 못했어요. 앱에서 다시 시도해 주세요."
       statusLabel.isHidden = false
     }
+  }
+
+  private func startNativeUploadWait(clientRecordId: UUID) {
+    let uploader: SymptomNativeUploader
+    do {
+      uploader = try SymptomNativeUploader.makeIfNeeded()
+    } catch {
+      SymptomNativeUploadLog.debug(
+        "extension native uploader unavailable record=\(SymptomNativeUploadLog.recordPrefix(clientRecordId)) "
+          + "error=\(SymptomNativeUploadLog.errorDescription(error))"
+      )
+      showThenDismiss("기기에 저장했어요. 앱을 열면 자동 전송합니다.")
+      return
+    }
+
+    awaitingNativeRecordID = clientRecordId
+    let timeout = DispatchWorkItem { [weak self, weak uploader] in
+      guard let self, self.awaitingNativeRecordID == clientRecordId else { return }
+      uploader?.removeResponseObserver(for: clientRecordId)
+      SymptomNativeUploadLog.debug(
+        "extension native response timeout record=\(SymptomNativeUploadLog.recordPrefix(clientRecordId))"
+      )
+      self.awaitingNativeRecordID = nil
+      self.responseTimeoutWorkItem = nil
+      self.showThenDismiss("기기에 저장했어요. 앱을 열면 자동 전송합니다.")
+    }
+    responseTimeoutWorkItem = timeout
+    DispatchQueue.main.asyncAfter(
+      deadline: .now() + Metric.responseWaitTimeout,
+      execute: timeout
+    )
+
+    do {
+      try uploader.upload(clientRecordId: clientRecordId) { [weak self] outcome in
+        self?.handleNativeUploadCompletion(outcome, clientRecordId: clientRecordId)
+      }
+    } catch {
+      responseTimeoutWorkItem?.cancel()
+      responseTimeoutWorkItem = nil
+      awaitingNativeRecordID = nil
+      uploader.removeResponseObserver(for: clientRecordId)
+      SymptomNativeUploadLog.debug(
+        "extension native upload start failed record=\(SymptomNativeUploadLog.recordPrefix(clientRecordId)) "
+          + "error=\(SymptomNativeUploadLog.errorDescription(error))"
+      )
+      showThenDismiss("기기에 저장했어요. 앱을 열면 자동 전송합니다.")
+    }
+  }
+
+  private func handleNativeUploadCompletion(
+    _ outcome: SymptomNativeUploadOutcome,
+    clientRecordId: UUID
+  ) {
+    guard awaitingNativeRecordID == clientRecordId else { return }
+    responseTimeoutWorkItem?.cancel()
+    responseTimeoutWorkItem = nil
+    awaitingNativeRecordID = nil
+    SymptomNativeUploadLog.debug(
+      "extension native upload callback record=\(SymptomNativeUploadLog.recordPrefix(clientRecordId)) outcome=\(outcome)"
+    )
+
+    switch outcome {
+    case .success:
+      extensionContext?.dismissNotificationContentExtension()
+    case .retryableFailure:
+      showThenDismiss("기기에 저장했어요. 앱을 열면 자동 전송합니다.")
+    case .permanentFailure:
+      showThenDismiss("기록을 확인할 수 없어요. 앱에서 다시 시도해 주세요.")
+    }
+  }
+
+  private func setSavingUI(_ isSaving: Bool) {
+    saveButton.isEnabled = !isSaving
+    slider.isEnabled = !isSaving
+    typeButtons.forEach { $0.isEnabled = !isSaving }
+
+    var configuration = saveButton.configuration
+    configuration?.title = isSaving ? "기록 저장 중…" : "기록 완료"
+    configuration?.showsActivityIndicator = isSaving
+    saveButton.configuration = configuration
+
+    statusLabel.text = isSaving ? "기록 저장 중…" : nil
+    statusLabel.isHidden = !isSaving
+  }
+
+  private func showThenDismiss(_ message: String) {
+    statusLabel.text = message
+    statusLabel.isHidden = false
+    dismissWorkItem?.cancel()
+    let dismiss = DispatchWorkItem { [weak self] in
+      self?.extensionContext?.dismissNotificationContentExtension()
+    }
+    dismissWorkItem = dismiss
+    DispatchQueue.main.asyncAfter(
+      deadline: .now() + Metric.fallbackDisplayDuration,
+      execute: dismiss
+    )
   }
 
   private func disableSave(_ message: String) {
@@ -389,4 +541,35 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
     formatter.formatOptions = [.withInternetDateTime]
     return formatter
   }()
+}
+
+private final class SymptomIntensitySlider: UISlider {
+  override func trackRect(forBounds bounds: CGRect) -> CGRect {
+    let defaultRect = super.trackRect(forBounds: bounds)
+    return CGRect(
+      x: defaultRect.minX,
+      y: bounds.midY - Metric.sliderTrackHeight / 2,
+      width: defaultRect.width,
+      height: Metric.sliderTrackHeight
+    )
+  }
+
+  static func thumbImage(diameter: CGFloat, outerColor: UIColor, innerColor: UIColor) -> UIImage {
+    let renderer = UIGraphicsImageRenderer(size: CGSize(width: diameter, height: diameter))
+    return renderer.image { _ in
+      let outerRect = CGRect(origin: .zero, size: CGSize(width: diameter, height: diameter))
+      outerColor.setFill()
+      UIBezierPath(ovalIn: outerRect).fill()
+
+      let innerDiameter = diameter / 2
+      let innerOrigin = (diameter - innerDiameter) / 2
+      let innerRect = CGRect(x: innerOrigin, y: innerOrigin, width: innerDiameter, height: innerDiameter)
+      innerColor.setFill()
+      UIBezierPath(ovalIn: innerRect).fill()
+    }
+  }
+
+  private enum Metric {
+    static let sliderTrackHeight: CGFloat = 6
+  }
 }
