@@ -102,6 +102,8 @@ class _MockMealRepository implements MealRepository {
 
 Widget _wrap({
   Symptom? existingSymptom,
+  SymptomState? initialMood,
+  List<SymptomType>? initialSymptomTypes,
   _MockSymptomRepository? symptomRepo,
 }) {
   final repo = symptomRepo ?? _MockSymptomRepository();
@@ -114,7 +116,11 @@ Widget _wrap({
     ],
     child: MaterialApp(
       theme: AppTheme.light,
-      home: SymptomWriteScreen(existingSymptom: existingSymptom),
+      home: SymptomWriteScreen(
+        existingSymptom: existingSymptom,
+        initialMood: initialMood,
+        initialSymptomTypes: initialSymptomTypes,
+      ),
     ),
   );
 }
@@ -145,6 +151,19 @@ void main() {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
       expect(find.text('저장하기'), findsOneWidget);
+    });
+
+    testWidgets('리치 푸시 강도 프리필이면 저장하기가 활성화된다', (tester) async {
+      await tester.pumpWidget(_wrap(initialMood: SymptomState.good));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('저장하기'));
+      final saveButton = tester.widget<FilledButton>(
+        find.ancestor(
+          of: find.text('저장하기'),
+          matching: find.byType(FilledButton),
+        ),
+      );
+      expect(saveButton.onPressed, isNotNull);
     });
 
     testWidgets('증상 칩 5개가 표시된다', (tester) async {

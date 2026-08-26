@@ -6,6 +6,8 @@ import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
+import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
+import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_write_screen.dart';
 
 /// 푸시에서 전달된 식사를 확인한 뒤 증상 작성 폼을 연다.
@@ -13,9 +15,16 @@ import 'package:can_i_eat_it/features/symptom/presentation/screens/symptom_write
 /// ID만 신뢰하지 않고 서버에서 식사를 다시 조회하므로, 삭제됐거나 다른 계정의
 /// 식사인 경우 연결되지 않은 증상 기록을 만들지 않는다.
 class PushSymptomEntryScreen extends ConsumerWidget {
-  const PushSymptomEntryScreen({super.key, required this.mealRecordId});
+  const PushSymptomEntryScreen({
+    super.key,
+    required this.mealRecordId,
+    this.initialIntensityIndex,
+    this.initialSymptomTypeCodes = const [],
+  });
 
   final String mealRecordId;
+  final int? initialIntensityIndex;
+  final List<String> initialSymptomTypeCodes;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,8 +44,24 @@ class PushSymptomEntryScreen extends ConsumerWidget {
       data: (meal) => SymptomWriteScreen(
         initialMealRecordId: meal.mealRecordId,
         initialMealName: _mealDisplayName(meal),
+        initialMood: _moodFromIndex(initialIntensityIndex),
+        initialSymptomTypes: _typesFromCodes(initialSymptomTypeCodes),
       ),
     );
+  }
+
+  static SymptomState? _moodFromIndex(int? index) {
+    if (index == null) return null;
+    const order = SymptomState.values;
+    if (index < 0 || index >= order.length) return null;
+    return order[index];
+  }
+
+  static List<SymptomType> _typesFromCodes(List<String> codes) {
+    return codes
+        .map(SymptomTypeMapper.fromServerNullable)
+        .whereType<SymptomType>()
+        .toList();
   }
 
   static String _mealDisplayName(MealRecord meal) {

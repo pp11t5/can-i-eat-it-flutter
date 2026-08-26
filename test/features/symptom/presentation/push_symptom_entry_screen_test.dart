@@ -7,7 +7,11 @@ import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/repositories/mock_meal_repository.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/screens/push_symptom_entry_screen.dart';
 
-Widget _wrap(String mealRecordId) {
+Widget _wrap(
+  String mealRecordId, {
+  int? initialIntensityIndex,
+  List<String> initialSymptomTypeCodes = const [],
+}) {
   return ProviderScope(
     overrides: [
       // ignore: scoped_providers_should_specify_dependencies
@@ -15,12 +19,37 @@ Widget _wrap(String mealRecordId) {
     ],
     child: MaterialApp(
       theme: AppTheme.light,
-      home: PushSymptomEntryScreen(mealRecordId: mealRecordId),
+      home: PushSymptomEntryScreen(
+        mealRecordId: mealRecordId,
+        initialIntensityIndex: initialIntensityIndex,
+        initialSymptomTypeCodes: initialSymptomTypeCodes,
+      ),
     ),
   );
 }
 
 void main() {
+  testWidgets('알림에서 고른 강도가 있으면 저장하기가 바로 활성화된다', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        'record-001',
+        initialIntensityIndex: 1,
+        initialSymptomTypeCodes: const ['cough'],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('증상 기록 작성'), findsOneWidget);
+    await tester.ensureVisible(find.text('저장하기'));
+    final saveButton = tester.widget<FilledButton>(
+      find.ancestor(
+        of: find.text('저장하기'),
+        matching: find.byType(FilledButton),
+      ),
+    );
+    expect(saveButton.onPressed, isNotNull);
+  });
+
   testWidgets('식사를 확인한 뒤 증상 작성 화면에 식사를 프리필한다', (tester) async {
     await tester.pumpWidget(_wrap('record-001'));
     await tester.pumpAndSettle();
