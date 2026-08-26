@@ -5,6 +5,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import com.canieatthis.can_i_eat_this1.auth.AuthTokenChannel
+import com.canieatthis.can_i_eat_this1.push.RichPushLaunchHolder
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
@@ -21,11 +23,13 @@ class MainActivity: FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialWidgetUri = widgetUriFrom(intent)
+        RichPushLaunchHolder.capture(this, intent)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        RichPushLaunchHolder.capture(this, intent)
         val uri = widgetUriFrom(intent) ?: return
         val sink = widgetClickSink
         if (sink != null) {
@@ -37,20 +41,23 @@ class MainActivity: FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        val messenger = flutterEngine.dartExecutor.binaryMessenger
+        AuthTokenChannel.register(messenger, this)
+        RichPushLaunchHolder.register(messenger)
 
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, appSettingsChannel)
+        MethodChannel(messenger, appSettingsChannel)
             .setMethodCallHandler { call, result ->
                 if (call.method == "openNotificationSettings") {
                     try {
-                        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        val settingsIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
                                 .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
                         } else {
                             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                                 .setData(Uri.fromParts("package", packageName, null))
                         }
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        startActivity(intent)
+                        settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        startActivity(settingsIntent)
                         result.success(null)
                     } catch (e: Exception) {
                         result.error("OPEN_SETTINGS_FAILED", e.message, null)
