@@ -29,9 +29,6 @@ mixin _$HealthProfile {
   /// 사용자 직접 입력 트리거. 예: '탄산음료'.
   String? get customTriggers;
 
-  /// 복용약 목록. 예: ['omeprazole'].
-  List<String> get medications;
-
   /// 알레르기 목록. 예: ['crustacean']. allergyOptions 카탈로그 코드 기준.
   List<String> get allergies;
 
@@ -58,8 +55,6 @@ mixin _$HealthProfile {
                 .equals(other.triggerFoods, triggerFoods) &&
             (identical(other.customTriggers, customTriggers) ||
                 other.customTriggers == customTriggers) &&
-            const DeepCollectionEquality()
-                .equals(other.medications, medications) &&
             const DeepCollectionEquality().equals(other.allergies, allergies));
   }
 
@@ -71,12 +66,11 @@ mixin _$HealthProfile {
       diagnosed,
       const DeepCollectionEquality().hash(triggerFoods),
       customTriggers,
-      const DeepCollectionEquality().hash(medications),
       const DeepCollectionEquality().hash(allergies));
 
   @override
   String toString() {
-    return 'HealthProfile(conditions: $conditions, symptomFrequency: $symptomFrequency, diagnosed: $diagnosed, triggerFoods: $triggerFoods, customTriggers: $customTriggers, medications: $medications, allergies: $allergies)';
+    return 'HealthProfile(conditions: $conditions, symptomFrequency: $symptomFrequency, diagnosed: $diagnosed, triggerFoods: $triggerFoods, customTriggers: $customTriggers, allergies: $allergies)';
   }
 }
 
@@ -92,7 +86,6 @@ abstract mixin class $HealthProfileCopyWith<$Res> {
       bool diagnosed,
       List<String> triggerFoods,
       String? customTriggers,
-      List<String> medications,
       List<String> allergies});
 }
 
@@ -114,7 +107,6 @@ class _$HealthProfileCopyWithImpl<$Res>
     Object? diagnosed = null,
     Object? triggerFoods = null,
     Object? customTriggers = freezed,
-    Object? medications = null,
     Object? allergies = null,
   }) {
     return _then(_self.copyWith(
@@ -138,10 +130,6 @@ class _$HealthProfileCopyWithImpl<$Res>
           ? _self.customTriggers
           : customTriggers // ignore: cast_nullable_to_non_nullable
               as String?,
-      medications: null == medications
-          ? _self.medications
-          : medications // ignore: cast_nullable_to_non_nullable
-              as List<String>,
       allergies: null == allergies
           ? _self.allergies
           : allergies // ignore: cast_nullable_to_non_nullable
@@ -249,7 +237,6 @@ extension HealthProfilePatterns on HealthProfile {
             bool diagnosed,
             List<String> triggerFoods,
             String? customTriggers,
-            List<String> medications,
             List<String> allergies)?
         $default, {
     required TResult orElse(),
@@ -263,7 +250,6 @@ extension HealthProfilePatterns on HealthProfile {
             _that.diagnosed,
             _that.triggerFoods,
             _that.customTriggers,
-            _that.medications,
             _that.allergies);
       case _:
         return orElse();
@@ -291,7 +277,6 @@ extension HealthProfilePatterns on HealthProfile {
             bool diagnosed,
             List<String> triggerFoods,
             String? customTriggers,
-            List<String> medications,
             List<String> allergies)
         $default,
   ) {
@@ -304,7 +289,6 @@ extension HealthProfilePatterns on HealthProfile {
             _that.diagnosed,
             _that.triggerFoods,
             _that.customTriggers,
-            _that.medications,
             _that.allergies);
       case _:
         throw StateError('Unexpected subclass');
@@ -331,7 +315,6 @@ extension HealthProfilePatterns on HealthProfile {
             bool diagnosed,
             List<String> triggerFoods,
             String? customTriggers,
-            List<String> medications,
             List<String> allergies)?
         $default,
   ) {
@@ -344,7 +327,6 @@ extension HealthProfilePatterns on HealthProfile {
             _that.diagnosed,
             _that.triggerFoods,
             _that.customTriggers,
-            _that.medications,
             _that.allergies);
       case _:
         return null;
@@ -361,12 +343,10 @@ class _HealthProfile implements HealthProfile {
       this.diagnosed = false,
       final List<String> triggerFoods = const <String>[],
       this.customTriggers,
-      final List<String> medications = const <String>[],
       final List<String> allergies = const <String>[]})
       : _conditions = conditions,
         _symptomFrequency = symptomFrequency,
         _triggerFoods = triggerFoods,
-        _medications = medications,
         _allergies = allergies;
 
   /// 질환 코드 목록. 예: ['GERD']. 다중 질환 확장 대비.
@@ -415,18 +395,6 @@ class _HealthProfile implements HealthProfile {
   @override
   final String? customTriggers;
 
-  /// 복용약 목록. 예: ['omeprazole'].
-  final List<String> _medications;
-
-  /// 복용약 목록. 예: ['omeprazole'].
-  @override
-  @JsonKey()
-  List<String> get medications {
-    if (_medications is EqualUnmodifiableListView) return _medications;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_medications);
-  }
-
   /// 알레르기 목록. 예: ['crustacean']. allergyOptions 카탈로그 코드 기준.
   final List<String> _allergies;
 
@@ -463,8 +431,6 @@ class _HealthProfile implements HealthProfile {
             (identical(other.customTriggers, customTriggers) ||
                 other.customTriggers == customTriggers) &&
             const DeepCollectionEquality()
-                .equals(other._medications, _medications) &&
-            const DeepCollectionEquality()
                 .equals(other._allergies, _allergies));
   }
 
@@ -476,12 +442,11 @@ class _HealthProfile implements HealthProfile {
       diagnosed,
       const DeepCollectionEquality().hash(_triggerFoods),
       customTriggers,
-      const DeepCollectionEquality().hash(_medications),
       const DeepCollectionEquality().hash(_allergies));
 
   @override
   String toString() {
-    return 'HealthProfile(conditions: $conditions, symptomFrequency: $symptomFrequency, diagnosed: $diagnosed, triggerFoods: $triggerFoods, customTriggers: $customTriggers, medications: $medications, allergies: $allergies)';
+    return 'HealthProfile(conditions: $conditions, symptomFrequency: $symptomFrequency, diagnosed: $diagnosed, triggerFoods: $triggerFoods, customTriggers: $customTriggers, allergies: $allergies)';
   }
 }
 
@@ -499,7 +464,6 @@ abstract mixin class _$HealthProfileCopyWith<$Res>
       bool diagnosed,
       List<String> triggerFoods,
       String? customTriggers,
-      List<String> medications,
       List<String> allergies});
 }
 
@@ -521,7 +485,6 @@ class __$HealthProfileCopyWithImpl<$Res>
     Object? diagnosed = null,
     Object? triggerFoods = null,
     Object? customTriggers = freezed,
-    Object? medications = null,
     Object? allergies = null,
   }) {
     return _then(_HealthProfile(
@@ -545,10 +508,6 @@ class __$HealthProfileCopyWithImpl<$Res>
           ? _self.customTriggers
           : customTriggers // ignore: cast_nullable_to_non_nullable
               as String?,
-      medications: null == medications
-          ? _self._medications
-          : medications // ignore: cast_nullable_to_non_nullable
-              as List<String>,
       allergies: null == allergies
           ? _self._allergies
           : allergies // ignore: cast_nullable_to_non_nullable

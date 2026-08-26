@@ -109,14 +109,13 @@ void main() {
           'symptoms': ['heartburn_reflux', 'post_meal_cough'],
           'triggers': ['spicy', 'caffeine'],
           'allergens': ['crustacean'],
-          'medications': ['omeprazole'],
           'customTriggerText': '탄산음료',
         },
       );
 
       // sampleGerd: conditions=['GERD'], symptomFrequency=['heartburn_reflux','post_meal_cough'],
       // diagnosed=true, triggerFoods=['spicy','caffeine'], customTriggers='탄산음료',
-      // medications=['omeprazole'], allergies=['crustacean']
+      // allergies=['crustacean']
       await repo.submitProfile(HealthProfile.sampleGerd());
 
       // 위 dioAdapter 가 정확한 바디로 매칭됐다면 예외 없이 통과함.
@@ -130,7 +129,6 @@ void main() {
           'symptoms': <String>[],
           'triggers': ['spicy'],
           'allergens': <String>[],
-          'medications': <String>[],
           'customTriggerText': null,
         },
       );
@@ -150,7 +148,6 @@ void main() {
           'symptoms': <String>[],
           'triggers': <String>[],
           'allergens': <String>[],
-          'medications': <String>[],
           'customTriggerText': null,
         },
       );
@@ -226,14 +223,13 @@ void main() {
   // -------------------------------------------------------------------------
 
   group('currentProfile — 서버 GET 병합 (W7)', () {
-    test('두 GET이 모두 성공하면 allergies/medications/conditions가 병합된다', () async {
+    test('두 GET이 모두 성공하면 allergies/conditions가 병합된다', () async {
       dioAdapter.onGet(
         ApiEndpoints.myPageHealthInfo,
         (server) => server.reply(
           200,
           _envelope({
             'allergies': ['milk', 'egg'],
-            'medications': ['omeprazole'],
           }),
         ),
       );
@@ -257,7 +253,6 @@ void main() {
 
       expect(profile, isNotNull);
       expect(profile!.allergies, equals(['milk', 'egg']));
-      expect(profile.medications, equals(['omeprazole']));
       expect(profile.conditions, equals(['GERD']));
     });
 
@@ -265,7 +260,7 @@ void main() {
         () async {
       dioAdapter.onGet(
         ApiEndpoints.myPageHealthInfo,
-        (server) => server.reply(200, _envelope({'allergies': [], 'medications': []})),
+        (server) => server.reply(200, _envelope({'allergies': []})),
       );
       dioAdapter.onGet(
         ApiEndpoints.myPageProfile,
@@ -297,7 +292,9 @@ void main() {
         ApiEndpoints.myPageHealthInfo,
         (server) => server.reply(
           200,
-          _envelope({'allergies': ['peanut'], 'medications': <String>[]}),
+          _envelope({
+            'allergies': ['peanut']
+          }),
         ),
       );
       dioAdapter.onGet(
@@ -312,7 +309,7 @@ void main() {
     });
 
     test(
-        'health-info만 실패하면 allergies/medications는 캐시로 폴백하되 conditions는 '
+        'health-info만 실패하면 allergies는 캐시로 폴백하되 conditions는 '
         '라이브 profile 값으로 병합된다 (독립 처리, pr-review 의료안전 플래그#2)', () async {
       // 사전에 캐시를 채워 둔다 (직전 성공 시 저장된 것으로 가정) — conditions는 이전 값(ibs).
       await cache.write(
@@ -344,7 +341,7 @@ void main() {
     });
 
     test(
-        'profile만 실패하면 conditions는 캐시로 폴백하되 allergies/medications는 '
+        'profile만 실패하면 conditions는 캐시로 폴백하되 allergies는 '
         '라이브 health-info 값으로 병합된다 (독립 처리)', () async {
       await cache.write(
         const HealthProfile(allergies: ['fish_shellfish'], conditions: ['ibs']),
@@ -354,7 +351,9 @@ void main() {
         ApiEndpoints.myPageHealthInfo,
         (server) => server.reply(
           200,
-          _envelope({'allergies': ['peanut'], 'medications': <String>[]}),
+          _envelope({
+            'allergies': ['peanut']
+          }),
         ),
       );
       dioAdapter.onGet(
@@ -435,21 +434,19 @@ void main() {
   // -------------------------------------------------------------------------
 
   group('fetchMedicalInfoStrict — 편집 화면 전용 strict 조회 (pr-review 의료안전 ②-1)', () {
-    test('성공 시 allergies/medications를 반환한다', () async {
+    test('성공 시 allergies를 반환한다', () async {
       dioAdapter.onGet(
         ApiEndpoints.myPageHealthInfo,
         (server) => server.reply(
           200,
           _envelope({
             'allergies': ['milk', 'egg'],
-            'medications': ['omeprazole'],
           }),
         ),
       );
 
       final result = await repo.fetchMedicalInfoStrict();
       expect(result.allergies, equals(['milk', 'egg']));
-      expect(result.medications, equals(['omeprazole']));
     });
 
     test('서버 displayName(한글) allergies를 code로 정규화한다', () async {
@@ -461,21 +458,17 @@ void main() {
           200,
           _envelope({
             'allergies': ['우유·유제품', '땅콩', '콩·대두'],
-            'medications': ['PPI'],
           }),
         ),
       );
 
       final result = await repo.fetchMedicalInfoStrict();
       expect(result.allergies, equals(['milk', 'peanut', 'soy']));
-      expect(result.medications, equals(['PPI']));
     });
 
     test('네트워크 오류 시 캐시 폴백 없이 NetworkFailure를 throw한다', () async {
       // 캐시에 이전 값이 있어도 절대 사용하지 않는다 — stale 데이터로 편집 진입 금지.
-      await cache.write(
-        const HealthProfile(allergies: ['fish_shellfish'], medications: ['stale-med']),
-      );
+      await cache.write(const HealthProfile(allergies: ['fish_shellfish']));
 
       dioAdapter.onGet(
         ApiEndpoints.myPageHealthInfo,
@@ -512,24 +505,21 @@ void main() {
   // -------------------------------------------------------------------------
 
   group('updateHealthInfo — PATCH /my-page/health-info', () {
-    test('allergens/medications 바디로 PATCH 되고 성공 시 캐시가 갱신된다', () async {
+    test('allergens 바디로 PATCH 되고 성공 시 캐시가 갱신된다', () async {
       dioAdapter.onPatch(
         ApiEndpoints.myPageHealthInfo,
         (server) => server.reply(200, _envelope(null)),
         data: {
           'allergens': ['milk', 'egg'],
-          'medications': ['omeprazole'],
         },
       );
 
       await repo.updateHealthInfo(
         allergies: ['milk', 'egg'],
-        medications: ['omeprazole'],
       );
 
       final cached = await cache.read();
       expect(cached!.allergies, equals(['milk', 'egg']));
-      expect(cached.medications, equals(['omeprazole']));
     });
 
     test('한글 displayName이 섞여 있어도 PATCH body는 code로 정규화된다', () async {
@@ -538,21 +528,18 @@ void main() {
         (server) => server.reply(200, _envelope(null)),
         data: {
           'allergens': ['milk', 'peanut'],
-          'medications': ['제산제'],
         },
       );
 
       await repo.updateHealthInfo(
         allergies: ['우유', 'peanut', 'unknown-junk'],
-        medications: ['제산제'],
       );
 
       final cached = await cache.read();
       expect(cached!.allergies, equals(['milk', 'peanut']));
-      expect(cached.medications, equals(['제산제']));
     });
 
-    test('기존 캐시가 있으면 allergies/medications만 교체하고 나머지는 보존한다', () async {
+    test('기존 캐시가 있으면 allergies만 교체하고 나머지는 보존한다', () async {
       await cache.write(HealthProfile.sampleGerd());
 
       dioAdapter.onPatch(
@@ -561,7 +548,7 @@ void main() {
         data: Matchers.any,
       );
 
-      await repo.updateHealthInfo(allergies: ['soy'], medications: []);
+      await repo.updateHealthInfo(allergies: ['soy']);
 
       final cached = await cache.read();
       expect(cached!.allergies, equals(['soy']));
@@ -583,7 +570,7 @@ void main() {
       );
 
       await expectLater(
-        repo.updateHealthInfo(allergies: ['milk'], medications: []),
+        repo.updateHealthInfo(allergies: ['milk']),
         throwsA(isA<NetworkFailure>()),
       );
       expect(await cache.read(), isNull);
@@ -615,8 +602,8 @@ void main() {
           ),
         );
         // 계약 케이스의 submitProfile 은 항상 서버 성공을 전제한다.
-        final contractAdapter =
-            DioAdapter(dio: contractDio, matcher: const FullHttpRequestMatcher());
+        final contractAdapter = DioAdapter(
+            dio: contractDio, matcher: const FullHttpRequestMatcher());
         contractAdapter.onPost(
           ApiEndpoints.onboarding,
           (server) => server.reply(200, _envelope(null)),

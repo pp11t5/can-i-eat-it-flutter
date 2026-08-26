@@ -16,17 +16,16 @@ import 'package:can_i_eat_it/features/health_profile/domain/entities/health_prof
 import 'package:can_i_eat_it/features/mypage/domain/medical_sources_catalog.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 
-/// 알레르기·복용약 편집 화면 (Figma 577-10291).
+/// 알레르기 편집 화면 (Figma 577-10291).
 ///
-/// 진입 시 [medicalInfoStrictProvider]로 서버 최신 allergies/medications를 로드해
+/// 진입 시 [medicalInfoStrictProvider]로 서버 최신 allergies를 로드해
 /// 로컬 상태를 초기화한다. [healthProfileControllerProvider]([currentProfile] 기반,
 /// 캐시 폴백 허용)와 달리 이 조회는 실패 시 캐시로 폴백하지 않고 에러를 그대로
 /// 노출한다 — stale 데이터를 편집 진실로 오인해 PATCH로 알레르기 정보를 덮어써
 /// 소실시키는 것을 방지하기 위함(의료안전, pr-review ②-1). 조회 실패 시 폼 대신
 /// 에러+재시도 UI를 보이고 저장 자체를 막는다.
 ///
-/// 저장 시 `PATCH /my-page/health-info {allergens[], medications[]}`로 allergies·
-/// medications만 갱신한다(W7 마이그레이션 — 과거 POST /onboarding 전체 재제출 방식 폐기).
+/// 저장 시 `PATCH /my-page/health-info {allergens[]}`로 allergies만 갱신한다.
 ///
 /// [T9] 토스트: '건강 정보를 수정했어요.'
 class AllergyMedEditScreen extends ConsumerStatefulWidget {
@@ -39,7 +38,6 @@ class AllergyMedEditScreen extends ConsumerStatefulWidget {
 
 class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
   late Set<String> _selectedAllergies;
-  late List<String> _medications;
   bool _initialized = false;
   bool _isSaving = false;
 
@@ -47,7 +45,6 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
   void initState() {
     super.initState();
     _selectedAllergies = {};
-    _medications = [];
   }
 
   /// 서버 조회([medicalInfoStrictProvider])가 성공하면 최초 1회 로컬 상태를 초기화한다.
@@ -61,7 +58,6 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
       if (!mounted) return;
       setState(() {
         _selectedAllergies = Set<String>.from(profile.allergies);
-        _medications = List<String>.from(profile.medications);
       });
     });
   }
@@ -85,12 +81,11 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
     setState(() => _isSaving = true);
 
     try {
-      // PATCH이므로 allergies/medications 두 필드만 전송한다 — 다른 건강 정보를
+      // PATCH이므로 allergies만 전송한다 — 다른 건강 정보를
       // 재제출하지 않으므로 base 프로필 부재를 경고할 필요가 없다(W7 마이그레이션).
       await ref.read(globalLoadingControllerProvider.notifier).run(
             () => profileController.updateHealthInfo(
               allergies: _selectedAllergies.toList(),
-              medications: _medications,
             ),
           );
 
@@ -138,7 +133,7 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
           },
         ),
         title: Text(
-          '알레르기 · 복용약',
+          '알레르기',
           style: AppTextStyles.body1Bold.copyWith(
             color: AppColors.textPrimary,
           ),
@@ -176,7 +171,7 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '알레르기와 복용 중인 약을\n알려주세요',
+                  '알레르기가 있나요?',
                   style: AppTextStyles.header1Bold.copyWith(
                     color: AppColors.textPrimary,
                   ),

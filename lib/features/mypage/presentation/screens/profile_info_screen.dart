@@ -20,9 +20,9 @@ import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart'
 /// 실패 시 기존 세션값/빈 표시 (크래시 금지).
 ///
 /// 내 정보 카드:
-/// - 닉네임 / 건강 고민 / 알레르기·복용약 — 우측 "수정" (chevron·자물쇠 없음)
+/// - 닉네임 / 건강 고민 / 알레르기 — 우측 "수정" (chevron·자물쇠 없음)
 /// - 건강 고민·알레르기: 라벨 위 + 값 아래 스택
-/// - 알레르기·복용약 2개 이상: "{첫 항목} 외 N개"
+/// - 알레르기 2개 이상: "{첫 항목} 외 N개"
 class ProfileInfoScreen extends ConsumerStatefulWidget {
   const ProfileInfoScreen({super.key});
 
@@ -95,7 +95,7 @@ class _ProfileInfoScreenState extends ConsumerState<ProfileInfoScreen> {
           _ProfileHeader(session: session),
           const SizedBox(height: AppSpacing.contentGap),
 
-          // 내 정보 섹션 (닉네임/건강 고민/알레르기·복용약)
+          // 내 정보 섹션 (닉네임/건강 고민/알레르기)
           const _SectionLabel(label: '내 정보'),
           const SizedBox(height: AppSpacing.itemGap),
           _MyInfoCard(session: session, profile: profile),
@@ -186,13 +186,12 @@ class _MyInfoCard extends StatelessWidget {
         .join(', ');
   }
 
-  /// 알레르기(라벨) + 복용약(원문) 목록.
+  /// 알레르기 라벨 목록.
   /// 0개 → "없음", 1개 → 해당 이름, 2개 이상 → "{첫 항목} 외 N개".
   String get _allergyMedLabel {
     final items = <String>[
       for (final code in profile?.allergies ?? const <String>[])
         labelForCode(allergyOptions, code) ?? code,
-      ...?profile?.medications,
     ];
     if (items.isEmpty) return '없음';
     if (items.length == 1) return items.first;
@@ -234,11 +233,11 @@ class _MyInfoCard extends StatelessWidget {
             ),
           ),
           const _RowDivider(),
-          // 알레르기 · 복용약 — 라벨/값 스택 + "수정" → allergy-med
+          // 알레르기 — 라벨/값 스택 + "수정" → allergy-med
           _EditRow(
             onTap: () => context.push('/mypage/profile/allergy-med'),
             child: _LabeledValue(
-              label: '알레르기 · 복용약',
+              label: '알레르기',
               value: _allergyMedLabel,
             ),
           ),
@@ -319,7 +318,7 @@ class _EditButton extends StatelessWidget {
   }
 }
 
-/// 라벨(위) + 값(아래) 스택 — 건강 고민 / 알레르기·복용약.
+/// 라벨(위) + 값(아래) 스택 — 건강 고민 / 알레르기.
 class _LabeledValue extends StatelessWidget {
   const _LabeledValue({required this.label, required this.value});
 
@@ -347,4 +346,3 @@ class _LabeledValue extends StatelessWidget {
     );
   }
 }
-

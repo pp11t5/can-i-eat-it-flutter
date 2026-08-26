@@ -15,7 +15,6 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MedicalInfoDto {
   List<String> get allergies;
-  List<String> get medications;
 
   /// Create a copy of MedicalInfoDto
   /// with the given fields replaced by the non-null parameter values.
@@ -33,21 +32,17 @@ mixin _$MedicalInfoDto {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MedicalInfoDto &&
-            const DeepCollectionEquality().equals(other.allergies, allergies) &&
-            const DeepCollectionEquality()
-                .equals(other.medications, medications));
+            const DeepCollectionEquality().equals(other.allergies, allergies));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(allergies),
-      const DeepCollectionEquality().hash(medications));
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(allergies));
 
   @override
   String toString() {
-    return 'MedicalInfoDto(allergies: $allergies, medications: $medications)';
+    return 'MedicalInfoDto(allergies: $allergies)';
   }
 }
 
@@ -57,7 +52,7 @@ abstract mixin class $MedicalInfoDtoCopyWith<$Res> {
           MedicalInfoDto value, $Res Function(MedicalInfoDto) _then) =
       _$MedicalInfoDtoCopyWithImpl;
   @useResult
-  $Res call({List<String> allergies, List<String> medications});
+  $Res call({List<String> allergies});
 }
 
 /// @nodoc
@@ -74,16 +69,11 @@ class _$MedicalInfoDtoCopyWithImpl<$Res>
   @override
   $Res call({
     Object? allergies = null,
-    Object? medications = null,
   }) {
     return _then(_self.copyWith(
       allergies: null == allergies
           ? _self.allergies
           : allergies // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      medications: null == medications
-          ? _self.medications
-          : medications // ignore: cast_nullable_to_non_nullable
               as List<String>,
     ));
   }
@@ -182,14 +172,13 @@ extension MedicalInfoDtoPatterns on MedicalInfoDto {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(List<String> allergies, List<String> medications)?
-        $default, {
+    TResult Function(List<String> allergies)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _MedicalInfoDto() when $default != null:
-        return $default(_that.allergies, _that.medications);
+        return $default(_that.allergies);
       case _:
         return orElse();
     }
@@ -210,12 +199,12 @@ extension MedicalInfoDtoPatterns on MedicalInfoDto {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(List<String> allergies, List<String> medications) $default,
+    TResult Function(List<String> allergies) $default,
   ) {
     final _that = this;
     switch (_that) {
       case _MedicalInfoDto():
-        return $default(_that.allergies, _that.medications);
+        return $default(_that.allergies);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -235,13 +224,12 @@ extension MedicalInfoDtoPatterns on MedicalInfoDto {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(List<String> allergies, List<String> medications)?
-        $default,
+    TResult? Function(List<String> allergies)? $default,
   ) {
     final _that = this;
     switch (_that) {
       case _MedicalInfoDto() when $default != null:
-        return $default(_that.allergies, _that.medications);
+        return $default(_that.allergies);
       case _:
         return null;
     }
@@ -251,11 +239,8 @@ extension MedicalInfoDtoPatterns on MedicalInfoDto {
 /// @nodoc
 @JsonSerializable()
 class _MedicalInfoDto implements MedicalInfoDto {
-  const _MedicalInfoDto(
-      {final List<String> allergies = const <String>[],
-      final List<String> medications = const <String>[]})
-      : _allergies = allergies,
-        _medications = medications;
+  const _MedicalInfoDto({final List<String> allergies = const <String>[]})
+      : _allergies = allergies;
   factory _MedicalInfoDto.fromJson(Map<String, dynamic> json) =>
       _$MedicalInfoDtoFromJson(json);
 
@@ -266,15 +251,6 @@ class _MedicalInfoDto implements MedicalInfoDto {
     if (_allergies is EqualUnmodifiableListView) return _allergies;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_allergies);
-  }
-
-  final List<String> _medications;
-  @override
-  @JsonKey()
-  List<String> get medications {
-    if (_medications is EqualUnmodifiableListView) return _medications;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_medications);
   }
 
   /// Create a copy of MedicalInfoDto
@@ -298,21 +274,17 @@ class _MedicalInfoDto implements MedicalInfoDto {
         (other.runtimeType == runtimeType &&
             other is _MedicalInfoDto &&
             const DeepCollectionEquality()
-                .equals(other._allergies, _allergies) &&
-            const DeepCollectionEquality()
-                .equals(other._medications, _medications));
+                .equals(other._allergies, _allergies));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(_allergies),
-      const DeepCollectionEquality().hash(_medications));
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(_allergies));
 
   @override
   String toString() {
-    return 'MedicalInfoDto(allergies: $allergies, medications: $medications)';
+    return 'MedicalInfoDto(allergies: $allergies)';
   }
 }
 
@@ -324,7 +296,7 @@ abstract mixin class _$MedicalInfoDtoCopyWith<$Res>
       __$MedicalInfoDtoCopyWithImpl;
   @override
   @useResult
-  $Res call({List<String> allergies, List<String> medications});
+  $Res call({List<String> allergies});
 }
 
 /// @nodoc
@@ -341,16 +313,11 @@ class __$MedicalInfoDtoCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   $Res call({
     Object? allergies = null,
-    Object? medications = null,
   }) {
     return _then(_MedicalInfoDto(
       allergies: null == allergies
           ? _self._allergies
           : allergies // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      medications: null == medications
-          ? _self._medications
-          : medications // ignore: cast_nullable_to_non_nullable
               as List<String>,
     ));
   }
@@ -359,7 +326,6 @@ class __$MedicalInfoDtoCopyWithImpl<$Res>
 /// @nodoc
 mixin _$MedicalInfoUpdateRequestDto {
   List<String> get allergens;
-  List<String> get medications;
 
   /// Create a copy of MedicalInfoUpdateRequestDto
   /// with the given fields replaced by the non-null parameter values.
@@ -378,21 +344,17 @@ mixin _$MedicalInfoUpdateRequestDto {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MedicalInfoUpdateRequestDto &&
-            const DeepCollectionEquality().equals(other.allergens, allergens) &&
-            const DeepCollectionEquality()
-                .equals(other.medications, medications));
+            const DeepCollectionEquality().equals(other.allergens, allergens));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(allergens),
-      const DeepCollectionEquality().hash(medications));
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(allergens));
 
   @override
   String toString() {
-    return 'MedicalInfoUpdateRequestDto(allergens: $allergens, medications: $medications)';
+    return 'MedicalInfoUpdateRequestDto(allergens: $allergens)';
   }
 }
 
@@ -403,7 +365,7 @@ abstract mixin class $MedicalInfoUpdateRequestDtoCopyWith<$Res> {
           $Res Function(MedicalInfoUpdateRequestDto) _then) =
       _$MedicalInfoUpdateRequestDtoCopyWithImpl;
   @useResult
-  $Res call({List<String> allergens, List<String> medications});
+  $Res call({List<String> allergens});
 }
 
 /// @nodoc
@@ -420,16 +382,11 @@ class _$MedicalInfoUpdateRequestDtoCopyWithImpl<$Res>
   @override
   $Res call({
     Object? allergens = null,
-    Object? medications = null,
   }) {
     return _then(_self.copyWith(
       allergens: null == allergens
           ? _self.allergens
           : allergens // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      medications: null == medications
-          ? _self.medications
-          : medications // ignore: cast_nullable_to_non_nullable
               as List<String>,
     ));
   }
@@ -528,14 +485,13 @@ extension MedicalInfoUpdateRequestDtoPatterns on MedicalInfoUpdateRequestDto {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(List<String> allergens, List<String> medications)?
-        $default, {
+    TResult Function(List<String> allergens)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _MedicalInfoUpdateRequestDto() when $default != null:
-        return $default(_that.allergens, _that.medications);
+        return $default(_that.allergens);
       case _:
         return orElse();
     }
@@ -556,12 +512,12 @@ extension MedicalInfoUpdateRequestDtoPatterns on MedicalInfoUpdateRequestDto {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(List<String> allergens, List<String> medications) $default,
+    TResult Function(List<String> allergens) $default,
   ) {
     final _that = this;
     switch (_that) {
       case _MedicalInfoUpdateRequestDto():
-        return $default(_that.allergens, _that.medications);
+        return $default(_that.allergens);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -581,13 +537,12 @@ extension MedicalInfoUpdateRequestDtoPatterns on MedicalInfoUpdateRequestDto {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(List<String> allergens, List<String> medications)?
-        $default,
+    TResult? Function(List<String> allergens)? $default,
   ) {
     final _that = this;
     switch (_that) {
       case _MedicalInfoUpdateRequestDto() when $default != null:
-        return $default(_that.allergens, _that.medications);
+        return $default(_that.allergens);
       case _:
         return null;
     }
@@ -598,10 +553,8 @@ extension MedicalInfoUpdateRequestDtoPatterns on MedicalInfoUpdateRequestDto {
 @JsonSerializable()
 class _MedicalInfoUpdateRequestDto implements MedicalInfoUpdateRequestDto {
   const _MedicalInfoUpdateRequestDto(
-      {final List<String> allergens = const <String>[],
-      final List<String> medications = const <String>[]})
-      : _allergens = allergens,
-        _medications = medications;
+      {final List<String> allergens = const <String>[]})
+      : _allergens = allergens;
   factory _MedicalInfoUpdateRequestDto.fromJson(Map<String, dynamic> json) =>
       _$MedicalInfoUpdateRequestDtoFromJson(json);
 
@@ -612,15 +565,6 @@ class _MedicalInfoUpdateRequestDto implements MedicalInfoUpdateRequestDto {
     if (_allergens is EqualUnmodifiableListView) return _allergens;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_allergens);
-  }
-
-  final List<String> _medications;
-  @override
-  @JsonKey()
-  List<String> get medications {
-    if (_medications is EqualUnmodifiableListView) return _medications;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_medications);
   }
 
   /// Create a copy of MedicalInfoUpdateRequestDto
@@ -645,21 +589,17 @@ class _MedicalInfoUpdateRequestDto implements MedicalInfoUpdateRequestDto {
         (other.runtimeType == runtimeType &&
             other is _MedicalInfoUpdateRequestDto &&
             const DeepCollectionEquality()
-                .equals(other._allergens, _allergens) &&
-            const DeepCollectionEquality()
-                .equals(other._medications, _medications));
+                .equals(other._allergens, _allergens));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(_allergens),
-      const DeepCollectionEquality().hash(_medications));
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(_allergens));
 
   @override
   String toString() {
-    return 'MedicalInfoUpdateRequestDto(allergens: $allergens, medications: $medications)';
+    return 'MedicalInfoUpdateRequestDto(allergens: $allergens)';
   }
 }
 
@@ -672,7 +612,7 @@ abstract mixin class _$MedicalInfoUpdateRequestDtoCopyWith<$Res>
       __$MedicalInfoUpdateRequestDtoCopyWithImpl;
   @override
   @useResult
-  $Res call({List<String> allergens, List<String> medications});
+  $Res call({List<String> allergens});
 }
 
 /// @nodoc
@@ -689,16 +629,11 @@ class __$MedicalInfoUpdateRequestDtoCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   $Res call({
     Object? allergens = null,
-    Object? medications = null,
   }) {
     return _then(_MedicalInfoUpdateRequestDto(
       allergens: null == allergens
           ? _self._allergens
           : allergens // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      medications: null == medications
-          ? _self._medications
-          : medications // ignore: cast_nullable_to_non_nullable
               as List<String>,
     ));
   }

@@ -22,10 +22,6 @@ _HealthProfileDto _$HealthProfileDtoFromJson(Map<String, dynamic> json) =>
               .toList() ??
           const <String>[],
       customTriggers: json['custom_triggers'] as String?,
-      medications: (json['medications'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const <String>[],
       allergies: (json['allergies'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
@@ -39,6 +35,5 @@ Map<String, dynamic> _$HealthProfileDtoToJson(_HealthProfileDto instance) =>
       'diagnosed': instance.diagnosed,
       'trigger_foods': instance.triggerFoods,
       'custom_triggers': instance.customTriggers,
-      'medications': instance.medications,
       'allergies': instance.allergies,
     };

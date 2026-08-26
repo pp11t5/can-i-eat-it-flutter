@@ -21,10 +21,6 @@ _OnboardingRequestDto _$OnboardingRequestDtoFromJson(
               ?.map((e) => e as String)
               .toList() ??
           const <String>[],
-      medications: (json['medications'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const <String>[],
       customTriggerText: json['customTriggerText'] as String?,
     );
 
@@ -34,6 +30,5 @@ Map<String, dynamic> _$OnboardingRequestDtoToJson(
       'symptoms': instance.symptoms,
       'triggers': instance.triggers,
       'allergens': instance.allergens,
-      'medications': instance.medications,
       'customTriggerText': instance.customTriggerText,
     };

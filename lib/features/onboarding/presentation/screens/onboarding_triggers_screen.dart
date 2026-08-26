@@ -19,7 +19,7 @@ import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding
 ///
 /// 탑바·[StepProgress]는 [OnboardingShell]이 고정 렌더한다.
 /// 제목·칩·기타 입력(+ 추가)·CTA를 한 스크롤로 묶어 키보드 시 입력란과 버튼이
-/// 붙지 않도록 한다 (medications 화면과 동일 패턴).
+/// 붙지 않도록 한다.
 class OnboardingTriggersScreen extends ConsumerStatefulWidget {
   const OnboardingTriggersScreen({super.key});
 
@@ -109,7 +109,7 @@ class _OnboardingTriggersScreenState
                               ),
                             ),
                             const SizedBox(height: 16),
-                            // 복용약 입력과 동일: TextField 우측 인라인 + 버튼.
+                            // TextField 우측 인라인 + 버튼.
                             TextField(
                               controller: _customController,
                               style: AppTextStyles.body1Regular.copyWith(

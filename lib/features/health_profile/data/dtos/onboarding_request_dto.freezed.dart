@@ -17,7 +17,6 @@ mixin _$OnboardingRequestDto {
   List<String> get symptoms;
   List<String> get triggers;
   List<String> get allergens;
-  List<String> get medications;
   String? get customTriggerText;
 
   /// Create a copy of OnboardingRequestDto
@@ -39,8 +38,6 @@ mixin _$OnboardingRequestDto {
             const DeepCollectionEquality().equals(other.symptoms, symptoms) &&
             const DeepCollectionEquality().equals(other.triggers, triggers) &&
             const DeepCollectionEquality().equals(other.allergens, allergens) &&
-            const DeepCollectionEquality()
-                .equals(other.medications, medications) &&
             (identical(other.customTriggerText, customTriggerText) ||
                 other.customTriggerText == customTriggerText));
   }
@@ -52,12 +49,11 @@ mixin _$OnboardingRequestDto {
       const DeepCollectionEquality().hash(symptoms),
       const DeepCollectionEquality().hash(triggers),
       const DeepCollectionEquality().hash(allergens),
-      const DeepCollectionEquality().hash(medications),
       customTriggerText);
 
   @override
   String toString() {
-    return 'OnboardingRequestDto(symptoms: $symptoms, triggers: $triggers, allergens: $allergens, medications: $medications, customTriggerText: $customTriggerText)';
+    return 'OnboardingRequestDto(symptoms: $symptoms, triggers: $triggers, allergens: $allergens, customTriggerText: $customTriggerText)';
   }
 }
 
@@ -71,7 +67,6 @@ abstract mixin class $OnboardingRequestDtoCopyWith<$Res> {
       {List<String> symptoms,
       List<String> triggers,
       List<String> allergens,
-      List<String> medications,
       String? customTriggerText});
 }
 
@@ -91,7 +86,6 @@ class _$OnboardingRequestDtoCopyWithImpl<$Res>
     Object? symptoms = null,
     Object? triggers = null,
     Object? allergens = null,
-    Object? medications = null,
     Object? customTriggerText = freezed,
   }) {
     return _then(_self.copyWith(
@@ -106,10 +100,6 @@ class _$OnboardingRequestDtoCopyWithImpl<$Res>
       allergens: null == allergens
           ? _self.allergens
           : allergens // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      medications: null == medications
-          ? _self.medications
-          : medications // ignore: cast_nullable_to_non_nullable
               as List<String>,
       customTriggerText: freezed == customTriggerText
           ? _self.customTriggerText
@@ -212,12 +202,8 @@ extension OnboardingRequestDtoPatterns on OnboardingRequestDto {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(
-            List<String> symptoms,
-            List<String> triggers,
-            List<String> allergens,
-            List<String> medications,
-            String? customTriggerText)?
+    TResult Function(List<String> symptoms, List<String> triggers,
+            List<String> allergens, String? customTriggerText)?
         $default, {
     required TResult orElse(),
   }) {
@@ -225,7 +211,7 @@ extension OnboardingRequestDtoPatterns on OnboardingRequestDto {
     switch (_that) {
       case _OnboardingRequestDto() when $default != null:
         return $default(_that.symptoms, _that.triggers, _that.allergens,
-            _that.medications, _that.customTriggerText);
+            _that.customTriggerText);
       case _:
         return orElse();
     }
@@ -246,19 +232,15 @@ extension OnboardingRequestDtoPatterns on OnboardingRequestDto {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(
-            List<String> symptoms,
-            List<String> triggers,
-            List<String> allergens,
-            List<String> medications,
-            String? customTriggerText)
+    TResult Function(List<String> symptoms, List<String> triggers,
+            List<String> allergens, String? customTriggerText)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _OnboardingRequestDto():
         return $default(_that.symptoms, _that.triggers, _that.allergens,
-            _that.medications, _that.customTriggerText);
+            _that.customTriggerText);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -278,19 +260,15 @@ extension OnboardingRequestDtoPatterns on OnboardingRequestDto {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(
-            List<String> symptoms,
-            List<String> triggers,
-            List<String> allergens,
-            List<String> medications,
-            String? customTriggerText)?
+    TResult? Function(List<String> symptoms, List<String> triggers,
+            List<String> allergens, String? customTriggerText)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _OnboardingRequestDto() when $default != null:
         return $default(_that.symptoms, _that.triggers, _that.allergens,
-            _that.medications, _that.customTriggerText);
+            _that.customTriggerText);
       case _:
         return null;
     }
@@ -304,12 +282,10 @@ class _OnboardingRequestDto extends OnboardingRequestDto {
       {final List<String> symptoms = const <String>[],
       final List<String> triggers = const <String>[],
       final List<String> allergens = const <String>[],
-      final List<String> medications = const <String>[],
       this.customTriggerText})
       : _symptoms = symptoms,
         _triggers = triggers,
         _allergens = allergens,
-        _medications = medications,
         super._();
   factory _OnboardingRequestDto.fromJson(Map<String, dynamic> json) =>
       _$OnboardingRequestDtoFromJson(json);
@@ -341,15 +317,6 @@ class _OnboardingRequestDto extends OnboardingRequestDto {
     return EqualUnmodifiableListView(_allergens);
   }
 
-  final List<String> _medications;
-  @override
-  @JsonKey()
-  List<String> get medications {
-    if (_medications is EqualUnmodifiableListView) return _medications;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_medications);
-  }
-
   @override
   final String? customTriggerText;
 
@@ -378,8 +345,6 @@ class _OnboardingRequestDto extends OnboardingRequestDto {
             const DeepCollectionEquality().equals(other._triggers, _triggers) &&
             const DeepCollectionEquality()
                 .equals(other._allergens, _allergens) &&
-            const DeepCollectionEquality()
-                .equals(other._medications, _medications) &&
             (identical(other.customTriggerText, customTriggerText) ||
                 other.customTriggerText == customTriggerText));
   }
@@ -391,12 +356,11 @@ class _OnboardingRequestDto extends OnboardingRequestDto {
       const DeepCollectionEquality().hash(_symptoms),
       const DeepCollectionEquality().hash(_triggers),
       const DeepCollectionEquality().hash(_allergens),
-      const DeepCollectionEquality().hash(_medications),
       customTriggerText);
 
   @override
   String toString() {
-    return 'OnboardingRequestDto(symptoms: $symptoms, triggers: $triggers, allergens: $allergens, medications: $medications, customTriggerText: $customTriggerText)';
+    return 'OnboardingRequestDto(symptoms: $symptoms, triggers: $triggers, allergens: $allergens, customTriggerText: $customTriggerText)';
   }
 }
 
@@ -412,7 +376,6 @@ abstract mixin class _$OnboardingRequestDtoCopyWith<$Res>
       {List<String> symptoms,
       List<String> triggers,
       List<String> allergens,
-      List<String> medications,
       String? customTriggerText});
 }
 
@@ -432,7 +395,6 @@ class __$OnboardingRequestDtoCopyWithImpl<$Res>
     Object? symptoms = null,
     Object? triggers = null,
     Object? allergens = null,
-    Object? medications = null,
     Object? customTriggerText = freezed,
   }) {
     return _then(_OnboardingRequestDto(
@@ -447,10 +409,6 @@ class __$OnboardingRequestDtoCopyWithImpl<$Res>
       allergens: null == allergens
           ? _self._allergens
           : allergens // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      medications: null == medications
-          ? _self._medications
-          : medications // ignore: cast_nullable_to_non_nullable
               as List<String>,
       customTriggerText: freezed == customTriggerText
           ? _self.customTriggerText

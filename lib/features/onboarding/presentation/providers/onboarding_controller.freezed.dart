@@ -32,9 +32,6 @@ mixin _$OnboardingDraft {
   /// (서버 `customTriggerText` 단일 문자열)로 보낸다.
   List<String> get customTriggers;
 
-  /// 복용약 목록.
-  List<String> get medications;
-
   /// 알레르기 코드 목록. 복수 선택.
   List<String> get allergies;
 
@@ -61,8 +58,6 @@ mixin _$OnboardingDraft {
                 .equals(other.triggerFoods, triggerFoods) &&
             const DeepCollectionEquality()
                 .equals(other.customTriggers, customTriggers) &&
-            const DeepCollectionEquality()
-                .equals(other.medications, medications) &&
             const DeepCollectionEquality().equals(other.allergies, allergies));
   }
 
@@ -74,12 +69,11 @@ mixin _$OnboardingDraft {
       diagnosed,
       const DeepCollectionEquality().hash(triggerFoods),
       const DeepCollectionEquality().hash(customTriggers),
-      const DeepCollectionEquality().hash(medications),
       const DeepCollectionEquality().hash(allergies));
 
   @override
   String toString() {
-    return 'OnboardingDraft(conditions: $conditions, symptomFrequency: $symptomFrequency, diagnosed: $diagnosed, triggerFoods: $triggerFoods, customTriggers: $customTriggers, medications: $medications, allergies: $allergies)';
+    return 'OnboardingDraft(conditions: $conditions, symptomFrequency: $symptomFrequency, diagnosed: $diagnosed, triggerFoods: $triggerFoods, customTriggers: $customTriggers, allergies: $allergies)';
   }
 }
 
@@ -95,7 +89,6 @@ abstract mixin class $OnboardingDraftCopyWith<$Res> {
       bool diagnosed,
       List<String> triggerFoods,
       List<String> customTriggers,
-      List<String> medications,
       List<String> allergies});
 }
 
@@ -117,7 +110,6 @@ class _$OnboardingDraftCopyWithImpl<$Res>
     Object? diagnosed = null,
     Object? triggerFoods = null,
     Object? customTriggers = null,
-    Object? medications = null,
     Object? allergies = null,
   }) {
     return _then(_self.copyWith(
@@ -140,10 +132,6 @@ class _$OnboardingDraftCopyWithImpl<$Res>
       customTriggers: null == customTriggers
           ? _self.customTriggers
           : customTriggers // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      medications: null == medications
-          ? _self.medications
-          : medications // ignore: cast_nullable_to_non_nullable
               as List<String>,
       allergies: null == allergies
           ? _self.allergies
@@ -252,7 +240,6 @@ extension OnboardingDraftPatterns on OnboardingDraft {
             bool diagnosed,
             List<String> triggerFoods,
             List<String> customTriggers,
-            List<String> medications,
             List<String> allergies)?
         $default, {
     required TResult orElse(),
@@ -266,7 +253,6 @@ extension OnboardingDraftPatterns on OnboardingDraft {
             _that.diagnosed,
             _that.triggerFoods,
             _that.customTriggers,
-            _that.medications,
             _that.allergies);
       case _:
         return orElse();
@@ -294,7 +280,6 @@ extension OnboardingDraftPatterns on OnboardingDraft {
             bool diagnosed,
             List<String> triggerFoods,
             List<String> customTriggers,
-            List<String> medications,
             List<String> allergies)
         $default,
   ) {
@@ -307,7 +292,6 @@ extension OnboardingDraftPatterns on OnboardingDraft {
             _that.diagnosed,
             _that.triggerFoods,
             _that.customTriggers,
-            _that.medications,
             _that.allergies);
       case _:
         throw StateError('Unexpected subclass');
@@ -334,7 +318,6 @@ extension OnboardingDraftPatterns on OnboardingDraft {
             bool diagnosed,
             List<String> triggerFoods,
             List<String> customTriggers,
-            List<String> medications,
             List<String> allergies)?
         $default,
   ) {
@@ -347,7 +330,6 @@ extension OnboardingDraftPatterns on OnboardingDraft {
             _that.diagnosed,
             _that.triggerFoods,
             _that.customTriggers,
-            _that.medications,
             _that.allergies);
       case _:
         return null;
@@ -364,13 +346,11 @@ class _OnboardingDraft implements OnboardingDraft {
       this.diagnosed = false,
       final List<String> triggerFoods = const <String>[],
       final List<String> customTriggers = const <String>[],
-      final List<String> medications = const <String>[],
       final List<String> allergies = const <String>[]})
       : _conditions = conditions,
         _symptomFrequency = symptomFrequency,
         _triggerFoods = triggerFoods,
         _customTriggers = customTriggers,
-        _medications = medications,
         _allergies = allergies;
 
   /// 질환 코드 목록. 기본 빈 목록 — 사용자가 선택해야 체크·다음 버튼 활성.
@@ -433,18 +413,6 @@ class _OnboardingDraft implements OnboardingDraft {
     return EqualUnmodifiableListView(_customTriggers);
   }
 
-  /// 복용약 목록.
-  final List<String> _medications;
-
-  /// 복용약 목록.
-  @override
-  @JsonKey()
-  List<String> get medications {
-    if (_medications is EqualUnmodifiableListView) return _medications;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_medications);
-  }
-
   /// 알레르기 코드 목록. 복수 선택.
   final List<String> _allergies;
 
@@ -481,8 +449,6 @@ class _OnboardingDraft implements OnboardingDraft {
             const DeepCollectionEquality()
                 .equals(other._customTriggers, _customTriggers) &&
             const DeepCollectionEquality()
-                .equals(other._medications, _medications) &&
-            const DeepCollectionEquality()
                 .equals(other._allergies, _allergies));
   }
 
@@ -494,12 +460,11 @@ class _OnboardingDraft implements OnboardingDraft {
       diagnosed,
       const DeepCollectionEquality().hash(_triggerFoods),
       const DeepCollectionEquality().hash(_customTriggers),
-      const DeepCollectionEquality().hash(_medications),
       const DeepCollectionEquality().hash(_allergies));
 
   @override
   String toString() {
-    return 'OnboardingDraft(conditions: $conditions, symptomFrequency: $symptomFrequency, diagnosed: $diagnosed, triggerFoods: $triggerFoods, customTriggers: $customTriggers, medications: $medications, allergies: $allergies)';
+    return 'OnboardingDraft(conditions: $conditions, symptomFrequency: $symptomFrequency, diagnosed: $diagnosed, triggerFoods: $triggerFoods, customTriggers: $customTriggers, allergies: $allergies)';
   }
 }
 
@@ -517,7 +482,6 @@ abstract mixin class _$OnboardingDraftCopyWith<$Res>
       bool diagnosed,
       List<String> triggerFoods,
       List<String> customTriggers,
-      List<String> medications,
       List<String> allergies});
 }
 
@@ -539,7 +503,6 @@ class __$OnboardingDraftCopyWithImpl<$Res>
     Object? diagnosed = null,
     Object? triggerFoods = null,
     Object? customTriggers = null,
-    Object? medications = null,
     Object? allergies = null,
   }) {
     return _then(_OnboardingDraft(
@@ -562,10 +525,6 @@ class __$OnboardingDraftCopyWithImpl<$Res>
       customTriggers: null == customTriggers
           ? _self._customTriggers
           : customTriggers // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      medications: null == medications
-          ? _self._medications
-          : medications // ignore: cast_nullable_to_non_nullable
               as List<String>,
       allergies: null == allergies
           ? _self._allergies

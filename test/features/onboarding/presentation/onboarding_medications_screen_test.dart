@@ -71,11 +71,11 @@ Widget _wrap({List<Override> overrides = const []}) => ProviderScope(
 
 void main() {
   group('OnboardingMedicationsScreen', () {
-    testWidgets('타이틀 "알레르기와 복용 중인 약을" 텍스트가 렌더된다', (tester) async {
+    testWidgets('타이틀 "알레르기가 있나요?" 텍스트가 렌더된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('알레르기와 복용 중인 약을'), findsOneWidget);
+      expect(find.text('알레르기가 있나요?'), findsOneWidget);
     });
 
     testWidgets('서브타이틀 "없으면 완료를 눌러주세요…" 멘트가 렌더된다', (tester) async {
@@ -191,11 +191,10 @@ void main() {
       );
     });
 
-    testWidgets('복용약 입력란은 렌더되지 않는다', (tester) async {
+    testWidgets('텍스트 입력란은 렌더되지 않는다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('복용 중인 약'), findsNothing);
       expect(find.byType(TextField), findsNothing);
     });
 

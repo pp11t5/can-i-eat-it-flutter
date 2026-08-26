@@ -12,7 +12,7 @@ import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/allergy_med_edit_screen.dart';
 
-/// 골든 테스트 — 알레르기·복용약 편집 화면 (마스터 Figma 577-10291 대조용 PNG).
+/// 골든 테스트 — 알레르기 편집 화면 (마스터 Figma 577-10291 대조용 PNG).
 ///
 /// 생성된 PNG 경로:
 /// - test/features/mypage/presentation/goldens/allergy_med_chip_selected.png
@@ -54,7 +54,6 @@ void main() {
         initialProfile: const HealthProfile(
           conditions: ['GERD'],
           allergies: ['crustacean'],
-          medications: ['omeprazole'],
         ),
       );
 
@@ -67,18 +66,17 @@ void main() {
       );
     });
 
-    testWidgets('복용약 입력 상태 — 알레르기 선택 + 복용약 추가됨', (tester) async {
+    testWidgets('복수 알레르기 선택 상태', (tester) async {
       tester.view.physicalSize = const Size(375, 812);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      // 복수 알레르기 + 복용약이 있는 프로필
+      // 복수 알레르기가 선택된 프로필
       final repo = MockHealthProfileRepository(
         initialProfile: const HealthProfile(
           conditions: ['GERD'],
           allergies: ['milk', 'egg', 'wheat'],
-          medications: ['omeprazole', '란소프라졸'],
         ),
       );
 

@@ -30,7 +30,6 @@ class _ThrowingHealthProfileRepository implements HealthProfileRepository {
   @override
   Future<void> updateHealthInfo({
     required List<String> allergies,
-    required List<String> medications,
   }) async {}
 
   @override
@@ -95,6 +94,32 @@ void main() {
 
       final status = container.read(sessionStatusProvider);
       expect(status, SessionStatus.ready);
+    });
+
+    test('로그인 시 이전 계정의 온보딩 완료 캐시를 무효화한다', () async {
+      final container = makeContainer(
+        authRepo: MockAuthRepository.existing(onboarded: true),
+        profileRepo: MockHealthProfileRepository.completed(
+          delay: const Duration(milliseconds: 50),
+        ),
+      );
+
+      await container.read(authControllerProvider.future);
+      await container.read(onboardedStatusProvider.future);
+      expect(container.read(onboardedStatusProvider).valueOrNull, isTrue);
+
+      final signIn =
+          container.read(authControllerProvider.notifier).signInWithKakao();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(
+        container.read(onboardedStatusProvider).isLoading,
+        isTrue,
+        reason: '새 세션은 이전 계정의 완료 상태를 재사용하면 안 된다',
+      );
+
+      await signIn;
+      await container.read(onboardedStatusProvider.future);
     });
 
     test('약관 미동의(newUser 로그인 후) → needsTerms', () async {

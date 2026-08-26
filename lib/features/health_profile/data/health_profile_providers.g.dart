@@ -34,7 +34,7 @@ typedef HealthProfileRepositoryRef
     = AutoDisposeProviderRef<HealthProfileRepository>;
 String _$medicalInfoStrictHash() => r'94e7c3ba02ec4f7dc2985547cdf4e786b9846027';
 
-/// 알레르기·복용약 편집 화면 전용 — 캐시 폴백 없이 서버 최신 상태를 조회한다.
+/// 알레르기 편집 화면 전용 — 캐시 폴백 없이 서버 최신 상태를 조회한다.
 ///
 /// [HealthProfileController]([currentProfile] 기반)와 달리 실패 시 에러를 그대로
 /// 전파한다 — stale 데이터 위에서 편집·PATCH하는 것을 막기 위함(의료안전, pr-review ②-1).
@@ -57,7 +57,7 @@ final medicalInfoStrictProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef MedicalInfoStrictRef = AutoDisposeFutureProviderRef<HealthProfile>;
-String _$onboardedStatusHash() => r'261b515f4f604aed6b2062c6ad180acde41d874d';
+String _$onboardedStatusHash() => r'f7b4f3fafad7e7eb14bdfaf1d8c2cd4753242f19';
 
 /// 온보딩 완료 여부 AsyncNotifier (ADR-0007 §3-1 (6-D)).
 ///
@@ -67,7 +67,7 @@ String _$onboardedStatusHash() => r'261b515f4f604aed6b2062c6ad180acde41d874d';
 ///
 /// Copied from [onboardedStatus].
 @ProviderFor(onboardedStatus)
-final onboardedStatusProvider = AutoDisposeFutureProvider<bool>.internal(
+final onboardedStatusProvider = FutureProvider<bool>.internal(
   onboardedStatus,
   name: r'onboardedStatusProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -79,9 +79,9 @@ final onboardedStatusProvider = AutoDisposeFutureProvider<bool>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef OnboardedStatusRef = AutoDisposeFutureProviderRef<bool>;
+typedef OnboardedStatusRef = FutureProviderRef<bool>;
 String _$healthProfileControllerHash() =>
-    r'6a33bc45677410f2803c61a8d3d180009ff54467';
+    r'd8329f9535c701b1f442da298c5a2a3ef00dca61';
 
 /// 건강 프로필 상태 컨트롤러 (AsyncNotifier).
 ///

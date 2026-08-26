@@ -7,7 +7,7 @@ part of 'onboarding_controller.dart';
 // **************************************************************************
 
 String _$onboardingControllerHash() =>
-    r'd6e311081ed40a5b8cff8b1856f02f4f341b2f8c';
+    r'318862667aa70aba8dd347b851a3605b9f305e3b';
 
 /// 온보딩 입력 드래프트를 관리하는 컨트롤러.
 ///
