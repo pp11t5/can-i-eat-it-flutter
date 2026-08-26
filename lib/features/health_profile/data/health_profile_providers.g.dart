@@ -57,7 +57,7 @@ final medicalInfoStrictProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef MedicalInfoStrictRef = AutoDisposeFutureProviderRef<HealthProfile>;
-String _$onboardedStatusHash() => r'261b515f4f604aed6b2062c6ad180acde41d874d';
+String _$onboardedStatusHash() => r'f7b4f3fafad7e7eb14bdfaf1d8c2cd4753242f19';
 
 /// 온보딩 완료 여부 AsyncNotifier (ADR-0007 §3-1 (6-D)).
 ///
@@ -67,7 +67,7 @@ String _$onboardedStatusHash() => r'261b515f4f604aed6b2062c6ad180acde41d874d';
 ///
 /// Copied from [onboardedStatus].
 @ProviderFor(onboardedStatus)
-final onboardedStatusProvider = AutoDisposeFutureProvider<bool>.internal(
+final onboardedStatusProvider = FutureProvider<bool>.internal(
   onboardedStatus,
   name: r'onboardedStatusProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -79,7 +79,7 @@ final onboardedStatusProvider = AutoDisposeFutureProvider<bool>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef OnboardedStatusRef = AutoDisposeFutureProviderRef<bool>;
+typedef OnboardedStatusRef = FutureProviderRef<bool>;
 String _$healthProfileControllerHash() =>
     r'd8329f9535c701b1f442da298c5a2a3ef00dca61';
 

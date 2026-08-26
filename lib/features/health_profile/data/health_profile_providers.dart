@@ -33,7 +33,9 @@ Future<HealthProfile> medicalInfoStrict(Ref ref) =>
 /// [sessionStatus] provider가 이 값을 `hasProfile` 소스로 사용한다.
 /// [HealthProfileRepository.onboardedStatus]를 호출해 boolean을 반환한다.
 /// 로딩 중에는 hasProfile=null → SessionStatus.loading 유지.
-@riverpod
+// 세션 게이트의 마지막 조회값은 유지한다. 화면 전환 사이 autoDispose로 다시
+// 로드되면 SessionStatus가 ready/needsOnboarding 대신 loading으로 흔들린다.
+@Riverpod(keepAlive: true)
 Future<bool> onboardedStatus(Ref ref) =>
     ref.watch(healthProfileRepositoryProvider).onboardedStatus();
 

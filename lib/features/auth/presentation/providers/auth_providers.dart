@@ -19,6 +19,7 @@ import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/consent.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
 import 'package:can_i_eat_it/features/auth/domain/repositories/auth_repository.dart';
+import 'package:can_i_eat_it/features/health_profile/data/health_profile_providers.dart';
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
 import 'package:can_i_eat_it/features/meal_log/data/sources/timeline_guide_store.dart';
 import 'package:can_i_eat_it/features/mypage/data/my_page_providers.dart';
@@ -147,7 +148,9 @@ bool coldStartOffline(Ref ref) =>
 /// [_onSessionExpired] 로 배선한다.
 /// 순환참조 없음: dioProvider → AuthInterceptor(seam=null) 먼저 생성 →
 /// AuthController.build() 가 post-init 으로 seam 주입.
-@riverpod
+// 인증 세션은 앱 수명 동안 유지해야 한다. autoDispose이면 로그인 완료 뒤 다음
+// sessionStatus read 전에 build가 재시작되어 일시적으로 loading으로 되돌 수 있다.
+@Riverpod(keepAlive: true)
 class AuthController extends _$AuthController {
   @override
   Future<AuthSession?> build() async {
@@ -253,6 +256,7 @@ class AuthController extends _$AuthController {
       {required String idToken}) async {
     final repo = ref.read(authRepositoryProvider);
     final outcome = await repo.recoverAccount(provider, idToken: idToken);
+    _invalidateOnboardingStatus();
     state = AsyncValue.data(outcome.session);
     await _syncSharedSession(outcome.session);
     // 복구 성공 후 세션이 생겼으므로 FCM 토큰 등록 — fire-and-forget.
@@ -332,6 +336,7 @@ class AuthController extends _$AuthController {
         await ref.read(timelineGuideStoreProvider).clearFabGuideSeen(userId);
       } catch (_) {}
     }
+    _invalidateOnboardingStatus();
     state = const AsyncValue.data(null);
   }
 
@@ -343,6 +348,7 @@ class AuthController extends _$AuthController {
     await _purgeSymptomOutbox();
     await ref.read(authRepositoryProvider).logout();
     await ref.read(profileCacheProvider).clear();
+    _invalidateOnboardingStatus();
     state = const AsyncValue.data(null);
   }
 
@@ -355,6 +361,7 @@ class AuthController extends _$AuthController {
     await _purgeSymptomOutbox();
     await ref.read(authRepositoryProvider).signOut();
     await ref.read(profileCacheProvider).clear();
+    _invalidateOnboardingStatus();
     state = const AsyncValue.data(null);
   }
 
@@ -364,6 +371,9 @@ class AuthController extends _$AuthController {
 
   /// [SignInOutcome] 에 따라 컨트롤러 상태를 갱신한다.
   void _applyOutcomeToState(SignInOutcome outcome) {
+    // keepAlive된 온보딩 게이트가 이전 계정 결과를 재사용하지 않도록, 로그인
+    // 결과를 세션에 반영하기 전에 항상 비운다.
+    _invalidateOnboardingStatus();
     switch (outcome) {
       case Authenticated(:final session):
         state = AsyncValue.data(session);
@@ -391,8 +401,14 @@ class AuthController extends _$AuthController {
   ///
   /// 세션을 null 로 전이시켜 sessionStatusProvider 가 unauthenticated 를 반환하도록 한다.
   void _onSessionExpired() {
+    _invalidateOnboardingStatus();
     state = const AsyncValue.data(null);
     unawaited(_purgeSymptomOutbox());
+  }
+
+  /// 세션 주체가 바뀌거나 해제될 때 이전 계정의 온보딩 완료 캐시를 폐기한다.
+  void _invalidateOnboardingStatus() {
+    ref.invalidate(onboardedStatusProvider);
   }
 
   /// 로그인/복구/부트스트랩 후 access token과 주체를 Extension에 제공한다.

@@ -17,18 +17,14 @@ import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding
 
 /// 온보딩 Step 4/4: 알레르기 선택 본문.
 ///
-/// 완료 버튼이 onboardingSubmitProvider.submit()을 호출하고
-/// [sessionStatus]가 [SessionStatus.ready]가 된 뒤에만 홈(/)으로 이동한다.
-/// (submit 직후 즉시 go 하면 needsOnboarding 가드가 condition 화면으로 튕김)
+/// 완료 버튼은 프로필 제출·온보딩 게이트 재조회 성공 후 홈(/)으로 이동한다.
+/// [sessionStatus]가 [SessionStatus.ready]로 전이되는 경우도 홈 이동을 보장한다.
 /// 건너뛰기 없음. 탑바·[StepProgress]는 [OnboardingShell]이 고정 렌더한다.
 class OnboardingMedicationsScreen extends ConsumerWidget {
   const OnboardingMedicationsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // submit 직후 go('/') 금지 — onboardedStatus 재조회 전 needsOnboarding이면
-    // 가드가 /onboarding/condition 으로 튕겨 첫 화면이 깜빡인다.
-    // sessionStatus가 ready로 전이된 뒤에만 홈으로 이동한다.
     ref.listen<SessionStatus>(sessionStatusProvider, (previous, next) {
       if (next == SessionStatus.ready && previous != SessionStatus.ready) {
         if (context.mounted) context.go('/');
@@ -158,14 +154,22 @@ class OnboardingMedicationsScreen extends ConsumerWidget {
                               label: '완료',
                               onPressed: isLoading
                                   ? null
-                                  : () {
+                                  : () async {
                                       FocusManager.instance.primaryFocus
                                           ?.unfocus();
-                                      ref
+                                      await ref
                                           .read(
                                             onboardingSubmitProvider.notifier,
                                           )
                                           .submit();
+                                      // submit은 onboardedStatus 재조회까지 완료한다.
+                                      // 성공한 경우에만 홈으로 교체 이동하면, 이후
+                                      // sessionStatus가 ready가 되어도 가드가 홈을 유지한다.
+                                      if (context.mounted &&
+                                          ref.read(onboardingSubmitProvider)
+                                              is AsyncData<void>) {
+                                        context.go('/');
+                                      }
                                     },
                               isLoading: isLoading,
                               isExpanded: true,
