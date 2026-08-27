@@ -3,3 +3,5 @@ SYMPTOM_APP_GROUP_ID = group.com.canieatthis.canIEatThis1.symptom-response
 SYMPTOM_KEYCHAIN_ACCESS_GROUP = $(AppIdentifierPrefix)com.canieatthis.canIEatThis1.extension-auth
 SYMPTOM_API_BASE_URL = https:/$()/prod.can-i-eat-it.com/api/v1
 SYMPTOM_BACKGROUND_SESSION_ID = com.canieatthis.symptom-response.prod.extension
+HOME_WIDGET_EXTENSION_BUNDLE_ID = com.canieatthis.canIEatThis1.HomeWidgetExtension
+HOME_WIDGET_APP_GROUP_ID = group.com.canieatthis.canIEatThis1.home-widget

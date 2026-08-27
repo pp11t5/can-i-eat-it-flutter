@@ -11,6 +11,7 @@
 	<key>com.apple.security.application-groups</key>
 	<array>
 		<string>$(SYMPTOM_APP_GROUP_ID)</string>
+		<string>$(HOME_WIDGET_APP_GROUP_ID)</string>
 	</array>
 	<key>keychain-access-groups</key>
 	<array>

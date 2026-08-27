@@ -30,6 +30,7 @@ import UserNotifications
       }
     }
     SymptomOutboxMethodChannel.register(binaryMessenger: engineBridge.applicationRegistrar.messenger())
+    HomeWidgetMethodChannel.register(binaryMessenger: engineBridge.applicationRegistrar.messenger())
   }
 
   override func application(
@@ -76,9 +77,21 @@ import UserNotifications
 class SceneDelegate: FlutterSceneDelegate {
   override func scene(
     _ scene: UIScene,
+    willConnectTo session: UISceneSession,
+    options connectionOptions: UIScene.ConnectionOptions
+  ) {
+    for context in connectionOptions.urlContexts {
+      _ = HomeWidgetLinkStore.capture(context.url)
+    }
+    super.scene(scene, willConnectTo: session, options: connectionOptions)
+  }
+
+  override func scene(
+    _ scene: UIScene,
     openURLContexts URLContexts: Set<UIOpenURLContext>
   ) {
-    for context in URLContexts {
+    let nonWidgetContexts = Set(URLContexts.filter { !HomeWidgetLinkStore.capture($0.url) })
+    for context in nonWidgetContexts {
       #if DEBUG
       // 진단 로그(디버그 전용). 인가 code 노출 방지 위해 scheme 만 기록한다.
       NSLog("[KakaoBridge] openURL scheme: \(context.url.scheme ?? "nil")")
@@ -91,6 +104,8 @@ class SceneDelegate: FlutterSceneDelegate {
         )
       }
     }
-    super.scene(scene, openURLContexts: URLContexts)
+    if !nonWidgetContexts.isEmpty {
+      super.scene(scene, openURLContexts: nonWidgetContexts)
+    }
   }
 }
