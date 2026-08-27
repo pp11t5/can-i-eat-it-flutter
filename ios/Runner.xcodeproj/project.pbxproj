@@ -33,6 +33,11 @@
 		A10000000000000000000087 /* SymptomHeaderIconProd@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000083 /* SymptomHeaderIconProd@3x.png */; };
 		A10000000000000000000070 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10000000000000000000072 /* UserNotifications.framework */; };
 		A10000000000000000000071 /* UserNotificationsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10000000000000000000073 /* UserNotificationsUI.framework */; };
+		D10000000000000000000001 /* HomeWidgetMethodChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000011 /* HomeWidgetMethodChannel.swift */; };
+		D10000000000000000000002 /* TodayMealWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D10000000000000000000012 /* TodayMealWidget.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D10000000000000000000003 /* HomeWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000013 /* HomeWidgetExtension.swift */; };
+		D10000000000000000000004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000016 /* Assets.xcassets */; };
+		D10000000000000000000005 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D10000000000000000000019 /* WidgetKit.framework */; };
 		A5B66CFE8F36A35358C945FE /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE6DFD94F243049A15886C5F /* Pods_RunnerTests.framework */; };
 		DF91CB99AD3EE7904AA2502E /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E003B43A1530AC2DEEF6FC26 /* Pods_Runner.framework */; };
 /* End PBXBuildFile section */
@@ -51,6 +56,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = A10000000000000000000040;
 			remoteInfo = SymptomNotificationContent;
+		};
+		D10000000000000000000010 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D10000000000000000000020;
+			remoteInfo = TodayMealWidget;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -72,6 +84,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				A10000000000000000000006 /* SymptomNotificationContent.appex in Embed App Extensions */,
+				D10000000000000000000002 /* TodayMealWidget.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -130,6 +143,15 @@
 		A10000000000000000000083 /* SymptomHeaderIconProd@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SymptomHeaderIconProd@3x.png"; sourceTree = "<group>"; };
 		A10000000000000000000072 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		A10000000000000000000073 /* UserNotificationsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotificationsUI.framework; path = System/Library/Frameworks/UserNotificationsUI.framework; sourceTree = SDKROOT; };
+		D10000000000000000000011 /* HomeWidgetMethodChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeWidgetMethodChannel.swift; sourceTree = "<group>"; };
+		D10000000000000000000012 /* TodayMealWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TodayMealWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D10000000000000000000013 /* HomeWidgetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeWidgetExtension.swift; sourceTree = "<group>"; };
+		D10000000000000000000014 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D10000000000000000000015 /* HomeWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HomeWidgetExtension.entitlements; sourceTree = "<group>"; };
+		D10000000000000000000016 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D10000000000000000000017 /* Extension-dev.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Extension-dev.xcconfig"; sourceTree = "<group>"; };
+		D10000000000000000000018 /* Extension-prod.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Extension-prod.xcconfig"; sourceTree = "<group>"; };
+		D10000000000000000000019 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		A83C397E2381911163FBECB1 /* Profile-prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Profile-prod.xcconfig"; path = "Flutter/Profile-prod.xcconfig"; sourceTree = "<group>"; };
 		AA475F0DBB62505CA6A3D54A /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		AE6DFD94F243049A15886C5F /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -166,6 +188,14 @@
 			files = (
 				A10000000000000000000070 /* UserNotifications.framework in Frameworks */,
 				A10000000000000000000071 /* UserNotificationsUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			};
+		D10000000000000000000052 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D10000000000000000000005 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -212,6 +242,7 @@
 				AE6DFD94F243049A15886C5F /* Pods_RunnerTests.framework */,
 				A10000000000000000000072 /* UserNotifications.framework */,
 				A10000000000000000000073 /* UserNotificationsUI.framework */,
+				D10000000000000000000019 /* WidgetKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -245,6 +276,7 @@
 				5387AC1D53B783780058B5A7 /* Frameworks */,
 				A10000000000000000000031 /* SymptomResponseShared */,
 				A10000000000000000000032 /* SymptomNotificationContent */,
+				D10000000000000000000030 /* HomeWidgetExtension */,
 			);
 			sourceTree = "<group>";
 		};
@@ -254,6 +286,7 @@
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
 				A10000000000000000000016 /* SymptomNotificationContent.appex */,
+				D10000000000000000000012 /* TodayMealWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -270,6 +303,7 @@
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				A10000000000000000000011 /* SymptomOutboxMethodChannel.swift */,
+				D10000000000000000000011 /* HomeWidgetMethodChannel.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 			);
 			path = Runner;
@@ -307,6 +341,27 @@
 			children = (
 				A1000000000000000000001A /* Extension-dev.xcconfig */,
 				A1000000000000000000001B /* Extension-prod.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000030 /* HomeWidgetExtension */ = {
+			isa = PBXGroup;
+			children = (
+				D10000000000000000000013 /* HomeWidgetExtension.swift */,
+				D10000000000000000000016 /* Assets.xcassets */,
+				D10000000000000000000014 /* Info.plist */,
+				D10000000000000000000015 /* HomeWidgetExtension.entitlements */,
+				D10000000000000000000031 /* Config */,
+			);
+			path = HomeWidgetExtension;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000031 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				D10000000000000000000017 /* Extension-dev.xcconfig */,
+				D10000000000000000000018 /* Extension-prod.xcconfig */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -353,6 +408,7 @@
 			);
 			dependencies = (
 				A10000000000000000000041 /* PBXTargetDependency */,
+				D10000000000000000000021 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			packageProductDependencies = (
@@ -379,15 +435,32 @@
 			productReference = A10000000000000000000016 /* SymptomNotificationContent.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		D10000000000000000000020 /* TodayMealWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D10000000000000000000050 /* Build configuration list for PBXNativeTarget "TodayMealWidget" */;
+			buildPhases = (
+				D10000000000000000000051 /* Sources */,
+				D10000000000000000000052 /* Frameworks */,
+				D10000000000000000000053 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TodayMealWidget;
+			productName = TodayMealWidget;
+			productReference = D10000000000000000000012 /* TodayMealWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		97C146E61CF9000F007C117D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				A10000000000000000000040 = {
-					CreatedOnToolsVersion = 15.0;
-				};
+			A10000000000000000000040 = {
+				CreatedOnToolsVersion = 15.0;
+			};
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1510;
 				ORGANIZATIONNAME = "";
@@ -396,11 +469,14 @@
 						CreatedOnToolsVersion = 14.0;
 						TestTargetID = 97C146ED1CF9000F007C117D;
 					};
-					97C146ED1CF9000F007C117D = {
-						CreatedOnToolsVersion = 7.3.1;
-						LastSwiftMigration = 1100;
-					};
+				97C146ED1CF9000F007C117D = {
+					CreatedOnToolsVersion = 7.3.1;
+					LastSwiftMigration = 1100;
 				};
+				D10000000000000000000020 = {
+					CreatedOnToolsVersion = 15.0;
+				};
+			};
 			};
 			buildConfigurationList = 97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */;
 			compatibilityVersion = "Xcode 9.3";
@@ -420,6 +496,7 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				A10000000000000000000040 /* SymptomNotificationContent */,
+				D10000000000000000000020 /* TodayMealWidget */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
 			);
 		};
@@ -453,6 +530,14 @@
 				A10000000000000000000085 /* SymptomHeaderIconDev@3x.png in Resources */,
 				A10000000000000000000086 /* SymptomHeaderIconProd@2x.png in Resources */,
 				A10000000000000000000087 /* SymptomHeaderIconProd@3x.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D10000000000000000000053 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D10000000000000000000004 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -606,6 +691,7 @@
 				A10000000000000000000003 /* SharedAccessTokenStore.swift in Sources */,
 				A10000000000000000000004 /* SymptomOutboxStore.swift in Sources */,
 				A10000000000000000000005 /* SymptomNativeUploader.swift in Sources */,
+				D10000000000000000000001 /* HomeWidgetMethodChannel.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 			);
@@ -623,6 +709,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D10000000000000000000051 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D10000000000000000000003 /* HomeWidgetExtension.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -635,6 +729,11 @@
 			isa = PBXTargetDependency;
 			target = A10000000000000000000040 /* SymptomNotificationContent */;
 			targetProxy = 38DB9CC73036C41600108D3B /* PBXContainerItemProxy */;
+		};
+		D10000000000000000000021 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D10000000000000000000020 /* TodayMealWidget */;
+			targetProxy = D10000000000000000000010 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1287,6 +1386,130 @@
 			};
 			name = "Profile-prod";
 		};
+		D10000000000000000000061 /* Debug-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D10000000000000000000017 /* Extension-dev.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = HomeWidgetExtension/HomeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = HomeWidgetExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(HOME_WIDGET_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Debug-dev";
+		};
+		D10000000000000000000062 /* Release-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D10000000000000000000017 /* Extension-dev.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = HomeWidgetExtension/HomeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = HomeWidgetExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(HOME_WIDGET_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Release-dev";
+		};
+		D10000000000000000000063 /* Profile-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D10000000000000000000017 /* Extension-dev.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = HomeWidgetExtension/HomeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = HomeWidgetExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(HOME_WIDGET_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Profile-dev";
+		};
+		D10000000000000000000064 /* Debug-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D10000000000000000000018 /* Extension-prod.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = HomeWidgetExtension/HomeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = HomeWidgetExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(HOME_WIDGET_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Debug-prod";
+		};
+		D10000000000000000000065 /* Release-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D10000000000000000000018 /* Extension-prod.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = HomeWidgetExtension/HomeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = HomeWidgetExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(HOME_WIDGET_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Release-prod";
+		};
+		D10000000000000000000066 /* Profile-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D10000000000000000000018 /* Extension-prod.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = HomeWidgetExtension/HomeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = HomeWidgetExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(HOME_WIDGET_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Profile-prod";
+		};
 		C2DB782345FDF572D943CE3C /* Release-dev */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1442,6 +1665,19 @@
 				A10000000000000000000064 /* Debug-prod */,
 				A10000000000000000000065 /* Release-prod */,
 				A10000000000000000000066 /* Profile-prod */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Release-prod";
+		};
+		D10000000000000000000050 /* Build configuration list for PBXNativeTarget "TodayMealWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D10000000000000000000061 /* Debug-dev */,
+				D10000000000000000000062 /* Release-dev */,
+				D10000000000000000000063 /* Profile-dev */,
+				D10000000000000000000064 /* Debug-prod */,
+				D10000000000000000000065 /* Release-prod */,
+				D10000000000000000000066 /* Profile-prod */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Release-prod";

@@ -1,0 +1,4 @@
+#include "../../Flutter/Generated.xcconfig"
+
+HOME_WIDGET_EXTENSION_BUNDLE_ID = com.canieatthis.canIEatThis.dev.HomeWidgetExtension
+HOME_WIDGET_APP_GROUP_ID = group.com.canieatthis.canIEatThis.dev.home-widget
