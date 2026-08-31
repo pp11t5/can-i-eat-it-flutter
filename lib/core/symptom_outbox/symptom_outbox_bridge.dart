@@ -3,6 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'symptom_outbox_bridge.g.dart';
 
 /// App Group Outbox의 iOS 구현과 통신하는 작은 경계 인터페이스.
 ///
@@ -184,7 +187,8 @@ class MethodChannelSymptomOutboxBridge implements SymptomOutboxBridge {
   }
 }
 
-final symptomOutboxBridgeProvider = Provider<SymptomOutboxBridge>((ref) {
+@Riverpod(keepAlive: true)
+SymptomOutboxBridge symptomOutboxBridge(Ref ref) {
   if (!Platform.isIOS) return const UnsupportedSymptomOutboxBridge();
   return MethodChannelSymptomOutboxBridge();
-});
+}

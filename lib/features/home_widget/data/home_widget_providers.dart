@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:can_i_eat_it/app/router/app_router.dart';
 import 'package:can_i_eat_it/core/push/push_route_navigator.dart';
@@ -13,12 +14,15 @@ import 'package:can_i_eat_it/features/home_widget/data/home_widget_controller.da
 import 'package:can_i_eat_it/features/home_widget/data/home_widget_coordinator.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 
+part 'home_widget_providers.g.dart';
+
 /// 식사/증상 저장 직후 위젯을 갱신할 때 쓴다. [Ref]와 [WidgetRef] 모두 `.read`로 호출한다.
 void scheduleHomeWidgetSync(HomeWidgetController controller) {
   unawaited(controller.sync());
 }
 
-final homeWidgetControllerProvider = Provider<HomeWidgetController>((ref) {
+@Riverpod(keepAlive: true)
+HomeWidgetController homeWidgetController(Ref ref) {
   return HomeWidgetController(
     composer: HomeWidgetComposer(
       homeRepository: ref.watch(homeRepositoryProvider),
@@ -27,10 +31,11 @@ final homeWidgetControllerProvider = Provider<HomeWidgetController>((ref) {
     bridge: const HomeWidgetPluginBridge(),
     isLoggedIn: () => ref.read(sessionStatusProvider) == SessionStatus.ready,
   );
-});
+}
 
 /// 세션 전이·앱 재개·위젯 탭을 연결한다. [App]에서 watch한다.
-final homeWidgetCoordinatorProvider = Provider<HomeWidgetCoordinator>((ref) {
+@Riverpod(keepAlive: true)
+HomeWidgetCoordinator homeWidgetCoordinator(Ref ref) {
   ref.watch(appRouterProvider);
 
   final coordinator = HomeWidgetCoordinator(
@@ -80,7 +85,7 @@ final homeWidgetCoordinatorProvider = Provider<HomeWidgetCoordinator>((ref) {
   }());
 
   return coordinator;
-});
+}
 
 class _HomeWidgetLifecycleObserver extends WidgetsBindingObserver {
   _HomeWidgetLifecycleObserver(this._onResumed);
