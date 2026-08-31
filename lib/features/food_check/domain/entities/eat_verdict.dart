@@ -112,7 +112,7 @@ abstract class VerdictSubstitute with _$VerdictSubstitute {
 ///
 /// 화면 구조:
 /// - HeroSection: [personalTitle] + 신호등 배지 ([level])
-/// - PersonalAnalysis: [items] 2개 (트리거/증상, 알레르기/복용약)
+/// - PersonalAnalysis: [items] 2개 (트리거/증상, 알레르기)
 /// - Substitutes: [substitutes] (RECOMMEND·UNKNOWN과 현재 by-text 응답에서 빈배열)
 /// - StateRecords: [stateRecords] (기록 없으면 total=0)
 ///
@@ -131,7 +131,7 @@ abstract class EatVerdict with _$EatVerdict {
     @Default('') String personalTitle,
 
     /// 분석 항목 2종.
-    /// [0] = 트리거/증상 분석, [1] = 알레르기/복용약 분석.
+    /// [0] = 트리거/증상 분석, [1] = 알레르기 분석.
     @Default(<VerdictItem>[]) List<VerdictItem> items,
 
     /// 연관 섭취 기록 요약. 기록 없으면 VerdictStateRecords(total:0).
@@ -164,8 +164,8 @@ abstract class EatVerdict with _$EatVerdict {
             body: '역류 트리거에 해당하지 않아요.',
           ),
           VerdictItem(
-            emphasis: '알레르기/복용약 분석',
-            body: '알레르기·복용약 충돌이 없어요.',
+            emphasis: '알레르기 분석',
+            body: '입력한 음식 정보에서 확인된 알레르겐이 없어요.',
           ),
         ],
         substitutes: const [],
@@ -182,11 +182,11 @@ abstract class EatVerdict with _$EatVerdict {
         items: const [
           VerdictItem(
             emphasis: '트리거/증상 분석',
-            body: '나트륨 함량이 높아 위산 역류를 악화할 수 있어요.',
+            body: '이 음식은 짠 편이에요. 사람마다 불편함이 다를 수 있어요.',
           ),
           VerdictItem(
-            emphasis: '알레르기/복용약 분석',
-            body: '알레르기·복용약 충돌은 없어요.',
+            emphasis: '알레르기 분석',
+            body: '입력한 음식 정보에서 확인된 알레르겐이 없어요.',
           ),
         ],
         substitutes: const [
@@ -215,11 +215,11 @@ abstract class EatVerdict with _$EatVerdict {
         items: const [
           VerdictItem(
             emphasis: '트리거/증상 분석',
-            body: '카페인이 위산 분비를 촉진해 증상을 악화시켜요.',
+            body: '카페인이 들어 있어요. 사람마다 불편함이 다를 수 있어요.',
           ),
           VerdictItem(
-            emphasis: '알레르기/복용약 분석',
-            body: '복용약과의 직접 충돌은 없어요.',
+            emphasis: '알레르기 분석',
+            body: '입력한 음식 정보에서 확인된 알레르겐이 없어요.',
           ),
         ],
         substitutes: const [

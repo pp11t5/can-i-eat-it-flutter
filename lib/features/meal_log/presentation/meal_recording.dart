@@ -8,6 +8,7 @@ import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_arg
 import 'package:can_i_eat_it/features/food_check/presentation/providers/add_to_diet_handler_provider.dart';
 import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/dictionary_list_controller.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
+import 'package:can_i_eat_it/features/home_widget/data/home_widget_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
 
 /// Riverpod [Provider] 기반 핸들러 — app 레이어 override 전용.
@@ -57,6 +58,7 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
       ref.invalidate(recentMealsProvider);
       ref.invalidate(unrecordedMealCountProvider);
       invalidateDictionaryCaches(ref.invalidate);
+      scheduleHomeWidgetSync(ref.read(homeWidgetControllerProvider));
 
       final message = ctx.mealRecordId != null
           ? '현재 식사에 음식을 추가했어요.'

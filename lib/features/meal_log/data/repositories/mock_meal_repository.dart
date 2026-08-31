@@ -1,6 +1,7 @@
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
-import 'package:can_i_eat_it/features/meal_log/data/dtos/meal_dtos.dart' show clampMealName;
+import 'package:can_i_eat_it/features/meal_log/data/dtos/meal_dtos.dart'
+    show clampMealName;
 import 'package:can_i_eat_it/features/meal_log/domain/entities/meal_entities.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/repositories/meal_repository.dart';
@@ -19,8 +20,7 @@ class MockMealRepository implements MealRepository {
     Map<String, MealFood>? initialFoodDetails,
     Map<String, List<MonthlyDay>>? initialMonthly,
     List<MealCandidatesDay>? initialCandidates,
-  })  : _timeline =
-            initialTimeline != null ? List.from(initialTimeline) : [],
+  })  : _timeline = initialTimeline != null ? List.from(initialTimeline) : [],
         _mealDetails = {...?initialMealDetails},
         _foodDetails = {...?initialFoodDetails},
         _monthly = {...?initialMonthly},
@@ -329,8 +329,8 @@ Map<String, MealFood> _buildSeedFoodDetails(DateTime base) {
           content: '역류 트리거에 해당하지 않아요.',
         ),
         allergy: AnalysisSection(
-          ment: '알레르기/복용약 분석',
-          content: '알레르기·복용약 충돌이 없어요.',
+          ment: '알레르기 분석',
+          content: '입력한 음식 정보에서 확인된 알레르겐이 없어요.',
         ),
       ),
     ),
@@ -344,11 +344,11 @@ Map<String, MealFood> _buildSeedFoodDetails(DateTime base) {
         judgmentGrade: VerdictLevel.caution,
         trigger: AnalysisSection(
           ment: '트리거/증상 분석',
-          content: '나트륨 함량이 높아 위산 역류를 악화할 수 있어요.',
+          content: '이 음식은 짠 편이에요. 사람마다 불편함이 다를 수 있어요.',
         ),
         allergy: AnalysisSection(
-          ment: '알레르기/복용약 분석',
-          content: '알레르기·복용약 충돌은 없어요.',
+          ment: '알레르기 분석',
+          content: '입력한 음식 정보에서 확인된 알레르겐이 없어요.',
         ),
       ),
     ),

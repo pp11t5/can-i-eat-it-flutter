@@ -48,7 +48,7 @@ class MockHealthProfileRepository implements HealthProfileRepository {
 
   /// 마지막으로 저장된 프로필. 테스트 검증용.
   ///
-  /// [submitProfile](전체 제출) · [updateHealthInfo](allergies/medications 부분 갱신)
+  /// [submitProfile](전체 제출) · [updateHealthInfo](allergies 부분 갱신)
   /// 양쪽 모두 이 필드를 갱신한다.
   HealthProfile? get lastSubmittedProfile => _lastSubmittedProfile;
 
@@ -77,11 +77,9 @@ class MockHealthProfileRepository implements HealthProfileRepository {
   @override
   Future<void> updateHealthInfo({
     required List<String> allergies,
-    required List<String> medications,
   }) async {
     final next = (_profile ?? const HealthProfile()).copyWith(
       allergies: normalizeAllergyCodes(allergies),
-      medications: medications,
     );
     _lastSubmittedProfile = next;
     _profile = next;
@@ -105,7 +103,6 @@ class MockHealthProfileRepository implements HealthProfileRepository {
     }
     return HealthProfile(
       allergies: normalizeAllergyCodes(p.allergies),
-      medications: p.medications,
     );
   }
 }

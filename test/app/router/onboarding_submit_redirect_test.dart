@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/router/app_router.dart';
+import 'package:can_i_eat_it/core/security/token_store.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
@@ -46,6 +47,8 @@ void main() {
         authRepositoryProvider.overrideWithValue(authRepo),
         // ignore: scoped_providers_should_specify_dependencies
         healthProfileRepositoryProvider.overrideWithValue(profileRepo),
+        // ignore: scoped_providers_should_specify_dependencies
+        tokenStoreProvider.overrideWithValue(InMemoryTokenStore()),
       ],
       child: Consumer(
         builder: (context, ref, _) {

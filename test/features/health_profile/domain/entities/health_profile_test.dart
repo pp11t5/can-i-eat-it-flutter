@@ -11,7 +11,6 @@ void main() {
       expect(profile.diagnosed, isFalse);
       expect(profile.triggerFoods, isEmpty);
       expect(profile.customTriggers, isNull);
-      expect(profile.medications, isEmpty);
       expect(profile.allergies, isEmpty);
     });
   });
@@ -62,11 +61,6 @@ void main() {
     test('sampleGerd 팩토리는 증상빈도 목록을 포함한다', () {
       final sample = HealthProfile.sampleGerd();
       expect(sample.symptomFrequency, isNotEmpty);
-    });
-
-    test('sampleGerd 팩토리는 복용약 목록을 포함한다', () {
-      final sample = HealthProfile.sampleGerd();
-      expect(sample.medications, isNotEmpty);
     });
 
     test('sampleGerd 팩토리는 알레르기 목록을 포함한다', () {

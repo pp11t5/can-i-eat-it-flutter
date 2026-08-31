@@ -8,13 +8,12 @@ void main() {
   // toJson 키 구성 검증 (W3-4 서버 스키마 정합)
   // -------------------------------------------------------------------------
   group('OnboardingRequestDto.toJson — 서버 스키마 키 검증', () {
-    test('toJson 결과에 symptoms/triggers/allergens/medications/customTriggerText 키만 존재한다',
+    test('toJson 결과에 symptoms/triggers/allergens/customTriggerText 키만 존재한다',
         () {
       const dto = OnboardingRequestDto(
         symptoms: ['heartburn_reflux'],
         triggers: ['caffeine'],
         allergens: ['milk'],
-        medications: ['omeprazole'],
         customTriggerText: '탄산음료',
       );
       final json = dto.toJson();
@@ -22,7 +21,7 @@ void main() {
       expect(json.containsKey('symptoms'), isTrue);
       expect(json.containsKey('triggers'), isTrue);
       expect(json.containsKey('allergens'), isTrue);
-      expect(json.containsKey('medications'), isTrue);
+      expect(json.containsKey('medications'), isFalse);
       expect(json.containsKey('customTriggerText'), isTrue);
 
       // 제거된 필드가 없는지 확인
@@ -49,7 +48,7 @@ void main() {
       expect(json['symptoms'], <String>[]);
       expect(json['triggers'], <String>[]);
       expect(json['allergens'], <String>[]);
-      expect(json['medications'], <String>[]);
+      expect(json.containsKey('medications'), isFalse);
       expect(json['customTriggerText'], isNull);
     });
   });
@@ -66,14 +65,12 @@ void main() {
         diagnosed: true,
         triggerFoods: ['caffeine'],
         allergies: ['egg'],
-        medications: ['omeprazole'],
       );
       final dto = OnboardingRequestDto.fromEntity(entity);
 
       expect(dto.symptoms, ['post_meal_cough', 'heartburn_reflux']);
       expect(dto.triggers, ['caffeine']);
       expect(dto.allergens, ['egg']);
-      expect(dto.medications, ['omeprazole']);
       expect(dto.customTriggerText, isNull);
     });
 
@@ -110,7 +107,7 @@ void main() {
       expect(json['symptoms'], ['heartburn_reflux', 'post_meal_cough']);
       expect(json['triggers'], ['spicy', 'caffeine']);
       expect(json['allergens'], ['crustacean']);
-      expect(json['medications'], ['omeprazole']);
+      expect(json.containsKey('medications'), isFalse);
       expect(json['customTriggerText'], '탄산음료');
 
       // 금지 키
@@ -125,7 +122,6 @@ void main() {
       expect(dto.symptoms, isEmpty);
       expect(dto.triggers, isEmpty);
       expect(dto.allergens, isEmpty);
-      expect(dto.medications, isEmpty);
       expect(dto.customTriggerText, isNull);
     });
   });

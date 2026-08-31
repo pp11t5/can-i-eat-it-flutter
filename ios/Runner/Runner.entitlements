@@ -8,5 +8,15 @@
 	<array>
 		<string>Default</string>
 	</array>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>$(SYMPTOM_APP_GROUP_ID)</string>
+		<string>$(HOME_WIDGET_APP_GROUP_ID)</string>
+	</array>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+		<string>$(SYMPTOM_KEYCHAIN_ACCESS_GROUP)</string>
+	</array>
 </dict>
 </plist>

@@ -1,6 +1,6 @@
 # API 계약 — 엔드포인트 목록 · 요청/응답 스키마
 
-> **정본**: 최신 Swagger 실측(2026-08-05). 이전 초안 엔드포인트(`/auth/kakao`, `/foods/analyze`, `/users/profile`, base `api.can-i-eat-it.com/v1`)와 ADR-0007의 "신규 사용자=로그인 400" 가정은 교체됨.
+> **정본**: 최신 Swagger 실측(2026-08-05), `POST /symptoms` 구현 계약 갱신(2026-08-14). 이전 초안 엔드포인트(`/auth/kakao`, `/foods/analyze`, `/users/profile`, base `api.can-i-eat-it.com/v1`)와 ADR-0007의 "신규 사용자=로그인 400" 가정은 교체됨.
 > 근거: PRD v1 §담당별 산출(Backend) · ADR-0007 §3-1
 
 ---
@@ -363,6 +363,7 @@ sealed SignInOutcome
 | GET | `/api/v1/meals/{mealId}` | 식사 기록 상세 조회 |
 | PATCH | `/api/v1/meals/{mealId}` | 식사 기록 수정 (memo만 수정 가능) |
 | DELETE | `/api/v1/meals/{mealId}` | 식사 기록 삭제 |
+| POST | `/api/v1/symptoms` | 증상 기록 생성 |
 
 ### GET /api/v1/meals
 
@@ -522,13 +523,97 @@ sealed SignInOutcome
 
 ---
 
-### /symptoms — 현재 서버 미구현 (예정)
+### POST /api/v1/symptoms
 
-> **서버 미구현**: 증상/상태 독립 CRUD 엔드포인트(`POST /symptoms`, `PATCH /symptoms/{id}` 등)는 현재 서버에 존재하지 않는다. 상태 기록은 식사 상세(`GET /meals/{mealId}`)의 **읽기전용 `stateRecords`** 필드로만 노출된다.
+증상 기록 생성 endpoint는 구현 완료 상태다. Bearer 인증을 사용하며 공통 응답 봉투의 `result`에 생성된 증상 상세를 반환한다.
 
-> 백엔드 "곧 추가 예정 · 계약 공유 가능" 상태. **계약 확정 시 이 섹션을 교체할 것 (TODO).**
+**요청**: `SymptomCreateRequestDTO`
 
-기존 초안의 `severity`(0~5), `occurred_at`, `meal_id`, `types` 필드는 실서버에 존재하지 않아 삭제됨.
+```json
+{
+  "symptomState": "comfortable",
+  "symptomTypes": [
+    "throat_foreign_body"
+  ],
+  "occurredAt": "2026-05-12T14:30:00+09:00",
+  "mealRecordId": "c4e90e6a-2b3c-4d5e-8f90-1a2b3c4d5e6f",
+  "memo": "속이 메스꺼웠어요"
+}
+```
+
+| 필드 | 타입 | 필수 | 설명 |
+|---|---|---|---|
+| `symptomState` | String enum | 필수 | `comfortable` \| `good` \| `normal` \| `uncomfortable` \| `severe` |
+| `symptomTypes` | String[] | 필수 | `throat_foreign_body` \| `acid_reflux` \| `cough` \| `chest_tightness`; 명시적 “없음”은 `[]` |
+| `occurredAt` | String? | 선택 | offset 포함 ISO-8601. iOS 리치 푸시는 `기록 완료` 탭 시각을 항상 전송 |
+| `mealRecordId` | String? | 선택 | 연결할 외부 식사 기록 ID. iOS 리치 푸시는 FCM `targetId`를 항상 전달 |
+| `memo` | String? | 선택 | 일반 앱의 메모. iOS 리치 푸시는 UI가 없어 필드 자체를 생략 |
+
+**응답**: 공통 응답 봉투의 `result`는 `SymptomResponseDTO`다.
+
+```json
+{
+  "code": "string",
+  "message": "string",
+  "result": {
+    "symptomId": "9b1c0e6a-2b3c-4d5e-8f90-1a2b3c4d5e6f",
+    "symptomState": "comfortable",
+    "stateTitle": "comfortable",
+    "symptomTypes": [
+      "throat_foreign_body"
+    ],
+    "occurredAt": "2026-05-12T19:30:00+09:00",
+    "linkedMeal": {
+      "mealRecordId": "string",
+      "foods": [
+        {
+          "mealFoodId": "string",
+          "name": "아메리카노",
+          "category": "beverage"
+        }
+      ]
+    },
+    "analysis": {
+      "items": [
+        {
+          "emphasis": "편안한 식사 패턴이에요",
+          "body": "이번 주 '저녁 가벼운 식사' 후 편안함 응답이 3회 연속 기록됐어요."
+        }
+      ]
+    }
+  },
+  "traceId": "string",
+  "isSuccess": true
+}
+```
+
+- `linkedMeal`과 `analysis`는 응답에서 nullable일 수 있으며 클라이언트는 빈 값에 안전하게 대응한다.
+- 응답 `occurredAt`은 서버 반환값으로 취급하며 요청값을 그대로 echo한다고 가정하지 않는다.
+- `Idempotency-Key` 계약은 없다. 서버가 저장한 뒤 응답이 유실되어 재전송하면 별도 증상 기록이 생성될 수 있다.
+- HTTP status/error code의 세부 목록은 별도 Swagger 정본을 따른다.
+
+---
+
+### iOS 식후 증상 리치 푸시 (FCM/APNs)
+
+`post_meal`, `post_meal_delayed_single`은 iOS Notification Content Extension과 Flutter 푸시 탭 라우팅이 함께 지원하는 type이다. 이 항목은 서버가 FCM을 전송할 때 지켜야 하는 계약이다.
+
+| 위치 | 필드 | 필수 | 규칙 |
+|---|---|---:|---|
+| `data` | `type` | O | 문자열. `post_meal` 또는 `post_meal_delayed_single` |
+| `data` | `targetId` | O | 비어 있지 않은 식사 기록 ID. `/symptoms`의 `mealRecordId`로 그대로 전송 |
+| `data` | `title`, `body`, `mealOccurredAt`, `hoursElapsed`, `foodNames` | X | Extension 카드의 제목·식사 문맥 표시용. 없어도 기록 기능은 동작 |
+| `apns.payload.aps` | `alert` | O | alert push와 기본 알림 fallback을 위한 제목·본문 |
+| `apns.payload.aps` | `category` | O | `data.type`과 같은 지원 type |
+| `apns.headers` | `apns-push-type` | O | `alert` |
+| `apns.headers` | `apns-priority` | O | `10` |
+
+- FCM `data` 값은 모두 문자열이다.
+- `schemaVersion`, `notificationEventId`, `subjectId`는 사용하지 않는다.
+- data-only 또는 `aps.category`와 `data.type`이 다른 메시지는 리치 푸시 기록 대상으로 처리되지 않는다.
+- Extension은 자체 UI를 렌더링한다. `aps.alert`은 리치 UI 입력값이 아니라 기본 알림 및 Extension 실패 fallback이다.
+
+전체 흐름과 재전송·인증 종료 정책은 [iOS 리치 푸시 운영 계약](./ios-rich-push.md)을 따른다.
 
 ---
 
@@ -586,6 +671,6 @@ API 확정 후 교체
 1. auth (F0) · gate (F1 consent·onboarding) — W3 실 연동 대상
 2. food search · recent (F2 실 엔드포인트) — W3 실 연동 대상
 3. `/foods/analyze` · 전체 프로필 GET — **엔드포인트 부재, Mock 유지** (출시 시 datasource 교체)
-4. F3 (식사·증상) · F4 (리포트) — Swagger 확인 후 착수
+4. F3 식사·증상 — 실 API 연동 완료, F4 리포트 — Swagger 확인 후 착수
 
 수기 dio datasource 재도입 시점: ADR-0007 §2-1 채택(retrofit 보류, 봉투 언랩·인증 분기·401 큐잉이 dio 인터셉터에 자연히 모임). retrofit 재도입은 엔드포인트가 충분히 늘고 봉투 처리 안정화 후 재검토(ADR-0001 후속).

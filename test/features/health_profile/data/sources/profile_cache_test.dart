@@ -71,16 +71,14 @@ void main() {
       expect(result.diagnosed, isTrue);
       expect(result.triggerFoods, equals(['spicy', 'caffeine']));
       expect(result.customTriggers, equals('탄산음료'));
-      expect(result.medications, equals(['omeprazole']));
       expect(result.allergies, equals(['crustacean']));
     });
 
-    test('triggerFoods/customTriggers/medications/allergies 누락 없음', () async {
+    test('triggerFoods/customTriggers/allergies 누락 없음', () async {
       final cache = InMemoryProfileCache();
       const profile = HealthProfile(
         triggerFoods: ['fatty'],
         customTriggers: 'test',
-        medications: ['med1', 'med2'],
         allergies: ['nuts'],
       );
       await cache.write(profile);
@@ -88,7 +86,6 @@ void main() {
 
       expect(result!.triggerFoods, equals(['fatty']));
       expect(result.customTriggers, equals('test'));
-      expect(result.medications, equals(['med1', 'med2']));
       expect(result.allergies, equals(['nuts']));
     });
   });

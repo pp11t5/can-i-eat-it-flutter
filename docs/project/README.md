@@ -12,6 +12,7 @@
 | `design-system.md` | 3층 토큰 구조·컴포넌트 인벤토리·하드코딩 금지 규약·Figma 교체 절차 | 디자인 토큰 변경 시 |
 | `data-model.md` | 도메인 엔티티·서버 테이블명 매핑·repository 인터페이스 전략 | API 계약 변경 시 |
 | `api-contract.md` | 엔드포인트 목록·요청/응답 스키마·Mock 교체 전략 | API 확정/변경 시 |
+| `ios-rich-push.md` | iOS 리치 푸시 payload·Outbox·인증 종료·flavor 운영 계약 | 푸시 또는 iOS 네이티브 변경 시 |
 | `roadmap.md` | 마일스톤 W1~W5·역할 스윔레인·베타후 범위 | 주차 시작 시 |
 | `open-issues.md` | 미결정 사항·보류 결정 | 결정될 때마다 |
 | `context-sources.md` | Notion·Figma·PRD 접근법·node-id 목록 | 링크 변경 시 |

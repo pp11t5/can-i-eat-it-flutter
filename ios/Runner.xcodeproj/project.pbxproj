@@ -15,6 +15,29 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		A10000000000000000000001 /* SymptomOutboxMethodChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000011 /* SymptomOutboxMethodChannel.swift */; };
+		A10000000000000000000002 /* NativeNotificationConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000012 /* NativeNotificationConfig.swift */; };
+		A10000000000000000000003 /* SharedAccessTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000013 /* SharedAccessTokenStore.swift */; };
+		A10000000000000000000004 /* SymptomOutboxStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000014 /* SymptomOutboxStore.swift */; };
+		A10000000000000000000005 /* SymptomNativeUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000015 /* SymptomNativeUploader.swift */; };
+		A10000000000000000000006 /* SymptomNotificationContent.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = A10000000000000000000016 /* SymptomNotificationContent.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		A10000000000000000000007 /* NotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000017 /* NotificationViewController.swift */; };
+		A10000000000000000000008 /* NativeNotificationConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000012 /* NativeNotificationConfig.swift */; };
+		A10000000000000000000009 /* SharedAccessTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000013 /* SharedAccessTokenStore.swift */; };
+		A1000000000000000000000A /* SymptomOutboxStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000014 /* SymptomOutboxStore.swift */; };
+		A1000000000000000000000B /* SymptomNativeUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000015 /* SymptomNativeUploader.swift */; };
+		A1000000000000000000001C /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000001D /* MainInterface.storyboard */; };
+		A10000000000000000000084 /* SymptomHeaderIconDev@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000080 /* SymptomHeaderIconDev@2x.png */; };
+		A10000000000000000000085 /* SymptomHeaderIconDev@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000081 /* SymptomHeaderIconDev@3x.png */; };
+		A10000000000000000000086 /* SymptomHeaderIconProd@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000082 /* SymptomHeaderIconProd@2x.png */; };
+		A10000000000000000000087 /* SymptomHeaderIconProd@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000083 /* SymptomHeaderIconProd@3x.png */; };
+		A10000000000000000000070 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10000000000000000000072 /* UserNotifications.framework */; };
+		A10000000000000000000071 /* UserNotificationsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10000000000000000000073 /* UserNotificationsUI.framework */; };
+		D10000000000000000000001 /* HomeWidgetMethodChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000011 /* HomeWidgetMethodChannel.swift */; };
+		D10000000000000000000002 /* TodayMealWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D10000000000000000000012 /* TodayMealWidget.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D10000000000000000000003 /* HomeWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000013 /* HomeWidgetExtension.swift */; };
+		D10000000000000000000004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000016 /* Assets.xcassets */; };
+		D10000000000000000000005 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D10000000000000000000019 /* WidgetKit.framework */; };
 		A5B66CFE8F36A35358C945FE /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE6DFD94F243049A15886C5F /* Pods_RunnerTests.framework */; };
 		DF91CB99AD3EE7904AA2502E /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E003B43A1530AC2DEEF6FC26 /* Pods_Runner.framework */; };
 /* End PBXBuildFile section */
@@ -27,6 +50,20 @@
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
 		};
+		38DB9CC73036C41600108D3B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A10000000000000000000040;
+			remoteInfo = SymptomNotificationContent;
+		};
+		D10000000000000000000010 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D10000000000000000000020;
+			remoteInfo = TodayMealWidget;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -38,6 +75,18 @@
 			files = (
 			);
 			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000000021 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A10000000000000000000006 /* SymptomNotificationContent.appex in Embed App Extensions */,
+				D10000000000000000000002 /* TodayMealWidget.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -76,6 +125,33 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A10000000000000000000011 /* SymptomOutboxMethodChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymptomOutboxMethodChannel.swift; sourceTree = "<group>"; };
+		A10000000000000000000012 /* NativeNotificationConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeNotificationConfig.swift; sourceTree = "<group>"; };
+		A10000000000000000000013 /* SharedAccessTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedAccessTokenStore.swift; sourceTree = "<group>"; };
+		A10000000000000000000014 /* SymptomOutboxStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymptomOutboxStore.swift; sourceTree = "<group>"; };
+		A10000000000000000000015 /* SymptomNativeUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymptomNativeUploader.swift; sourceTree = "<group>"; };
+		A10000000000000000000016 /* SymptomNotificationContent.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SymptomNotificationContent.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000017 /* NotificationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationViewController.swift; sourceTree = "<group>"; };
+		A10000000000000000000018 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A10000000000000000000019 /* SymptomNotificationContent.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SymptomNotificationContent.entitlements; sourceTree = "<group>"; };
+		A1000000000000000000001A /* Extension-dev.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Extension-dev.xcconfig"; sourceTree = "<group>"; };
+		A1000000000000000000001B /* Extension-prod.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Extension-prod.xcconfig"; sourceTree = "<group>"; };
+		A1000000000000000000001E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		A10000000000000000000080 /* SymptomHeaderIconDev@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SymptomHeaderIconDev@2x.png"; sourceTree = "<group>"; };
+		A10000000000000000000081 /* SymptomHeaderIconDev@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SymptomHeaderIconDev@3x.png"; sourceTree = "<group>"; };
+		A10000000000000000000082 /* SymptomHeaderIconProd@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SymptomHeaderIconProd@2x.png"; sourceTree = "<group>"; };
+		A10000000000000000000083 /* SymptomHeaderIconProd@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SymptomHeaderIconProd@3x.png"; sourceTree = "<group>"; };
+		A10000000000000000000072 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
+		A10000000000000000000073 /* UserNotificationsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotificationsUI.framework; path = System/Library/Frameworks/UserNotificationsUI.framework; sourceTree = SDKROOT; };
+		D10000000000000000000011 /* HomeWidgetMethodChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeWidgetMethodChannel.swift; sourceTree = "<group>"; };
+		D10000000000000000000012 /* TodayMealWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TodayMealWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D10000000000000000000013 /* HomeWidgetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeWidgetExtension.swift; sourceTree = "<group>"; };
+		D10000000000000000000014 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D10000000000000000000015 /* HomeWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HomeWidgetExtension.entitlements; sourceTree = "<group>"; };
+		D10000000000000000000016 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D10000000000000000000017 /* Extension-dev.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Extension-dev.xcconfig"; sourceTree = "<group>"; };
+		D10000000000000000000018 /* Extension-prod.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Extension-prod.xcconfig"; sourceTree = "<group>"; };
+		D10000000000000000000019 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		A83C397E2381911163FBECB1 /* Profile-prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Profile-prod.xcconfig"; path = "Flutter/Profile-prod.xcconfig"; sourceTree = "<group>"; };
 		AA475F0DBB62505CA6A3D54A /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		AE6DFD94F243049A15886C5F /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -103,6 +179,23 @@
 			files = (
 				78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */,
 				DF91CB99AD3EE7904AA2502E /* Pods_Runner.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000000074 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000070 /* UserNotifications.framework in Frameworks */,
+				A10000000000000000000071 /* UserNotificationsUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			};
+		D10000000000000000000052 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D10000000000000000000005 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -147,6 +240,9 @@
 			children = (
 				E003B43A1530AC2DEEF6FC26 /* Pods_Runner.framework */,
 				AE6DFD94F243049A15886C5F /* Pods_RunnerTests.framework */,
+				A10000000000000000000072 /* UserNotifications.framework */,
+				A10000000000000000000073 /* UserNotificationsUI.framework */,
+				D10000000000000000000019 /* WidgetKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -178,6 +274,9 @@
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				4BBC24754AE3C91C15E9E40E /* Pods */,
 				5387AC1D53B783780058B5A7 /* Frameworks */,
+				A10000000000000000000031 /* SymptomResponseShared */,
+				A10000000000000000000032 /* SymptomNotificationContent */,
+				D10000000000000000000030 /* HomeWidgetExtension */,
 			);
 			sourceTree = "<group>";
 		};
@@ -186,6 +285,8 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
+				A10000000000000000000016 /* SymptomNotificationContent.appex */,
+				D10000000000000000000012 /* TodayMealWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -201,9 +302,68 @@
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
+				A10000000000000000000011 /* SymptomOutboxMethodChannel.swift */,
+				D10000000000000000000011 /* HomeWidgetMethodChannel.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 			);
 			path = Runner;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000031 /* SymptomResponseShared */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000012 /* NativeNotificationConfig.swift */,
+				A10000000000000000000013 /* SharedAccessTokenStore.swift */,
+				A10000000000000000000014 /* SymptomOutboxStore.swift */,
+				A10000000000000000000015 /* SymptomNativeUploader.swift */,
+			);
+			path = SymptomResponseShared;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000032 /* SymptomNotificationContent */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000017 /* NotificationViewController.swift */,
+				A1000000000000000000001D /* MainInterface.storyboard */,
+				A10000000000000000000080 /* SymptomHeaderIconDev@2x.png */,
+				A10000000000000000000081 /* SymptomHeaderIconDev@3x.png */,
+				A10000000000000000000082 /* SymptomHeaderIconProd@2x.png */,
+				A10000000000000000000083 /* SymptomHeaderIconProd@3x.png */,
+				A10000000000000000000018 /* Info.plist */,
+				A10000000000000000000019 /* SymptomNotificationContent.entitlements */,
+				A10000000000000000000033 /* Config */,
+			);
+			path = SymptomNotificationContent;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000033 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				A1000000000000000000001A /* Extension-dev.xcconfig */,
+				A1000000000000000000001B /* Extension-prod.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000030 /* HomeWidgetExtension */ = {
+			isa = PBXGroup;
+			children = (
+				D10000000000000000000013 /* HomeWidgetExtension.swift */,
+				D10000000000000000000016 /* Assets.xcassets */,
+				D10000000000000000000014 /* Info.plist */,
+				D10000000000000000000015 /* HomeWidgetExtension.entitlements */,
+				D10000000000000000000031 /* Config */,
+			);
+			path = HomeWidgetExtension;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000031 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				D10000000000000000000017 /* Extension-dev.xcconfig */,
+				D10000000000000000000018 /* Extension-prod.xcconfig */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -238,6 +398,7 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				A10000000000000000000021 /* Embed App Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				E4A72700C0FE55D60DEFD8F1 /* [CP] Embed Pods Frameworks */,
 				F9D14B85239AB508A94EF5D0 /* [CP] Copy Pods Resources */,
@@ -246,6 +407,8 @@
 			buildRules = (
 			);
 			dependencies = (
+				A10000000000000000000041 /* PBXTargetDependency */,
+				D10000000000000000000021 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			packageProductDependencies = (
@@ -255,12 +418,49 @@
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
 		};
+		A10000000000000000000040 /* SymptomNotificationContent */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000000000000000000050 /* Build configuration list for PBXNativeTarget "SymptomNotificationContent" */;
+			buildPhases = (
+				A10000000000000000000051 /* Sources */,
+				A10000000000000000000074 /* Frameworks */,
+				A10000000000000000000052 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SymptomNotificationContent;
+			productName = SymptomNotificationContent;
+			productReference = A10000000000000000000016 /* SymptomNotificationContent.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		D10000000000000000000020 /* TodayMealWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D10000000000000000000050 /* Build configuration list for PBXNativeTarget "TodayMealWidget" */;
+			buildPhases = (
+				D10000000000000000000051 /* Sources */,
+				D10000000000000000000052 /* Frameworks */,
+				D10000000000000000000053 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TodayMealWidget;
+			productName = TodayMealWidget;
+			productReference = D10000000000000000000012 /* TodayMealWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		97C146E61CF9000F007C117D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+			A10000000000000000000040 = {
+				CreatedOnToolsVersion = 15.0;
+			};
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1510;
 				ORGANIZATIONNAME = "";
@@ -269,11 +469,14 @@
 						CreatedOnToolsVersion = 14.0;
 						TestTargetID = 97C146ED1CF9000F007C117D;
 					};
-					97C146ED1CF9000F007C117D = {
-						CreatedOnToolsVersion = 7.3.1;
-						LastSwiftMigration = 1100;
-					};
+				97C146ED1CF9000F007C117D = {
+					CreatedOnToolsVersion = 7.3.1;
+					LastSwiftMigration = 1100;
 				};
+				D10000000000000000000020 = {
+					CreatedOnToolsVersion = 15.0;
+				};
+			};
 			};
 			buildConfigurationList = 97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */;
 			compatibilityVersion = "Xcode 9.3";
@@ -292,6 +495,8 @@
 			projectRoot = "";
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
+				A10000000000000000000040 /* SymptomNotificationContent */,
+				D10000000000000000000020 /* TodayMealWidget */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
 			);
 		};
@@ -313,6 +518,26 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000000052 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000000000000000000001C /* MainInterface.storyboard in Resources */,
+				A10000000000000000000084 /* SymptomHeaderIconDev@2x.png in Resources */,
+				A10000000000000000000085 /* SymptomHeaderIconDev@3x.png in Resources */,
+				A10000000000000000000086 /* SymptomHeaderIconProd@2x.png in Resources */,
+				A10000000000000000000087 /* SymptomHeaderIconProd@3x.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D10000000000000000000053 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D10000000000000000000004 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -461,8 +686,34 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10000000000000000000001 /* SymptomOutboxMethodChannel.swift in Sources */,
+				A10000000000000000000002 /* NativeNotificationConfig.swift in Sources */,
+				A10000000000000000000003 /* SharedAccessTokenStore.swift in Sources */,
+				A10000000000000000000004 /* SymptomOutboxStore.swift in Sources */,
+				A10000000000000000000005 /* SymptomNativeUploader.swift in Sources */,
+				D10000000000000000000001 /* HomeWidgetMethodChannel.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000000051 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000007 /* NotificationViewController.swift in Sources */,
+				A10000000000000000000008 /* NativeNotificationConfig.swift in Sources */,
+				A10000000000000000000009 /* SharedAccessTokenStore.swift in Sources */,
+				A1000000000000000000000A /* SymptomOutboxStore.swift in Sources */,
+				A1000000000000000000000B /* SymptomNativeUploader.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D10000000000000000000051 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D10000000000000000000003 /* HomeWidgetExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -474,7 +725,28 @@
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
 		};
+		A10000000000000000000041 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A10000000000000000000040 /* SymptomNotificationContent */;
+			targetProxy = 38DB9CC73036C41600108D3B /* PBXContainerItemProxy */;
+		};
+		D10000000000000000000021 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D10000000000000000000020 /* TodayMealWidget */;
+			targetProxy = D10000000000000000000010 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		A1000000000000000000001D /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A1000000000000000000001E /* Base */,
+			);
+			name = MainInterface.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin PBXVariantGroup section */
 		97C146FA1CF9000F007C117D /* Main.storyboard */ = {
@@ -560,11 +832,11 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = SXJPM9PRM7;
 				ENABLE_BITCODE = NO;
+				GID_CLIENT_ID = "717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3.apps.googleusercontent.com";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3";
 				GOOGLE_SERVICE_FLAVOR = prod;
 				INFOPLIST_FILE = Runner/Info.plist;
 				KAKAO_URL_SCHEME = kakao2d007771e0083b600999053b9b1d4e83;
-				GID_CLIENT_ID = "717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3.apps.googleusercontent.com";
-				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -753,11 +1025,11 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = SXJPM9PRM7;
 				ENABLE_BITCODE = NO;
+				GID_CLIENT_ID = "717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk.apps.googleusercontent.com";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk";
 				GOOGLE_SERVICE_FLAVOR = dev;
 				INFOPLIST_FILE = Runner/Info.plist;
 				KAKAO_URL_SCHEME = kakaocd24aa08a740a475401f84390c8219df;
-				GID_CLIENT_ID = "717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk.apps.googleusercontent.com";
-				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -768,6 +1040,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -806,11 +1079,11 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = SXJPM9PRM7;
 				ENABLE_BITCODE = NO;
+				GID_CLIENT_ID = "717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk.apps.googleusercontent.com";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk";
 				GOOGLE_SERVICE_FLAVOR = dev;
 				INFOPLIST_FILE = Runner/Info.plist;
 				KAKAO_URL_SCHEME = kakaocd24aa08a740a475401f84390c8219df;
-				GID_CLIENT_ID = "717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk.apps.googleusercontent.com";
-				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -951,11 +1224,11 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = SXJPM9PRM7;
 				ENABLE_BITCODE = NO;
+				GID_CLIENT_ID = "717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3.apps.googleusercontent.com";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3";
 				GOOGLE_SERVICE_FLAVOR = prod;
 				INFOPLIST_FILE = Runner/Info.plist;
 				KAKAO_URL_SCHEME = kakao2d007771e0083b600999053b9b1d4e83;
-				GID_CLIENT_ID = "717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3.apps.googleusercontent.com";
-				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -966,6 +1239,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -986,11 +1260,11 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = SXJPM9PRM7;
 				ENABLE_BITCODE = NO;
+				GID_CLIENT_ID = "717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3.apps.googleusercontent.com";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3";
 				GOOGLE_SERVICE_FLAVOR = prod;
 				INFOPLIST_FILE = Runner/Info.plist;
 				KAKAO_URL_SCHEME = kakao2d007771e0083b600999053b9b1d4e83;
-				GID_CLIENT_ID = "717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3.apps.googleusercontent.com";
-				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.717895572091-mk2rg68mblogvjao8elhjeo2qpcjs7v3";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1023,6 +1297,218 @@
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
 			};
 			name = "Release-dev";
+		};
+		A10000000000000000000061 /* Debug-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A1000000000000000000001A /* Extension-dev.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = SymptomNotificationContent/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(SYMPTOM_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Debug-dev";
+		};
+		A10000000000000000000062 /* Release-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A1000000000000000000001A /* Extension-dev.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = SymptomNotificationContent/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(SYMPTOM_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Release-dev";
+		};
+		A10000000000000000000063 /* Profile-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A1000000000000000000001A /* Extension-dev.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = SymptomNotificationContent/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(SYMPTOM_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Profile-dev";
+		};
+		A10000000000000000000064 /* Debug-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A1000000000000000000001B /* Extension-prod.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = SymptomNotificationContent/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(SYMPTOM_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Debug-prod";
+		};
+		A10000000000000000000065 /* Release-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A1000000000000000000001B /* Extension-prod.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = SymptomNotificationContent/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(SYMPTOM_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Release-prod";
+		};
+		A10000000000000000000066 /* Profile-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A1000000000000000000001B /* Extension-prod.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = SymptomNotificationContent/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(SYMPTOM_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Profile-prod";
+		};
+		D10000000000000000000061 /* Debug-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D10000000000000000000017 /* Extension-dev.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = HomeWidgetExtension/HomeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = HomeWidgetExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(HOME_WIDGET_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Debug-dev";
+		};
+		D10000000000000000000062 /* Release-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D10000000000000000000017 /* Extension-dev.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = HomeWidgetExtension/HomeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = HomeWidgetExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(HOME_WIDGET_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Release-dev";
+		};
+		D10000000000000000000063 /* Profile-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D10000000000000000000017 /* Extension-dev.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = HomeWidgetExtension/HomeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = HomeWidgetExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(HOME_WIDGET_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Profile-dev";
+		};
+		D10000000000000000000064 /* Debug-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D10000000000000000000018 /* Extension-prod.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = HomeWidgetExtension/HomeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = HomeWidgetExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(HOME_WIDGET_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Debug-prod";
+		};
+		D10000000000000000000065 /* Release-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D10000000000000000000018 /* Extension-prod.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = HomeWidgetExtension/HomeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = HomeWidgetExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(HOME_WIDGET_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Release-prod";
+		};
+		D10000000000000000000066 /* Profile-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D10000000000000000000018 /* Extension-prod.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = HomeWidgetExtension/HomeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = SXJPM9PRM7;
+				INFOPLIST_FILE = HomeWidgetExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(HOME_WIDGET_EXTENSION_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Profile-prod";
 		};
 		C2DB782345FDF572D943CE3C /* Release-dev */ = {
 			isa = XCBuildConfiguration;
@@ -1090,11 +1576,11 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = SXJPM9PRM7;
 				ENABLE_BITCODE = NO;
+				GID_CLIENT_ID = "717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk.apps.googleusercontent.com";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk";
 				GOOGLE_SERVICE_FLAVOR = dev;
 				INFOPLIST_FILE = Runner/Info.plist;
 				KAKAO_URL_SCHEME = kakaocd24aa08a740a475401f84390c8219df;
-				GID_CLIENT_ID = "717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk.apps.googleusercontent.com";
-				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.717895572091-ionr78r2egrpb3r3nu9lghd0optsofhk";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1169,6 +1655,32 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		A10000000000000000000050 /* Build configuration list for PBXNativeTarget "SymptomNotificationContent" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000061 /* Debug-dev */,
+				A10000000000000000000062 /* Release-dev */,
+				A10000000000000000000063 /* Profile-dev */,
+				A10000000000000000000064 /* Debug-prod */,
+				A10000000000000000000065 /* Release-prod */,
+				A10000000000000000000066 /* Profile-prod */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Release-prod";
+		};
+		D10000000000000000000050 /* Build configuration list for PBXNativeTarget "TodayMealWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D10000000000000000000061 /* Debug-dev */,
+				D10000000000000000000062 /* Release-dev */,
+				D10000000000000000000063 /* Profile-dev */,
+				D10000000000000000000064 /* Debug-prod */,
+				D10000000000000000000065 /* Release-prod */,
+				D10000000000000000000066 /* Profile-prod */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Release-prod";
 		};
 /* End XCConfigurationList section */
 

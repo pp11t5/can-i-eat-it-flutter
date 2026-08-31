@@ -40,7 +40,8 @@ void main() {
       expect(repo.lastSubmittedProfile, equals(profile));
     });
 
-    test('submitProfile을 두 번 호출하면 lastSubmittedProfile이 마지막 것으로 갱신된다', () async {
+    test('submitProfile을 두 번 호출하면 lastSubmittedProfile이 마지막 것으로 갱신된다',
+        () async {
       final repo = MockHealthProfileRepository.noProfile();
       final first = HealthProfile.sampleGerd();
       final second = first.copyWith(conditions: ['GERD', 'Gastritis']);
@@ -57,20 +58,18 @@ void main() {
 
   // ---------------------------------------------------------------------------
   group('updateHealthInfo — Mock 전용 검증 (W7 마이그레이션)', () {
-    test('updateHealthInfo 후 lastSubmittedProfile에 allergies/medications가 반영된다', () async {
+    test('updateHealthInfo 후 lastSubmittedProfile에 allergies가 반영된다', () async {
       final repo = MockHealthProfileRepository.completed();
       await repo.updateHealthInfo(
         allergies: ['milk', 'egg'],
-        medications: ['란소프라졸'],
       );
 
       expect(repo.lastSubmittedProfile!.allergies, equals(['milk', 'egg']));
-      expect(repo.lastSubmittedProfile!.medications, equals(['란소프라졸']));
     });
 
     test('updateHealthInfo는 conditions 등 다른 필드를 base에서 그대로 보존한다', () async {
       final repo = MockHealthProfileRepository.completed();
-      await repo.updateHealthInfo(allergies: ['wheat'], medications: []);
+      await repo.updateHealthInfo(allergies: ['wheat']);
 
       expect(repo.lastSubmittedProfile!.conditions, equals(['GERD']));
       expect(repo.lastSubmittedProfile!.diagnosed, isTrue);
@@ -78,22 +77,20 @@ void main() {
 
     test('base 프로필(noProfile)이 없어도 updateHealthInfo가 정상 동작한다', () async {
       final repo = MockHealthProfileRepository.noProfile();
-      await repo.updateHealthInfo(allergies: ['soy'], medications: ['med1']);
+      await repo.updateHealthInfo(allergies: ['soy']);
 
       final profile = await repo.currentProfile();
       expect(profile!.allergies, equals(['soy']));
-      expect(profile.medications, equals(['med1']));
     });
   });
 
   // ---------------------------------------------------------------------------
   group('fetchMedicalInfoStrict — Mock 전용 검증 (pr-review 의료안전 ②-1)', () {
-    test('completed 팩토리는 allergies/medications를 반환한다', () async {
+    test('completed 팩토리는 allergies를 반환한다', () async {
       final repo = MockHealthProfileRepository.completed();
       final result = await repo.fetchMedicalInfoStrict();
 
       expect(result.allergies, equals(HealthProfile.sampleGerd().allergies));
-      expect(result.medications, equals(HealthProfile.sampleGerd().medications));
     });
 
     test('noProfile 상태에서는 실패를 흉내 내 throw한다(캐시 폴백 없음 검증용)', () async {
@@ -105,13 +102,12 @@ void main() {
       );
     });
 
-    test('updateHealthInfo 후에는 갱신된 allergies/medications를 반환한다', () async {
+    test('updateHealthInfo 후에는 갱신된 allergies를 반환한다', () async {
       final repo = MockHealthProfileRepository.completed();
-      await repo.updateHealthInfo(allergies: ['milk'], medications: []);
+      await repo.updateHealthInfo(allergies: ['milk']);
 
       final result = await repo.fetchMedicalInfoStrict();
       expect(result.allergies, equals(['milk']));
-      expect(result.medications, equals(<String>[]));
     });
   });
 }

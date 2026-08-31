@@ -40,6 +40,14 @@
 					<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
 				</array>
 			</dict>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>canieatit</string>
+				</array>
+			</dict>
 		</array>
 		<key>GIDClientID</key>
 		<string>$(GID_CLIENT_ID)</string>
@@ -53,6 +61,18 @@
 		</array>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
+		<key>SymptomAPIBaseURL</key>
+		<string>$(SYMPTOM_API_BASE_URL)</string>
+		<key>SymptomAppGroupID</key>
+		<string>$(SYMPTOM_APP_GROUP_ID)</string>
+		<key>SymptomBackgroundSessionID</key>
+		<string>$(SYMPTOM_BACKGROUND_SESSION_ID)</string>
+	<key>SymptomKeychainAccessGroup</key>
+	<string>$(SYMPTOM_KEYCHAIN_ACCESS_GROUP)</string>
+	<key>HomeWidgetAppGroupID</key>
+	<string>$(HOME_WIDGET_APP_GROUP_ID)</string>
+	<key>FlutterDeepLinkingEnabled</key>
+	<false/>
 		<key>UIApplicationSceneManifest</key>
 		<dict>
 			<key>UIApplicationSupportsMultipleScenes</key>

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/router/app_router.dart';
+import 'package:can_i_eat_it/core/security/token_store.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/login_screen.dart';
@@ -18,14 +19,18 @@ void main() {
   Widget buildApp() => ProviderScope(
         overrides: [
           // ignore: scoped_providers_should_specify_dependencies
-          authRepositoryProvider.overrideWithValue(MockAuthRepository.newUser()),
+          authRepositoryProvider
+              .overrideWithValue(MockAuthRepository.newUser()),
           // ignore: scoped_providers_should_specify_dependencies
           healthProfileRepositoryProvider
               .overrideWithValue(MockHealthProfileRepository.noProfile()),
+          // ignore: scoped_providers_should_specify_dependencies
+          tokenStoreProvider.overrideWithValue(InMemoryTokenStore()),
         ],
         child: Consumer(
           builder: (context, ref, _) {
-            return MaterialApp.router(routerConfig: ref.watch(appRouterProvider));
+            return MaterialApp.router(
+                routerConfig: ref.watch(appRouterProvider));
           },
         ),
       );

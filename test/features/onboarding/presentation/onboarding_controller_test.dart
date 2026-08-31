@@ -35,11 +35,10 @@ void main() {
       expect(draft.diagnosed, isFalse);
     });
 
-    test('빌드 시 triggerFoods, medications, allergies 기본값은 빈 리스트이다', () {
+    test('빌드 시 triggerFoods와 allergies 기본값은 빈 리스트이다', () {
       final container = makeContainer();
       final draft = container.read(onboardingControllerProvider);
       expect(draft.triggerFoods, isEmpty);
-      expect(draft.medications, isEmpty);
       expect(draft.allergies, isEmpty);
     });
   });
@@ -115,7 +114,9 @@ void main() {
   group('toggleTrigger', () {
     test('없는 트리거 코드를 토글하면 추가된다', () {
       final container = makeContainer();
-      container.read(onboardingControllerProvider.notifier).toggleTrigger('spicy');
+      container
+          .read(onboardingControllerProvider.notifier)
+          .toggleTrigger('spicy');
       expect(
         container.read(onboardingControllerProvider).triggerFoods,
         ['spicy'],
@@ -197,55 +198,6 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  // group 6: medications
-  // -------------------------------------------------------------------------
-  group('medications', () {
-    test('addMedication으로 복용약이 추가된다', () {
-      final container = makeContainer();
-      container
-          .read(onboardingControllerProvider.notifier)
-          .addMedication('omeprazole');
-      expect(
-        container.read(onboardingControllerProvider).medications,
-        ['omeprazole'],
-      );
-    });
-
-    test('이미 존재하는 복용약을 addMedication 호출해도 중복 추가되지 않는다', () {
-      final container = makeContainer();
-      final notifier = container.read(onboardingControllerProvider.notifier);
-      notifier.addMedication('omeprazole');
-      notifier.addMedication('omeprazole');
-      expect(
-        container.read(onboardingControllerProvider).medications.length,
-        1,
-      );
-    });
-
-    test('removeMedication으로 복용약이 제거된다', () {
-      final container = makeContainer();
-      final notifier = container.read(onboardingControllerProvider.notifier);
-      notifier.addMedication('omeprazole');
-      notifier.removeMedication('omeprazole');
-      expect(
-        container.read(onboardingControllerProvider).medications,
-        isEmpty,
-      );
-    });
-
-    test('setMedications으로 목록을 교체한다', () {
-      final container = makeContainer();
-      container
-          .read(onboardingControllerProvider.notifier)
-          .setMedications(['omeprazole', 'antacid']);
-      expect(
-        container.read(onboardingControllerProvider).medications,
-        ['omeprazole', 'antacid'],
-      );
-    });
-  });
-
-  // -------------------------------------------------------------------------
   // group 7: toggleAllergy
   // -------------------------------------------------------------------------
   group('toggleAllergy', () {
@@ -294,7 +246,9 @@ void main() {
   group('toggleCondition', () {
     test('미선택 코드를 토글하면 해당 코드만 선택된다', () {
       final container = makeContainer();
-      container.read(onboardingControllerProvider.notifier).toggleCondition('GERD');
+      container
+          .read(onboardingControllerProvider.notifier)
+          .toggleCondition('GERD');
       expect(
         container.read(onboardingControllerProvider).conditions,
         ['GERD'],
@@ -338,7 +292,6 @@ void main() {
       notifier.toggleTrigger('spicy');
       notifier.addCustomTrigger('탄산음료');
       notifier.addCustomTrigger('라면');
-      notifier.addMedication('omeprazole');
       notifier.toggleAllergy('shellfish');
 
       final draft = container.read(onboardingControllerProvider);
@@ -350,7 +303,6 @@ void main() {
       expect(profile.triggerFoods, ['spicy']);
       // 목록 → 서버 customTriggerText 단일 문자열 (', ' 조인)
       expect(profile.customTriggers, '탄산음료, 라면');
-      expect(profile.medications, ['omeprazole']);
       expect(profile.allergies, ['shellfish']);
     });
 

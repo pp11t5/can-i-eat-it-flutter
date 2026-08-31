@@ -35,7 +35,7 @@ GoRouter _testRouter() => GoRouter(
             GoRoute(
               path: '/onboarding/medications',
               builder: (_, __) =>
-                  const Scaffold(body: Text('medications stub')),
+                  const Scaffold(body: Text('allergy step stub')),
             ),
           ],
         ),
@@ -303,14 +303,14 @@ void main() {
       expect(link.sourceUrl, MedicalSourcesCatalog.acg2022Url);
     });
 
-    testWidgets('"다음" 버튼 탭 시 /onboarding/medications로 이동한다', (tester) async {
+    testWidgets('"다음" 버튼 탭 시 알레르기 단계로 이동한다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('다음'));
       await tester.pumpAndSettle();
 
-      expect(find.text('medications stub'), findsOneWidget);
+      expect(find.text('allergy step stub'), findsOneWidget);
     });
   });
 }

@@ -12,6 +12,7 @@ import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/app/widgets/selectable_chip.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
+import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
 import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/providers/symptom_write_controller.dart';
@@ -55,13 +56,24 @@ const _symptomChipDefs = [
 ///
 /// 미기록 식단 목록 등에서 특정 식사를 원인으로 지정해 증상 작성으로 진입할 때 사용.
 class SymptomWriteArgs {
-  const SymptomWriteArgs({this.initialMealRecordId, this.initialMealName});
+  const SymptomWriteArgs({
+    this.initialMealRecordId,
+    this.initialMealName,
+    this.initialMood,
+    this.initialSymptomTypes,
+  });
 
   /// 프리필할 원인 식사 ID.
   final String? initialMealRecordId;
 
   /// 프리필할 원인 식사 표시명.
   final String? initialMealName;
+
+  /// 리치 푸시에서 고른 강도.
+  final SymptomState? initialMood;
+
+  /// 리치 푸시에서 고른 증상 칩.
+  final List<SymptomType>? initialSymptomTypes;
 }
 
 // ---------------------------------------------------------------------------
@@ -81,6 +93,8 @@ class SymptomWriteScreen extends ConsumerStatefulWidget {
     this.existingSymptom,
     this.initialMealRecordId,
     this.initialMealName,
+    this.initialMood,
+    this.initialSymptomTypes,
   });
 
   final Symptom? existingSymptom;
@@ -90,6 +104,12 @@ class SymptomWriteScreen extends ConsumerStatefulWidget {
 
   /// 신규 작성 모드 전용 원인 식사 프리필 표시명.
   final String? initialMealName;
+
+  /// 신규 작성 모드 전용 강도 프리필.
+  final SymptomState? initialMood;
+
+  /// 신규 작성 모드 전용 증상 칩 프리필.
+  final List<SymptomType>? initialSymptomTypes;
 
   @override
   ConsumerState<SymptomWriteScreen> createState() => _SymptomWriteScreenState();
@@ -121,6 +141,8 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
     } else {
       // 신규 모드: 빈 폼 (원인 식사 프리필 인자가 있으면 시딩)
       _formState = SymptomWriteFormState(
+        mood: widget.initialMood,
+        symptomTypes: widget.initialSymptomTypes ?? const [],
         occurredAt: nowKst(),
         linkedMealId: widget.initialMealRecordId,
         linkedMealDisplayName:
@@ -189,8 +211,10 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
   Future<void> _onTimeTap() async {
     final result = await Navigator.of(context).push<DateTime>(
       MaterialPageRoute(
-        builder: (_) =>
-            SymptomTimePickScreen(initialDateTime: _formState.occurredAt),
+        builder: (_) => SymptomTimePickScreen(
+          initialDateTime: _formState.occurredAt,
+          joinDate: ref.read(authControllerProvider).valueOrNull?.createdAt,
+        ),
       ),
     );
     if (result != null) {

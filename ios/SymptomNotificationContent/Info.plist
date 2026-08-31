@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>먹어도 돼?</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_MODULE_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>XPC!</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>SymptomHeaderIconName</key>
+	<string>$(SYMPTOM_HEADER_ICON_NAME)</string>
+	<key>SymptomHeaderAppName</key>
+	<string>$(SYMPTOM_HEADER_APP_NAME)</string>
+	<key>NSExtension</key>
+	<dict>
+		<key>NSExtensionMainStoryboard</key>
+		<string>MainInterface</string>
+		<key>NSExtensionPointIdentifier</key>
+		<string>com.apple.usernotifications.content-extension</string>
+		<key>NSExtensionAttributes</key>
+		<dict>
+			<key>UNNotificationExtensionCategory</key>
+			<array>
+				<string>post_meal</string>
+				<string>post_meal_delayed_single</string>
+			</array>
+		<key>UNNotificationExtensionInitialContentSizeRatio</key>
+		<real>1.36</real>
+			<key>UNNotificationExtensionDefaultContentHidden</key>
+			<true/>
+			<key>UNNotificationExtensionUserInteractionEnabled</key>
+			<true/>
+		</dict>
+	</dict>
+	<key>SymptomAppGroupID</key>
+	<string>$(SYMPTOM_APP_GROUP_ID)</string>
+	<key>SymptomKeychainAccessGroup</key>
+	<string>$(SYMPTOM_KEYCHAIN_ACCESS_GROUP)</string>
+	<key>SymptomAPIBaseURL</key>
+	<string>$(SYMPTOM_API_BASE_URL)</string>
+	<key>SymptomBackgroundSessionID</key>
+	<string>$(SYMPTOM_BACKGROUND_SESSION_ID)</string>
+</dict>
+</plist>

@@ -73,7 +73,6 @@ class _FlakyHealthProfileRepository implements HealthProfileRepository {
   @override
   Future<void> updateHealthInfo({
     required List<String> allergies,
-    required List<String> medications,
   }) async {}
 }
 
@@ -82,23 +81,21 @@ void main() {
   // 1. 보존 회귀 테스트 (TDD 핵심 — 순수 로직, 위젯 불필요)
   // ---------------------------------------------------------------------------
   group('보존 회귀 테스트', () {
-    test('allergies·medications만 교체하고 나머지 필드는 base와 동일해야 한다', () async {
+    test('allergies만 교체하고 나머지 필드는 base와 동일해야 한다', () async {
       const base = HealthProfile(
         conditions: ['GERD'],
         symptomFrequency: ['heartburn_reflux', 'post_meal_cough'],
         diagnosed: true,
         triggerFoods: ['spicy', 'caffeine'],
         customTriggers: '탄산음료',
-        medications: ['omeprazole'],
         allergies: ['crustacean'],
       );
 
       final repo = _CaptureMockRepo(initialProfile: base);
 
-      // copyWith로 allergies/medications만 교체한 결과 단언
+      // copyWith로 allergies만 교체한 결과 단언
       final next = base.copyWith(
         allergies: ['milk', 'egg'],
-        medications: ['란소프라졸'],
       );
 
       // 보존 검증: 나머지 필드는 base와 동일
@@ -110,7 +107,6 @@ void main() {
 
       // 변경 검증
       expect(next.allergies, equals(['milk', 'egg']));
-      expect(next.medications, equals(['란소프라졸']));
 
       // repo에 submit — lastSubmittedProfile 캡처 확인
       await repo.submitProfile(next);
@@ -122,7 +118,6 @@ void main() {
       expect(submitted.triggerFoods, equals(base.triggerFoods));
       expect(submitted.customTriggers, equals(base.customTriggers));
       expect(submitted.allergies, equals(['milk', 'egg']));
-      expect(submitted.medications, equals(['란소프라졸']));
     });
   });
 
@@ -130,21 +125,18 @@ void main() {
   // 2. 화면 위젯 테스트
   // ---------------------------------------------------------------------------
   group('AllergyMedEditScreen 위젯 테스트', () {
-    testWidgets('앱바에 "알레르기 · 복용약" 타이틀이 표시된다', (tester) async {
+    testWidgets('앱바에 "알레르기" 타이틀이 표시된다', (tester) async {
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('알레르기 · 복용약'), findsOneWidget);
+      expect(find.text('알레르기'), findsAtLeastNWidgets(1));
     });
 
-    testWidgets('헤더 "알레르기와 복용 중인 약을 알려주세요"가 표시된다', (tester) async {
+    testWidgets('헤더 "알레르기가 있나요?"가 표시된다', (tester) async {
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('알레르기와 복용 중인 약을\n알려주세요'),
-        findsOneWidget,
-      );
+      expect(find.text('알레르기가 있나요?'), findsOneWidget);
     });
 
     testWidgets('allergyOptions 8종 칩이 모두 표시된다', (tester) async {
@@ -161,13 +153,11 @@ void main() {
       expect(find.text('생선·조개류'), findsOneWidget);
     });
 
-    testWidgets('복용약 입력란은 렌더되지 않는다', (tester) async {
+    testWidgets('텍스트 입력란은 렌더되지 않는다', (tester) async {
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('복용 중인 약'), findsNothing);
       expect(find.byType(TextField), findsNothing);
-      expect(find.text('omeprazole'), findsNothing);
     });
 
     testWidgets('ACG 가이드라인 안내가 표시된다', (tester) async {
@@ -213,7 +203,6 @@ void main() {
           diagnosed: true,
           triggerFoods: ['spicy'],
           customTriggers: '탄산음료',
-          medications: [],
           allergies: [],
         ),
       );
@@ -235,14 +224,13 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300)); // reverse anim
     });
 
-    testWidgets('저장 시 allergies·medications만 변경되고 나머지 필드 보존됨', (tester) async {
+    testWidgets('저장 시 allergies만 변경되고 나머지 필드 보존됨', (tester) async {
       const base = HealthProfile(
         conditions: ['GERD'],
         symptomFrequency: ['heartburn_reflux'],
         diagnosed: true,
         triggerFoods: ['spicy'],
         customTriggers: '탄산음료',
-        medications: [],
         allergies: [],
       );
 
@@ -269,8 +257,6 @@ void main() {
       expect(submitted.diagnosed, equals(base.diagnosed));
       expect(submitted.triggerFoods, equals(base.triggerFoods));
       expect(submitted.customTriggers, equals(base.customTriggers));
-      expect(submitted.medications, equals(base.medications));
-
       // 변경 검증
       expect(submitted.allergies, contains('milk'));
 

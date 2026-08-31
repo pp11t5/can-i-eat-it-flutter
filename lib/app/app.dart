@@ -1,20 +1,56 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:can_i_eat_it/features/home_widget/data/home_widget_providers.dart';
+
 import 'router/app_router.dart';
 import 'router/push_navigation_provider.dart';
+import '../core/symptom_outbox/symptom_outbox_retry_coordinator.dart';
+import '../features/auth/presentation/providers/auth_providers.dart';
 import 'theme/app_theme.dart';
 import 'widgets/global_loading.dart';
 
 /// 앱 루트 위젯. 라우터/테마를 주입한다.
-class App extends ConsumerWidget {
+class App extends ConsumerStatefulWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<App> createState() => _AppState();
+}
+
+class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    final session = ref.read(authControllerProvider).valueOrNull;
+    if (session != null) {
+      unawaited(
+        ref.read(symptomOutboxRetryCoordinatorProvider).drain(),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
     // ProviderScope/GoRouter가 준비된 뒤 FCM 탭 수신을 연결한다.
     ref.watch(pushNavigationCoordinatorProvider);
+    ref.watch(homeWidgetCoordinatorProvider);
+    ref.watch(symptomOutboxReadyListenerProvider);
     return MaterialApp.router(
       title: '먹어도 돼?',
       theme: AppTheme.light,

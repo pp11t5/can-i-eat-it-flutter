@@ -38,9 +38,6 @@ abstract class OnboardingDraft with _$OnboardingDraft {
     /// (서버 `customTriggerText` 단일 문자열)로 보낸다.
     @Default(<String>[]) List<String> customTriggers,
 
-    /// 복용약 목록.
-    @Default(<String>[]) List<String> medications,
-
     /// 알레르기 코드 목록. 복수 선택.
     @Default(<String>[]) List<String> allergies,
   }) = _OnboardingDraft;
@@ -58,7 +55,6 @@ extension OnboardingDraftX on OnboardingDraft {
         triggerFoods: triggerFoods,
         customTriggers:
             customTriggers.isEmpty ? null : customTriggers.join(', '),
-        medications: medications,
         allergies: allergies,
       );
 }
@@ -154,32 +150,6 @@ class OnboardingController extends _$OnboardingController {
   /// 사용자 직접 입력 트리거 목록을 교체한다.
   void setCustomTriggers(List<String> triggers) {
     state = state.copyWith(customTriggers: List.unmodifiable(triggers));
-  }
-
-  // -------------------------------------------------------------------------
-  // 복용약
-  // -------------------------------------------------------------------------
-
-  /// 복용약 목록을 교체한다.
-  void setMedications(List<String> medications) {
-    state = state.copyWith(medications: List.unmodifiable(medications));
-  }
-
-  /// 복용약을 추가한다. 이미 존재하면 무시한다.
-  void addMedication(String medication) {
-    if (state.medications.contains(medication)) return;
-    state = state.copyWith(
-      medications: List.unmodifiable([...state.medications, medication]),
-    );
-  }
-
-  /// 복용약을 제거한다.
-  void removeMedication(String medication) {
-    state = state.copyWith(
-      medications: List.unmodifiable(
-        state.medications.where((m) => m != medication).toList(),
-      ),
-    );
   }
 
   // -------------------------------------------------------------------------

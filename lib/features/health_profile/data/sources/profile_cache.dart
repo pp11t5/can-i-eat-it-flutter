@@ -44,7 +44,6 @@ class _HealthProfileCodec {
         'diagnosed': p.diagnosed,
         'triggerFoods': p.triggerFoods,
         'customTriggers': p.customTriggers,
-        'medications': p.medications,
         'allergies': p.allergies,
       };
 
@@ -61,7 +60,6 @@ class _HealthProfileCodec {
       diagnosed: (json['diagnosed'] as bool?) ?? false,
       triggerFoods: strList(json['triggerFoods']),
       customTriggers: json['customTriggers'] as String?,
-      medications: strList(json['medications']),
       allergies: strList(json['allergies']),
     );
   }
@@ -90,7 +88,16 @@ class SecureStorageProfileCache implements ProfileCache {
     if (raw == null) return null;
     try {
       final json = jsonDecode(raw) as Map<String, dynamic>;
-      return _codec.decode(json);
+      final profile = _codec.decode(json);
+      // 구 버전이 로컬에 보관한 민감정보는 읽지 않고 즉시 정제된 포맷으로 덮어쓴다.
+      if (json.containsKey('medications')) {
+        try {
+          await write(profile);
+        } catch (_) {
+          // 정제 저장 실패와 무관하게 이미 안전하게 디코드한 프로필은 사용한다.
+        }
+      }
+      return profile;
     } catch (_) {
       // 파싱 실패 시 null 반환 — 크래시 금지
       return null;

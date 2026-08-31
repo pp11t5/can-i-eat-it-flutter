@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
+import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_record_screen.dart';
 
@@ -13,6 +14,7 @@ import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_record_
 /// 테스트용 라우터 — /meal/record → MealRecordScreen, /check → 캡처
 GoRouter _makeRouter({
   String? mealRecordId,
+  DateTime? joinDate,
   void Function(MealRecordContext ctx)? onCheckPush,
 }) {
   return GoRouter(
@@ -21,7 +23,10 @@ GoRouter _makeRouter({
       GoRoute(
         path: '/meal/record',
         pageBuilder: (context, state) => MaterialPage(
-          child: MealRecordScreen(mealRecordId: mealRecordId),
+          child: MealRecordScreen(
+            mealRecordId: mealRecordId,
+            joinDate: joinDate,
+          ),
         ),
       ),
       GoRoute(
@@ -36,11 +41,16 @@ GoRouter _makeRouter({
   );
 }
 
-Widget _wrap({String? mealRecordId, void Function(MealRecordContext)? onCheckPush}) {
+Widget _wrap({
+  String? mealRecordId,
+  DateTime? joinDate,
+  void Function(MealRecordContext)? onCheckPush,
+}) {
   return MaterialApp.router(
     theme: AppTheme.light,
     routerConfig: _makeRouter(
       mealRecordId: mealRecordId,
+      joinDate: joinDate,
       onCheckPush: onCheckPush,
     ),
   );
@@ -149,6 +159,219 @@ void main() {
 
       expect(captured, isNotNull);
       expect(captured!.mealRecordId, 'mr-1');
+    });
+  });
+
+  group('MealRecordScreen — 직접 입력 휠 미래 시각 제한', () {
+    Future<void> openManualWheel(WidgetTester tester) async {
+      await tester.tap(find.text('직접 입력'));
+      await tester.pumpAndSettle();
+    }
+
+    List<ListWheelScrollView> wheelsOf(WidgetTester tester) {
+      return tester
+          .widgetList<ListWheelScrollView>(find.byType(ListWheelScrollView))
+          .toList();
+    }
+
+    ListWheelChildBuilderDelegate delegateOf(ListWheelScrollView wheel) {
+      return wheel.childDelegate as ListWheelChildBuilderDelegate;
+    }
+
+    testWidgets('"직접 입력" 탭 시 휠이 노출된다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      expect(find.byType(ListWheelScrollView), findsNothing);
+
+      await openManualWheel(tester);
+
+      expect(find.text('직접 선택'), findsOneWidget);
+      expect(find.byType(ListWheelScrollView), findsNWidgets(3));
+    });
+
+    testWidgets('직접 입력 휠 좌우 열은 옆에서 본 원통 각도다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await openManualWheel(tester);
+
+      final wheels = wheelsOf(tester);
+      expect(wheels[0].offAxisFraction, -0.45);
+      expect(wheels[1].offAxisFraction, 0);
+      expect(wheels[2].offAxisFraction, 0.45);
+    });
+
+    testWidgets('직접 입력 휠은 현재 시각을 기본 선택한다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await openManualWheel(tester);
+
+      final now = nowKst();
+      final wheels = wheelsOf(tester);
+      final dateCtrl = wheels[0].controller! as FixedExtentScrollController;
+      final hourCtrl = wheels[1].controller! as FixedExtentScrollController;
+      final minuteCtrl = wheels[2].controller! as FixedExtentScrollController;
+      expect(dateCtrl.selectedItem, 6);
+      expect(hourCtrl.selectedItem, now.hour);
+      expect(minuteCtrl.selectedItem, now.minute);
+    });
+
+    testWidgets('다른 빠른 선택 후 직접 입력이어도 휠은 현재 시각부터다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('10분 전'));
+      await tester.pumpAndSettle();
+      await openManualWheel(tester);
+
+      final now = nowKst();
+      final wheels = wheelsOf(tester);
+      final hourCtrl = wheels[1].controller! as FixedExtentScrollController;
+      final minuteCtrl = wheels[2].controller! as FixedExtentScrollController;
+      expect(hourCtrl.selectedItem, now.hour);
+      expect(minuteCtrl.selectedItem, now.minute);
+    });
+
+    testWidgets('오늘이면 현재 시각 이후 시·분은 휠에 없다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await openManualWheel(tester);
+
+      final now = nowKst();
+      final wheels = wheelsOf(tester);
+      expect(wheels, hasLength(3));
+
+      expect(delegateOf(wheels[1]).childCount, now.hour + 1);
+      expect(delegateOf(wheels[2]).childCount, now.minute + 1);
+
+      expect(
+        find.text('${now.hour.toString().padLeft(2, '0')}시'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('${now.minute.toString().padLeft(2, '0')}분'),
+        findsOneWidget,
+      );
+
+      if (now.hour < 23) {
+        expect(
+          find.text('${(now.hour + 1).toString().padLeft(2, '0')}시'),
+          findsNothing,
+        );
+      }
+      if (now.minute < 59) {
+        expect(
+          find.text('${(now.minute + 1).toString().padLeft(2, '0')}분'),
+          findsNothing,
+        );
+      }
+    });
+
+    testWidgets('날짜 휠은 과거가 위, 오늘이 마지막이다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await openManualWheel(tester);
+
+      final dateCtrl = wheelsOf(tester).first.controller!
+          as FixedExtentScrollController;
+      expect(dateCtrl.selectedItem, 6);
+
+      final yesterday = nowKst().subtract(const Duration(days: 1));
+      const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+      final yesterdayLabel =
+          '${yesterday.month}월 ${yesterday.day}일 (${weekdays[yesterday.weekday - 1]})';
+      expect(find.text(yesterdayLabel), findsOneWidget);
+      expect(find.text('오늘'), findsOneWidget);
+    });
+
+    testWidgets('어제 날짜를 고르면 시 0–23, 분 0–59가 모두 있다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await openManualWheel(tester);
+
+      final dateCtrl = wheelsOf(tester).first.controller!
+          as FixedExtentScrollController;
+      expect(dateCtrl.selectedItem, 6);
+      dateCtrl.jumpToItem(5);
+      await tester.pumpAndSettle();
+
+      final wheels = wheelsOf(tester);
+      expect(delegateOf(wheels[1]).childCount, 24);
+      expect(delegateOf(wheels[2]).childCount, 60);
+    });
+
+    testWidgets('가입일이 오늘이면 날짜 휠에 오늘만 있다', (tester) async {
+      final now = nowKst();
+      await tester.pumpWidget(_wrap(joinDate: now));
+      await tester.pumpAndSettle();
+      await openManualWheel(tester);
+
+      final dateWheel = wheelsOf(tester).first;
+      expect(delegateOf(dateWheel).childCount, 1);
+      expect(find.text('오늘'), findsOneWidget);
+
+      final yesterday = now.subtract(const Duration(days: 1));
+      const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+      final yesterdayLabel =
+          '${yesterday.month}월 ${yesterday.day}일 (${weekdays[yesterday.weekday - 1]})';
+      expect(find.text(yesterdayLabel), findsNothing);
+    });
+
+    testWidgets('가입일이 어제이면 어제와 오늘만 있다', (tester) async {
+      final now = nowKst();
+      final yesterday = now.subtract(const Duration(days: 1));
+      await tester.pumpWidget(_wrap(joinDate: yesterday));
+      await tester.pumpAndSettle();
+      await openManualWheel(tester);
+
+      final dateWheel = wheelsOf(tester).first;
+      expect(delegateOf(dateWheel).childCount, 2);
+      expect(
+        (dateWheel.controller! as FixedExtentScrollController).selectedItem,
+        1,
+      );
+
+      const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+      final yesterdayLabel =
+          '${yesterday.month}월 ${yesterday.day}일 (${weekdays[yesterday.weekday - 1]})';
+      expect(find.text(yesterdayLabel), findsOneWidget);
+      expect(find.text('오늘'), findsOneWidget);
+    });
+
+    testWidgets('오늘에서 현재 시보다 이른 시를 고르면 분은 0–59다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await openManualWheel(tester);
+
+      final now = nowKst();
+      if (now.hour == 0) {
+        // 0시면 이른 시가 없으므로 어제 날짜로 전체 분 범위를 검증한다.
+        final dateCtrl = wheelsOf(tester).first.controller!
+            as FixedExtentScrollController;
+        expect(dateCtrl.selectedItem, 6);
+        dateCtrl.jumpToItem(5);
+        await tester.pumpAndSettle();
+        expect(delegateOf(wheelsOf(tester)[2]).childCount, 60);
+        return;
+      }
+
+      final hourCtrl = wheelsOf(tester)[1].controller!
+          as FixedExtentScrollController;
+      hourCtrl.jumpToItem(now.hour - 1);
+      await tester.pumpAndSettle();
+
+      expect(delegateOf(wheelsOf(tester)[2]).childCount, 60);
+    });
+
+    testWidgets('직접 입력 후 다음 → eatenAt이 현재 시각 이후가 아니다', (tester) async {
+      MealRecordContext? captured;
+      await tester.pumpWidget(_wrap(onCheckPush: (ctx) => captured = ctx));
+      await tester.pumpAndSettle();
+      await openManualWheel(tester);
+
+      await tester.tap(find.text('다음'));
+      await tester.pumpAndSettle();
+
+      expect(captured, isNotNull);
+      expect(captured!.eatenAt.isAfter(nowKst()), isFalse);
     });
   });
 }

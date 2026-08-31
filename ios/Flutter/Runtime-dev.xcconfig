@@ -1,0 +1,5 @@
+// Xcode에서 dev 스킴을 직접 실행할 때도 Flutter 런타임 설정을 고정한다.
+// 반드시 Generated.xcconfig 뒤에 include해야 Flutter가 주입한 공통 define을 보존한다.
+FLUTTER_TARGET=lib/main_dev.dart
+FLAVOR=dev
+DART_DEFINES=$(inherited),RkxVVFRFUl9BUFBfRkxBVk9SPWRldg==,S0FLQU9fTkFUSVZFX0FQUF9LRVk9Y2QyNGFhMDhhNzQwYTQ3NTQwMWY4NDM5MGM4MjE5ZGY=,R09PR0xFX1NFUlZFUl9DTElFTlRfSUQ9NzE3ODk1NTcyMDkxLWlwZmYwcXZuZ21hMXFvaGwxNDJpMW9tMDEzMWFxcDlyLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29t

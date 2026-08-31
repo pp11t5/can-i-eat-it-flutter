@@ -22,7 +22,6 @@ mixin _$HealthProfileDto {
   List<String> get triggerFoods;
   @JsonKey(name: 'custom_triggers')
   String? get customTriggers;
-  List<String> get medications;
   List<String> get allergies;
 
   /// Create a copy of HealthProfileDto
@@ -51,8 +50,6 @@ mixin _$HealthProfileDto {
                 .equals(other.triggerFoods, triggerFoods) &&
             (identical(other.customTriggers, customTriggers) ||
                 other.customTriggers == customTriggers) &&
-            const DeepCollectionEquality()
-                .equals(other.medications, medications) &&
             const DeepCollectionEquality().equals(other.allergies, allergies));
   }
 
@@ -65,12 +62,11 @@ mixin _$HealthProfileDto {
       diagnosed,
       const DeepCollectionEquality().hash(triggerFoods),
       customTriggers,
-      const DeepCollectionEquality().hash(medications),
       const DeepCollectionEquality().hash(allergies));
 
   @override
   String toString() {
-    return 'HealthProfileDto(conditions: $conditions, symptomFrequency: $symptomFrequency, diagnosed: $diagnosed, triggerFoods: $triggerFoods, customTriggers: $customTriggers, medications: $medications, allergies: $allergies)';
+    return 'HealthProfileDto(conditions: $conditions, symptomFrequency: $symptomFrequency, diagnosed: $diagnosed, triggerFoods: $triggerFoods, customTriggers: $customTriggers, allergies: $allergies)';
   }
 }
 
@@ -86,7 +82,6 @@ abstract mixin class $HealthProfileDtoCopyWith<$Res> {
       bool diagnosed,
       @JsonKey(name: 'trigger_foods') List<String> triggerFoods,
       @JsonKey(name: 'custom_triggers') String? customTriggers,
-      List<String> medications,
       List<String> allergies});
 }
 
@@ -108,7 +103,6 @@ class _$HealthProfileDtoCopyWithImpl<$Res>
     Object? diagnosed = null,
     Object? triggerFoods = null,
     Object? customTriggers = freezed,
-    Object? medications = null,
     Object? allergies = null,
   }) {
     return _then(_self.copyWith(
@@ -132,10 +126,6 @@ class _$HealthProfileDtoCopyWithImpl<$Res>
           ? _self.customTriggers
           : customTriggers // ignore: cast_nullable_to_non_nullable
               as String?,
-      medications: null == medications
-          ? _self.medications
-          : medications // ignore: cast_nullable_to_non_nullable
-              as List<String>,
       allergies: null == allergies
           ? _self.allergies
           : allergies // ignore: cast_nullable_to_non_nullable
@@ -243,7 +233,6 @@ extension HealthProfileDtoPatterns on HealthProfileDto {
             bool diagnosed,
             @JsonKey(name: 'trigger_foods') List<String> triggerFoods,
             @JsonKey(name: 'custom_triggers') String? customTriggers,
-            List<String> medications,
             List<String> allergies)?
         $default, {
     required TResult orElse(),
@@ -257,7 +246,6 @@ extension HealthProfileDtoPatterns on HealthProfileDto {
             _that.diagnosed,
             _that.triggerFoods,
             _that.customTriggers,
-            _that.medications,
             _that.allergies);
       case _:
         return orElse();
@@ -285,7 +273,6 @@ extension HealthProfileDtoPatterns on HealthProfileDto {
             bool diagnosed,
             @JsonKey(name: 'trigger_foods') List<String> triggerFoods,
             @JsonKey(name: 'custom_triggers') String? customTriggers,
-            List<String> medications,
             List<String> allergies)
         $default,
   ) {
@@ -298,7 +285,6 @@ extension HealthProfileDtoPatterns on HealthProfileDto {
             _that.diagnosed,
             _that.triggerFoods,
             _that.customTriggers,
-            _that.medications,
             _that.allergies);
       case _:
         throw StateError('Unexpected subclass');
@@ -325,7 +311,6 @@ extension HealthProfileDtoPatterns on HealthProfileDto {
             bool diagnosed,
             @JsonKey(name: 'trigger_foods') List<String> triggerFoods,
             @JsonKey(name: 'custom_triggers') String? customTriggers,
-            List<String> medications,
             List<String> allergies)?
         $default,
   ) {
@@ -338,7 +323,6 @@ extension HealthProfileDtoPatterns on HealthProfileDto {
             _that.diagnosed,
             _that.triggerFoods,
             _that.customTriggers,
-            _that.medications,
             _that.allergies);
       case _:
         return null;
@@ -357,12 +341,10 @@ class _HealthProfileDto extends HealthProfileDto {
       @JsonKey(name: 'trigger_foods')
       final List<String> triggerFoods = const <String>[],
       @JsonKey(name: 'custom_triggers') this.customTriggers,
-      final List<String> medications = const <String>[],
       final List<String> allergies = const <String>[]})
       : _conditions = conditions,
         _symptomFrequency = symptomFrequency,
         _triggerFoods = triggerFoods,
-        _medications = medications,
         _allergies = allergies,
         super._();
   factory _HealthProfileDto.fromJson(Map<String, dynamic> json) =>
@@ -402,15 +384,6 @@ class _HealthProfileDto extends HealthProfileDto {
   @override
   @JsonKey(name: 'custom_triggers')
   final String? customTriggers;
-  final List<String> _medications;
-  @override
-  @JsonKey()
-  List<String> get medications {
-    if (_medications is EqualUnmodifiableListView) return _medications;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_medications);
-  }
-
   final List<String> _allergies;
   @override
   @JsonKey()
@@ -451,8 +424,6 @@ class _HealthProfileDto extends HealthProfileDto {
             (identical(other.customTriggers, customTriggers) ||
                 other.customTriggers == customTriggers) &&
             const DeepCollectionEquality()
-                .equals(other._medications, _medications) &&
-            const DeepCollectionEquality()
                 .equals(other._allergies, _allergies));
   }
 
@@ -465,12 +436,11 @@ class _HealthProfileDto extends HealthProfileDto {
       diagnosed,
       const DeepCollectionEquality().hash(_triggerFoods),
       customTriggers,
-      const DeepCollectionEquality().hash(_medications),
       const DeepCollectionEquality().hash(_allergies));
 
   @override
   String toString() {
-    return 'HealthProfileDto(conditions: $conditions, symptomFrequency: $symptomFrequency, diagnosed: $diagnosed, triggerFoods: $triggerFoods, customTriggers: $customTriggers, medications: $medications, allergies: $allergies)';
+    return 'HealthProfileDto(conditions: $conditions, symptomFrequency: $symptomFrequency, diagnosed: $diagnosed, triggerFoods: $triggerFoods, customTriggers: $customTriggers, allergies: $allergies)';
   }
 }
 
@@ -488,7 +458,6 @@ abstract mixin class _$HealthProfileDtoCopyWith<$Res>
       bool diagnosed,
       @JsonKey(name: 'trigger_foods') List<String> triggerFoods,
       @JsonKey(name: 'custom_triggers') String? customTriggers,
-      List<String> medications,
       List<String> allergies});
 }
 
@@ -510,7 +479,6 @@ class __$HealthProfileDtoCopyWithImpl<$Res>
     Object? diagnosed = null,
     Object? triggerFoods = null,
     Object? customTriggers = freezed,
-    Object? medications = null,
     Object? allergies = null,
   }) {
     return _then(_HealthProfileDto(
@@ -534,10 +502,6 @@ class __$HealthProfileDtoCopyWithImpl<$Res>
           ? _self.customTriggers
           : customTriggers // ignore: cast_nullable_to_non_nullable
               as String?,
-      medications: null == medications
-          ? _self._medications
-          : medications // ignore: cast_nullable_to_non_nullable
-              as List<String>,
       allergies: null == allergies
           ? _self._allergies
           : allergies // ignore: cast_nullable_to_non_nullable

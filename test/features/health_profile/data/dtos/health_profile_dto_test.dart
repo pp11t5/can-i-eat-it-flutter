@@ -12,7 +12,6 @@ void main() {
     'diagnosed': true,
     'trigger_foods': ['spicy', 'caffeine'],
     'custom_triggers': '탄산음료',
-    'medications': ['omeprazole'],
     'allergies': ['shellfish'],
   };
 
@@ -25,7 +24,6 @@ void main() {
       expect(dto.diagnosed, isTrue);
       expect(dto.triggerFoods, ['spicy', 'caffeine']);
       expect(dto.customTriggers, '탄산음료');
-      expect(dto.medications, ['omeprazole']);
       expect(dto.allergies, ['shellfish']);
     });
 
@@ -35,8 +33,18 @@ void main() {
       expect(json.containsKey('symptom_frequency'), isTrue);
       expect(json.containsKey('trigger_foods'), isTrue);
       expect(json.containsKey('custom_triggers'), isTrue);
-      expect(json['symptom_frequency'], ['weekly_heartburn', 'post_meal_cough']);
+      expect(
+          json['symptom_frequency'], ['weekly_heartburn', 'post_meal_cough']);
       expect(json['trigger_foods'], ['spicy', 'caffeine']);
+    });
+
+    test('이전 버전의 medications 필드는 무시하고 다시 직렬화하지 않는다', () {
+      final legacyJson = Map<String, dynamic>.from(sampleJson)
+        ..['medications'] = ['omeprazole'];
+
+      final json = HealthProfileDto.fromJson(legacyJson).toJson();
+
+      expect(json.containsKey('medications'), isFalse);
     });
 
     test('fromJson → toJson 라운드트립이 원본 JSON과 동일하다', () {
@@ -47,7 +55,6 @@ void main() {
       expect(json['diagnosed'], sampleJson['diagnosed']);
       expect(json['trigger_foods'], sampleJson['trigger_foods']);
       expect(json['custom_triggers'], sampleJson['custom_triggers']);
-      expect(json['medications'], sampleJson['medications']);
       expect(json['allergies'], sampleJson['allergies']);
     });
 
@@ -65,7 +72,6 @@ void main() {
       expect(dto.conditions, isEmpty);
       expect(dto.symptomFrequency, isEmpty);
       expect(dto.triggerFoods, isEmpty);
-      expect(dto.medications, isEmpty);
       expect(dto.allergies, isEmpty);
       expect(dto.diagnosed, isFalse);
     });
@@ -81,7 +87,6 @@ void main() {
       expect(entity.diagnosed, dto.diagnosed);
       expect(entity.triggerFoods, dto.triggerFoods);
       expect(entity.customTriggers, dto.customTriggers);
-      expect(entity.medications, dto.medications);
       expect(entity.allergies, dto.allergies);
     });
 
@@ -93,7 +98,6 @@ void main() {
       expect(dto.diagnosed, entity.diagnosed);
       expect(dto.triggerFoods, entity.triggerFoods);
       expect(dto.customTriggers, entity.customTriggers);
-      expect(dto.medications, entity.medications);
       expect(dto.allergies, entity.allergies);
     });
 

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:can_i_eat_it/app/router/guards/auth_guard.dart';
+import 'package:can_i_eat_it/app/router/guards/app_redirect.dart';
 import 'package:can_i_eat_it/app/widgets/app_shell.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/session_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
@@ -63,12 +63,14 @@ GoRouter appRouter(Ref ref) {
 
   return GoRouter(
     initialLocation: '/splash',
+    overridePlatformDefaultLocation: true,
     refreshListenable: notifier,
     redirect: (context, state) {
       final status = ref.read(sessionStatusProvider);
-      return resolveRedirect(
+      return resolveAppRedirect(
         status: status,
-        location: state.matchedLocation,
+        uri: state.uri,
+        matchedLocation: state.matchedLocation,
         allowTermsDuringConsentTransition:
             ref.read(consentNavigationTransitionProvider),
       );
@@ -141,6 +143,14 @@ GoRouter appRouter(Ref ref) {
           final existing = extra is Symptom ? extra : null;
           final args = extra is SymptomWriteArgs ? extra : null;
           final pushMealRecordId = state.uri.queryParameters['mealRecordId'];
+          final intensityIndex = int.tryParse(
+            state.uri.queryParameters['intensityIndex'] ?? '',
+          );
+          final typeCodes = (state.uri.queryParameters['symptomTypes'] ?? '')
+              .split(',')
+              .map((part) => part.trim())
+              .where((part) => part.isNotEmpty)
+              .toList();
           return MaterialPage(
             fullscreenDialog: true,
             child: args != null || existing != null
@@ -148,9 +158,15 @@ GoRouter appRouter(Ref ref) {
                     existingSymptom: existing,
                     initialMealRecordId: args?.initialMealRecordId,
                     initialMealName: args?.initialMealName,
+                    initialMood: args?.initialMood,
+                    initialSymptomTypes: args?.initialSymptomTypes,
                   )
                 : pushMealRecordId != null && pushMealRecordId.isNotEmpty
-                    ? PushSymptomEntryScreen(mealRecordId: pushMealRecordId)
+                    ? PushSymptomEntryScreen(
+                        mealRecordId: pushMealRecordId,
+                        initialIntensityIndex: intensityIndex,
+                        initialSymptomTypeCodes: typeCodes,
+                      )
                     : const SymptomWriteScreen(),
           );
         },
@@ -196,7 +212,11 @@ GoRouter appRouter(Ref ref) {
           final mealRecordId = state.extra as String?;
           return MaterialPage(
             fullscreenDialog: true,
-            child: MealRecordScreen(mealRecordId: mealRecordId),
+            child: MealRecordScreen(
+              mealRecordId: mealRecordId,
+              joinDate:
+                  ref.read(authControllerProvider).valueOrNull?.createdAt,
+            ),
           );
         },
       ),

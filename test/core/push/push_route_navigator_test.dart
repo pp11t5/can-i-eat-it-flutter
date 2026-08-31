@@ -95,6 +95,23 @@ void main() {
       expect(find.byKey(const Key('splash')), findsNothing);
     });
 
+    testWidgets('Page Not Found면 go로 목적지를 연다', (tester) async {
+      router = buildRouter(initialLocation: '/meal-record');
+      await pumpRouter(tester, router);
+
+      expect(find.text('Page Not Found'), findsOneWidget);
+
+      await navigateFromPush(
+        router: router,
+        location: '/symptom/record',
+        waitFrame: pumpWait(tester),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('symptom')), findsOneWidget);
+      expect(find.text('Page Not Found'), findsNothing);
+    });
+
     testWidgets('식후 증상 경로도 cold baseline 후 push된다', (tester) async {
       router = buildRouter(initialLocation: '/splash');
       await pumpRouter(tester, router);

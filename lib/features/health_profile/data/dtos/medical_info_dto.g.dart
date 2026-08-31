@@ -12,16 +12,11 @@ _MedicalInfoDto _$MedicalInfoDtoFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           const <String>[],
-      medications: (json['medications'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const <String>[],
     );
 
 Map<String, dynamic> _$MedicalInfoDtoToJson(_MedicalInfoDto instance) =>
     <String, dynamic>{
       'allergies': instance.allergies,
-      'medications': instance.medications,
     };
 
 _MedicalInfoUpdateRequestDto _$MedicalInfoUpdateRequestDtoFromJson(
@@ -31,15 +26,10 @@ _MedicalInfoUpdateRequestDto _$MedicalInfoUpdateRequestDtoFromJson(
               ?.map((e) => e as String)
               .toList() ??
           const <String>[],
-      medications: (json['medications'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const <String>[],
     );
 
 Map<String, dynamic> _$MedicalInfoUpdateRequestDtoToJson(
         _MedicalInfoUpdateRequestDto instance) =>
     <String, dynamic>{
       'allergens': instance.allergens,
-      'medications': instance.medications,
     };

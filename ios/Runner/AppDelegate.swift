@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import UserNotifications
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -7,6 +8,7 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    registerSymptomCheckinCategory()
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
@@ -27,6 +29,36 @@ import UIKit
         result(FlutterMethodNotImplemented)
       }
     }
+    SymptomOutboxMethodChannel.register(binaryMessenger: engineBridge.applicationRegistrar.messenger())
+    HomeWidgetMethodChannel.register(binaryMessenger: engineBridge.applicationRegistrar.messenger())
+  }
+
+  override func application(
+    _ application: UIApplication,
+    handleEventsForBackgroundURLSession identifier: String,
+    completionHandler: @escaping () -> Void
+  ) {
+    guard let uploader = try? SymptomNativeUploader.makeIfNeeded(),
+          uploader.backgroundSessionID == identifier else {
+      completionHandler()
+      return
+    }
+    SymptomNativeUploadLog.debug("Runner received background session handoff sessionID=\(identifier)")
+    uploader.setBackgroundCompletionHandler(completionHandler)
+  }
+
+  private func registerSymptomCheckinCategory() {
+    let open = UNNotificationAction(
+      identifier: "SYMPTOM_OPEN_APP_ACTION", title: "앱에서 자세히", options: [.foreground]
+    )
+    let checkinCategories = ["post_meal", "post_meal_delayed_single"].map {
+      UNNotificationCategory(identifier: $0, actions: [open], intentIdentifiers: [], options: [.customDismissAction])
+    }
+    UNUserNotificationCenter.current().getNotificationCategories { categories in
+      var updated = categories.filter { !["post_meal", "post_meal_delayed_single"].contains($0.identifier) }
+      updated.formUnion(checkinCategories)
+      UNUserNotificationCenter.current().setNotificationCategories(updated)
+    }
   }
 }
 
@@ -45,9 +77,21 @@ import UIKit
 class SceneDelegate: FlutterSceneDelegate {
   override func scene(
     _ scene: UIScene,
+    willConnectTo session: UISceneSession,
+    options connectionOptions: UIScene.ConnectionOptions
+  ) {
+    for context in connectionOptions.urlContexts {
+      _ = HomeWidgetLinkStore.capture(context.url)
+    }
+    super.scene(scene, willConnectTo: session, options: connectionOptions)
+  }
+
+  override func scene(
+    _ scene: UIScene,
     openURLContexts URLContexts: Set<UIOpenURLContext>
   ) {
-    for context in URLContexts {
+    let nonWidgetContexts = Set(URLContexts.filter { !HomeWidgetLinkStore.capture($0.url) })
+    for context in nonWidgetContexts {
       #if DEBUG
       // 진단 로그(디버그 전용). 인가 code 노출 방지 위해 scheme 만 기록한다.
       NSLog("[KakaoBridge] openURL scheme: \(context.url.scheme ?? "nil")")
@@ -60,6 +104,8 @@ class SceneDelegate: FlutterSceneDelegate {
         )
       }
     }
-    super.scene(scene, openURLContexts: URLContexts)
+    if !nonWidgetContexts.isEmpty {
+      super.scene(scene, openURLContexts: nonWidgetContexts)
+    }
   }
 }

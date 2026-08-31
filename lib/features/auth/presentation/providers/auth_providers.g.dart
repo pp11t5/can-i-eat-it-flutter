@@ -161,7 +161,7 @@ final consentNavigationTransitionProvider =
 );
 
 typedef _$ConsentNavigationTransition = Notifier<bool>;
-String _$authControllerHash() => r'db79a9f9831408f9c127fc9ac19f18ffde083d24';
+String _$authControllerHash() => r'5fdbe8448ede5120e65a958c74521598d24eb4aa';
 
 /// 인증 상태 컨트롤러 (AsyncNotifier).
 ///
@@ -176,7 +176,7 @@ String _$authControllerHash() => r'db79a9f9831408f9c127fc9ac19f18ffde083d24';
 /// Copied from [AuthController].
 @ProviderFor(AuthController)
 final authControllerProvider =
-    AutoDisposeAsyncNotifierProvider<AuthController, AuthSession?>.internal(
+    AsyncNotifierProvider<AuthController, AuthSession?>.internal(
   AuthController.new,
   name: r'authControllerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -186,6 +186,6 @@ final authControllerProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$AuthController = AutoDisposeAsyncNotifier<AuthSession?>;
+typedef _$AuthController = AsyncNotifier<AuthSession?>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

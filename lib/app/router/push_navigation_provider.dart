@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:can_i_eat_it/core/push/fcm_messaging_handler.dart';
 import 'package:can_i_eat_it/core/push/push_navigation_coordinator.dart';
 import 'package:can_i_eat_it/core/push/push_route_navigator.dart';
+import 'package:can_i_eat_it/core/push/rich_push_launch.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/session_providers.dart';
 
 import 'app_router.dart';
@@ -44,6 +45,7 @@ final pushNavigationCoordinatorProvider =
 /// cold start 탭을 먼저 잡고, 그다음 포그라운드/로컬 알림을 켠다.
 Future<void> _startPushMessaging(PushNavigationCoordinator coordinator) async {
   await wireOpenedApp(coordinator.handleRemoteMessage);
+  await wireRichPushLaunch(coordinator.handleData);
   await initForegroundMessaging(
     onLocalNotificationTap: coordinator.handleLocalPayload,
   );

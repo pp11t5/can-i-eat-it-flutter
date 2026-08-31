@@ -23,6 +23,7 @@ import 'package:can_i_eat_it/features/notification/data/repositories/mock_notifi
 import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
+import 'package:can_i_eat_it/core/security/token_store.dart';
 
 // ---------------------------------------------------------------------------
 // Stubs
@@ -58,6 +59,8 @@ Widget _buildMypageScreen({
     overrides: [
       // ignore: scoped_providers_should_specify_dependencies
       authRepositoryProvider.overrideWithValue(repo),
+      // ignore: scoped_providers_should_specify_dependencies
+      tokenStoreProvider.overrideWithValue(InMemoryTokenStore()),
       // ignore: scoped_providers_should_specify_dependencies
       healthProfileRepositoryProvider.overrideWithValue(profileRepo),
       // ignore: scoped_providers_should_specify_dependencies
@@ -104,6 +107,8 @@ Widget _buildMypageWithWithdrawRouter({AuthSession? session}) {
     overrides: [
       // ignore: scoped_providers_should_specify_dependencies
       authRepositoryProvider.overrideWithValue(repo),
+      // ignore: scoped_providers_should_specify_dependencies
+      tokenStoreProvider.overrideWithValue(InMemoryTokenStore()),
       // ignore: scoped_providers_should_specify_dependencies
       healthProfileRepositoryProvider.overrideWithValue(
         MockHealthProfileRepository.completed(),

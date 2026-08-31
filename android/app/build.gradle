@@ -32,6 +32,10 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.canieatthis.can_i_eat_this1"
         // flutter_local_notifications 22.x requires API 24 or newer.
@@ -49,6 +53,7 @@ android {
             resValue "string", "app_name", "먹어도돼?"
             // Kakao 로그인 리다이렉트 스킴(네이티브 앱키 기반, 클라 식별자).
             manifestPlaceholders["kakaoScheme"] = "kakao2d007771e0083b600999053b9b1d4e83"
+            buildConfigField "String", "API_BASE_URL", "\"https://prod.can-i-eat-it.com/api/v1\""
         }
         dev {
             dimension = "env"
@@ -58,6 +63,7 @@ android {
             resValue "string", "app_name", "먹어도돼? Dev"
             // dev 카카오 테스트앱 네이티브 앱키 기반 스킴.
             manifestPlaceholders["kakaoScheme"] = "kakaocd24aa08a740a475401f84390c8219df"
+            buildConfigField "String", "API_BASE_URL", "\"https://staging.can-i-eat-it.com/api/v1\""
         }
     }
 
@@ -86,4 +92,6 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.1.4"
+    implementation "androidx.security:security-crypto:1.0.0"
+    implementation "androidx.work:work-runtime-ktx:2.9.1"
 }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_surface">#FFFEFEFE</color>
+    <color name="widget_text_primary">#FF222222</color>
+    <color name="widget_text_secondary">#FF737380</color>
+    <color name="widget_text_title">#FF6B7280</color>
+    <color name="widget_cta_bg">#FF222222</color>
+    <color name="widget_cta_text">#FFFEFEFE</color>
+    <color name="widget_recommend">#FF00BF72</color>
+    <color name="widget_recommend_bg">#FFF0FFF4</color>
+    <color name="widget_caution">#FFFF8D28</color>
+    <color name="widget_caution_bg">#FFFFF5EA</color>
+    <color name="widget_risk">#FFFF383C</color>
+    <color name="widget_risk_bg">#FFFFEDED</color>
+    <color name="widget_divider">#FFD3D3D3</color>
+</resources>

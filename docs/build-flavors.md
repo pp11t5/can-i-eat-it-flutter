@@ -7,7 +7,7 @@
 
 | 플랫폼 | 운영(prod) | 개발(dev) | 방식 |
 |---|---|---|---|
-| **iOS 번들 ID** | `com.canieatthis.canIEatThis` | `com.canieatthis.canIEatThis.dev` | 접미사 `.dev` (Xcode 컨피그 `*-prod`/`*-dev` 빌드세팅, 구현됨) |
+| **iOS 번들 ID** | `com.canieatthis.canIEatThis1` | `com.canieatthis.canIEatThis.dev` | 접미사 `.dev` (Xcode 컨피그 `*-prod`/`*-dev` 빌드세팅, 구현됨) |
 | **Android 패키지** | `com.canieatthis.can_i_eat_this` | `com.canieatthis.can_i_eat_this.dev` | `applicationIdSuffix = ".dev"` (구현됨) |
 | **앱 표시명** | `먹어도돼?` | `먹어도돼? Dev` | Android resValue / iOS `APP_DISPLAY_NAME` 빌드세팅 |
 
@@ -81,6 +81,14 @@ flutter run --flavor dev -t lib/main_dev.dart \
 - iOS: 정적 번들 대신 **Run Script build phase** 가 `GOOGLE_SERVICE_FLAVOR` 빌드세팅을 읽어
   `ios/config/<flavor>/GoogleService-Info.plist` 를 앱 번들로 복사한다.
 
+## iOS 리치 푸시 Extension
+
+`SymptomNotificationContent`는 `Debug`·`Profile`·`Release` 각각의 dev/prod configuration을 가진다. flavor별 `NotificationResponse-<flavor>.xcconfig`가 Extension bundle ID, App Group, Keychain access group, API base URL, background session identifier를 설정한다.
+
+- Runner와 Extension entitlement는 같은 flavor의 App Group·Keychain group을 공유한다.
+- Automatic Signing을 유지한다. archive 검증 때 Runner와 `.appex`의 bundle ID, provisioning profile, entitlement가 같은 flavor인지 확인한다.
+- 운영 계약과 payload 형식은 [iOS 리치 푸시 운영 계약](project/ios-rich-push.md)을 따른다.
+
 ## 앱 아이콘
 
 - 소스: `assets/app_icon/app_icon_prod.png`, `app_icon_dev.png` (1024×1024, Figma `2045:5086`, Stg 제외).
@@ -89,9 +97,6 @@ flutter run --flavor dev -t lib/main_dev.dart \
 
 ## 남은 작업 (TODO)
 
-- [ ] iOS 네이티브 플레이버(스킴 `prod`/`dev` + xcconfig 빌드 컨피그 + 번들ID/표시명/AppIcon/Kakao scheme/GoogleService-Info 분리) — Xcode 필요.
-- [ ] dev 카카오 앱 생성 → dev 네이티브 앱키·URL scheme.
-- [ ] dev Firebase 앱 생성 → `android/app/src/dev/google-services.json`, iOS dev `GoogleService-Info.plist`.
 - [ ] 아이콘 적용(`flutter_launcher_icons`) — iOS 플레이버 타겟 준비 후.
 
 ## dev-login (미커밋 로컬 도구)

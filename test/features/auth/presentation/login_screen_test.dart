@@ -6,6 +6,7 @@ import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
+import 'package:can_i_eat_it/core/security/token_store.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/data/services/google_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
@@ -86,6 +87,8 @@ Widget _wrapWithOfflineFlag(MockAuthRepository repo, {required bool offline}) =>
         // ignore: scoped_providers_should_specify_dependencies
         coldStartOfflineProvider.overrideWithValue(offline),
         // ignore: scoped_providers_should_specify_dependencies
+        tokenStoreProvider.overrideWithValue(InMemoryTokenStore()),
+        // ignore: scoped_providers_should_specify_dependencies
         fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
       ],
       child: MaterialApp.router(routerConfig: _testRouter()),
@@ -115,6 +118,8 @@ Widget _wrap(MockAuthRepository repo) => ProviderScope(
       overrides: [
         // ignore: scoped_providers_should_specify_dependencies
         authRepositoryProvider.overrideWithValue(repo),
+        // ignore: scoped_providers_should_specify_dependencies
+        tokenStoreProvider.overrideWithValue(InMemoryTokenStore()),
         // ignore: scoped_providers_should_specify_dependencies
         fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
       ],
