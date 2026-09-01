@@ -1,5 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/dictionary_list_controller.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/home_widget/data/home_widget_providers.dart';
@@ -108,6 +110,10 @@ class SymptomWriteController extends _$SymptomWriteController {
       if (existingSymptomId == null) {
         final result = await repo.create(draft);
         symptomId = result.symptomId;
+        // 신규 기록만 퍼널(증상 응답). 수정은 해당하지 않는다.
+        await ref
+            .read(analyticsServiceProvider)
+            .logFunnel(FunnelEvent.symptomResponse);
       } else {
         await repo.update(existingSymptomId!, draft);
         symptomId = existingSymptomId!;

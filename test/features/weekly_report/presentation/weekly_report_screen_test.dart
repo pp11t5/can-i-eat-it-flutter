@@ -7,6 +7,9 @@ import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
 import 'package:can_i_eat_it/features/weekly_report/data/repositories/mock_weekly_report_repository.dart';
 import 'package:can_i_eat_it/features/weekly_report/data/weekly_report_providers.dart';
 import 'package:can_i_eat_it/features/weekly_report/domain/entities/weekly_report.dart';
@@ -43,6 +46,29 @@ class _FixedWeeklyReportRepository implements WeeklyReportRepository {
   Future<WeeklyReport> getWeeklyReport() async => _report;
 }
 
+class _SpyAnalyticsService implements AnalyticsService {
+  final List<String> funnelNames = [];
+
+  @override
+  Future<void> logFunnel(
+    FunnelEvent event, {
+    Map<String, Object?> params = const {},
+  }) async {
+    funnelNames.add(event.eventName);
+  }
+
+  @override
+  Future<void> logEvent(
+    String name, {
+    Map<String, Object?> params = const {},
+  }) async {}
+}
+
+class _ThrowingWeeklyReportRepository implements WeeklyReportRepository {
+  @override
+  Future<WeeklyReport> getWeeklyReport() => throw Exception('load failed');
+}
+
 const _kReportWithUnknown = WeeklyReport(
   startDate: '2026-06-29',
   endDate: '2026-07-05',
@@ -60,11 +86,16 @@ const _kReportWithUnknown = WeeklyReport(
   ),
 );
 
-Widget _wrap(WeeklyReportRepository repo) {
+Widget _wrap(
+  WeeklyReportRepository repo, {
+  AnalyticsService? analytics,
+}) {
   return ProviderScope(
     overrides: [
       // ignore: scoped_providers_should_specify_dependencies
       weeklyReportRepositoryProvider.overrideWithValue(repo),
+      if (analytics != null)
+        analyticsServiceProvider.overrideWithValue(analytics),
     ],
     child: MaterialApp(
       theme: AppTheme.light,
@@ -205,6 +236,43 @@ void main() {
         ),
       );
       expect(button.onPressed, isNotNull);
+    });
+  });
+
+  group('WeeklyReportScreen — report_viewed 퍼널', () {
+    testWidgets('로드 성공 시 report_viewed 가 1회 발화된다', (tester) async {
+      final analytics = _SpyAnalyticsService();
+      await tester.pumpWidget(
+        _wrap(MockWeeklyReportRepository.seeded(), analytics: analytics),
+      );
+      await tester.pumpAndSettle();
+
+      expect(analytics.funnelNames, [FunnelEvent.reportViewed.eventName]);
+    });
+
+    testWidgets('로딩 중에는 report_viewed 를 발화하지 않는다', (tester) async {
+      final analytics = _SpyAnalyticsService();
+      final repo = _DelayedWeeklyReportRepository(
+        MockWeeklyReportRepository.seeded(),
+        delay: const Duration(milliseconds: 500),
+      );
+
+      await tester.pumpWidget(_wrap(repo, analytics: analytics));
+      await tester.pump();
+
+      expect(analytics.funnelNames, isEmpty);
+
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('로드 실패 시 report_viewed 를 발화하지 않는다', (tester) async {
+      final analytics = _SpyAnalyticsService();
+      await tester.pumpWidget(
+        _wrap(_ThrowingWeeklyReportRepository(), analytics: analytics),
+      );
+      await tester.pumpAndSettle();
+
+      expect(analytics.funnelNames, isEmpty);
     });
   });
 }
