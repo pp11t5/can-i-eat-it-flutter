@@ -9,8 +9,8 @@ part of 'analytics_providers.dart';
 String _$analyticsServiceHash() => r'a85855e6408f4d294a3904a0e45e00e5215098d3';
 
 /// 계측 서비스 provider.
-/// 기본값은 [DebugAnalyticsService] (디버그 로깅 스텁).
-/// 실 분석 도구 도입 시 ProviderScope overrides로 교체.
+/// 기본값은 [DebugAnalyticsService] (테스트·플러그인 없는 환경).
+/// 실 앱은 bootstrap에서 FirebaseAnalyticsService로 override.
 ///
 /// Copied from [analyticsService].
 @ProviderFor(analyticsService)
