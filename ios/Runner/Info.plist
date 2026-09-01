@@ -73,6 +73,10 @@
 	<string>$(HOME_WIDGET_APP_GROUP_ID)</string>
 	<key>FlutterDeepLinkingEnabled</key>
 	<false/>
+		<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
+		<true/>
+		<key>GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS</key>
+		<false/>
 		<key>UIApplicationSceneManifest</key>
 		<dict>
 			<key>UIApplicationSupportsMultipleScenes</key>
