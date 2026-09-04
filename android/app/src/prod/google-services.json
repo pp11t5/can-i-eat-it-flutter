@@ -102,6 +102,30 @@
       },
       "oauth_client": [
         {
+          "client_id": "717895572091-2tmjrqc4g91p2asaa1vouqtae7oq5lhq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.canieatthis.can_i_eat_this1",
+            "certificate_hash": "c253f72256e0363e3550f07b744519fbad68e069"
+          }
+        },
+        {
+          "client_id": "717895572091-cj21l9giamaaa6d3t72eu2o3pr718kho.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.canieatthis.can_i_eat_this1",
+            "certificate_hash": "e63909a0f346b3a169833b3a65dbcf38a656bb32"
+          }
+        },
+        {
+          "client_id": "717895572091-mig6sk04klifm36e5cf6s6qgg9ob5lcf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.canieatthis.can_i_eat_this1",
+            "certificate_hash": "6f5701c7c7dcd40daffb35581839c8f45cdc81c9"
+          }
+        },
+        {
           "client_id": "717895572091-ipff0qvngma1qohl142i1om0131aqp9r.apps.googleusercontent.com",
           "client_type": 3
         }
