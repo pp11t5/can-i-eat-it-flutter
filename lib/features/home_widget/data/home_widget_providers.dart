@@ -37,7 +37,8 @@ HomeWidgetController homeWidgetController(Ref ref) {
 }
 
 /// 세션 전이·앱 재개·위젯 탭을 연결한다. [App]에서 watch한다.
-final homeWidgetCoordinatorProvider = Provider<HomeWidgetCoordinator>((ref) {
+@Riverpod(keepAlive: true)
+HomeWidgetCoordinator homeWidgetCoordinator(Ref ref) {
   ref.watch(appRouterProvider);
 
   final coordinator = HomeWidgetCoordinator(
@@ -87,7 +88,7 @@ final homeWidgetCoordinatorProvider = Provider<HomeWidgetCoordinator>((ref) {
   }());
 
   return coordinator;
-});
+}
 
 class _HomeWidgetLifecycleObserver extends WidgetsBindingObserver {
   _HomeWidgetLifecycleObserver(this._onResumed);
