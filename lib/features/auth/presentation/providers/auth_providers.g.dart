@@ -95,12 +95,12 @@ final authRepositoryProvider = AutoDisposeProvider<AuthRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AuthRepositoryRef = AutoDisposeProviderRef<AuthRepository>;
-String _$consentTermsHash() => r'57ca411a68d8bbbd29d08e2fb26da53d91908e3a';
+String _$consentTermsHash() => r'd6bb528385d8243e230c404b80e9a5204b8c71f2';
 
 /// 서버 최신 약관을 시안 순서로 정렬해 제공한다.
 ///
-/// 필수 항목을 먼저 두고, 알려진 코드는 tos → privacy → health_sensitive →
-/// marketing 순서를 사용한다. 미지 코드는 같은 필수 그룹 안에서 서버 순서를 유지한다.
+/// 필수 항목을 먼저 두고, 알려진 코드는 tos → privacy → marketing 순서를
+/// 사용한다. 미지 코드는 같은 필수 그룹 안에서 서버 순서를 유지한다.
 ///
 /// Copied from [consentTerms].
 @ProviderFor(consentTerms)
