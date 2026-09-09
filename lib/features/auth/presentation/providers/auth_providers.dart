@@ -158,7 +158,8 @@ class AuthController extends _$AuthController {
   Future<AuthSession?> build() async {
     _wireSessionExpiredSeam();
     final session = await ref.watch(authRepositoryProvider).currentSession();
-    if (session != null) await _syncSharedSession(session);
+    // 콜드스타트 게이트 해석을 secure storage 읽기에 묶지 않는다(fire-and-forget).
+    if (session != null) unawaited(_syncSharedSession(session));
     return session;
   }
 
@@ -173,7 +174,9 @@ class AuthController extends _$AuthController {
     final outcome = await ref.read(authRepositoryProvider).signInWithKakao();
     _applyOutcomeToState(outcome);
     if (outcome is Authenticated) {
-      await _syncSharedSession(outcome.session);
+      // fire-and-forget — secure storage 읽기가 끝나지 않는 환경에서도 로그인
+      // UX를 막지 않는다. 지연·실패는 다음 lifecycle에서 보완된다.
+      unawaited(_syncSharedSession(outcome.session));
       // FCM 토큰 등록 — fire-and-forget(로그인 UX 블로킹 제거).
       // 실패해도 로그인 흐름을 막지 않는다(graceful).
       unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
@@ -198,7 +201,7 @@ class AuthController extends _$AuthController {
     final outcome = await ref.read(authRepositoryProvider).signInWithApple();
     _applyOutcomeToState(outcome);
     if (outcome is Authenticated) {
-      await _syncSharedSession(outcome.session);
+      unawaited(_syncSharedSession(outcome.session));
       // FCM 토큰 등록 — fire-and-forget(로그인 UX 블로킹 제거).
       // 실패해도 로그인 흐름을 막지 않는다(graceful).
       unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
@@ -217,7 +220,7 @@ class AuthController extends _$AuthController {
     final outcome = await ref.read(authRepositoryProvider).signInWithGoogle();
     _applyOutcomeToState(outcome);
     if (outcome is Authenticated) {
-      await _syncSharedSession(outcome.session);
+      unawaited(_syncSharedSession(outcome.session));
       unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
       await _hydrateSessionAfterAuth();
     }
@@ -260,7 +263,8 @@ class AuthController extends _$AuthController {
     final outcome = await repo.recoverAccount(provider, idToken: idToken);
     _invalidateOnboardingStatus();
     state = AsyncValue.data(outcome.session);
-    await _syncSharedSession(outcome.session);
+    // fire-and-forget — 복구 UX를 secure storage 읽기에 묶지 않는다(로그인과 동일 원칙).
+    unawaited(_syncSharedSession(outcome.session));
     // 복구 성공 후 세션이 생겼으므로 FCM 토큰 등록 — fire-and-forget.
     // 실패해도 복구 흐름을 막지 않는다(graceful).
     unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
@@ -423,7 +427,9 @@ class AuthController extends _$AuthController {
             accessToken: token,
             subjectId: session.userId,
           );
-    } catch (_) {}
+    } catch (_) {
+      // Extension 세션 동기화 실패는 다음 app/extension lifecycle에서 보완한다.
+    }
   }
 
   Future<void> _purgeSymptomOutbox() async {
