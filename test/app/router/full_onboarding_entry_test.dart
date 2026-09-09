@@ -22,10 +22,10 @@ void main() {
           authRepositoryProvider
               .overrideWithValue(MockAuthRepository.newUser()),
           // ignore: scoped_providers_should_specify_dependencies
+          tokenStoreProvider.overrideWithValue(InMemoryTokenStore()),
+          // ignore: scoped_providers_should_specify_dependencies
           healthProfileRepositoryProvider
               .overrideWithValue(MockHealthProfileRepository.noProfile()),
-          // ignore: scoped_providers_should_specify_dependencies
-          tokenStoreProvider.overrideWithValue(InMemoryTokenStore()),
         ],
         child: Consumer(
           builder: (context, ref, _) {
@@ -36,7 +36,7 @@ void main() {
       );
 
   testWidgets(
-    '로그인 → 약관 3개 동의 → 다음 → 온보딩 1페이지(condition)로 진입한다',
+    '로그인 → 약관 필수 2개 동의 → 다음 → 온보딩 1페이지(condition)로 진입한다',
     (tester) async {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
@@ -49,10 +49,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(TermsScreen), findsOneWidget);
 
-      // 필수 3개 동의
+      // 필수 2개 동의
       await tester.tap(find.text('[필수] 서비스 이용약관'));
       await tester.tap(find.text('[필수] 개인정보 수집·이용 동의'));
-      await tester.tap(find.text('[필수] 민감정보(건강) 수집 동의'));
       await tester.pumpAndSettle();
 
       // 다음 → agreeToTerms → needsOnboarding → 가드가 condition 으로

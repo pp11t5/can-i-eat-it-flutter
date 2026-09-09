@@ -187,6 +187,11 @@ class MethodChannelSymptomOutboxBridge implements SymptomOutboxBridge {
   }
 }
 
+/// iOS App Group Outbox 브리지 provider.
+///
+/// 수동 Provider 대신 generated provider로 제공한다 — generated provider가
+/// manual provider에 의존하면 riverpod_lint(avoid_manual_providers_as_
+/// generated_provider_dependency)가 빌드를 실패시킨다.
 @Riverpod(keepAlive: true)
 SymptomOutboxBridge symptomOutboxBridge(Ref ref) {
   if (!Platform.isIOS) return const UnsupportedSymptomOutboxBridge();

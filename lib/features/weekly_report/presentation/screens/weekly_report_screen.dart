@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -16,6 +17,8 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/medical_sources_link.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/features/weekly_report/data/weekly_report_providers.dart';
 import 'package:can_i_eat_it/features/weekly_report/domain/entities/weekly_report.dart';
 import 'package:can_i_eat_it/features/weekly_report/presentation/controllers/report_sharer.dart';
@@ -94,6 +97,9 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
   /// 공유 PNG 캡처 대상([_Body] 내부 RepaintBoundary).
   final GlobalKey _shareKey = GlobalKey();
 
+  /// 이 화면 인스턴스에서 report_viewed 를 1회만 보낸다.
+  bool _loggedReportViewed = false;
+
   /// 탭한 위젯의 전역 bounds — iOS sharePositionOrigin 용.
   static Rect? _originFrom(BuildContext context) {
     final box = context.findRenderObject() as RenderBox?;
@@ -162,6 +168,12 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
   @override
   Widget build(BuildContext context) {
     final weeklyReportAsync = ref.watch(weeklyReportProvider);
+    if (!_loggedReportViewed && weeklyReportAsync.hasValue) {
+      _loggedReportViewed = true;
+      unawaited(
+        ref.read(analyticsServiceProvider).logFunnel(FunnelEvent.reportViewed),
+      );
+    }
     final report = weeklyReportAsync.valueOrNull;
 
     return Scaffold(

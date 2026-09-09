@@ -9,7 +9,11 @@ part of 'home_widget_providers.dart';
 String _$homeWidgetControllerHash() =>
     r'2ac57cb8204366a8f71fc0618115cd3c095951c5';
 
-/// See also [homeWidgetController].
+/// 수동 Provider 대신 generated provider로 제공한다 — generated provider가
+/// manual provider에 의존하면 riverpod_lint(avoid_manual_providers_as_
+/// generated_provider_dependency)가 빌드를 실패시킨다.
+///
+/// Copied from [homeWidgetController].
 @ProviderFor(homeWidgetController)
 final homeWidgetControllerProvider = Provider<HomeWidgetController>.internal(
   homeWidgetController,

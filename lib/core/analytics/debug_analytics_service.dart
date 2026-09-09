@@ -5,8 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'analytics_event.dart';
 import 'analytics_service.dart';
 
-/// 실제 분석 도구(Firebase/Amplitude 등) 미정 — 인터페이스 확정 + 디버그 로깅 스텁.
-/// 실 구현은 이 인터페이스를 구현해 Riverpod override로 주입.
+/// 디버그 로깅 스텁. 테스트 기본값이며 릴리즈에서는 no-op.
 class DebugAnalyticsService implements AnalyticsService {
   const DebugAnalyticsService();
 

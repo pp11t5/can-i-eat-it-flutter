@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/providers/add_to_diet_handler_provider.dart';
@@ -44,6 +46,13 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
           eatenAt: ctx.eatenAt,
           mealRecordId: ctx.mealRecordId,
         );
+      }
+
+      // 신규 식사만 퍼널(첫 기록). 기존 식사 append는 해당하지 않는다.
+      if (ctx.mealRecordId == null) {
+        await ref
+            .read(analyticsServiceProvider)
+            .logFunnel(FunnelEvent.firstMealRecorded);
       }
 
       // 식사 데이터를 소비하는 화면의 캐시를 모두 무효화한다.

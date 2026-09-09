@@ -130,11 +130,10 @@ void main() {
 
       final tosY = tester.getTopLeft(find.text('[필수] 서비스 이용약관')).dy;
       final privacyY = tester.getTopLeft(find.text('[필수] 개인정보 처리방침')).dy;
-      final healthY = tester.getTopLeft(find.text('[필수] 민감정보 수집 동의')).dy;
       final marketingY = tester.getTopLeft(find.text('[선택] 마케팅 정보 수신 동의')).dy;
       expect(tosY, lessThan(privacyY));
-      expect(privacyY, lessThan(healthY));
-      expect(healthY, lessThan(marketingY));
+      expect(privacyY, lessThan(marketingY));
+      expect(find.text('[필수] 민감정보 수집 동의'), findsNothing);
     });
   });
 
@@ -146,7 +145,6 @@ void main() {
 
       await tester.tap(find.text('[필수] 서비스 이용약관'));
       await tester.tap(find.text('[필수] 개인정보 수집·이용 동의'));
-      await tester.tap(find.text('[필수] 민감정보(건강) 수집 동의'));
       await tester.pump();
       await tester.tap(find.text('다음'));
       await tester.pumpAndSettle();
@@ -157,7 +155,6 @@ void main() {
         const [
           ConsentChoice(termId: 1, agreed: true),
           ConsentChoice(termId: 2, agreed: true),
-          ConsentChoice(termId: 3, agreed: true),
           ConsentChoice(termId: 4, agreed: false),
         ],
       );

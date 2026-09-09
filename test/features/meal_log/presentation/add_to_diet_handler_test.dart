@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
@@ -16,6 +19,24 @@ import 'package:can_i_eat_it/features/meal_log/presentation/meal_recording.dart'
 // Spy MealRepository — 호출 횟수·인자 기록용
 // ---------------------------------------------------------------------------
 
+class _SpyAnalyticsService implements AnalyticsService {
+  final List<String> funnelNames = [];
+
+  @override
+  Future<void> logFunnel(
+    FunnelEvent event, {
+    Map<String, Object?> params = const {},
+  }) async {
+    funnelNames.add(event.eventName);
+  }
+
+  @override
+  Future<void> logEvent(
+    String name, {
+    Map<String, Object?> params = const {},
+  }) async {}
+}
+
 class _SpyMealRepository implements MealRepository {
   String? lastFoodExternalId;
   String? lastFoodTextInput;
@@ -23,6 +44,7 @@ class _SpyMealRepository implements MealRepository {
   String? lastMealRecordId;
   int appendFoodCallCount = 0;
   int appendFoodByTextCallCount = 0;
+  Object? appendError;
 
   @override
   Future<MealFood> appendFood({
@@ -30,6 +52,7 @@ class _SpyMealRepository implements MealRepository {
     DateTime? eatenAt,
     String? mealRecordId,
   }) async {
+    if (appendError != null) throw appendError!;
     appendFoodCallCount++;
     lastFoodExternalId = foodExternalId;
     lastEatenAt = eatenAt;
@@ -48,6 +71,7 @@ class _SpyMealRepository implements MealRepository {
     DateTime? eatenAt,
     String? mealRecordId,
   }) async {
+    if (appendError != null) throw appendError!;
     appendFoodByTextCallCount++;
     lastFoodTextInput = foodTextInput;
     lastEatenAt = eatenAt;
@@ -187,18 +211,25 @@ const _kVerdictByText = EatVerdict(
 // 성공 시 모달 스택을 전부 pop 하므로 셸 경로(/ 또는 /timeline)가 남는다.
 // ---------------------------------------------------------------------------
 
-Future<({_FakeRef ref, GoRouter router})> _runHandler({
+Future<({_FakeRef ref, GoRouter router, _SpyAnalyticsService analytics})>
+    _runHandler({
   required WidgetTester tester,
   required _SpyMealRepository spy,
   required EatVerdict verdict,
   required MealRecordContext ctx,
+
   /// 셸 기준 경로 — 홈 `/` 또는 타임라인 `/timeline`.
   String shellLocation = '/',
+
   /// 유사 음식처럼 /check → /verdict → /verdict-sub 스택 위에서 호출할지.
   bool fromNestedVerdict = false,
 }) async {
+  final analytics = _SpyAnalyticsService();
   final container = ProviderContainer(
-    overrides: [mealRepositoryProvider.overrideWithValue(spy)],
+    overrides: [
+      mealRepositoryProvider.overrideWithValue(spy),
+      analyticsServiceProvider.overrideWithValue(analytics),
+    ],
   );
   addTearDown(container.dispose);
 
@@ -219,8 +250,7 @@ Future<({_FakeRef ref, GoRouter router})> _runHandler({
               routes: [
                 GoRoute(
                   path: 'sub',
-                  builder: (_, __) =>
-                      const Scaffold(body: Text('verdict-sub')),
+                  builder: (_, __) => const Scaffold(body: Text('verdict-sub')),
                 ),
               ],
             ),
@@ -269,7 +299,7 @@ Future<({_FakeRef ref, GoRouter router})> _runHandler({
   await tester.pump(const Duration(milliseconds: 300));
   await tester.pump(const Duration(seconds: 3));
   await tester.pump(const Duration(milliseconds: 300));
-  return (ref: ref, router: router);
+  return (ref: ref, router: router, analytics: analytics);
 }
 
 // ---------------------------------------------------------------------------
@@ -430,6 +460,62 @@ void main() {
 
       expect(spy.appendFoodByTextCallCount, 0);
       expect(spy.appendFoodCallCount, 0);
+    });
+  });
+
+  group('makeHandlerFromRef — first_meal_recorded 퍼널', () {
+    testWidgets('신규 식사 저장 성공 시 first_meal_recorded 가 발화된다', (tester) async {
+      final result = await _runHandler(
+        tester: tester,
+        spy: _SpyMealRepository(),
+        verdict: _kVerdictById,
+        ctx: MealRecordContext(eatenAt: _kEatAt),
+      );
+
+      expect(
+        result.analytics.funnelNames,
+        [FunnelEvent.firstMealRecorded.eventName],
+      );
+    });
+
+    testWidgets('기존 식사 append 는 first_meal_recorded 를 발화하지 않는다',
+        (tester) async {
+      final result = await _runHandler(
+        tester: tester,
+        spy: _SpyMealRepository(),
+        verdict: _kVerdictById,
+        ctx: MealRecordContext(eatenAt: _kEatAt, mealRecordId: 'mr-42'),
+      );
+
+      expect(result.analytics.funnelNames, isEmpty);
+    });
+
+    testWidgets('저장 실패 시 first_meal_recorded 를 발화하지 않는다', (tester) async {
+      final spy = _SpyMealRepository()..appendError = Exception('save failed');
+      final result = await _runHandler(
+        tester: tester,
+        spy: spy,
+        verdict: _kVerdictById,
+        ctx: MealRecordContext(eatenAt: _kEatAt),
+      );
+
+      expect(result.analytics.funnelNames, isEmpty);
+    });
+
+    testWidgets('foodName이 빈 문자열이면 first_meal_recorded 를 발화하지 않는다',
+        (tester) async {
+      const emptyVerdict = EatVerdict(
+        level: VerdictLevel.caution,
+        foodName: '',
+      );
+      final result = await _runHandler(
+        tester: tester,
+        spy: _SpyMealRepository(),
+        verdict: emptyVerdict,
+        ctx: MealRecordContext(eatenAt: _kEatAt),
+      );
+
+      expect(result.analytics.funnelNames, isEmpty);
     });
   });
 }

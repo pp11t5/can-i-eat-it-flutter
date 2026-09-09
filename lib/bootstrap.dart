@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 import 'app/app.dart';
+import 'core/analytics/analytics_providers.dart';
+import 'core/analytics/firebase_analytics_service.dart';
 import 'core/config/flavor_config.dart';
 import 'core/network/dio_client.dart';
 import 'core/push/fcm_messaging_handler.dart';
@@ -34,11 +37,21 @@ Future<void> bootstrap(
   FlavorConfig.current = config;
 
   // Firebase 초기화 — GoogleService-Info.plist / google-services.json 자동 사용.
-  // 설정파일 누락 등에도 앱은 계속 떠야 한다(푸시만 비활성).
+  // 설정파일 누락 등에도 앱은 계속 떠야 한다(푸시·Analytics만 비활성).
+  var firebaseReady = false;
   try {
     await Firebase.initializeApp();
+    firebaseReady = true;
   } catch (e, st) {
     debugPrint('[FCM] Firebase.initializeApp failed: $e\n$st');
+  }
+
+  if (firebaseReady) {
+    try {
+      await configureFirebaseAnalytics(FirebaseAnalytics.instance);
+    } catch (e, st) {
+      debugPrint('[Analytics] setup failed: $e\n$st');
+    }
   }
 
   // 백그라운드/종료 메시지 핸들러(Firebase init 직후, runApp 전 필수).
@@ -60,6 +73,10 @@ Future<void> bootstrap(
   runApp(
     ProviderScope(
       overrides: [
+        if (firebaseReady)
+          analyticsServiceProvider.overrideWithValue(
+            FirebaseAnalyticsService(),
+          ),
         // 실 앱에서 HealthProfileRepositoryImpl 주입 (ADR-0007 §3-1 (6-D)).
         healthProfileRepositoryProvider.overrideWith(
           (ref) => HealthProfileRepositoryImpl(
