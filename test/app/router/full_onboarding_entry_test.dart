@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/router/app_router.dart';
+import 'package:can_i_eat_it/core/security/token_store.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/login_screen.dart';
@@ -18,20 +19,24 @@ void main() {
   Widget buildApp() => ProviderScope(
         overrides: [
           // ignore: scoped_providers_should_specify_dependencies
-          authRepositoryProvider.overrideWithValue(MockAuthRepository.newUser()),
+          authRepositoryProvider
+              .overrideWithValue(MockAuthRepository.newUser()),
+          // ignore: scoped_providers_should_specify_dependencies
+          tokenStoreProvider.overrideWithValue(InMemoryTokenStore()),
           // ignore: scoped_providers_should_specify_dependencies
           healthProfileRepositoryProvider
               .overrideWithValue(MockHealthProfileRepository.noProfile()),
         ],
         child: Consumer(
           builder: (context, ref, _) {
-            return MaterialApp.router(routerConfig: ref.watch(appRouterProvider));
+            return MaterialApp.router(
+                routerConfig: ref.watch(appRouterProvider));
           },
         ),
       );
 
   testWidgets(
-    '로그인 → 약관 3개 동의 → 다음 → 온보딩 1페이지(condition)로 진입한다',
+    '로그인 → 약관 필수 2개 동의 → 다음 → 온보딩 1페이지(condition)로 진입한다',
     (tester) async {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
@@ -44,10 +49,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(TermsScreen), findsOneWidget);
 
-      // 필수 3개 동의
+      // 필수 2개 동의
       await tester.tap(find.text('[필수] 서비스 이용약관'));
       await tester.tap(find.text('[필수] 개인정보 수집·이용 동의'));
-      await tester.tap(find.text('[필수] 민감정보(건강) 수집 동의'));
       await tester.pumpAndSettle();
 
       // 다음 → agreeToTerms → needsOnboarding → 가드가 condition 으로

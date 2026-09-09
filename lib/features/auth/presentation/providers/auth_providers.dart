@@ -82,17 +82,19 @@ AuthRepository authRepository(Ref ref) => AuthRepositoryImpl(
 
 /// 서버 최신 약관을 시안 순서로 정렬해 제공한다.
 ///
-/// 필수 항목을 먼저 두고, 알려진 코드는 tos → privacy → health_sensitive →
-/// marketing 순서를 사용한다. 미지 코드는 같은 필수 그룹 안에서 서버 순서를 유지한다.
+/// 필수 항목을 먼저 두고, 알려진 코드는 tos → privacy → marketing 순서를
+/// 사용한다. 미지 코드는 같은 필수 그룹 안에서 서버 순서를 유지한다.
 @riverpod
 Future<List<ConsentTerm>> consentTerms(Ref ref) async {
   final terms = await ref.watch(authRepositoryProvider).fetchConsentTerms();
-  final indexed = terms.indexed.toList(growable: false);
+  final visible = terms
+      .where((term) => term.code != TermsCatalogCodes.healthSensitive)
+      .toList(growable: false);
+  final indexed = visible.indexed.toList(growable: false);
   const rank = {
     TermsCatalogCodes.tos: 0,
     TermsCatalogCodes.privacy: 1,
-    TermsCatalogCodes.healthSensitive: 2,
-    TermsCatalogCodes.marketing: 3,
+    TermsCatalogCodes.marketing: 2,
   };
   indexed.sort((a, b) {
     final requiredCompare =

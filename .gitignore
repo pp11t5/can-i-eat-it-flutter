@@ -61,3 +61,4 @@ app.*.map.json
 .playwright-mcp/
 
 graphify-out
+.omo/
