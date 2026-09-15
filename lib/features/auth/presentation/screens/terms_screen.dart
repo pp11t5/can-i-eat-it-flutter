@@ -12,6 +12,7 @@ import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/global_loading.dart';
 import 'package:can_i_eat_it/core/error/failure.dart';
+import 'package:can_i_eat_it/features/auth/domain/consent_terms.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/consent.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/screens/terms_detail_screen.dart';
@@ -137,17 +138,14 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
   }
 
   Future<void> _onNext(List<ConsentTerm> terms) async {
-    if (_isSubmitting || !_allRequiredAgreed(terms)) return;
+    final visible = visibleConsentTerms(terms);
+    if (_isSubmitting || !_allRequiredAgreed(visible)) return;
     setState(() => _isSubmitting = true);
     _beginConsentTransition();
-    final choices = terms
-        .map(
-          (term) => ConsentChoice(
-            termId: term.id,
-            agreed: _agreedTermIds.contains(term.id),
-          ),
-        )
-        .toList(growable: false);
+    final choices = consentChoicesForSubmit(
+      terms: terms,
+      agreedTermIds: _agreedTermIds,
+    );
     try {
       await ref.read(globalLoadingControllerProvider.notifier).run(
             () =>
@@ -174,8 +172,9 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
   Widget build(BuildContext context) {
     final termsAsync = ref.watch(consentTermsProvider);
     final loadedTerms = termsAsync.valueOrNull ?? const <ConsentTerm>[];
-    final canSubmit = loadedTerms.isNotEmpty &&
-        _allRequiredAgreed(loadedTerms) &&
+    final visibleTerms = visibleConsentTerms(loadedTerms);
+    final canSubmit = visibleTerms.isNotEmpty &&
+        _allRequiredAgreed(visibleTerms) &&
         !_isSubmitting;
 
     return PopScope<Object?>(
@@ -254,14 +253,17 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
                               ref.invalidate(consentTermsProvider);
                             },
                           ),
-                          data: (terms) => _TermsList(
-                            terms: terms,
-                            agreedTermIds: _agreedTermIds,
-                            onToggleAll: () => _toggleAll(terms),
-                            onToggleTerm: _toggleTerm,
-                            onOpenTerm: (term) =>
-                                widget.openTerm(context, term),
-                          ),
+                          data: (terms) {
+                            final visible = visibleConsentTerms(terms);
+                            return _TermsList(
+                              terms: visible,
+                              agreedTermIds: _agreedTermIds,
+                              onToggleAll: () => _toggleAll(visible),
+                              onToggleTerm: _toggleTerm,
+                              onOpenTerm: (term) =>
+                                  widget.openTerm(context, term),
+                            );
+                          },
                         ),
                       ),
                     ],

@@ -155,7 +155,30 @@ void main() {
         const [
           ConsentChoice(termId: 1, agreed: true),
           ConsentChoice(termId: 2, agreed: true),
+          ConsentChoice(termId: 3, agreed: true),
           ConsentChoice(termId: 4, agreed: false),
+        ],
+      );
+    });
+
+    testWidgets('전체 동의 제출에도 숨긴 필수 약관을 포함한다', (tester) async {
+      final repo = _loggedInRepo();
+      await tester.pumpWidget(_wrap(repo));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('모든 약관에 동의합니다'));
+      await tester.pump();
+      await tester.tap(find.text('다음'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('[필수] 민감정보(건강) 수집 동의'), findsNothing);
+      expect(
+        repo.lastConsentChoices,
+        const [
+          ConsentChoice(termId: 1, agreed: true),
+          ConsentChoice(termId: 2, agreed: true),
+          ConsentChoice(termId: 3, agreed: true),
+          ConsentChoice(termId: 4, agreed: true),
         ],
       );
     });
