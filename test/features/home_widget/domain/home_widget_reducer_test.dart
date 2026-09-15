@@ -82,8 +82,9 @@ void main() {
       );
 
       expect(snapshot.kind, HomeWidgetKind.recordMeal);
+      expect(snapshot.headline, '오늘 음식을\n기록해보세요');
       expect(snapshot.ctaLabel, '음식 기록하기 +');
-      expect(snapshot.turtle, HomeWidgetTurtle.none);
+      expect(snapshot.turtle, HomeWidgetTurtle.happy);
     });
 
     test('오늘 식사를 모두 기록하고 편안 계열이면 스트릭을 보여준다', () {

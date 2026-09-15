@@ -84,13 +84,11 @@ AuthRepository authRepository(Ref ref) => AuthRepositoryImpl(
 ///
 /// 필수 항목을 먼저 두고, 알려진 코드는 tos → privacy → marketing 순서를
 /// 사용한다. 미지 코드는 같은 필수 그룹 안에서 서버 순서를 유지한다.
+/// 민감정보 행은 화면에서만 숨기고, 제출은 전체 목록을 쓴다.
 @riverpod
 Future<List<ConsentTerm>> consentTerms(Ref ref) async {
   final terms = await ref.watch(authRepositoryProvider).fetchConsentTerms();
-  final visible = terms
-      .where((term) => term.code != TermsCatalogCodes.healthSensitive)
-      .toList(growable: false);
-  final indexed = visible.indexed.toList(growable: false);
+  final indexed = terms.indexed.toList(growable: false);
   const rank = {
     TermsCatalogCodes.tos: 0,
     TermsCatalogCodes.privacy: 1,

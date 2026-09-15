@@ -40,6 +40,8 @@ void main() {
     await controller.sync();
 
     expect(bridge.written?.kind, HomeWidgetKind.recordMeal);
+    expect(bridge.written?.headline, '오늘 음식을\n기록해보세요');
+    expect(bridge.written?.turtle, HomeWidgetTurtle.happy);
     expect(bridge.updates, 1);
   });
 
