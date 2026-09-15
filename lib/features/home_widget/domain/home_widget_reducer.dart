@@ -47,10 +47,10 @@ HomeWidgetSnapshot reduceHomeWidget(HomeWidgetInputs inputs) {
       kind: HomeWidgetKind.recordMeal,
       counts: inputs.counts,
       streakDays: inputs.streakDays,
-      headline: '',
+      headline: '오늘 음식을\n기록해보세요',
       subtitle: '',
       ctaLabel: '음식 기록하기 +',
-      turtle: HomeWidgetTurtle.none,
+      turtle: HomeWidgetTurtle.happy,
     );
   }
 

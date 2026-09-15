@@ -116,7 +116,7 @@ private struct HomeWidgetSnapshot: Codable {
     headline: "오늘 음식을\n기록해보세요",
     subtitle: "",
     ctaLabel: "음식 기록하기 +",
-    turtle: .none,
+    turtle: .happy,
     uri: "canieatit://widget/meal-record"
   )
 
