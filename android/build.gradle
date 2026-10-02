@@ -13,6 +13,33 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
+// 일부 플러그인(예: tflite_flutter)은 자체 build.gradle에 Java
+// compileOptions만 지정하고 kotlinOptions는 선언하지 않는다. 이 경우 Kotlin
+// 컴파일 타겟이 Gradle JDK 기본값(예: 21)으로 떨어져 해당 모듈의 Java 타겟과
+// 어긋나 "Inconsistent JVM Target Compatibility" 빌드 실패가 난다. 각
+// 서브프로젝트의 Kotlin 컴파일 타겟을 그 모듈 자신의 Java
+// targetCompatibility에 맞춰 강제한다(모듈별 자기 일관성 — 값을 새로
+// 지어내지 않고 그 모듈이 이미 선언한 Java 타겟을 그대로 따른다).
+subprojects {
+    // :app은 evaluationDependsOn(":app")(위)에 의해 다른 서브프로젝트보다 먼저
+    // 평가가 끝나버려 이 시점에 afterEvaluate를 걸면 "already evaluated" 에러가
+    // 난다. :app은 이미 자기 kotlinOptions를 직접 선언해두므로 건드릴 필요가
+    // 없어 제외한다 — 이 블록은 서드파티 플러그인 모듈만 대상으로 한다.
+    if (project.name == "app") {
+        return
+    }
+    afterEvaluate { project ->
+        def androidExt = project.extensions.findByName("android")
+        if (androidExt != null) {
+            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+                kotlinOptions {
+                    jvmTarget = androidExt.compileOptions.targetCompatibility.toString()
+                }
+            }
+        }
+    }
+}
+
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
