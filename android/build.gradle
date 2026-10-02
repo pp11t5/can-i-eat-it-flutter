@@ -13,6 +13,27 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
+// tflite_flutter처럼 kotlinOptions를 선언하지 않는 플러그인은 Kotlin 타겟이
+// Gradle JDK 기본값으로 잡혀 Java 타겟과 어긋난다("Inconsistent JVM Target").
+// 각 모듈의 Kotlin 타겟을 그 모듈의 Java targetCompatibility에 맞춘다.
+subprojects {
+    // :app은 위 evaluationDependsOn으로 이미 평가가 끝나 afterEvaluate를 걸 수 없고,
+    // 자체 kotlinOptions도 있어 제외한다.
+    if (project.name == "app") {
+        return
+    }
+    afterEvaluate { project ->
+        def androidExt = project.extensions.findByName("android")
+        if (androidExt != null) {
+            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+                kotlinOptions {
+                    jvmTarget = androidExt.compileOptions.targetCompatibility.toString()
+                }
+            }
+        }
+    }
+}
+
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
