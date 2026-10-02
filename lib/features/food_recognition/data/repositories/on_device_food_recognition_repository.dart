@@ -6,10 +6,7 @@ import 'package:can_i_eat_it/features/food_recognition/data/sources/food_image_p
 import 'package:can_i_eat_it/features/food_recognition/domain/entities/food_recognition_result.dart';
 import 'package:can_i_eat_it/features/food_recognition/domain/repositories/food_recognition_repository.dart';
 
-/// [FoodRecognitionRepository] 온디바이스 MobileNetV3 TFLite 구현 (ADR-0009 §6-4).
-///
-/// [Interpreter]와 라벨 목록은 생성자로 주입받는다 — 1회 로드 책임은 이 클래스가
-/// 아니라 다음 단계의 Riverpod provider가 진다.
+/// 온디바이스 MobileNetV3 TFLite 구현. [Interpreter]·라벨은 외부에서 주입한다.
 class OnDeviceFoodRecognitionRepository implements FoodRecognitionRepository {
   OnDeviceFoodRecognitionRepository({
     required Interpreter interpreter,
@@ -20,8 +17,7 @@ class OnDeviceFoodRecognitionRepository implements FoodRecognitionRepository {
   final Interpreter _interpreter;
   final List<String> _labels;
 
-  /// 사진 1장을 추론해 Top-3 후보를 반환한다. 재정규화 없이 원점수 그대로
-  /// (`top3_output.md`), 신호등 판정은 하지 않는다.
+  /// 사진 1장을 추론해 Top-3 후보를 반환한다 (판정은 하지 않는다).
   @override
   Future<FoodRecognitionResult> recognize(Uint8List imageBytes) async {
     final input = FoodImagePreprocessor.preprocess(imageBytes);
@@ -34,9 +30,7 @@ class OnDeviceFoodRecognitionRepository implements FoodRecognitionRepository {
     );
   }
 
-  /// 점수 내림차순 Top-[k] 후보. 재정규화·추가 softmax 없이 원점수를 그대로
-  /// 담고, 인덱스를 [labels]의 같은 인덱스(0-based) 라벨에 매핑한다
-  /// (`top3_output.md`). `Interpreter` 없이 단위 테스트 가능한 순수 함수.
+  /// 점수 내림차순 Top-[k]. 원점수를 그대로 쓰고(재정규화 없음) 인덱스를 라벨에 매핑한다.
   static List<FoodCandidate> topCandidates({
     required List<double> scores,
     required List<String> labels,
