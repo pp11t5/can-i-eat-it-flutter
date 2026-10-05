@@ -61,6 +61,8 @@ dependencies:
   webview_flutter: ^4.10.0
   # 런타임 preserve/remove — OS 스플래시 ↔ Flutter SplashScreen 깜빡임 방지.
   flutter_native_splash: ^2.4.6
+  tflite_flutter: ^0.12.1
+  image: ^4.10.1
 
 dev_dependencies:
   flutter_test:
@@ -110,6 +112,7 @@ flutter:
     - assets/figma_extracted/
     - assets/illustrations/
     - assets/splash/
+    - assets/ml/
 
   fonts:
     - family: Pretendard
