@@ -28,6 +28,9 @@ class RecordingAnalyticsService implements AnalyticsService {
   }) async {
     calls.add((name: name, params: params));
   }
+
+  @override
+  Future<void> setUserId(String? userId) async {}
 }
 
 void main() {
@@ -62,6 +65,25 @@ void main() {
 
     test('퍼널 이벤트는 정확히 6종이다', () {
       expect(FunnelEvent.values.length, 6);
+    });
+
+    test('검색 화면 진입 키는 search_screen_viewed 로 고정된다', () {
+      expect(
+        AnalyticsEvent.searchScreenViewed.eventName,
+        'search_screen_viewed',
+      );
+    });
+
+    test('식사 기록 실패 키는 meal_record_failed 로 고정된다', () {
+      expect(AnalyticsEvent.mealRecordFailed.eventName, 'meal_record_failed');
+    });
+
+    test('판정 횟수 키는 verdict_checked 로 고정된다', () {
+      expect(AnalyticsEvent.verdictChecked.eventName, 'verdict_checked');
+    });
+
+    test('식사 기록 횟수 키는 meal_recorded 로 고정된다', () {
+      expect(AnalyticsEvent.mealRecorded.eventName, 'meal_recorded');
     });
   });
 

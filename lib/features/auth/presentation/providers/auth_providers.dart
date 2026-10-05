@@ -158,6 +158,7 @@ class AuthController extends _$AuthController {
     final session = await ref.watch(authRepositoryProvider).currentSession();
     // 콜드스타트 게이트 해석을 secure storage 읽기에 묶지 않는다(fire-and-forget).
     if (session != null) unawaited(_syncSharedSession(session));
+    await _syncAnalyticsUser(session?.userId);
     return session;
   }
 
@@ -179,6 +180,7 @@ class AuthController extends _$AuthController {
       // 실패해도 로그인 흐름을 막지 않는다(graceful).
       unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
       await _hydrateSessionAfterAuth();
+      await _syncAnalyticsUser(outcome.session.userId);
     }
     if (outcome is! Recoverable) {
       await ref
@@ -204,6 +206,7 @@ class AuthController extends _$AuthController {
       // 실패해도 로그인 흐름을 막지 않는다(graceful).
       unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
       await _hydrateSessionAfterAuth();
+      await _syncAnalyticsUser(outcome.session.userId);
     }
     if (outcome is! Recoverable) {
       await ref
@@ -221,6 +224,7 @@ class AuthController extends _$AuthController {
       unawaited(_syncSharedSession(outcome.session));
       unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
       await _hydrateSessionAfterAuth();
+      await _syncAnalyticsUser(outcome.session.userId);
     }
     if (outcome is! Recoverable) {
       await ref
@@ -228,6 +232,11 @@ class AuthController extends _$AuthController {
           .logFunnel(FunnelEvent.signUp, params: {'provider': 'google'});
     }
     return outcome;
+  }
+
+  /// 백엔드 userId를 GA 사용자 매핑에 넣는다. 세션이 없으면 지운다.
+  Future<void> _syncAnalyticsUser(String? userId) {
+    return ref.read(analyticsServiceProvider).setUserId(userId);
   }
 
   /// 로그인 직후 [getMe]로 세션 식별정보를 채운다.
@@ -266,6 +275,7 @@ class AuthController extends _$AuthController {
     // 복구 성공 후 세션이 생겼으므로 FCM 토큰 등록 — fire-and-forget.
     // 실패해도 복구 흐름을 막지 않는다(graceful).
     unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
+    await _syncAnalyticsUser(outcome.session.userId);
     return outcome;
   }
 
@@ -339,9 +349,13 @@ class AuthController extends _$AuthController {
       try {
         await ref.read(timelineGuideStoreProvider).clearFabGuideSeen(userId);
       } catch (_) {}
+      try {
+        await ref.read(funnelOnceStoreProvider).clear(userId);
+      } catch (_) {}
     }
     _invalidateOnboardingStatus();
     state = const AsyncValue.data(null);
+    await _syncAnalyticsUser(null);
   }
 
   /// 서버 로그아웃 + 로컬 세션·프로필 캐시 초기화.
@@ -354,6 +368,7 @@ class AuthController extends _$AuthController {
     await ref.read(profileCacheProvider).clear();
     _invalidateOnboardingStatus();
     state = const AsyncValue.data(null);
+    await _syncAnalyticsUser(null);
   }
 
   /// 로컬 세션만 초기화 (오프라인 signOut) + 프로필 캐시 초기화.
@@ -367,6 +382,7 @@ class AuthController extends _$AuthController {
     await ref.read(profileCacheProvider).clear();
     _invalidateOnboardingStatus();
     state = const AsyncValue.data(null);
+    await _syncAnalyticsUser(null);
   }
 
   // ---------------------------------------------------------------------------

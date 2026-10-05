@@ -6,6 +6,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
 import 'package:can_i_eat_it/features/food_check/data/food_check_providers.dart';
 import 'package:can_i_eat_it/features/food_check/data/repositories/mock_food_repository.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
@@ -622,4 +625,72 @@ void main() {
       expect(results.map((r) => r.query), contains('두부'));
     });
   });
+
+  group('FoodCheckScreen — search_screen_viewed', () {
+    testWidgets('화면 진입 시 1회만 발화하고 식사 기록이 아니면 0이다', (tester) async {
+      final analytics = _ScreenAnalytics();
+      await tester.pumpWidget(
+        _wrap([
+          foodRepositoryProvider.overrideWithValue(MockFoodRepository.empty()),
+          analyticsServiceProvider.overrideWithValue(analytics),
+        ]),
+      );
+      await tester.pump();
+
+      expect(analytics.events, hasLength(1));
+      expect(
+        analytics.events.single.name,
+        AnalyticsEvent.searchScreenViewed.eventName,
+      );
+      expect(analytics.events.single.params['from_meal_record'], 0);
+
+      await tester.pump();
+      expect(analytics.events, hasLength(1));
+    });
+
+    testWidgets('식사 기록 흐름이면 from_meal_record 가 1이다', (tester) async {
+      final analytics = _ScreenAnalytics();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            foodRepositoryProvider.overrideWithValue(
+              MockFoodRepository.empty(),
+            ),
+            analyticsServiceProvider.overrideWithValue(analytics),
+          ],
+          child: MaterialApp(
+            home: FoodCheckScreen(
+              recordContext: MealRecordContext(
+                eatenAt: DateTime(2026, 6, 1),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(analytics.events.single.params['from_meal_record'], 1);
+    });
+  });
+}
+
+class _ScreenAnalytics implements AnalyticsService {
+  final List<({String name, Map<String, Object?> params})> events = [];
+
+  @override
+  Future<void> logFunnel(
+    FunnelEvent event, {
+    Map<String, Object?> params = const {},
+  }) async {}
+
+  @override
+  Future<void> logEvent(
+    String name, {
+    Map<String, Object?> params = const {},
+  }) async {
+    events.add((name: name, params: params));
+  }
+
+  @override
+  Future<void> setUserId(String? userId) async {}
 }

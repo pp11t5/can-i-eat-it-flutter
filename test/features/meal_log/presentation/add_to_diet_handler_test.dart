@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
+import 'package:can_i_eat_it/core/analytics/funnel_once_store.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
@@ -21,6 +22,7 @@ import 'package:can_i_eat_it/features/meal_log/presentation/meal_recording.dart'
 
 class _SpyAnalyticsService implements AnalyticsService {
   final List<String> funnelNames = [];
+  final List<({String name, Map<String, Object?> params})> events = [];
 
   @override
   Future<void> logFunnel(
@@ -34,7 +36,12 @@ class _SpyAnalyticsService implements AnalyticsService {
   Future<void> logEvent(
     String name, {
     Map<String, Object?> params = const {},
-  }) async {}
+  }) async {
+    events.add((name: name, params: params));
+  }
+
+  @override
+  Future<void> setUserId(String? userId) async {}
 }
 
 class _SpyMealRepository implements MealRepository {
@@ -223,12 +230,18 @@ Future<({_FakeRef ref, GoRouter router, _SpyAnalyticsService analytics})>
 
   /// 유사 음식처럼 /check → /verdict → /verdict-sub 스택 위에서 호출할지.
   bool fromNestedVerdict = false,
+  String? userId,
+  FunnelOnceStore? onceStore,
 }) async {
   final analytics = _SpyAnalyticsService();
   final container = ProviderContainer(
     overrides: [
       mealRepositoryProvider.overrideWithValue(spy),
       analyticsServiceProvider.overrideWithValue(analytics),
+      if (userId != null)
+        analyticsSubjectIdProvider.overrideWithValue(userId),
+      if (onceStore != null)
+        funnelOnceStoreProvider.overrideWithValue(onceStore),
     ],
   );
   addTearDown(container.dispose);
@@ -463,8 +476,8 @@ void main() {
     });
   });
 
-  group('makeHandlerFromRef — first_meal_recorded 퍼널', () {
-    testWidgets('신규 식사 저장 성공 시 first_meal_recorded 가 발화된다', (tester) async {
+  group('makeHandlerFromRef — 식사 기록 이벤트', () {
+    testWidgets('세션이 없으면 신규 식사는 meal_recorded 만 보낸다', (tester) async {
       final result = await _runHandler(
         tester: tester,
         spy: _SpyMealRepository(),
@@ -472,22 +485,65 @@ void main() {
         ctx: MealRecordContext(eatenAt: _kEatAt),
       );
 
+      expect(result.analytics.funnelNames, isEmpty);
       expect(
-        result.analytics.funnelNames,
-        [FunnelEvent.firstMealRecorded.eventName],
+        result.analytics.events.single.name,
+        AnalyticsEvent.mealRecorded.eventName,
       );
     });
 
-    testWidgets('기존 식사 append 는 first_meal_recorded 를 발화하지 않는다',
+    testWidgets('계정의 첫 신규 식사는 두 이벤트를 보내고 다음은 meal_recorded 만 보낸다',
         (tester) async {
+      final store = InMemoryFunnelOnceStore();
+      final first = await _runHandler(
+        tester: tester,
+        spy: _SpyMealRepository(),
+        verdict: _kVerdictById,
+        ctx: MealRecordContext(eatenAt: _kEatAt),
+        userId: 'user-1',
+        onceStore: store,
+      );
+      final second = await _runHandler(
+        tester: tester,
+        spy: _SpyMealRepository(),
+        verdict: _kVerdictById,
+        ctx: MealRecordContext(eatenAt: _kEatAt),
+        userId: 'user-1',
+        onceStore: store,
+      );
+
+      expect(
+        first.analytics.funnelNames,
+        [FunnelEvent.firstMealRecorded.eventName],
+      );
+      expect(
+        first.analytics.events.single.name,
+        AnalyticsEvent.mealRecorded.eventName,
+      );
+      expect(second.analytics.funnelNames, isEmpty);
+      expect(
+        second.analytics.events.single.name,
+        AnalyticsEvent.mealRecorded.eventName,
+      );
+    });
+
+    testWidgets('기존 식사 append 는 기록 이벤트를 보내지 않는다', (tester) async {
+      final store = InMemoryFunnelOnceStore();
       final result = await _runHandler(
         tester: tester,
         spy: _SpyMealRepository(),
         verdict: _kVerdictById,
         ctx: MealRecordContext(eatenAt: _kEatAt, mealRecordId: 'mr-42'),
+        userId: 'user-1',
+        onceStore: store,
       );
 
       expect(result.analytics.funnelNames, isEmpty);
+      expect(result.analytics.events, isEmpty);
+      expect(
+        await store.hasFired('user-1', FunnelEvent.firstMealRecorded),
+        isFalse,
+      );
     });
 
     testWidgets('저장 실패 시 first_meal_recorded 를 발화하지 않는다', (tester) async {
@@ -500,6 +556,12 @@ void main() {
       );
 
       expect(result.analytics.funnelNames, isEmpty);
+      expect(
+        result.analytics.events.single.name,
+        AnalyticsEvent.mealRecordFailed.eventName,
+      );
+      expect(result.analytics.events.single.params['reason'], 'request_failed');
+      expect(result.analytics.events.single.params['is_new_meal'], 1);
     });
 
     testWidgets('foodName이 빈 문자열이면 first_meal_recorded 를 발화하지 않는다',
@@ -516,6 +578,12 @@ void main() {
       );
 
       expect(result.analytics.funnelNames, isEmpty);
+      expect(
+        result.analytics.events.single.name,
+        AnalyticsEvent.mealRecordFailed.eventName,
+      );
+      expect(result.analytics.events.single.params['reason'], 'empty_name');
+      expect(result.analytics.events.single.params['is_new_meal'], 1);
     });
   });
 }

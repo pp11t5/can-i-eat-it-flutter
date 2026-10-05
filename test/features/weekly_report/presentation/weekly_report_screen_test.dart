@@ -62,6 +62,9 @@ class _SpyAnalyticsService implements AnalyticsService {
     String name, {
     Map<String, Object?> params = const {},
   }) async {}
+
+  @override
+  Future<void> setUserId(String? userId) async {}
 }
 
 class _ThrowingWeeklyReportRepository implements WeeklyReportRepository {

@@ -40,6 +40,9 @@ class _NoopAnalytics implements AnalyticsService {
   @override
   Future<void> logEvent(String name,
       {Map<String, Object?> params = const {}}) async {}
+
+  @override
+  Future<void> setUserId(String? userId) async {}
 }
 
 Widget _buildMypage({

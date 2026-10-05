@@ -11,3 +11,14 @@ enum FunnelEvent {
   const FunnelEvent(this.eventName);
   final String eventName;
 }
+
+/// 퍼널 6개 밖의 계측 키. 문자열은 대시보드 키이므로 임의 변경 금지.
+enum AnalyticsEvent {
+  searchScreenViewed('search_screen_viewed'),
+  mealRecordFailed('meal_record_failed'),
+  verdictChecked('verdict_checked'),
+  mealRecorded('meal_recorded');
+
+  const AnalyticsEvent(this.eventName);
+  final String eventName;
+}
