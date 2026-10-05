@@ -95,6 +95,7 @@ class SymptomWriteScreen extends ConsumerStatefulWidget {
     this.initialMealName,
     this.initialMood,
     this.initialSymptomTypes,
+    this.fromPush = false,
   });
 
   final Symptom? existingSymptom;
@@ -110,6 +111,9 @@ class SymptomWriteScreen extends ConsumerStatefulWidget {
 
   /// 신규 작성 모드 전용 증상 칩 프리필.
   final List<SymptomType>? initialSymptomTypes;
+
+  /// 식후 알림 진입이면 true. 이 경로의 신규 저장만 symptom_response를 보낸다.
+  final bool fromPush;
 
   @override
   ConsumerState<SymptomWriteScreen> createState() => _SymptomWriteScreenState();
@@ -260,7 +264,7 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
     );
     final id = await ref
         .read(globalLoadingControllerProvider.notifier)
-        .run(() => ctrl.submit(_formState));
+        .run(() => ctrl.submit(_formState, fromPush: widget.fromPush));
     if (!mounted) return;
     if (id != null) {
       await showAppToast(

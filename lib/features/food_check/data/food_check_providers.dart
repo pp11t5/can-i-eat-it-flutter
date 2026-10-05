@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
+import 'package:can_i_eat_it/core/analytics/funnel_once_store.dart';
 import 'package:can_i_eat_it/core/network/dio_client.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/domain/repositories/food_repository.dart';
@@ -58,12 +59,7 @@ class VerdictController extends _$VerdictController {
       final repo = ref.read(foodRepositoryProvider);
       final verdict = await repo.judgeByText(text);
 
-      // 성공 시 퍼널 이벤트 발화 (unknown 포함 — 응답 자체가 성공)
-      final analytics = ref.read(analyticsServiceProvider);
-      await analytics.logFunnel(
-        FunnelEvent.firstVerdictChecked,
-        params: {'food_name': text, 'level': verdict.level.name},
-      );
+      await _logVerdict(verdict, text);
 
       return verdict;
     });
@@ -79,17 +75,30 @@ class VerdictController extends _$VerdictController {
       final repo = ref.read(foodRepositoryProvider);
       final verdict = await repo.judgeById(foodExternalId);
 
-      final analytics = ref.read(analyticsServiceProvider);
-      await analytics.logFunnel(
-        FunnelEvent.firstVerdictChecked,
-        params: {
-          'food_name': displayName ?? foodExternalId,
-          'level': verdict.level.name,
-        },
-      );
+      await _logVerdict(verdict, displayName ?? foodExternalId);
 
       return verdict;
     });
+  }
+
+  /// 성공 판정마다 [AnalyticsEvent.verdictChecked]를 보내고,
+  /// 이 계정의 첫 성공만 [FunnelEvent.firstVerdictChecked]를 보낸다.
+  /// unknown 등급도 성공 응답이면 대상이다.
+  Future<void> _logVerdict(EatVerdict verdict, String foodLabel) async {
+    final params = {
+      'food_name': foodLabel,
+      'level': verdict.level.name,
+    };
+    final analytics = ref.read(analyticsServiceProvider);
+    await analytics.logEvent(
+      AnalyticsEvent.verdictChecked.eventName,
+      params: params,
+    );
+    if (!await claimFunnelOnce(ref, FunnelEvent.firstVerdictChecked)) return;
+    await analytics.logFunnel(
+      FunnelEvent.firstVerdictChecked,
+      params: params,
+    );
   }
 
   /// 상태를 초기(idle)로 리셋한다. "다시 검색" 탭 시 사용.

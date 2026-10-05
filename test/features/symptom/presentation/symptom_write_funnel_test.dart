@@ -33,6 +33,9 @@ class _SpyAnalyticsService implements AnalyticsService {
     String name, {
     Map<String, Object?> params = const {},
   }) async {}
+
+  @override
+  Future<void> setUserId(String? userId) async {}
 }
 
 class _ThrowingSymptomRepository implements SymptomRepository {
@@ -82,7 +85,7 @@ ProviderContainer _container({
 
 void main() {
   group('SymptomWriteController — symptom_response 퍼널', () {
-    test('신규 생성 성공 시 symptom_response 가 발화된다', () async {
+    test('직접 신규 생성은 symptom_response 를 보내지 않는다', () async {
       final analytics = _SpyAnalyticsService();
       final container = _container(
         repo: MockSymptomRepository.empty(),
@@ -92,6 +95,20 @@ void main() {
       await container
           .read(symptomWriteControllerProvider(null).notifier)
           .submit(_form());
+
+      expect(analytics.funnelNames, isEmpty);
+    });
+
+    test('식후 알림으로 연 신규 생성은 symptom_response 를 보낸다', () async {
+      final analytics = _SpyAnalyticsService();
+      final container = _container(
+        repo: MockSymptomRepository.empty(),
+        analytics: analytics,
+      );
+
+      await container
+          .read(symptomWriteControllerProvider(null).notifier)
+          .submit(_form(), fromPush: true);
 
       expect(analytics.funnelNames, [FunnelEvent.symptomResponse.eventName]);
     });
@@ -105,7 +122,7 @@ void main() {
 
       await container
           .read(symptomWriteControllerProvider('symptom-001').notifier)
-          .submit(_form());
+          .submit(_form(), fromPush: true);
 
       expect(analytics.funnelNames, isEmpty);
     });
@@ -119,7 +136,7 @@ void main() {
 
       await container
           .read(symptomWriteControllerProvider(null).notifier)
-          .submit(_form());
+          .submit(_form(), fromPush: true);
 
       expect(analytics.funnelNames, isEmpty);
     });

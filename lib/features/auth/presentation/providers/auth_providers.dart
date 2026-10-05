@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
+import 'package:can_i_eat_it/core/analytics/funnel_once_store.dart';
 import 'package:can_i_eat_it/core/config/terms_catalog.dart';
 import 'package:can_i_eat_it/core/network/auth_interceptor.dart';
 import 'package:can_i_eat_it/core/network/dio_client.dart';
