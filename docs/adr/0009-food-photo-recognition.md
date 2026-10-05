@@ -1,20 +1,22 @@
 # ADR-0009: 음식 사진 인식 — 온디바이스(MobileNetV3) ↔ Gemini(백엔드 경유) 교체 가능 구조
 
-- **Status**: Proposed
+- **Status**: Proposed (domain/data 구현 완료)
 - **Date**: 2026-10-02
 - **Decider(s)**: 프로젝트 팀
 - **작성 근거**: 실측 `food_check` 레이어 구조(`food_category_providers.dart` 등), `pubspec.yaml`(ML/카메라/Gemini 의존성 전무 확인), `mobilenet`(README.md·input_rules.md·top3_output.md·model_metadata.json·labels.txt) 모델 계약, `docs/adr/0003-verdict-model-and-auth.md`
+
+> **범위**: 이번 라운드는 설계와 domain/data 구현(§6의 1~6단계)까지다. 화면(presentation)은 목업이 확정되지 않아 한 차례 구현했다가 되돌렸고, 확정 후 별도로 진행한다. 엔진 교체 방식은 초기안(사용자 트리거 단계적 확대)에서 **코드 상수 고정**으로 수정했다(결정 D).
 
 ## 1. 의사결정 요약
 
 신규 feature `food_recognition`을 만든다. 사진 1장을 넣으면 음식명 후보(최대 3개)를 돌려주는 단일 책임만 갖고, 신호등 판정(recommend/caution/risk/unknown)은 하지 않는다 — 인식된 음식명은 기존 `food_check`의 `judgeByText`/`judgeById`로 넘겨 기존 판정 파이프라인을 그대로 탄다.
 
-인식 엔진은 **두 구현체를 모두 만들고 런타임에 교체 가능하게** 한다:
+인식 엔진은 **두 구현체를 모두 만들고, 어느 쪽을 쓸지는 코드 상수 하나로 고르게** 한다:
 
 - **OnDevice**: 전달받은 MobileNetV3 TFLite 모델(150클래스 분류)을 기기에서 직접 추론.
 - **Gemini**: 사진을 **자체 백엔드 API**로 전송해 서버가 Gemini를 호출하고 결과를 받아온다. 클라이언트는 Gemini API 키나 SDK를 직접 갖지 않는다.
 
-교체는 이미 쓰고 있는 "Riverpod provider가 구현체를 결정한다" 패턴(`food_category_providers.dart` 등)을 엔진 선택으로 확장한 것이다. 기본 엔진은 OnDevice(모델 파일이 이미 있고 오프라인 동작), 백엔드 `/foods/recognize`류 엔드포인트가 나오기 전까지 Gemini 구현체는 **Mock**으로 대체한다(이 저장소의 "서버 API 미정 시 mock-우선" 컨벤션 그대로 적용).
+교체는 이미 쓰고 있는 "Riverpod provider가 구현체를 결정한다" 패턴(`food_category_providers.dart` 등)을 엔진 선택으로 확장한 것이다. 선택은 `kFoodRecognitionEngine` 상수 한 줄이며 기본값은 OnDevice(모델 파일이 이미 있고 오프라인 동작)다. 백엔드 `/foods/recognize`류 엔드포인트가 나오기 전까지 Gemini 구현체는 **Mock**으로 대체한다
 
 ## 2. 옵션 비교
 
@@ -37,7 +39,7 @@
 **Option B2 — 단일 최소공통 스키마 (채택)**
 
 ```dart
-abstract class FoodRecognitionRepository {
+abstract interface class FoodRecognitionRepository {
   Future<FoodRecognitionResult> recognize(Uint8List imageBytes);
 }
 
@@ -73,30 +75,35 @@ enum RecognitionSource { onDevice, gemini }
 
 **Option D3 — 자동 폴백 체인(confidence threshold로 전환)**: 학습 밖 음식에도 softmax가 높게 나올 수 있어 임계값으로 못 거른다. 몰래 Gemini를 호출해 비용·지연이 이중으로 든다.
 
-**Option D4 — 엔진을 인자로 받는 provider + 사용자 주도 단계적 확대 (채택)**
+**Option D4 — 엔진을 인자로 받는 provider + 코드 상수로 엔진 고정 (채택)**
 
 ```dart
+/// 이 값만 바꾸면 OnDevice ↔ Gemini가 전환된다.
+const kFoodRecognitionEngine = RecognitionSource.onDevice;
+
 @riverpod
-FoodRecognitionRepository foodRecognitionRepository(
+Future<FoodRecognitionRepository> foodRecognitionRepository(
   Ref ref,
   RecognitionSource engine,
-) {
-  final dio = ref.watch(dioProvider);
-  return switch (engine) {
-    RecognitionSource.onDevice => OnDeviceFoodRecognitionRepository(...),
-    RecognitionSource.gemini => GeminiFoodRecognitionRepository(dio: dio), // 백엔드 전: Mock
-  };
+) async {
+  switch (engine) {
+    case RecognitionSource.onDevice:
+      // Interpreter·labels는 keepAlive provider로 앱 전역 1회 로드
+      return OnDeviceFoodRecognitionRepository(interpreter: ..., labels: ...);
+    case RecognitionSource.gemini:
+      return const MockGeminiFoodRecognitionRepository(); // 백엔드 계약 전
+  }
 }
 ```
 
-컨트롤러는 먼저 `onDevice`로 인식한다. 사용자가 Top-3 중 "맞는 항목 없음"을 누르면 그때 `gemini` 엔진을 호출한다. 오프라인이면 Gemini 버튼을 비활성화한다.
+호출부는 `foodRecognitionRepositoryProvider(kFoodRecognitionEngine)`만 쓴다. 런타임 자동 전환이나 사용자 트리거 전환은 없다.
 
 ## 3. 선택 근거
 
 선택: **A2 + B2 + C2 + D4**
 
 - **기존 패턴의 확장**: `food_category_providers.dart`가 보여주는 "provider가 구현체를 고른다" 패턴에 엔진 인자만 추가한 것이라, 이 저장소에 새로운 전역 아키텍처 패턴을 만들지 않는다.
-- **비용 통제**: Gemini 호출 횟수의 상한이 "사용자가 없음을 누른 횟수"가 된다. 자동 폴백(D3)처럼 몰래 이중 호출이 나지 않는다.
+- **비용 통제**: 엔진을 코드에서 하나로 고정하므로 Gemini 호출은 의도적으로 켠 경우에만 발생한다. 자동 폴백(D3)처럼 몰래 이중 호출이 나지 않는다.
 - **오프라인 우선**: 기본 경로(OnDevice)가 네트워크 없이도 항상 동작한다.
 - **보안/원칙 일치**: Gemini 키가 앱에 없다(C2). 이 저장소가 이미 "AI·의료성 로직은 서버가 소유"로 정한 원칙(ADR-0003의 판정 파이프라인)과 인식 AI도 같은 모양이 된다.
 - **선개발 가능**: 백엔드 `/foods/recognize`가 나오기 전에도 OnDevice는 바로 구현·출시 가능하고, Gemini는 Mock으로 UI/흐름을 먼저 완성해둘 수 있다.
@@ -104,7 +111,7 @@ FoodRecognitionRepository foodRecognitionRepository(
 ## 4. 위험·전제
 
 **위험**:
-- **150클래스 한계**: 학습 밖 음식도 확신에 찬 오답이 나올 수 있다. → Top-3 노출 + "맞는 항목 없음" 선택지를 항상 둔다(단정 금지, ADR-0003의 `unknown` 철학과 동일).
+- **150클래스 한계**: 학습 밖 음식도 확신에 찬 오답이 나올 수 있다. → 화면 단계에서 후보 확인과 "맞는 항목 없음"(검색 전환) 경로를 두어야 한다(단정 금지, ADR-0003의 `unknown` 철학과 동일. 화면은 미구현).
 - **전처리 드리프트**: EXIF 보정·center-crop·bilinear resize·정규화(`0..255` 그대로, `/255` 금지)가 `input_rules.md`와 조금만 어긋나도 에러 없이 정확도만 조용히 떨어진다. → Python TF 기준 출력과 비교하는 golden test 필요.
 - **백엔드 엔드포인트 미정**: `/foods/recognize`의 요청/응답 계약이 아직 없다. 계약이 늦어지면 Gemini 경로가 Mock 상태로 장기 방치될 위험이 있다.
 - **라벨-DB 어휘 불일치**: 인식된 라벨은 ID가 아니라 검색어로 `food_check`에 넘어간다. 150개 라벨이 실제 음식 DB에서 몇 개나 검색되는지 사전 측정이 필요하다.
@@ -115,7 +122,7 @@ FoodRecognitionRepository foodRecognitionRepository(
 - 백엔드팀이 `/foods/recognize`류 엔드포인트를 합의된 일정 내에 제공한다.
 
 **전제 깨짐 신호**:
-- "맞는 항목 없음" 선택률이 비정상적으로 높으면 OnDevice 모델/기본 엔진을 재검토한다.
+- (화면 도입 후) "맞는 항목 없음" 선택률이 비정상적으로 높으면 OnDevice 모델/기본 엔진을 재검토한다.
 - 백엔드 엔드포인트 일정이 장기 지연되면 1차 출시를 OnDevice 단독으로 축소하고 Gemini는 후속 릴리스로 분리한다.
 
 ## 5. 신규 의존성
@@ -123,7 +130,6 @@ FoodRecognitionRepository foodRecognitionRepository(
 | 패키지 | 역할 | 선택 이유 |
 |---|---|---|
 | `tflite_flutter` | TFLite 추론 | TensorFlow 공식 배포, 유지되는 사실상 유일한 선택 |
-| `camera` | 인앱 라이브 카메라 뷰파인더 | (2026-10-02 수정) 목업이 커스텀 오버레이(안내 문구·촬영 버튼)가 있는 인앱 뷰파인더를 요구해 OS 기본 카메라 UI(`image_picker`)로는 재현 불가 — `image_picker`는 제거 |
 | `image` | decode/EXIF 보정/center-crop | 순수 Dart라 `Isolate`에서 동작, half-pixel bilinear resize는 계약 일치를 위해 직접 구현 |
 
 Gemini 호출은 **신규 의존성이 없다** — 기존 `dio_client`를 그대로 재사용한다(C2 채택의 핵심 이점).
@@ -131,16 +137,17 @@ Gemini 호출은 **신규 의존성이 없다** — 기존 `dio_client`를 그�
 ## 6. 구현 순서 (후속 액션)
 
 - [ ] **(선행, 확인 필요)** 사진의 서버 전송(결국 Gemini로 연결)에 대한 고지/동의 문구를 PO·법무와 확정 — Gemini 경로를 실제로 켜기 전 블로커.
-- [ ] `food_mobilenetv3_fp16.tflite` + `labels.txt`를 `assets/ml/`로 이동, `pubspec.yaml` assets 등록. `tflite_flutter`/`image_picker`/`image` 의존성 추가.
-- [ ] domain: `lib/features/food_recognition/domain/entities/food_recognition_result.dart`(FoodCandidate·RecognitionSource·FoodRecognitionResult, freezed), `domain/repositories/food_recognition_repository.dart`(인터페이스).
-- [ ] data(OnDevice) `[TDD]`: 전처리(EXIF·center-crop·224 bilinear resize, `input_rules.md` 그대로) + Interpreter 로드(앱 전역 1회) + Top-3 추출(`top3_output.md`, 재정규화 없음). 라벨 150줄/출력 shape를 로드 시 assert.
-- [ ] data(Gemini) `[None]`: 백엔드 계약 전까지는 `MockGeminiFoodRecognitionRepository`(샘플 후보 반환)만 구현. 계약 확정 시 `dio` 기반 실 구현으로 교체(인터페이스 불변).
-- [ ] `food_recognition_providers.dart`: 엔진 인자를 받는 Riverpod provider(결정 D4) 추가.
-- [ ] presentation: 캡처 화면(카메라/갤러리) → Top-3 후보 화면("맞는 항목 없음" → Gemini 엔진 재호출) → 후보 선택 시 기존 `judgeByText`/`judgeById`로 연결.
+- [x] `food_mobilenetv3_fp16.tflite` + `labels.txt`를 `assets/ml/`로 이동·등록, `tflite_flutter`/`image` 의존성 추가.
+- [x] domain: `food_recognition_result.dart`(FoodCandidate·RecognitionSource·FoodRecognitionResult, freezed), `food_recognition_repository.dart`(인터페이스).
+- [x] data(OnDevice) `[TDD]`: 전처리(EXIF·center-crop·224 bilinear resize) + Top-3 추출 + 단위 테스트. Interpreter는 생성자 주입.
+- [x] data(Gemini) `[None]`: `MockGeminiFoodRecognitionRepository`. 계약 확정 시 `dio` 기반 실 구현으로 교체(인터페이스 불변).
+- [x] `food_recognition_providers.dart`: Interpreter/라벨 1회 로드 + 엔진 인자 provider + `kFoodRecognitionEngine`.
+- [x] `android/build.gradle`: `tflite_flutter` Kotlin/Java JVM 타겟 불일치 보정.
+- [ ] presentation: 목업 확정 후 진행. 컨트롤러(`recognize`/`reset`) + 캡처 화면 → 결과 확인 → 후보 선택 시 기존 `judgeByText`로 연결. 실기기에서 모델 로딩도 이때 확인.
+- [ ] 카메라 의존성 선택 및 Android `CAMERA` 권한, iOS `NSCameraUsageDescription` 추가(화면과 함께).
 - [ ] `[TDD]` golden test: 샘플 이미지 1장 기준 Python TF 출력과 OnDevice Top-3 일치 확인.
-- [ ] iOS `NSCameraUsageDescription`/`NSPhotoLibraryUsageDescription` 추가.
 - [ ] `[Review]` pr-reviewer: 이미지 업로드·모델 로딩 경로, Gemini 실 구현 교체 시점에 보안 리뷰.
 
 ## 참고 (실측 근거 파일)
 
-`lib/features/food_check/domain/repositories/food_repository.dart`, `lib/features/food_check/data/food_check_providers.dart`, `lib/core/network/dio_client.dart`, `pubspec.yaml`, `C:/Users/awon0/Desktop/mobilenet/{README.md,input_rules.md,top3_output.md,model_metadata.json,labels.txt}`, `docs/adr/0003-verdict-model-and-auth.md`(AI는 서버가 소유하는 원칙의 선례).
+`lib/features/food_check/domain/repositories/food_repository.dart`, `lib/features/food_check/data/food_check_providers.dart`, `lib/core/network/dio_client.dart`, `pubspec.yaml`, `android/build.gradle`, 모델 번들(`mobilenet/`의 `README.md`·`input_rules.md`·`top3_output.md`·`model_metadata.json`·`labels.txt`), `docs/adr/0003-verdict-model-and-auth.md`(AI는 서버가 소유하는 원칙의 선례).
