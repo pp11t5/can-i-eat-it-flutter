@@ -14,7 +14,7 @@ import 'package:can_i_eat_it/features/auth/domain/entities/consent.dart';
 
 class _NoOpKakaoAuthService implements KakaoAuthService {
   @override
-  Future<KakaoAuthResult> signIn() async =>
+  Future<KakaoAuthResult> signIn({bool useKakaoAccount = false}) async =>
       const KakaoAuthResult(idToken: 'id', email: 'e@e.com', nickname: 'nick');
 
   @override

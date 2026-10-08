@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -34,7 +36,8 @@ class _ThrowingObjectAuthRepository implements AuthRepository {
   bool consumeOfflineRestoreFlag() => false;
 
   @override
-  Future<SignInOutcome> signInWithKakao() async => throw error;
+  Future<SignInOutcome> signInWithKakao({bool useKakaoAccount = false}) async =>
+      throw error;
 
   @override
   Future<SignInOutcome> signInWithApple() async => throw error;
@@ -72,6 +75,24 @@ class _ThrowingObjectAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {}
+}
+
+class _RecordingAuthRepository extends _ThrowingObjectAuthRepository {
+  _RecordingAuthRepository()
+      : super(KakaoClientException(ClientErrorCause.cancelled, 'cancelled'));
+
+  final methods = <bool>[];
+
+  @override
+  Future<SignInOutcome> signInWithKakao({bool useKakaoAccount = false}) async {
+    methods.add(useKakaoAccount);
+    throw error;
+  }
+}
+
+class _LoadingAuthController extends AuthController {
+  @override
+  Future<AuthSession?> build() => Completer<AuthSession?>().future;
 }
 
 // ---------------------------------------------------------------------------
@@ -132,8 +153,9 @@ void main() {
       await tester.pumpWidget(_wrap(MockAuthRepository.signedOut()));
       await tester.pumpAndSettle();
 
-      expect(find.text('카카오로 로그인'), findsOneWidget);
+      expect(find.text('카카오 로그인'), findsOneWidget);
       expect(find.text('Google로 로그인'), findsOneWidget);
+      expect(find.text('다른 카카오계정으로 로그인'), findsOneWidget);
       expect(find.text('Apple로 로그인'), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
@@ -141,27 +163,80 @@ void main() {
       await tester.pumpWidget(_wrap(MockAuthRepository.signedOut()));
       await tester.pumpAndSettle();
 
-      expect(find.text('카카오로 로그인'), findsOneWidget);
+      expect(find.text('카카오 로그인'), findsOneWidget);
       expect(find.text('Apple로 로그인'), findsOneWidget);
       expect(find.text('Google로 로그인'), findsOneWidget);
+      expect(find.text('다른 카카오계정으로 로그인'), findsOneWidget);
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
   });
 
+  testWidgets('카카오 버튼 경로와 하단 위치·밑줄을 검증한다', (tester) async {
+    final repo = _RecordingAuthRepository();
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        // ignore: scoped_providers_should_specify_dependencies
+        authRepositoryProvider.overrideWithValue(repo),
+      ],
+      child: MaterialApp.router(routerConfig: _testRouter()),
+    ));
+    await tester.pumpAndSettle();
+
+    final account = find.text('다른 카카오계정으로 로그인');
+    expect(tester.getTopLeft(account).dy,
+        greaterThan(tester.getBottomLeft(find.text('Google로 로그인')).dy));
+    expect(tester.widget<Text>(account).style?.decoration,
+        TextDecoration.underline);
+    await tester.tap(find.text('카카오 로그인'));
+    await tester.pumpAndSettle();
+    await tester.tap(account);
+    await tester.pumpAndSettle();
+    expect(repo.methods, [false, true]);
+    expect(find.text('로그인에 실패했어요. 잠시 후 다시 시도해 주세요.'), findsNothing);
+  },
+      variant: const TargetPlatformVariant(
+          {TargetPlatform.android, TargetPlatform.iOS}));
+
+  testWidgets('인증 로딩 중 카카오 버튼 둘 다 비활성이다', (tester) async {
+    final repo = _RecordingAuthRepository();
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        // ignore: scoped_providers_should_specify_dependencies
+        authRepositoryProvider.overrideWithValue(repo),
+        // ignore: scoped_providers_should_specify_dependencies
+        authControllerProvider.overrideWith(_LoadingAuthController.new),
+      ],
+      child: MaterialApp.router(routerConfig: _testRouter()),
+    ));
+    await tester.pump();
+    expect(
+        tester
+            .widget<TextButton>(
+                find.widgetWithText(TextButton, '다른 카카오계정으로 로그인'))
+            .onPressed,
+        isNull);
+    await tester.tap(find.text('카카오 로그인'));
+    await tester.tap(find.text('다른 카카오계정으로 로그인'));
+    await tester.pump();
+    expect(repo.methods, isEmpty);
+  });
+
   group('LoginScreen 로그인 동작 — SignInOutcome 분기', () {
-    testWidgets('Authenticated(onboarded=false) 신규 사용자 — /terms 로 push 된다',
-        (tester) async {
-      final repo = MockAuthRepository.newUser();
-      await tester.pumpWidget(_wrap(repo));
-      await tester.pumpAndSettle();
+    for (final useAccount in [false, true]) {
+      testWidgets('신규 사용자 — /terms 로 push 된다, account=$useAccount',
+          (tester) async {
+        final repo = MockAuthRepository.newUser();
+        await tester.pumpWidget(_wrap(repo));
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.text('카카오로 로그인'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text(useAccount ? '다른 카카오계정으로 로그인' : '카카오 로그인'));
+        await tester.pumpAndSettle();
 
-      // /terms stub 이 보인다.
-      expect(find.text('terms stub'), findsOneWidget);
-      // home 이나 onboarding 으로 이동하지 않는다.
-      expect(find.text('home stub'), findsNothing);
-    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+        // /terms stub 이 보인다.
+        expect(find.text('terms stub'), findsOneWidget);
+        // home 이나 onboarding 으로 이동하지 않는다.
+        expect(find.text('home stub'), findsNothing);
+      }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+    }
 
     testWidgets('Authenticated(onboarded=true) — 구글 로그인 시 / 로 이동한다',
         (tester) async {
@@ -182,7 +257,7 @@ void main() {
       await tester.pumpWidget(_wrap(repo));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('카카오로 로그인'));
+      await tester.tap(find.text('카카오 로그인'));
       await tester.pumpAndSettle();
 
       expect(find.text('home stub'), findsOneWidget);
@@ -195,7 +270,7 @@ void main() {
       await tester.pumpWidget(_wrap(repo));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('카카오로 로그인'));
+      await tester.tap(find.text('카카오 로그인'));
       await tester.pumpAndSettle();
 
       expect(find.text('terms stub'), findsOneWidget);
@@ -208,7 +283,7 @@ void main() {
       await tester.pumpWidget(_wrap(MockAuthRepository.deletionGrace()));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('카카오로 로그인'));
+      await tester.tap(find.text('카카오 로그인'));
       await tester.pumpAndSettle();
 
       expect(find.text('탈퇴를 진행 중인 계정이에요'), findsOneWidget);
@@ -227,7 +302,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('카카오로 로그인'));
+      await tester.tap(find.text('카카오 로그인'));
       await tester.pumpAndSettle();
 
       expect(find.text('탈퇴를 진행 중인 계정이에요'), findsOneWidget);
@@ -264,7 +339,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('카카오로 로그인'));
+      await tester.tap(find.text('카카오 로그인'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('계정 복구하고 계속하기'));
       await tester.pumpAndSettle();
@@ -298,7 +373,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        await tester.tap(find.text('카카오로 로그인'));
+        await tester.tap(find.text('카카오 로그인'));
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 100));
 
@@ -306,7 +381,7 @@ void main() {
           find.text('로그인에 실패했어요. 잠시 후 다시 시도해 주세요.'),
           findsNothing,
         );
-        expect(find.text('카카오로 로그인'), findsOneWidget);
+        expect(find.text('카카오 로그인'), findsOneWidget);
         expect(find.byType(CircularProgressIndicator), findsNothing);
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),
@@ -333,6 +408,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Google로 로그인'), findsOneWidget);
+        expect(find.text('다른 카카오계정으로 로그인'), findsOneWidget);
         await tester.tap(find.text('Google로 로그인'));
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 100));
@@ -342,6 +418,7 @@ void main() {
           findsNothing,
         );
         expect(find.text('Google로 로그인'), findsOneWidget);
+        expect(find.text('다른 카카오계정으로 로그인'), findsOneWidget);
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),
     );
@@ -368,10 +445,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // 초기 상태: 로그인 화면 대기
-      expect(find.text('카카오로 로그인'), findsOneWidget);
+      expect(find.text('카카오 로그인'), findsOneWidget);
 
       // 카카오 버튼 탭
-      await tester.tap(find.text('카카오로 로그인'));
+      await tester.tap(find.text('카카오 로그인'));
       // signInWithKakao() throw → catch → showAppToast 호출
       await tester.pump(); // OverlayEntry 삽입
       await tester.pump(const Duration(milliseconds: 100)); // 등장 애니메이션 진입
@@ -400,7 +477,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('카카오로 로그인'));
+      await tester.tap(find.text('카카오 로그인'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 

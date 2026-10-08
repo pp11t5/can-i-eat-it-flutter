@@ -161,15 +161,17 @@ class AuthController extends _$AuthController {
     return session;
   }
 
-  /// 카카오 계정으로 로그인하고 [SignInOutcome]을 반환한다.
+  /// 카카오톡 또는 명시적 계정 재로그인 후 [SignInOutcome]을 반환한다.
   ///
   /// [Authenticated] 시 [FunnelEvent.signUp] 퍼널 이벤트를 발화한다 (US-SYS-2).
   /// [Recoverable](복구 필요)은 가입 퍼널 진입으로 보지 않아 발화하지 않는다.
   ///
   /// [Authenticated] 시 [getMe]로 displayName 등 식별정보를 채운 뒤 반환한다
   /// (로그인 DTO에는 nickname이 없어 마이페이지가 '사용자'로 뜨던 문제 방지).
-  Future<SignInOutcome> signInWithKakao() async {
-    final outcome = await ref.read(authRepositoryProvider).signInWithKakao();
+  Future<SignInOutcome> signInWithKakao({bool useKakaoAccount = false}) async {
+    final outcome = await ref.read(authRepositoryProvider).signInWithKakao(
+          useKakaoAccount: useKakaoAccount,
+        );
     _applyOutcomeToState(outcome);
     if (outcome is Authenticated) {
       // fire-and-forget — secure storage 읽기가 끝나지 않는 환경에서도 로그인
