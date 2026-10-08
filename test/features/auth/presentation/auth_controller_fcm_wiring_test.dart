@@ -130,7 +130,8 @@ class _SpyAuthRepository implements AuthRepository {
   bool consumeOfflineRestoreFlag() => _delegate.consumeOfflineRestoreFlag();
 
   @override
-  Future<SignInOutcome> signInWithKakao() => _delegate.signInWithKakao();
+  Future<SignInOutcome> signInWithKakao({bool useKakaoAccount = false}) =>
+      _delegate.signInWithKakao(useKakaoAccount: useKakaoAccount);
 
   @override
   Future<SignInOutcome> signInWithApple() => _delegate.signInWithApple();

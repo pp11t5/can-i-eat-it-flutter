@@ -8,8 +8,9 @@ import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 abstract interface class KakaoAuthService {
   /// 카카오 로그인을 수행하고 OIDC idToken 과 사용자 정보를 반환한다.
   ///
+  /// [useKakaoAccount]가 true면 카카오톡 대신 계정 재로그인을 요청한다.
   /// 스코프: email, nickname (ADR-0007 §3-1 (6-A)).
-  Future<KakaoAuthResult> signIn();
+  Future<KakaoAuthResult> signIn({bool useKakaoAccount = false});
 
   /// 카카오 로그아웃 (SDK 세션 해제).
   Future<void> signOut();
@@ -30,14 +31,40 @@ class KakaoAuthResult {
 
 /// 실 카카오 SDK 구현.
 class KakaoAuthServiceImpl implements KakaoAuthService {
+  KakaoAuthServiceImpl({
+    UserApi? userApi,
+    Future<bool> Function()? isTalkInstalled,
+  })  : _userApi = userApi ?? UserApi.instance,
+        _isTalkInstalled = isTalkInstalled ?? isKakaoTalkInstalled;
+
+  final UserApi _userApi;
+  final Future<bool> Function() _isTalkInstalled;
+
+  Future<OAuthToken> _login({required bool useKakaoAccount}) async {
+    if (useKakaoAccount) {
+      return _userApi.loginWithKakaoAccount(prompts: [Prompt.login]);
+    }
+    if (await _isTalkInstalled()) {
+      try {
+        return await _userApi.loginWithKakaoTalk();
+      } catch (error) {
+        if (error is KakaoClientException &&
+            error.reason == ClientErrorCause.cancelled) {
+          rethrow;
+        }
+        _debugLog('카카오톡 인증 실패: 계정 로그인으로 전환');
+      }
+    }
+    return _userApi.loginWithKakaoAccount();
+  }
+
   @override
-  Future<KakaoAuthResult> signIn() async {
-    var stage = '브라우저 로그인 시작';
+  Future<KakaoAuthResult> signIn({bool useKakaoAccount = false}) async {
+    var stage = useKakaoAccount ? '계정 로그인 시작' : '카카오톡 로그인 시작';
     try {
       _debugLog(stage);
 
-      // 카카오톡 앱 전환 없이 기본 브라우저의 카카오계정 로그인만 사용한다.
-      final token = await UserApi.instance.loginWithKakaoAccount();
+      final token = await _login(useKakaoAccount: useKakaoAccount);
 
       stage = 'SDK 토큰 수신';
       _debugLog('$stage (idToken=${token.idToken != null ? '있음' : '없음'})');
@@ -51,7 +78,7 @@ class KakaoAuthServiceImpl implements KakaoAuthService {
 
       stage = '사용자 정보 조회';
       _debugLog(stage);
-      final user = await UserApi.instance.me();
+      final user = await _userApi.me();
       final email = user.kakaoAccount?.email;
       final nickname = user.kakaoAccount?.profile?.nickname;
       _debugLog(
@@ -75,7 +102,7 @@ class KakaoAuthServiceImpl implements KakaoAuthService {
 
   @override
   Future<void> signOut() async {
-    await UserApi.instance.logout();
+    await _userApi.logout();
   }
 }
 

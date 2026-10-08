@@ -39,13 +39,17 @@ class _StubKakaoAuthService implements KakaoAuthService {
   _StubKakaoAuthService({required this.idToken});
 
   final String idToken;
+  final methods = <bool>[];
 
   @override
-  Future<KakaoAuthResult> signIn() async => KakaoAuthResult(
-        idToken: idToken,
-        email: 'test@example.com',
-        nickname: 'testuser',
-      );
+  Future<KakaoAuthResult> signIn({bool useKakaoAccount = false}) async {
+    methods.add(useKakaoAccount);
+    return KakaoAuthResult(
+      idToken: idToken,
+      email: 'test@example.com',
+      nickname: 'testuser',
+    );
+  }
 
   @override
   Future<void> signOut() async {}
@@ -71,7 +75,7 @@ class _CountingKakaoAuthService implements KakaoAuthService {
   final void Function() onSignIn;
 
   @override
-  Future<KakaoAuthResult> signIn() async {
+  Future<KakaoAuthResult> signIn({bool useKakaoAccount = false}) async {
     onSignIn();
     return KakaoAuthResult(
       idToken: idToken,
@@ -113,6 +117,7 @@ void main() {
   late DioAdapter dioAdapter;
   late InMemoryTokenStore tokenStore;
   late AuthRepositoryImpl repo;
+  late _StubKakaoAuthService kakao;
 
   setUp(() {
     dio = Dio(BaseOptions(
@@ -123,10 +128,11 @@ void main() {
     ));
     dioAdapter = DioAdapter(dio: dio, matcher: const FullHttpRequestMatcher());
     tokenStore = InMemoryTokenStore();
+    kakao = _StubKakaoAuthService(idToken: 'test-id-token');
     repo = AuthRepositoryImpl(
       dio: dio,
       tokenStore: tokenStore,
-      kakaoAuthService: _StubKakaoAuthService(idToken: 'test-id-token'),
+      kakaoAuthService: kakao,
       appleAuthService: _StubAppleAuthService(idToken: 'test-id-token'),
       googleAuthService: _StubGoogleAuthService(idToken: 'test-id-token'),
     );
@@ -140,36 +146,40 @@ void main() {
   }
 
   group('signInWithKakao — HTTP 200 → Authenticated', () {
-    test('200 성공 + onboarding/status → Authenticated(onboarded=true)',
-        () async {
-      dioAdapter
-        ..onPost(
-          '/auth/kakao/login',
-          (server) => server.reply(
-              200,
-              _envelope({
-                'accessToken': 'access-123',
-                'refreshToken': 'refresh-456',
-                'userId': 'user-1',
-                'email': 'test@example.com',
-                'role': 'USER',
-              })),
-          data: {'idToken': 'test-id-token'},
-        )
-        ..onGet(
-          '/onboarding/status',
-          (server) => server.reply(200, _envelope({'onboarded': true})),
-        );
+    for (final useAccount in [false, true]) {
+      test(
+          '200 성공 + onboarding/status → Authenticated(onboarded=true), account=$useAccount',
+          () async {
+        dioAdapter
+          ..onPost(
+            '/auth/kakao/login',
+            (server) => server.reply(
+                200,
+                _envelope({
+                  'accessToken': 'access-123',
+                  'refreshToken': 'refresh-456',
+                  'userId': 'user-1',
+                  'email': 'test@example.com',
+                  'role': 'USER',
+                })),
+            data: {'idToken': 'test-id-token'},
+          )
+          ..onGet(
+            '/onboarding/status',
+            (server) => server.reply(200, _envelope({'onboarded': true})),
+          );
 
-      final outcome = await repo.signInWithKakao();
+        final outcome = await repo.signInWithKakao(useKakaoAccount: useAccount);
+        expect(kakao.methods, [useAccount]);
 
-      expect(outcome, isA<Authenticated>());
-      final auth = outcome as Authenticated;
-      expect(auth.onboarded, isTrue);
-      expect(auth.session.userId, 'user-1');
-      expect(auth.session.hasAgreedTerms, isTrue);
-      expect(await tokenStore.readPendingConsentUserId(), isNull);
-    });
+        expect(outcome, isA<Authenticated>());
+        final auth = outcome as Authenticated;
+        expect(auth.onboarded, isTrue);
+        expect(auth.session.userId, 'user-1');
+        expect(auth.session.hasAgreedTerms, isTrue);
+        expect(await tokenStore.readPendingConsentUserId(), isNull);
+      });
+    }
 
     test('200 성공 + onboarding/status → Authenticated(onboarded=false)',
         () async {

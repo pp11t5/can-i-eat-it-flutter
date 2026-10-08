@@ -60,7 +60,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('카카오로 로그인'));
+    await tester.tap(find.text('카카오 로그인'));
     await tester.pumpAndSettle();
     final context = tester.element(find.byType(HomeScreen));
     GoRouter.of(context).push(

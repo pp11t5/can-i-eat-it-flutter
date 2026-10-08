@@ -128,6 +128,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: _ButtonSection(
                   isLoading: isLoading,
                   onKakaoPressed: () => _handleKakaoPressed(context),
+                  onKakaoAccountPressed: () =>
+                      _handleKakaoPressed(context, useKakaoAccount: true),
                   onApplePressed: () => _handleApplePressed(context),
                   onGooglePressed: () => _handleGooglePressed(context),
                 ),
@@ -139,13 +141,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Future<void> _handleKakaoPressed(BuildContext context) async {
+  Future<void> _handleKakaoPressed(BuildContext context,
+      {bool useKakaoAccount = false}) async {
     // 카카오/Apple 은 Custom Tab·시스템 UI 등 외부 OAuth 플로우다.
     // 그 구간을 전역 로딩으로 감싸면, 사용자가 로그인 없이 앱으로만 돌아올 때
     // SDK Future 가 끝나지 않아 스피너가 영구 고정된다 → 전역 로딩 사용 금지.
     try {
-      final outcome =
-          await ref.read(authControllerProvider.notifier).signInWithKakao();
+      final outcome = await ref
+          .read(authControllerProvider.notifier)
+          .signInWithKakao(useKakaoAccount: useKakaoAccount);
       if (!context.mounted) return;
       await _handlePostSignIn(context, outcome);
     } catch (e) {
@@ -267,12 +271,14 @@ class _ButtonSection extends StatelessWidget {
   const _ButtonSection({
     required this.isLoading,
     required this.onKakaoPressed,
+    required this.onKakaoAccountPressed,
     required this.onApplePressed,
     required this.onGooglePressed,
   });
 
   final bool isLoading;
   final VoidCallback onKakaoPressed;
+  final VoidCallback onKakaoAccountPressed;
   final VoidCallback onApplePressed;
   final VoidCallback onGooglePressed;
 
@@ -296,6 +302,17 @@ class _ButtonSection extends StatelessWidget {
         _GoogleButton(
           isLoading: isLoading,
           onPressed: isLoading ? null : onGooglePressed,
+        ),
+        const SizedBox(height: AppSpacing.itemGap),
+        TextButton(
+          onPressed: isLoading ? null : onKakaoAccountPressed,
+          child: Text(
+            '다른 카카오계정으로 로그인',
+            style: AppTextStyles.body2Medium.copyWith(
+              color: AppColors.textSecondary,
+              decoration: TextDecoration.underline,
+            ),
+          ),
         ),
         if (isLoading) ...[
           const SizedBox(height: AppSpacing.cardPadding),
@@ -344,7 +361,7 @@ class _KakaoButton extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.itemGap),
                 Text(
-                  '카카오로 로그인',
+                  '카카오 로그인',
                   style: AppTextStyles.body1Medium.copyWith(
                     color: AppColors.kakaoText,
                   ),

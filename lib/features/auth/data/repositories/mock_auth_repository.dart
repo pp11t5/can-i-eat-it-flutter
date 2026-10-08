@@ -25,7 +25,8 @@ class ThrowingAuthRepository implements AuthRepository {
   bool consumeOfflineRestoreFlag() => false;
 
   @override
-  Future<SignInOutcome> signInWithKakao() async => throw _failure;
+  Future<SignInOutcome> signInWithKakao({bool useKakaoAccount = false}) async =>
+      throw _failure;
 
   @override
   Future<SignInOutcome> signInWithApple() async => throw _failure;
@@ -279,7 +280,7 @@ class MockAuthRepository implements AuthRepository {
       false; // Mock 에서는 항상 false (오프라인 시나리오 불필요).
 
   @override
-  Future<SignInOutcome> signInWithKakao() async {
+  Future<SignInOutcome> signInWithKakao({bool useKakaoAccount = false}) async {
     final outcome = _kakaoOutcome ?? _defaultOutcome;
     _applyOutcomeToSession(outcome, AuthProvider.kakao);
     return outcome;

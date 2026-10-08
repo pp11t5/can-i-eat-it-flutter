@@ -30,11 +30,11 @@ abstract interface class AuthRepository {
   // 소셜 로그인
   // ---------------------------------------------------------------------------
 
-  /// 카카오 계정으로 로그인한다.
+  /// 카카오톡으로 로그인한다. [useKakaoAccount]는 계정 재로그인을 요청한다.
   ///
   /// 성공 시 [SignInOutcome.Authenticated] (200),
   /// 복구 가능 계정 시 [Recoverable] (403) 를 반환한다.
-  Future<SignInOutcome> signInWithKakao();
+  Future<SignInOutcome> signInWithKakao({bool useKakaoAccount = false});
 
   /// Apple 계정으로 로그인한다.
   ///
