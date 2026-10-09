@@ -13,6 +13,11 @@ abstract interface class FunnelOnceStore {
 
   Future<void> markFired(String userId, FunnelEvent event);
 
+  /// 확인과 기록을 한 번에 한다. 이 계정에서 처음이면 기록하고 true.
+  ///
+  /// 같은 키로 동시에 호출돼도 true는 한 번만 나와야 한다.
+  Future<bool> claim(String userId, FunnelEvent event);
+
   /// 탈퇴 시 해당 계정의 1회 기록을 지운다.
   Future<void> clear(String userId);
 }
@@ -47,6 +52,23 @@ class SecureStorageFunnelOnceStore implements FunnelOnceStore {
     await _storage.write(key: _key(userId, event), value: '1');
   }
 
+  // 읽기→쓰기 사이 await 동안 같은 키의 두 번째 호출이 끼어들지 못하게 막는다.
+  final Set<String> _inFlight = {};
+
+  @override
+  Future<bool> claim(String userId, FunnelEvent event) async {
+    if (userId.isEmpty) return false;
+    final key = _key(userId, event);
+    if (!_inFlight.add(key)) return false;
+    try {
+      if (await hasFired(userId, event)) return false;
+      await markFired(userId, event);
+      return true;
+    } finally {
+      _inFlight.remove(key);
+    }
+  }
+
   @override
   Future<void> clear(String userId) async {
     if (userId.isEmpty) return;
@@ -76,6 +98,12 @@ class InMemoryFunnelOnceStore implements FunnelOnceStore {
   }
 
   @override
+  Future<bool> claim(String userId, FunnelEvent event) async {
+    if (userId.isEmpty) return false;
+    return _fired.add(_key(userId, event));
+  }
+
+  @override
   Future<void> clear(String userId) async {
     if (userId.isEmpty) return;
     _fired.removeWhere((key) => key.endsWith('\u0000$userId'));
@@ -91,16 +119,14 @@ final analyticsSubjectIdProvider = Provider<String?>((ref) => null);
 
 /// 이 계정에서 [event]를 아직 안 보냈으면 기록하고 true.
 ///
+/// 세션 확인과 예외 처리만 맡고, "처음인지" 판단은 [FunnelOnceStore.claim]이 한다.
 /// 세션이 없거나 이미 보냈거나 저장이 실패하면 false. 호출부의 저장 흐름을
 /// 막지 않도록 예외를 삼킨다.
 Future<bool> claimFunnelOnce(Ref ref, FunnelEvent event) async {
   try {
     final userId = ref.read(analyticsSubjectIdProvider);
     if (userId == null || userId.isEmpty) return false;
-    final store = ref.read(funnelOnceStoreProvider);
-    if (await store.hasFired(userId, event)) return false;
-    await store.markFired(userId, event);
-    return true;
+    return await ref.read(funnelOnceStoreProvider).claim(userId, event);
   } catch (e, st) {
     debugPrint('[Analytics] claim ${event.eventName} failed: $e\n$st');
     return false;

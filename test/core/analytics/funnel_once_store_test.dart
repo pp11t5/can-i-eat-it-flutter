@@ -1,10 +1,45 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
 import 'package:can_i_eat_it/core/analytics/funnel_once_store.dart';
 
 final _refProbeProvider = Provider<Ref>((ref) => ref);
+
+/// read/write 에 await 틈을 줘서 동시 호출 경합을 재현하는 저장소.
+class _SlowStorage extends FlutterSecureStorage {
+  final Map<String, String> _data = {};
+
+  @override
+  Future<String?> read({
+    required String key,
+    AppleOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    AppleOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    return _data[key];
+  }
+
+  @override
+  Future<void> write({
+    required String key,
+    required String? value,
+    AppleOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    AppleOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    if (value != null) _data[key] = value;
+  }
+}
 
 void main() {
   group('InMemoryFunnelOnceStore', () {
@@ -34,6 +69,26 @@ void main() {
         await store.hasFired('user-1', FunnelEvent.accountFirstVerdictChecked),
         isFalse,
       );
+    });
+  });
+
+  group('FunnelOnceStore.claim', () {
+    test('InMemory: 동시에 호출해도 true는 한 번만 나온다', () async {
+      final store = InMemoryFunnelOnceStore();
+      final results = await Future.wait([
+        store.claim('user-1', FunnelEvent.accountFirstMealRecorded),
+        store.claim('user-1', FunnelEvent.accountFirstMealRecorded),
+      ]);
+      expect(results.where((r) => r).length, 1);
+    });
+
+    test('SecureStorage: 저장이 느려도 동시 호출 중 하나만 true', () async {
+      final store = SecureStorageFunnelOnceStore(storage: _SlowStorage());
+      final results = await Future.wait([
+        store.claim('user-1', FunnelEvent.accountFirstMealRecorded),
+        store.claim('user-1', FunnelEvent.accountFirstMealRecorded),
+      ]);
+      expect(results.where((r) => r).length, 1);
     });
   });
 

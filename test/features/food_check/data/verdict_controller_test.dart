@@ -316,6 +316,11 @@ class _ThrowingOnceStore implements FunnelOnceStore {
 
   @override
   Future<void> markFired(String userId, FunnelEvent event) async {}
+
+  @override
+  Future<bool> claim(String userId, FunnelEvent event) async {
+    throw Exception('store down');
+  }
 }
 
 /// judgeByText/judgeById 모두 예외를 던지는 테스트 전용 저장소.

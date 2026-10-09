@@ -33,6 +33,8 @@ Flutter 클라이언트가 Firebase Analytics로 보내는 이벤트 키다. `ev
 
 1회 기록은 기기 로컬이다. 키는 `analytics.funnel_once_v1.<event>.<userId>`이고, 토큰 저장소와 다른 기본 Secure Storage를 쓴다. 세션이 없거나 저장에 실패하면 1회 이벤트만 건너뛴다. 매번 나가는 `first_meal_recorded`와 `first_verdict_checked`는 그대로 보낸다. 탈퇴가 끝나면 그 계정의 1회 기록을 지운다. 로그아웃과 로컬 로그아웃은 지우지 않는다. 재설치나 다른 기기에서는 1회 이벤트가 다시 나갈 수 있다.
 
+"처음인지 확인하고 기록"은 `FunnelOnceStore.claim`이 한 번에 처리한다. 같은 계정·이벤트로 동시에 호출돼도 `true`는 한 번만 나온다. 먼저 들어온 호출이 끝나기 전에 온 호출은 `false`를 받는다. 먼저 들어온 호출이 저장에 실패하면 그 1회 이벤트는 나가지 않는다.
+
 ## 호출 위치
 
 | 키 | 파일 |
@@ -44,3 +46,4 @@ Flutter 클라이언트가 Firebase Analytics로 보내는 이벤트 키다. `ev
 | `symptom_response` | `lib/features/symptom/presentation/providers/symptom_write_controller.dart` |
 | `report_viewed` | `lib/features/weekly_report/presentation/screens/weekly_report_screen.dart` |
 | `search_screen_viewed` | `lib/features/food_check/presentation/screens/food_check_screen.dart` |
+| 1회 기록 확인·저장(`claim`) | `lib/core/analytics/funnel_once_store.dart` |
