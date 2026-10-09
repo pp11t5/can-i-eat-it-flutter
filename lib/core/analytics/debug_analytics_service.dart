@@ -32,4 +32,13 @@ class DebugAnalyticsService implements AnalyticsService {
       name: 'DebugAnalyticsService',
     );
   }
+
+  @override
+  Future<void> setUserId(String? userId) async {
+    if (kReleaseMode) return;
+    dev.log(
+      '[Analytics][user] ${userId == null ? 'cleared' : 'set'}',
+      name: 'DebugAnalyticsService',
+    );
+  }
 }

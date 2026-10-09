@@ -6,6 +6,7 @@ import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
+import 'package:can_i_eat_it/features/auth/domain/entities/auth_session.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 
 import '../../../core/push/fcm_test_helpers.dart';
@@ -16,6 +17,7 @@ import '../../../core/push/fcm_test_helpers.dart';
 
 class SpyAnalyticsService implements AnalyticsService {
   final List<({String name, Map<String, Object?> params})> calls = [];
+  final List<String?> userIds = [];
 
   @override
   Future<void> logFunnel(
@@ -28,6 +30,11 @@ class SpyAnalyticsService implements AnalyticsService {
   @override
   Future<void> logEvent(String name, {Map<String, Object?> params = const {}}) async {
     calls.add((name: name, params: params));
+  }
+
+  @override
+  Future<void> setUserId(String? userId) async {
+    userIds.add(userId);
   }
 }
 
@@ -193,6 +200,37 @@ void main() {
       final signUpCount =
           spy.calls.where((c) => c.name == FunnelEvent.signUp.eventName).length;
       expect(signUpCount, 1);
+    });
+  });
+
+  group('GA 사용자 ID', () {
+    test('복원된 세션이 있으면 백엔드 userId를 설정한다', () async {
+      final spy = SpyAnalyticsService();
+      final container = makeContainer(
+        repo: MockAuthRepository(
+          initialSession: const AuthSession(
+            userId: 'user-42',
+            provider: AuthProvider.kakao,
+          ),
+        ),
+        spy: spy,
+      );
+
+      await container.read(authControllerProvider.future);
+
+      expect(spy.userIds, ['user-42']);
+    });
+
+    test('로그인 성공 시 백엔드 userId를 설정한다', () async {
+      final spy = SpyAnalyticsService();
+      final container = makeContainer(
+        repo: MockAuthRepository.newUser(),
+        spy: spy,
+      );
+
+      await container.read(authControllerProvider.notifier).signInWithKakao();
+
+      expect(spy.userIds, [null, 'mock-new-user']);
     });
   });
 }

@@ -22,7 +22,7 @@
 - `lib/core/config/flavor.dart` — `enum Flavor { dev, prod }`.
 - `lib/core/config/flavor_config.dart` — `FlavorConfig`(apiBaseUrl·appDisplayName·kakaoNativeAppKey…).
   `FlavorConfig.current` 기본값 `prod`(테스트 안전), `bootstrap`이 진입점에서 교체.
-- `lib/bootstrap.dart` — 공통 초기화(Firebase·FCM·Kakao) + 실 repository override.
+- `lib/bootstrap.dart` — 공통 초기화(Firebase·Crashlytics·FCM·Kakao) + 실 repository override.
 - `lib/main_prod.dart` / `lib/main_dev.dart` — 플레이버 진입점.
 - `lib/main.dart` — 플레이버 미지정 `flutter run` 편의용 → prod 위임 shim.
 

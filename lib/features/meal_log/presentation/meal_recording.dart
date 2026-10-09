@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
+import 'package:can_i_eat_it/core/analytics/funnel_once_store.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/eat_verdict.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/providers/add_to_diet_handler_provider.dart';
@@ -21,7 +22,19 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
   return (BuildContext context, EatVerdict verdict,
       MealRecordContext ctx) async {
     final repo = ref.read(mealRepositoryProvider);
+    final isNewMeal = ctx.mealRecordId == null;
 
+    Future<void> logFailure(String reason) {
+      return ref.read(analyticsServiceProvider).logEvent(
+        AnalyticsEvent.mealRecordFailed.eventName,
+        params: {
+          'reason': reason,
+          'is_new_meal': isNewMeal ? 1 : 0,
+        },
+      );
+    }
+
+    var saved = false;
     try {
       // grade 미전송 — 서버가 analysis 를 계산한다(F-10).
       // foodExternalId 有 → by-id / null → by-text(자유 입력 음식명).
@@ -36,6 +49,7 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
         if (trimmedName.isEmpty) {
           // 빈 이름 음식 기록 금지(의료성 — 이름 없는 식사 기록은 판정 근거를
           // 남기지 못한다, pr-review 소소 수정 ③). 방어적으로 스킵하고 실패 토스트.
+          await logFailure('empty_name');
           if (context.mounted) {
             await showAppToast(context, '식사 기록에 실패했어요. 다시 시도해주세요.');
           }
@@ -47,12 +61,16 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
           mealRecordId: ctx.mealRecordId,
         );
       }
+      saved = true;
 
-      // 신규 식사만 퍼널(첫 기록). 기존 식사 append는 해당하지 않는다.
+      // 신규 식사만. first_meal_recorded 는 식사 기록 이벤트(매번).
+      // 이 계정의 첫 신규 식사만 account_first_meal_recorded.
       if (ctx.mealRecordId == null) {
-        await ref
-            .read(analyticsServiceProvider)
-            .logFunnel(FunnelEvent.firstMealRecorded);
+        final analytics = ref.read(analyticsServiceProvider);
+        await analytics.logFunnel(FunnelEvent.firstMealRecorded);
+        if (await claimFunnelOnce(ref, FunnelEvent.accountFirstMealRecorded)) {
+          await analytics.logFunnel(FunnelEvent.accountFirstMealRecorded);
+        }
       }
 
       // 식사 데이터를 소비하는 화면의 캐시를 모두 무효화한다.
@@ -88,6 +106,7 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
         }
       }
     } catch (_) {
+      if (!saved) await logFailure('request_failed');
       if (context.mounted) {
         await showAppToast(context, '식사 기록에 실패했어요. 다시 시도해주세요.');
       }

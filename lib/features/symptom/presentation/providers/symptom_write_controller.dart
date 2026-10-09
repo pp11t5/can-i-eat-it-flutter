@@ -87,8 +87,12 @@ class SymptomWriteController extends _$SymptomWriteController {
   /// - mood 미선택 시 예외.
   /// - 성공 시 타임라인/주간·홈 미기록 식단·식사 상세·도감 캐시 invalidate.
   /// - 증상 상세 갱신·로딩은 상세 화면이 pop 이후 전역 로딩과 함께 수행.
+  /// - [fromPush]: 식후 알림으로 연 작성만 [FunnelEvent.symptomResponse]를 보낸다.
   /// - 반환값: 성공 시 생성/수정된 symptomId.
-  Future<String?> submit(SymptomWriteFormState formState) async {
+  Future<String?> submit(
+    SymptomWriteFormState formState, {
+    bool fromPush = false,
+  }) async {
     if (state is AsyncLoading) return null;
     state = const AsyncLoading();
 
@@ -110,10 +114,12 @@ class SymptomWriteController extends _$SymptomWriteController {
       if (existingSymptomId == null) {
         final result = await repo.create(draft);
         symptomId = result.symptomId;
-        // 신규 기록만 퍼널(증상 응답). 수정은 해당하지 않는다.
-        await ref
-            .read(analyticsServiceProvider)
-            .logFunnel(FunnelEvent.symptomResponse);
+        // 푸시로 들어온 신규 저장만 증상 응답. 직접 작성과 수정은 제외.
+        if (fromPush) {
+          await ref
+              .read(analyticsServiceProvider)
+              .logFunnel(FunnelEvent.symptomResponse);
+        }
       } else {
         await repo.update(existingSymptomId!, draft);
         symptomId = existingSymptomId!;

@@ -1,6 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/foundation.dart';
 
+import '../monitoring/error_reporter.dart';
 import 'analytics_event.dart';
 import 'analytics_params.dart';
 import 'analytics_service.dart';
@@ -9,10 +9,17 @@ import 'analytics_service.dart';
 class FirebaseAnalyticsService implements AnalyticsService {
   FirebaseAnalyticsService({
     Future<void> Function(String name, Map<String, Object> parameters)? send,
-  }) : _send = send ?? _sendToFirebase;
+    Future<void> Function(String? userId)? setUser,
+    ErrorReporter errorReporter = const DebugErrorReporter(),
+  })  : _send = send ?? _sendToFirebase,
+        _setUser = setUser ?? _setUserOnFirebase,
+        _errorReporter = errorReporter;
+
+  final ErrorReporter _errorReporter;
 
   final Future<void> Function(String name, Map<String, Object> parameters)
       _send;
+  final Future<void> Function(String? userId) _setUser;
 
   static Future<void> _sendToFirebase(
     String name,
@@ -22,6 +29,10 @@ class FirebaseAnalyticsService implements AnalyticsService {
       name: name,
       parameters: parameters.isEmpty ? null : parameters,
     );
+  }
+
+  static Future<void> _setUserOnFirebase(String? userId) {
+    return FirebaseAnalytics.instance.setUserId(id: userId);
   }
 
   @override
@@ -40,7 +51,17 @@ class FirebaseAnalyticsService implements AnalyticsService {
     try {
       await _send(name, sanitizeAnalyticsParameters(params));
     } catch (e, st) {
-      debugPrint('[Analytics] logEvent($name) failed: $e\n$st');
+      _errorReporter.recordNonFatal(e, st, reason: 'analytics.logEvent($name)');
+    }
+  }
+
+  @override
+  Future<void> setUserId(String? userId) async {
+    final id = userId?.trim();
+    try {
+      await _setUser(id == null || id.isEmpty ? null : id);
+    } catch (e, st) {
+      _errorReporter.recordNonFatal(e, st, reason: 'analytics.setUserId');
     }
   }
 }

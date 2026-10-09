@@ -30,6 +30,9 @@ class SpyAnalyticsService implements AnalyticsService {
       {Map<String, Object?> params = const {}}) async {
     calls.add((name: name, params: params));
   }
+
+  @override
+  Future<void> setUserId(String? userId) async {}
 }
 
 /// 항상 예외를 던지는 HealthProfileRepository (submitProfile만 throw).
