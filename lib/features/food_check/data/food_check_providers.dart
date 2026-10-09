@@ -81,8 +81,8 @@ class VerdictController extends _$VerdictController {
     });
   }
 
-  /// 성공 판정마다 [AnalyticsEvent.verdictChecked]를 보내고,
-  /// 이 계정의 첫 성공만 [FunnelEvent.firstVerdictChecked]를 보낸다.
+  /// 성공 판정마다 [FunnelEvent.firstVerdictChecked]를 보낸다.
+  /// 이 계정의 첫 성공만 [FunnelEvent.accountFirstVerdictChecked]를 추가로 보낸다.
   /// unknown 등급도 성공 응답이면 대상이다.
   Future<void> _logVerdict(EatVerdict verdict, String foodLabel) async {
     final params = {
@@ -90,13 +90,15 @@ class VerdictController extends _$VerdictController {
       'level': verdict.level.name,
     };
     final analytics = ref.read(analyticsServiceProvider);
-    await analytics.logEvent(
-      AnalyticsEvent.verdictChecked.eventName,
-      params: params,
-    );
-    if (!await claimFunnelOnce(ref, FunnelEvent.firstVerdictChecked)) return;
     await analytics.logFunnel(
       FunnelEvent.firstVerdictChecked,
+      params: params,
+    );
+    if (!await claimFunnelOnce(ref, FunnelEvent.accountFirstVerdictChecked)) {
+      return;
+    }
+    await analytics.logFunnel(
+      FunnelEvent.accountFirstVerdictChecked,
       params: params,
     );
   }

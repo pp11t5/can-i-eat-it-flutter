@@ -47,12 +47,27 @@ void main() {
       expect(FunnelEvent.onboardingCompleted.eventName, 'onboarding_completed');
     });
 
-    test('첫 판정 이벤트 키는 first_verdict_checked 으로 고정된다', () {
-      expect(FunnelEvent.firstVerdictChecked.eventName, 'first_verdict_checked');
+    test('판정 이벤트 키는 first_verdict_checked 으로 고정된다', () {
+      expect(
+          FunnelEvent.firstVerdictChecked.eventName, 'first_verdict_checked');
     });
 
-    test('첫 기록 이벤트 키는 first_meal_recorded 으로 고정된다', () {
+    test('식사 기록 이벤트 키는 first_meal_recorded 으로 고정된다', () {
       expect(FunnelEvent.firstMealRecorded.eventName, 'first_meal_recorded');
+    });
+
+    test('계정의 첫 판정 키는 account_first_verdict_checked 로 고정된다', () {
+      expect(
+        FunnelEvent.accountFirstVerdictChecked.eventName,
+        'account_first_verdict_checked',
+      );
+    });
+
+    test('계정의 첫 신규 식사 키는 account_first_meal_recorded 로 고정된다', () {
+      expect(
+        FunnelEvent.accountFirstMealRecorded.eventName,
+        'account_first_meal_recorded',
+      );
     });
 
     test('증상 응답 이벤트 키는 symptom_response 으로 고정된다', () {
@@ -63,8 +78,8 @@ void main() {
       expect(FunnelEvent.reportViewed.eventName, 'report_viewed');
     });
 
-    test('퍼널 이벤트는 정확히 6종이다', () {
-      expect(FunnelEvent.values.length, 6);
+    test('퍼널 이벤트는 정확히 8종이다', () {
+      expect(FunnelEvent.values.length, 8);
     });
 
     test('검색 화면 진입 키는 search_screen_viewed 로 고정된다', () {
@@ -76,14 +91,6 @@ void main() {
 
     test('식사 기록 실패 키는 meal_record_failed 로 고정된다', () {
       expect(AnalyticsEvent.mealRecordFailed.eventName, 'meal_record_failed');
-    });
-
-    test('판정 횟수 키는 verdict_checked 로 고정된다', () {
-      expect(AnalyticsEvent.verdictChecked.eventName, 'verdict_checked');
-    });
-
-    test('식사 기록 횟수 키는 meal_recorded 로 고정된다', () {
-      expect(AnalyticsEvent.mealRecorded.eventName, 'meal_recorded');
     });
   });
 
@@ -138,7 +145,8 @@ void main() {
       const svc = DebugAnalyticsService();
 
       await expectLater(
-        svc.logFunnel(FunnelEvent.onboardingCompleted, params: {'source': 'test'}),
+        svc.logFunnel(FunnelEvent.onboardingCompleted,
+            params: {'source': 'test'}),
         completes,
       );
     });

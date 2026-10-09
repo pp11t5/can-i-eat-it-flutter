@@ -26,12 +26,12 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
 
     Future<void> logFailure(String reason) {
       return ref.read(analyticsServiceProvider).logEvent(
-            AnalyticsEvent.mealRecordFailed.eventName,
-            params: {
-              'reason': reason,
-              'is_new_meal': isNewMeal ? 1 : 0,
-            },
-          );
+        AnalyticsEvent.mealRecordFailed.eventName,
+        params: {
+          'reason': reason,
+          'is_new_meal': isNewMeal ? 1 : 0,
+        },
+      );
     }
 
     var saved = false;
@@ -63,13 +63,13 @@ AddToDietHandler makeHandlerFromRef(Ref ref) {
       }
       saved = true;
 
-      // 신규 식사만 기록 이벤트. 기존 식사 append는 해당하지 않는다.
-      // 매번 meal_recorded, 이 계정의 첫 신규 식사만 first_meal_recorded.
+      // 신규 식사만. first_meal_recorded 는 식사 기록 이벤트(매번).
+      // 이 계정의 첫 신규 식사만 account_first_meal_recorded.
       if (ctx.mealRecordId == null) {
         final analytics = ref.read(analyticsServiceProvider);
-        await analytics.logEvent(AnalyticsEvent.mealRecorded.eventName);
-        if (await claimFunnelOnce(ref, FunnelEvent.firstMealRecorded)) {
-          await analytics.logFunnel(FunnelEvent.firstMealRecorded);
+        await analytics.logFunnel(FunnelEvent.firstMealRecorded);
+        if (await claimFunnelOnce(ref, FunnelEvent.accountFirstMealRecorded)) {
+          await analytics.logFunnel(FunnelEvent.accountFirstMealRecorded);
         }
       }
 

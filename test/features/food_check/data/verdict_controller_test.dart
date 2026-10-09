@@ -158,7 +158,7 @@ void main() {
   });
 
   group('VerdictController — 판정 이벤트', () {
-    test('세션이 없으면 verdict_checked 만 보낸다', () async {
+    test('세션이 없으면 first_verdict_checked 만 보낸다', () async {
       final analytics = _SpyAnalytics();
       final container = _analyticsContainer(analytics: analytics);
       addTearDown(container.dispose);
@@ -167,13 +167,13 @@ void main() {
           .read(verdictControllerProvider.notifier)
           .judgeByText('두부');
 
-      expect(analytics.funnelNames, isEmpty);
-      expect(analytics.events.single.name, 'verdict_checked');
-      expect(analytics.events.single.params['level'], 'recommend');
-      expect(analytics.events.single.params['food_name'], '두부');
+      expect(analytics.funnelNames, ['first_verdict_checked']);
+      expect(analytics.events, isEmpty);
+      expect(analytics.funnelParams.single['level'], 'recommend');
+      expect(analytics.funnelParams.single['food_name'], '두부');
     });
 
-    test('계정의 첫 성공은 두 이벤트를 보내고 다음은 verdict_checked 만 보낸다', () async {
+    test('계정의 첫 성공은 두 이벤트를 보내고 다음은 first_verdict_checked 만 보낸다', () async {
       final analytics = _SpyAnalytics();
       final container = _analyticsContainer(
         analytics: analytics,
@@ -185,14 +185,17 @@ void main() {
       await notifier.judgeByText('두부');
       await notifier.judgeById('food-ext-1', displayName: '커피');
 
-      expect(analytics.funnelNames, ['first_verdict_checked']);
-      expect(
-        analytics.events.map((event) => event.name),
-        ['verdict_checked', 'verdict_checked'],
-      );
-      expect(analytics.funnelParams.single['level'], 'recommend');
-      expect(analytics.events.last.params['level'], 'recommend');
-      expect(analytics.events.last.params['food_name'], '커피');
+      expect(analytics.funnelNames, [
+        'first_verdict_checked',
+        'account_first_verdict_checked',
+        'first_verdict_checked',
+      ]);
+      expect(analytics.events, isEmpty);
+      expect(analytics.funnelParams[0]['level'], 'recommend');
+      expect(analytics.funnelParams[0]['food_name'], '두부');
+      expect(analytics.funnelParams[1]['food_name'], '두부');
+      expect(analytics.funnelParams[2]['level'], 'recommend');
+      expect(analytics.funnelParams[2]['food_name'], '커피');
     });
 
     test('unknown 성공도 첫 판정으로 센다', () async {
@@ -207,8 +210,12 @@ void main() {
           .read(verdictControllerProvider.notifier)
           .judgeByText('unknown');
 
-      expect(analytics.funnelNames, ['first_verdict_checked']);
-      expect(analytics.events.single.params['level'], 'unknown');
+      expect(analytics.funnelNames, [
+        'first_verdict_checked',
+        'account_first_verdict_checked',
+      ]);
+      expect(
+          analytics.funnelParams.every((p) => p['level'] == 'unknown'), isTrue);
     });
 
     test('판정 실패는 이벤트를 보내지 않는다', () async {
@@ -228,7 +235,7 @@ void main() {
       expect(analytics.events, isEmpty);
     });
 
-    test('1회 저장이 실패해도 verdict_checked 는 보내고 판정 결과는 유지한다', () async {
+    test('1회 저장이 실패해도 first_verdict_checked 는 보내고 판정 결과는 유지한다', () async {
       final analytics = _SpyAnalytics();
       final container = _analyticsContainer(
         analytics: analytics,
@@ -245,8 +252,9 @@ void main() {
         container.read(verdictControllerProvider).value!.foodName,
         '두부',
       );
-      expect(analytics.funnelNames, isEmpty);
-      expect(analytics.events.single.name, 'verdict_checked');
+      expect(analytics.funnelNames, ['first_verdict_checked']);
+      expect(analytics.events, isEmpty);
+      expect(analytics.funnelParams.single['level'], 'recommend');
     });
   });
 }

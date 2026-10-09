@@ -138,19 +138,31 @@ void main() {
         ),
       );
       final onceStore = InMemoryFunnelOnceStore();
-      await onceStore.markFired('mock-user', FunnelEvent.firstVerdictChecked);
-      await onceStore.markFired('mock-user', FunnelEvent.firstMealRecorded);
+      await onceStore.markFired(
+        'mock-user',
+        FunnelEvent.accountFirstVerdictChecked,
+      );
+      await onceStore.markFired(
+        'mock-user',
+        FunnelEvent.accountFirstMealRecorded,
+      );
       final container = _makeContainer(repo: repo, onceStore: onceStore);
       await container.read(authControllerProvider.future);
 
       await container.read(authControllerProvider.notifier).withdraw();
 
       expect(
-        await onceStore.hasFired('mock-user', FunnelEvent.firstVerdictChecked),
+        await onceStore.hasFired(
+          'mock-user',
+          FunnelEvent.accountFirstVerdictChecked,
+        ),
         isFalse,
       );
       expect(
-        await onceStore.hasFired('mock-user', FunnelEvent.firstMealRecorded),
+        await onceStore.hasFired(
+          'mock-user',
+          FunnelEvent.accountFirstMealRecorded,
+        ),
         isFalse,
       );
     });
@@ -164,14 +176,20 @@ void main() {
         ),
       );
       final onceStore = InMemoryFunnelOnceStore();
-      await onceStore.markFired('mock-user', FunnelEvent.firstMealRecorded);
+      await onceStore.markFired(
+        'mock-user',
+        FunnelEvent.accountFirstMealRecorded,
+      );
       final container = _makeContainer(repo: repo, onceStore: onceStore);
       await container.read(authControllerProvider.future);
 
       await container.read(authControllerProvider.notifier).logout();
 
       expect(
-        await onceStore.hasFired('mock-user', FunnelEvent.firstMealRecorded),
+        await onceStore.hasFired(
+          'mock-user',
+          FunnelEvent.accountFirstMealRecorded,
+        ),
         isTrue,
       );
     });

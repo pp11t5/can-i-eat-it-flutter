@@ -12,26 +12,26 @@ void main() {
       final store = InMemoryFunnelOnceStore();
 
       expect(
-        await store.hasFired('user-1', FunnelEvent.firstVerdictChecked),
+        await store.hasFired('user-1', FunnelEvent.accountFirstVerdictChecked),
         isFalse,
       );
-      await store.markFired('user-1', FunnelEvent.firstVerdictChecked);
+      await store.markFired('user-1', FunnelEvent.accountFirstVerdictChecked);
       expect(
-        await store.hasFired('user-1', FunnelEvent.firstVerdictChecked),
+        await store.hasFired('user-1', FunnelEvent.accountFirstVerdictChecked),
         isTrue,
       );
       expect(
-        await store.hasFired('user-1', FunnelEvent.firstMealRecorded),
+        await store.hasFired('user-1', FunnelEvent.accountFirstMealRecorded),
         isFalse,
       );
       expect(
-        await store.hasFired('user-2', FunnelEvent.firstVerdictChecked),
+        await store.hasFired('user-2', FunnelEvent.accountFirstVerdictChecked),
         isFalse,
       );
 
       await store.clear('user-1');
       expect(
-        await store.hasFired('user-1', FunnelEvent.firstVerdictChecked),
+        await store.hasFired('user-1', FunnelEvent.accountFirstVerdictChecked),
         isFalse,
       );
     });
@@ -49,12 +49,12 @@ void main() {
 
       final claimed = await claimFunnelOnce(
         container.read(_refProbeProvider),
-        FunnelEvent.firstMealRecorded,
+        FunnelEvent.accountFirstMealRecorded,
       );
 
       expect(claimed, isFalse);
       expect(
-        await store.hasFired('user-1', FunnelEvent.firstMealRecorded),
+        await store.hasFired('user-1', FunnelEvent.accountFirstMealRecorded),
         isFalse,
       );
     });
@@ -71,11 +71,11 @@ void main() {
       final ref = container.read(_refProbeProvider);
 
       expect(
-        await claimFunnelOnce(ref, FunnelEvent.firstVerdictChecked),
+        await claimFunnelOnce(ref, FunnelEvent.accountFirstVerdictChecked),
         isTrue,
       );
       expect(
-        await claimFunnelOnce(ref, FunnelEvent.firstVerdictChecked),
+        await claimFunnelOnce(ref, FunnelEvent.accountFirstVerdictChecked),
         isFalse,
       );
     });

@@ -27,8 +27,8 @@ class SecureStorageFunnelOnceStore implements FunnelOnceStore {
   final FlutterSecureStorage _storage;
 
   static const _events = [
-    FunnelEvent.firstVerdictChecked,
-    FunnelEvent.firstMealRecorded,
+    FunnelEvent.accountFirstVerdictChecked,
+    FunnelEvent.accountFirstMealRecorded,
   ];
 
   static String _key(String userId, FunnelEvent event) =>

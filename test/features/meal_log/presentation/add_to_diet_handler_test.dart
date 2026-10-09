@@ -238,8 +238,7 @@ Future<({_FakeRef ref, GoRouter router, _SpyAnalyticsService analytics})>
     overrides: [
       mealRepositoryProvider.overrideWithValue(spy),
       analyticsServiceProvider.overrideWithValue(analytics),
-      if (userId != null)
-        analyticsSubjectIdProvider.overrideWithValue(userId),
+      if (userId != null) analyticsSubjectIdProvider.overrideWithValue(userId),
       if (onceStore != null)
         funnelOnceStoreProvider.overrideWithValue(onceStore),
     ],
@@ -477,7 +476,7 @@ void main() {
   });
 
   group('makeHandlerFromRef — 식사 기록 이벤트', () {
-    testWidgets('세션이 없으면 신규 식사는 meal_recorded 만 보낸다', (tester) async {
+    testWidgets('세션이 없으면 신규 식사는 first_meal_recorded 만 보낸다', (tester) async {
       final result = await _runHandler(
         tester: tester,
         spy: _SpyMealRepository(),
@@ -485,14 +484,14 @@ void main() {
         ctx: MealRecordContext(eatenAt: _kEatAt),
       );
 
-      expect(result.analytics.funnelNames, isEmpty);
       expect(
-        result.analytics.events.single.name,
-        AnalyticsEvent.mealRecorded.eventName,
+        result.analytics.funnelNames,
+        [FunnelEvent.firstMealRecorded.eventName],
       );
+      expect(result.analytics.events, isEmpty);
     });
 
-    testWidgets('계정의 첫 신규 식사는 두 이벤트를 보내고 다음은 meal_recorded 만 보낸다',
+    testWidgets('계정의 첫 신규 식사는 두 이벤트를 보내고 다음은 first_meal_recorded 만 보낸다',
         (tester) async {
       final store = InMemoryFunnelOnceStore();
       final first = await _runHandler(
@@ -512,19 +511,15 @@ void main() {
         onceStore: store,
       );
 
-      expect(
-        first.analytics.funnelNames,
-        [FunnelEvent.firstMealRecorded.eventName],
-      );
-      expect(
-        first.analytics.events.single.name,
-        AnalyticsEvent.mealRecorded.eventName,
-      );
-      expect(second.analytics.funnelNames, isEmpty);
-      expect(
-        second.analytics.events.single.name,
-        AnalyticsEvent.mealRecorded.eventName,
-      );
+      expect(first.analytics.funnelNames, [
+        FunnelEvent.firstMealRecorded.eventName,
+        FunnelEvent.accountFirstMealRecorded.eventName,
+      ]);
+      expect(first.analytics.events, isEmpty);
+      expect(second.analytics.funnelNames, [
+        FunnelEvent.firstMealRecorded.eventName,
+      ]);
+      expect(second.analytics.events, isEmpty);
     });
 
     testWidgets('기존 식사 append 는 기록 이벤트를 보내지 않는다', (tester) async {
@@ -541,7 +536,7 @@ void main() {
       expect(result.analytics.funnelNames, isEmpty);
       expect(result.analytics.events, isEmpty);
       expect(
-        await store.hasFired('user-1', FunnelEvent.firstMealRecorded),
+        await store.hasFired('user-1', FunnelEvent.accountFirstMealRecorded),
         isFalse,
       );
     });

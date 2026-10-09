@@ -32,7 +32,7 @@ final foodRepositoryProvider = AutoDisposeProvider<FoodRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FoodRepositoryRef = AutoDisposeProviderRef<FoodRepository>;
-String _$verdictControllerHash() => r'577d3f3361c581edc7ac2722361f7ec29f6e133f';
+String _$verdictControllerHash() => r'74671d0a46e365bf9b11feee309f6da132837385';
 
 /// 판정 컨트롤러.
 ///
