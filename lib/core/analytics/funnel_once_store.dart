@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../monitoring/error_reporter.dart';
 import 'analytics_event.dart';
 
 /// 계정 단위로 한 번만 보내는 퍼널을 기억한다.
@@ -128,7 +129,12 @@ Future<bool> claimFunnelOnce(Ref ref, FunnelEvent event) async {
     if (userId == null || userId.isEmpty) return false;
     return await ref.read(funnelOnceStoreProvider).claim(userId, event);
   } catch (e, st) {
-    debugPrint('[Analytics] claim ${event.eventName} failed: $e\n$st');
+    if (kDebugMode) debugPrint('[Analytics] claim failed: $e');
+    ref.read(errorReporterProvider).recordNonFatal(
+          StateError('claim failed: ${e.runtimeType}'),
+          st,
+          reason: 'analytics.claim(${event.eventName})',
+        );
     return false;
   }
 }

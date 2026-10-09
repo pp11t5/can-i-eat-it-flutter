@@ -1,6 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/foundation.dart';
 
+import '../monitoring/error_reporter.dart';
 import 'analytics_event.dart';
 import 'analytics_params.dart';
 import 'analytics_service.dart';
@@ -10,8 +10,12 @@ class FirebaseAnalyticsService implements AnalyticsService {
   FirebaseAnalyticsService({
     Future<void> Function(String name, Map<String, Object> parameters)? send,
     Future<void> Function(String? userId)? setUser,
+    ErrorReporter errorReporter = const DebugErrorReporter(),
   })  : _send = send ?? _sendToFirebase,
-        _setUser = setUser ?? _setUserOnFirebase;
+        _setUser = setUser ?? _setUserOnFirebase,
+        _errorReporter = errorReporter;
+
+  final ErrorReporter _errorReporter;
 
   final Future<void> Function(String name, Map<String, Object> parameters)
       _send;
@@ -47,7 +51,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
     try {
       await _send(name, sanitizeAnalyticsParameters(params));
     } catch (e, st) {
-      debugPrint('[Analytics] logEvent($name) failed: $e\n$st');
+      _errorReporter.recordNonFatal(e, st, reason: 'analytics.logEvent($name)');
     }
   }
 
@@ -57,7 +61,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
     try {
       await _setUser(id == null || id.isEmpty ? null : id);
     } catch (e, st) {
-      debugPrint('[Analytics] setUserId failed: $e\n$st');
+      _errorReporter.recordNonFatal(e, st, reason: 'analytics.setUserId');
     }
   }
 }

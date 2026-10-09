@@ -49,7 +49,7 @@ dependencies:
   sign_in_with_apple: ^8.1.0
   google_sign_in: ^6.3.0
 
-  # Firebase (FCM 푸시 + Analytics)
+  # Firebase (FCM 푸시 + Analytics + Crashlytics)
   firebase_core: ^4.11.0
   firebase_messaging: ^16.4.1
   firebase_analytics: ^12.5.0
@@ -63,6 +63,7 @@ dependencies:
   flutter_native_splash: ^2.4.6
   tflite_flutter: ^0.12.1
   image: ^4.10.1
+  firebase_crashlytics: ^5.4.0
 
 dev_dependencies:
   flutter_test:

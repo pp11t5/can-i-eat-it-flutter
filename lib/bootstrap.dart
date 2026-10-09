@@ -11,6 +11,7 @@ import 'core/analytics/analytics_providers.dart';
 import 'core/analytics/firebase_analytics_service.dart';
 import 'core/analytics/funnel_once_store.dart';
 import 'core/config/flavor_config.dart';
+import 'core/monitoring/error_reporter.dart';
 import 'core/network/dio_client.dart';
 import 'core/push/fcm_messaging_handler.dart';
 import 'features/auth/presentation/providers/auth_providers.dart';
@@ -48,11 +49,18 @@ Future<void> bootstrap(
     debugPrint('[FCM] Firebase.initializeApp failed: $e\n$st');
   }
 
+  // Crashlytics는 Analytics보다 먼저 켜서 이후 단계의 오류도 보고되게 한다.
+  ErrorReporter errorReporter = const DebugErrorReporter();
   if (firebaseReady) {
+    try {
+      errorReporter = await setUpCrashlytics();
+    } catch (e, st) {
+      debugPrint('[Crashlytics] setup failed: $e\n$st');
+    }
     try {
       await configureFirebaseAnalytics(FirebaseAnalytics.instance);
     } catch (e, st) {
-      debugPrint('[Analytics] setup failed: $e\n$st');
+      errorReporter.recordNonFatal(e, st, reason: 'analytics.setup');
     }
   }
 
@@ -75,9 +83,10 @@ Future<void> bootstrap(
   runApp(
     ProviderScope(
       overrides: [
+        errorReporterProvider.overrideWithValue(errorReporter),
         if (firebaseReady)
           analyticsServiceProvider.overrideWithValue(
-            FirebaseAnalyticsService(),
+            FirebaseAnalyticsService(errorReporter: errorReporter),
           ),
         analyticsSubjectIdProvider.overrideWith(
           (ref) => ref.watch(authControllerProvider).valueOrNull?.userId,

@@ -18,6 +18,7 @@
 | 코드 생성 | build_runner | `^2.5.4` |
 | 소셜 로그인 | 카카오 / 애플 | `kakao_flutter_sdk_user ^1.9.7`, `sign_in_with_apple ^8.1.0` |
 | 푸시 | Firebase Cloud Messaging | `firebase_core ^4.11.0`, `firebase_messaging ^16.4.1`, `flutter_local_notifications ^22.0.1` |
+| 모니터링 | Firebase Crashlytics | `firebase_crashlytics ^5.4.0` |
 | 기타 주요 패키지 | | `flutter_secure_storage ^9.2.4`(토큰 저장), `webview_flutter ^4.10.0`(약관), `fl_chart ^1.2.0`(리포트 차트), `share_plus ^10.1.4` |
 | 린트 | flutter_lints + custom_lint | `flutter_lints ^4.0.0`, `custom_lint ^0.7.6`, `riverpod_lint ^2.6.5` |
 
@@ -41,14 +42,15 @@ lib/
     config/         flavor.dart(enum Flavor{dev,prod}), flavor_config.dart(FlavorConfig)
     security/       token_store(flutter_secure_storage 래핑)
     push/           fcm_messaging_handler / fcm_repository / fcm_providers / fcm_token_service
-    analytics/       analytics_event / analytics_service
+    analytics/       analytics_event / analytics_service / funnel_once_store
+    monitoring/      error_reporter (삼킨 오류를 Crashlytics non-fatal로 보고)
     error/          failure.dart (Failure 계층)
     utils/, util/   kst_time.dart(KST 직렬화 헬퍼) 등
   features/<feature>/
     domain/         entity + repository 인터페이스 (프레임워크 비종속)
     data/           DTO(freezed) + repository 구현(dio 직접 호출) + mock repository
     presentation/    screen + widget + controller(Riverpod provider)
-  bootstrap.dart  # 플레이버 공통 초기화(Firebase/FCM/Kakao) + 실 repository override
+  bootstrap.dart  # 플레이버 공통 초기화(Firebase/Crashlytics/FCM/Kakao) + 실 repository override
   main.dart       # 플레이버 미지정 실행 시 prod로 위임하는 shim
   main_dev.dart   # 개발 플레이버 진입점
   main_prod.dart  # 운영 플레이버 진입점
@@ -228,6 +230,7 @@ dart run build_runner build --delete-conflicting-outputs
 - Android: `android/app/src/{prod,dev}/google-services.json` — google-services 플러그인이 `src/<flavor>`를 자동 인식.
 - iOS: `ios/config/{prod,dev}/GoogleService-Info.plist` — Run Script build phase가 `GOOGLE_SERVICE_FLAVOR` 빌드세팅을 읽어 앱 번들로 복사.
 - `bootstrap.dart`가 `Firebase.initializeApp()`을 시도하되 실패해도 앱은 계속 뜨도록 try/catch로 감싸져 있다(설정 누락 시 푸시만 비활성). 이어서 `FirebaseMessaging.onBackgroundMessage` 등록, `initForegroundMessaging()`, `wireOpenedApp()` 순으로 초기화한다(`lib/core/push/`).
+- **Crashlytics**: `bootstrap.dart`가 Firebase 초기화 직후 `setUpCrashlytics()`로 켠다. 릴리즈 빌드만 수집하고 디버그는 수집·훅 교체를 하지 않는다. 미처리 오류(`FlutterError.onError`, `PlatformDispatcher.onError`)는 fatal로, 분석처럼 흐름을 막지 않으려고 삼킨 오류는 `errorReporterProvider`(`lib/core/monitoring/error_reporter.dart`)로 non-fatal 보고한다. `reason`에는 userId 등 식별 정보를 넣지 않는다. Android는 Gradle 플러그인(`com.google.firebase.crashlytics`)이 매핑 파일을 올린다. iOS는 Xcode Runner 타깃에 Crashlytics dSYM 업로드 Run Script가 있어야 스택이 심볼화된다.
 - AI(LLM) 분석 응답용 `receiveTimeout`은 제거되어 있다(`FlavorConfig.receiveTimeout = Duration.zero`) — 응답이 10초 이상 걸릴 수 있는 판정 API에서 timeout으로 인한 오탐 에러("분석 중 오류…")를 없애기 위함. `connectTimeout`(10초)은 유지되어 진짜 오프라인은 계속 감지한다.
 
 ---
