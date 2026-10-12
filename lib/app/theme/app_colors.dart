@@ -119,4 +119,36 @@ abstract final class AppColors {
 
   /// AI 분석 배지 배경 (Figma 증상 상세 1324:13865 실측 #F8F2FF)
   static const Color aiAccentSurface = ColorPrimitives.purple10;
+
+  // --- 음식 사진 인식 ---
+
+  /// Beta 배지 배경 (#FF8D28)
+  static const Color badgeBeta = ColorPrimitives.semanticOrange;
+
+  /// 식단 기록 방식 바텀시트 카드 배경 (#E6E8EA)
+  static const Color surfaceSheetCard = ColorPrimitives.lightGray10;
+
+  /// 촬영 버튼 링, 다시 찍기·돌아가기 배경 (#525252)
+  static const Color captureRing = ColorPrimitives.gray100;
+
+  /// 촬영 버튼 눌림 상태 안쪽 원 (#8C8C8C)
+  static const Color capturePressed = ColorPrimitives.gray80;
+
+  /// 카메라 화면 배경
+  static const Color cameraBackground = Color(0xFF000000);
+
+  /// 사진 위 Dim 오버레이 (black 50%)
+  static const Color cameraScrim = Color(0x80000000);
+
+  /// 카메라 화면 하단 패널 (#131416)
+  static const Color cameraPanel = Color(0xFF131416);
+
+  /// 홈 검색바 카메라 아이콘 (#989898)
+  static const Color iconCamera = Color(0xFF989898);
+
+  /// 사진 위 안내 문구 박스 배경 (black 80%)
+  static const Color cameraLabel = Color(0xCC000000);
+
+  /// 모달 카드 그림자 (black 4%)
+  static const Color cardShadow = Color(0x0A000000);
 }

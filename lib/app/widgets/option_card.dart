@@ -28,6 +28,7 @@ class OptionCard extends StatelessWidget {
     this.enabled = true,
     required this.onTap,
     this.size = OptionCardSize.large,
+    this.labelStyle,
   });
 
   final String label;
@@ -35,6 +36,9 @@ class OptionCard extends StatelessWidget {
   final bool selected;
   final bool enabled;
   final OptionCardSize size;
+
+  /// 라벨 스타일 덮어쓰기(색은 상태별 값 유지). null 이면 [size] 기본값.
+  final TextStyle? labelStyle;
 
   /// null 또는 enabled==false 시 탭 이벤트를 무시한다.
   final VoidCallback? onTap;
@@ -91,9 +95,10 @@ class OptionCard extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: (isCompact
-                        ? AppTextStyles.body2Medium
-                        : AppTextStyles.body1Bold)
+                    style: (labelStyle ??
+                            (isCompact
+                                ? AppTextStyles.body2Medium
+                                : AppTextStyles.body1Bold))
                         .copyWith(color: labelColor),
                   ),
                   if (caption != null) ...[

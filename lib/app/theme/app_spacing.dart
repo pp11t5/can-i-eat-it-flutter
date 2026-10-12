@@ -47,4 +47,7 @@ abstract final class AppSpacing {
 
   /// 알약형(Pill) 반경
   static const double radiusPill = RadiusPrimitives.rPill;
+
+  /// 바텀시트 상단 라운드
+  static const double radiusSheet = RadiusPrimitives.r32;
 }
