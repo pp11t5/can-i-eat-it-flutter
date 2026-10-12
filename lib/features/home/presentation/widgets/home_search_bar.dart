@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 
 /// 홈 화면 검색 진입 바 (tappable pill).
 ///
 /// Figma 1207:6590 — fill #F5F5F5, radius pill, padding 8/8/8/24.
-/// 전체 탭 시 [onTap] 호출.
+/// 카메라 아이콘 탭 시 [onCameraTap], 나머지 영역 탭 시 [onTap].
 class HomeSearchBar extends StatelessWidget {
-  const HomeSearchBar({super.key, required this.onTap});
+  const HomeSearchBar({
+    super.key,
+    required this.onTap,
+    required this.onCameraTap,
+  });
 
   final VoidCallback onTap;
+  final VoidCallback onCameraTap;
 
   @override
   Widget build(BuildContext context) {
@@ -46,22 +53,19 @@ class HomeSearchBar extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
             ),
-            // 흰 원형 검색 아이콘 버튼 (36×38, radius 999, white fill)
-            Container(
-              width: 36,
-              height: 38,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(999)),
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  'assets/figma_extracted/icon_search.svg',
-                  width: 24,
-                  height: 24,
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.textPrimary,
-                    BlendMode.srcIn,
+            // 바 전체 탭(검색)과 분리된 카메라 탭 영역.
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onCameraTap,
+              child: const SizedBox(
+                width: 40,
+                height: 38,
+                child: Center(
+                  child: AppIcon(
+                    AppIcons.camera,
+                    size: AppIconSizes.s32,
+                    color: AppColors.iconCamera,
+                    semanticsLabel: '사진으로 음식 확인',
                   ),
                 ),
               ),

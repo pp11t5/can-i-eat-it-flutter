@@ -48,7 +48,10 @@ class HomeScreen extends ConsumerWidget {
               _GreetingBlock(streakDays: streakDays),
 
               // ── 2. 검색 바 ────────────────────────────────────────────
-              HomeSearchBar(onTap: () => context.push('/check')),
+              HomeSearchBar(
+                onTap: () => context.push('/check'),
+                onCameraTap: () => context.push('/food-recognition'),
+              ),
               const SizedBox(height: 14),
 
               // ── 3. 제안 칩 행 — Figma 1207:6604 단일 행 수평 스크롤 ────────
