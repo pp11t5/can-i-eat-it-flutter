@@ -18,6 +18,8 @@
 		<string>can_i_eat_this</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
+		<key>NSCameraUsageDescription</key>
+		<string>음식 사진을 찍어 어떤 음식인지 인식하기 위해 카메라를 사용해요.</string>
 		<key>CFBundleShortVersionString</key>
 		<string>$(FLUTTER_BUILD_NAME)</string>
 		<key>CFBundleSignature</key>

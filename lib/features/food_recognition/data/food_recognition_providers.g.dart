@@ -9,7 +9,7 @@ part of 'food_recognition_providers.dart';
 String _$foodRecognitionInterpreterHash() =>
     r'2030f1c8609427b22207a1eebe13ea19f9d218ad';
 
-/// MobileNetV3 TFLite [Interpreter]. 앱 전역에서 1회만 로드하고 재사용한다.
+/// MobileNetV3 TFLite [Interpreter] (앱 전역 1회 로드).
 ///
 /// Copied from [foodRecognitionInterpreter].
 @ProviderFor(foodRecognitionInterpreter)
@@ -27,12 +27,9 @@ final foodRecognitionInterpreterProvider = FutureProvider<Interpreter>.internal(
 // ignore: unused_element
 typedef FoodRecognitionInterpreterRef = FutureProviderRef<Interpreter>;
 String _$foodRecognitionLabelsHash() =>
-    r'5f6de536e97e9f7fbc451b0889fe7693ed8baf37';
+    r'6aa6edb85597700b5543423993861087bfd621bf';
 
-/// 150개 음식 라벨 목록. 인덱스는 모델 출력 텐서의 클래스 인덱스와 1:1 대응.
-///
-/// 줄 수가 [_expectedLabelCount](=150, `model_metadata.json` num_classes)와
-/// 다르면 라벨-모델 불일치를 조용히 넘기지 않고 즉시 assert로 드러낸다.
+/// 음식 라벨 목록. 인덱스가 모델 출력 클래스 인덱스와 1:1 대응한다.
 ///
 /// Copied from [foodRecognitionLabels].
 @ProviderFor(foodRecognitionLabels)
@@ -73,43 +70,27 @@ class _SystemHash {
   }
 }
 
-/// [FoodRecognitionRepository] 공급자. [engine]에 따라 구현체를 교체한다.
-///
-/// - [RecognitionSource.onDevice]: [foodRecognitionInterpreterProvider] /
-///   [foodRecognitionLabelsProvider]를 await해 [OnDeviceFoodRecognitionRepository] 생성.
-/// - [RecognitionSource.gemini]: 백엔드 `/foods/recognize` 계약 전까지
-///   [MockGeminiFoodRecognitionRepository] (ADR-0009 §6, 구현 순서 5).
+/// [engine]에 맞는 [FoodRecognitionRepository]를 제공한다.
+/// Gemini는 백엔드 계약 전까지 Mock이다.
 ///
 /// Copied from [foodRecognitionRepository].
 @ProviderFor(foodRecognitionRepository)
 const foodRecognitionRepositoryProvider = FoodRecognitionRepositoryFamily();
 
-/// [FoodRecognitionRepository] 공급자. [engine]에 따라 구현체를 교체한다.
-///
-/// - [RecognitionSource.onDevice]: [foodRecognitionInterpreterProvider] /
-///   [foodRecognitionLabelsProvider]를 await해 [OnDeviceFoodRecognitionRepository] 생성.
-/// - [RecognitionSource.gemini]: 백엔드 `/foods/recognize` 계약 전까지
-///   [MockGeminiFoodRecognitionRepository] (ADR-0009 §6, 구현 순서 5).
+/// [engine]에 맞는 [FoodRecognitionRepository]를 제공한다.
+/// Gemini는 백엔드 계약 전까지 Mock이다.
 ///
 /// Copied from [foodRecognitionRepository].
 class FoodRecognitionRepositoryFamily
     extends Family<AsyncValue<FoodRecognitionRepository>> {
-  /// [FoodRecognitionRepository] 공급자. [engine]에 따라 구현체를 교체한다.
-  ///
-  /// - [RecognitionSource.onDevice]: [foodRecognitionInterpreterProvider] /
-  ///   [foodRecognitionLabelsProvider]를 await해 [OnDeviceFoodRecognitionRepository] 생성.
-  /// - [RecognitionSource.gemini]: 백엔드 `/foods/recognize` 계약 전까지
-  ///   [MockGeminiFoodRecognitionRepository] (ADR-0009 §6, 구현 순서 5).
+  /// [engine]에 맞는 [FoodRecognitionRepository]를 제공한다.
+  /// Gemini는 백엔드 계약 전까지 Mock이다.
   ///
   /// Copied from [foodRecognitionRepository].
   const FoodRecognitionRepositoryFamily();
 
-  /// [FoodRecognitionRepository] 공급자. [engine]에 따라 구현체를 교체한다.
-  ///
-  /// - [RecognitionSource.onDevice]: [foodRecognitionInterpreterProvider] /
-  ///   [foodRecognitionLabelsProvider]를 await해 [OnDeviceFoodRecognitionRepository] 생성.
-  /// - [RecognitionSource.gemini]: 백엔드 `/foods/recognize` 계약 전까지
-  ///   [MockGeminiFoodRecognitionRepository] (ADR-0009 §6, 구현 순서 5).
+  /// [engine]에 맞는 [FoodRecognitionRepository]를 제공한다.
+  /// Gemini는 백엔드 계약 전까지 Mock이다.
   ///
   /// Copied from [foodRecognitionRepository].
   FoodRecognitionRepositoryProvider call(
@@ -144,22 +125,14 @@ class FoodRecognitionRepositoryFamily
   String? get name => r'foodRecognitionRepositoryProvider';
 }
 
-/// [FoodRecognitionRepository] 공급자. [engine]에 따라 구현체를 교체한다.
-///
-/// - [RecognitionSource.onDevice]: [foodRecognitionInterpreterProvider] /
-///   [foodRecognitionLabelsProvider]를 await해 [OnDeviceFoodRecognitionRepository] 생성.
-/// - [RecognitionSource.gemini]: 백엔드 `/foods/recognize` 계약 전까지
-///   [MockGeminiFoodRecognitionRepository] (ADR-0009 §6, 구현 순서 5).
+/// [engine]에 맞는 [FoodRecognitionRepository]를 제공한다.
+/// Gemini는 백엔드 계약 전까지 Mock이다.
 ///
 /// Copied from [foodRecognitionRepository].
 class FoodRecognitionRepositoryProvider
     extends AutoDisposeFutureProvider<FoodRecognitionRepository> {
-  /// [FoodRecognitionRepository] 공급자. [engine]에 따라 구현체를 교체한다.
-  ///
-  /// - [RecognitionSource.onDevice]: [foodRecognitionInterpreterProvider] /
-  ///   [foodRecognitionLabelsProvider]를 await해 [OnDeviceFoodRecognitionRepository] 생성.
-  /// - [RecognitionSource.gemini]: 백엔드 `/foods/recognize` 계약 전까지
-  ///   [MockGeminiFoodRecognitionRepository] (ADR-0009 §6, 구현 순서 5).
+  /// [engine]에 맞는 [FoodRecognitionRepository]를 제공한다.
+  /// Gemini는 백엔드 계약 전까지 Mock이다.
   ///
   /// Copied from [foodRecognitionRepository].
   FoodRecognitionRepositoryProvider(
@@ -249,5 +222,32 @@ class _FoodRecognitionRepositoryProviderElement
   RecognitionSource get engine =>
       (origin as FoodRecognitionRepositoryProvider).engine;
 }
+
+String _$foodRecognitionControllerHash() =>
+    r'c13bbdb3a63e546a2cd1a61e338f4b6eb33e944e';
+
+/// 음식 사진 인식 화면 상태.
+///
+/// - `data(null)`: 인식 전
+/// - `loading`: 인식 중
+/// - `data([])`: 인식 실패 (후보 없음 또는 Top-1 점수 미달)
+/// - `data([...])`: 후보 목록
+/// - `error`: 모델 로딩·추론 예외 (화면은 실패와 같이 처리)
+///
+/// Copied from [FoodRecognitionController].
+@ProviderFor(FoodRecognitionController)
+final foodRecognitionControllerProvider = AutoDisposeNotifierProvider<
+    FoodRecognitionController, AsyncValue<List<FoodCandidate>?>>.internal(
+  FoodRecognitionController.new,
+  name: r'foodRecognitionControllerProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$foodRecognitionControllerHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$FoodRecognitionController
+    = AutoDisposeNotifier<AsyncValue<List<FoodCandidate>?>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

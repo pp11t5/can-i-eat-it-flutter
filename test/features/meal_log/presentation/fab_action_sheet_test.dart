@@ -44,6 +44,12 @@ Widget _makeApp({
         },
       ),
       GoRoute(
+        path: '/food-recognition',
+        pageBuilder: (context, state) => const MaterialPage(
+          child: Scaffold(body: Text('food-recognition')),
+        ),
+      ),
+      GoRoute(
         path: '/symptom/record',
         pageBuilder: (context, state) {
           onSymptomRecordPush?.call();
@@ -99,7 +105,7 @@ void main() {
   });
 
   group('FabActionSheet — 식단 기록 탭', () {
-    testWidgets('"식단 기록" 탭 → /meal/record로 이동한다', (tester) async {
+    testWidgets('"식단 기록" → "직접 입력" 탭 → /meal/record로 이동한다', (tester) async {
       var navigated = false;
       await tester.pumpWidget(_makeApp(onMealRecordPush: () => navigated = true));
       await tester.pumpAndSettle();
@@ -109,9 +115,29 @@ void main() {
 
       await tester.tap(find.text('식단 기록'));
       await tester.pumpAndSettle();
+      expect(find.text('식단 기록을 어떻게 남길까요?'), findsOneWidget);
+
+      await tester.tap(find.text('직접 입력'));
+      await tester.pumpAndSettle();
 
       expect(navigated, isTrue);
       expect(find.text('meal/record'), findsOneWidget);
+    });
+
+    testWidgets('"식단 기록" → "사진으로 기록" 탭 → /food-recognition으로 이동한다',
+        (tester) async {
+      await tester.pumpWidget(_makeApp());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('식단 기록'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('사진으로 기록'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('food-recognition'), findsOneWidget);
     });
   });
 

@@ -11,15 +11,20 @@ enum AppButtonVariant {
 
   /// 외곽선 보조 버튼 (배경 surface, border primary).
   secondary,
+
+  /// 회색 채움 보조 버튼 (배경 border, 텍스트 textSecondary).
+  tertiary,
 }
 
 /// 앱 공용 CTA 버튼.
 ///
 /// - [label]: 버튼 텍스트 (필수).
 /// - [onPressed]: null 전달 시 disabled 상태.
-/// - [variant]: [AppButtonVariant.primary] (기본) 또는 [AppButtonVariant.secondary].
+/// - [variant]: [AppButtonVariant.primary] (기본), [AppButtonVariant.secondary],
+///   [AppButtonVariant.tertiary].
 /// - [isExpanded]: true이면 가로 전체 확장. false이면 내용에 맞는 너비.
 /// - [width]: 명시적 너비. [isExpanded]보다 우선 적용되지 않음(expanded가 우선).
+/// - [height]: 고정 높이(텍스트는 세로 가운데). null 이면 패딩 기반 높이.
 /// - [isLoading]: true이면 버튼을 비활성화하고 로딩 인디케이터를 표시한다.
 class AppButton extends StatelessWidget {
   const AppButton({
@@ -29,6 +34,7 @@ class AppButton extends StatelessWidget {
     this.variant = AppButtonVariant.primary,
     this.isExpanded = false,
     this.width,
+    this.height,
     this.isLoading = false,
   });
 
@@ -39,6 +45,7 @@ class AppButton extends StatelessWidget {
     required this.onPressed,
     this.isExpanded = false,
     this.width,
+    this.height,
     this.isLoading = false,
   }) : variant = AppButtonVariant.primary;
 
@@ -49,14 +56,29 @@ class AppButton extends StatelessWidget {
     required this.onPressed,
     this.isExpanded = false,
     this.width,
+    this.height,
     this.isLoading = false,
   }) : variant = AppButtonVariant.secondary;
+
+  /// 회색 채움 보조 버튼 (편의 생성자).
+  const AppButton.tertiary({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.isExpanded = false,
+    this.width,
+    this.height,
+    this.isLoading = false,
+  }) : variant = AppButtonVariant.tertiary;
 
   final String label;
   final VoidCallback? onPressed;
   final AppButtonVariant variant;
   final bool isExpanded;
   final double? width;
+
+  /// 고정 높이. null 이면 세로 패딩 16 + 텍스트 높이.
+  final double? height;
   final bool isLoading;
 
   bool get _isDisabled => onPressed == null;
@@ -64,8 +86,11 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final button = switch (variant) {
-      AppButtonVariant.primary => _buildPrimary(),
+      AppButtonVariant.primary =>
+        _buildFilled(AppColors.primary, AppColors.onPrimary),
       AppButtonVariant.secondary => _buildSecondary(),
+      AppButtonVariant.tertiary =>
+        _buildFilled(AppColors.border, AppColors.textSecondary),
     };
 
     if (isExpanded) {
@@ -80,29 +105,27 @@ class AppButton extends StatelessWidget {
   /// 온보딩 선택/CTA 활성 전환과 맞춘 색 보간 duration.
   static const Duration _stateAnimDuration = Duration(milliseconds: 150);
 
-  Widget _buildPrimary() {
+  Widget _buildFilled(Color background, Color foreground) {
     return FilledButton(
       onPressed: isLoading ? null : onPressed,
       style: FilledButton.styleFrom(
-        backgroundColor:
-            _isDisabled ? AppColors.surfaceMuted : AppColors.primary,
-        foregroundColor:
-            _isDisabled ? AppColors.textTertiary : AppColors.onPrimary,
+        backgroundColor: _isDisabled ? AppColors.surfaceMuted : background,
+        foregroundColor: _isDisabled ? AppColors.textTertiary : foreground,
         disabledBackgroundColor: AppColors.surfaceMuted,
         disabledForegroundColor: AppColors.textTertiary,
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.cardPadding, // 16
+        padding: EdgeInsets.symmetric(
+          vertical: height == null ? AppSpacing.cardPadding : 0,
           horizontal: AppSpacing.sectionGap, // 24
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         ),
         textStyle: AppTextStyles.body1Bold,
-        minimumSize: Size.zero,
+        minimumSize: Size(0, height ?? 0),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         animationDuration: _stateAnimDuration,
       ),
-      child: _buildChild(AppColors.onPrimary),
+      child: _buildChild(foreground),
     );
   }
 
@@ -119,15 +142,15 @@ class AppButton extends StatelessWidget {
         side: BorderSide(
           color: _isDisabled ? AppColors.border : AppColors.primary,
         ),
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.cardPadding, // 16
+        padding: EdgeInsets.symmetric(
+          vertical: height == null ? AppSpacing.cardPadding : 0,
           horizontal: AppSpacing.sectionGap, // 24
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         ),
         textStyle: AppTextStyles.body1Bold,
-        minimumSize: Size.zero,
+        minimumSize: Size(0, height ?? 0),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         animationDuration: _stateAnimDuration,
       ),

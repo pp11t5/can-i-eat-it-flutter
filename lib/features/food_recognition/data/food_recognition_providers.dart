@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -61,4 +62,39 @@ Future<FoodRecognitionRepository> foodRecognitionRepository(
     case RecognitionSource.gemini:
       return const MockGeminiFoodRecognitionRepository();
   }
+}
+
+/// Top-1 점수가 이 값 미만이면 인식 실패로 본다 (ADR-0009 "단정 금지").
+// TODO(tuning): 임시값. 실기기 오인식·실패율을 보고 조정.
+const kRecognitionMinTopScore = 0.3;
+
+/// 음식 사진 인식 화면 상태.
+///
+/// - `data(null)`: 인식 전
+/// - `loading`: 인식 중
+/// - `data([])`: 인식 실패 (후보 없음 또는 Top-1 점수 미달)
+/// - `data([...])`: 후보 목록
+/// - `error`: 모델 로딩·추론 예외 (화면은 실패와 같이 처리)
+@riverpod
+class FoodRecognitionController extends _$FoodRecognitionController {
+  @override
+  AsyncValue<List<FoodCandidate>?> build() => const AsyncValue.data(null);
+
+  Future<void> recognize(Uint8List imageBytes) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final repo = await ref.read(
+          foodRecognitionRepositoryProvider(kFoodRecognitionEngine).future);
+      final candidates = (await repo.recognize(imageBytes)).candidates;
+      final topScore = candidates.firstOrNull?.score;
+      // 점수가 없는 엔진(Gemini)은 임계값 판정을 건너뛴다.
+      if (candidates.isEmpty ||
+          (topScore != null && topScore < kRecognitionMinTopScore)) {
+        return const <FoodCandidate>[];
+      }
+      return candidates;
+    });
+  }
+
+  void reset() => state = const AsyncValue.data(null);
 }
