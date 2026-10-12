@@ -64,6 +64,8 @@ dependencies:
   tflite_flutter: ^0.12.1
   image: ^4.10.1
   firebase_crashlytics: ^5.4.0
+  camera: ^0.12.1
+  app_settings: ^9.0.0
 
 dev_dependencies:
   flutter_test:
