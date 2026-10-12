@@ -15,6 +15,7 @@ import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_arg
 import 'package:can_i_eat_it/features/food_check/presentation/screens/food_check_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_screen.dart';
 import 'package:can_i_eat_it/features/food_dictionary/presentation/screens/food_history_screen.dart';
+import 'package:can_i_eat_it/features/food_recognition/presentation/screens/food_recognition_screen.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_food_detail_screen.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_record_detail_screen.dart';
 import 'package:can_i_eat_it/features/meal_log/presentation/screens/meal_record_screen.dart';
@@ -132,6 +133,18 @@ GoRouter appRouter(Ref ref) {
           );
         },
       ),
+      // 음식 사진 인식 화면 (fullscreenDialog 모달).
+      // extra: MealRecordContext? (null=단순 판정, 비-null=식단 기록 흐름).
+      GoRoute(
+        path: '/food-recognition',
+        name: 'food-recognition',
+        pageBuilder: (context, state) => MaterialPage(
+          fullscreenDialog: true,
+          child: FoodRecognitionScreen(
+            recordContext: state.extra as MealRecordContext?,
+          ),
+        ),
+      ),
       // 증상 작성/수정 화면 (fullscreenDialog 모달).
       // extra: Symptom? (null=신규, 비-null=수정) 또는 SymptomWriteArgs
       // (신규 작성 시 원인 식사 프리필, 예: 미기록 식단 목록 진입).
@@ -214,8 +227,7 @@ GoRouter appRouter(Ref ref) {
             fullscreenDialog: true,
             child: MealRecordScreen(
               mealRecordId: mealRecordId,
-              joinDate:
-                  ref.read(authControllerProvider).valueOrNull?.createdAt,
+              joinDate: ref.read(authControllerProvider).valueOrNull?.createdAt,
             ),
           );
         },
