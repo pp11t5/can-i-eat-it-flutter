@@ -252,21 +252,31 @@ class _FoodRecognitionScreenState extends ConsumerState<FoodRecognitionScreen>
           _CoverPreview(camera: camera),
         Align(
           alignment: Alignment.bottomCenter,
-          // 셔터 아래 23 + 돌아가기(34) + 23 = Figma 하단 여백 80.
-          child: _BottomPanel(
-            bottom: 23,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CaptureButton(onPressed: camera == null ? null : _capture),
-                const SizedBox(height: 23),
-                _Pill(
-                  label: '돌아가기',
-                  color: AppColors.captureRing,
-                  onTap: () => context.pop(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const _Pill(
+                label: '현재는 "한식"만 검색할 수 있어요!',
+                color: AppColors.cameraLabel,
+              ),
+              const SizedBox(height: AppSpacing.sectionGap),
+              // 셔터 아래 23 + 돌아가기(34) + 23 = Figma 하단 여백 80.
+              _BottomPanel(
+                bottom: 23,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CaptureButton(onPressed: camera == null ? null : _capture),
+                    const SizedBox(height: 23),
+                    _Pill(
+                      label: '돌아가기',
+                      color: AppColors.captureRing,
+                      onTap: () => context.pop(),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ],

@@ -96,6 +96,7 @@ class SymptomWriteScreen extends ConsumerStatefulWidget {
     this.initialMood,
     this.initialSymptomTypes,
     this.fromPush = false,
+    @visibleForTesting this.nowOverride,
   });
 
   final Symptom? existingSymptom;
@@ -114,6 +115,10 @@ class SymptomWriteScreen extends ConsumerStatefulWidget {
 
   /// 식후 알림 진입이면 true. 이 경로의 신규 저장만 symptom_response를 보낸다.
   final bool fromPush;
+
+  /// 골든 테스트의 초기 시각과 "지금" 표시를 고정한다.
+  @visibleForTesting
+  final DateTime? nowOverride;
 
   @override
   ConsumerState<SymptomWriteScreen> createState() => _SymptomWriteScreenState();
@@ -147,7 +152,7 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
       _formState = SymptomWriteFormState(
         mood: widget.initialMood,
         symptomTypes: widget.initialSymptomTypes ?? const [],
-        occurredAt: nowKst(),
+        occurredAt: widget.nowOverride ?? nowKst(),
         linkedMealId: widget.initialMealRecordId,
         linkedMealDisplayName:
             widget.initialMealRecordId != null ? widget.initialMealName : null,
@@ -280,7 +285,7 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
   // --------------------------------------------------------------------------
 
   String _formatOccurredAt(DateTime dt) {
-    final now = nowKst();
+    final now = widget.nowOverride ?? nowKst();
     final h = dt.hour.toString().padLeft(2, '0');
     final m = dt.minute.toString().padLeft(2, '0');
     final isToday =

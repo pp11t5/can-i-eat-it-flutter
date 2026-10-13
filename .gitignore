@@ -35,6 +35,9 @@ migrate_working_dir/
 /build/
 /ios/build/
 
+# 골든 비교 실패 시 생성되는 진단 이미지
+/test/**/failures/
+
 # Symbolication related
 app.*.symbols
 

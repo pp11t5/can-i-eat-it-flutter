@@ -45,7 +45,7 @@ class HomeWidgetComposer {
     return reduceHomeWidget(
       HomeWidgetInputs(
         isLoggedIn: true,
-        streakDays: streak,
+        streakDays: streak.streak,
         counts: _countsFrom(timeline),
         todayHasMeals: _hasMeals(timeline),
         prompt: _latestPrompt(candidates, now),

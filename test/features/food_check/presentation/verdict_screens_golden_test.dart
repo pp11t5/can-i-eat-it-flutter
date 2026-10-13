@@ -1,11 +1,15 @@
 @Tags(['golden'])
 library;
 
+import 'dart:io';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_loading_screen.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/screens/verdict_unknown_screen.dart';
 
@@ -38,12 +42,29 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
+      // GIF는 정적 첫 프레임으로 캐시해 디코딩/애니메이션 타이밍을 고정한다.
+      await tester.runAsync(() async {
+        final bytes = await File(AppImages.characterSearching).readAsBytes();
+        final codec = await ui.instantiateImageCodec(bytes);
+        final frame = await codec.getNextFrame();
+        codec.dispose();
+        final key = await const AssetImage(AppImages.characterSearching)
+            .obtainKey(const ImageConfiguration());
+        addTearDown(() => imageCache.evict(key));
+        imageCache.putIfAbsent(
+          key,
+          () => OneFrameImageStreamCompleter(
+            Future.value(ImageInfo(image: frame.image)),
+          ),
+        );
+      });
       await tester.pumpWidget(
         _wrapFullScreen(
           const VerdictLoadingScreen(nickname: '철수', messageIndex: 0),
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(tester.widget<RawImage>(find.byType(RawImage)).image, isNotNull);
 
       await expectLater(
         find.byType(VerdictLoadingScreen),
@@ -61,7 +82,7 @@ void main() {
       await tester.pumpWidget(
         _wrapFullScreen(VerdictUnknownScreen(onRetry: () {})),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       await expectLater(
         find.byType(VerdictUnknownScreen),

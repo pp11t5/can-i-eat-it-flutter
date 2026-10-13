@@ -1,4 +1,5 @@
 import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
+import 'package:can_i_eat_it/features/home/domain/entities/user_streak.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
 
 /// 홈 화면 저장소 인터페이스 — read 전용 (W7 minor EP).
@@ -6,10 +7,10 @@ import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.da
 /// - 도메인 레이어 — 프레임워크 비종속.
 /// - 실 구현: [HomeRepositoryImpl], 테스트·오프라인: [MockHomeRepository].
 abstract interface class HomeRepository {
-  /// 현재 사용자의 편안한 증상 기록 연속일을 조회한다.
+  /// 현재 사용자의 편안한 증상 기록 연속일과 캐릭터 상태를 조회한다.
   ///
-  /// 대응 API: GET /users/me/streak (result.streak).
-  Future<int> myStreak();
+  /// 대응 API: GET /users/me/streak (result.streak, result.characterStatus).
+  Future<UserStreak> myStreak();
 
   /// 미기록 식단 개수를 조회한다.
   ///

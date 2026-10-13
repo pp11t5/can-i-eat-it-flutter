@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:can_i_eat_it/core/network/dio_client.dart';
 import 'package:can_i_eat_it/features/home/data/repositories/home_repository_impl.dart';
 import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
+import 'package:can_i_eat_it/features/home/domain/entities/user_streak.dart';
 import 'package:can_i_eat_it/features/home/domain/repositories/home_repository.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
 
@@ -29,11 +30,12 @@ HomeRepository homeRepository(Ref ref) {
 // 현재 스트릭 (홈 인사말)
 // ---------------------------------------------------------------------------
 
-/// 현재 사용자의 편안한 증상 기록 연속일을 조회한다.
+/// 현재 사용자의 편안한 증상 기록 연속일과 캐릭터 상태를 조회한다.
 ///
 /// [HomeScreen] 인사말이 구독한다. 오류 시 화면은 `—`로 폴백한다.
 @riverpod
-Future<int> myStreak(Ref ref) => ref.watch(homeRepositoryProvider).myStreak();
+Future<UserStreak> myStreak(Ref ref) =>
+    ref.watch(homeRepositoryProvider).myStreak();
 
 // ---------------------------------------------------------------------------
 // 미기록 식단 카운트 (홈 "증상 기록하기" 카드 배지)

@@ -3,7 +3,9 @@ import 'package:dio/dio.dart';
 import 'package:can_i_eat_it/core/network/api_endpoints.dart';
 import 'package:can_i_eat_it/core/network/failure_mapper.dart';
 import 'package:can_i_eat_it/features/home/data/dtos/recent_meal_dto.dart';
+import 'package:can_i_eat_it/features/home/data/dtos/user_streak_dto.dart';
 import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
+import 'package:can_i_eat_it/features/home/domain/entities/user_streak.dart';
 import 'package:can_i_eat_it/features/home/domain/repositories/home_repository.dart';
 import 'package:can_i_eat_it/features/food_check/data/dtos/food_summary_dto.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
@@ -16,12 +18,12 @@ class HomeRepositoryImpl implements HomeRepository {
   final Dio _dio;
 
   @override
-  Future<int> myStreak() async {
+  Future<UserStreak> myStreak() async {
     try {
       final response = await _dio.get<dynamic>(ApiEndpoints.myStreak);
-      return unwrap<int>(
+      return unwrap<UserStreak>(
         response,
-        (j) => (j as Map<String, dynamic>)['streak'] as int? ?? 0,
+        (j) => UserStreakDto.fromJson(j as Map<String, dynamic>).toEntity(),
       );
     } on DioException catch (e) {
       throw FailureMapper.fromDioException(e);
