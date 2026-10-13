@@ -182,7 +182,9 @@ dart run build_runner build --delete-conflicting-outputs
 
 ### 골든 테스트
 
-`@Tags(['golden'])`로 태그된 위젯 골든 테스트가 `test/` 하위 11개 파일에 있다(예: `test/features/mypage/presentation/mypage_golden_test.dart`). **CI는 `--exclude-tags golden`으로 골든을 아예 실행하지 않는다.** 로컬 폰트 환경 차이로 일부 골든이 로컬에서 상시 실패하는 이력이 있으므로, 로컬에서 `--update-goldens`로 임의 갱신하지 않는다.
+`@Tags(['golden'])`로 태그된 위젯 골든 테스트가 `test/` 하위 13개 파일에 있다(예: `test/features/mypage/presentation/mypage_golden_test.dart`). **CI는 `--exclude-tags golden`으로 골든을 아예 실행하지 않는다.** 현재 기준 이미지는 macOS / Flutter `3.47.3`에서 생성했다. 환경 차이만으로 기준을 덮어쓰지 않는다.
+
+`test/flutter_test_config.dart`가 번들 Pretendard와 Material Icons 폰트를 로드한다. 증상 작성 골든의 시각과 로딩 GIF 첫 프레임은 테스트에서 고정한다. `flutter test --tags golden`으로 비교한 뒤 `test/**/failures/`의 기준·현재·차이 이미지를 검토한다. 검토하고 승인한 UI 변경에 한해서 같은 환경에서 `flutter test --tags golden --update-goldens`로 갱신하고, 갱신 옵션 없이 다시 실행해 통과를 확인한다. 새로 생성되는 실패 진단 이미지는 Git에서 제외한다.
 
 ### 시간대(KST) 관련 주의
 
@@ -261,7 +263,7 @@ dart run build_runner build --delete-conflicting-outputs
 - iOS 최소 배포 타깃 **15.0**.
 - 새 CocoaPods 의존성 추가 시 **플레이버별 Flutter xcconfig 배선**을 함께 확인한다(PR #177에서 발견된 함정 — per-flavor Pods xcconfig 누락 시 빌드가 깨질 수 있음).
 - Android 로컬 빌드가 JDK 25 환경에서 실패한 이력이 있다(정확한 요구 JDK 버전은 확인 필요). CI에는 Android 빌드 스텝이 없어(analyze/test/codegen만) 이 문제가 CI에서는 드러나지 않는다.
-- 골든 테스트는 로컬 폰트 환경에 따라 상시 실패할 수 있다 — 로컬 `--update-goldens` 금지, CI는 골든을 아예 제외한다(§7).
+- 골든 기준은 macOS / Flutter `3.47.3` 환경이다. 환경 차이로 임의 갱신하지 않으며, 검토하고 승인한 UI 변경에 한해서 갱신한다. CI는 골든을 제외한다(§7).
 - `@freezed`/`@riverpod`/provider 변경 후 생성물(`.g.dart`/`.freezed.dart`) 커밋 누락 시 CI가 "Verify generated files are up-to-date" 스텝에서 실패한다(§6).
 - 프로덕션 코드에서 `.toLocal()` 금지 — KST 이중변환 버그 이력(§7).
 - AI(LLM) 판정 API는 `receiveTimeout`이 의도적으로 무제한이다(§10) — 임의로 timeout을 다시 넣지 않는다.

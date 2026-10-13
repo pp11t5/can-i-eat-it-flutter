@@ -21,5 +21,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   }
   await loader.load();
 
+  final iconLoader = FontLoader('MaterialIcons')
+    ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
+  await iconLoader.load();
+
   await testMain();
 }

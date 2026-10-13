@@ -26,7 +26,7 @@ void main() {
   group('VerdictCard 골든 테스트 — 4상태', () {
     testWidgets('VerdictCard recommend 상태를 골든과 일치하게 렌더한다', (tester) async {
       await tester.pumpWidget(_wrap(VerdictLevel.recommend));
-      await tester.pump(); // 애니메이션 초기 프레임
+      await tester.pumpAndSettle();
       await expectLater(
         find.byType(VerdictCard),
         matchesGoldenFile('goldens/verdict_card_recommend.png'),
@@ -35,7 +35,7 @@ void main() {
 
     testWidgets('VerdictCard caution 상태를 골든과 일치하게 렌더한다', (tester) async {
       await tester.pumpWidget(_wrap(VerdictLevel.caution));
-      await tester.pump();
+      await tester.pumpAndSettle();
       await expectLater(
         find.byType(VerdictCard),
         matchesGoldenFile('goldens/verdict_card_caution.png'),
@@ -44,7 +44,7 @@ void main() {
 
     testWidgets('VerdictCard risk 상태를 골든과 일치하게 렌더한다', (tester) async {
       await tester.pumpWidget(_wrap(VerdictLevel.risk));
-      await tester.pump();
+      await tester.pumpAndSettle();
       await expectLater(
         find.byType(VerdictCard),
         matchesGoldenFile('goldens/verdict_card_risk.png'),
@@ -53,7 +53,7 @@ void main() {
 
     testWidgets('VerdictCard unknown 상태를 골든과 일치하게 렌더한다', (tester) async {
       await tester.pumpWidget(_wrap(VerdictLevel.unknown));
-      await tester.pump();
+      await tester.pumpAndSettle();
       await expectLater(
         find.byType(VerdictCard),
         matchesGoldenFile('goldens/verdict_card_unknown.png'),
