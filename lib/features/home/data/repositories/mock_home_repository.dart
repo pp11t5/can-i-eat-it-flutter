@@ -1,4 +1,5 @@
 import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
+import 'package:can_i_eat_it/features/home/domain/entities/user_streak.dart';
 import 'package:can_i_eat_it/features/home/domain/repositories/home_repository.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/food_summary.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
@@ -10,10 +11,12 @@ import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dar
 class MockHomeRepository implements HomeRepository {
   MockHomeRepository({
     int? streak,
+    CharacterStatus characterStatus = CharacterStatus.statisfied,
     int? unrecordedCount,
     List<RecentMeal>? recentFoods,
     List<FoodSummary>? topSearchedFoods,
-  })  : _streak = streak ?? 0,
+  })  : _streak =
+            UserStreak(streak: streak ?? 0, characterStatus: characterStatus),
         _unrecordedCount = unrecordedCount ?? 0,
         _recentFoods = recentFoods ?? const [],
         _topSearchedFoods = topSearchedFoods ?? const [];
@@ -29,13 +32,13 @@ class MockHomeRepository implements HomeRepository {
         topSearchedFoods: _seededTopSearchedFoods,
       );
 
-  final int _streak;
+  final UserStreak _streak;
   final int _unrecordedCount;
   final List<RecentMeal> _recentFoods;
   final List<FoodSummary> _topSearchedFoods;
 
   @override
-  Future<int> myStreak() async => _streak;
+  Future<UserStreak> myStreak() async => _streak;
 
   @override
   Future<int> unrecordedMealCount() async => _unrecordedCount;

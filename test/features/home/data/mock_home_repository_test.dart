@@ -6,7 +6,7 @@ void main() {
   group('MockHomeRepository.seeded', () {
     test('myStreak는 0보다 크다', () async {
       final repo = MockHomeRepository.seeded();
-      expect(await repo.myStreak(), greaterThan(0));
+      expect((await repo.myStreak()).streak, greaterThan(0));
     });
 
     test('unrecordedMealCount는 0보다 크다', () async {
@@ -29,7 +29,7 @@ void main() {
   group('MockHomeRepository.empty', () {
     test('myStreak는 0이다', () async {
       final repo = MockHomeRepository.empty();
-      expect(await repo.myStreak(), 0);
+      expect((await repo.myStreak()).streak, 0);
     });
 
     test('unrecordedMealCount는 0이다', () async {

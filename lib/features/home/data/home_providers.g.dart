@@ -30,15 +30,15 @@ final homeRepositoryProvider = AutoDisposeProvider<HomeRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef HomeRepositoryRef = AutoDisposeProviderRef<HomeRepository>;
-String _$myStreakHash() => r'cca7d2d6d0d7fb42a92902ffab4864c5a39dd3ed';
+String _$myStreakHash() => r'f3dc6e0cdfb05dc00eab728758b5c449f4ed6004';
 
-/// 현재 사용자의 편안한 증상 기록 연속일을 조회한다.
+/// 현재 사용자의 편안한 증상 기록 연속일과 캐릭터 상태를 조회한다.
 ///
 /// [HomeScreen] 인사말이 구독한다. 오류 시 화면은 `—`로 폴백한다.
 ///
 /// Copied from [myStreak].
 @ProviderFor(myStreak)
-final myStreakProvider = AutoDisposeFutureProvider<int>.internal(
+final myStreakProvider = AutoDisposeFutureProvider<UserStreak>.internal(
   myStreak,
   name: r'myStreakProvider',
   debugGetCreateSourceHash:
@@ -49,7 +49,7 @@ final myStreakProvider = AutoDisposeFutureProvider<int>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef MyStreakRef = AutoDisposeFutureProviderRef<int>;
+typedef MyStreakRef = AutoDisposeFutureProviderRef<UserStreak>;
 String _$unrecordedMealCountHash() =>
     r'923c9eafcd0d063d97f90fca4787015cd1109d45';
 
