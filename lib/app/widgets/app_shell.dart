@@ -35,6 +35,7 @@ class AppShell extends ConsumerWidget {
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         if (currentIndex != 0) {
+          ref.invalidate(myStreakProvider);
           navigationShell.goBranch(0);
         }
       },
@@ -46,6 +47,7 @@ class AppShell extends ConsumerWidget {
             // StatefulShellRoute.indexedStack은 홈 브랜치를 유지하므로, 홈 탭에
             // 재진입할 때 식사 관련 요약 데이터를 명시적으로 다시 조회한다.
             if (index == 0) {
+              ref.invalidate(myStreakProvider);
               ref.invalidate(recentMealsProvider);
               ref.invalidate(unrecordedMealCountProvider);
               scheduleHomeWidgetSync(ref.read(homeWidgetControllerProvider));
