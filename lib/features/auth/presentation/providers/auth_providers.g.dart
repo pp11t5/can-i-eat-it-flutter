@@ -162,7 +162,7 @@ final consentNavigationTransitionProvider =
 );
 
 typedef _$ConsentNavigationTransition = Notifier<bool>;
-String _$authControllerHash() => r'dedcc7e1efe294560c99e95ddd1dad6084d1d85a';
+String _$authControllerHash() => r'fc335d873256581a6eb97a9cc4eae635848a501a';
 
 /// 인증 상태 컨트롤러 (AsyncNotifier).
 ///

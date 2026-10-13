@@ -1,9 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../monitoring/error_reporter.dart';
 import 'analytics_event.dart';
+
+part 'funnel_once_store.g.dart';
 
 /// 계정 단위로 한 번만 보내는 퍼널을 기억한다.
 ///
@@ -111,9 +114,8 @@ class InMemoryFunnelOnceStore implements FunnelOnceStore {
   }
 }
 
-final funnelOnceStoreProvider = Provider<FunnelOnceStore>(
-  (ref) => SecureStorageFunnelOnceStore(),
-);
+@Riverpod(keepAlive: true)
+FunnelOnceStore funnelOnceStore(Ref ref) => SecureStorageFunnelOnceStore();
 
 /// 1회 퍼널의 계정 키. 실 앱은 bootstrap에서 세션 userId로 override한다.
 final analyticsSubjectIdProvider = Provider<String?>((ref) => null);

@@ -14,14 +14,10 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$FoodCandidate {
-  /// 음식명. 자유 문자열 — 150클래스 제약은 OnDevice 구현 내부 사정이며,
-  /// 이 라벨은 검색어로 기존 `food_check`의 judgeByText/judgeById에 넘어간다.
+  /// 음식명. 기존 `food_check` 판정의 검색어로 쓴다.
   String get label;
 
-  /// 신뢰도 점수.
-  ///
-  /// OnDevice: softmax 원점수(재정규화 없음, `top3_output.md` 그대로).
-  /// Gemini: 항상 null — Gemini는 확률을 산출하지 않으므로 점수를 지어내지 않는다.
+  /// OnDevice는 softmax 원점수, Gemini는 null.
   double? get score;
 
   /// Create a copy of FoodCandidate
@@ -250,15 +246,11 @@ extension FoodCandidatePatterns on FoodCandidate {
 class _FoodCandidate implements FoodCandidate {
   const _FoodCandidate({required this.label, this.score});
 
-  /// 음식명. 자유 문자열 — 150클래스 제약은 OnDevice 구현 내부 사정이며,
-  /// 이 라벨은 검색어로 기존 `food_check`의 judgeByText/judgeById에 넘어간다.
+  /// 음식명. 기존 `food_check` 판정의 검색어로 쓴다.
   @override
   final String label;
 
-  /// 신뢰도 점수.
-  ///
-  /// OnDevice: softmax 원점수(재정규화 없음, `top3_output.md` 그대로).
-  /// Gemini: 항상 null — Gemini는 확률을 산출하지 않으므로 점수를 지어내지 않는다.
+  /// OnDevice는 softmax 원점수, Gemini는 null.
   @override
   final double? score;
 
@@ -330,10 +322,10 @@ class __$FoodCandidateCopyWithImpl<$Res>
 
 /// @nodoc
 mixin _$FoodRecognitionResult {
-  /// 인식 후보 목록. 0~3개 (Top-3, `top3_output.md`).
+  /// 후보 0~3개.
   List<FoodCandidate> get candidates;
 
-  /// 이 결과를 생성한 엔진.
+  /// 결과를 만든 엔진.
   RecognitionSource get source;
 
   /// Create a copy of FoodRecognitionResult
@@ -570,10 +562,10 @@ class _FoodRecognitionResult implements FoodRecognitionResult {
       required this.source})
       : _candidates = candidates;
 
-  /// 인식 후보 목록. 0~3개 (Top-3, `top3_output.md`).
+  /// 후보 0~3개.
   final List<FoodCandidate> _candidates;
 
-  /// 인식 후보 목록. 0~3개 (Top-3, `top3_output.md`).
+  /// 후보 0~3개.
   @override
   @JsonKey()
   List<FoodCandidate> get candidates {
@@ -582,7 +574,7 @@ class _FoodRecognitionResult implements FoodRecognitionResult {
     return EqualUnmodifiableListView(_candidates);
   }
 
-  /// 이 결과를 생성한 엔진.
+  /// 결과를 만든 엔진.
   @override
   final RecognitionSource source;
 

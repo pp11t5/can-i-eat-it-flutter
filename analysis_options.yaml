@@ -10,9 +10,8 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  # riverpod_lint 등 custom_lint 기반 규칙 활성화. 실행: `dart run custom_lint`
-  plugins:
-    - custom_lint
+  # custom_lint 0.7.x는 Dart 3.12 분석 서버의 AOT 실행과 호환되지 않는다.
+  # Riverpod 규칙은 CI의 별도 `dart run custom_lint` 단계에서 검사한다.
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"

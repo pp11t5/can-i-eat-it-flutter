@@ -169,6 +169,8 @@ dart run build_runner build --delete-conflicting-outputs
 
 ## 7. 테스트 & CI
 
+Riverpod 린트는 `dart run custom_lint`로 별도 실행한다. `custom_lint 0.7.x`의 분석 서버 플러그인은 Dart 3.12 AOT 실행과 호환되지 않아 `analysis_options.yaml`에 등록하지 않는다.
+
 `.github/workflows/ci.yml` — 단일 잡(`build`, `ubuntu-latest`, Flutter `3.44.0` stable), PR/`main` push 시 실행:
 
 1. `flutter pub get`
