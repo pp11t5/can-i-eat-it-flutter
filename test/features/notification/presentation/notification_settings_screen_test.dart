@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
 import 'package:can_i_eat_it/features/notification/data/notification_providers.dart';
 import 'package:can_i_eat_it/features/notification/data/repositories/mock_notification_repository.dart';
@@ -137,6 +139,40 @@ void main() {
       expect(find.text('주간 리포트'), findsOneWidget);
       // MY-015: 서버 발송 시각(월 10:00)·마이 «월요일 아침 10시»와 일치.
       expect(find.text('매주 월요일 10:00에 알림이 가요.'), findsOneWidget);
+    });
+
+    // 하위 OFF 색: 누를 수 있으면 진한 회색, 비활성(마스터 OFF)이면 흐린 회색.
+    testWidgets('하위 토글 OFF 색은 활성일 때 진하고 비활성일 때 흐리다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      final switches = tester.widgetList<Switch>(find.byType(Switch)).toList();
+      final child = switches[1];
+      expect(
+        child.thumbColor!.resolve({}),
+        AppColors.textPrimary.withValues(alpha: 0.38),
+      );
+      expect(
+        child.thumbColor!.resolve({WidgetState.disabled}),
+        AppColors.border,
+      );
+      expect(child.thumbColor!.resolve({WidgetState.selected}), isNull);
+      // 마스터 토글은 기본 색 유지.
+      expect(switches.first.thumbColor, isNull);
+    });
+
+    testWidgets('iOS에서는 하위 토글 색을 덮어쓰지 않는다', (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      try {
+        await tester.pumpWidget(_wrap());
+        await tester.pumpAndSettle();
+
+        final switches = tester.widgetList<Switch>(find.byType(Switch));
+        expect(switches.map((s) => s.thumbColor), everyElement(isNull));
+        expect(switches.map((s) => s.trackOutlineColor), everyElement(isNull));
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
     });
 
     testWidgets('알림 받을 시간 섹션은 표시되지 않는다', (tester) async {

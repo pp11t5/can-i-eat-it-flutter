@@ -497,8 +497,26 @@ class _ToggleRow extends StatelessWidget {
   /// false면 스위치 비활성(OS 알림 off 시).
   final bool enabled;
 
+  /// OFF 상태 색 — 누를 수 있으면 [enabled](진한 회색), 비활성이면 [disabled](흐린 회색).
+  /// M3 기본값은 테마 outline(#EAEAEA) 때문에 이 둘이 뒤바뀌어 보인다.
+  /// ON 상태는 null → 기존 색(흰 thumb + 초록 track) 유지.
+  static WidgetStateProperty<Color?> _offColor({
+    required Color enabled,
+    required Color disabled,
+  }) {
+    return WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) return null;
+      return states.contains(WidgetState.disabled) ? disabled : enabled;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isCupertino = switch (Theme.of(context).platform) {
+      TargetPlatform.iOS || TargetPlatform.macOS => true,
+      _ => false,
+    };
+
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 24,
@@ -532,6 +550,19 @@ class _ToggleRow extends StatelessWidget {
             value: value,
             onChanged: enabled ? onChanged : null,
             activeTrackColor: const Color(0xFF34C759),
+            // iOS는 Cupertino 스위치(비활성 시 opacity 0.5)라 기본값을 유지한다.
+            thumbColor: isCupertino
+                ? null
+                : _offColor(
+                    enabled: AppColors.textPrimary.withValues(alpha: 0.38),
+                    disabled: AppColors.border,
+                  ),
+            trackOutlineColor: isCupertino
+                ? null
+                : _offColor(
+                    enabled: AppColors.textPrimary.withValues(alpha: 0.12),
+                    disabled: AppColors.border,
+                  ),
           ),
         ],
       ),
