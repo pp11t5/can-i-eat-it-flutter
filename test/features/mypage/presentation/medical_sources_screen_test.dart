@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
@@ -129,5 +130,21 @@ void main() {
     await tester.pump();
 
     expect(calls, 0);
+  });
+
+  // MY-014: 탭 불가 행은 chevron 없이 탭 불가로 보여야 한다.
+  testWidgets('chevron은 출처가 있는 행에만 그린다', (tester) async {
+    await tester.pumpWidget(subject());
+
+    Finder chevronIn(String title) => find.descendant(
+          of: find.ancestor(
+            of: find.text(title),
+            matching: find.byType(InkWell),
+          ),
+          matching: find.byType(SvgPicture),
+        );
+
+    expect(chevronIn('탄산음료'), findsOneWidget);
+    expect(chevronIn('양파·마늘 · 정제 밀가루'), findsNothing);
   });
 }
