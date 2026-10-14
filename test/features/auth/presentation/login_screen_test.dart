@@ -92,6 +92,31 @@ class _RecordingAuthRepository extends _ThrowingObjectAuthRepository {
   }
 }
 
+class _PendingAuthRepository extends _ThrowingObjectAuthRepository {
+  _PendingAuthRepository() : super(const GoogleSignInCancelledException());
+
+  final pending = Completer<SignInOutcome>();
+  final calls = <String>[];
+
+  @override
+  Future<SignInOutcome> signInWithKakao({bool useKakaoAccount = false}) {
+    calls.add(useKakaoAccount ? '다른 카카오계정으로 로그인' : '카카오 로그인');
+    return pending.future;
+  }
+
+  @override
+  Future<SignInOutcome> signInWithApple() {
+    calls.add('Apple로 로그인');
+    return pending.future;
+  }
+
+  @override
+  Future<SignInOutcome> signInWithGoogle() {
+    calls.add('Google로 로그인');
+    return pending.future;
+  }
+}
+
 class _LoadingAuthController extends AuthController {
   @override
   Future<AuthSession?> build() => Completer<AuthSession?>().future;
@@ -221,6 +246,75 @@ void main() {
     await tester.pump();
     expect(repo.methods, isEmpty);
   });
+
+  for (final label in [
+    '카카오 로그인',
+    '다른 카카오계정으로 로그인',
+    'Apple로 로그인',
+    'Google로 로그인',
+  ]) {
+    for (final cancelled in [true, false]) {
+      testWidgets('$label 진행 중 버튼 잠금·스피너, 종료 후 해제 (cancel=$cancelled)',
+          (tester) async {
+        final repo = _PendingAuthRepository();
+        await tester.pumpWidget(ProviderScope(
+          overrides: [
+            // ignore: scoped_providers_should_specify_dependencies
+            authRepositoryProvider.overrideWithValue(repo),
+            // ignore: scoped_providers_should_specify_dependencies
+            fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
+          ],
+          child: MaterialApp.router(routerConfig: _testRouter()),
+        ));
+        await tester.pumpAndSettle();
+
+        // 같은 프레임 내 중복 탭도 SDK를 한 번만 호출해야 한다.
+        await tester.tap(find.text(label));
+        await tester.tap(find.text(label));
+        await tester.pump();
+        expect(repo.calls, [label]);
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        final button = label == '다른 카카오계정으로 로그인'
+            ? find.ancestor(
+                of: find.text(label), matching: find.byType(TextButton))
+            : find.ancestor(
+                of: find.text(label), matching: find.byType(InkWell));
+        expect(
+            find.descendant(
+                of: button, matching: find.byType(CircularProgressIndicator)),
+            findsOneWidget);
+        expect(
+            tester
+                .widgetList<InkWell>(find.byType(InkWell))
+                .every((w) => w.onTap == null),
+            isTrue);
+        expect(tester.widget<TextButton>(find.byType(TextButton)).onPressed,
+            isNull);
+
+        await tester.tap(find.text('Google로 로그인'));
+        expect(repo.calls, [label]);
+        repo.pending
+            .completeError(cancelled ? repo.error : const NetworkFailure());
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(
+            tester
+                .widgetList<InkWell>(find.byType(InkWell))
+                .every((w) => w.onTap != null),
+            isTrue);
+        expect(tester.widget<TextButton>(find.byType(TextButton)).onPressed,
+            isNotNull);
+        expect(find.text('로그인에 실패했어요. 잠시 후 다시 시도해 주세요.'),
+            cancelled ? findsNothing : findsOneWidget);
+        if (!cancelled) {
+          await tester.pump(const Duration(milliseconds: 200));
+          await tester.pump(const Duration(milliseconds: 2500));
+          await tester.pump(const Duration(milliseconds: 300));
+        }
+      }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+    }
+  }
 
   group('LoginScreen 로그인 동작 — SignInOutcome 분기', () {
     for (final useAccount in [false, true]) {

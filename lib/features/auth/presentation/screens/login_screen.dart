@@ -44,7 +44,10 @@ class LoginScreen extends ConsumerStatefulWidget {
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
+enum _LoginMethod { kakao, kakaoAccount, apple, google }
+
 class _LoginScreenState extends ConsumerState<LoginScreen> {
+  _LoginMethod? _signingInWith;
   // Figma 기준 비율 상수 (375×812).
   static const double _kCanvasW = 375;
   static const double _kCanvasH = 812;
@@ -74,7 +77,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
-    final isLoading = authState.isLoading;
+    final isLoading = authState.isLoading || _signingInWith != null;
 
     return Scaffold(
       backgroundColor: AppColors.loginBackground,
@@ -127,11 +130,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 right: AppSpacing.screenPadding,
                 child: _ButtonSection(
                   isLoading: isLoading,
-                  onKakaoPressed: () => _handleKakaoPressed(context),
+                  signingInWith: _signingInWith,
+                  onKakaoPressed: () =>
+                      _handleSignIn(context, _LoginMethod.kakao),
                   onKakaoAccountPressed: () =>
-                      _handleKakaoPressed(context, useKakaoAccount: true),
-                  onApplePressed: () => _handleApplePressed(context),
-                  onGooglePressed: () => _handleGooglePressed(context),
+                      _handleSignIn(context, _LoginMethod.kakaoAccount),
+                  onApplePressed: () =>
+                      _handleSignIn(context, _LoginMethod.apple),
+                  onGooglePressed: () =>
+                      _handleSignIn(context, _LoginMethod.google),
                 ),
               ),
             ],
@@ -141,47 +148,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Future<void> _handleKakaoPressed(BuildContext context,
-      {bool useKakaoAccount = false}) async {
-    // 카카오/Apple 은 Custom Tab·시스템 UI 등 외부 OAuth 플로우다.
-    // 그 구간을 전역 로딩으로 감싸면, 사용자가 로그인 없이 앱으로만 돌아올 때
-    // SDK Future 가 끝나지 않아 스피너가 영구 고정된다 → 전역 로딩 사용 금지.
-    try {
-      final outcome = await ref
-          .read(authControllerProvider.notifier)
-          .signInWithKakao(useKakaoAccount: useKakaoAccount);
-      if (!context.mounted) return;
-      await _handlePostSignIn(context, outcome);
-    } catch (e) {
-      if (!context.mounted) return;
-      if (_isUserCancelledSocialAuth(e)) return;
-      _showSignInErrorToast(context);
+  Future<void> _handleSignIn(BuildContext context, _LoginMethod method) async {
+    if (_signingInWith != null || ref.read(authControllerProvider).isLoading) {
+      return;
     }
-  }
-
-  Future<void> _handleApplePressed(BuildContext context) async {
+    // 외부 OAuth 대기는 화면의 버튼 상태로만 표시한다.
+    setState(() => _signingInWith = method);
     try {
-      final outcome =
-          await ref.read(authControllerProvider.notifier).signInWithApple();
+      final controller = ref.read(authControllerProvider.notifier);
+      final outcome = await switch (method) {
+        _LoginMethod.kakao => controller.signInWithKakao(),
+        _LoginMethod.kakaoAccount =>
+          controller.signInWithKakao(useKakaoAccount: true),
+        _LoginMethod.apple => controller.signInWithApple(),
+        _LoginMethod.google => controller.signInWithGoogle(),
+      };
       if (!context.mounted) return;
+      setState(() => _signingInWith = null);
       await _handlePostSignIn(context, outcome);
     } catch (e) {
       if (!context.mounted) return;
       if (_isUserCancelledSocialAuth(e)) return;
       _showSignInErrorToast(context);
-    }
-  }
-
-  Future<void> _handleGooglePressed(BuildContext context) async {
-    try {
-      final outcome =
-          await ref.read(authControllerProvider.notifier).signInWithGoogle();
-      if (!context.mounted) return;
-      await _handlePostSignIn(context, outcome);
-    } catch (e) {
-      if (!context.mounted) return;
-      if (_isUserCancelledSocialAuth(e)) return;
-      _showSignInErrorToast(context);
+    } finally {
+      if (mounted && _signingInWith != null) {
+        setState(() => _signingInWith = null);
+      }
     }
   }
 
@@ -203,8 +195,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   /// 로그인 실패 시 T2 토스트를 표시한다.
   ///
   /// [Failure] 서브타입과 기타 예외 모두 동일한 사용자 메시지를 노출한다.
-  /// authControllerProvider 가 AsyncError 로 전환되면 [isLoading] 이 false 로
-  /// 돌아오므로 로딩 스피너·버튼 비활성이 자동 해제된다.
+  /// 진행 상태는 [_handleSignIn]의 finally에서 해제한다.
   void _showSignInErrorToast(BuildContext context) {
     showAppToast(context, '로그인에 실패했어요. 잠시 후 다시 시도해 주세요.');
   }
@@ -269,6 +260,7 @@ class _Slogan extends StatelessWidget {
 class _ButtonSection extends StatelessWidget {
   const _ButtonSection({
     required this.isLoading,
+    required this.signingInWith,
     required this.onKakaoPressed,
     required this.onKakaoAccountPressed,
     required this.onApplePressed,
@@ -276,6 +268,7 @@ class _ButtonSection extends StatelessWidget {
   });
 
   final bool isLoading;
+  final _LoginMethod? signingInWith;
   final VoidCallback onKakaoPressed;
   final VoidCallback onKakaoAccountPressed;
   final VoidCallback onApplePressed;
@@ -288,32 +281,44 @@ class _ButtonSection extends StatelessWidget {
       children: [
         _KakaoButton(
           isLoading: isLoading,
+          isSigningIn: signingInWith == _LoginMethod.kakao,
           onPressed: isLoading ? null : onKakaoPressed,
         ),
         if (defaultTargetPlatform == TargetPlatform.iOS) ...[
           const SizedBox(height: AppSpacing.itemGap),
           _AppleButton(
             isLoading: isLoading,
+            isSigningIn: signingInWith == _LoginMethod.apple,
             onPressed: isLoading ? null : onApplePressed,
           ),
         ],
         const SizedBox(height: AppSpacing.itemGap),
         _GoogleButton(
           isLoading: isLoading,
+          isSigningIn: signingInWith == _LoginMethod.google,
           onPressed: isLoading ? null : onGooglePressed,
         ),
         const SizedBox(height: AppSpacing.itemGap),
         TextButton(
           onPressed: isLoading ? null : onKakaoAccountPressed,
-          child: Text(
-            '다른 카카오계정으로 로그인',
-            style: AppTextStyles.body2Medium.copyWith(
-              color: AppColors.textSecondary,
-              decoration: TextDecoration.underline,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (signingInWith == _LoginMethod.kakaoAccount) ...[
+                const _LoginSpinner(),
+                const SizedBox(width: AppSpacing.itemGap),
+              ],
+              Text(
+                '다른 카카오계정으로 로그인',
+                style: AppTextStyles.body2Medium.copyWith(
+                  color: AppColors.textSecondary,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ],
           ),
         ),
-        if (isLoading) ...[
+        if (isLoading && signingInWith == null) ...[
           const SizedBox(height: AppSpacing.cardPadding),
           const CircularProgressIndicator(color: AppColors.primary),
         ],
@@ -329,10 +334,12 @@ class _ButtonSection extends StatelessWidget {
 class _KakaoButton extends StatelessWidget {
   const _KakaoButton({
     required this.isLoading,
+    required this.isSigningIn,
     required this.onPressed,
   });
 
   final bool isLoading;
+  final bool isSigningIn;
   final VoidCallback? onPressed;
 
   @override
@@ -353,11 +360,14 @@ class _KakaoButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.asset(
-                  'assets/figma_extracted/kakao_logo_symbol.svg',
-                  width: 18,
-                  height: 18,
-                ),
+                if (isSigningIn)
+                  const _LoginSpinner()
+                else
+                  SvgPicture.asset(
+                    'assets/figma_extracted/kakao_logo_symbol.svg',
+                    width: 18,
+                    height: 18,
+                  ),
                 const SizedBox(width: AppSpacing.itemGap),
                 Text(
                   '카카오 로그인',
@@ -381,10 +391,12 @@ class _KakaoButton extends StatelessWidget {
 class _AppleButton extends StatelessWidget {
   const _AppleButton({
     required this.isLoading,
+    required this.isSigningIn,
     required this.onPressed,
   });
 
   final bool isLoading;
+  final bool isSigningIn;
   final VoidCallback? onPressed;
 
   @override
@@ -403,11 +415,14 @@ class _AppleButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const AppIcon(
-                  AppIcons.appleLogo,
-                  size: 22,
-                  color: AppColors.surface,
-                ),
+                if (isSigningIn)
+                  const _LoginSpinner()
+                else
+                  const AppIcon(
+                    AppIcons.appleLogo,
+                    size: 22,
+                    color: AppColors.surface,
+                  ),
                 const SizedBox(width: 15),
                 Text(
                   'Apple로 로그인',
@@ -431,10 +446,12 @@ class _AppleButton extends StatelessWidget {
 class _GoogleButton extends StatelessWidget {
   const _GoogleButton({
     required this.isLoading,
+    required this.isSigningIn,
     required this.onPressed,
   });
 
   final bool isLoading;
+  final bool isSigningIn;
   final VoidCallback? onPressed;
 
   @override
@@ -458,11 +475,14 @@ class _GoogleButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.asset(
-                  'assets/figma_extracted/google_logo.svg',
-                  width: 18,
-                  height: 18,
-                ),
+                if (isSigningIn)
+                  const _LoginSpinner()
+                else
+                  SvgPicture.asset(
+                    'assets/figma_extracted/google_logo.svg',
+                    width: 18,
+                    height: 18,
+                  ),
                 const SizedBox(width: AppSpacing.itemGap),
                 Text(
                   'Google로 로그인',
@@ -477,4 +497,19 @@ class _GoogleButton extends StatelessWidget {
       ),
     );
   }
+}
+
+class _LoginSpinner extends StatelessWidget {
+  const _LoginSpinner();
+
+  @override
+  Widget build(BuildContext context) => const SizedBox(
+        width: 18,
+        height: 18,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: AppColors.primary,
+          semanticsLabel: '로그인 진행 중',
+        ),
+      );
 }
