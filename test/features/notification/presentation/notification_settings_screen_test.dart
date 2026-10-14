@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,9 +45,12 @@ class _FailingBatchNotificationRepository implements NotificationRepository {
 /// `NotificationSettingService` 기준).
 /// - 두 토글 모두 요청 값을 무시하고 flip.
 /// - 마케팅 동의가 ON으로 바뀌면 하위 3개를 모두 켠다(`enableAll`).
-/// - GET 응답에 마케팅 동의 값이 없다 → 클라이언트 DTO 기본값 true
-///   (BE `marketingEnabled` 추가 전 상태).
+/// - GET 응답의 마케팅 동의 값: [exposesMarketing]이 false면 응답에 없어
+///   클라이언트 DTO 기본값 true(BE `marketingEnabled` 추가 전), true면 실제 값.
 class _ServerLikeNotificationRepository implements NotificationRepository {
+  _ServerLikeNotificationRepository({this.exposesMarketing = false});
+
+  final bool exposesMarketing;
   bool marketing = true;
   bool postMeal = false;
   bool dailyRecord = false;
@@ -57,7 +62,7 @@ class _ServerLikeNotificationRepository implements NotificationRepository {
         dailyRecordEnabled: dailyRecord,
         weeklyReportEnabled: weeklyReport,
         dailyTime: DailyNotificationTime.morning8,
-        marketingPushEnabled: true,
+        marketingPushEnabled: exposesMarketing ? marketing : true,
       );
 
   @override
@@ -83,6 +88,20 @@ class _ServerLikeNotificationRepository implements NotificationRepository {
 
   @override
   Future<void> updateDailyTime(DailyNotificationTime time) async {}
+}
+
+/// 동의 토글 요청이 [gate]가 완료될 때까지 서버에 반영되지 않는 느린 서버.
+class _SlowServerLikeNotificationRepository
+    extends _ServerLikeNotificationRepository {
+  _SlowServerLikeNotificationRepository() : super(exposesMarketing: true);
+
+  final gate = Completer<void>();
+
+  @override
+  Future<bool> toggleMarketingConsent(bool enabled) async {
+    await gate.future;
+    return super.toggleMarketingConsent(enabled);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -389,6 +408,92 @@ void main() {
       expect(switches[3].value, isTrue);
       expect(find.text('알림 설정 변경에 실패했어요.'), findsOneWidget);
       await tester.pump(const Duration(seconds: 3));
+    });
+
+    // MY-005: BE가 GET에 marketingEnabled를 내려주면 재진입해도 저장값이 유지된다.
+    testWidgets('marketingEnabled 응답 서버에서 재진입 시 상위·하위 상태가 유지된다',
+        (tester) async {
+      final server = _ServerLikeNotificationRepository(exposesMarketing: true);
+
+      Future<void> reenter() async {
+        await tester.pumpWidget(const SizedBox());
+        await tester.pumpWidget(_wrap(repo: server));
+        await tester.pumpAndSettle();
+      }
+
+      List<bool> values() => tester
+          .widgetList<Switch>(find.byType(Switch))
+          .map((switch_) => switch_.value)
+          .toList();
+
+      await reenter();
+      final master = find.byType(Switch).first;
+
+      // 상위 OFF → 재진입해도 OFF 유지 (S10 재현 케이스).
+      await tester.tap(master);
+      await tester.pumpAndSettle();
+      await reenter();
+      expect(values(), [false, false, false, false]);
+
+      // 상위 ON → 하위 모두 ON, 재진입 유지.
+      await tester.tap(master);
+      await tester.pumpAndSettle();
+      await reenter();
+      expect(values(), [true, true, true, true]);
+
+      // 하위 하나 OFF → 재진입 유지 (iPhone 재현 케이스).
+      await tester.tap(find.byType(Switch).at(1));
+      await tester.pumpAndSettle();
+      await reenter();
+      expect(values(), [true, false, true, true]);
+    });
+
+    // MY-005: 요청 처리 중 나갔다 바로 재진입해도 이전 값으로 돌아가지 않는다.
+    testWidgets('상위 토글 요청 중 재진입해도 새 값이 유지된다', (tester) async {
+      final server = _SlowServerLikeNotificationRepository();
+      final showScreen = ValueNotifier(true);
+      addTearDown(showScreen.dispose);
+
+      // 실제 앱처럼 ProviderScope는 유지하고 화면만 dispose/재생성한다.
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            // ignore: scoped_providers_should_specify_dependencies
+            notificationRepositoryProvider.overrideWithValue(server),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: ValueListenableBuilder<bool>(
+              valueListenable: showScreen,
+              builder: (_, show, __) =>
+                  show ? const NotificationSettingsScreen() : const SizedBox(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      List<bool> values() => tester
+          .widgetList<Switch>(find.byType(Switch))
+          .map((switch_) => switch_.value)
+          .toList();
+
+      await tester.tap(find.byType(Switch).first); // 상위 OFF — 서버 응답 대기 중
+      await tester.pump();
+
+      showScreen.value = false; // 나가기
+      await tester.pumpAndSettle();
+      showScreen.value = true; // 바로 재진입
+      await tester.pumpAndSettle();
+
+      expect(server.marketing, isTrue); // 서버는 아직 처리 전
+      expect(values().first, isFalse); // 화면은 이전 값(ON)으로 돌아가지 않음
+
+      server.gate.complete();
+      await tester.pumpAndSettle();
+
+      expect(server.marketing, isFalse);
+      expect(values(), [false, false, false, false]);
     });
 
     testWidgets('식후 알림 토글 탭 시 toggle(postMeal) 호출된다', (tester) async {

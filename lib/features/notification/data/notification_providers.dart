@@ -62,12 +62,17 @@ class NotificationSettingsController extends _$NotificationSettingsController {
       };
     });
 
+    // 요청 중 화면을 나가도 dispose되지 않게 붙잡는다 — 재진입 시 build()가
+    // 진행 중인 쓰기와 경쟁해 이전 값을 읽어 오는 것을 막는다.
+    final link = ref.keepAlive();
     try {
       await ref.read(notificationRepositoryProvider).toggle(type);
     } catch (_) {
       // 실패 시 이전 상태 복원
       state = previous;
       rethrow;
+    } finally {
+      link.close();
     }
   }
 
@@ -98,6 +103,8 @@ class NotificationSettingsController extends _$NotificationSettingsController {
     );
 
     final repository = ref.read(notificationRepositoryProvider);
+    // 순차 요청(최대 5회) 동안 화면을 나가도 dispose되지 않게 붙잡는다([toggle] 참고).
+    final link = ref.keepAlive();
     bool? agreed;
     try {
       agreed = await repository.toggleMarketingConsent(nextMarketingEnabled);
@@ -131,6 +138,8 @@ class NotificationSettingsController extends _$NotificationSettingsController {
         state = previous;
       }
       rethrow;
+    } finally {
+      link.close();
     }
   }
 
