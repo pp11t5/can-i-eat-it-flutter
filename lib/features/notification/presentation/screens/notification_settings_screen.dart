@@ -253,7 +253,8 @@ class _SettingsBody extends ConsumerWidget {
         ),
         _ToggleRow(
           title: '주간 리포트',
-          subtitle: '매주 일요일 19:00에 알림이 가요.',
+          // 서버 리포트 생성 cron(월 10:00 KST) 완료 직후 발송 — 마이 «월요일 아침 10시»와 일치.
+          subtitle: '매주 월요일 10:00에 알림이 가요.',
           value: settings.weeklyReportEnabled,
           enabled: togglesEnabled,
           onChanged: (v) => _handleToggle(

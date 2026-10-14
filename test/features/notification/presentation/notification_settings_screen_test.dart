@@ -89,6 +89,8 @@ void main() {
       expect(find.text('식후 2시간 알림'), findsOneWidget);
       expect(find.text('식단 기록 알림'), findsOneWidget);
       expect(find.text('주간 리포트'), findsOneWidget);
+      // MY-015: 서버 발송 시각(월 10:00)·마이 «월요일 아침 10시»와 일치.
+      expect(find.text('매주 월요일 10:00에 알림이 가요.'), findsOneWidget);
     });
 
     testWidgets('알림 받을 시간 섹션은 표시되지 않는다', (tester) async {
