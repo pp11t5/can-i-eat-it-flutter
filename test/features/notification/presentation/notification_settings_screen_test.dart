@@ -31,7 +31,53 @@ class _FailingBatchNotificationRepository implements NotificationRepository {
   }
 
   @override
-  Future<void> toggleMarketingConsent(bool enabled) async {}
+  Future<bool> toggleMarketingConsent(bool enabled) async => enabled;
+
+  @override
+  Future<void> updateDailyTime(DailyNotificationTime time) async {}
+}
+
+/// 운영 서버 동작을 그대로 흉내 낸다 (GERD_BE `ConsentService`·
+/// `NotificationSettingService` 기준).
+/// - 두 토글 모두 요청 값을 무시하고 flip.
+/// - 마케팅 동의가 ON으로 바뀌면 하위 3개를 모두 켠다(`enableAll`).
+/// - GET 응답에 마케팅 동의 값이 없다 → 클라이언트 DTO 기본값 true
+///   (BE `marketingEnabled` 추가 전 상태).
+class _ServerLikeNotificationRepository implements NotificationRepository {
+  bool marketing = true;
+  bool postMeal = false;
+  bool dailyRecord = false;
+  bool weeklyReport = false;
+
+  @override
+  Future<NotificationSettings> fetch() async => NotificationSettings(
+        postMealEnabled: postMeal,
+        dailyRecordEnabled: dailyRecord,
+        weeklyReportEnabled: weeklyReport,
+        dailyTime: DailyNotificationTime.morning8,
+        marketingPushEnabled: true,
+      );
+
+  @override
+  Future<void> toggle(NotificationToggleType type) async {
+    switch (type) {
+      case NotificationToggleType.postMeal:
+        postMeal = !postMeal;
+      case NotificationToggleType.dailyRecord:
+        dailyRecord = !dailyRecord;
+      case NotificationToggleType.weeklyReport:
+        weeklyReport = !weeklyReport;
+    }
+  }
+
+  @override
+  Future<bool> toggleMarketingConsent(bool enabled) async {
+    marketing = !marketing;
+    if (marketing) {
+      postMeal = dailyRecord = weeklyReport = true;
+    }
+    return marketing;
+  }
 
   @override
   Future<void> updateDailyTime(DailyNotificationTime time) async {}
@@ -185,7 +231,7 @@ void main() {
           everyElement(isNull));
     });
 
-    testWidgets('마스터를 다시 ON으로 켜도 하위 알림은 OFF로 유지한다', (tester) async {
+    testWidgets('마스터를 다시 ON으로 켜면 서버 정책대로 하위 알림이 모두 ON이 된다', (tester) async {
       final mock = MockNotificationRepository(
         seed: const NotificationSettings(
           postMealEnabled: true,
@@ -215,11 +261,62 @@ void main() {
       expect(mock.toggleCalls, hasLength(2));
 
       final switches = tester.widgetList<Switch>(find.byType(Switch)).toList();
-      expect(switches.first.value, isTrue);
-      expect(switches.skip(1).map((switch_) => switch_.value),
-          everyElement(isFalse));
+      expect(switches.map((switch_) => switch_.value), everyElement(isTrue));
       expect(switches.skip(1).map((switch_) => switch_.onChanged),
           everyElement(isNotNull));
+    });
+
+    // MY-005 회귀: 화면 표시가 항상 서버 저장값과 일치해야 한다.
+    testWidgets('flip 서버에서 마스터 OFF→ON·하위 변경 후에도 화면과 저장값이 일치한다',
+        (tester) async {
+      final server = _ServerLikeNotificationRepository();
+      await tester.pumpWidget(_wrap(repo: server));
+      await tester.pumpAndSettle();
+
+      void expectScreenMatchesServer() {
+        final values = tester
+            .widgetList<Switch>(find.byType(Switch))
+            .map((switch_) => switch_.value)
+            .toList();
+        expect(values, [
+          server.marketing,
+          server.postMeal,
+          server.dailyRecord,
+          server.weeklyReport,
+        ]);
+      }
+
+      final master = find.byType(Switch).first;
+
+      // 마스터 OFF → 하위 모두 OFF.
+      await tester.tap(master);
+      await tester.pumpAndSettle();
+      expect(server.marketing, isFalse);
+      expectScreenMatchesServer();
+
+      // 마스터 ON → 서버 enableAll로 하위 모두 ON.
+      await tester.tap(master);
+      await tester.pumpAndSettle();
+      expect(
+        [server.postMeal, server.dailyRecord, server.weeklyReport],
+        everyElement(isTrue),
+      );
+      expectScreenMatchesServer();
+
+      // 하위 하나 OFF.
+      await tester.tap(find.byType(Switch).at(1));
+      await tester.pumpAndSettle();
+      expect(server.postMeal, isFalse);
+      expectScreenMatchesServer();
+
+      // 하위가 섞인 상태에서 마스터 OFF → 남은 하위도 모두 OFF.
+      await tester.tap(master);
+      await tester.pumpAndSettle();
+      expect(
+        [server.postMeal, server.dailyRecord, server.weeklyReport],
+        everyElement(isFalse),
+      );
+      expectScreenMatchesServer();
     });
 
     testWidgets('일괄 변경 실패 시 서버 설정을 다시 조회해 상태를 복구한다', (tester) async {
@@ -246,9 +343,11 @@ void main() {
       await tester.tap(find.byType(Switch).first);
       await tester.pumpAndSettle();
 
-      expect(repository.fetchCalls, 2);
+      // 초기 조회 + 동의 토글 후 조회 + 실패 복구 조회.
+      expect(repository.fetchCalls, 3);
       final switches = tester.widgetList<Switch>(find.byType(Switch)).toList();
-      expect(switches.first.value, isTrue);
+      // 동의 토글은 성공(OFF)했으므로 마스터는 서버 동의 값을 따른다.
+      expect(switches.first.value, isFalse);
       expect(switches[1].value, isTrue);
       expect(switches[2].value, isFalse);
       expect(switches[3].value, isTrue);
