@@ -603,11 +603,15 @@ class _SettingsSection extends ConsumerWidget {
 
 // ---------------------------------------------------------------------------
 // 약관 섹션 (Figma: padding 24 · 행 사이 24+24=48 · radius 16)
-// - 서비스 이용 약관 / 개인정보 수집·이용 동의 / 의학 정보 출처
+// - 서비스 이용약관 / 개인정보 처리방침 / 의학 정보 출처
 // ---------------------------------------------------------------------------
 
 class _TermsSection extends StatelessWidget {
   const _TermsSection();
+
+  // 행 라벨 통일
+  static const _tosTitle = '서비스 이용약관';
+  static const _privacyTitle = '개인정보 처리방침';
 
   @override
   Widget build(BuildContext context) {
@@ -623,11 +627,11 @@ class _TermsSection extends StatelessWidget {
         children: [
           // rootNavigator: 바텀 탭 셸 위로 올려 탭바가 가리지 않게 한다.
           _TermsRow(
-            label: '서비스 이용 약관',
+            label: _tosTitle,
             onTap: () => Navigator.of(context, rootNavigator: true).push(
               MaterialPageRoute(
                 builder: (_) => const TermsDetailScreen(
-                  title: '서비스 이용약관',
+                  title: _tosTitle,
                   url: TermsCatalog.tosUrl,
                 ),
               ),
@@ -643,11 +647,11 @@ class _TermsSection extends StatelessWidget {
             ),
           ),
           _TermsRow(
-            label: '개인정보 수집·이용 동의',
+            label: _privacyTitle,
             onTap: () => Navigator.of(context, rootNavigator: true).push(
               MaterialPageRoute(
                 builder: (_) => const TermsDetailScreen(
-                  title: '개인정보 보호 약관',
+                  title: _privacyTitle,
                   url: TermsCatalog.privacyUrl,
                 ),
               ),

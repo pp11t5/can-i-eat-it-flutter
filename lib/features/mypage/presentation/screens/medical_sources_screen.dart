@@ -186,16 +186,19 @@ class _SourceRow extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: AppSpacing.itemGap),
-          SvgPicture.asset(
-            AppIcons.chevronRight,
-            width: AppIconSizes.s24,
-            height: AppIconSizes.s24,
-            colorFilter: const ColorFilter.mode(
-              AppColors.textTertiary,
-              BlendMode.srcIn,
+          // 링크 없는 행(개인 기록 기반)은 탭 불가 — chevron도 그리지 않는다.
+          if (item.url != null) ...[
+            const SizedBox(width: AppSpacing.itemGap),
+            SvgPicture.asset(
+              AppIcons.chevronRight,
+              width: AppIconSizes.s24,
+              height: AppIconSizes.s24,
+              colorFilter: const ColorFilter.mode(
+                AppColors.textTertiary,
+                BlendMode.srcIn,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

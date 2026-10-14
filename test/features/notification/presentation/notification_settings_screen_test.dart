@@ -1,7 +1,11 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
 import 'package:can_i_eat_it/features/notification/data/notification_providers.dart';
 import 'package:can_i_eat_it/features/notification/data/repositories/mock_notification_repository.dart';
@@ -31,10 +35,73 @@ class _FailingBatchNotificationRepository implements NotificationRepository {
   }
 
   @override
-  Future<void> toggleMarketingConsent(bool enabled) async {}
+  Future<bool> toggleMarketingConsent(bool enabled) async => enabled;
 
   @override
   Future<void> updateDailyTime(DailyNotificationTime time) async {}
+}
+
+/// 운영 서버 동작을 그대로 흉내 낸다 (GERD_BE `ConsentService`·
+/// `NotificationSettingService` 기준).
+/// - 두 토글 모두 요청 값을 무시하고 flip.
+/// - 마케팅 동의가 ON으로 바뀌면 하위 3개를 모두 켠다(`enableAll`).
+/// - GET 응답의 마케팅 동의 값: [exposesMarketing]이 false면 응답에 없어
+///   클라이언트 DTO 기본값 true(BE `marketingEnabled` 추가 전), true면 실제 값.
+class _ServerLikeNotificationRepository implements NotificationRepository {
+  _ServerLikeNotificationRepository({this.exposesMarketing = false});
+
+  final bool exposesMarketing;
+  bool marketing = true;
+  bool postMeal = false;
+  bool dailyRecord = false;
+  bool weeklyReport = false;
+
+  @override
+  Future<NotificationSettings> fetch() async => NotificationSettings(
+        postMealEnabled: postMeal,
+        dailyRecordEnabled: dailyRecord,
+        weeklyReportEnabled: weeklyReport,
+        dailyTime: DailyNotificationTime.morning8,
+        marketingPushEnabled: exposesMarketing ? marketing : true,
+      );
+
+  @override
+  Future<void> toggle(NotificationToggleType type) async {
+    switch (type) {
+      case NotificationToggleType.postMeal:
+        postMeal = !postMeal;
+      case NotificationToggleType.dailyRecord:
+        dailyRecord = !dailyRecord;
+      case NotificationToggleType.weeklyReport:
+        weeklyReport = !weeklyReport;
+    }
+  }
+
+  @override
+  Future<bool> toggleMarketingConsent(bool enabled) async {
+    marketing = !marketing;
+    if (marketing) {
+      postMeal = dailyRecord = weeklyReport = true;
+    }
+    return marketing;
+  }
+
+  @override
+  Future<void> updateDailyTime(DailyNotificationTime time) async {}
+}
+
+/// 동의 토글 요청이 [gate]가 완료될 때까지 서버에 반영되지 않는 느린 서버.
+class _SlowServerLikeNotificationRepository
+    extends _ServerLikeNotificationRepository {
+  _SlowServerLikeNotificationRepository() : super(exposesMarketing: true);
+
+  final gate = Completer<void>();
+
+  @override
+  Future<bool> toggleMarketingConsent(bool enabled) async {
+    await gate.future;
+    return super.toggleMarketingConsent(enabled);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -89,6 +156,42 @@ void main() {
       expect(find.text('식후 2시간 알림'), findsOneWidget);
       expect(find.text('식단 기록 알림'), findsOneWidget);
       expect(find.text('주간 리포트'), findsOneWidget);
+      // MY-015: 서버 발송 시각(월 10:00)·마이 «월요일 아침 10시»와 일치.
+      expect(find.text('매주 월요일 10:00에 알림이 가요.'), findsOneWidget);
+    });
+
+    // 하위 OFF 색: 누를 수 있으면 진한 회색, 비활성(마스터 OFF)이면 흐린 회색.
+    testWidgets('하위 토글 OFF 색은 활성일 때 진하고 비활성일 때 흐리다', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      final switches = tester.widgetList<Switch>(find.byType(Switch)).toList();
+      final child = switches[1];
+      expect(
+        child.thumbColor!.resolve({}),
+        AppColors.textPrimary.withValues(alpha: 0.38),
+      );
+      expect(
+        child.thumbColor!.resolve({WidgetState.disabled}),
+        AppColors.border,
+      );
+      expect(child.thumbColor!.resolve({WidgetState.selected}), isNull);
+      // 마스터 토글은 기본 색 유지.
+      expect(switches.first.thumbColor, isNull);
+    });
+
+    testWidgets('iOS에서는 하위 토글 색을 덮어쓰지 않는다', (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      try {
+        await tester.pumpWidget(_wrap());
+        await tester.pumpAndSettle();
+
+        final switches = tester.widgetList<Switch>(find.byType(Switch));
+        expect(switches.map((s) => s.thumbColor), everyElement(isNull));
+        expect(switches.map((s) => s.trackOutlineColor), everyElement(isNull));
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
     });
 
     testWidgets('알림 받을 시간 섹션은 표시되지 않는다', (tester) async {
@@ -183,7 +286,7 @@ void main() {
           everyElement(isNull));
     });
 
-    testWidgets('마스터를 다시 ON으로 켜도 하위 알림은 OFF로 유지한다', (tester) async {
+    testWidgets('마스터를 다시 ON으로 켜면 서버 정책대로 하위 알림이 모두 ON이 된다', (tester) async {
       final mock = MockNotificationRepository(
         seed: const NotificationSettings(
           postMealEnabled: true,
@@ -213,11 +316,62 @@ void main() {
       expect(mock.toggleCalls, hasLength(2));
 
       final switches = tester.widgetList<Switch>(find.byType(Switch)).toList();
-      expect(switches.first.value, isTrue);
-      expect(switches.skip(1).map((switch_) => switch_.value),
-          everyElement(isFalse));
+      expect(switches.map((switch_) => switch_.value), everyElement(isTrue));
       expect(switches.skip(1).map((switch_) => switch_.onChanged),
           everyElement(isNotNull));
+    });
+
+    // MY-005 회귀: 화면 표시가 항상 서버 저장값과 일치해야 한다.
+    testWidgets('flip 서버에서 마스터 OFF→ON·하위 변경 후에도 화면과 저장값이 일치한다',
+        (tester) async {
+      final server = _ServerLikeNotificationRepository();
+      await tester.pumpWidget(_wrap(repo: server));
+      await tester.pumpAndSettle();
+
+      void expectScreenMatchesServer() {
+        final values = tester
+            .widgetList<Switch>(find.byType(Switch))
+            .map((switch_) => switch_.value)
+            .toList();
+        expect(values, [
+          server.marketing,
+          server.postMeal,
+          server.dailyRecord,
+          server.weeklyReport,
+        ]);
+      }
+
+      final master = find.byType(Switch).first;
+
+      // 마스터 OFF → 하위 모두 OFF.
+      await tester.tap(master);
+      await tester.pumpAndSettle();
+      expect(server.marketing, isFalse);
+      expectScreenMatchesServer();
+
+      // 마스터 ON → 서버 enableAll로 하위 모두 ON.
+      await tester.tap(master);
+      await tester.pumpAndSettle();
+      expect(
+        [server.postMeal, server.dailyRecord, server.weeklyReport],
+        everyElement(isTrue),
+      );
+      expectScreenMatchesServer();
+
+      // 하위 하나 OFF.
+      await tester.tap(find.byType(Switch).at(1));
+      await tester.pumpAndSettle();
+      expect(server.postMeal, isFalse);
+      expectScreenMatchesServer();
+
+      // 하위가 섞인 상태에서 마스터 OFF → 남은 하위도 모두 OFF.
+      await tester.tap(master);
+      await tester.pumpAndSettle();
+      expect(
+        [server.postMeal, server.dailyRecord, server.weeklyReport],
+        everyElement(isFalse),
+      );
+      expectScreenMatchesServer();
     });
 
     testWidgets('일괄 변경 실패 시 서버 설정을 다시 조회해 상태를 복구한다', (tester) async {
@@ -244,14 +398,102 @@ void main() {
       await tester.tap(find.byType(Switch).first);
       await tester.pumpAndSettle();
 
-      expect(repository.fetchCalls, 2);
+      // 초기 조회 + 동의 토글 후 조회 + 실패 복구 조회.
+      expect(repository.fetchCalls, 3);
       final switches = tester.widgetList<Switch>(find.byType(Switch)).toList();
-      expect(switches.first.value, isTrue);
+      // 동의 토글은 성공(OFF)했으므로 마스터는 서버 동의 값을 따른다.
+      expect(switches.first.value, isFalse);
       expect(switches[1].value, isTrue);
       expect(switches[2].value, isFalse);
       expect(switches[3].value, isTrue);
       expect(find.text('알림 설정 변경에 실패했어요.'), findsOneWidget);
       await tester.pump(const Duration(seconds: 3));
+    });
+
+    // MY-005: BE가 GET에 marketingEnabled를 내려주면 재진입해도 저장값이 유지된다.
+    testWidgets('marketingEnabled 응답 서버에서 재진입 시 상위·하위 상태가 유지된다',
+        (tester) async {
+      final server = _ServerLikeNotificationRepository(exposesMarketing: true);
+
+      Future<void> reenter() async {
+        await tester.pumpWidget(const SizedBox());
+        await tester.pumpWidget(_wrap(repo: server));
+        await tester.pumpAndSettle();
+      }
+
+      List<bool> values() => tester
+          .widgetList<Switch>(find.byType(Switch))
+          .map((switch_) => switch_.value)
+          .toList();
+
+      await reenter();
+      final master = find.byType(Switch).first;
+
+      // 상위 OFF → 재진입해도 OFF 유지 (S10 재현 케이스).
+      await tester.tap(master);
+      await tester.pumpAndSettle();
+      await reenter();
+      expect(values(), [false, false, false, false]);
+
+      // 상위 ON → 하위 모두 ON, 재진입 유지.
+      await tester.tap(master);
+      await tester.pumpAndSettle();
+      await reenter();
+      expect(values(), [true, true, true, true]);
+
+      // 하위 하나 OFF → 재진입 유지 (iPhone 재현 케이스).
+      await tester.tap(find.byType(Switch).at(1));
+      await tester.pumpAndSettle();
+      await reenter();
+      expect(values(), [true, false, true, true]);
+    });
+
+    // MY-005: 요청 처리 중 나갔다 바로 재진입해도 이전 값으로 돌아가지 않는다.
+    testWidgets('상위 토글 요청 중 재진입해도 새 값이 유지된다', (tester) async {
+      final server = _SlowServerLikeNotificationRepository();
+      final showScreen = ValueNotifier(true);
+      addTearDown(showScreen.dispose);
+
+      // 실제 앱처럼 ProviderScope는 유지하고 화면만 dispose/재생성한다.
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            // ignore: scoped_providers_should_specify_dependencies
+            notificationRepositoryProvider.overrideWithValue(server),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: ValueListenableBuilder<bool>(
+              valueListenable: showScreen,
+              builder: (_, show, __) =>
+                  show ? const NotificationSettingsScreen() : const SizedBox(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      List<bool> values() => tester
+          .widgetList<Switch>(find.byType(Switch))
+          .map((switch_) => switch_.value)
+          .toList();
+
+      await tester.tap(find.byType(Switch).first); // 상위 OFF — 서버 응답 대기 중
+      await tester.pump();
+
+      showScreen.value = false; // 나가기
+      await tester.pumpAndSettle();
+      showScreen.value = true; // 바로 재진입
+      await tester.pumpAndSettle();
+
+      expect(server.marketing, isTrue); // 서버는 아직 처리 전
+      expect(values().first, isFalse); // 화면은 이전 값(ON)으로 돌아가지 않음
+
+      server.gate.complete();
+      await tester.pumpAndSettle();
+
+      expect(server.marketing, isFalse);
+      expect(values(), [false, false, false, false]);
     });
 
     testWidgets('식후 알림 토글 탭 시 toggle(postMeal) 호출된다', (tester) async {
