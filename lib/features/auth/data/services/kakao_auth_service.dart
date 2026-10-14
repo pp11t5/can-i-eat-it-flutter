@@ -1,5 +1,13 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+
+/// 카카오톡·브라우저 닫기와 동의 화면 취소를 같은 사용자 취소로 처리한다.
+bool isKakaoSignInCancelled(Object error) =>
+    (error is KakaoClientException &&
+        error.reason == ClientErrorCause.cancelled) ||
+    (error is PlatformException && error.code == 'CANCELED') ||
+    (error is KakaoAuthException && error.error == AuthErrorCause.accessDenied);
 
 /// 카카오 SDK 얇은 래퍼 (ADR-0007 §3-1 (6-A)).
 ///
@@ -48,8 +56,7 @@ class KakaoAuthServiceImpl implements KakaoAuthService {
       try {
         return await _userApi.loginWithKakaoTalk();
       } catch (error) {
-        if (error is KakaoClientException &&
-            error.reason == ClientErrorCause.cancelled) {
+        if (isKakaoSignInCancelled(error)) {
           rethrow;
         }
         _debugLog('카카오톡 인증 실패: 계정 로그인으로 전환');
