@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
@@ -14,6 +13,7 @@ import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/features/auth/data/services/google_auth_service.dart';
+import 'package:can_i_eat_it/features/auth/data/services/kakao_auth_service.dart';
 import 'package:can_i_eat_it/features/auth/domain/entities/sign_in_outcome.dart';
 import 'package:can_i_eat_it/features/auth/presentation/providers/auth_providers.dart';
 import 'package:can_i_eat_it/features/auth/presentation/widgets/deletion_grace_dialog.dart';
@@ -187,8 +187,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   /// 사용자가 OAuth UI 를 닫거나 취소한 경우 — 실패 토스트 없이 로그인 화면 유지.
   bool _isUserCancelledSocialAuth(Object error) {
-    if (error is KakaoClientException &&
-        error.reason == ClientErrorCause.cancelled) {
+    if (isKakaoSignInCancelled(error)) {
       return true;
     }
     if (error is SignInWithAppleAuthorizationException &&

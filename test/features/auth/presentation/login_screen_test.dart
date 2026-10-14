@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
@@ -350,78 +352,100 @@ void main() {
   });
 
   group('LoginScreen 소셜 로그인 취소', () {
-    testWidgets(
-      'Kakao 사용자 취소(ClientErrorCause.cancelled) — 실패 토스트 없이 로그인 화면 유지',
-      (tester) async {
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              // ignore: scoped_providers_should_specify_dependencies
-              authRepositoryProvider.overrideWithValue(
-                _ThrowingObjectAuthRepository(
-                  KakaoClientException(
-                    ClientErrorCause.cancelled,
-                    'User Cancelled',
+    final cancellations = <String, Object>{
+      'SDK cancelled':
+          KakaoClientException(ClientErrorCause.cancelled, 'cancelled'),
+      'native CANCELED': PlatformException(code: 'CANCELED'),
+      'consent denied':
+          KakaoAuthException(AuthErrorCause.accessDenied, 'User denied access'),
+    };
+    for (final entry in cancellations.entries) {
+      for (final useAccount in [false, true]) {
+        testWidgets(
+          'Kakao ${entry.key} — 실패 토스트 없음, account=$useAccount',
+          (tester) async {
+            await tester.pumpWidget(
+              ProviderScope(
+                overrides: [
+                  // ignore: scoped_providers_should_specify_dependencies
+                  authRepositoryProvider.overrideWithValue(
+                    _ThrowingObjectAuthRepository(
+                      entry.value,
+                    ),
+                  ),
+                  // ignore: scoped_providers_should_specify_dependencies
+                  fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
+                ],
+                child: MaterialApp.router(routerConfig: _testRouter()),
+              ),
+            );
+            await tester.pumpAndSettle();
+
+            await tester
+                .tap(find.text(useAccount ? '다른 카카오계정으로 로그인' : '카카오 로그인'));
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 100));
+
+            expect(
+              find.text('로그인에 실패했어요. 잠시 후 다시 시도해 주세요.'),
+              findsNothing,
+            );
+            expect(find.text('카카오 로그인'), findsOneWidget);
+            expect(find.byType(CircularProgressIndicator), findsNothing);
+          },
+          variant: const TargetPlatformVariant(
+              {TargetPlatform.android, TargetPlatform.iOS}),
+        );
+      }
+    }
+
+    final otherCancellations = <String, Object>{
+      'Google로 로그인': const GoogleSignInCancelledException(),
+      'Apple로 로그인': const SignInWithAppleAuthorizationException(
+        code: AuthorizationErrorCode.canceled,
+        message: 'User canceled',
+      ),
+    };
+    for (final entry in otherCancellations.entries) {
+      testWidgets(
+        '${entry.key} 사용자 취소 — 실패 토스트 없이 로그인 화면 유지',
+        (tester) async {
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: [
+                // ignore: scoped_providers_should_specify_dependencies
+                authRepositoryProvider.overrideWithValue(
+                  _ThrowingObjectAuthRepository(
+                    entry.value,
                   ),
                 ),
-              ),
-              // ignore: scoped_providers_should_specify_dependencies
-              fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
-            ],
-            child: MaterialApp.router(routerConfig: _testRouter()),
-          ),
-        );
-        await tester.pumpAndSettle();
+                // ignore: scoped_providers_should_specify_dependencies
+                fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
+              ],
+              child: MaterialApp.router(routerConfig: _testRouter()),
+            ),
+          );
+          await tester.pumpAndSettle();
 
-        await tester.tap(find.text('카카오 로그인'));
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 100));
+          expect(find.text(entry.key), findsOneWidget);
+          expect(find.text('다른 카카오계정으로 로그인'), findsOneWidget);
+          await tester.tap(find.text(entry.key));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 100));
 
-        expect(
-          find.text('로그인에 실패했어요. 잠시 후 다시 시도해 주세요.'),
-          findsNothing,
-        );
-        expect(find.text('카카오 로그인'), findsOneWidget);
-        expect(find.byType(CircularProgressIndicator), findsNothing);
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.android),
-    );
-
-    testWidgets(
-      'Google 사용자 취소 — 실패 토스트 없이 로그인 화면 유지',
-      (tester) async {
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              // ignore: scoped_providers_should_specify_dependencies
-              authRepositoryProvider.overrideWithValue(
-                _ThrowingObjectAuthRepository(
-                  const GoogleSignInCancelledException(),
-                ),
-              ),
-              // ignore: scoped_providers_should_specify_dependencies
-              fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
-            ],
-            child: MaterialApp.router(routerConfig: _testRouter()),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        expect(find.text('Google로 로그인'), findsOneWidget);
-        expect(find.text('다른 카카오계정으로 로그인'), findsOneWidget);
-        await tester.tap(find.text('Google로 로그인'));
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 100));
-
-        expect(
-          find.text('로그인에 실패했어요. 잠시 후 다시 시도해 주세요.'),
-          findsNothing,
-        );
-        expect(find.text('Google로 로그인'), findsOneWidget);
-        expect(find.text('다른 카카오계정으로 로그인'), findsOneWidget);
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.android),
-    );
+          expect(
+            find.text('로그인에 실패했어요. 잠시 후 다시 시도해 주세요.'),
+            findsNothing,
+          );
+          expect(find.text(entry.key), findsOneWidget);
+          expect(find.text('다른 카카오계정으로 로그인'), findsOneWidget);
+        },
+        variant: entry.key == 'Apple로 로그인'
+            ? TargetPlatformVariant.only(TargetPlatform.iOS)
+            : const TargetPlatformVariant(
+                {TargetPlatform.android, TargetPlatform.iOS}),
+      );
+    }
   });
 
   group('LoginScreen 로그인 실패 T2 토스트 (Bug A 회귀)', () {

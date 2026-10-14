@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
@@ -101,13 +102,6 @@ void main() {
     expect(api.calls, ['talk', 'account', 'me']);
   });
 
-  test('Talk cancellation: propagates without Account fallback', () async {
-    final error = KakaoClientException(ClientErrorCause.cancelled, 'cancelled');
-    api.talkError = error;
-    await expectLater(service.signIn(), throwsA(same(error)));
-    expect(api.calls, ['talk']);
-  });
-
   test('explicit Account: forces login and skips Talk installation check',
       () async {
     await service.signIn(useKakaoAccount: true);
@@ -116,14 +110,40 @@ void main() {
     expect(installationChecks, 0);
   });
 
-  test('Account cancellation propagates without Talk attempt', () async {
-    final error = KakaoClientException(ClientErrorCause.cancelled, 'cancelled');
-    api.accountError = error;
-    await expectLater(
-      service.signIn(useKakaoAccount: true),
-      throwsA(same(error)),
-    );
-    expect(api.calls, ['account']);
+  final cancellations = <String, Object>{
+    'SDK cancelled':
+        KakaoClientException(ClientErrorCause.cancelled, 'cancelled'),
+    'native CANCELED': PlatformException(code: 'CANCELED'),
+    'consent denied':
+        KakaoAuthException(AuthErrorCause.accessDenied, 'User denied access'),
+  };
+  for (final entry in cancellations.entries) {
+    test('Talk ${entry.key}: propagates without Account fallback', () async {
+      api.talkError = entry.value;
+      await expectLater(service.signIn(), throwsA(same(entry.value)));
+      expect(api.calls, ['talk']);
+    });
+
+    for (final useAccount in [false, true]) {
+      test('Account ${entry.key}: propagates, explicit=$useAccount', () async {
+        installed = false;
+        api.accountError = entry.value;
+        await expectLater(
+          service.signIn(useKakaoAccount: useAccount),
+          throwsA(same(entry.value)),
+        );
+        expect(api.calls, ['account']);
+      });
+    }
+  }
+
+  test('non-cancellation SDK errors remain failures', () {
+    expect(isKakaoSignInCancelled(PlatformException(code: 'FAILED')), isFalse);
+    expect(
+        isKakaoSignInCancelled(
+          KakaoAuthException(AuthErrorCause.serverError, 'server error'),
+        ),
+        isFalse);
   });
 
   test('missing OIDC token fails before user lookup, without fallback',
