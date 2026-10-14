@@ -27,10 +27,10 @@ class HomeSearchBar extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.only(
-          top: 8,
-          bottom: 8,
-          left: 24,
-          right: 8,
+          top: AppSpacing.homeSearchBarPaddingV,
+          bottom: AppSpacing.homeSearchBarPaddingV,
+          left: AppSpacing.homeSearchBarPaddingLeft,
+          right: AppSpacing.homeSearchBarPaddingRight,
         ),
         decoration: BoxDecoration(
           color: AppColors.surfaceMuted, // #F5F5F5
