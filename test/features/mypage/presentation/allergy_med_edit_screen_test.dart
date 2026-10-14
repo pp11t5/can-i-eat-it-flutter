@@ -9,6 +9,7 @@ import 'package:can_i_eat_it/features/health_profile/data/repositories/mock_heal
 import 'package:can_i_eat_it/features/health_profile/data/sources/profile_cache.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/entities/health_profile.dart';
 import 'package:can_i_eat_it/features/health_profile/domain/repositories/health_profile_repository.dart';
+import 'package:can_i_eat_it/features/mypage/domain/medical_sources_catalog.dart';
 import 'package:can_i_eat_it/features/mypage/presentation/screens/allergy_med_edit_screen.dart';
 
 // ---------------------------------------------------------------------------
@@ -160,12 +161,20 @@ void main() {
       expect(find.byType(TextField), findsNothing);
     });
 
-    testWidgets('ACG 가이드라인 안내가 표시된다', (tester) async {
+    // MY-016: 알레르기 근거는 ACG가 아닌 식약처 표시기준으로 연결한다.
+    testWidgets('알레르기 근거 링크는 식약처 표시기준(식품안전나라)으로 연결된다', (tester) async {
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
 
       expect(find.byType(MedicalSourcesLink), findsOneWidget);
-      expect(find.text('ACG 2022 가이드라인을 바탕으로 한 정보예요'), findsOneWidget);
+      expect(find.text('식약처 「식품등의 표시기준」을 바탕으로 한 정보예요'), findsOneWidget);
+      expect(find.text('ACG 2022 가이드라인을 바탕으로 한 정보예요'), findsNothing);
+
+      final link = tester.widget<MedicalSourcesLink>(
+        find.byType(MedicalSourcesLink),
+      );
+      expect(link.sourceUrl, MedicalSourcesCatalog.allergenLabelingUrl);
+      expect(link.pageTitle, MedicalSourcesCatalog.allergenPageTitle);
     });
 
     testWidgets('알레르기 칩 탭 → 토글 (미선택 → 선택 → 미선택)', (tester) async {
@@ -316,7 +325,7 @@ void main() {
 
       // 재시도 성공 → 폼 표시
       expect(find.text('저장하기'), findsOneWidget);
-      expect(find.text('ACG 2022 가이드라인을 바탕으로 한 정보예요'), findsOneWidget);
+      expect(find.text('식약처 「식품등의 표시기준」을 바탕으로 한 정보예요'), findsOneWidget);
       expect(repo.fetchAttempts, 2);
     });
   });
