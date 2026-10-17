@@ -4,12 +4,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
+import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
+import 'package:can_i_eat_it/features/home/domain/entities/user_streak.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/home_search_bar.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
 import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
@@ -24,7 +26,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // loading/error 시 '—' 폴백 (_FoodHistoryCard valueOrNull 패턴과 동일).
-    final streakDays = ref.watch(myStreakProvider).valueOrNull;
+    final userStreak = ref.watch(myStreakProvider).valueOrNull;
     final unrecordedCount = ref.watch(unrecordedMealCountProvider).valueOrNull;
     final topSearchedFoods =
         (ref.watch(topSearchedFoodsProvider).valueOrNull ?? const [])
@@ -45,10 +47,13 @@ class HomeScreen extends ConsumerWidget {
 
               // ── 1. 인사말 블록 ─────────────────────────────────────────
               // 캐릭터 하단이 검색바 상단과 맞붙도록 gap 0 (Figma 절대배치 overlap).
-              _GreetingBlock(streakDays: streakDays),
+              _GreetingBlock(userStreak: userStreak),
 
               // ── 2. 검색 바 ────────────────────────────────────────────
-              HomeSearchBar(onTap: () => context.push('/check')),
+              HomeSearchBar(
+                onTap: () => context.push('/check'),
+                onCameraTap: () => context.push('/food-recognition'),
+              ),
               const SizedBox(height: 14),
 
               // ── 3. 제안 칩 행 — Figma 1207:6604 단일 행 수평 스크롤 ────────
@@ -129,10 +134,10 @@ class HomeScreen extends ConsumerWidget {
 // ── 인사말 블록 (캐릭터 이미지 + 텍스트) ────────────────────────────────────
 
 class _GreetingBlock extends StatelessWidget {
-  const _GreetingBlock({required this.streakDays});
+  const _GreetingBlock({required this.userStreak});
 
   /// 연속 편안 일수. myStreakProvider loading/error 시 null → '—' 폴백.
-  final int? streakDays;
+  final UserStreak? userStreak;
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +167,7 @@ class _GreetingBlock extends StatelessWidget {
                   children: [
                     const TextSpan(text: '연속 편안한 날 '),
                     TextSpan(
-                      text: '${streakDays ?? '—'}일',
+                      text: '${userStreak?.streak ?? '—'}일',
                       style: AppTextStyles.body1Bold.copyWith(
                         color: AppColors.primary,
                       ),
@@ -176,7 +181,12 @@ class _GreetingBlock extends StatelessWidget {
         ),
         // 캐릭터 이미지 — Figma overlap ~-26px; Row 내 고정 너비로 근사.
         Image.asset(
-          'assets/illustrations/character_greeting.png',
+          switch (userStreak?.characterStatus ?? CharacterStatus.statisfied) {
+            CharacterStatus.greeting => AppImages.characterGreeting,
+            CharacterStatus.terrible => AppImages.characterTerrible,
+            CharacterStatus.statisfied => AppImages.characterSatisfied,
+            CharacterStatus.grateful => AppImages.characterGrateful,
+          },
           width: 154,
           height: 138,
           fit: BoxFit.contain,

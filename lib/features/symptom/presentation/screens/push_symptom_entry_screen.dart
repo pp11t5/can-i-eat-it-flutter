@@ -46,6 +46,7 @@ class PushSymptomEntryScreen extends ConsumerWidget {
         initialMealName: _mealDisplayName(meal),
         initialMood: _moodFromIndex(initialIntensityIndex),
         initialSymptomTypes: _typesFromCodes(initialSymptomTypeCodes),
+        fromPush: true,
       ),
     );
   }

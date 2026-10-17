@@ -36,6 +36,9 @@ class _NoopAnalytics implements AnalyticsService {
   @override
   Future<void> logEvent(String name,
       {Map<String, Object?> params = const {}}) async {}
+
+  @override
+  Future<void> setUserId(String? userId) async {}
 }
 
 // ---------------------------------------------------------------------------
@@ -243,21 +246,23 @@ void main() {
       expect(find.text('알림 설정'), findsOneWidget);
     });
 
-    testWidgets('약관 섹션에 서비스 이용 약관·개인정보 수집·이용 동의가 표시된다', (tester) async {
+    testWidgets('약관 섹션에 서비스 이용약관·개인정보 처리방침이 표시된다', (tester) async {
       await tester.pumpWidget(_buildMypageScreen());
       await tester.pumpAndSettle();
 
       await tester.scrollUntilVisible(
-        find.text('서비스 이용 약관'),
+        find.text('서비스 이용약관'),
         500,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('서비스 이용 약관'), findsOneWidget);
-      expect(find.text('개인정보 수집·이용 동의'), findsOneWidget);
+      expect(find.text('서비스 이용약관'), findsOneWidget);
+      expect(find.text('개인정보 처리방침'), findsOneWidget);
       expect(find.text('의학 정보 출처'), findsOneWidget);
       // 구 항목 제거
+      expect(find.text('서비스 이용 약관'), findsNothing);
+      expect(find.text('개인정보 수집·이용 동의'), findsNothing);
       expect(find.text('개인정보 보호 약관'), findsNothing);
       expect(find.text('마케팅 정보 수신'), findsNothing);
     });

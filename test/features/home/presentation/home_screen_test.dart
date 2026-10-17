@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/home/data/repositories/mock_home_repository.dart';
 import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
+import 'package:can_i_eat_it/features/home/domain/entities/user_streak.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
 
@@ -59,6 +60,55 @@ Widget _wrapWithRouter({bool withData = false}) => ProviderScope(
 
 void main() {
   group('HomeScreen — 인사말 블록', () {
+    testWidgets('로딩과 기본 응답에서 satisfied 캐릭터를 표시한다', (tester) async {
+      await tester.pumpWidget(_wrap());
+
+      final satisfiedImage = find.byWidgetPredicate((widget) =>
+          widget is Image &&
+          widget.image is AssetImage &&
+          (widget.image as AssetImage).assetName ==
+              'assets/illustrations/character_satisfied.png');
+      expect(satisfiedImage, findsOneWidget);
+
+      await tester.pumpAndSettle();
+      expect(satisfiedImage, findsOneWidget);
+    });
+
+    const characterAssets = {
+      CharacterStatus.greeting: 'assets/illustrations/character_greeting.png',
+      CharacterStatus.terrible: 'assets/illustrations/character_terrible.png',
+      CharacterStatus.statisfied:
+          'assets/illustrations/character_satisfied.png',
+      CharacterStatus.grateful: 'assets/illustrations/character_grateful.png',
+    };
+
+    for (final entry in characterAssets.entries) {
+      testWidgets('${entry.key.name} 캐릭터와 연속일수를 표시한다', (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              // ignore: scoped_providers_should_specify_dependencies
+              homeRepositoryProvider.overrideWithValue(
+                MockHomeRepository(streak: 5, characterStatus: entry.key),
+              ),
+            ],
+            child: const MaterialApp(home: HomeScreen()),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('5일'), findsOneWidget);
+        expect(
+          find.byWidgetPredicate((widget) =>
+              widget is Image &&
+              widget.image is AssetImage &&
+              (widget.image as AssetImage).assetName == entry.value),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      });
+    }
+
     testWidgets('"편안하신가요?" 인사말 텍스트가 표시된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();

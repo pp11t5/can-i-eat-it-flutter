@@ -84,8 +84,8 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<SignInOutcome> signInWithKakao() async {
-    return _signIn(AuthProvider.kakao);
+  Future<SignInOutcome> signInWithKakao({bool useKakaoAccount = false}) async {
+    return _signIn(AuthProvider.kakao, useKakaoAccount: useKakaoAccount);
   }
 
   @override
@@ -290,7 +290,8 @@ class AuthRepositoryImpl implements AuthRepository {
   /// 3. 성공(200) → 토큰 저장 + `GET /onboarding/status` → [Authenticated]
   /// 4. 온보딩 미완료면 로컬 consent pending 저장
   /// 5. [RecoverableAccountFailure] catch → [Recoverable]
-  Future<SignInOutcome> _signIn(AuthProvider provider) async {
+  Future<SignInOutcome> _signIn(AuthProvider provider,
+      {bool useKakaoAccount = false}) async {
     // idToken 을 try 블록 밖에 선언 — RecoverableAccountFailure catch 에서 운반하기 위함.
     String? idToken;
     try {
@@ -298,7 +299,8 @@ class AuthRepositoryImpl implements AuthRepository {
       late Map<String, dynamic> loginData;
       switch (provider) {
         case AuthProvider.kakao:
-          final kakaoResult = await _kakaoAuthService.signIn();
+          final kakaoResult =
+              await _kakaoAuthService.signIn(useKakaoAccount: useKakaoAccount);
           idToken = kakaoResult.idToken;
           loginData = {'idToken': idToken};
         case AuthProvider.google:

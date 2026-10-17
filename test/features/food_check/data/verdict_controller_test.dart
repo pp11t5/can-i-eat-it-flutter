@@ -1,6 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
+import 'package:can_i_eat_it/core/analytics/funnel_once_store.dart';
 import 'package:can_i_eat_it/core/error/failure.dart';
 import 'package:can_i_eat_it/features/food_check/data/food_check_providers.dart';
 import 'package:can_i_eat_it/features/food_check/data/repositories/mock_food_repository.dart';
@@ -152,6 +156,171 @@ void main() {
       expect(state.error, isA<FoodNotFoundFailure>());
     });
   });
+
+  group('VerdictController — 판정 이벤트', () {
+    test('세션이 없으면 first_verdict_checked 만 보낸다', () async {
+      final analytics = _SpyAnalytics();
+      final container = _analyticsContainer(analytics: analytics);
+      addTearDown(container.dispose);
+
+      await container
+          .read(verdictControllerProvider.notifier)
+          .judgeByText('두부');
+
+      expect(analytics.funnelNames, ['first_verdict_checked']);
+      expect(analytics.events, isEmpty);
+      expect(analytics.funnelParams.single['level'], 'recommend');
+      expect(analytics.funnelParams.single['food_name'], '두부');
+    });
+
+    test('계정의 첫 성공은 두 이벤트를 보내고 다음은 first_verdict_checked 만 보낸다', () async {
+      final analytics = _SpyAnalytics();
+      final container = _analyticsContainer(
+        analytics: analytics,
+        userId: 'user-1',
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(verdictControllerProvider.notifier);
+
+      await notifier.judgeByText('두부');
+      await notifier.judgeById('food-ext-1', displayName: '커피');
+
+      expect(analytics.funnelNames, [
+        'first_verdict_checked',
+        'account_first_verdict_checked',
+        'first_verdict_checked',
+      ]);
+      expect(analytics.events, isEmpty);
+      expect(analytics.funnelParams[0]['level'], 'recommend');
+      expect(analytics.funnelParams[0]['food_name'], '두부');
+      expect(analytics.funnelParams[1]['food_name'], '두부');
+      expect(analytics.funnelParams[2]['level'], 'recommend');
+      expect(analytics.funnelParams[2]['food_name'], '커피');
+    });
+
+    test('unknown 성공도 첫 판정으로 센다', () async {
+      final analytics = _SpyAnalytics();
+      final container = _analyticsContainer(
+        analytics: analytics,
+        userId: 'user-1',
+      );
+      addTearDown(container.dispose);
+
+      await container
+          .read(verdictControllerProvider.notifier)
+          .judgeByText('unknown');
+
+      expect(analytics.funnelNames, [
+        'first_verdict_checked',
+        'account_first_verdict_checked',
+      ]);
+      expect(
+          analytics.funnelParams.every((p) => p['level'] == 'unknown'), isTrue);
+    });
+
+    test('판정 실패는 이벤트를 보내지 않는다', () async {
+      final analytics = _SpyAnalytics();
+      final container = _analyticsContainer(
+        analytics: analytics,
+        userId: 'user-1',
+        repo: _FailingFoodRepository(),
+      );
+      addTearDown(container.dispose);
+
+      await container
+          .read(verdictControllerProvider.notifier)
+          .judgeByText('아무거나');
+
+      expect(analytics.funnelNames, isEmpty);
+      expect(analytics.events, isEmpty);
+    });
+
+    test('1회 저장이 실패해도 first_verdict_checked 는 보내고 판정 결과는 유지한다', () async {
+      final analytics = _SpyAnalytics();
+      final container = _analyticsContainer(
+        analytics: analytics,
+        userId: 'user-1',
+        store: _ThrowingOnceStore(),
+      );
+      addTearDown(container.dispose);
+
+      await container
+          .read(verdictControllerProvider.notifier)
+          .judgeByText('두부');
+
+      expect(
+        container.read(verdictControllerProvider).value!.foodName,
+        '두부',
+      );
+      expect(analytics.funnelNames, ['first_verdict_checked']);
+      expect(analytics.events, isEmpty);
+      expect(analytics.funnelParams.single['level'], 'recommend');
+    });
+  });
+}
+
+class _SpyAnalytics implements AnalyticsService {
+  final List<String> funnelNames = [];
+  final List<Map<String, Object?>> funnelParams = [];
+  final List<({String name, Map<String, Object?> params})> events = [];
+
+  @override
+  Future<void> logFunnel(
+    FunnelEvent event, {
+    Map<String, Object?> params = const {},
+  }) async {
+    funnelNames.add(event.eventName);
+    funnelParams.add(params);
+  }
+
+  @override
+  Future<void> logEvent(
+    String name, {
+    Map<String, Object?> params = const {},
+  }) async {
+    events.add((name: name, params: params));
+  }
+
+  @override
+  Future<void> setUserId(String? userId) async {}
+}
+
+ProviderContainer _analyticsContainer({
+  required _SpyAnalytics analytics,
+  String? userId,
+  FoodRepository? repo,
+  FunnelOnceStore? store,
+}) {
+  return ProviderContainer(
+    overrides: [
+      foodRepositoryProvider.overrideWithValue(
+        repo ?? MockFoodRepository.empty(),
+      ),
+      analyticsServiceProvider.overrideWithValue(analytics),
+      if (userId != null) analyticsSubjectIdProvider.overrideWithValue(userId),
+      funnelOnceStoreProvider.overrideWithValue(
+        store ?? InMemoryFunnelOnceStore(),
+      ),
+    ],
+  );
+}
+
+class _ThrowingOnceStore implements FunnelOnceStore {
+  @override
+  Future<void> clear(String userId) async {}
+
+  @override
+  Future<bool> hasFired(String userId, FunnelEvent event) async {
+    throw Exception('store down');
+  }
+
+  @override
+  Future<void> markFired(String userId, FunnelEvent event) async {}
+
+  @override
+  Future<bool> claim(String userId, FunnelEvent event) async {
+    throw Exception('store down');
+  }
 }
 
 /// judgeByText/judgeById 모두 예외를 던지는 테스트 전용 저장소.

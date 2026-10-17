@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_service.dart';
 import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
+import 'package:can_i_eat_it/core/analytics/funnel_once_store.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/features/auth/data/repositories/mock_auth_repository.dart';
 import '../../../core/push/fcm_test_helpers.dart';
@@ -25,6 +26,9 @@ class _NoopAnalyticsService implements AnalyticsService {
   @override
   Future<void> logEvent(String name,
       {Map<String, Object?> params = const {}}) async {}
+
+  @override
+  Future<void> setUserId(String? userId) async {}
 }
 
 // ---------------------------------------------------------------------------
@@ -35,6 +39,7 @@ ProviderContainer _makeContainer({
   required MockAuthRepository repo,
   InMemoryProfileCache? cache,
   InMemoryTimelineGuideStore? guideStore,
+  InMemoryFunnelOnceStore? onceStore,
 }) {
   final container = ProviderContainer(
     overrides: [
@@ -42,10 +47,13 @@ ProviderContainer _makeContainer({
       analyticsServiceProvider.overrideWithValue(_NoopAnalyticsService()),
       // FCM: 네이티브 플러그인 접근 차단 — noop으로 override.
       fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
-      // secure_storage 플러그인 차단 (프로필·타임라인 가이드 공통).
+      // secure_storage 플러그인 차단 (프로필·타임라인 가이드·1회 퍼널 공통).
       profileCacheProvider.overrideWithValue(cache ?? InMemoryProfileCache()),
       timelineGuideStoreProvider.overrideWithValue(
         guideStore ?? InMemoryTimelineGuideStore(),
+      ),
+      funnelOnceStoreProvider.overrideWithValue(
+        onceStore ?? InMemoryFunnelOnceStore(),
       ),
       // updateNickname 이 myPageRepository 를 호출하므로 Mock 으로 주입.
       myPageRepositoryProvider.overrideWithValue(MockMyPageRepository.seeded()),
@@ -119,6 +127,71 @@ void main() {
       expect(await guideStore.hasSeenFabGuide('mock-user'), isTrue);
       await container.read(authControllerProvider.notifier).withdraw();
       expect(await guideStore.hasSeenFabGuide('mock-user'), isFalse);
+    });
+
+    test('withdraw 후 1회 퍼널 기록이 지워진다', () async {
+      final repo = MockAuthRepository(
+        initialSession: const AuthSession(
+          userId: 'mock-user',
+          provider: AuthProvider.kakao,
+          hasAgreedTerms: true,
+        ),
+      );
+      final onceStore = InMemoryFunnelOnceStore();
+      await onceStore.markFired(
+        'mock-user',
+        FunnelEvent.accountFirstVerdictChecked,
+      );
+      await onceStore.markFired(
+        'mock-user',
+        FunnelEvent.accountFirstMealRecorded,
+      );
+      final container = _makeContainer(repo: repo, onceStore: onceStore);
+      await container.read(authControllerProvider.future);
+
+      await container.read(authControllerProvider.notifier).withdraw();
+
+      expect(
+        await onceStore.hasFired(
+          'mock-user',
+          FunnelEvent.accountFirstVerdictChecked,
+        ),
+        isFalse,
+      );
+      expect(
+        await onceStore.hasFired(
+          'mock-user',
+          FunnelEvent.accountFirstMealRecorded,
+        ),
+        isFalse,
+      );
+    });
+
+    test('logout 은 1회 퍼널 기록을 지우지 않는다', () async {
+      final repo = MockAuthRepository(
+        initialSession: const AuthSession(
+          userId: 'mock-user',
+          provider: AuthProvider.kakao,
+          hasAgreedTerms: true,
+        ),
+      );
+      final onceStore = InMemoryFunnelOnceStore();
+      await onceStore.markFired(
+        'mock-user',
+        FunnelEvent.accountFirstMealRecorded,
+      );
+      final container = _makeContainer(repo: repo, onceStore: onceStore);
+      await container.read(authControllerProvider.future);
+
+      await container.read(authControllerProvider.notifier).logout();
+
+      expect(
+        await onceStore.hasFired(
+          'mock-user',
+          FunnelEvent.accountFirstMealRecorded,
+        ),
+        isTrue,
+      );
     });
 
     test('logout 후 profileCache 가 cleared 된다', () async {

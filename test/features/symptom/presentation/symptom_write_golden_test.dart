@@ -1,4 +1,4 @@
-// 골든 셸 — PNG 미생성 상태. 마스터가 --update-goldens로 생성.
+// 신규 작성 폼의 초기 상태. 시각을 고정해 실행 시점에 따른 차이를 방지한다.
 //
 // 실행: flutter test --update-goldens --tags golden test/features/symptom/presentation/symptom_write_golden_test.dart
 // 검증: flutter test --tags golden test/features/symptom/presentation/symptom_write_golden_test.dart
@@ -77,8 +77,9 @@ Widget _wrap() {
       mealRepositoryProvider.overrideWithValue(_MockMealRepository()),
     ],
     child: MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      home: const SymptomWriteScreen(),
+      home: SymptomWriteScreen(nowOverride: DateTime(2026, 6, 17, 10, 30)),
     ),
   );
 }

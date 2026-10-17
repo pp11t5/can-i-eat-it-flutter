@@ -65,7 +65,8 @@ class _MockAuthRepository implements AuthRepository {
   Future<SignInOutcome> signInWithApple() => throw UnimplementedError();
 
   @override
-  Future<SignInOutcome> signInWithKakao() => throw UnimplementedError();
+  Future<SignInOutcome> signInWithKakao({bool useKakaoAccount = false}) =>
+      throw UnimplementedError();
 
   @override
   Future<SignInOutcome> signInWithGoogle() => throw UnimplementedError();

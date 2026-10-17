@@ -19,6 +19,15 @@ abstract final class AppSpacing {
   /// 칩 세로 패딩
   static const double chipPaddingV = SpacingPrimitives.s8;
 
+  /// 홈 검색바 세로 패딩
+  static const double homeSearchBarPaddingV = SpacingPrimitives.s8;
+
+  /// 홈 검색바 왼쪽 패딩
+  static const double homeSearchBarPaddingLeft = SpacingPrimitives.s24;
+
+  /// 홈 검색바 오른쪽 패딩
+  static const double homeSearchBarPaddingRight = SpacingPrimitives.s8;
+
   /// 아이템 간 기본 간격
   static const double itemGap = SpacingPrimitives.s8;
 
@@ -47,4 +56,7 @@ abstract final class AppSpacing {
 
   /// 알약형(Pill) 반경
   static const double radiusPill = RadiusPrimitives.rPill;
+
+  /// 바텀시트 상단 라운드
+  static const double radiusSheet = RadiusPrimitives.r32;
 }

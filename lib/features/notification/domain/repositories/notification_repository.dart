@@ -15,5 +15,8 @@ abstract interface class NotificationRepository {
   ///
   /// [enabled]는 변경 후 원하는 값이다. `/notifications/settings/toggle`과
   /// 달리 마케팅 동의는 별도 계약(consent)에 속한다(A2).
-  Future<void> toggleMarketingConsent(bool enabled);
+  ///
+  /// 반환값은 서버가 실제로 저장한 동의 값이다. 서버는 현재 [enabled]를 무시하고
+  /// 값을 뒤집으며(flip), 결과가 ON이면 하위 알림 3개를 모두 켠다(`enableAll`).
+  Future<bool> toggleMarketingConsent(bool enabled);
 }

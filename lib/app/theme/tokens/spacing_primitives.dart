@@ -18,5 +18,6 @@ abstract final class RadiusPrimitives {
   static const double r8 = 8;
   static const double r14 = 14;
   static const double r16 = 16;
+  static const double r32 = 32;
   static const double rPill = 999;
 }

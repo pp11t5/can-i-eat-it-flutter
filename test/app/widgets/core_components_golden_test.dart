@@ -34,7 +34,7 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
       await expectLater(
         find.byType(AppButton),
         matchesGoldenFile('goldens/app_button_primary_enabled.png'),
@@ -54,7 +54,7 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
       await expectLater(
         find.byType(AppButton),
         matchesGoldenFile('goldens/app_button_primary_disabled.png'),
@@ -73,7 +73,7 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
       await expectLater(
         find.byType(AppButton),
         matchesGoldenFile('goldens/app_button_secondary_enabled.png'),
@@ -95,7 +95,7 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
       await expectLater(
         find.byType(AppCard),
         matchesGoldenFile('goldens/app_card_unselected.png'),
@@ -114,7 +114,7 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
       await expectLater(
         find.byType(AppCard),
         matchesGoldenFile('goldens/app_card_selected.png'),
@@ -132,7 +132,7 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
       await expectLater(
         find.byType(StepProgress),
         matchesGoldenFile('goldens/step_progress_2_of_4.png'),
@@ -159,7 +159,7 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
       await expectLater(
         find.byType(Column).first,
         matchesGoldenFile('goldens/verdict_badge_all_states.png'),

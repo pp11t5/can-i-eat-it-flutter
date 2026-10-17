@@ -18,6 +18,7 @@
 | 코드 생성 | build_runner | `^2.5.4` |
 | 소셜 로그인 | 카카오 / 애플 | `kakao_flutter_sdk_user ^1.9.7`, `sign_in_with_apple ^8.1.0` |
 | 푸시 | Firebase Cloud Messaging | `firebase_core ^4.11.0`, `firebase_messaging ^16.4.1`, `flutter_local_notifications ^22.0.1` |
+| 모니터링 | Firebase Crashlytics | `firebase_crashlytics ^5.4.0` |
 | 기타 주요 패키지 | | `flutter_secure_storage ^9.2.4`(토큰 저장), `webview_flutter ^4.10.0`(약관), `fl_chart ^1.2.0`(리포트 차트), `share_plus ^10.1.4` |
 | 린트 | flutter_lints + custom_lint | `flutter_lints ^4.0.0`, `custom_lint ^0.7.6`, `riverpod_lint ^2.6.5` |
 
@@ -41,14 +42,15 @@ lib/
     config/         flavor.dart(enum Flavor{dev,prod}), flavor_config.dart(FlavorConfig)
     security/       token_store(flutter_secure_storage 래핑)
     push/           fcm_messaging_handler / fcm_repository / fcm_providers / fcm_token_service
-    analytics/       analytics_event / analytics_service
+    analytics/       analytics_event / analytics_service / funnel_once_store
+    monitoring/      error_reporter (삼킨 오류를 Crashlytics non-fatal로 보고)
     error/          failure.dart (Failure 계층)
     utils/, util/   kst_time.dart(KST 직렬화 헬퍼) 등
   features/<feature>/
     domain/         entity + repository 인터페이스 (프레임워크 비종속)
     data/           DTO(freezed) + repository 구현(dio 직접 호출) + mock repository
     presentation/    screen + widget + controller(Riverpod provider)
-  bootstrap.dart  # 플레이버 공통 초기화(Firebase/FCM/Kakao) + 실 repository override
+  bootstrap.dart  # 플레이버 공통 초기화(Firebase/Crashlytics/FCM/Kakao) + 실 repository override
   main.dart       # 플레이버 미지정 실행 시 prod로 위임하는 shim
   main_dev.dart   # 개발 플레이버 진입점
   main_prod.dart  # 운영 플레이버 진입점
@@ -167,6 +169,8 @@ dart run build_runner build --delete-conflicting-outputs
 
 ## 7. 테스트 & CI
 
+Riverpod 린트는 `dart run custom_lint`로 별도 실행한다. `custom_lint 0.7.x`의 분석 서버 플러그인은 Dart 3.12 AOT 실행과 호환되지 않아 `analysis_options.yaml`에 등록하지 않는다.
+
 `.github/workflows/ci.yml` — 단일 잡(`build`, `ubuntu-latest`, Flutter `3.44.0` stable), PR/`main` push 시 실행:
 
 1. `flutter pub get`
@@ -180,7 +184,9 @@ dart run build_runner build --delete-conflicting-outputs
 
 ### 골든 테스트
 
-`@Tags(['golden'])`로 태그된 위젯 골든 테스트가 `test/` 하위 11개 파일에 있다(예: `test/features/mypage/presentation/mypage_golden_test.dart`). **CI는 `--exclude-tags golden`으로 골든을 아예 실행하지 않는다.** 로컬 폰트 환경 차이로 일부 골든이 로컬에서 상시 실패하는 이력이 있으므로, 로컬에서 `--update-goldens`로 임의 갱신하지 않는다.
+`@Tags(['golden'])`로 태그된 위젯 골든 테스트가 `test/` 하위 13개 파일에 있다(예: `test/features/mypage/presentation/mypage_golden_test.dart`). **CI는 `--exclude-tags golden`으로 골든을 아예 실행하지 않는다.** 현재 기준 이미지는 macOS / Flutter `3.47.3`에서 생성했다. 환경 차이만으로 기준을 덮어쓰지 않는다.
+
+`test/flutter_test_config.dart`가 번들 Pretendard와 Material Icons 폰트를 로드한다. 증상 작성 골든의 시각과 로딩 GIF 첫 프레임은 테스트에서 고정한다. `flutter test --tags golden`으로 비교한 뒤 `test/**/failures/`의 기준·현재·차이 이미지를 검토한다. 검토하고 승인한 UI 변경에 한해서 같은 환경에서 `flutter test --tags golden --update-goldens`로 갱신하고, 갱신 옵션 없이 다시 실행해 통과를 확인한다. 새로 생성되는 실패 진단 이미지는 Git에서 제외한다.
 
 ### 시간대(KST) 관련 주의
 
@@ -228,6 +234,7 @@ dart run build_runner build --delete-conflicting-outputs
 - Android: `android/app/src/{prod,dev}/google-services.json` — google-services 플러그인이 `src/<flavor>`를 자동 인식.
 - iOS: `ios/config/{prod,dev}/GoogleService-Info.plist` — Run Script build phase가 `GOOGLE_SERVICE_FLAVOR` 빌드세팅을 읽어 앱 번들로 복사.
 - `bootstrap.dart`가 `Firebase.initializeApp()`을 시도하되 실패해도 앱은 계속 뜨도록 try/catch로 감싸져 있다(설정 누락 시 푸시만 비활성). 이어서 `FirebaseMessaging.onBackgroundMessage` 등록, `initForegroundMessaging()`, `wireOpenedApp()` 순으로 초기화한다(`lib/core/push/`).
+- **Crashlytics**: `bootstrap.dart`가 Firebase 초기화 직후 `setUpCrashlytics()`로 켠다. 릴리즈 빌드만 수집하고 디버그는 수집·훅 교체를 하지 않는다. 미처리 오류(`FlutterError.onError`, `PlatformDispatcher.onError`)는 fatal로, 분석처럼 흐름을 막지 않으려고 삼킨 오류는 `errorReporterProvider`(`lib/core/monitoring/error_reporter.dart`)로 non-fatal 보고한다. `reason`에는 userId 등 식별 정보를 넣지 않는다. Android는 Gradle 플러그인(`com.google.firebase.crashlytics`)이 매핑 파일을 올린다. iOS는 Xcode Runner 타깃에 Crashlytics dSYM 업로드 Run Script가 있어야 스택이 심볼화된다.
 - AI(LLM) 분석 응답용 `receiveTimeout`은 제거되어 있다(`FlavorConfig.receiveTimeout = Duration.zero`) — 응답이 10초 이상 걸릴 수 있는 판정 API에서 timeout으로 인한 오탐 에러("분석 중 오류…")를 없애기 위함. `connectTimeout`(10초)은 유지되어 진짜 오프라인은 계속 감지한다.
 
 ---
@@ -258,7 +265,7 @@ dart run build_runner build --delete-conflicting-outputs
 - iOS 최소 배포 타깃 **15.0**.
 - 새 CocoaPods 의존성 추가 시 **플레이버별 Flutter xcconfig 배선**을 함께 확인한다(PR #177에서 발견된 함정 — per-flavor Pods xcconfig 누락 시 빌드가 깨질 수 있음).
 - Android 로컬 빌드가 JDK 25 환경에서 실패한 이력이 있다(정확한 요구 JDK 버전은 확인 필요). CI에는 Android 빌드 스텝이 없어(analyze/test/codegen만) 이 문제가 CI에서는 드러나지 않는다.
-- 골든 테스트는 로컬 폰트 환경에 따라 상시 실패할 수 있다 — 로컬 `--update-goldens` 금지, CI는 골든을 아예 제외한다(§7).
+- 골든 기준은 macOS / Flutter `3.47.3` 환경이다. 환경 차이로 임의 갱신하지 않으며, 검토하고 승인한 UI 변경에 한해서 갱신한다. CI는 골든을 제외한다(§7).
 - `@freezed`/`@riverpod`/provider 변경 후 생성물(`.g.dart`/`.freezed.dart`) 커밋 누락 시 CI가 "Verify generated files are up-to-date" 스텝에서 실패한다(§6).
 - 프로덕션 코드에서 `.toLocal()` 금지 — KST 이중변환 버그 이력(§7).
 - AI(LLM) 판정 API는 `receiveTimeout`이 의도적으로 무제한이다(§10) — 임의로 timeout을 다시 넣지 않는다.

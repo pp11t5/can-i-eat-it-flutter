@@ -116,4 +116,7 @@ abstract final class ColorPrimitives {
 
   /// 홈 카드 테두리 (Figma 1207:6590 도감·최근식사 stroke #EDEDF5)
   static const Color cardBorderSubtle = Color(0xFFEDEDF5);
+
+  /// Figma color/light/gray/10
+  static const Color lightGray10 = Color(0xFFE6E8EA);
 }

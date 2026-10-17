@@ -197,8 +197,13 @@ class _AllergyMedEditScreenState extends ConsumerState<AllergyMedEditScreen> {
                   }).toList(),
                 ),
                 const SizedBox(height: AppSpacing.sectionGap),
-                const MedicalSourcesLink.guideline(
-                  sourceUrl: MedicalSourcesCatalog.acg2022Url,
+                // 알레르기 근거는 식약처 표시기준(식품안전나라 안내 페이지)으로 분리.
+                const MedicalSourcesLink(
+                  message: '식약처 「식품등의 표시기준」을 바탕으로 한 정보예요',
+                  actionLabel: null,
+                  showLeadingIcon: false,
+                  sourceUrl: MedicalSourcesCatalog.allergenLabelingUrl,
+                  pageTitle: MedicalSourcesCatalog.allergenPageTitle,
                 ),
               ],
             ),

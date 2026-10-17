@@ -40,6 +40,9 @@ abstract final class AppIcons {
   static const String sad = '$_figma/ic_sad.svg';
   static const String trash = '$_figma/ic_trash.svg';
   static const String pencil = '$_figma/ic_pencil.svg';
+  // 음식 사진 인식
+  static const String camera = '$_figma/ic_camera.svg';
+  static const String reset = '$_figma/ic_reset.svg';
   static const String download = '$_figma/ic_download.svg';
   static const String check = '$_figma/ic_check.svg';
   static const String arrowRight = '$_figma/ic_arrow_right.svg';
@@ -103,6 +106,9 @@ abstract final class AppImages {
   static const String pencil = '$_illust/icon_pencil.png';
   static const String fire = '$_illust/icon_fire.png';
   static const String characterGreeting = '$_illust/character_greeting.png';
+  static const String characterTerrible = '$_illust/character_terrible.png';
+  static const String characterSatisfied = '$_illust/character_satisfied.png';
+  static const String characterGrateful = '$_illust/character_grateful.png';
 
   /// 판정 로딩 캐릭터 GIF (생각하는 포즈, Figma Loading_Dido).
   static const String characterSearching = '$_illust/character_searching.gif';

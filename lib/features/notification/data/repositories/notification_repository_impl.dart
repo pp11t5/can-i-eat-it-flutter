@@ -75,13 +75,14 @@ class NotificationRepositoryImpl implements NotificationRepository {
   // ---------------------------------------------------------------------------
 
   @override
-  Future<void> toggleMarketingConsent(bool enabled) async {
+  Future<bool> toggleMarketingConsent(bool enabled) async {
     try {
       final response = await _dio.patch<dynamic>(
         ApiEndpoints.consentMarketingToggle,
         data: {'enabled': enabled},
       );
-      unwrapVoid(response);
+      // result = 토글 후 동의 상태(agreed).
+      return unwrap<bool>(response, (j) => j as bool);
     } on DioException catch (e) {
       throw FailureMapper.fromDioException(e);
     }

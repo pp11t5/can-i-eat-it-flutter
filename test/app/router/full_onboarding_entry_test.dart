@@ -45,7 +45,7 @@ void main() {
       expect(find.byType(LoginScreen), findsOneWidget);
 
       // 카카오 로그인 → 신규(약관 미동의) → /terms push
-      await tester.tap(find.text('카카오로 로그인'));
+      await tester.tap(find.text('카카오 로그인'));
       await tester.pumpAndSettle();
       expect(find.byType(TermsScreen), findsOneWidget);
 

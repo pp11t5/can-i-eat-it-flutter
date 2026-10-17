@@ -79,5 +79,30 @@ void main() {
         completes,
       );
     });
+
+    test('setUserId 는 값을 전달하고 빈 문자열은 null로 지운다', () async {
+      final ids = <String?>[];
+      final svc = FirebaseAnalyticsService(
+        setUser: (userId) async {
+          ids.add(userId);
+        },
+      );
+
+      await svc.setUserId(' user-1 ');
+      await svc.setUserId('  ');
+      await svc.setUserId(null);
+
+      expect(ids, ['user-1', null, null]);
+    });
+
+    test('setUserId 실패해도 예외를 밖으로 던지지 않는다', () async {
+      final svc = FirebaseAnalyticsService(
+        setUser: (userId) async {
+          throw StateError('plugin missing');
+        },
+      );
+
+      await expectLater(svc.setUserId('user-1'), completes);
+    });
   });
 }

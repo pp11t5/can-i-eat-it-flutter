@@ -12,6 +12,8 @@ import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/features/food_check/data/food_check_providers.dart';
 import 'package:can_i_eat_it/features/food_check/data/recent_food_providers.dart';
 import 'package:can_i_eat_it/features/food_check/domain/entities/food_search_result.dart';
@@ -60,6 +62,9 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
 
   /// 판정 화면 진입 in-flight 가드 (다중 탭 중복 push 방지).
   bool _navigating = false;
+
+  /// 이 화면 인스턴스에서 search_screen_viewed 를 1회만 보낸다.
+  bool _loggedSearchEntry = false;
 
   @override
   void initState() {
@@ -192,6 +197,17 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_loggedSearchEntry) {
+      _loggedSearchEntry = true;
+      unawaited(
+        ref.read(analyticsServiceProvider).logEvent(
+          AnalyticsEvent.searchScreenViewed.eventName,
+          params: {
+            'from_meal_record': widget.recordContext != null ? 1 : 0,
+          },
+        ),
+      );
+    }
     final bool showResults = _query.isNotEmpty;
 
     return Scaffold(

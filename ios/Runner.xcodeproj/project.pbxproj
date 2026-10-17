@@ -403,6 +403,7 @@
 				E4A72700C0FE55D60DEFD8F1 /* [CP] Embed Pods Frameworks */,
 				F9D14B85239AB508A94EF5D0 /* [CP] Copy Pods Resources */,
 				ED2EEF0994AA4C2D60F3963D /* Copy flavored GoogleService-Info.plist */,
+				C10000000000000000000001 /* [firebase_crashlytics] Crashlytics Upload Symbols */,
 			);
 			buildRules = (
 			);
@@ -669,6 +670,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C10000000000000000000001 /* [firebase_crashlytics] Crashlytics Upload Symbols */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"${DWARF_DSYM_FOLDER_PATH}/App.framework.dSYM",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist",
+				"${TARGET_BUILD_DIR}/${EXECUTABLE_PATH}",
+			);
+			name = "[firebase_crashlytics] Crashlytics Upload Symbols";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nif [ \"${CONFIGURATION}\" != \"Release-prod\" ]; then\n  exit 0\nfi\nPLIST=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist\"\nAPP_ID=$(/usr/libexec/PlistBuddy -c \"Print :GOOGLE_APP_ID\" \"$PLIST\")\nif [ -z \"$APP_ID\" ]; then\n  echo \"error: GOOGLE_APP_ID is empty in $PLIST\" >&2\n  exit 1\nfi\nUPLOAD_SYMBOLS=\"${PODS_ROOT}/FirebaseCrashlytics/upload-symbols\"\nfor DSYM in \"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}\" \"${DWARF_DSYM_FOLDER_PATH}/App.framework.dSYM\"; do\n  if [ ! -d \"$DSYM\" ]; then\n    echo \"error: Missing Crashlytics dSYM: $DSYM\" >&2\n    exit 1\n  fi\n  \"$UPLOAD_SYMBOLS\" --build-phase --validate -ai \"$APP_ID\" -- \"$DSYM\"\n  \"$UPLOAD_SYMBOLS\" --build-phase -ai \"$APP_ID\" -- \"$DSYM\"\ndone\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */

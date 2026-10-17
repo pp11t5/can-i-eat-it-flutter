@@ -5,6 +5,7 @@ import 'package:http_mock_adapter/http_mock_adapter.dart';
 import 'package:can_i_eat_it/core/network/api_endpoints.dart';
 import 'package:can_i_eat_it/features/home/data/repositories/home_repository_impl.dart';
 import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
+import 'package:can_i_eat_it/features/home/domain/entities/user_streak.dart';
 
 // ---------------------------------------------------------------------------
 // 헬퍼
@@ -40,14 +41,22 @@ void main() {
 
   // -------------------------------------------------------------------------
   group('myStreak — GET /users/me/streak', () {
-    test('result.streak를 정확히 반환한다', () async {
-      adapter.onGet(
-        ApiEndpoints.myStreak,
-        (server) => server.reply(200, _envelope({'streak': 5})),
-      );
+    for (final status in CharacterStatus.values) {
+      test('streak와 characterStatus(${status.name})를 반환한다', () async {
+        adapter.onGet(
+          ApiEndpoints.myStreak,
+          (server) => server.reply(
+            200,
+            _envelope({'streak': 5, 'characterStatus': status.name}),
+          ),
+        );
 
-      expect(await repo.myStreak(), 5);
-    });
+        expect(
+          await repo.myStreak(),
+          UserStreak(streak: 5, characterStatus: status),
+        );
+      });
+    }
 
     test('streak 누락 시 0으로 폴백된다', () async {
       adapter.onGet(
@@ -55,8 +64,26 @@ void main() {
         (server) => server.reply(200, _envelope(<String, dynamic>{})),
       );
 
-      expect(await repo.myStreak(), 0);
+      final result = await repo.myStreak();
+      expect(result.streak, 0);
+      expect(result.characterStatus, CharacterStatus.statisfied);
     });
+
+    for (final status in [null, 'unknown']) {
+      test('characterStatus가 $status이면 statisfied로 폴백된다', () async {
+        adapter.onGet(
+          ApiEndpoints.myStreak,
+          (server) => server.reply(
+            200,
+            _envelope({'streak': 5, 'characterStatus': status}),
+          ),
+        );
+
+        final result = await repo.myStreak();
+        expect(result.streak, 5);
+        expect(result.characterStatus, CharacterStatus.statisfied);
+      });
+    }
   });
 
   // -------------------------------------------------------------------------

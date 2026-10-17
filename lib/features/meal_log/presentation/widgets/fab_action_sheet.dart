@@ -8,13 +8,17 @@ import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
+import 'package:can_i_eat_it/core/utils/kst_time.dart';
+import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
+import 'package:can_i_eat_it/features/meal_log/presentation/widgets/meal_record_method_sheet.dart';
 
 /// FAB 액션시트 표시.
 ///
 /// Figma node 1351-14767.
 /// Dim 오버레이(검정 ~35%) + 우하단 X(녹색 원 FAB, `+` 를 45° 회전) + 흰 알약
 /// 메뉴 2개(우측정렬).
-/// - "식단 기록"(밥그릇 아이콘) → 닫고 '/meal/record' push
+/// - "식단 기록"(밥그릇 아이콘) → 닫고 기록 방식 바텀시트
+///   (직접 입력 → '/meal/record', 사진으로 기록 → '/food-recognition')
 /// - "증상 일기"(연필 아이콘) → 닫고 '/symptom/record' push
 Future<void> showFabActionSheet(BuildContext context) {
   return showGeneralDialog<void>(
@@ -24,7 +28,7 @@ Future<void> showFabActionSheet(BuildContext context) {
     barrierColor: Colors.transparent,
     transitionDuration: const Duration(milliseconds: 220),
     pageBuilder: (dialogContext, animation, secondaryAnimation) {
-      return _FabActionSheet(animation: animation);
+      return _FabActionSheet(hostContext: context, animation: animation);
     },
     transitionBuilder: (dialogContext, animation, secondaryAnimation, child) {
       return FadeTransition(
@@ -36,8 +40,10 @@ Future<void> showFabActionSheet(BuildContext context) {
 }
 
 class _FabActionSheet extends StatelessWidget {
-  const _FabActionSheet({required this.animation});
+  const _FabActionSheet({required this.hostContext, required this.animation});
 
+  /// 시트를 띄운 화면의 context. 이 시트가 닫힌 뒤 바텀시트를 띄우는 데 쓴다.
+  final BuildContext hostContext;
   final Animation<double> animation;
 
   @override
@@ -82,7 +88,15 @@ class _FabActionSheet extends StatelessWidget {
                     label: '식단 기록',
                     onTap: () {
                       Navigator.of(context).pop();
-                      context.push('/meal/record');
+                      showMealRecordMethodSheet(
+                        hostContext,
+                        onManual: () => hostContext.push('/meal/record'),
+                        // 섭취 시각은 인식 화면이 촬영 시각으로 바꾼다.
+                        onPhoto: () => hostContext.push(
+                          '/food-recognition',
+                          extra: MealRecordContext(eatenAt: nowKst()),
+                        ),
+                      );
                     },
                   ),
                 ),
