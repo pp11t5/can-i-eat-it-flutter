@@ -83,9 +83,11 @@ class MealTimelineList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.screenPadding,
-        vertical: AppSpacing.sectionGap,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screenPadding,
+        AppSpacing.sectionGap,
+        AppSpacing.screenPadding,
+        88,
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
@@ -629,8 +631,6 @@ class _SymptomCard extends StatelessWidget {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  // 서버는 연결 식사가 없는 증상에 afterMealMinutes=0을 보낸다
-                  // 0이면 "식후 0분" 대신 줄을 숨긴다.
                   if (item.afterMealMinutes != 0) ...[
                     const SizedBox(height: AppSpacing.xs),
                     Text(
