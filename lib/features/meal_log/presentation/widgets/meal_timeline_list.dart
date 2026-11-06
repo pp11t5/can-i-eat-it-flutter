@@ -306,11 +306,11 @@ class _ConnectedSymptomsSection extends StatelessWidget {
 
   /// 대표증상 + "외 N개" 요약.
   ///
-  /// 증상 유형이 비어 있으면("없음" 선택) 상세 화면과 동일 문구를 쓴다.
+  /// 증상 유형이 비어 있으면("없음" 선택) 상세 화면과 동일하게 상태별 문구를 쓴다.
   String _summary() {
     final names = connectedSymptoms.representativeSymptoms.join(', ');
     if (names.isEmpty && connectedSymptoms.etcCount == 0) {
-      return '특별한 불편이 없었어요';
+      return connectedSymptoms.symptomState.noSymptomHeadline;
     }
     if (connectedSymptoms.etcCount > 0) {
       return names.isEmpty

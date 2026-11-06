@@ -18,6 +18,7 @@ import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/d
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/home_widget/data/home_widget_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
+import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
 import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/providers/symptom_detail_controller.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/widgets/mood_face.dart';
@@ -252,7 +253,9 @@ class _Body extends StatelessWidget {
 
   /// 증상 유형 → 한국어 join. 비어있으면 기본 문구.
   String get _symptomTypesLabel {
-    if (symptom.symptomTypes.isEmpty) return '특별한 불편이 없었어요';
+    if (symptom.symptomTypes.isEmpty) {
+      return symptom.symptomState.noSymptomHeadline;
+    }
     return symptom.symptomTypes.map((t) => t.label).join(', ');
   }
 
