@@ -222,8 +222,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 증상 유형 join (역류, 기침)
-      expect(find.text('역류, 기침'), findsOneWidget);
+      // 증상 유형 join (신물, 기침)
+      expect(find.text('신물, 기침'), findsOneWidget);
     });
 
     testWidgets('linkedMeal 식사 카드 렌더 (된장찌개 외 1개)', (tester) async {
