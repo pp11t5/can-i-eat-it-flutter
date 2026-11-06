@@ -629,13 +629,17 @@ class _SymptomCard extends StatelessWidget {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    _afterMealLabel(item.afterMealMinutes),
-                    style: AppTextStyles.caption1Medium.copyWith(
-                      color: AppColors.textSecondary,
+                  // 서버는 연결 식사가 없는 증상에 afterMealMinutes=0을 보낸다
+                  // 0이면 "식후 0분" 대신 줄을 숨긴다.
+                  if (item.afterMealMinutes != 0) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      _afterMealLabel(item.afterMealMinutes),
+                      style: AppTextStyles.caption1Medium.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
