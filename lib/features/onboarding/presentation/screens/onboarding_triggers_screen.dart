@@ -235,10 +235,14 @@ class _CustomTriggerChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            style: AppTextStyles.body2Medium.copyWith(
-              color: AppColors.primary,
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.body2Medium.copyWith(
+                color: AppColors.primary,
+              ),
             ),
           ),
           const SizedBox(width: AppSpacing.xs),
