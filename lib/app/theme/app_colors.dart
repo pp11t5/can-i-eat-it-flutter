@@ -85,6 +85,9 @@ abstract final class AppColors {
   /// 브랜드 강조 텍스트 색 (예: 로그인 슬로건). green200 다크 그린.
   static const Color brandAccent = ColorPrimitives.green200;
 
+  /// Figma `Accents/Green` (iOS 시스템 그린 #34C759) — 스위치 ON 트랙 등.
+  static const Color accentGreen = Color(0xFF34C759);
+
   // --- OptionCard / SelectableChip 전용 (Figma onboarding 실측) ---
 
   /// 비선택 OptionCard 배경 (#F7F7FA)
