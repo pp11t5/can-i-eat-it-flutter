@@ -26,6 +26,28 @@ class TermsDetailScreen extends StatefulWidget {
   State<TermsDetailScreen> createState() => _TermsDetailScreenState();
 }
 
+/// Notion 무료 요금제 공개 페이지의 «Get Notion free» 배너를 숨긴다.
+///
+/// Notion 은 SPA 라 로드 후에도 늦게 그리므로 MutationObserver 로 계속 감시한다.
+/// DOM 구조에 의존하지 않도록 텍스트가 일치하는 가장 가까운 링크/버튼을 숨긴다.
+// ponytail: Notion DOM/문구가 바뀌면 조용히 풀림. 근본 해결은 Notion 요금제/자체 호스팅.
+const _hideNotionBannerJs = '''
+(function () {
+  if (window.__hideNotionBanner) return;
+  window.__hideNotionBanner = true;
+  function hide() {
+    document.querySelectorAll('a, [role="button"], div, span').forEach(function (el) {
+      if (el.children.length === 0 && el.textContent.trim() === 'Get Notion free') {
+        var t = el.closest('a, [role="button"]') || el;
+        t.style.setProperty('display', 'none', 'important');
+      }
+    });
+  }
+  hide();
+  new MutationObserver(hide).observe(document.documentElement, { childList: true, subtree: true });
+})();
+''';
+
 class _TermsDetailScreenState extends State<TermsDetailScreen> {
   late final WebViewController _controller;
   double _progress = 0;
@@ -45,6 +67,7 @@ class _TermsDetailScreenState extends State<TermsDetailScreen> {
           },
           onPageFinished: (_) {
             setState(() => _progress = 1);
+            _controller.runJavaScript(_hideNotionBannerJs);
           },
         ),
       )
