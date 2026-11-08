@@ -308,11 +308,11 @@ class _ConnectedSymptomsSection extends StatelessWidget {
 
   /// 대표증상 + "외 N개" 요약.
   ///
-  /// 증상 유형이 비어 있으면("없음" 선택) 상세 화면과 동일하게 상태별 문구를 쓴다.
+  /// 증상 유형이 비어 있으면("없음" 선택) 문장 대신 상태 라벨(편안함·보통·심함 등)만 쓴다.
   String _summary() {
     final names = connectedSymptoms.representativeSymptoms.join(', ');
     if (names.isEmpty && connectedSymptoms.etcCount == 0) {
-      return connectedSymptoms.symptomState.noSymptomHeadline;
+      return connectedSymptoms.symptomState.label;
     }
     if (connectedSymptoms.etcCount > 0) {
       return names.isEmpty
