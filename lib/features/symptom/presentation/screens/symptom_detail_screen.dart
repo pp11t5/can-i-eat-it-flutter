@@ -565,6 +565,8 @@ class _AnalysisCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      // 부모 Column 이 crossAxisAlignment.start 라 텍스트 폭만큼 줄어들던 것을 방지.
+      width: double.infinity,
       margin: const EdgeInsets.only(bottom: AppSpacing.itemGap),
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
