@@ -145,7 +145,7 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
         linkedMealDisplayName: existing.linkedMeal?.foods.isNotEmpty == true
             ? existing.linkedMeal!.foods.first.name
             : null,
-        memo: '',
+        memo: existing.memo ?? '',
       );
     } else {
       // 신규 모드: 빈 폼 (원인 식사 프리필 인자가 있으면 시딩)
