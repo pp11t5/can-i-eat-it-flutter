@@ -83,9 +83,11 @@ class MealTimelineList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.screenPadding,
-        vertical: AppSpacing.sectionGap,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screenPadding,
+        AppSpacing.sectionGap,
+        AppSpacing.screenPadding,
+        88,
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
@@ -306,11 +308,11 @@ class _ConnectedSymptomsSection extends StatelessWidget {
 
   /// 대표증상 + "외 N개" 요약.
   ///
-  /// 증상 유형이 비어 있으면("없음" 선택) 상세 화면과 동일 문구를 쓴다.
+  /// 증상 유형이 비어 있으면("없음" 선택) 문장 대신 상태 라벨(편안함·보통·심함 등)만 쓴다.
   String _summary() {
     final names = connectedSymptoms.representativeSymptoms.join(', ');
     if (names.isEmpty && connectedSymptoms.etcCount == 0) {
-      return '특별한 불편이 없었어요';
+      return connectedSymptoms.symptomState.label;
     }
     if (connectedSymptoms.etcCount > 0) {
       return names.isEmpty
@@ -629,13 +631,15 @@ class _SymptomCard extends StatelessWidget {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    _afterMealLabel(item.afterMealMinutes),
-                    style: AppTextStyles.caption1Medium.copyWith(
-                      color: AppColors.textSecondary,
+                  if (item.afterMealMinutes != 0) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      _afterMealLabel(item.afterMealMinutes),
+                      style: AppTextStyles.caption1Medium.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),

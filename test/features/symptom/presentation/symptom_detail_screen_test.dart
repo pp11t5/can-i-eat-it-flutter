@@ -222,8 +222,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 증상 유형 join (역류, 기침)
-      expect(find.text('역류, 기침'), findsOneWidget);
+      // 증상 유형 join (신물, 기침)
+      expect(find.text('신물, 기침'), findsOneWidget);
     });
 
     testWidgets('linkedMeal 식사 카드 렌더 (된장찌개 외 1개)', (tester) async {
@@ -281,6 +281,36 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('식후'), findsNothing);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  group('SymptomDetailScreen — 추가 메모', () {
+    testWidgets('memo 가 있으면 메모와 글자 수를 표시한다', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          symptom: _symptomNoMealNoAnalysis.copyWith(memo: '가슴이 답답했음'),
+          symptomId: 'symptom-002',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('추가 메모 기록'), findsOneWidget);
+      expect(find.text('가슴이 답답했음'), findsOneWidget);
+      expect(find.text('8 / 200'), findsOneWidget);
+    });
+
+    testWidgets('memo 가 없으면 "메모가 없어요." 와 0 / 200 을 표시한다', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          symptom: _symptomNoMealNoAnalysis,
+          symptomId: 'symptom-002',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('메모가 없어요.'), findsOneWidget);
+      expect(find.text('0 / 200'), findsOneWidget);
     });
   });
 

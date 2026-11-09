@@ -53,25 +53,51 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.screenPadding,
-                0,
-                AppSpacing.screenPadding,
-                24,
-              ),
-              itemCount: symptomFrequencyOptions.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                final entry = symptomFrequencyOptions[index];
-                final isSelected = draft.symptomFrequency.contains(entry.code);
-                return OptionCard(
-                  label: entry.label,
-                  selected: isSelected,
-                  size: OptionCardSize.compact,
-                  onTap: () => notifier.toggleSymptom(entry.code),
-                );
-              },
+            child: Stack(
+              children: [
+                ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.screenPadding,
+                    0,
+                    AppSpacing.screenPadding,
+                    32,
+                  ),
+                  itemCount: symptomFrequencyOptions.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 16),
+                  itemBuilder: (context, index) {
+                    final entry = symptomFrequencyOptions[index];
+                    final isSelected =
+                        draft.symptomFrequency.contains(entry.code);
+                    return OptionCard(
+                      label: entry.label,
+                      selected: isSelected,
+                      size: OptionCardSize.compact,
+                      onTap: () => notifier.toggleSymptom(entry.code),
+                    );
+                  },
+                ),
+                // 아래에 더 있다는 스크롤 단서: CTA 바로 위 하단 페이드.
+                const Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 32,
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0x00FFFFFF),
+                            AppColors.scaffoldBackground,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           Padding(

@@ -274,12 +274,12 @@ void main() {
     });
 
     testWidgets(
-        'representativeSymptoms가 비어 있으면 "특별한 불편이 없었어요"를 표시한다',
+        'representativeSymptoms가 비어 있으면 상태 라벨("편안함")을 표시한다',
         (tester) async {
       await tester.pumpWidget(
         _wrap(const MealTimelineList(items: [_kSingleWithEmptySymptomTypes])),
       );
-      expect(find.text('특별한 불편이 없었어요'), findsOneWidget);
+      expect(find.text('편안함'), findsOneWidget);
       expect(find.textContaining('식후 2시간'), findsOneWidget);
     });
 

@@ -856,7 +856,7 @@ void main() {
       expect(entity, isA<ConnectedSymptoms>());
       expect(entity.symptomId, 'sym-1');
       expect(entity.symptomState, SymptomState.uncomfortable);
-      expect(entity.representativeSymptoms, ['가슴 답답함', '역류']);
+      expect(entity.representativeSymptoms, ['가슴 답답함', '신물']);
       expect(entity.etcCount, 2);
     });
 
@@ -874,7 +874,7 @@ void main() {
       }).toEntity();
       expect(entity.representativeSymptoms, [
         '목 이물감',
-        '역류',
+        '신물',
         '기침',
         '가슴 답답함',
       ]);

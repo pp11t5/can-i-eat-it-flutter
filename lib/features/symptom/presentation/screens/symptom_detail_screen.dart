@@ -7,6 +7,7 @@ import 'package:can_i_eat_it/app/theme/app_icon_sizes.dart';
 import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
+import 'package:can_i_eat_it/app/widgets/app_button.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
@@ -18,6 +19,7 @@ import 'package:can_i_eat_it/features/food_dictionary/presentation/controllers/d
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/home_widget/data/home_widget_providers.dart';
 import 'package:can_i_eat_it/features/meal_log/data/meal_log_providers.dart';
+import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dart';
 import 'package:can_i_eat_it/features/symptom/domain/entities/symptom.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/providers/symptom_detail_controller.dart';
 import 'package:can_i_eat_it/features/symptom/presentation/widgets/mood_face.dart';
@@ -252,7 +254,9 @@ class _Body extends StatelessWidget {
 
   /// 증상 유형 → 한국어 join. 비어있으면 기본 문구.
   String get _symptomTypesLabel {
-    if (symptom.symptomTypes.isEmpty) return '특별한 불편이 없었어요';
+    if (symptom.symptomTypes.isEmpty) {
+      return symptom.symptomState.noSymptomHeadline;
+    }
     return symptom.symptomTypes.map((t) => t.label).join(', ');
   }
 
@@ -350,6 +354,19 @@ class _Body extends StatelessWidget {
             _NoMealRow(onLink: onLinkMeal),
 
           // ---------------------------------------------------------------
+          // 추가 메모 기록 (없어도 항상 표시: "메모가 없어요." + 0 / 200)
+          // ---------------------------------------------------------------
+          const SizedBox(height: AppSpacing.contentGap),
+          Text(
+            '추가 메모 기록',
+            style: AppTextStyles.body1Bold.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.itemGap),
+          _MemoCard(memo: symptom.memo),
+
+          // ---------------------------------------------------------------
           // AI 분석 섹션 (analysis null 또는 빈 목록이면 숨김)
           // ---------------------------------------------------------------
           if (symptom.analysisItems.isNotEmpty) ...[
@@ -414,6 +431,54 @@ class _MealCard extends StatelessWidget {
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _MemoCard
+// ---------------------------------------------------------------------------
+
+class _MemoCard extends StatelessWidget {
+  const _MemoCard({required this.memo});
+
+  /// 추가 메모. null/빈 문자열이면 "메모가 없어요." 표시.
+  final String? memo;
+
+  static const int _maxLength = 200;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = memo ?? '';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(color: AppColors.borderCard),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            text.isEmpty ? '메모가 없어요.' : text,
+            style: AppTextStyles.body2Medium.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.itemGap),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '${text.characters.length} / $_maxLength',
+              style: AppTextStyles.caption1Medium.copyWith(
+                color: AppColors.textTertiary,
+              ),
             ),
           ),
         ],
@@ -562,6 +627,8 @@ class _AnalysisCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      // 부모 Column 이 crossAxisAlignment.start 라 텍스트 폭만큼 줄어들던 것을 방지.
+      width: double.infinity,
       margin: const EdgeInsets.only(bottom: AppSpacing.itemGap),
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
@@ -651,28 +718,10 @@ class _BottomCta extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: OutlinedButton(
+            child: AppButton.tertiary(
+              label: '기록 삭제하기',
               onPressed: onDelete,
-              style: OutlinedButton.styleFrom(
-                backgroundColor: AppColors.surface,
-                foregroundColor: AppColors.textSecondary,
-                side: const BorderSide(
-                  color: Color(0xFF8C8C8C),
-                  width: 1.5,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  vertical: AppSpacing.cardPadding,
-                ),
-              ),
-              child: Text(
-                '기록 삭제하기',
-                style: AppTextStyles.body1Bold.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
+              isExpanded: true,
             ),
           ),
           const SizedBox(width: AppSpacing.itemGap),

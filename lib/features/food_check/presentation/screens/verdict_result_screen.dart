@@ -129,20 +129,37 @@ class VerdictResultScreen extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.screenPadding,
-              AppSpacing.screenPadding,
-              AppSpacing.screenPadding,
-              0,
+          // 스크롤 전 본문이 면책 고지 뒤에서 비쳐 보이지 않도록 위에서부터
+          // 배경색으로 서서히 덮는다.
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0x00FFFFFF),
+                  AppColors.scaffoldBackground,
+                  AppColors.scaffoldBackground,
+                ],
+                stops: [0, 0.4, 1],
+              ),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                MedicalDisclaimer(),
-                SizedBox(height: AppSpacing.sectionGap),
-              ],
+            child: Padding(
+              // 위쪽 48은 페이드가 보이는 구간 (면책 박스 위치는 그대로).
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.screenPadding,
+                48,
+                AppSpacing.screenPadding,
+                0,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  MedicalDisclaimer(),
+                  SizedBox(height: AppSpacing.sectionGap),
+                ],
+              ),
             ),
           ),
           ColoredBox(

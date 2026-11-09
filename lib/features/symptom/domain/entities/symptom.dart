@@ -11,7 +11,7 @@ part 'symptom.freezed.dart';
 /// 증상 유형 4종 (서버 소문자 문자열과 1:1 정합).
 ///
 /// - [throatForeignBody]: 목 이물감
-/// - [acidReflux]: 역류
+/// - [acidReflux]: 신물
 /// - [cough]: 기침
 /// - [chestTightness]: 가슴 답답함
 enum SymptomType { throatForeignBody, acidReflux, cough, chestTightness }
@@ -40,7 +40,7 @@ extension SymptomTypeMapper on SymptomType {
   /// 화면 표시용 한국어 라벨.
   String get label => switch (this) {
         SymptomType.throatForeignBody => '목 이물감',
-        SymptomType.acidReflux => '역류',
+        SymptomType.acidReflux => '신물',
         SymptomType.cough => '기침',
         SymptomType.chestTightness => '가슴 답답함',
       };
@@ -121,6 +121,9 @@ abstract class Symptom with _$Symptom {
 
     /// 연결 식사. 없으면 null.
     SymptomLinkedMeal? linkedMeal,
+
+    /// 사용자가 입력한 추가 메모 (0~200자). 없으면 null.
+    String? memo,
 
     /// 분석 항목 목록. 없으면 빈 목록.
     @Default(<SymptomAnalysisItem>[]) List<SymptomAnalysisItem> analysisItems,

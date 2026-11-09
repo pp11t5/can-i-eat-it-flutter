@@ -443,7 +443,7 @@ class _MasterToggleRow extends StatelessWidget {
           Switch.adaptive(
             value: value,
             onChanged: onChanged,
-            activeTrackColor: const Color(0xFF34C759),
+            activeTrackColor: AppColors.accentGreen,
           ),
         ],
       ),
@@ -544,12 +544,12 @@ class _ToggleRow extends StatelessWidget {
               ],
             ),
           ),
-          // Figma 577:10290 — iOS 스타일 스위치(흰 thumb, ON=#34C759 track).
+          // Figma 577:10290 — iOS 스타일 스위치(흰 thumb, ON=Accents/Green track).
           // enabled=false → onChanged null → 비활성 스타일 (OS off).
           Switch.adaptive(
             value: value,
             onChanged: enabled ? onChanged : null,
-            activeTrackColor: const Color(0xFF34C759),
+            activeTrackColor: AppColors.accentGreen,
             // iOS는 Cupertino 스위치(비활성 시 opacity 0.5)라 기본값을 유지한다.
             thumbColor: isCupertino
                 ? null

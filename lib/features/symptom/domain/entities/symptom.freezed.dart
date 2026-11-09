@@ -1003,6 +1003,9 @@ mixin _$Symptom {
   /// 연결 식사. 없으면 null.
   SymptomLinkedMeal? get linkedMeal;
 
+  /// 사용자가 입력한 추가 메모 (0~200자). 없으면 null.
+  String? get memo;
+
   /// 분석 항목 목록. 없으면 빈 목록.
   List<SymptomAnalysisItem> get analysisItems;
 
@@ -1030,6 +1033,7 @@ mixin _$Symptom {
                 other.occurredAt == occurredAt) &&
             (identical(other.linkedMeal, linkedMeal) ||
                 other.linkedMeal == linkedMeal) &&
+            (identical(other.memo, memo) || other.memo == memo) &&
             const DeepCollectionEquality()
                 .equals(other.analysisItems, analysisItems));
   }
@@ -1043,11 +1047,12 @@ mixin _$Symptom {
       const DeepCollectionEquality().hash(symptomTypes),
       occurredAt,
       linkedMeal,
+      memo,
       const DeepCollectionEquality().hash(analysisItems));
 
   @override
   String toString() {
-    return 'Symptom(symptomId: $symptomId, symptomState: $symptomState, stateTitle: $stateTitle, symptomTypes: $symptomTypes, occurredAt: $occurredAt, linkedMeal: $linkedMeal, analysisItems: $analysisItems)';
+    return 'Symptom(symptomId: $symptomId, symptomState: $symptomState, stateTitle: $stateTitle, symptomTypes: $symptomTypes, occurredAt: $occurredAt, linkedMeal: $linkedMeal, memo: $memo, analysisItems: $analysisItems)';
   }
 }
 
@@ -1063,6 +1068,7 @@ abstract mixin class $SymptomCopyWith<$Res> {
       List<SymptomType> symptomTypes,
       String occurredAt,
       SymptomLinkedMeal? linkedMeal,
+      String? memo,
       List<SymptomAnalysisItem> analysisItems});
 
   $SymptomLinkedMealCopyWith<$Res>? get linkedMeal;
@@ -1086,6 +1092,7 @@ class _$SymptomCopyWithImpl<$Res> implements $SymptomCopyWith<$Res> {
     Object? symptomTypes = null,
     Object? occurredAt = null,
     Object? linkedMeal = freezed,
+    Object? memo = freezed,
     Object? analysisItems = null,
   }) {
     return _then(_self.copyWith(
@@ -1113,6 +1120,10 @@ class _$SymptomCopyWithImpl<$Res> implements $SymptomCopyWith<$Res> {
           ? _self.linkedMeal
           : linkedMeal // ignore: cast_nullable_to_non_nullable
               as SymptomLinkedMeal?,
+      memo: freezed == memo
+          ? _self.memo
+          : memo // ignore: cast_nullable_to_non_nullable
+              as String?,
       analysisItems: null == analysisItems
           ? _self.analysisItems
           : analysisItems // ignore: cast_nullable_to_non_nullable
@@ -1235,6 +1246,7 @@ extension SymptomPatterns on Symptom {
             List<SymptomType> symptomTypes,
             String occurredAt,
             SymptomLinkedMeal? linkedMeal,
+            String? memo,
             List<SymptomAnalysisItem> analysisItems)?
         $default, {
     required TResult orElse(),
@@ -1249,6 +1261,7 @@ extension SymptomPatterns on Symptom {
             _that.symptomTypes,
             _that.occurredAt,
             _that.linkedMeal,
+            _that.memo,
             _that.analysisItems);
       case _:
         return orElse();
@@ -1277,6 +1290,7 @@ extension SymptomPatterns on Symptom {
             List<SymptomType> symptomTypes,
             String occurredAt,
             SymptomLinkedMeal? linkedMeal,
+            String? memo,
             List<SymptomAnalysisItem> analysisItems)
         $default,
   ) {
@@ -1290,6 +1304,7 @@ extension SymptomPatterns on Symptom {
             _that.symptomTypes,
             _that.occurredAt,
             _that.linkedMeal,
+            _that.memo,
             _that.analysisItems);
       case _:
         throw StateError('Unexpected subclass');
@@ -1317,6 +1332,7 @@ extension SymptomPatterns on Symptom {
             List<SymptomType> symptomTypes,
             String occurredAt,
             SymptomLinkedMeal? linkedMeal,
+            String? memo,
             List<SymptomAnalysisItem> analysisItems)?
         $default,
   ) {
@@ -1330,6 +1346,7 @@ extension SymptomPatterns on Symptom {
             _that.symptomTypes,
             _that.occurredAt,
             _that.linkedMeal,
+            _that.memo,
             _that.analysisItems);
       case _:
         return null;
@@ -1347,6 +1364,7 @@ class _Symptom implements Symptom {
       final List<SymptomType> symptomTypes = const <SymptomType>[],
       required this.occurredAt,
       this.linkedMeal,
+      this.memo,
       final List<SymptomAnalysisItem> analysisItems =
           const <SymptomAnalysisItem>[]})
       : _symptomTypes = symptomTypes,
@@ -1383,6 +1401,10 @@ class _Symptom implements Symptom {
   /// 연결 식사. 없으면 null.
   @override
   final SymptomLinkedMeal? linkedMeal;
+
+  /// 사용자가 입력한 추가 메모 (0~200자). 없으면 null.
+  @override
+  final String? memo;
 
   /// 분석 항목 목록. 없으면 빈 목록.
   final List<SymptomAnalysisItem> _analysisItems;
@@ -1421,6 +1443,7 @@ class _Symptom implements Symptom {
                 other.occurredAt == occurredAt) &&
             (identical(other.linkedMeal, linkedMeal) ||
                 other.linkedMeal == linkedMeal) &&
+            (identical(other.memo, memo) || other.memo == memo) &&
             const DeepCollectionEquality()
                 .equals(other._analysisItems, _analysisItems));
   }
@@ -1434,11 +1457,12 @@ class _Symptom implements Symptom {
       const DeepCollectionEquality().hash(_symptomTypes),
       occurredAt,
       linkedMeal,
+      memo,
       const DeepCollectionEquality().hash(_analysisItems));
 
   @override
   String toString() {
-    return 'Symptom(symptomId: $symptomId, symptomState: $symptomState, stateTitle: $stateTitle, symptomTypes: $symptomTypes, occurredAt: $occurredAt, linkedMeal: $linkedMeal, analysisItems: $analysisItems)';
+    return 'Symptom(symptomId: $symptomId, symptomState: $symptomState, stateTitle: $stateTitle, symptomTypes: $symptomTypes, occurredAt: $occurredAt, linkedMeal: $linkedMeal, memo: $memo, analysisItems: $analysisItems)';
   }
 }
 
@@ -1455,6 +1479,7 @@ abstract mixin class _$SymptomCopyWith<$Res> implements $SymptomCopyWith<$Res> {
       List<SymptomType> symptomTypes,
       String occurredAt,
       SymptomLinkedMeal? linkedMeal,
+      String? memo,
       List<SymptomAnalysisItem> analysisItems});
 
   @override
@@ -1479,6 +1504,7 @@ class __$SymptomCopyWithImpl<$Res> implements _$SymptomCopyWith<$Res> {
     Object? symptomTypes = null,
     Object? occurredAt = null,
     Object? linkedMeal = freezed,
+    Object? memo = freezed,
     Object? analysisItems = null,
   }) {
     return _then(_Symptom(
@@ -1506,6 +1532,10 @@ class __$SymptomCopyWithImpl<$Res> implements _$SymptomCopyWith<$Res> {
           ? _self.linkedMeal
           : linkedMeal // ignore: cast_nullable_to_non_nullable
               as SymptomLinkedMeal?,
+      memo: freezed == memo
+          ? _self.memo
+          : memo // ignore: cast_nullable_to_non_nullable
+              as String?,
       analysisItems: null == analysisItems
           ? _self._analysisItems
           : analysisItems // ignore: cast_nullable_to_non_nullable

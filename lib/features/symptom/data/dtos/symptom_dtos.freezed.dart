@@ -1325,6 +1325,9 @@ mixin _$SymptomResponseDto {
   SymptomLinkedMealDto? get linkedMeal;
   SymptomAnalysisDto? get analysis;
 
+  /// 추가 메모. 서버가 아직 내려주지 않으면 null.
+  String? get memo;
+
   /// Create a copy of SymptomResponseDto
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1354,7 +1357,8 @@ mixin _$SymptomResponseDto {
             (identical(other.linkedMeal, linkedMeal) ||
                 other.linkedMeal == linkedMeal) &&
             (identical(other.analysis, analysis) ||
-                other.analysis == analysis));
+                other.analysis == analysis) &&
+            (identical(other.memo, memo) || other.memo == memo));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1367,11 +1371,12 @@ mixin _$SymptomResponseDto {
       const DeepCollectionEquality().hash(symptomTypes),
       occurredAt,
       linkedMeal,
-      analysis);
+      analysis,
+      memo);
 
   @override
   String toString() {
-    return 'SymptomResponseDto(symptomId: $symptomId, symptomState: $symptomState, stateTitle: $stateTitle, symptomTypes: $symptomTypes, occurredAt: $occurredAt, linkedMeal: $linkedMeal, analysis: $analysis)';
+    return 'SymptomResponseDto(symptomId: $symptomId, symptomState: $symptomState, stateTitle: $stateTitle, symptomTypes: $symptomTypes, occurredAt: $occurredAt, linkedMeal: $linkedMeal, analysis: $analysis, memo: $memo)';
   }
 }
 
@@ -1388,7 +1393,8 @@ abstract mixin class $SymptomResponseDtoCopyWith<$Res> {
       List<String> symptomTypes,
       String occurredAt,
       SymptomLinkedMealDto? linkedMeal,
-      SymptomAnalysisDto? analysis});
+      SymptomAnalysisDto? analysis,
+      String? memo});
 
   $SymptomLinkedMealDtoCopyWith<$Res>? get linkedMeal;
   $SymptomAnalysisDtoCopyWith<$Res>? get analysis;
@@ -1414,6 +1420,7 @@ class _$SymptomResponseDtoCopyWithImpl<$Res>
     Object? occurredAt = null,
     Object? linkedMeal = freezed,
     Object? analysis = freezed,
+    Object? memo = freezed,
   }) {
     return _then(_self.copyWith(
       symptomId: null == symptomId
@@ -1444,6 +1451,10 @@ class _$SymptomResponseDtoCopyWithImpl<$Res>
           ? _self.analysis
           : analysis // ignore: cast_nullable_to_non_nullable
               as SymptomAnalysisDto?,
+      memo: freezed == memo
+          ? _self.memo
+          : memo // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 
@@ -1576,7 +1587,8 @@ extension SymptomResponseDtoPatterns on SymptomResponseDto {
             List<String> symptomTypes,
             String occurredAt,
             SymptomLinkedMealDto? linkedMeal,
-            SymptomAnalysisDto? analysis)?
+            SymptomAnalysisDto? analysis,
+            String? memo)?
         $default, {
     required TResult orElse(),
   }) {
@@ -1590,7 +1602,8 @@ extension SymptomResponseDtoPatterns on SymptomResponseDto {
             _that.symptomTypes,
             _that.occurredAt,
             _that.linkedMeal,
-            _that.analysis);
+            _that.analysis,
+            _that.memo);
       case _:
         return orElse();
     }
@@ -1618,7 +1631,8 @@ extension SymptomResponseDtoPatterns on SymptomResponseDto {
             List<String> symptomTypes,
             String occurredAt,
             SymptomLinkedMealDto? linkedMeal,
-            SymptomAnalysisDto? analysis)
+            SymptomAnalysisDto? analysis,
+            String? memo)
         $default,
   ) {
     final _that = this;
@@ -1631,7 +1645,8 @@ extension SymptomResponseDtoPatterns on SymptomResponseDto {
             _that.symptomTypes,
             _that.occurredAt,
             _that.linkedMeal,
-            _that.analysis);
+            _that.analysis,
+            _that.memo);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -1658,7 +1673,8 @@ extension SymptomResponseDtoPatterns on SymptomResponseDto {
             List<String> symptomTypes,
             String occurredAt,
             SymptomLinkedMealDto? linkedMeal,
-            SymptomAnalysisDto? analysis)?
+            SymptomAnalysisDto? analysis,
+            String? memo)?
         $default,
   ) {
     final _that = this;
@@ -1671,7 +1687,8 @@ extension SymptomResponseDtoPatterns on SymptomResponseDto {
             _that.symptomTypes,
             _that.occurredAt,
             _that.linkedMeal,
-            _that.analysis);
+            _that.analysis,
+            _that.memo);
       case _:
         return null;
     }
@@ -1688,7 +1705,8 @@ class _SymptomResponseDto implements SymptomResponseDto {
       final List<String> symptomTypes = const <String>[],
       required this.occurredAt,
       this.linkedMeal,
-      this.analysis})
+      this.analysis,
+      this.memo})
       : _symptomTypes = symptomTypes;
   factory _SymptomResponseDto.fromJson(Map<String, dynamic> json) =>
       _$SymptomResponseDtoFromJson(json);
@@ -1714,6 +1732,10 @@ class _SymptomResponseDto implements SymptomResponseDto {
   final SymptomLinkedMealDto? linkedMeal;
   @override
   final SymptomAnalysisDto? analysis;
+
+  /// 추가 메모. 서버가 아직 내려주지 않으면 null.
+  @override
+  final String? memo;
 
   /// Create a copy of SymptomResponseDto
   /// with the given fields replaced by the non-null parameter values.
@@ -1748,7 +1770,8 @@ class _SymptomResponseDto implements SymptomResponseDto {
             (identical(other.linkedMeal, linkedMeal) ||
                 other.linkedMeal == linkedMeal) &&
             (identical(other.analysis, analysis) ||
-                other.analysis == analysis));
+                other.analysis == analysis) &&
+            (identical(other.memo, memo) || other.memo == memo));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1761,11 +1784,12 @@ class _SymptomResponseDto implements SymptomResponseDto {
       const DeepCollectionEquality().hash(_symptomTypes),
       occurredAt,
       linkedMeal,
-      analysis);
+      analysis,
+      memo);
 
   @override
   String toString() {
-    return 'SymptomResponseDto(symptomId: $symptomId, symptomState: $symptomState, stateTitle: $stateTitle, symptomTypes: $symptomTypes, occurredAt: $occurredAt, linkedMeal: $linkedMeal, analysis: $analysis)';
+    return 'SymptomResponseDto(symptomId: $symptomId, symptomState: $symptomState, stateTitle: $stateTitle, symptomTypes: $symptomTypes, occurredAt: $occurredAt, linkedMeal: $linkedMeal, analysis: $analysis, memo: $memo)';
   }
 }
 
@@ -1784,7 +1808,8 @@ abstract mixin class _$SymptomResponseDtoCopyWith<$Res>
       List<String> symptomTypes,
       String occurredAt,
       SymptomLinkedMealDto? linkedMeal,
-      SymptomAnalysisDto? analysis});
+      SymptomAnalysisDto? analysis,
+      String? memo});
 
   @override
   $SymptomLinkedMealDtoCopyWith<$Res>? get linkedMeal;
@@ -1812,6 +1837,7 @@ class __$SymptomResponseDtoCopyWithImpl<$Res>
     Object? occurredAt = null,
     Object? linkedMeal = freezed,
     Object? analysis = freezed,
+    Object? memo = freezed,
   }) {
     return _then(_SymptomResponseDto(
       symptomId: null == symptomId
@@ -1842,6 +1868,10 @@ class __$SymptomResponseDtoCopyWithImpl<$Res>
           ? _self.analysis
           : analysis // ignore: cast_nullable_to_non_nullable
               as SymptomAnalysisDto?,
+      memo: freezed == memo
+          ? _self.memo
+          : memo // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 
