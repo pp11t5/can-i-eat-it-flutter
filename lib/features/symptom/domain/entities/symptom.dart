@@ -122,6 +122,9 @@ abstract class Symptom with _$Symptom {
     /// 연결 식사. 없으면 null.
     SymptomLinkedMeal? linkedMeal,
 
+    /// 사용자가 입력한 추가 메모 (0~200자). 없으면 null.
+    String? memo,
+
     /// 분석 항목 목록. 없으면 빈 목록.
     @Default(<SymptomAnalysisItem>[]) List<SymptomAnalysisItem> analysisItems,
   }) = _Symptom;

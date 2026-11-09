@@ -96,6 +96,9 @@ abstract class SymptomResponseDto with _$SymptomResponseDto {
     required String occurredAt,
     SymptomLinkedMealDto? linkedMeal,
     SymptomAnalysisDto? analysis,
+
+    /// 추가 메모. 서버가 아직 내려주지 않으면 null.
+    String? memo,
   }) = _SymptomResponseDto;
 
   factory SymptomResponseDto.fromJson(Map<String, dynamic> json) =>
@@ -113,6 +116,7 @@ extension SymptomResponseDtoMapper on SymptomResponseDto {
             .toList(),
         occurredAt: occurredAt,
         linkedMeal: linkedMeal?.toEntity(),
+        memo: memo,
         analysisItems: (analysis?.items ?? const [])
             .map((i) => i.toEntity())
             .toList(),

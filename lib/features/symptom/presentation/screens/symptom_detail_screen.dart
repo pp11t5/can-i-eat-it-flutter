@@ -353,6 +353,19 @@ class _Body extends StatelessWidget {
             _NoMealRow(onLink: onLinkMeal),
 
           // ---------------------------------------------------------------
+          // 추가 메모 기록 (없어도 항상 표시: "메모가 없어요." + 0 / 200)
+          // ---------------------------------------------------------------
+          const SizedBox(height: AppSpacing.contentGap),
+          Text(
+            '추가 메모 기록',
+            style: AppTextStyles.body1Bold.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.itemGap),
+          _MemoCard(memo: symptom.memo),
+
+          // ---------------------------------------------------------------
           // AI 분석 섹션 (analysis null 또는 빈 목록이면 숨김)
           // ---------------------------------------------------------------
           if (symptom.analysisItems.isNotEmpty) ...[
@@ -417,6 +430,54 @@ class _MealCard extends StatelessWidget {
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _MemoCard
+// ---------------------------------------------------------------------------
+
+class _MemoCard extends StatelessWidget {
+  const _MemoCard({required this.memo});
+
+  /// 추가 메모. null/빈 문자열이면 "메모가 없어요." 표시.
+  final String? memo;
+
+  static const int _maxLength = 200;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = memo ?? '';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(color: AppColors.borderCard),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            text.isEmpty ? '메모가 없어요.' : text,
+            style: AppTextStyles.body2Medium.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.itemGap),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '${text.characters.length} / $_maxLength',
+              style: AppTextStyles.caption1Medium.copyWith(
+                color: AppColors.textTertiary,
+              ),
             ),
           ),
         ],

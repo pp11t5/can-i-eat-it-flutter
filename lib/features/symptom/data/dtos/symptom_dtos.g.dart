@@ -86,6 +86,7 @@ _SymptomResponseDto _$SymptomResponseDtoFromJson(Map<String, dynamic> json) =>
           ? null
           : SymptomAnalysisDto.fromJson(
               json['analysis'] as Map<String, dynamic>),
+      memo: json['memo'] as String?,
     );
 
 Map<String, dynamic> _$SymptomResponseDtoToJson(_SymptomResponseDto instance) =>
@@ -97,6 +98,7 @@ Map<String, dynamic> _$SymptomResponseDtoToJson(_SymptomResponseDto instance) =>
       'occurredAt': instance.occurredAt,
       'linkedMeal': instance.linkedMeal,
       'analysis': instance.analysis,
+      'memo': instance.memo,
     };
 
 _SymptomCreateRequestDto _$SymptomCreateRequestDtoFromJson(
