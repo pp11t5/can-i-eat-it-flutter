@@ -90,7 +90,7 @@ void main() {
       expect(find.text('기록이 없어요'), findsNothing);
     });
 
-    testWidgets('미열람이면 타임라인 로딩 중에도 스피너 없이 가이드', (tester) async {
+    testWidgets('타임라인 로딩 중에는 가이드 대신 로딩 표시', (tester) async {
       final store = InMemoryTimelineGuideStore();
       const delay = Duration(seconds: 5);
       await tester.pumpWidget(
@@ -101,16 +101,26 @@ void main() {
           timelineDelay: delay,
         ),
       );
-      // auth + guide 플래그 완료, timeline 은 아직 로딩
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
 
-      expect(find.byType(TimelineFirstVisitGuide), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byType(TimelineFirstVisitGuide), findsNothing);
 
-      // pending timer 정리
+      // 로딩이 끝나고 비어 있으면 그때 가이드
       await tester.pump(delay);
       await tester.pumpAndSettle();
+      expect(find.byType(TimelineFirstVisitGuide), findsOneWidget);
+    });
+
+    testWidgets('기록이 있는 미열람 계정은 탭 없이 가이드 대상에서 제외(봄 처리)', (tester) async {
+      final store = InMemoryTimelineGuideStore();
+      await tester.pumpWidget(
+        _wrap(guideStore: store, userId: 'u-has-meals', seededMeals: true),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TimelineFirstVisitGuide), findsNothing);
+      expect(store.seenUserIds, contains('u-has-meals'));
     });
 
     testWidgets('empty + 이미 본 계정이면 일반 empty', (tester) async {

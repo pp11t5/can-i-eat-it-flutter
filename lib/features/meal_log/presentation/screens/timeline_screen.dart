@@ -169,9 +169,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
   }
 
   void _reloadTimeline(DateTime date) {
-    ref
-        .read(timelineControllerProvider(date).notifier)
-        .changeDate(date);
+    ref.read(timelineControllerProvider(date).notifier).changeDate(date);
   }
 
   static bool _isSameDay(DateTime a, DateTime b) =>
@@ -179,8 +177,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final timelineAsync =
-        ref.watch(timelineControllerProvider(_selectedDate));
+    final timelineAsync = ref.watch(timelineControllerProvider(_selectedDate));
     final monthlyAsync = ref.watch(monthlyControllerProvider(_visibleMonth));
     // 가입일 하한 — auth 세션이 로드되면 MonthNav `‹` 비활성 갱신.
     final joinDate = _joinDateFromSession(
@@ -188,6 +185,10 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
     );
     // false = 미열람(가이드), true = 봄, null = 플래그 로딩 중.
     final hasSeenGuide = ref.watch(timelineFabGuideProvider).valueOrNull;
+    // 이번 달에 기록이 있는 계정은 최초 가이드 대상이 아니다 (탭 없이 «봄» 처리).
+    if (monthlyAsync.valueOrNull?.isNotEmpty == true) {
+      _dismissGuideIfNeeded(hasSeenGuide);
+    }
 
     return Scaffold(
       // Figma 실측: #FCFCFC (surfaceBackground #F5F5F5 과 구분되는 타임라인 전용 배경)
@@ -231,17 +232,17 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
               ),
             ),
             // --- 타임라인 리스트 ---
-            // 미열람(hasSeenGuide == false)이면 API 로딩 스피너 없이 가이드 즉시 표시.
+            // 가이드는 로딩이 끝나고 비어 있을 때만 (기록 있는 날 깜빡임 방지).
             Expanded(
               child: timelineAsync.when(
-                loading: () => hasSeenGuide == false
-                    ? const TimelineFirstVisitGuide()
-                    : const _TimelineLoadingPlaceholder(),
+                loading: () => const _TimelineLoadingPlaceholder(),
                 error: (err, _) => _TimelineErrorView(
                   onRetry: () => _reloadTimeline(_selectedDate),
                 ),
                 data: (items) {
                   if (items.isNotEmpty) {
+                    // 기록이 보이는 계정은 가이드 대상이 아니다.
+                    _dismissGuideIfNeeded(hasSeenGuide);
                     return _TimelineItemList(items: items);
                   }
                   if (hasSeenGuide == false) {
@@ -271,6 +272,14 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
         ),
       ),
     );
+  }
+
+  /// 가이드 미열람 계정이 기록을 확인했으면 탭 없이 «봄» 으로 저장한다.
+  void _dismissGuideIfNeeded(bool? hasSeenGuide) {
+    if (hasSeenGuide != false) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(timelineFabGuideProvider.notifier).dismiss();
+    });
   }
 
   /// 월별 데이터에서 도트 맵 생성 (GET /timeline/monthly 연동).
