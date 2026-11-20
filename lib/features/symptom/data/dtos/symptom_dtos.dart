@@ -36,6 +36,7 @@ extension SymptomLinkedFoodDtoMapper on SymptomLinkedFoodDto {
 abstract class SymptomLinkedMealDto with _$SymptomLinkedMealDto {
   const factory SymptomLinkedMealDto({
     required String mealRecordId,
+    int? afterMealMinutes,
     @Default(<SymptomLinkedFoodDto>[]) List<SymptomLinkedFoodDto> foods,
   }) = _SymptomLinkedMealDto;
 
@@ -46,6 +47,7 @@ abstract class SymptomLinkedMealDto with _$SymptomLinkedMealDto {
 extension SymptomLinkedMealDtoMapper on SymptomLinkedMealDto {
   SymptomLinkedMeal toEntity() => SymptomLinkedMeal(
         mealRecordId: mealRecordId,
+        afterMealMinutes: afterMealMinutes,
         foods: foods.map((f) => f.toEntity()).toList(),
       );
 }
@@ -117,9 +119,8 @@ extension SymptomResponseDtoMapper on SymptomResponseDto {
         occurredAt: occurredAt,
         linkedMeal: linkedMeal?.toEntity(),
         memo: memo,
-        analysisItems: (analysis?.items ?? const [])
-            .map((i) => i.toEntity())
-            .toList(),
+        analysisItems:
+            (analysis?.items ?? const []).map((i) => i.toEntity()).toList(),
       );
 }
 

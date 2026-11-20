@@ -354,6 +354,7 @@ class __$SymptomLinkedFoodDtoCopyWithImpl<$Res>
 /// @nodoc
 mixin _$SymptomLinkedMealDto {
   String get mealRecordId;
+  int? get afterMealMinutes;
   List<SymptomLinkedFoodDto> get foods;
 
   /// Create a copy of SymptomLinkedMealDto
@@ -374,17 +375,19 @@ mixin _$SymptomLinkedMealDto {
             other is SymptomLinkedMealDto &&
             (identical(other.mealRecordId, mealRecordId) ||
                 other.mealRecordId == mealRecordId) &&
+            (identical(other.afterMealMinutes, afterMealMinutes) ||
+                other.afterMealMinutes == afterMealMinutes) &&
             const DeepCollectionEquality().equals(other.foods, foods));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, mealRecordId, const DeepCollectionEquality().hash(foods));
+  int get hashCode => Object.hash(runtimeType, mealRecordId, afterMealMinutes,
+      const DeepCollectionEquality().hash(foods));
 
   @override
   String toString() {
-    return 'SymptomLinkedMealDto(mealRecordId: $mealRecordId, foods: $foods)';
+    return 'SymptomLinkedMealDto(mealRecordId: $mealRecordId, afterMealMinutes: $afterMealMinutes, foods: $foods)';
   }
 }
 
@@ -394,7 +397,10 @@ abstract mixin class $SymptomLinkedMealDtoCopyWith<$Res> {
           $Res Function(SymptomLinkedMealDto) _then) =
       _$SymptomLinkedMealDtoCopyWithImpl;
   @useResult
-  $Res call({String mealRecordId, List<SymptomLinkedFoodDto> foods});
+  $Res call(
+      {String mealRecordId,
+      int? afterMealMinutes,
+      List<SymptomLinkedFoodDto> foods});
 }
 
 /// @nodoc
@@ -411,6 +417,7 @@ class _$SymptomLinkedMealDtoCopyWithImpl<$Res>
   @override
   $Res call({
     Object? mealRecordId = null,
+    Object? afterMealMinutes = freezed,
     Object? foods = null,
   }) {
     return _then(_self.copyWith(
@@ -418,6 +425,10 @@ class _$SymptomLinkedMealDtoCopyWithImpl<$Res>
           ? _self.mealRecordId
           : mealRecordId // ignore: cast_nullable_to_non_nullable
               as String,
+      afterMealMinutes: freezed == afterMealMinutes
+          ? _self.afterMealMinutes
+          : afterMealMinutes // ignore: cast_nullable_to_non_nullable
+              as int?,
       foods: null == foods
           ? _self.foods
           : foods // ignore: cast_nullable_to_non_nullable
@@ -519,14 +530,16 @@ extension SymptomLinkedMealDtoPatterns on SymptomLinkedMealDto {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String mealRecordId, List<SymptomLinkedFoodDto> foods)?
+    TResult Function(String mealRecordId, int? afterMealMinutes,
+            List<SymptomLinkedFoodDto> foods)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _SymptomLinkedMealDto() when $default != null:
-        return $default(_that.mealRecordId, _that.foods);
+        return $default(
+            _that.mealRecordId, _that.afterMealMinutes, _that.foods);
       case _:
         return orElse();
     }
@@ -547,13 +560,15 @@ extension SymptomLinkedMealDtoPatterns on SymptomLinkedMealDto {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String mealRecordId, List<SymptomLinkedFoodDto> foods)
+    TResult Function(String mealRecordId, int? afterMealMinutes,
+            List<SymptomLinkedFoodDto> foods)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SymptomLinkedMealDto():
-        return $default(_that.mealRecordId, _that.foods);
+        return $default(
+            _that.mealRecordId, _that.afterMealMinutes, _that.foods);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -573,13 +588,15 @@ extension SymptomLinkedMealDtoPatterns on SymptomLinkedMealDto {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String mealRecordId, List<SymptomLinkedFoodDto> foods)?
+    TResult? Function(String mealRecordId, int? afterMealMinutes,
+            List<SymptomLinkedFoodDto> foods)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SymptomLinkedMealDto() when $default != null:
-        return $default(_that.mealRecordId, _that.foods);
+        return $default(
+            _that.mealRecordId, _that.afterMealMinutes, _that.foods);
       case _:
         return null;
     }
@@ -591,6 +608,7 @@ extension SymptomLinkedMealDtoPatterns on SymptomLinkedMealDto {
 class _SymptomLinkedMealDto implements SymptomLinkedMealDto {
   const _SymptomLinkedMealDto(
       {required this.mealRecordId,
+      this.afterMealMinutes,
       final List<SymptomLinkedFoodDto> foods = const <SymptomLinkedFoodDto>[]})
       : _foods = foods;
   factory _SymptomLinkedMealDto.fromJson(Map<String, dynamic> json) =>
@@ -598,6 +616,8 @@ class _SymptomLinkedMealDto implements SymptomLinkedMealDto {
 
   @override
   final String mealRecordId;
+  @override
+  final int? afterMealMinutes;
   final List<SymptomLinkedFoodDto> _foods;
   @override
   @JsonKey()
@@ -630,17 +650,19 @@ class _SymptomLinkedMealDto implements SymptomLinkedMealDto {
             other is _SymptomLinkedMealDto &&
             (identical(other.mealRecordId, mealRecordId) ||
                 other.mealRecordId == mealRecordId) &&
+            (identical(other.afterMealMinutes, afterMealMinutes) ||
+                other.afterMealMinutes == afterMealMinutes) &&
             const DeepCollectionEquality().equals(other._foods, _foods));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, mealRecordId, const DeepCollectionEquality().hash(_foods));
+  int get hashCode => Object.hash(runtimeType, mealRecordId, afterMealMinutes,
+      const DeepCollectionEquality().hash(_foods));
 
   @override
   String toString() {
-    return 'SymptomLinkedMealDto(mealRecordId: $mealRecordId, foods: $foods)';
+    return 'SymptomLinkedMealDto(mealRecordId: $mealRecordId, afterMealMinutes: $afterMealMinutes, foods: $foods)';
   }
 }
 
@@ -652,7 +674,10 @@ abstract mixin class _$SymptomLinkedMealDtoCopyWith<$Res>
       __$SymptomLinkedMealDtoCopyWithImpl;
   @override
   @useResult
-  $Res call({String mealRecordId, List<SymptomLinkedFoodDto> foods});
+  $Res call(
+      {String mealRecordId,
+      int? afterMealMinutes,
+      List<SymptomLinkedFoodDto> foods});
 }
 
 /// @nodoc
@@ -669,6 +694,7 @@ class __$SymptomLinkedMealDtoCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   $Res call({
     Object? mealRecordId = null,
+    Object? afterMealMinutes = freezed,
     Object? foods = null,
   }) {
     return _then(_SymptomLinkedMealDto(
@@ -676,6 +702,10 @@ class __$SymptomLinkedMealDtoCopyWithImpl<$Res>
           ? _self.mealRecordId
           : mealRecordId // ignore: cast_nullable_to_non_nullable
               as String,
+      afterMealMinutes: freezed == afterMealMinutes
+          ? _self.afterMealMinutes
+          : afterMealMinutes // ignore: cast_nullable_to_non_nullable
+              as int?,
       foods: null == foods
           ? _self._foods
           : foods // ignore: cast_nullable_to_non_nullable

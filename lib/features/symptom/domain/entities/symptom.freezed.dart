@@ -662,6 +662,9 @@ mixin _$SymptomLinkedMeal {
   /// 연결 식사 기록 식별자.
   String get mealRecordId;
 
+  /// 식사 후 증상 발생까지 경과 분 (식전이면 음수). 서버 미제공 시 null.
+  int? get afterMealMinutes;
+
   /// 연결 식사 내 음식 목록.
   List<SymptomLinkedFood> get foods;
 
@@ -680,16 +683,18 @@ mixin _$SymptomLinkedMeal {
             other is SymptomLinkedMeal &&
             (identical(other.mealRecordId, mealRecordId) ||
                 other.mealRecordId == mealRecordId) &&
+            (identical(other.afterMealMinutes, afterMealMinutes) ||
+                other.afterMealMinutes == afterMealMinutes) &&
             const DeepCollectionEquality().equals(other.foods, foods));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, mealRecordId, const DeepCollectionEquality().hash(foods));
+  int get hashCode => Object.hash(runtimeType, mealRecordId, afterMealMinutes,
+      const DeepCollectionEquality().hash(foods));
 
   @override
   String toString() {
-    return 'SymptomLinkedMeal(mealRecordId: $mealRecordId, foods: $foods)';
+    return 'SymptomLinkedMeal(mealRecordId: $mealRecordId, afterMealMinutes: $afterMealMinutes, foods: $foods)';
   }
 }
 
@@ -699,7 +704,10 @@ abstract mixin class $SymptomLinkedMealCopyWith<$Res> {
           SymptomLinkedMeal value, $Res Function(SymptomLinkedMeal) _then) =
       _$SymptomLinkedMealCopyWithImpl;
   @useResult
-  $Res call({String mealRecordId, List<SymptomLinkedFood> foods});
+  $Res call(
+      {String mealRecordId,
+      int? afterMealMinutes,
+      List<SymptomLinkedFood> foods});
 }
 
 /// @nodoc
@@ -716,6 +724,7 @@ class _$SymptomLinkedMealCopyWithImpl<$Res>
   @override
   $Res call({
     Object? mealRecordId = null,
+    Object? afterMealMinutes = freezed,
     Object? foods = null,
   }) {
     return _then(_self.copyWith(
@@ -723,6 +732,10 @@ class _$SymptomLinkedMealCopyWithImpl<$Res>
           ? _self.mealRecordId
           : mealRecordId // ignore: cast_nullable_to_non_nullable
               as String,
+      afterMealMinutes: freezed == afterMealMinutes
+          ? _self.afterMealMinutes
+          : afterMealMinutes // ignore: cast_nullable_to_non_nullable
+              as int?,
       foods: null == foods
           ? _self.foods
           : foods // ignore: cast_nullable_to_non_nullable
@@ -824,14 +837,16 @@ extension SymptomLinkedMealPatterns on SymptomLinkedMeal {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String mealRecordId, List<SymptomLinkedFood> foods)?
+    TResult Function(String mealRecordId, int? afterMealMinutes,
+            List<SymptomLinkedFood> foods)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _SymptomLinkedMeal() when $default != null:
-        return $default(_that.mealRecordId, _that.foods);
+        return $default(
+            _that.mealRecordId, _that.afterMealMinutes, _that.foods);
       case _:
         return orElse();
     }
@@ -852,13 +867,15 @@ extension SymptomLinkedMealPatterns on SymptomLinkedMeal {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String mealRecordId, List<SymptomLinkedFood> foods)
+    TResult Function(String mealRecordId, int? afterMealMinutes,
+            List<SymptomLinkedFood> foods)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SymptomLinkedMeal():
-        return $default(_that.mealRecordId, _that.foods);
+        return $default(
+            _that.mealRecordId, _that.afterMealMinutes, _that.foods);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -878,13 +895,15 @@ extension SymptomLinkedMealPatterns on SymptomLinkedMeal {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String mealRecordId, List<SymptomLinkedFood> foods)?
+    TResult? Function(String mealRecordId, int? afterMealMinutes,
+            List<SymptomLinkedFood> foods)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _SymptomLinkedMeal() when $default != null:
-        return $default(_that.mealRecordId, _that.foods);
+        return $default(
+            _that.mealRecordId, _that.afterMealMinutes, _that.foods);
       case _:
         return null;
     }
@@ -896,12 +915,17 @@ extension SymptomLinkedMealPatterns on SymptomLinkedMeal {
 class _SymptomLinkedMeal implements SymptomLinkedMeal {
   const _SymptomLinkedMeal(
       {required this.mealRecordId,
+      this.afterMealMinutes,
       final List<SymptomLinkedFood> foods = const <SymptomLinkedFood>[]})
       : _foods = foods;
 
   /// 연결 식사 기록 식별자.
   @override
   final String mealRecordId;
+
+  /// 식사 후 증상 발생까지 경과 분 (식전이면 음수). 서버 미제공 시 null.
+  @override
+  final int? afterMealMinutes;
 
   /// 연결 식사 내 음식 목록.
   final List<SymptomLinkedFood> _foods;
@@ -930,16 +954,18 @@ class _SymptomLinkedMeal implements SymptomLinkedMeal {
             other is _SymptomLinkedMeal &&
             (identical(other.mealRecordId, mealRecordId) ||
                 other.mealRecordId == mealRecordId) &&
+            (identical(other.afterMealMinutes, afterMealMinutes) ||
+                other.afterMealMinutes == afterMealMinutes) &&
             const DeepCollectionEquality().equals(other._foods, _foods));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, mealRecordId, const DeepCollectionEquality().hash(_foods));
+  int get hashCode => Object.hash(runtimeType, mealRecordId, afterMealMinutes,
+      const DeepCollectionEquality().hash(_foods));
 
   @override
   String toString() {
-    return 'SymptomLinkedMeal(mealRecordId: $mealRecordId, foods: $foods)';
+    return 'SymptomLinkedMeal(mealRecordId: $mealRecordId, afterMealMinutes: $afterMealMinutes, foods: $foods)';
   }
 }
 
@@ -951,7 +977,10 @@ abstract mixin class _$SymptomLinkedMealCopyWith<$Res>
       __$SymptomLinkedMealCopyWithImpl;
   @override
   @useResult
-  $Res call({String mealRecordId, List<SymptomLinkedFood> foods});
+  $Res call(
+      {String mealRecordId,
+      int? afterMealMinutes,
+      List<SymptomLinkedFood> foods});
 }
 
 /// @nodoc
@@ -968,6 +997,7 @@ class __$SymptomLinkedMealCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   $Res call({
     Object? mealRecordId = null,
+    Object? afterMealMinutes = freezed,
     Object? foods = null,
   }) {
     return _then(_SymptomLinkedMeal(
@@ -975,6 +1005,10 @@ class __$SymptomLinkedMealCopyWithImpl<$Res>
           ? _self.mealRecordId
           : mealRecordId // ignore: cast_nullable_to_non_nullable
               as String,
+      afterMealMinutes: freezed == afterMealMinutes
+          ? _self.afterMealMinutes
+          : afterMealMinutes // ignore: cast_nullable_to_non_nullable
+              as int?,
       foods: null == foods
           ? _self._foods
           : foods // ignore: cast_nullable_to_non_nullable

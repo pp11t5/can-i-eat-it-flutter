@@ -2378,6 +2378,9 @@ class __$ConnectedSymptomsCopyWithImpl<$Res>
 
 /// @nodoc
 mixin _$TimelineItem {
+  /// 표시되지 않은 나머지 증상 유형 개수.
+  int get etcCount;
+
   /// 서버 지정 시간대 아이콘. null 이면 hour 휴리스틱 폴백.
   TimeIcon? get timeIcon;
 
@@ -2394,16 +2397,18 @@ mixin _$TimelineItem {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is TimelineItem &&
+            (identical(other.etcCount, etcCount) ||
+                other.etcCount == etcCount) &&
             (identical(other.timeIcon, timeIcon) ||
                 other.timeIcon == timeIcon));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, timeIcon);
+  int get hashCode => Object.hash(runtimeType, etcCount, timeIcon);
 
   @override
   String toString() {
-    return 'TimelineItem(timeIcon: $timeIcon)';
+    return 'TimelineItem(etcCount: $etcCount, timeIcon: $timeIcon)';
   }
 }
 
@@ -2413,7 +2418,7 @@ abstract mixin class $TimelineItemCopyWith<$Res> {
           TimelineItem value, $Res Function(TimelineItem) _then) =
       _$TimelineItemCopyWithImpl;
   @useResult
-  $Res call({TimeIcon? timeIcon});
+  $Res call({int etcCount, TimeIcon? timeIcon});
 }
 
 /// @nodoc
@@ -2428,9 +2433,14 @@ class _$TimelineItemCopyWithImpl<$Res> implements $TimelineItemCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? etcCount = null,
     Object? timeIcon = freezed,
   }) {
     return _then(_self.copyWith(
+      etcCount: null == etcCount
+          ? _self.etcCount
+          : etcCount // ignore: cast_nullable_to_non_nullable
+              as int,
       timeIcon: freezed == timeIcon
           ? _self.timeIcon
           : timeIcon // ignore: cast_nullable_to_non_nullable
@@ -2567,8 +2577,14 @@ extension TimelineItemPatterns on TimelineItem {
             TimeIcon? timeIcon,
             ConnectedSymptoms? connectedSymptoms)?
         group,
-    TResult Function(SymptomState symptomState, int afterMealMinutes,
-            String occurredAt, TimeIcon? timeIcon, String? symptomId)?
+    TResult Function(
+            SymptomState symptomState,
+            int? afterMealMinutes,
+            String occurredAt,
+            List<String> representativeSymptoms,
+            int etcCount,
+            TimeIcon? timeIcon,
+            String? symptomId)?
         symptom,
     required TResult orElse(),
   }) {
@@ -2594,8 +2610,14 @@ extension TimelineItemPatterns on TimelineItem {
             _that.timeIcon,
             _that.connectedSymptoms);
       case TimelineSymptom() when symptom != null:
-        return symptom(_that.symptomState, _that.afterMealMinutes,
-            _that.occurredAt, _that.timeIcon, _that.symptomId);
+        return symptom(
+            _that.symptomState,
+            _that.afterMealMinutes,
+            _that.occurredAt,
+            _that.representativeSymptoms,
+            _that.etcCount,
+            _that.timeIcon,
+            _that.symptomId);
       case _:
         return orElse();
     }
@@ -2635,8 +2657,14 @@ extension TimelineItemPatterns on TimelineItem {
             TimeIcon? timeIcon,
             ConnectedSymptoms? connectedSymptoms)
         group,
-    required TResult Function(SymptomState symptomState, int afterMealMinutes,
-            String occurredAt, TimeIcon? timeIcon, String? symptomId)
+    required TResult Function(
+            SymptomState symptomState,
+            int? afterMealMinutes,
+            String occurredAt,
+            List<String> representativeSymptoms,
+            int etcCount,
+            TimeIcon? timeIcon,
+            String? symptomId)
         symptom,
   }) {
     final _that = this;
@@ -2661,8 +2689,14 @@ extension TimelineItemPatterns on TimelineItem {
             _that.timeIcon,
             _that.connectedSymptoms);
       case TimelineSymptom():
-        return symptom(_that.symptomState, _that.afterMealMinutes,
-            _that.occurredAt, _that.timeIcon, _that.symptomId);
+        return symptom(
+            _that.symptomState,
+            _that.afterMealMinutes,
+            _that.occurredAt,
+            _that.representativeSymptoms,
+            _that.etcCount,
+            _that.timeIcon,
+            _that.symptomId);
     }
   }
 
@@ -2699,8 +2733,14 @@ extension TimelineItemPatterns on TimelineItem {
             TimeIcon? timeIcon,
             ConnectedSymptoms? connectedSymptoms)?
         group,
-    TResult? Function(SymptomState symptomState, int afterMealMinutes,
-            String occurredAt, TimeIcon? timeIcon, String? symptomId)?
+    TResult? Function(
+            SymptomState symptomState,
+            int? afterMealMinutes,
+            String occurredAt,
+            List<String> representativeSymptoms,
+            int etcCount,
+            TimeIcon? timeIcon,
+            String? symptomId)?
         symptom,
   }) {
     final _that = this;
@@ -2725,8 +2765,14 @@ extension TimelineItemPatterns on TimelineItem {
             _that.timeIcon,
             _that.connectedSymptoms);
       case TimelineSymptom() when symptom != null:
-        return symptom(_that.symptomState, _that.afterMealMinutes,
-            _that.occurredAt, _that.timeIcon, _that.symptomId);
+        return symptom(
+            _that.symptomState,
+            _that.afterMealMinutes,
+            _that.occurredAt,
+            _that.representativeSymptoms,
+            _that.etcCount,
+            _that.timeIcon,
+            _that.symptomId);
       case _:
         return null;
     }
@@ -2751,6 +2797,7 @@ class TimelineSingle extends TimelineItem {
   final String mealRecordDateTime;
   final String mealFoodName;
   final VerdictLevel grade;
+  @override
   @JsonKey()
   final int etcCount;
 
@@ -2923,6 +2970,7 @@ class TimelineGroup extends TimelineItem {
     return EqualUnmodifiableListView(_representativeFoods);
   }
 
+  @override
   @JsonKey()
   final int etcCount;
 
@@ -3075,15 +3123,37 @@ class _$TimelineGroupCopyWithImpl<$Res>
 class TimelineSymptom extends TimelineItem {
   const TimelineSymptom(
       {required this.symptomState,
-      required this.afterMealMinutes,
+      this.afterMealMinutes,
       required this.occurredAt,
+      final List<String> representativeSymptoms = const <String>[],
+      this.etcCount = 0,
       this.timeIcon,
       this.symptomId})
-      : super._();
+      : _representativeSymptoms = representativeSymptoms,
+        super._();
 
   final SymptomState symptomState;
-  final int afterMealMinutes;
+
+  /// 식후 경과 분. 식사에 연결되지 않은 증상은 null.
+  final int? afterMealMinutes;
   final String occurredAt;
+
+  /// 증상 유형 라벨 최대 2개 (타임라인 카드 윗줄). 없으면 빈 목록.
+  final List<String> _representativeSymptoms;
+
+  /// 증상 유형 라벨 최대 2개 (타임라인 카드 윗줄). 없으면 빈 목록.
+  @JsonKey()
+  List<String> get representativeSymptoms {
+    if (_representativeSymptoms is EqualUnmodifiableListView)
+      return _representativeSymptoms;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_representativeSymptoms);
+  }
+
+  /// 표시되지 않은 나머지 증상 유형 개수.
+  @override
+  @JsonKey()
+  final int etcCount;
 
   /// 서버 지정 시간대 아이콘. symptom 행은 항상 의료 아이콘을 쓰므로 표시엔
   /// 미사용 — 계약 완전성을 위해 보관만.
@@ -3112,6 +3182,10 @@ class TimelineSymptom extends TimelineItem {
                 other.afterMealMinutes == afterMealMinutes) &&
             (identical(other.occurredAt, occurredAt) ||
                 other.occurredAt == occurredAt) &&
+            const DeepCollectionEquality().equals(
+                other._representativeSymptoms, _representativeSymptoms) &&
+            (identical(other.etcCount, etcCount) ||
+                other.etcCount == etcCount) &&
             (identical(other.timeIcon, timeIcon) ||
                 other.timeIcon == timeIcon) &&
             (identical(other.symptomId, symptomId) ||
@@ -3119,12 +3193,19 @@ class TimelineSymptom extends TimelineItem {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, symptomState, afterMealMinutes,
-      occurredAt, timeIcon, symptomId);
+  int get hashCode => Object.hash(
+      runtimeType,
+      symptomState,
+      afterMealMinutes,
+      occurredAt,
+      const DeepCollectionEquality().hash(_representativeSymptoms),
+      etcCount,
+      timeIcon,
+      symptomId);
 
   @override
   String toString() {
-    return 'TimelineItem.symptom(symptomState: $symptomState, afterMealMinutes: $afterMealMinutes, occurredAt: $occurredAt, timeIcon: $timeIcon, symptomId: $symptomId)';
+    return 'TimelineItem.symptom(symptomState: $symptomState, afterMealMinutes: $afterMealMinutes, occurredAt: $occurredAt, representativeSymptoms: $representativeSymptoms, etcCount: $etcCount, timeIcon: $timeIcon, symptomId: $symptomId)';
   }
 }
 
@@ -3138,8 +3219,10 @@ abstract mixin class $TimelineSymptomCopyWith<$Res>
   @useResult
   $Res call(
       {SymptomState symptomState,
-      int afterMealMinutes,
+      int? afterMealMinutes,
       String occurredAt,
+      List<String> representativeSymptoms,
+      int etcCount,
       TimeIcon? timeIcon,
       String? symptomId});
 }
@@ -3158,8 +3241,10 @@ class _$TimelineSymptomCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   $Res call({
     Object? symptomState = null,
-    Object? afterMealMinutes = null,
+    Object? afterMealMinutes = freezed,
     Object? occurredAt = null,
+    Object? representativeSymptoms = null,
+    Object? etcCount = null,
     Object? timeIcon = freezed,
     Object? symptomId = freezed,
   }) {
@@ -3168,14 +3253,22 @@ class _$TimelineSymptomCopyWithImpl<$Res>
           ? _self.symptomState
           : symptomState // ignore: cast_nullable_to_non_nullable
               as SymptomState,
-      afterMealMinutes: null == afterMealMinutes
+      afterMealMinutes: freezed == afterMealMinutes
           ? _self.afterMealMinutes
           : afterMealMinutes // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       occurredAt: null == occurredAt
           ? _self.occurredAt
           : occurredAt // ignore: cast_nullable_to_non_nullable
               as String,
+      representativeSymptoms: null == representativeSymptoms
+          ? _self._representativeSymptoms
+          : representativeSymptoms // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      etcCount: null == etcCount
+          ? _self.etcCount
+          : etcCount // ignore: cast_nullable_to_non_nullable
+              as int,
       timeIcon: freezed == timeIcon
           ? _self.timeIcon
           : timeIcon // ignore: cast_nullable_to_non_nullable

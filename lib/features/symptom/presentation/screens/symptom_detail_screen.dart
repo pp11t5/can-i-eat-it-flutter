@@ -149,7 +149,9 @@ class SymptomDetailScreen extends ConsumerWidget {
                 ),
                 data: (symptom) => _Body(
                   symptom: symptom,
-                  afterMealMinutes: afterMealMinutes,
+                  // 타임라인 탭 진입(extra)이 없어도 서버 linkedMeal 값으로 표시.
+                  afterMealMinutes:
+                      afterMealMinutes ?? symptom.linkedMeal?.afterMealMinutes,
                   occurredAtLabel: _formatOccurredAt(symptom.occurredAt),
                   displayName: displayName,
                   onLinkMeal: () async {

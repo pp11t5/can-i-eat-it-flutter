@@ -205,8 +205,16 @@ sealed class TimelineItem with _$TimelineItem {
   /// symptom: 증상 기록.
   const factory TimelineItem.symptom({
     required SymptomState symptomState,
-    required int afterMealMinutes,
+
+    /// 식후 경과 분. 식사에 연결되지 않은 증상은 null.
+    int? afterMealMinutes,
     required String occurredAt,
+
+    /// 증상 유형 라벨 최대 2개 (타임라인 카드 윗줄). 없으면 빈 목록.
+    @Default(<String>[]) List<String> representativeSymptoms,
+
+    /// 표시되지 않은 나머지 증상 유형 개수.
+    @Default(0) int etcCount,
 
     /// 서버 지정 시간대 아이콘. symptom 행은 항상 의료 아이콘을 쓰므로 표시엔
     /// 미사용 — 계약 완전성을 위해 보관만.

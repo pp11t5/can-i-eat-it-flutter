@@ -271,6 +271,31 @@ void main() {
       );
     });
 
+    testWidgets('extra 가 없어도 linkedMeal.afterMealMinutes 로 "식후 N분" 표시',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          symptom: _symptomWithMealAndAnalysis.copyWith(
+            linkedMeal: const SymptomLinkedMeal(
+              mealRecordId: 'record-001',
+              afterMealMinutes: 90,
+              foods: [
+                SymptomLinkedFood(
+                  mealFoodId: 'food-001',
+                  name: '된장찌개',
+                  category: '한식',
+                ),
+              ],
+            ),
+          ),
+          symptomId: 'symptom-001',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('식후 1시간 30분'), findsOneWidget);
+    });
+
     testWidgets('afterMealMinutes 없으면 "식후" 문구 미노출', (tester) async {
       await tester.pumpWidget(
         _wrap(

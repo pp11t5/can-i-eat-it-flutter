@@ -91,6 +91,9 @@ abstract class SymptomLinkedMeal with _$SymptomLinkedMeal {
     /// 연결 식사 기록 식별자.
     required String mealRecordId,
 
+    /// 식사 후 증상 발생까지 경과 분 (식전이면 음수). 서버 미제공 시 null.
+    int? afterMealMinutes,
+
     /// 연결 식사 내 음식 목록.
     @Default(<SymptomLinkedFood>[]) List<SymptomLinkedFood> foods,
   }) = _SymptomLinkedMeal;
