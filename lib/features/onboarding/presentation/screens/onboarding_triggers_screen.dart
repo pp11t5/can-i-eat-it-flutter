@@ -15,11 +15,13 @@ import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart'
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_step_body.dart';
 
+/// 하단 플로팅 CTA 가 차지하는 높이(바닥 32 + 버튼 56 + 간격 16 + 안내 링크) + 여유.
+const double _ctaScrollPadding = 168;
+
 /// 온보딩 Step 3/4: 트리거 음식 선택 본문 (Figma 365:1553).
 ///
 /// 탑바·[StepProgress]는 [OnboardingShell]이 고정 렌더한다.
-/// 제목·칩·기타 입력(+ 추가)·CTA를 한 스크롤로 묶어 키보드 시 입력란과 버튼이
-/// 붙지 않도록 한다.
+/// 제목·칩·기타 입력(+ 추가)은 스크롤하고, 안내 링크·«다음» 버튼은 그 위에 떠 있다.
 class OnboardingTriggersScreen extends ConsumerStatefulWidget {
   const OnboardingTriggersScreen({super.key});
 
@@ -55,11 +57,12 @@ class _OnboardingTriggersScreenState
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         behavior: HitTestBehavior.translucent,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Expanded(
+            Positioned.fill(
               child: SingleChildScrollView(
+                // 플로팅 CTA(안내 링크 + 버튼)에 마지막 입력 영역이 가려지지 않게.
+                padding: const EdgeInsets.only(bottom: _ctaScrollPadding),
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 child: Column(
@@ -178,15 +181,13 @@ class _OnboardingTriggersScreenState
                 ),
               ),
             ),
-            // CTA (Figma p3: top16/bottom32) — 스크롤 밖 하단 고정.
-            Padding(
-              padding: const EdgeInsets.only(
-                left: AppSpacing.screenPadding,
-                right: AppSpacing.screenPadding,
-                top: 16,
-                bottom: 32,
-              ),
+            // CTA — 스크롤 영역 위에 떠 있고 뒤는 투명 (Figma p3: bottom32).
+            Positioned(
+              left: AppSpacing.screenPadding,
+              right: AppSpacing.screenPadding,
+              bottom: 32,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const MedicalSourcesLink.guideline(
                     sourceUrl: MedicalSourcesCatalog.acg2022Url,
