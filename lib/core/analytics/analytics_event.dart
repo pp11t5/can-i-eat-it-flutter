@@ -20,7 +20,14 @@ enum FunnelEvent {
 /// 퍼널 밖의 계측 키. 문자열은 대시보드 키이므로 임의 변경 금지.
 enum AnalyticsEvent {
   searchScreenViewed('search_screen_viewed'),
-  mealRecordFailed('meal_record_failed');
+  mealRecordFailed('meal_record_failed'),
+
+  // 사진 인식 퍼널: 진입 → 촬영 → 인식 결과 → 후보 선택 / 직접 검색 이탈.
+  photoScreenViewed('photo_screen_viewed'),
+  photoCaptured('photo_captured'),
+  photoRecognized('photo_recognized'),
+  photoCandidateSelected('photo_candidate_selected'),
+  photoSearchFallback('photo_search_fallback');
 
   const AnalyticsEvent(this.eventName);
   final String eventName;

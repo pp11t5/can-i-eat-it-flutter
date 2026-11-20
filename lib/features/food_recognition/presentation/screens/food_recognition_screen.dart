@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:app_settings/app_settings.dart';
@@ -16,6 +17,8 @@ import 'package:can_i_eat_it/app/widgets/app_button.dart';
 import 'package:can_i_eat_it/app/widgets/app_icon.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/app/widgets/confirm_modal.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/food_check/presentation/models/verdict_args.dart';
 import 'package:can_i_eat_it/features/food_recognition/data/food_recognition_providers.dart';
@@ -61,7 +64,18 @@ class _FoodRecognitionScreenState extends ConsumerState<FoodRecognitionScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _log(AnalyticsEvent.photoScreenViewed);
     _initCamera();
+  }
+
+  void _log(AnalyticsEvent event, [Map<String, Object?> params = const {}]) {
+    unawaited(ref.read(analyticsServiceProvider).logEvent(
+      event.eventName,
+      params: {
+        'from_meal_record': widget.recordContext != null ? 1 : 0,
+        ...params,
+      },
+    ));
   }
 
   @override
@@ -155,6 +169,7 @@ class _FoodRecognitionScreenState extends ConsumerState<FoodRecognitionScreen>
         _photo = bytes;
         _capturedAt = nowKst();
       });
+      _log(AnalyticsEvent.photoCaptured);
       await taken?.dispose();
     } on CameraException {
       if (mounted) showAppToast(context, '사진을 찍지 못했어요. 다시 시도해 주세요.');
@@ -206,7 +221,12 @@ class _FoodRecognitionScreenState extends ConsumerState<FoodRecognitionScreen>
       );
 
   // 뒤로 가면 카드로 돌아오도록 push 한다.
-  void _search() => context.push('/check', extra: _recordContext);
+  void _search({required bool afterCandidates}) {
+    _log(AnalyticsEvent.photoSearchFallback, {
+      'after': afterCandidates ? 'candidates' : 'failure',
+    });
+    context.push('/check', extra: _recordContext);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -360,10 +380,14 @@ class _FoodRecognitionScreenState extends ConsumerState<FoodRecognitionScreen>
         onSelect: (i) => setState(() => _selectedIndex = i),
         onDiagnose: () {
           if (selected != null && selected < labels.length) {
+            _log(AnalyticsEvent.photoCandidateSelected, {
+              'rank': selected + 1,
+              'candidate_count': labels.length,
+            });
             _diagnose(labels[selected]);
           }
         },
-        onSearch: _search,
+        onSearch: () => _search(afterCandidates: true),
         onRetake: _retake,
       ),
     );
@@ -373,7 +397,10 @@ class _FoodRecognitionScreenState extends ConsumerState<FoodRecognitionScreen>
 
   Widget _buildFailure() {
     return _DimmedCard(
-      child: RecognitionFailureCard(onSearch: _search, onRetake: _retake),
+      child: RecognitionFailureCard(
+        onSearch: () => _search(afterCandidates: false),
+        onRetake: _retake,
+      ),
     );
   }
 }

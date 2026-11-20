@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -6,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 
+import 'package:can_i_eat_it/core/analytics/analytics_event.dart';
+import 'package:can_i_eat_it/core/analytics/analytics_providers.dart';
 import 'package:can_i_eat_it/features/food_recognition/data/repositories/mock_gemini_food_recognition_repository.dart';
 import 'package:can_i_eat_it/features/food_recognition/data/repositories/on_device_food_recognition_repository.dart';
 import 'package:can_i_eat_it/features/food_recognition/domain/entities/food_recognition_result.dart';
@@ -81,8 +84,9 @@ class FoodRecognitionController extends _$FoodRecognitionController {
   AsyncValue<List<FoodCandidate>?> build() => const AsyncValue.data(null);
 
   Future<void> recognize(Uint8List imageBytes) async {
+    final analytics = ref.read(analyticsServiceProvider);
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
+    final result = await AsyncValue.guard(() async {
       final repo = await ref.read(
           foodRecognitionRepositoryProvider(kFoodRecognitionEngine).future);
       final candidates = (await repo.recognize(imageBytes)).candidates;
@@ -94,6 +98,19 @@ class FoodRecognitionController extends _$FoodRecognitionController {
       }
       return candidates;
     });
+    final count = result.valueOrNull?.length ?? 0;
+    unawaited(analytics.logEvent(
+      AnalyticsEvent.photoRecognized.eventName,
+      params: {
+        'result': result.hasError
+            ? 'error'
+            : count == 0
+                ? 'empty'
+                : 'success',
+        'candidate_count': count,
+      },
+    ));
+    state = result;
   }
 
   void reset() => state = const AsyncValue.data(null);
