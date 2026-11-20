@@ -5,11 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
-import 'package:can_i_eat_it/app/widgets/app_button.dart';
 import 'package:can_i_eat_it/app/widgets/option_card.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_step_body.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_list_with_cta.dart';
 
 /// 온보딩 Step 2/4: 증상 빈도 선택 본문 (Figma 365:1554).
 ///
@@ -53,65 +53,21 @@ class OnboardingFrequencyScreen extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: Stack(
-              children: [
-                ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.screenPadding,
-                    0,
-                    AppSpacing.screenPadding,
-                    32,
-                  ),
-                  itemCount: symptomFrequencyOptions.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 16),
-                  itemBuilder: (context, index) {
-                    final entry = symptomFrequencyOptions[index];
-                    final isSelected =
-                        draft.symptomFrequency.contains(entry.code);
-                    return OptionCard(
-                      label: entry.label,
-                      selected: isSelected,
-                      size: OptionCardSize.compact,
-                      onTap: () => notifier.toggleSymptom(entry.code),
-                    );
-                  },
-                ),
-                // 아래에 더 있다는 스크롤 단서: CTA 바로 위 하단 페이드.
-                const Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: 32,
-                  child: IgnorePointer(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Color(0x00FFFFFF),
-                            AppColors.scaffoldBackground,
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              left: AppSpacing.screenPadding,
-              right: AppSpacing.screenPadding,
-              bottom: 32,
-            ),
-            child: AppButton.primary(
-              label: '다음',
+            child: OnboardingListWithCta(
+              itemCount: symptomFrequencyOptions.length,
+              itemBuilder: (context, index) {
+                final entry = symptomFrequencyOptions[index];
+                final isSelected = draft.symptomFrequency.contains(entry.code);
+                return OptionCard(
+                  label: entry.label,
+                  selected: isSelected,
+                  size: OptionCardSize.compact,
+                  onTap: () => notifier.toggleSymptom(entry.code),
+                );
+              },
               onPressed: draft.symptomFrequency.isNotEmpty
                   ? () => context.push('/onboarding/triggers')
                   : null,
-              isExpanded: true,
             ),
           ),
         ],
