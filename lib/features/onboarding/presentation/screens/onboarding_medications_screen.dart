@@ -15,6 +15,9 @@ import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart'
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_step_body.dart';
 
+/// 하단 플로팅 CTA(오류 박스·면책·완료 버튼) 높이 + 여유.
+const double _ctaScrollPadding = 260;
+
 /// 온보딩 Step 4/4: 알레르기 선택 본문.
 ///
 /// 완료 버튼은 프로필 제출·온보딩 게이트 재조회 성공 후 홈(/)으로 이동한다.
@@ -41,148 +44,143 @@ class OnboardingMedicationsScreen extends ConsumerWidget {
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         behavior: HitTestBehavior.translucent,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: IntrinsicHeight(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: AppSpacing.sectionGap),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '알레르기가 있나요?',
-                              style: AppTextStyles.header1Bold.copyWith(
-                                color: AppColors.textPrimary,
-                              ),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: SingleChildScrollView(
+                // 플로팅 CTA(안내·버튼)에 마지막 칩이 가려지지 않게.
+                padding: const EdgeInsets.only(bottom: _ctaScrollPadding),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: AppSpacing.sectionGap),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '알레르기가 있나요?',
+                            style: AppTextStyles.header1Bold.copyWith(
+                              color: AppColors.textPrimary,
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              '없으면 완료를 눌러주세요. 지금까지 입력한 내용은\n'
-                              '마이페이지에서 수정할 수 있어요.',
-                              style: AppTextStyles.body1Medium.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            '없으면 완료를 눌러주세요. 지금까지 입력한 내용은\n'
+                            '마이페이지에서 수정할 수 있어요.',
+                            style: AppTextStyles.body1Medium.copyWith(
+                              color: AppColors.textSecondary,
                             ),
-                            const SizedBox(height: AppSpacing.contentGap),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: AppSpacing.contentGap),
+                        ],
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '알레르기',
-                              style: AppTextStyles.body1Bold.copyWith(
-                                color: AppColors.textPrimary,
-                              ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '알레르기',
+                            style: AppTextStyles.body1Bold.copyWith(
+                              color: AppColors.textPrimary,
                             ),
-                            const SizedBox(height: 16),
-                            Wrap(
-                              spacing: AppSpacing.itemGap,
-                              runSpacing: AppSpacing.itemGap,
-                              children: allergyOptions.map((entry) {
-                                final isSelected =
-                                    draft.allergies.contains(entry.code);
-                                return SelectableChip(
-                                  label: entry.label,
-                                  selected: isSelected,
-                                  onTap: () =>
-                                      notifier.toggleAllergy(entry.code),
-                                );
-                              }).toList(),
-                            ),
-                            const SizedBox(height: AppSpacing.sectionGap),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 16),
+                          Wrap(
+                            spacing: AppSpacing.itemGap,
+                            runSpacing: AppSpacing.itemGap,
+                            children: allergyOptions.map((entry) {
+                              final isSelected =
+                                  draft.allergies.contains(entry.code);
+                              return SelectableChip(
+                                label: entry.label,
+                                selected: isSelected,
+                                onTap: () => notifier.toggleAllergy(entry.code),
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: AppSpacing.sectionGap),
+                        ],
                       ),
-                      const Spacer(),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: AppSpacing.screenPadding,
-                          right: AppSpacing.screenPadding,
-                          top: 16,
-                          bottom: 32,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (hasError) ...[
-                              Container(
-                                padding: const EdgeInsets.all(
-                                  AppSpacing.cardPadding,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.surfaceMuted,
-                                  borderRadius: BorderRadius.circular(
-                                    AppSpacing.radiusCard,
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const AppIcon(
-                                      AppIcons.error,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: AppSpacing.itemGap),
-                                    Expanded(
-                                      child: Text(
-                                        '저장 중 오류가 발생했어요. 다시 시도해 주세요.',
-                                        style:
-                                            AppTextStyles.body2Regular.copyWith(
-                                          color: AppColors.verdictDanger,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.itemGap),
-                            ],
-                            const MedicalDisclaimer(),
-                            const SizedBox(height: AppSpacing.itemGap),
-                            AppButton.primary(
-                              label: '완료',
-                              onPressed: isLoading
-                                  ? null
-                                  : () async {
-                                      FocusManager.instance.primaryFocus
-                                          ?.unfocus();
-                                      await ref
-                                          .read(
-                                            onboardingSubmitProvider.notifier,
-                                          )
-                                          .submit();
-                                      // submit은 onboardedStatus 재조회까지 완료한다.
-                                      // 성공한 경우에만 홈으로 교체 이동하면, 이후
-                                      // sessionStatus가 ready가 되어도 가드가 홈을 유지한다.
-                                      if (context.mounted &&
-                                          ref.read(onboardingSubmitProvider)
-                                              is AsyncData<void>) {
-                                        context.go('/');
-                                      }
-                                    },
-                              isLoading: isLoading,
-                              isExpanded: true,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            );
-          },
+            ),
+            // CTA — 스크롤 영역 위에 떠 있고 뒤는 투명 (bottom32).
+            Positioned(
+              left: AppSpacing.screenPadding,
+              right: AppSpacing.screenPadding,
+              bottom: 32,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (hasError) ...[
+                    Container(
+                      padding: const EdgeInsets.all(
+                        AppSpacing.cardPadding,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceMuted,
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusCard,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const AppIcon(
+                            AppIcons.error,
+                            size: 20,
+                          ),
+                          const SizedBox(width: AppSpacing.itemGap),
+                          Expanded(
+                            child: Text(
+                              '저장 중 오류가 발생했어요. 다시 시도해 주세요.',
+                              style: AppTextStyles.body2Regular.copyWith(
+                                color: AppColors.verdictDanger,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.itemGap),
+                  ],
+                  const MedicalDisclaimer(),
+                  const SizedBox(height: AppSpacing.itemGap),
+                  AppButton.primary(
+                    label: '완료',
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            await ref
+                                .read(
+                                  onboardingSubmitProvider.notifier,
+                                )
+                                .submit();
+                            // submit은 onboardedStatus 재조회까지 완료한다.
+                            // 성공한 경우에만 홈으로 교체 이동하면, 이후
+                            // sessionStatus가 ready가 되어도 가드가 홈을 유지한다.
+                            if (context.mounted &&
+                                ref.read(onboardingSubmitProvider)
+                                    is AsyncData<void>) {
+                              context.go('/');
+                            }
+                          },
+                    isLoading: isLoading,
+                    isExpanded: true,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -346,6 +346,19 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('증상 기록 작성'), findsOneWidget);
     });
+
+    testWidgets('existingSymptom 의 memo 를 입력창에 프리필한다', (tester) async {
+      const existing = Symptom(
+        symptomId: 'sym-1',
+        symptomState: SymptomState.uncomfortable,
+        stateTitle: '불편함',
+        occurredAt: '2026-06-25T10:00:00+09:00',
+        memo: '점심 후 가슴이 답답했음',
+      );
+      await tester.pumpWidget(_wrap(existingSymptom: existing));
+      await tester.pumpAndSettle();
+      expect(find.text('점심 후 가슴이 답답했음'), findsOneWidget);
+    });
   });
 
   group('SymptomWriteScreen — 원인 식사 수정(edit 모드 회귀)', () {

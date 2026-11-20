@@ -168,7 +168,8 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
     try {
       if (!mounted) return;
       // 판정 화면 present-modal — by-id 진입 (externalId 보유)
-      context.push(
+      // await: 화면이 닫힐 때까지 가드 유지 (미대기 시 즉시 해제되어 중복 push)
+      await context.push(
         '/verdict',
         extra: VerdictArgs(
           externalId: food.externalId,
@@ -183,16 +184,19 @@ class _FoodCheckScreenState extends ConsumerState<FoodCheckScreen> {
 
   /// 매칭 없음 → raw text 직접 분석 진입 (by-text).
   ///
-  void _onDirectAnalyze() {
+  Future<void> _onDirectAnalyze() async {
     if (_navigating) return;
     final q = _query.trim();
     if (q.isEmpty) return;
     _navigating = true;
-    context.push(
-      '/verdict',
-      extra: VerdictArgs(text: q, recordContext: widget.recordContext),
-    );
-    _navigating = false;
+    try {
+      await context.push(
+        '/verdict',
+        extra: VerdictArgs(text: q, recordContext: widget.recordContext),
+      );
+    } finally {
+      _navigating = false;
+    }
   }
 
   @override

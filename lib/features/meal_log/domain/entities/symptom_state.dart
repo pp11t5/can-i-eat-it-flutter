@@ -50,6 +50,17 @@ extension SymptomStateMapper on SymptomState {
         SymptomState.severe => '심함',
       };
 
+  /// 증상 유형 칩이 없을 때 쓰는 헤드라인. 상태가 보통 이상이면 "불편 없음" 대신
+  /// 상태에 맞는 문구를 쓴다 (아이콘과 문구 의미 일치).
+  String get noSymptomHeadline => switch (this) {
+        SymptomState.comfortable ||
+        SymptomState.good =>
+          '특별한 불편이 없었어요',
+        SymptomState.normal => '보통이었어요',
+        SymptomState.uncomfortable => '불편했어요',
+        SymptomState.severe => '많이 불편했어요',
+      };
+
   /// 서버 코드·표시 문자열을 [SymptomState] 로 매핑한다.
   ///
   /// 1) 서버 enum code (`severe` 등) 정확 매칭

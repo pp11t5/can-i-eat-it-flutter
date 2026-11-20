@@ -83,9 +83,11 @@ class MealTimelineList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.screenPadding,
-        vertical: AppSpacing.sectionGap,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screenPadding,
+        AppSpacing.sectionGap,
+        AppSpacing.screenPadding,
+        88,
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
@@ -306,19 +308,13 @@ class _ConnectedSymptomsSection extends StatelessWidget {
 
   /// 대표증상 + "외 N개" 요약.
   ///
-  /// 증상 유형이 비어 있으면("없음" 선택) 상세 화면과 동일 문구를 쓴다.
-  String _summary() {
-    final names = connectedSymptoms.representativeSymptoms.join(', ');
-    if (names.isEmpty && connectedSymptoms.etcCount == 0) {
-      return '특별한 불편이 없었어요';
-    }
-    if (connectedSymptoms.etcCount > 0) {
-      return names.isEmpty
-          ? '외 ${connectedSymptoms.etcCount}개'
-          : '$names 외 ${connectedSymptoms.etcCount}개';
-    }
-    return names;
-  }
+  /// 증상 유형이 비어 있으면("없음" 선택) 문장 대신 상태 라벨(편안함·보통·심함 등)만 쓴다.
+  String _summary() =>
+      _symptomTypesSummary(
+        connectedSymptoms.representativeSymptoms,
+        connectedSymptoms.etcCount,
+      ) ??
+      connectedSymptoms.symptomState.label;
 
   @override
   Widget build(BuildContext context) {
@@ -597,6 +593,15 @@ class _GroupMealCard extends StatelessWidget {
 // symptomId 가 있으면 탭 가능 → 증상 상세(구 페이로드 방어를 위해 nullable,
 // symptomId 없는 항목은 onTap 이 null 로 전달되어 탭 불가).
 
+/// 증상 유형 요약("신물, 기침 외 1개"). 유형이 하나도 없으면 null.
+String? _symptomTypesSummary(List<String> names, int etcCount) {
+  final joined = names.join(', ');
+  if (etcCount > 0) {
+    return joined.isEmpty ? '외 $etcCount개' : '$joined 외 $etcCount개';
+  }
+  return joined.isEmpty ? null : joined;
+}
+
 class _SymptomCard extends StatelessWidget {
   const _SymptomCard({required this.item, this.onTap});
 
@@ -605,6 +610,17 @@ class _SymptomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final types = _symptomTypesSummary(
+      item.representativeSymptoms,
+      item.etcCount,
+    );
+    final minutes = item.afterMealMinutes;
+    // 윗줄은 증상 유형, 없으면 상태 라벨. 유형이 있으면 아랫줄에 상태 라벨을 붙인다.
+    // 식후 시간은 식사 연결이 없으면(null) 숨긴다. 구버전 서버가 보내던 0 도 같은 취급.
+    final subParts = [
+      if (types != null) item.symptomState.label,
+      if (minutes != null && minutes != 0) _afterMealLabel(minutes),
+    ];
     return _CardShell(
       color: AppColors.surfaceBackground,
       child: GestureDetector(
@@ -624,18 +640,20 @@ class _SymptomCard extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    item.symptomState.label,
+                    types ?? item.symptomState.label,
                     style: AppTextStyles.body2Bold.copyWith(
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    _afterMealLabel(item.afterMealMinutes),
-                    style: AppTextStyles.caption1Medium.copyWith(
-                      color: AppColors.textSecondary,
+                  if (subParts.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      subParts.join(' · '),
+                      style: AppTextStyles.caption1Medium.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),

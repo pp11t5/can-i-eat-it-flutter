@@ -179,6 +179,8 @@ class _SecondaryCta extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      // 눌림 효과가 각진 네모로 보이지 않게 primary 버튼과 같은 radius.
+      borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.cardPadding),
         child: Center(
