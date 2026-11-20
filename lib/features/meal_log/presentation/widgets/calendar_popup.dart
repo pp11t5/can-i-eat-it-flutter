@@ -235,7 +235,7 @@ class _CalendarHeader extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 그리드 — 7열×6행
+// 그리드 — 7열×(4~6)행
 // ---------------------------------------------------------------------------
 
 class _CalendarGrid extends StatelessWidget {
@@ -262,13 +262,16 @@ class _CalendarGrid extends StatelessWidget {
     return AppColors.textPrimary;
   }
 
-  /// 표시월 그리드용 42(7×6)일 목록 — 일요일 시작.
-  /// 전/후월 칸은 자리만 맞추고 표시하지 않는다(null).
+  /// 표시월 그리드용 일 목록 — 일요일 시작.
+  /// 날짜가 있는 주(행)까지만 만든다(4~6행). 마지막 날짜 아래 빈 행이 없어
+  /// 스크롤해도 날짜 영역을 넘어가지 않는다.
+  /// 앞/뒤 빈 칸은 자리만 맞추고 표시하지 않는다(null).
   List<DateTime?> _buildGridDays() {
     final firstOfMonth = DateTime(month.year, month.month, 1);
     final leadingCount = firstOfMonth.weekday % 7; // Sun=0, Mon=1 ... Sat=6
     final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
-    final cells = List<DateTime?>.filled(42, null);
+    final rows = (leadingCount + daysInMonth + 6) ~/ 7;
+    final cells = List<DateTime?>.filled(rows * 7, null);
     for (var d = 1; d <= daysInMonth; d++) {
       cells[leadingCount + d - 1] = DateTime(month.year, month.month, d);
     }
