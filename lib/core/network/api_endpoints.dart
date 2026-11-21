@@ -45,8 +45,7 @@ class ApiEndpoints {
   /// `GET /consent/terms` — 약관 목록(TermResponseDTO[]). termId 조인용.
   static const String consentTerms = '/consent/terms';
 
-  /// `PATCH /consent/marketing/toggle` — 마케팅·푸시 알림 수신 동의 토글
-  /// (A2: `/notifications/settings/toggle`과 분리된 별도 경로).
+  /// `PATCH /consent/marketing/toggle` — 마케팅 정보 수신 동의 토글(바디 없는 flip).
   static const String consentMarketingToggle = '/consent/marketing/toggle';
 
   /// `POST /onboarding`
@@ -186,16 +185,8 @@ class ApiEndpoints {
   // Notifications (W5-6)
   // ---------------------------------------------------------------------------
 
-  /// `GET /notifications/settings`
+  /// `GET /notifications/settings` — 마케팅 동의 값(`marketingEnabled`) 조회용.
   static const String notificationSettings = '/notifications/settings';
-
-  /// `PATCH /notifications/settings/toggle`
-  static const String notificationSettingsToggle =
-      '/notifications/settings/toggle';
-
-  /// `PATCH /notifications/settings/daily-time`
-  static const String notificationSettingsDailyTime =
-      '/notifications/settings/daily-time';
 
   // ---------------------------------------------------------------------------
   // Weekly Report (W6-5, 마이페이지 주간 리포트)

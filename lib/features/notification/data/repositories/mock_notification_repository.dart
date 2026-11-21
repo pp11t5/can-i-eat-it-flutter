@@ -1,70 +1,20 @@
-import 'package:can_i_eat_it/features/notification/domain/entities/notification_settings.dart';
 import 'package:can_i_eat_it/features/notification/domain/repositories/notification_repository.dart';
 
-/// [NotificationRepository] 목 구현 (테스트·오프라인용).
-///
-/// [seeded] 생성자: 초기 설정값 지정 가능.
-/// [defaults] 생성자: 모두 false + morning8 시드.
+/// [NotificationRepository] 목 구현 (테스트·오프라인용). 서버처럼 flip한다.
 class MockNotificationRepository implements NotificationRepository {
-  MockNotificationRepository({required NotificationSettings seed})
-      : _settings = seed;
+  MockNotificationRepository({this.marketingEnabled = false});
 
-  /// 기본값 시드 생성자.
-  MockNotificationRepository.defaults()
-      : _settings = const NotificationSettings(
-          postMealEnabled: false,
-          dailyRecordEnabled: false,
-          weeklyReportEnabled: false,
-          dailyTime: DailyNotificationTime.morning8,
-          marketingPushEnabled: true,
-        );
+  bool marketingEnabled;
 
-  NotificationSettings _settings;
-
-  /// 마지막으로 toggle된 타입 목록 (테스트 검증용).
-  final List<NotificationToggleType> toggleCalls = [];
-
-  /// 마지막으로 설정된 daily-time 목록 (테스트 검증용).
-  final List<DailyNotificationTime> dailyTimeCalls = [];
-
-  /// 마지막으로 호출된 마케팅 동의 토글 값 목록 (테스트 검증용, A2).
-  final List<bool> marketingToggleCalls = [];
+  /// 마케팅 동의 토글 호출 횟수 (테스트 검증용).
+  int marketingToggleCalls = 0;
 
   @override
-  Future<NotificationSettings> fetch() async => _settings;
+  Future<bool> fetchMarketingEnabled() async => marketingEnabled;
 
   @override
-  Future<void> toggle(NotificationToggleType type) async {
-    toggleCalls.add(type);
-    _settings = switch (type) {
-      NotificationToggleType.postMeal => _settings.copyWith(
-          postMealEnabled: !_settings.postMealEnabled,
-        ),
-      NotificationToggleType.dailyRecord => _settings.copyWith(
-          dailyRecordEnabled: !_settings.dailyRecordEnabled,
-        ),
-      NotificationToggleType.weeklyReport => _settings.copyWith(
-          weeklyReportEnabled: !_settings.weeklyReportEnabled,
-        ),
-    };
-  }
-
-  @override
-  Future<void> updateDailyTime(DailyNotificationTime time) async {
-    dailyTimeCalls.add(time);
-    _settings = _settings.copyWith(dailyTime: time);
-  }
-
-  @override
-  Future<bool> toggleMarketingConsent(bool enabled) async {
-    marketingToggleCalls.add(enabled);
-    // 서버와 동일: 동의 ON이면 하위 알림 3개를 모두 켠다(`enableAll`).
-    _settings = _settings.copyWith(
-      marketingPushEnabled: enabled,
-      postMealEnabled: enabled ? true : null,
-      dailyRecordEnabled: enabled ? true : null,
-      weeklyReportEnabled: enabled ? true : null,
-    );
-    return enabled;
+  Future<bool> toggleMarketingConsent() async {
+    marketingToggleCalls += 1;
+    return marketingEnabled = !marketingEnabled;
   }
 }

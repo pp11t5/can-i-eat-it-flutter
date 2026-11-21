@@ -1,22 +1,12 @@
-import 'package:can_i_eat_it/features/notification/domain/entities/notification_settings.dart';
-
-/// 알림 설정 저장소 인터페이스.
+/// 마케팅 정보 수신 동의 저장소 인터페이스.
+///
+/// 앱 알림(식후·식단 기록·주간 리포트)은 OS 알림 권한으로만 제어하므로
+/// 여기서 다루지 않는다(#261).
 abstract interface class NotificationRepository {
-  /// GET /notifications/settings → [NotificationSettings].
-  Future<NotificationSettings> fetch();
+  /// GET /notifications/settings 의 `marketingEnabled`.
+  Future<bool> fetchMarketingEnabled();
 
-  /// PATCH /notifications/settings/toggle — 토글 타입 지정.
-  Future<void> toggle(NotificationToggleType type);
-
-  /// PATCH /notifications/settings/daily-time — 알림 수신 시간 변경.
-  Future<void> updateDailyTime(DailyNotificationTime time);
-
-  /// PATCH /consent/marketing/toggle — 마케팅·푸시 알림 수신 동의 토글.
-  ///
-  /// [enabled]는 변경 후 원하는 값이다. `/notifications/settings/toggle`과
-  /// 달리 마케팅 동의는 별도 계약(consent)에 속한다(A2).
-  ///
-  /// 반환값은 서버가 실제로 저장한 동의 값이다. 서버는 현재 [enabled]를 무시하고
-  /// 값을 뒤집으며(flip), 결과가 ON이면 하위 알림 3개를 모두 켠다(`enableAll`).
-  Future<bool> toggleMarketingConsent(bool enabled);
+  /// PATCH /consent/marketing/toggle — 서버가 현재 값을 뒤집고(flip)
+  /// 실제 저장된 동의 값을 돌려준다.
+  Future<bool> toggleMarketingConsent();
 }
