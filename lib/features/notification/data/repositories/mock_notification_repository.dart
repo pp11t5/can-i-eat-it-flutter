@@ -56,7 +56,9 @@ class MockNotificationRepository implements NotificationRepository {
   }
 
   @override
-  Future<bool> toggleMarketingConsent(bool enabled) async {
+  Future<bool> toggleMarketingConsent() async {
+    // 서버와 동일하게 현재 값을 뒤집는다(flip).
+    final enabled = !_settings.marketingPushEnabled;
     marketingToggleCalls.add(enabled);
     // 서버와 동일: 동의 ON이면 하위 알림 3개를 모두 켠다(`enableAll`).
     _settings = _settings.copyWith(

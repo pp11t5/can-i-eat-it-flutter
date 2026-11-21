@@ -29,4 +29,10 @@ void main() {
 
     expect(entity.marketingPushEnabled, isTrue);
   });
+
+  test('marketingEnabled가 없으면 BE 기본값과 같이 OFF로 파싱한다', () {
+    final entity = NotificationSettingResponseDto.fromJson(_json()).toEntity();
+
+    expect(entity.marketingPushEnabled, isFalse);
+  });
 }

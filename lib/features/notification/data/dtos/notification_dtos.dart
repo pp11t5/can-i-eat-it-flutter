@@ -31,12 +31,8 @@ class NotificationSettingResponseDto {
       dailyNotificationTime:
           json['dailyNotificationTime'] as String? ?? 'morning_8',
       weeklyReportEnabled: json['weeklyReportEnabled'] as bool? ?? false,
-      // ⚠️ TODO(contract): 백엔드 계약 확정 시 마케팅 알림 키 정합 필요.
-      // camel(marketingEnabled)/snake(marketing_enabled) 두 키 모두 대응하고,
-      // 응답에 없으면 기본 true(옵트아웃 방식 안전 기본값).
-      marketingPushEnabled:
-          (json['marketingEnabled'] ?? json['marketing_enabled']) as bool? ??
-              true,
+      // BE 기본값과 동일하게 값이 없으면 미동의로 본다.
+      marketingPushEnabled: json['marketingEnabled'] as bool? ?? false,
     );
   }
 

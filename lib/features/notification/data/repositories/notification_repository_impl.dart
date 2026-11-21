@@ -25,7 +25,8 @@ class NotificationRepositoryImpl implements NotificationRepository {
           await _dio.get<dynamic>(ApiEndpoints.notificationSettings);
       final dto = unwrap<NotificationSettingResponseDto>(
         response,
-        (j) => NotificationSettingResponseDto.fromJson(j as Map<String, dynamic>),
+        (j) =>
+            NotificationSettingResponseDto.fromJson(j as Map<String, dynamic>),
       );
       return dto.toEntity();
     } on DioException catch (e) {
@@ -75,13 +76,10 @@ class NotificationRepositoryImpl implements NotificationRepository {
   // ---------------------------------------------------------------------------
 
   @override
-  Future<bool> toggleMarketingConsent(bool enabled) async {
+  Future<bool> toggleMarketingConsent() async {
     try {
-      final response = await _dio.patch<dynamic>(
-        ApiEndpoints.consentMarketingToggle,
-        data: {'enabled': enabled},
-      );
-      // result = 토글 후 동의 상태(agreed).
+      final response =
+          await _dio.patch<dynamic>(ApiEndpoints.consentMarketingToggle);
       return unwrap<bool>(response, (j) => j as bool);
     } on DioException catch (e) {
       throw FailureMapper.fromDioException(e);

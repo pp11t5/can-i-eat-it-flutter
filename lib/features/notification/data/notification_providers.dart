@@ -107,7 +107,7 @@ class NotificationSettingsController extends _$NotificationSettingsController {
     final link = ref.keepAlive();
     bool? agreed;
     try {
-      agreed = await repository.toggleMarketingConsent(nextMarketingEnabled);
+      agreed = await repository.toggleMarketingConsent();
       var server = await repository.fetch();
       if (!agreed) {
         // 동일 설정 행에 flip을 동시에 보내면 서버에서 lost update가 나므로 순차 호출.

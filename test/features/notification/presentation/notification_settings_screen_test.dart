@@ -35,7 +35,7 @@ class _FailingBatchNotificationRepository implements NotificationRepository {
   }
 
   @override
-  Future<bool> toggleMarketingConsent(bool enabled) async => enabled;
+  Future<bool> toggleMarketingConsent() async => false;
 
   @override
   Future<void> updateDailyTime(DailyNotificationTime time) async {}
@@ -78,7 +78,7 @@ class _ServerLikeNotificationRepository implements NotificationRepository {
   }
 
   @override
-  Future<bool> toggleMarketingConsent(bool enabled) async {
+  Future<bool> toggleMarketingConsent() async {
     marketing = !marketing;
     if (marketing) {
       postMeal = dailyRecord = weeklyReport = true;
@@ -98,9 +98,9 @@ class _SlowServerLikeNotificationRepository
   final gate = Completer<void>();
 
   @override
-  Future<bool> toggleMarketingConsent(bool enabled) async {
+  Future<bool> toggleMarketingConsent() async {
     await gate.future;
-    return super.toggleMarketingConsent(enabled);
+    return super.toggleMarketingConsent();
   }
 }
 
@@ -322,8 +322,7 @@ void main() {
     });
 
     // MY-005 회귀: 화면 표시가 항상 서버 저장값과 일치해야 한다.
-    testWidgets('flip 서버에서 마스터 OFF→ON·하위 변경 후에도 화면과 저장값이 일치한다',
-        (tester) async {
+    testWidgets('flip 서버에서 마스터 OFF→ON·하위 변경 후에도 화면과 저장값이 일치한다', (tester) async {
       final server = _ServerLikeNotificationRepository();
       await tester.pumpWidget(_wrap(repo: server));
       await tester.pumpAndSettle();

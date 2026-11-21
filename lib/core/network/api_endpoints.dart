@@ -45,8 +45,7 @@ class ApiEndpoints {
   /// `GET /consent/terms` — 약관 목록(TermResponseDTO[]). termId 조인용.
   static const String consentTerms = '/consent/terms';
 
-  /// `PATCH /consent/marketing/toggle` — 마케팅·푸시 알림 수신 동의 토글
-  /// (A2: `/notifications/settings/toggle`과 분리된 별도 경로).
+  /// `PATCH /consent/marketing/toggle` — 마케팅 정보 수신 동의 토글(바디 없는 flip).
   static const String consentMarketingToggle = '/consent/marketing/toggle';
 
   /// `POST /onboarding`
