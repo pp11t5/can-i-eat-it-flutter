@@ -93,7 +93,7 @@ void main() {
       expect(find.text('설정 바로 가기'), findsOneWidget);
     });
 
-    testWidgets('마스터 토글은 OS 차단 중에도 항상 활성 상태를 유지한다', (tester) async {
+    testWidgets('마케팅 토글은 OS 차단 중에도 dim 없이 조작할 수 있다', (tester) async {
       final mock = MockNotificationRepository(
         seed: const NotificationSettings(
           postMealEnabled: false,
@@ -106,22 +106,18 @@ void main() {
       await tester.pumpWidget(_wrap(osBlocked: true, repo: mock));
       await tester.pumpAndSettle();
 
-      // 마스터 토글(첫 번째 Switch)은 dim(Opacity 0.5) 처리 대상이 아니다.
-      final switches = find.byType(Switch);
-      final masterSwitch = switches.first;
       final dimmedFinder = find.byWidgetPredicate(
         (widget) => widget is Opacity && widget.opacity == 0.5,
       );
       expect(
-        find.ancestor(of: masterSwitch, matching: dimmedFinder),
+        find.ancestor(of: find.byType(Switch), matching: dimmedFinder),
         findsNothing,
       );
 
-      await tester.tap(masterSwitch);
+      await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 
-      // 마케팅 토글은 별도 경로(toggleMarketingConsent)를 호출한다 (A2).
-      expect(mock.marketingToggleCalls, contains(false));
+      expect(mock.marketingToggleCalls, [false]);
     });
 
     testWidgets('"설정 바로 가기" 탭 시 openAppSettingsProvider 콜백이 호출된다',
