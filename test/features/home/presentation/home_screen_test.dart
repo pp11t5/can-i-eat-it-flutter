@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/home/data/repositories/mock_home_repository.dart';
 import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
@@ -10,9 +11,24 @@ import 'package:can_i_eat_it/features/home/domain/entities/user_streak.dart';
 import 'package:can_i_eat_it/features/home/presentation/screens/home_screen.dart';
 import 'package:can_i_eat_it/features/home/presentation/widgets/suggestion_chip.dart';
 
+import '../../../core/push/fcm_test_helpers.dart';
+
+class _SpyFcmLifecycle extends FcmLifecycle {
+  _SpyFcmLifecycle()
+      : super(repo: NoopFcmRepository(), tokenService: NoopFcmTokenService());
+
+  int registerCount = 0;
+
+  @override
+  Future<void> registerCurrentToken() async {
+    registerCount++;
+  }
+}
+
 /// 테스트용 래퍼. homeRepositoryProvider를 결정적 Mock으로 override한다.
 Widget _wrap({bool withData = false}) => ProviderScope(
       overrides: [
+        fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
         // ignore: scoped_providers_should_specify_dependencies
         homeRepositoryProvider.overrideWithValue(
           withData ? MockHomeRepository.seeded() : MockHomeRepository.empty(),
@@ -50,6 +66,7 @@ GoRouter _testRouter() => GoRouter(
 
 Widget _wrapWithRouter({bool withData = false}) => ProviderScope(
       overrides: [
+        fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
         // ignore: scoped_providers_should_specify_dependencies
         homeRepositoryProvider.overrideWithValue(
           withData ? MockHomeRepository.seeded() : MockHomeRepository.empty(),
@@ -59,6 +76,44 @@ Widget _wrapWithRouter({bool withData = false}) => ProviderScope(
     );
 
 void main() {
+  testWidgets('홈 첫 프레임 이후 FCM 등록하고 rebuild에서는 반복하지 않는다', (tester) async {
+    final lifecycle = _SpyFcmLifecycle();
+    late StateSetter rebuild;
+    final countsDuringLayout = <int>[];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          fcmLifecycleProvider.overrideWithValue(lifecycle),
+          homeRepositoryProvider.overrideWithValue(MockHomeRepository.empty()),
+        ],
+        child: MaterialApp(
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              rebuild = setState;
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  countsDuringLayout.add(lifecycle.registerCount);
+                  // 새 위젯으로 rebuild해도 등록이 반복되지 않는지 검증한다.
+                  // ignore: prefer_const_constructors
+                  return HomeScreen();
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(countsDuringLayout.first, 0);
+    expect(lifecycle.registerCount, 1);
+    await tester.pumpAndSettle();
+    rebuild(() {});
+    await tester.pumpAndSettle();
+    expect(lifecycle.registerCount, 1);
+    expect(find.byType(HomeScreen), findsOneWidget);
+  });
+
   group('HomeScreen — 인사말 블록', () {
     testWidgets('로딩과 기본 응답에서 satisfied 캐릭터를 표시한다', (tester) async {
       await tester.pumpWidget(_wrap());
@@ -87,6 +142,7 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
+              fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
               // ignore: scoped_providers_should_specify_dependencies
               homeRepositoryProvider.overrideWithValue(
                 MockHomeRepository(streak: 5, characterStatus: entry.key),
@@ -270,6 +326,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            fcmLifecycleProvider.overrideWithValue(noopFcmLifecycle()),
             // ignore: scoped_providers_should_specify_dependencies
             homeRepositoryProvider.overrideWithValue(
               MockHomeRepository(

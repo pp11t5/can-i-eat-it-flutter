@@ -239,9 +239,9 @@ class _NoopAnalyticsService implements AnalyticsService {
 
 void main() {
   // -------------------------------------------------------------------------
-  // ① Authenticated 로그인 → registerCurrentToken 1회 호출
+  // ① 홈 진입 전 인증 단계에서는 FCM 등록 미호출
   // -------------------------------------------------------------------------
-  group('AuthController FCM 배선 — 로그인 register 트리거', () {
+  group('AuthController FCM 배선 — 로그인 register 미호출', () {
     test('Google 로그인은 access token과 userId를 공유 Keychain bridge로 동기화한다',
         () async {
       final bridge = _SpySymptomOutboxBridge();
@@ -259,7 +259,7 @@ void main() {
       expect(bridge.synced.last, ('access-google', 'mock-existing'));
     });
 
-    test('signInWithKakao: Authenticated 결과 → registerCurrentToken 정확히 1회',
+    test('signInWithKakao: Authenticated 결과 → registerCurrentToken 미호출',
         () async {
       final (:container, fcmSpy: fcmSpy, calls: _) = makeSpyContainer(
           mockRepo: MockAuthRepository.existing(onboarded: true));
@@ -267,14 +267,12 @@ void main() {
       await container.read(authControllerProvider.future);
       await container.read(authControllerProvider.notifier).signInWithKakao();
 
-      // unawaited이므로 microtask flush 대기
       await Future<void>.delayed(Duration.zero);
 
-      expect(fcmSpy.registerCount, 1,
-          reason: 'Authenticated 로그인 시 register 1회');
+      expect(fcmSpy.registerCount, 0, reason: '권한 요청과 등록은 홈 진입 후 수행');
     });
 
-    test('signInWithApple: Authenticated 결과 → registerCurrentToken 정확히 1회',
+    test('signInWithApple: Authenticated 결과 → registerCurrentToken 미호출',
         () async {
       final (:container, fcmSpy: fcmSpy, calls: _) = makeSpyContainer(
           mockRepo: MockAuthRepository.existing(onboarded: true));
@@ -284,11 +282,10 @@ void main() {
 
       await Future<void>.delayed(Duration.zero);
 
-      expect(fcmSpy.registerCount, 1,
-          reason: 'Authenticated 로그인(Apple) 시 register 1회');
+      expect(fcmSpy.registerCount, 0, reason: '권한 요청과 등록은 홈 진입 후 수행');
     });
 
-    test('signInWithGoogle: Authenticated 결과 → registerCurrentToken 정확히 1회',
+    test('signInWithGoogle: Authenticated 결과 → registerCurrentToken 미호출',
         () async {
       final (:container, fcmSpy: fcmSpy, calls: _) = makeSpyContainer(
           mockRepo: MockAuthRepository.existing(onboarded: true));
@@ -298,11 +295,10 @@ void main() {
 
       await Future<void>.delayed(Duration.zero);
 
-      expect(fcmSpy.registerCount, 1,
-          reason: 'Authenticated 로그인(Google) 시 register 1회');
+      expect(fcmSpy.registerCount, 0, reason: '권한 요청과 등록은 홈 진입 후 수행');
     });
 
-    test('recoverAccount: 복구 성공 → registerCurrentToken 정확히 1회', () async {
+    test('recoverAccount: 복구 성공 → registerCurrentToken 미호출', () async {
       final (:container, fcmSpy: fcmSpy, calls: _) =
           makeSpyContainer(mockRepo: MockAuthRepository.deletionGrace());
 
@@ -317,17 +313,16 @@ void main() {
 
       await Future<void>.delayed(Duration.zero);
 
-      // recoverAccount에 의한 register 1회 추가
-      expect(fcmSpy.registerCount - registerBefore, 1,
-          reason: '복구 성공 후 register 1회');
+      expect(fcmSpy.registerCount - registerBefore, 0,
+          reason: '복구 후에도 홈 진입 전에는 register 미호출');
     });
   });
 
   // -------------------------------------------------------------------------
-  // ② Authenticated pending도 토큰 보유 → register, Recoverable은 미호출
+  // ② 약관 pending과 Recoverable에서도 FCM 등록 미호출
   // -------------------------------------------------------------------------
   group('AuthController FCM 배선 — 로그인 결과별 register', () {
-    test('signInWithKakao: 약관 pending Authenticated도 register 1회', () async {
+    test('signInWithKakao: 약관 pending Authenticated도 register 미호출', () async {
       final (:container, fcmSpy: fcmSpy, calls: _) =
           makeSpyContainer(mockRepo: MockAuthRepository.newUser());
 
@@ -336,8 +331,7 @@ void main() {
 
       await Future<void>.delayed(Duration.zero);
 
-      expect(fcmSpy.registerCount, 1,
-          reason: '최신 계약은 신규 사용자도 토큰이 발급되므로 register 호출');
+      expect(fcmSpy.registerCount, 0, reason: '약관 동의 전에는 권한 요청과 등록을 수행하지 않음');
     });
 
     test('signInWithKakao: Recoverable 결과 → register 0회', () async {

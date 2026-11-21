@@ -50,7 +50,7 @@ FcmLifecycle fcmLifecycle(Ref ref) {
 
 /// FCM 토큰 라이프사이클 관리.
 ///
-/// - [registerCurrentToken]: 로그인 성공 후 호출 (권한 요청 + 토큰 등록 + onTokenRefresh 구독).
+/// - [registerCurrentToken]: 홈 첫 프레임 표시 후 호출 (권한 요청 + 토큰 등록 + onTokenRefresh 구독).
 /// - [deleteToken]: 로그아웃/탈퇴 **전** 호출 (Bearer 유효 시점, 서버 삭제 + 구독 해제).
 ///
 /// 모든 FCM 부수효과는 try/catch로 감싸 인증 흐름을 절대 막지 않는다(graceful 원칙).
@@ -65,7 +65,7 @@ class FcmLifecycle {
   final FcmTokenService _tokenService;
   StreamSubscription<String>? _refreshSub;
 
-  /// 로그인 성공 후 호출.
+  /// 홈 첫 프레임 표시 후 호출.
   ///
   /// 1. 권한 요청
   /// 2. 토큰 취득 (iOS APNs 미설정 시 null → skip)
