@@ -7,35 +7,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:can_i_eat_it/app/theme/app_theme.dart';
 import 'package:can_i_eat_it/features/notification/data/notification_providers.dart';
 import 'package:can_i_eat_it/features/notification/data/repositories/mock_notification_repository.dart';
-import 'package:can_i_eat_it/features/notification/domain/entities/notification_settings.dart';
 import 'package:can_i_eat_it/features/notification/domain/repositories/notification_repository.dart';
 import 'package:can_i_eat_it/features/notification/presentation/screens/notification_settings_screen.dart';
 
-NotificationSettings _settings({
-  bool marketing = true,
-  bool children = false,
-}) =>
-    NotificationSettings(
-      postMealEnabled: children,
-      dailyRecordEnabled: children,
-      weeklyReportEnabled: children,
-      dailyTime: DailyNotificationTime.morning8,
-      marketingPushEnabled: marketing,
-    );
-
-class _FailingBatchNotificationRepository extends MockNotificationRepository {
-  _FailingBatchNotificationRepository()
-      : super(seed: _settings(children: true));
+class _FailingNotificationRepository extends MockNotificationRepository {
+  _FailingNotificationRepository() : super(marketingEnabled: true);
 
   @override
-  Future<void> toggle(NotificationToggleType type) async {
-    throw StateError('toggle failed');
-  }
+  Future<bool> toggleMarketingConsent() async =>
+      throw StateError('toggle failed');
 }
 
 /// 동의 토글 요청이 [gate]가 완료될 때까지 서버에 반영되지 않는 느린 서버.
 class _SlowNotificationRepository extends MockNotificationRepository {
-  _SlowNotificationRepository() : super(seed: _settings());
+  _SlowNotificationRepository() : super(marketingEnabled: true);
 
   final gate = Completer<void>();
 
@@ -51,7 +36,7 @@ Widget _wrap({NotificationRepository? repo}) {
     overrides: [
       // ignore: scoped_providers_should_specify_dependencies
       notificationRepositoryProvider.overrideWithValue(
-        repo ?? MockNotificationRepository(seed: _settings()),
+        repo ?? MockNotificationRepository(marketingEnabled: true),
       ),
     ],
     child: MaterialApp(
@@ -82,9 +67,7 @@ void main() {
 
     testWidgets('서버의 마케팅 동의 값을 토글에 반영한다', (tester) async {
       await tester.pumpWidget(
-        _wrap(
-            repo:
-                MockNotificationRepository(seed: _settings(marketing: false))),
+        _wrap(repo: MockNotificationRepository(marketingEnabled: false)),
       );
       await tester.pumpAndSettle();
       expect(_switchValue(tester), isFalse);
@@ -93,30 +76,30 @@ void main() {
 
   group('NotificationSettingsScreen — 토글 상호작용', () {
     testWidgets('탭하면 마케팅 동의 토글을 호출하고 서버 값으로 맞춘다', (tester) async {
-      final repo = MockNotificationRepository(seed: _settings());
+      final repo = MockNotificationRepository(marketingEnabled: true);
       await tester.pumpWidget(_wrap(repo: repo));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
+      expect(repo.marketingToggleCalls, 1);
+      expect(repo.marketingEnabled, isFalse);
       expect(_switchValue(tester), isFalse);
 
       await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
-      expect(repo.marketingToggleCalls, [false, true]);
+      expect(repo.marketingToggleCalls, 2);
       expect(_switchValue(tester), isTrue);
     });
 
-    testWidgets('일괄 변경 실패 시 서버 값으로 맞추고 토스트를 띄운다', (tester) async {
-      await tester
-          .pumpWidget(_wrap(repo: _FailingBatchNotificationRepository()));
+    testWidgets('토글 실패 시 이전 값으로 복구하고 토스트를 띄운다', (tester) async {
+      await tester.pumpWidget(_wrap(repo: _FailingNotificationRepository()));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 
-      // 동의 토글은 성공(OFF)했으므로 토글은 서버 동의 값을 따른다.
-      expect(_switchValue(tester), isFalse);
+      expect(_switchValue(tester), isTrue);
       expect(find.text('알림 설정 변경에 실패했어요.'), findsOneWidget);
       await tester.pump(const Duration(seconds: 3));
     });
@@ -154,13 +137,13 @@ void main() {
       showScreen.value = true;
       await tester.pumpAndSettle();
 
-      expect(server.marketingToggleCalls, isEmpty); // 서버는 아직 처리 전
+      expect(server.marketingEnabled, isTrue); // 서버는 아직 처리 전
       expect(_switchValue(tester), isFalse); // 화면은 이전 값으로 돌아가지 않음
 
       server.gate.complete();
       await tester.pumpAndSettle();
 
-      expect(server.marketingToggleCalls, [false]);
+      expect(server.marketingEnabled, isFalse);
       expect(_switchValue(tester), isFalse);
     });
   });

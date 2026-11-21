@@ -133,7 +133,7 @@ class _NotificationSettingsScreenState
           message: e.toString(),
           onRetry: () => ref.invalidate(notificationSettingsControllerProvider),
         ),
-        data: (settings) {
+        data: (marketingEnabled) {
           // 권한 상태가 실제로 바뀐 경우에만 전환 인디케이터 표시.
           if (_showTransitionIndicator) {
             return const Center(
@@ -144,7 +144,7 @@ class _NotificationSettingsScreenState
             );
           }
           return _SettingsBody(
-            marketingEnabled: settings.marketingPushEnabled,
+            marketingEnabled: marketingEnabled,
             osBlocked: osBlocked,
             onOpenOsSettings: _openOsSettings,
           );

@@ -3,7 +3,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:can_i_eat_it/core/network/dio_client.dart';
 import 'package:can_i_eat_it/features/notification/data/repositories/notification_repository_impl.dart';
-import 'package:can_i_eat_it/features/notification/domain/entities/notification_settings.dart';
 import 'package:can_i_eat_it/features/notification/domain/repositories/notification_repository.dart';
 
 part 'notification_providers.g.dart';
@@ -27,144 +26,35 @@ NotificationRepository notificationRepository(Ref ref) {
 // NotificationSettingsController — AsyncNotifier
 // ---------------------------------------------------------------------------
 
-/// 알림 설정 상태 컨트롤러.
+/// 알림 설정 화면 상태 = 마케팅 정보 수신 동의 여부.
 ///
-/// [build]: GET /notifications/settings fetch.
-/// [toggle]: 낙관적 갱신 후 PATCH /toggle 호출. 실패 시 이전 상태 복원.
-/// [updateDailyTime]: 낙관적 갱신 후 PATCH /daily-time 호출. 실패 시 복원.
+/// 앱 알림은 OS 권한으로만 제어하므로 이 컨트롤러는 마케팅 동의만 다룬다(#261).
 @riverpod
 class NotificationSettingsController extends _$NotificationSettingsController {
   @override
-  Future<NotificationSettings> build() async {
-    return ref.watch(notificationRepositoryProvider).fetch();
-  }
+  Future<bool> build() =>
+      ref.watch(notificationRepositoryProvider).fetchMarketingEnabled();
 
-  /// 토글 타입을 낙관적으로 갱신하고 서버에 PATCH 요청한다.
-  Future<void> toggle(NotificationToggleType type) async {
+  /// 마케팅 동의를 낙관적으로 뒤집고 서버 응답 값(실제 저장값)으로 맞춘다.
+  Future<void> toggleMarketing() async {
     final previous = state;
-    final settings = previous.valueOrNull;
+    final agreed = previous.valueOrNull;
+    if (agreed == null) return;
 
-    // 마케팅·푸시 수신 동의가 꺼진 동안에는 하위 알림을 다시 켤 수 없다.
-    if (settings == null || !settings.marketingPushEnabled) return;
-
-    // 낙관적 갱신
-    state = previous.whenData((settings) {
-      return switch (type) {
-        NotificationToggleType.postMeal => settings.copyWith(
-            postMealEnabled: !settings.postMealEnabled,
-          ),
-        NotificationToggleType.dailyRecord => settings.copyWith(
-            dailyRecordEnabled: !settings.dailyRecordEnabled,
-          ),
-        NotificationToggleType.weeklyReport => settings.copyWith(
-            weeklyReportEnabled: !settings.weeklyReportEnabled,
-          ),
-      };
-    });
+    state = AsyncData(!agreed);
 
     // 요청 중 화면을 나가도 dispose되지 않게 붙잡는다 — 재진입 시 build()가
     // 진행 중인 쓰기와 경쟁해 이전 값을 읽어 오는 것을 막는다.
     final link = ref.keepAlive();
     try {
-      await ref.read(notificationRepositoryProvider).toggle(type);
+      state = AsyncData(
+        await ref.read(notificationRepositoryProvider).toggleMarketingConsent(),
+      );
     } catch (_) {
-      // 실패 시 이전 상태 복원
       state = previous;
       rethrow;
     } finally {
       link.close();
-    }
-  }
-
-  /// 마케팅·푸시 알림 수신 동의를 낙관적으로 갱신하고 서버에 PATCH 요청한다.
-  ///
-  /// `/notifications/settings/toggle`이 아닌 `/consent/marketing/toggle`을
-  /// 별도로 호출한다(A2).
-  ///
-  /// 서버 정책(MY-005): 마스터 ON → 하위 3개 모두 ON(서버 `enableAll`),
-  /// 마스터 OFF → 켜진 하위를 클라이언트가 끈다.
-  /// 두 토글 API 모두 목표값이 아닌 flip이라, 로컬 추정이 아닌 **서버 응답·재조회
-  /// 값**으로 화면을 맞춘다.
-  Future<void> toggleMarketing() async {
-    final previous = state;
-    final settings = previous.valueOrNull;
-    if (settings == null) return;
-
-    final nextMarketingEnabled = !settings.marketingPushEnabled;
-
-    // 낙관적 갱신 — 하위 3개를 마스터와 같은 값으로 맞춘다.
-    state = AsyncData(
-      settings.copyWith(
-        marketingPushEnabled: nextMarketingEnabled,
-        postMealEnabled: nextMarketingEnabled,
-        dailyRecordEnabled: nextMarketingEnabled,
-        weeklyReportEnabled: nextMarketingEnabled,
-      ),
-    );
-
-    final repository = ref.read(notificationRepositoryProvider);
-    // 순차 요청(최대 5회) 동안 화면을 나가도 dispose되지 않게 붙잡는다([toggle] 참고).
-    final link = ref.keepAlive();
-    bool? agreed;
-    try {
-      agreed = await repository.toggleMarketingConsent();
-      var server = await repository.fetch();
-      if (!agreed) {
-        // 동일 설정 행에 flip을 동시에 보내면 서버에서 lost update가 나므로 순차 호출.
-        for (final type in _enabledChildToggles(server)) {
-          await repository.toggle(type);
-        }
-        server = server.copyWith(
-          postMealEnabled: false,
-          dailyRecordEnabled: false,
-          weeklyReportEnabled: false,
-        );
-      }
-      // ponytail: GET 응답에 마케팅 동의 값이 없을 수 있어(BE `marketingEnabled`
-      // 추가 전) 토글 응답의 실제 동의 값으로 덮어쓴다.
-      state = AsyncData(server.copyWith(marketingPushEnabled: agreed));
-    } catch (_) {
-      // 여러 요청 중 일부만 성공했을 수 있으므로 이전 로컬 상태로 되돌리지 않고
-      // 서버의 최신 상태를 다시 읽어 화면을 정합시킨다.
-      try {
-        final server = await repository.fetch();
-        state = AsyncData(
-          agreed == null
-              ? server
-              : server.copyWith(marketingPushEnabled: agreed),
-        );
-      } catch (_) {
-        // 재조회도 실패하면 기존 화면 상태를 유지한다.
-        state = previous;
-      }
-      rethrow;
-    } finally {
-      link.close();
-    }
-  }
-
-  List<NotificationToggleType> _enabledChildToggles(
-    NotificationSettings settings,
-  ) {
-    return [
-      if (settings.postMealEnabled) NotificationToggleType.postMeal,
-      if (settings.dailyRecordEnabled) NotificationToggleType.dailyRecord,
-      if (settings.weeklyReportEnabled) NotificationToggleType.weeklyReport,
-    ];
-  }
-
-  /// 알림 수신 시간을 낙관적으로 갱신하고 서버에 PATCH 요청한다.
-  Future<void> updateDailyTime(DailyNotificationTime time) async {
-    final previous = state;
-    // 낙관적 갱신
-    state = previous.whenData((s) => s.copyWith(dailyTime: time));
-
-    try {
-      await ref.read(notificationRepositoryProvider).updateDailyTime(time);
-    } catch (_) {
-      // 실패 시 이전 상태 복원
-      state = previous;
-      rethrow;
     }
   }
 }

@@ -11,7 +11,6 @@ import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/core/push/fcm_token_service.dart';
 import 'package:can_i_eat_it/features/notification/data/notification_providers.dart';
 import 'package:can_i_eat_it/features/notification/data/repositories/mock_notification_repository.dart';
-import 'package:can_i_eat_it/features/notification/domain/entities/notification_settings.dart';
 import 'package:can_i_eat_it/features/notification/presentation/screens/notification_settings_screen.dart';
 
 // ---------------------------------------------------------------------------
@@ -49,16 +48,7 @@ Widget _wrap({
   VoidCallback? onOpenAppSettings,
   FcmTokenService? fcmTokenService,
 }) {
-  final repository = repo ??
-      MockNotificationRepository(
-        seed: const NotificationSettings(
-          postMealEnabled: false,
-          dailyRecordEnabled: true,
-          weeklyReportEnabled: false,
-          dailyTime: DailyNotificationTime.morning8,
-          marketingPushEnabled: true,
-        ),
-      );
+  final repository = repo ?? MockNotificationRepository(marketingEnabled: true);
   return ProviderScope(
     overrides: [
       // ignore: scoped_providers_should_specify_dependencies
@@ -94,15 +84,7 @@ void main() {
     });
 
     testWidgets('마케팅 토글은 OS 차단 중에도 dim 없이 조작할 수 있다', (tester) async {
-      final mock = MockNotificationRepository(
-        seed: const NotificationSettings(
-          postMealEnabled: false,
-          dailyRecordEnabled: false,
-          weeklyReportEnabled: false,
-          dailyTime: DailyNotificationTime.morning8,
-          marketingPushEnabled: true,
-        ),
-      );
+      final mock = MockNotificationRepository(marketingEnabled: true);
       await tester.pumpWidget(_wrap(osBlocked: true, repo: mock));
       await tester.pumpAndSettle();
 
@@ -117,7 +99,7 @@ void main() {
       await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 
-      expect(mock.marketingToggleCalls, [false]);
+      expect(mock.marketingToggleCalls, 1);
     });
 
     testWidgets('"설정 바로 가기" 탭 시 openAppSettingsProvider 콜백이 호출된다',
