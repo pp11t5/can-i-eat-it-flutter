@@ -66,13 +66,13 @@ bool _switchValue(WidgetTester tester) =>
 
 void main() {
   group('NotificationSettingsScreen — 렌더링', () {
-    testWidgets('마케팅 토글 하나만 표시된다', (tester) async {
+    testWidgets('마케팅 정보 수신 토글 하나만 표시된다', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
       expect(find.text('알림 설정'), findsOneWidget);
-      expect(find.text('마케팅·푸시 알림 수신'), findsOneWidget);
-      expect(find.text('식단 기록, 리포트 등 알림을 보내드릴게요.'), findsOneWidget);
+      expect(find.text('마케팅 정보 수신'), findsOneWidget);
+      expect(find.text('신규 기능, 혜택, 이벤트를 알려드려요.'), findsOneWidget);
       expect(find.byType(Switch), findsOneWidget);
       // #261: 앱 알림 하위 토글은 OS 권한으로 대체돼 제거됐다.
       expect(find.text('식후 2시간 알림'), findsNothing);

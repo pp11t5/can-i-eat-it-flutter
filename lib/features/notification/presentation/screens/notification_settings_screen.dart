@@ -34,7 +34,7 @@ final openAppSettingsProvider = Provider<Future<void> Function()>(
 
 /// 알림 설정 화면 (Figma 577-10290, 577-10286).
 ///
-/// - 토글 1개: 마케팅 수신 동의. 법적 수신 동의라 OS 권한과 무관하게 항상 활성.
+/// - 토글 1개: 마케팅 정보 수신 동의. 법적 수신 동의라 OS 권한과 무관하게 항상 활성.
 /// - 앱 알림(식후·식단 기록·주간 리포트)은 OS 알림 권한으로만 제어한다(#261).
 ///   그래서 OS 권한이 차단(denied)돼 있으면 안내 배너로 시스템 설정 진입을 돕는다.
 /// - 「설정 바로 가기」→ 시스템 설정 후 복귀 시 OS 권한을 재조회한다.
@@ -317,7 +317,7 @@ class _OsBlockedBanner extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 마케팅 수신 토글 행 (Figma 577:10290)
+// 마케팅 정보 수신 토글 행 (Figma 577:10290)
 // ---------------------------------------------------------------------------
 
 /// 카드가 아닌 bare row — OS 차단 여부와 무관하게 항상 활성 상태를 유지한다.
@@ -338,14 +338,14 @@ class _MarketingToggleRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '마케팅·푸시 알림 수신',
+                  '마케팅 정보 수신',
                   style: AppTextStyles.body1Medium.copyWith(
                     color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '식단 기록, 리포트 등 알림을 보내드릴게요.',
+                  '신규 기능, 혜택, 이벤트를 알려드려요.',
                   style: AppTextStyles.body2Medium.copyWith(
                     color: AppColors.textSecondary,
                   ),
