@@ -11,7 +11,6 @@ import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/app_toast.dart';
 import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/features/notification/data/notification_providers.dart';
-import 'package:can_i_eat_it/features/notification/domain/entities/notification_settings.dart';
 
 /// 1st-party 플랫폼 채널 — 취약한 app_settings 패키지(Swift 6 SPM 매니페스트로
 /// `flutter build ios`가 깨짐) 대체용. iOS: [AppDelegate], Android: [MainActivity]에서 구현.
@@ -35,11 +34,9 @@ final openAppSettingsProvider = Provider<Future<void> Function()>(
 
 /// 알림 설정 화면 (Figma 577-10290, 577-10286).
 ///
-/// - 마스터 토글 1개: 마케팅·푸시 알림 수신(marketing).
-/// - 토글 3개: 식후 2시간 알림(postMeal), 식단 기록 알림(dailyRecord), 주간 리포트(weeklyReport).
-/// - 토글 변경 시 낙관적 갱신 + PATCH 호출.
-/// - 기기 OS 알림 권한이 차단(denied)돼 있으면 상단 안내 배너를 띄운다. 이때도 마스터
-///   토글은 항상 활성 상태를 유지하고, 배너 아래 3개 토글 카드만 비활성화(dim)한다.
+/// - 토글 1개: 마케팅 수신 동의. 법적 수신 동의라 OS 권한과 무관하게 항상 활성.
+/// - 앱 알림(식후·식단 기록·주간 리포트)은 OS 알림 권한으로만 제어한다(#261).
+///   그래서 OS 권한이 차단(denied)돼 있으면 안내 배너로 시스템 설정 진입을 돕는다.
 /// - 「설정 바로 가기」→ 시스템 설정 후 복귀 시 OS 권한을 재조회한다.
 ///   **상태가 바뀐 경우에만** 로딩 인디케이터를 잠깐 보여 준 뒤 UI를 갱신하고,
 ///   동일하면 인디케이터 없이 유지한다.
@@ -147,7 +144,7 @@ class _NotificationSettingsScreenState
             );
           }
           return _SettingsBody(
-            settings: settings,
+            marketingEnabled: settings.marketingPushEnabled,
             osBlocked: osBlocked,
             onOpenOsSettings: _openOsSettings,
           );
@@ -195,11 +192,12 @@ class _ErrorBody extends StatelessWidget {
 
 class _SettingsBody extends ConsumerWidget {
   const _SettingsBody({
-    required this.settings,
+    required this.marketingEnabled,
     required this.osBlocked,
     required this.onOpenOsSettings,
   });
-  final NotificationSettings settings;
+
+  final bool marketingEnabled;
 
   /// 기기 OS 알림 권한이 denied(차단)됐는지 여부.
   final bool osBlocked;
@@ -209,109 +207,24 @@ class _SettingsBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Figma 577-10286 (OS off) / 577-10290 (OS on)
-    // - OS 꺼짐: 안내 배너 + 3토글 카드 dim·비활성
-    // - OS 켜짐: 배너 없음 + 3토글 활성
-    // - 마스터(마케팅) 토글은 항상 활성
-    final togglesEnabled = !osBlocked && settings.marketingPushEnabled;
-
-    final toggleCard = _SectionCard(
-      children: [
-        _ToggleRow(
-          title: '식후 2시간 알림',
-          subtitle: '증상 기록을 위해 보내요.',
-          value: settings.postMealEnabled,
-          enabled: togglesEnabled,
-          onChanged: (v) => _handleToggle(
-            context,
-            ref,
-            NotificationToggleType.postMeal,
-          ),
-        ),
-        const Divider(
-          height: 1,
-          indent: 24,
-          endIndent: 24,
-          color: AppColors.divider,
-        ),
-        _ToggleRow(
-          title: '식단 기록 알림',
-          subtitle: '식사, 증상 기록을 위해 보내요.',
-          value: settings.dailyRecordEnabled,
-          enabled: togglesEnabled,
-          onChanged: (v) => _handleToggle(
-            context,
-            ref,
-            NotificationToggleType.dailyRecord,
-          ),
-        ),
-        const Divider(
-          height: 1,
-          indent: 24,
-          endIndent: 24,
-          color: AppColors.divider,
-        ),
-        _ToggleRow(
-          title: '주간 리포트',
-          // 서버 리포트 생성 cron(월 10:00 KST) 완료 직후 발송 — 마이 «월요일 아침 10시»와 일치.
-          subtitle: '매주 월요일 10:00에 알림이 가요.',
-          value: settings.weeklyReportEnabled,
-          enabled: togglesEnabled,
-          onChanged: (v) => _handleToggle(
-            context,
-            ref,
-            NotificationToggleType.weeklyReport,
-          ),
-        ),
-      ],
-    );
-
     return ListView(
       padding: const EdgeInsets.symmetric(
         horizontal: 24,
         vertical: 24,
       ),
       children: [
-        // 마스터 토글 — OS 차단 여부와 무관하게 항상 활성.
-        _MasterToggleRow(
-          value: settings.marketingPushEnabled,
-          onChanged: (v) => _handleMarketingToggle(context, ref),
+        _MarketingToggleRow(
+          value: marketingEnabled,
+          onChanged: (_) => _handleMarketingToggle(context, ref),
         ),
-        const SizedBox(height: AppSpacing.contentGap),
-        // OS 알림 off (Figma 577-10286): 배너 노출
         if (osBlocked) ...[
+          const SizedBox(height: AppSpacing.contentGap),
           _OsBlockedBanner(onOpenSettings: onOpenOsSettings),
-          const SizedBox(height: AppSpacing.sectionGap),
         ],
-        // OS off → dim, OS on → 정상
-        if (osBlocked)
-          Opacity(
-            opacity: 0.5,
-            child: IgnorePointer(child: toggleCard),
-          )
-        else
-          toggleCard,
       ],
     );
   }
 
-  Future<void> _handleToggle(
-    BuildContext context,
-    WidgetRef ref,
-    NotificationToggleType type,
-  ) async {
-    try {
-      await ref
-          .read(notificationSettingsControllerProvider.notifier)
-          .toggle(type);
-    } catch (_) {
-      if (context.mounted) {
-        await showAppToast(context, '알림 설정 변경에 실패했어요.');
-      }
-    }
-  }
-
-  /// 마케팅·푸시 알림 수신 동의 마스터 토글 핸들러 — 별도 경로(A2)를 호출한다.
   Future<void> _handleMarketingToggle(
     BuildContext context,
     WidgetRef ref,
@@ -404,12 +317,12 @@ class _OsBlockedBanner extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 마스터 토글 행 (마케팅·푸시 알림 수신, Figma 577:10290)
+// 마케팅 수신 토글 행 (Figma 577:10290)
 // ---------------------------------------------------------------------------
 
 /// 카드가 아닌 bare row — OS 차단 여부와 무관하게 항상 활성 상태를 유지한다.
-class _MasterToggleRow extends StatelessWidget {
-  const _MasterToggleRow({required this.value, required this.onChanged});
+class _MarketingToggleRow extends StatelessWidget {
+  const _MarketingToggleRow({required this.value, required this.onChanged});
 
   final bool value;
   final ValueChanged<bool> onChanged;
@@ -444,125 +357,6 @@ class _MasterToggleRow extends StatelessWidget {
             value: value,
             onChanged: onChanged,
             activeTrackColor: AppColors.primary,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// 공용 섹션 카드 (테두리 + 둥근 모서리)
-// ---------------------------------------------------------------------------
-
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({required this.children});
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        // Figma 577:10290 섹션 카드 — radius 16, stroke #EAEAEA.
-        borderRadius: BorderRadius.circular(AppSpacing.radiusModal),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: children,
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// 토글 행
-// ---------------------------------------------------------------------------
-
-class _ToggleRow extends StatelessWidget {
-  const _ToggleRow({
-    required this.title,
-    required this.subtitle,
-    required this.value,
-    required this.onChanged,
-    this.enabled = true,
-  });
-
-  final String title;
-  final String subtitle;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  /// false면 스위치 비활성(OS 알림 off 시).
-  final bool enabled;
-
-  /// OFF 상태 색 — 누를 수 있으면 [enabled](진한 회색), 비활성이면 [disabled](흐린 회색).
-  /// M3 기본값은 테마 outline(#EAEAEA) 때문에 이 둘이 뒤바뀌어 보인다.
-  /// ON 상태는 null → 기존 색(흰 thumb + 초록 track) 유지.
-  static WidgetStateProperty<Color?> _offColor({
-    required Color enabled,
-    required Color disabled,
-  }) {
-    return WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.selected)) return null;
-      return states.contains(WidgetState.disabled) ? disabled : enabled;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isCupertino = switch (Theme.of(context).platform) {
-      TargetPlatform.iOS || TargetPlatform.macOS => true,
-      _ => false,
-    };
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 24,
-        vertical: 24,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.body1Medium.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: AppTextStyles.body2Medium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Figma 577:10290 — iOS 스타일 스위치(흰 thumb, ON=브랜드 primary track).
-          // enabled=false → onChanged null → 비활성 스타일 (OS off).
-          Switch.adaptive(
-            value: value,
-            onChanged: enabled ? onChanged : null,
-            activeTrackColor: AppColors.primary,
-            // iOS는 Cupertino 스위치(비활성 시 opacity 0.5)라 기본값을 유지한다.
-            thumbColor: isCupertino
-                ? null
-                : _offColor(
-                    enabled: AppColors.textPrimary.withValues(alpha: 0.38),
-                    disabled: AppColors.border,
-                  ),
-            trackOutlineColor: isCupertino
-                ? null
-                : _offColor(
-                    enabled: AppColors.textPrimary.withValues(alpha: 0.12),
-                    disabled: AppColors.border,
-                  ),
           ),
         ],
       ),

@@ -85,45 +85,12 @@ Widget _wrap({
 
 void main() {
   group('NotificationSettingsScreen — OS 알림 차단(denied)', () {
-    testWidgets('배너 + "설정 바로 가기" 버튼이 렌더되고, 3토글 카드는 비활성화된다', (tester) async {
-      final mock = MockNotificationRepository(
-        seed: const NotificationSettings(
-          postMealEnabled: false,
-          dailyRecordEnabled: false,
-          weeklyReportEnabled: false,
-          dailyTime: DailyNotificationTime.morning8,
-          marketingPushEnabled: true,
-        ),
-      );
-      await tester.pumpWidget(_wrap(osBlocked: true, repo: mock));
+    testWidgets('배너 + "설정 바로 가기" 버튼이 렌더된다', (tester) async {
+      await tester.pumpWidget(_wrap(osBlocked: true));
       await tester.pumpAndSettle();
 
       expect(find.text('기기 알림이 꺼져있어요'), findsOneWidget);
       expect(find.text('설정 바로 가기'), findsOneWidget);
-
-      // "식후 2시간 알림" 토글은 IgnorePointer로 감싸져 있어 탭해도 반응하지 않는다.
-      final postMealRow = find.ancestor(
-        of: find.text('식후 2시간 알림'),
-        matching: find.byType(Row),
-      );
-      final postMealSwitch = find.descendant(
-        of: postMealRow.first,
-        matching: find.byType(Switch),
-      );
-      await tester.tap(postMealSwitch, warnIfMissed: false);
-      await tester.pumpAndSettle();
-
-      expect(mock.toggleCalls, isEmpty);
-
-      // 3토글 카드가 Opacity(0.5)로 dim 처리돼 있는지 확인.
-      final dimmedFinder = find.byWidgetPredicate(
-        (widget) => widget is Opacity && widget.opacity == 0.5,
-      );
-      expect(dimmedFinder, findsOneWidget);
-      expect(
-        find.ancestor(of: postMealSwitch, matching: dimmedFinder),
-        findsOneWidget,
-      );
     });
 
     testWidgets('마스터 토글은 OS 차단 중에도 항상 활성 상태를 유지한다', (tester) async {
@@ -173,34 +140,12 @@ void main() {
   });
 
   group('NotificationSettingsScreen — OS 알림 정상(denied 아님)', () {
-    testWidgets('배너가 표시되지 않고 토글이 정상 동작한다', (tester) async {
-      final mock = MockNotificationRepository(
-        seed: const NotificationSettings(
-          postMealEnabled: false,
-          dailyRecordEnabled: false,
-          weeklyReportEnabled: false,
-          dailyTime: DailyNotificationTime.morning8,
-          marketingPushEnabled: true,
-        ),
-      );
-      await tester.pumpWidget(_wrap(osBlocked: false, repo: mock));
+    testWidgets('배너가 표시되지 않는다', (tester) async {
+      await tester.pumpWidget(_wrap(osBlocked: false));
       await tester.pumpAndSettle();
 
       expect(find.text('기기 알림이 꺼져있어요'), findsNothing);
       expect(find.text('설정 바로 가기'), findsNothing);
-
-      final postMealRow = find.ancestor(
-        of: find.text('식후 2시간 알림'),
-        matching: find.byType(Row),
-      );
-      final postMealSwitch = find.descendant(
-        of: postMealRow.first,
-        matching: find.byType(Switch),
-      );
-      await tester.tap(postMealSwitch);
-      await tester.pumpAndSettle();
-
-      expect(mock.toggleCalls, contains(NotificationToggleType.postMeal));
     });
 
     testWidgets('앱 복귀 시 화면 재진입 없이 OS 알림 권한을 다시 반영한다', (tester) async {
@@ -223,22 +168,12 @@ void main() {
 
       expect(tokenService.permissionStatusCalls, initialCalls + 1);
       expect(find.text('기기 알림이 꺼져있어요'), findsOneWidget);
-      final postMealRow = find.ancestor(
-        of: find.text('식후 2시간 알림'),
-        matching: find.byType(Row),
-      );
-      final postMealSwitch = find.descendant(
-        of: postMealRow.first,
-        matching: find.byType(Switch),
-      );
-      expect(tester.widget<Switch>(postMealSwitch).onChanged, isNull);
 
       tokenService.status = AuthorizationStatus.authorized;
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
 
       expect(find.text('기기 알림이 꺼져있어요'), findsNothing);
-      expect(tester.widget<Switch>(postMealSwitch).onChanged, isNotNull);
     });
 
     testWidgets('권한 갱신 중 중복된 resumed 이벤트는 한 번만 처리한다', (tester) async {
