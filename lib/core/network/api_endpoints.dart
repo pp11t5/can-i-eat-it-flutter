@@ -185,16 +185,8 @@ class ApiEndpoints {
   // Notifications (W5-6)
   // ---------------------------------------------------------------------------
 
-  /// `GET /notifications/settings`
+  /// `GET /notifications/settings` — 마케팅 동의 값(`marketingEnabled`) 조회용.
   static const String notificationSettings = '/notifications/settings';
-
-  /// `PATCH /notifications/settings/toggle`
-  static const String notificationSettingsToggle =
-      '/notifications/settings/toggle';
-
-  /// `PATCH /notifications/settings/daily-time`
-  static const String notificationSettingsDailyTime =
-      '/notifications/settings/daily-time';
 
   // ---------------------------------------------------------------------------
   // Weekly Report (W6-5, 마이페이지 주간 리포트)
