@@ -24,6 +24,10 @@
         android:name="android.hardware.camera.any"
         android:required="false"
         tools:replace="android:required"/>
+    <!-- 세로 고정(screenOrientation)이 암묵 추가하는 필수 기능을 선택으로 낮춘다. 가로 전용 기기도 설치 가능. -->
+    <uses-feature
+        android:name="android.hardware.screen.portrait"
+        android:required="false"/>
     <application
         android:label="@string/app_name"
         android:name=".MainApplication"
