@@ -179,9 +179,6 @@ class AuthController extends _$AuthController {
       // fire-and-forget — secure storage 읽기가 끝나지 않는 환경에서도 로그인
       // UX를 막지 않는다. 지연·실패는 다음 lifecycle에서 보완된다.
       unawaited(_syncSharedSession(outcome.session));
-      // FCM 토큰 등록 — fire-and-forget(로그인 UX 블로킹 제거).
-      // 실패해도 로그인 흐름을 막지 않는다(graceful).
-      unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
       await _hydrateSessionAfterAuth();
       await _syncAnalyticsUser(outcome.session.userId);
     }
@@ -205,9 +202,6 @@ class AuthController extends _$AuthController {
     _applyOutcomeToState(outcome);
     if (outcome is Authenticated) {
       unawaited(_syncSharedSession(outcome.session));
-      // FCM 토큰 등록 — fire-and-forget(로그인 UX 블로킹 제거).
-      // 실패해도 로그인 흐름을 막지 않는다(graceful).
-      unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
       await _hydrateSessionAfterAuth();
       await _syncAnalyticsUser(outcome.session.userId);
     }
@@ -225,7 +219,6 @@ class AuthController extends _$AuthController {
     _applyOutcomeToState(outcome);
     if (outcome is Authenticated) {
       unawaited(_syncSharedSession(outcome.session));
-      unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
       await _hydrateSessionAfterAuth();
       await _syncAnalyticsUser(outcome.session.userId);
     }
@@ -275,9 +268,6 @@ class AuthController extends _$AuthController {
     state = AsyncValue.data(outcome.session);
     // fire-and-forget — 복구 UX를 secure storage 읽기에 묶지 않는다(로그인과 동일 원칙).
     unawaited(_syncSharedSession(outcome.session));
-    // 복구 성공 후 세션이 생겼으므로 FCM 토큰 등록 — fire-and-forget.
-    // 실패해도 복구 흐름을 막지 않는다(graceful).
-    unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
     await _syncAnalyticsUser(outcome.session.userId);
     return outcome;
   }

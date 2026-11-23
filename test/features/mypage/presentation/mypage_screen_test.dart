@@ -78,7 +78,7 @@ Widget _buildMypageScreen({
       myPageRepositoryProvider.overrideWithValue(summaryRepo),
       // ignore: scoped_providers_should_specify_dependencies
       notificationRepositoryProvider.overrideWithValue(
-        MockNotificationRepository.defaults(),
+        MockNotificationRepository(),
       ),
     ],
     child: MaterialApp(
@@ -128,7 +128,7 @@ Widget _buildMypageWithWithdrawRouter({AuthSession? session}) {
       myPageRepositoryProvider.overrideWithValue(MockMyPageRepository.seeded()),
       // ignore: scoped_providers_should_specify_dependencies
       notificationRepositoryProvider.overrideWithValue(
-        MockNotificationRepository.defaults(),
+        MockNotificationRepository(),
       ),
     ],
     child: MaterialApp.router(
@@ -407,7 +407,7 @@ Widget _buildMypageWithMedicalSourcesRouter() {
       myPageRepositoryProvider.overrideWithValue(MockMyPageRepository.seeded()),
       // ignore: scoped_providers_should_specify_dependencies
       notificationRepositoryProvider.overrideWithValue(
-        MockNotificationRepository.defaults(),
+        MockNotificationRepository(),
       ),
     ],
     child: MaterialApp.router(

@@ -52,6 +52,13 @@ const _kSymptom = TimelineItem.symptom(
   occurredAt: '2026-06-17T14:30:00+09:00',
 );
 
+const _kSymptomUnlinkedWithTypes = TimelineItem.symptom(
+  symptomState: SymptomState.uncomfortable,
+  occurredAt: '2026-06-17T14:30:00+09:00',
+  representativeSymptoms: ['신물', '기침'],
+  etcCount: 1,
+);
+
 const _kSymptomWithId = TimelineItem.symptom(
   symptomState: SymptomState.uncomfortable,
   afterMealMinutes: 120,
@@ -213,8 +220,7 @@ void main() {
   });
 
   group('MealTimelineList — 연결증상 칩 (P1)', () {
-    testWidgets('connectedSymptoms가 있으면 대표증상+외N개+식후N분 칩을 표시한다',
-        (tester) async {
+    testWidgets('connectedSymptoms가 있으면 대표증상+외N개+식후N분 칩을 표시한다', (tester) async {
       await tester.pumpWidget(
         _wrap(const MealTimelineList(items: [_kSingleWithSymptom])),
       );
@@ -229,8 +235,7 @@ void main() {
       expect(find.textContaining('식후'), findsNothing);
     });
 
-    testWidgets('afterMealMinutes 음수면 식사 전 N시간 M분으로 표시한다',
-        (tester) async {
+    testWidgets('afterMealMinutes 음수면 식사 전 N시간 M분으로 표시한다', (tester) async {
       // -8693분 = 144시간 53분
       const item = TimelineItem.single(
         mealRecordId: 'mr-pre',
@@ -273,18 +278,25 @@ void main() {
       expect(find.text('식사 전 30분'), findsOneWidget);
     });
 
-    testWidgets(
-        'representativeSymptoms가 비어 있으면 "특별한 불편이 없었어요"를 표시한다',
+    testWidgets('representativeSymptoms가 비어 있으면 상태 라벨("편안함")을 표시한다',
         (tester) async {
       await tester.pumpWidget(
         _wrap(const MealTimelineList(items: [_kSingleWithEmptySymptomTypes])),
       );
-      expect(find.text('특별한 불편이 없었어요'), findsOneWidget);
+      expect(find.text('편안함'), findsOneWidget);
       expect(find.textContaining('식후 2시간'), findsOneWidget);
     });
 
-    testWidgets('연결증상 칩 탭 시 onTapSymptom이 symptomId와 함께 호출된다',
-        (tester) async {
+    testWidgets('미연결 단독 증상은 유형 요약 + 상태 라벨을 보이고 식후 문구는 숨긴다', (tester) async {
+      await tester.pumpWidget(
+        _wrap(const MealTimelineList(items: [_kSymptomUnlinkedWithTypes])),
+      );
+      expect(find.text('신물, 기침 외 1개'), findsOneWidget);
+      expect(find.text('불편함'), findsOneWidget);
+      expect(find.textContaining('식후'), findsNothing);
+    });
+
+    testWidgets('연결증상 칩 탭 시 onTapSymptom이 symptomId와 함께 호출된다', (tester) async {
       String? tappedSymptomId;
       await tester.pumpWidget(
         _wrap(

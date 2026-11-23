@@ -33,18 +33,16 @@ final notificationRepositoryProvider =
 typedef NotificationRepositoryRef
     = AutoDisposeProviderRef<NotificationRepository>;
 String _$notificationSettingsControllerHash() =>
-    r'7ef971b6f9c0195a1efc206518b6494904e202ff';
+    r'5f488719af954aeb115fbd85ede3cc23047787a4';
 
-/// 알림 설정 상태 컨트롤러.
+/// 알림 설정 화면 상태 = 마케팅 정보 수신 동의 여부.
 ///
-/// [build]: GET /notifications/settings fetch.
-/// [toggle]: 낙관적 갱신 후 PATCH /toggle 호출. 실패 시 이전 상태 복원.
-/// [updateDailyTime]: 낙관적 갱신 후 PATCH /daily-time 호출. 실패 시 복원.
+/// 앱 알림은 OS 권한으로만 제어하므로 이 컨트롤러는 마케팅 동의만 다룬다(#261).
 ///
 /// Copied from [NotificationSettingsController].
 @ProviderFor(NotificationSettingsController)
 final notificationSettingsControllerProvider = AutoDisposeAsyncNotifierProvider<
-    NotificationSettingsController, NotificationSettings>.internal(
+    NotificationSettingsController, bool>.internal(
   NotificationSettingsController.new,
   name: r'notificationSettingsControllerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -54,7 +52,6 @@ final notificationSettingsControllerProvider = AutoDisposeAsyncNotifierProvider<
   allTransitiveDependencies: null,
 );
 
-typedef _$NotificationSettingsController
-    = AutoDisposeAsyncNotifier<NotificationSettings>;
+typedef _$NotificationSettingsController = AutoDisposeAsyncNotifier<bool>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

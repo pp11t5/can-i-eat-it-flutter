@@ -5,11 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:can_i_eat_it/app/theme/app_colors.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
-import 'package:can_i_eat_it/app/widgets/app_button.dart';
 import 'package:can_i_eat_it/app/widgets/option_card.dart';
 import 'package:can_i_eat_it/features/onboarding/domain/onboarding_options.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_step_body.dart';
+import 'package:can_i_eat_it/features/onboarding/presentation/widgets/onboarding_list_with_cta.dart';
 
 /// 온보딩 Step 1/4: 질환 선택 본문 (Figma 365:1555).
 ///
@@ -52,12 +52,8 @@ class OnboardingConditionScreen extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-              ),
+            child: OnboardingListWithCta(
               itemCount: conditionOptions.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
               itemBuilder: (context, index) {
                 final entry = conditionOptions[index];
                 final isSelected = draft.conditions.contains(entry.code);
@@ -71,21 +67,9 @@ class OnboardingConditionScreen extends ConsumerWidget {
                       : null,
                 );
               },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              left: AppSpacing.screenPadding,
-              right: AppSpacing.screenPadding,
-              top: 16,
-              bottom: 32,
-            ),
-            child: AppButton.primary(
-              label: '다음',
               onPressed: draft.conditions.isNotEmpty
                   ? () => context.push('/onboarding/frequency')
                   : null,
-              isExpanded: true,
             ),
           ),
         ],

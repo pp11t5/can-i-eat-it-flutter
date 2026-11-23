@@ -224,7 +224,7 @@ class _FoodRecognitionRepositoryProviderElement
 }
 
 String _$foodRecognitionControllerHash() =>
-    r'c13bbdb3a63e546a2cd1a61e338f4b6eb33e944e';
+    r'cda0f9de4fe169b2b7a221a0d3b60128a1b0dc81';
 
 /// 음식 사진 인식 화면 상태.
 ///

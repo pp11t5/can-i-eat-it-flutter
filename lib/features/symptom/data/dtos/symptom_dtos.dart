@@ -36,6 +36,7 @@ extension SymptomLinkedFoodDtoMapper on SymptomLinkedFoodDto {
 abstract class SymptomLinkedMealDto with _$SymptomLinkedMealDto {
   const factory SymptomLinkedMealDto({
     required String mealRecordId,
+    int? afterMealMinutes,
     @Default(<SymptomLinkedFoodDto>[]) List<SymptomLinkedFoodDto> foods,
   }) = _SymptomLinkedMealDto;
 
@@ -46,6 +47,7 @@ abstract class SymptomLinkedMealDto with _$SymptomLinkedMealDto {
 extension SymptomLinkedMealDtoMapper on SymptomLinkedMealDto {
   SymptomLinkedMeal toEntity() => SymptomLinkedMeal(
         mealRecordId: mealRecordId,
+        afterMealMinutes: afterMealMinutes,
         foods: foods.map((f) => f.toEntity()).toList(),
       );
 }
@@ -96,6 +98,9 @@ abstract class SymptomResponseDto with _$SymptomResponseDto {
     required String occurredAt,
     SymptomLinkedMealDto? linkedMeal,
     SymptomAnalysisDto? analysis,
+
+    /// 추가 메모. 서버가 아직 내려주지 않으면 null.
+    String? memo,
   }) = _SymptomResponseDto;
 
   factory SymptomResponseDto.fromJson(Map<String, dynamic> json) =>
@@ -113,9 +118,9 @@ extension SymptomResponseDtoMapper on SymptomResponseDto {
             .toList(),
         occurredAt: occurredAt,
         linkedMeal: linkedMeal?.toEntity(),
-        analysisItems: (analysis?.items ?? const [])
-            .map((i) => i.toEntity())
-            .toList(),
+        memo: memo,
+        analysisItems:
+            (analysis?.items ?? const []).map((i) => i.toEntity()).toList(),
       );
 }
 

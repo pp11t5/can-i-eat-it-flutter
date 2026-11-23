@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -8,6 +10,7 @@ import 'package:can_i_eat_it/app/theme/app_icons.dart';
 import 'package:can_i_eat_it/app/theme/app_spacing.dart';
 import 'package:can_i_eat_it/app/theme/app_text_styles.dart';
 import 'package:can_i_eat_it/app/widgets/category_icon.dart';
+import 'package:can_i_eat_it/core/push/fcm_providers.dart';
 import 'package:can_i_eat_it/core/utils/kst_time.dart';
 import 'package:can_i_eat_it/features/home/data/home_providers.dart';
 import 'package:can_i_eat_it/features/home/domain/entities/recent_meal.dart';
@@ -20,11 +23,27 @@ import 'package:can_i_eat_it/features/meal_log/domain/entities/symptom_state.dar
 ///
 /// AppShell(하단 탭) 내부에 포함되므로 자체 bottomNavigationBar를 갖지 않는다.
 /// 최근 검색은 /check 검색 화면으로 이동했으므로 홈에서 제거됨.
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(ref.read(fcmLifecycleProvider).registerCurrentToken());
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // 홈이 유지되는 동안 토큰 갱신 구독도 유지한다.
+    ref.watch(fcmLifecycleProvider);
     // loading/error 시 '—' 폴백 (_FoodHistoryCard valueOrNull 패턴과 동일).
     final userStreak = ref.watch(myStreakProvider).valueOrNull;
     final unrecordedCount = ref.watch(unrecordedMealCountProvider).valueOrNull;

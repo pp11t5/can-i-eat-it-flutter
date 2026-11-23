@@ -160,6 +160,7 @@ abstract class MealRecordDetailDto with _$MealRecordDetailDto {
     required String mealRecordId,
     required String eatenAt,
     @Default(<MealDetailFoodDto>[]) List<MealDetailFoodDto> meals,
+
     /// 연결된 상태 기록. 없으면 null (서버 단건 계약).
     StateRecordDto? stateRecords,
   }) = _MealRecordDetailDto;
@@ -232,9 +233,7 @@ abstract final class TimelineItemDto {
   static ConnectedSymptoms? _connectedSymptomsOf(Map<String, dynamic> j) {
     try {
       final raw = j['connectedSymptoms'] as Map<String, dynamic>?;
-      return raw == null
-          ? null
-          : ConnectedSymptomsDto.fromJson(raw).toEntity();
+      return raw == null ? null : ConnectedSymptomsDto.fromJson(raw).toEntity();
     } catch (_) {
       return null;
     }
@@ -296,17 +295,24 @@ abstract final class TimelineItemDto {
       case 'symptom':
         // 필수 필드 중 하나라도 null/누락이면 항목 스킵.
         final symptomStateRaw = j['symptomState'] as String?;
-        final afterMealMinutes = (j['afterMealMinutes'] as num?)?.toInt();
         final occurredAt = j['occurredAt'] as String?;
-        if (symptomStateRaw == null ||
-            afterMealMinutes == null ||
-            occurredAt == null) {
+        if (symptomStateRaw == null || occurredAt == null) {
           return null;
         }
         return TimelineItem.symptom(
           symptomState: SymptomStateMapper.fromServer(symptomStateRaw),
-          afterMealMinutes: afterMealMinutes,
+          // 식사에 연결되지 않은 증상은 서버가 null 을 준다 (항목은 살린다).
+          afterMealMinutes: (j['afterMealMinutes'] as num?)?.toInt(),
           occurredAt: occurredAt,
+          representativeSymptoms: (j['representativeSymptoms'] as List?)
+                  ?.map(
+                    (e) =>
+                        SymptomTypeMapper.fromServerNullable('$e')?.label ??
+                        '$e',
+                  )
+                  .toList() ??
+              const [],
+          etcCount: (j['etcCount'] as num?)?.toInt() ?? 0,
           timeIcon: _timeIconOf(j),
           symptomId: j['symptomId'] as String?,
         );
@@ -436,5 +442,7 @@ abstract class MealRecordByIdRequestDto with _$MealRecordByIdRequestDto {
 /// `characters` 패키지의 grapheme cluster 기준으로 잘라 완전한 문자만 남긴다.
 String clampMealName(String input) {
   final trimmed = input.trim().characters;
-  return trimmed.length > 100 ? trimmed.take(100).toString() : trimmed.toString();
+  return trimmed.length > 100
+      ? trimmed.take(100).toString()
+      : trimmed.toString();
 }

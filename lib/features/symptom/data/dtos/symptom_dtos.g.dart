@@ -26,6 +26,7 @@ _SymptomLinkedMealDto _$SymptomLinkedMealDtoFromJson(
         Map<String, dynamic> json) =>
     _SymptomLinkedMealDto(
       mealRecordId: json['mealRecordId'] as String,
+      afterMealMinutes: (json['afterMealMinutes'] as num?)?.toInt(),
       foods: (json['foods'] as List<dynamic>?)
               ?.map((e) =>
                   SymptomLinkedFoodDto.fromJson(e as Map<String, dynamic>))
@@ -37,6 +38,7 @@ Map<String, dynamic> _$SymptomLinkedMealDtoToJson(
         _SymptomLinkedMealDto instance) =>
     <String, dynamic>{
       'mealRecordId': instance.mealRecordId,
+      'afterMealMinutes': instance.afterMealMinutes,
       'foods': instance.foods,
     };
 
@@ -86,6 +88,7 @@ _SymptomResponseDto _$SymptomResponseDtoFromJson(Map<String, dynamic> json) =>
           ? null
           : SymptomAnalysisDto.fromJson(
               json['analysis'] as Map<String, dynamic>),
+      memo: json['memo'] as String?,
     );
 
 Map<String, dynamic> _$SymptomResponseDtoToJson(_SymptomResponseDto instance) =>
@@ -97,6 +100,7 @@ Map<String, dynamic> _$SymptomResponseDtoToJson(_SymptomResponseDto instance) =>
       'occurredAt': instance.occurredAt,
       'linkedMeal': instance.linkedMeal,
       'analysis': instance.analysis,
+      'memo': instance.memo,
     };
 
 _SymptomCreateRequestDto _$SymptomCreateRequestDtoFromJson(

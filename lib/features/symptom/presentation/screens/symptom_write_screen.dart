@@ -145,7 +145,7 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
         linkedMealDisplayName: existing.linkedMeal?.foods.isNotEmpty == true
             ? existing.linkedMeal!.foods.first.name
             : null,
-        memo: '',
+        memo: existing.memo ?? '',
       );
     } else {
       // 신규 모드: 빈 폼 (원인 식사 프리필 인자가 있으면 시딩)
@@ -437,41 +437,71 @@ class _SymptomWriteScreenState extends ConsumerState<SymptomWriteScreen> {
                   // ── 섹션 5: 메모 ───────────────────────────────────────
                   const _SectionLabel(label: '추가 메모 기록'),
                   const SizedBox(height: 16),
-                  TextField(
-                    controller: _memoController,
-                    maxLength: 200,
-                    maxLines: 4,
-                    keyboardType: TextInputType.multiline,
-                    style: AppTextStyles.body2Regular
-                        .copyWith(color: AppColors.textPrimary),
-                    decoration: InputDecoration(
-                      hintText: '구체적인 상태를 써주세요',
-                      hintStyle: AppTextStyles.body2Medium
-                          .copyWith(color: AppColors.textSecondary),
-                      counterStyle: AppTextStyles.caption1Medium
-                          .copyWith(color: AppColors.textSecondary),
-                      filled: true,
-                      fillColor: AppColors.surface,
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusCard),
-                        borderSide: const BorderSide(
-                            color: AppColors.border, width: 1.5),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusCard),
-                        borderSide: const BorderSide(
-                            color: AppColors.border, width: 1.5),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusCard),
-                        borderSide: const BorderSide(
-                            color: AppColors.primary, width: 1.5),
-                      ),
-                      contentPadding:
-                          const EdgeInsets.all(AppSpacing.cardPadding),
+                  // 카운터를 카드 안 우하단에 두기 위해 테두리를 직접 그린다.
+                  Focus(
+                    child: Builder(
+                      builder: (context) {
+                        final length = _memoController.text.characters.length;
+                        return Container(
+                          padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius:
+                                BorderRadius.circular(AppSpacing.radiusCard),
+                            border: Border.all(
+                              color: Focus.of(context).hasFocus
+                                  ? AppColors.primary
+                                  : AppColors.border,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextField(
+                                controller: _memoController,
+                                maxLength: 200,
+                                minLines: 2,
+                                maxLines: 4,
+                                keyboardType: TextInputType.multiline,
+                                style: AppTextStyles.body2Regular
+                                    .copyWith(color: AppColors.textPrimary),
+                                decoration: InputDecoration(
+                                  hintText: '추가 상태를 써주세요.',
+                                  hintStyle: AppTextStyles.body2Medium
+                                      .copyWith(color: AppColors.textSecondary),
+                                  isCollapsed: true,
+                                  counterText: '',
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.itemGap),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: '$length',
+                                        // 입력이 있으면 숫자만 진하게.
+                                        style: TextStyle(
+                                          color: length > 0
+                                              ? AppColors.textPrimary
+                                              : AppColors.textSecondary,
+                                        ),
+                                      ),
+                                      const TextSpan(text: ' / 200'),
+                                    ],
+                                  ),
+                                  style: AppTextStyles.caption1Medium.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sectionGap),

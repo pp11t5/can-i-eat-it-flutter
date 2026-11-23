@@ -173,7 +173,8 @@ void main() {
     });
 
     test('analysis가 있으면 toEntity가 analysis를 채운다', () {
-      final entity = MealFoodRecordDetailDto.fromJson(_foodDetailJson).toEntity();
+      final entity =
+          MealFoodRecordDetailDto.fromJson(_foodDetailJson).toEntity();
       expect(entity, isA<MealFood>());
       expect(entity.mealFoodId, 'mf1');
       expect(entity.mealRecordExternalId, 'mr1');
@@ -206,7 +207,8 @@ void main() {
         ..remove('stateRecord');
       // MealFoodRecordDetailDto.toEntity()가 stateRecord를 직접 매핑하지 않으므로
       // 예외 없이 완료되어야 한다.
-      expect(() => MealFoodRecordDetailDto.fromJson(json).toEntity(), returnsNormally);
+      expect(() => MealFoodRecordDetailDto.fromJson(json).toEntity(),
+          returnsNormally);
     });
 
     // 계약: analysis 명시 null (키 존재, 값 null)
@@ -229,7 +231,8 @@ void main() {
     });
 
     test('meals 2건을 foods로 매핑하고 analysis는 null이다', () {
-      final entity = MealRecordDetailDto.fromJson(_mealRecordDetailJson).toEntity();
+      final entity =
+          MealRecordDetailDto.fromJson(_mealRecordDetailJson).toEntity();
       expect(entity, isA<MealRecord>());
       expect(entity.foods.length, 2);
       expect(entity.foods[0].mealFoodId, 'mf1');
@@ -305,6 +308,23 @@ void main() {
       expect(group.etcCount, 2);
     });
 
+    test('symptom — afterMealMinutes null(미연결)이어도 항목을 유지하고 유형을 라벨로 매핑한다', () {
+      final item = TimelineItemDto.fromJson(const {
+        'timeLineType': 'symptom',
+        'symptomId': 'sym-9',
+        'symptomState': 'uncomfortable',
+        'afterMealMinutes': null,
+        'representativeSymptoms': ['acid_reflux', 'cough'],
+        'etcCount': 1,
+        'occurredAt': '2026-06-17T14:30:00',
+      });
+      expect(item, isA<TimelineSymptom>());
+      final symptom = item! as TimelineSymptom;
+      expect(symptom.afterMealMinutes, isNull);
+      expect(symptom.representativeSymptoms, ['신물', '기침']);
+      expect(symptom.etcCount, 1);
+    });
+
     test('symptom → TimelineSymptom, symptomState 매핑', () {
       final item = TimelineItemDto.fromJson(const {
         'timeLineType': 'symptom',
@@ -348,7 +368,8 @@ void main() {
         'occurredAt': '2026-06-24T10:00:00+09:00',
       });
       expect(item, isA<TimelineSymptom>());
-      expect((item! as TimelineSymptom).occurredAt, '2026-06-24T10:00:00+09:00');
+      expect(
+          (item! as TimelineSymptom).occurredAt, '2026-06-24T10:00:00+09:00');
     });
 
     test('group — etcCount가 2일 때 보존된다 (계약 verbatim)', () {
@@ -388,7 +409,8 @@ void main() {
         expect(single.timeIcon, TimeIcon.sun);
         expect(single.connectedSymptoms, isNotNull);
         expect(single.connectedSymptoms!.symptomId, 'sym-1');
-        expect(single.connectedSymptoms!.symptomState, SymptomState.uncomfortable);
+        expect(
+            single.connectedSymptoms!.symptomState, SymptomState.uncomfortable);
         expect(
           single.connectedSymptoms!.representativeSymptoms,
           ['가슴 답답함'],
@@ -435,7 +457,9 @@ void main() {
 
       // pr-review 수정1: connectedSymptoms 필수 필드 누락 시 TypeError로
       // 항목 전체가 무너지지 않고 칩만 null로 흡수돼야 한다.
-      test('single — connectedSymptoms 필수 필드(symptomId) 누락 시 칩은 null이지만 항목은 유지된다', () {
+      test(
+          'single — connectedSymptoms 필수 필드(symptomId) 누락 시 칩은 null이지만 항목은 유지된다',
+          () {
         final item = TimelineItemDto.fromJson(const {
           'timeLineType': 'single',
           'mealRecordId': 'mr1',
@@ -520,7 +544,9 @@ void main() {
     // S-2 회귀: 알려진 타입이라도 필수 필드 누락 시 항목만 스킵 (TypeError 방지)
     // -------------------------------------------------------------------------
     group('필수 필드 누락 — 해당 항목만 null 반환 (whereType 스킵)', () {
-      test('혼합 리스트: 유효 single + mealFoodName 누락 single + afterMealMinutes 누락 symptom → 유효 항목만', () {
+      test(
+          '혼합 리스트: 유효 single + mealFoodName 누락 single + symptomState 누락 symptom → 유효 항목만',
+          () {
         final rawItems = [
           // 유효 single
           const {
@@ -538,11 +564,12 @@ void main() {
             // 'mealFoodName' 누락
             'grade': 'CAUTION',
           },
-          // afterMealMinutes 누락 symptom → null 반환(스킵)
+          // symptomState 누락 symptom → null 반환(스킵).
+          // (afterMealMinutes 는 미연결 증상에서 null 이 정상이라 스킵 사유가 아니다)
           const {
             'timeLineType': 'symptom',
-            'symptomState': 'uncomfortable',
-            // 'afterMealMinutes' 누락
+            // 'symptomState' 누락
+            'afterMealMinutes': 30,
             'occurredAt': '2026-06-24T10:00:00+09:00',
           },
         ];
@@ -698,7 +725,9 @@ void main() {
     });
 
     // 계약 verbatim: representativeFood.category null 방어
-    test('representativeFood.category null → representativeFoodCategory가 null이다', () {
+    test(
+        'representativeFood.category null → representativeFoodCategory가 null이다',
+        () {
       final entity = MealCandidatesDayDto.fromJson(const {
         'date': '2026-06-24',
         'meals': [
@@ -715,7 +744,9 @@ void main() {
     });
 
     // 계약: category 키 아예 없을 때도 null 방어
-    test('representativeFood.category 키 누락 → representativeFoodCategory가 null이다', () {
+    test(
+        'representativeFood.category 키 누락 → representativeFoodCategory가 null이다',
+        () {
       final entity = MealCandidatesDayDto.fromJson(const {
         'date': '2026-06-24',
         'meals': [
@@ -777,7 +808,8 @@ void main() {
     });
 
     test('eatenAt 제공 시 값이 보존된다', () {
-      const dto = MealRecordByIdRequestDto(eatenAt: '2026-06-24T08:30:00+09:00');
+      const dto =
+          MealRecordByIdRequestDto(eatenAt: '2026-06-24T08:30:00+09:00');
       expect(dto.toJson()['eatenAt'], '2026-06-24T08:30:00+09:00');
     });
   });
@@ -856,7 +888,7 @@ void main() {
       expect(entity, isA<ConnectedSymptoms>());
       expect(entity.symptomId, 'sym-1');
       expect(entity.symptomState, SymptomState.uncomfortable);
-      expect(entity.representativeSymptoms, ['가슴 답답함', '역류']);
+      expect(entity.representativeSymptoms, ['가슴 답답함', '신물']);
       expect(entity.etcCount, 2);
     });
 
@@ -874,7 +906,7 @@ void main() {
       }).toEntity();
       expect(entity.representativeSymptoms, [
         '목 이물감',
-        '역류',
+        '신물',
         '기침',
         '가슴 답답함',
       ]);
