@@ -31,11 +31,28 @@ class OnboardingTriggersScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingTriggersScreenState
-    extends ConsumerState<OnboardingTriggersScreen> {
+    extends ConsumerState<OnboardingTriggersScreen>
+    with WidgetsBindingObserver {
   final _customController = TextEditingController();
+  bool _keyboardOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeMetrics() {
+    // 키보드가 떠 있으면 플로팅 CTA가 입력란을 가리므로 숨긴다.
+    // Scaffold가 body MediaQuery에서 키보드 inset을 지우므로 View에서 직접 읽는다.
+    final open = View.of(context).viewInsets.bottom > 0;
+    if (open != _keyboardOpen) setState(() => _keyboardOpen = open);
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _customController.dispose();
     super.dispose();
   }
@@ -182,25 +199,26 @@ class _OnboardingTriggersScreenState
               ),
             ),
             // CTA — 스크롤 영역 위에 떠 있고 뒤는 투명 (Figma p3: bottom32).
-            Positioned(
-              left: AppSpacing.screenPadding,
-              right: AppSpacing.screenPadding,
-              bottom: 32,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const MedicalSourcesLink.guideline(
-                    sourceUrl: MedicalSourcesCatalog.acg2022Url,
-                  ),
-                  const SizedBox(height: AppSpacing.cardPadding),
-                  AppButton.primary(
-                    label: '다음',
-                    onPressed: () => context.push('/onboarding/medications'),
-                    isExpanded: true,
-                  ),
-                ],
+            if (!_keyboardOpen)
+              Positioned(
+                left: AppSpacing.screenPadding,
+                right: AppSpacing.screenPadding,
+                bottom: 32,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const MedicalSourcesLink.guideline(
+                      sourceUrl: MedicalSourcesCatalog.acg2022Url,
+                    ),
+                    const SizedBox(height: AppSpacing.cardPadding),
+                    AppButton.primary(
+                      label: '다음',
+                      onPressed: () => context.push('/onboarding/medications'),
+                      isExpanded: true,
+                    ),
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),

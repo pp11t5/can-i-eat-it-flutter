@@ -312,5 +312,24 @@ void main() {
 
       expect(find.text('allergy step stub'), findsOneWidget);
     });
+
+    // OnboardingShell의 Scaffold가 body MediaQuery에서 키보드 inset을 지우므로
+    // 실제 셸 안에서 키보드를 흉내 내 검증한다.
+    testWidgets('키보드가 열리면 CTA를 숨기고 닫히면 다시 보인다', (tester) async {
+      addTearDown(tester.view.resetViewInsets);
+
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      expect(find.text('다음'), findsOneWidget);
+
+      tester.view.viewInsets = const FakeViewPadding(bottom: 900);
+      await tester.pumpAndSettle();
+      expect(find.text('다음'), findsNothing);
+      expect(find.byType(MedicalSourcesLink), findsNothing);
+
+      tester.view.resetViewInsets();
+      await tester.pumpAndSettle();
+      expect(find.text('다음'), findsOneWidget);
+    });
   });
 }
