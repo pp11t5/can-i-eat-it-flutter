@@ -52,6 +52,8 @@ class _OnboardingTriggersScreenState
   Widget build(BuildContext context) {
     final draft = ref.watch(onboardingControllerProvider);
     final notifier = ref.read(onboardingControllerProvider.notifier);
+    // 키보드가 떠 있으면 플로팅 CTA가 입력란을 가리므로 숨긴다.
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return OnboardingStepBody(
       child: GestureDetector(
@@ -182,25 +184,26 @@ class _OnboardingTriggersScreenState
               ),
             ),
             // CTA — 스크롤 영역 위에 떠 있고 뒤는 투명 (Figma p3: bottom32).
-            Positioned(
-              left: AppSpacing.screenPadding,
-              right: AppSpacing.screenPadding,
-              bottom: 32,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const MedicalSourcesLink.guideline(
-                    sourceUrl: MedicalSourcesCatalog.acg2022Url,
-                  ),
-                  const SizedBox(height: AppSpacing.cardPadding),
-                  AppButton.primary(
-                    label: '다음',
-                    onPressed: () => context.push('/onboarding/medications'),
-                    isExpanded: true,
-                  ),
-                ],
+            if (!keyboardOpen)
+              Positioned(
+                left: AppSpacing.screenPadding,
+                right: AppSpacing.screenPadding,
+                bottom: 32,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const MedicalSourcesLink.guideline(
+                      sourceUrl: MedicalSourcesCatalog.acg2022Url,
+                    ),
+                    const SizedBox(height: AppSpacing.cardPadding),
+                    AppButton.primary(
+                      label: '다음',
+                      onPressed: () => context.push('/onboarding/medications'),
+                      isExpanded: true,
+                    ),
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),
